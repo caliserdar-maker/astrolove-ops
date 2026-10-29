@@ -1,0 +1,106 @@
+name: wa-kart-v11
+# Galeri v11 W02-W06 bilgi kartlari (Merkez 29 Eki; kararlar scripts/kapak78/wa_kart_v11.py basinda). ETSY YOK, Canva yok.
+# ciftler=CANCER_LIBRA: onayli referans ornegi (Serdar gorsel onayi bekler). ciftler=HEPSI: 78 cift, 8 parca paralel (yalniz onaydan sonra).
+# Girdiler (yalniz okuma): sembol kupa-printful-sonuc, A kesimleri kapak-ci-ref-20261029 ref/kapak_ci, MB poster Drive TEMP/MOTOR/SOSYAL/78,
+# W07 / W08 / W10 (+ kontak icin W01 / W09) Drive TEMP/POSTER_GALERI_V11/<galeri_damga>.
+# Cikti: TEMP/POSTER_GALERI_V11/<galeri_damga>/W02_W06/<kosu>/ (kartlar, MANIFEST_W02_W06.csv, KART_OZET_V11_<CIFT>.json, KONTAK_V11_*.jpg), --immutable.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      ciftler: {description: "virgullu cift anahtari ya da HEPSI (78)", required: true, default: "CANCER_LIBRA"}
+      galeri_damga: {description: "TEMP/POSTER_GALERI_V11/<damga> (W01 / W07-W10)", required: true, default: "20261029_103607"}
+jobs:
+  kart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        parca: [0, 1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - name: Girdi kapisi
+        env: {C: "${{ inputs.ciftler }}", G: "${{ inputs.galeri_damga }}"}
+        run: '[[ "$C" =~ ^(HEPSI|[A-Z]+_[A-Z]+(,[A-Z]+_[A-Z]+)*)$ && "$G" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - name: Bu parcanin ciftleri
+        env: {C: "${{ inputs.ciftler }}", P: "${{ matrix.parca }}"}
+        run: |
+          set -euo pipefail
+          python3 - <<'EOF' > _ciftler.txt
+          import csv, os
+          t = [r["cift"] for r in csv.DictReader(open("data/pod/pod78_ids.csv"))]
+          c = t if os.environ["C"] == "HEPSI" else os.environ["C"].split(",")
+          bil = [x for x in c if x not in t]
+          if bil:
+              raise SystemExit(f"bilinmeyen cift: {bil}")
+          print("\n".join(x for i, x in enumerate(c) if i % 8 == int(os.environ["P"])))
+          EOF
+          echo "N=$(grep -c . _ciftler.txt || true)" >> "$GITHUB_ENV"; cat _ciftler.txt
+      - uses: actions/checkout@v4
+        if: env.N != '0'
+        with: {ref: kupa-printful-sonuc, path: _kupa, sparse-checkout: kupa_uretim/sembol}
+      - uses: actions/checkout@v4
+        if: env.N != '0'
+        with: {ref: kapak-ci-ref-20261029, path: _kes, sparse-checkout: ref/kapak_ci}
+      - uses: actions/setup-python@v5
+        if: env.N != '0'
+        with:
+          python-version: "3.12"
+      - name: Ortam (Pillow 11.0.0 + raqm, tesseract, rclone)
+        if: env.N != '0'
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          sudo apt-get install -y -qq libfribidi0 tesseract-ocr >/dev/null
+          pip install -q pillow==11.0.0 numpy==2.1.3 requests==2.34.2
+          python3 -c "from PIL import features, __version__; assert features.check('raqm'); print('pillow', __version__, 'raqm')"
+          tesseract --version | head -1
+          sudo apt-get install -y -qq rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+          rclone version | head -1
+      - name: rclone.conf
+        if: env.N != '0'
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Kartlar
+        if: env.N != '0'
+        env: {G: "${{ inputs.galeri_damga }}", P: "${{ matrix.parca }}", C: "${{ inputs.ciftler }}"}
+        run: |
+          set -euo pipefail
+          mkdir -p _g _mb _out
+          ORT=""; [ "$P" = 0 ] && ORT="--ortak"          # ORTAK_W04 yalniz parca 0'da
+          i=0; n=$N; t0=$(date +%s)
+          while read -r CF; do
+            [ -n "$CF" ] || continue
+            i=$((i+1))
+            rclone copy "gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V11/$G" _g --include "${CF}_W*.jpg" --max-depth 1 -q
+            rclone copyto "gdrive:ASTROLOVE/TEMP/MOTOR/SOSYAL/78/${CF}.png" "_mb/${CF}.png" -q
+            L=$(python3 -c "import csv,sys; r=next(r for r in csv.DictReader(open('data/pod/pod78_ids.csv')) if r['cift']==sys.argv[1]); print(r['a'], r['b'])" "$CF")
+            read -r A B <<< "$L"
+            python3 scripts/kapak78/wa_kart_v11.py --cift "$CF" --a "$A" --b "$B" --sembol "_kupa/kupa_uretim/sembol/$CF" \
+              --mb-poster "_mb/${CF}.png" --isim-csv data/sosyal/instagram/IG_78_ORNEK_ISIM_TAGLINE.csv --kesim _kes/ref/kapak_ci \
+              --galeri _g --out _out --kaynak "kart_sablon@${GITHUB_SHA::8}" $ORT
+            ORT=""
+            [ "$C" = "HEPSI" ] || python3 scripts/kapak78/wa_kart_v11.py kontak _g _out "$CF" "_out/KONTAK_V11_${CF}.jpg"
+            e=$(( $(date +%s) - t0 )); echo "ETA parca $P: $i/$n, gecen ${e}s, kalan $(( e * (n - i) / i ))s, %$(( 100 * i / n ))"
+          done < _ciftler.txt
+      - name: Drive'a yaz
+        if: always() && env.N != '0'
+        env: {G: "${{ inputs.galeri_damga }}", P: "${{ matrix.parca }}"}
+        run: |
+          set -euo pipefail
+          [ -d _out ] || exit 0
+          [ -f _out/MANIFEST_W02_W06.csv ] && mv _out/MANIFEST_W02_W06.csv "_out/MANIFEST_W02_W06_p${P}.csv"
+          sha256sum _out/*.jpg 2>/dev/null | head -50 || true
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V11/$G/W02_W06/${GITHUB_RUN_ID}" --immutable -q
+          echo "Cikti: TEMP/POSTER_GALERI_V11/$G/W02_W06/${GITHUB_RUN_ID} parca $P ($(ls _out/*.jpg 2>/dev/null | wc -l) jpg)" | tee -a "$GITHUB_STEP_SUMMARY"
+      - if: always()
+        run: rm -rf _g _mb _out _kupa _kes ~/.config/rclone

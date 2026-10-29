@@ -44,6 +44,13 @@ def main():
         by = (int(m.group(1)), int(m.group(2))) if m else None
         if not by or by[0] < Y0 + PAY or by[1] > Y0 + KH - PAY:
             raise SystemExit(f'DUR: {st} baslik {by} kirpim disina yakin')
+        import numpy as np                       # baski bolgesi her stilde olculur (inceleme 28 Eki: sabit BASKI_Y yalniz orange olcumuydu)
+        gs = np.asarray(Image.open(g).convert('RGB')).astype(np.int16)
+        sh = np.asarray(Image.open(V + f'sahne/{st}_k40.png').convert('RGB').resize(Image.open(g).size)).astype(np.int16)
+        ys = np.nonzero((np.abs(gs - sh).max(axis=2) > 25).any(axis=1))[0]
+        bk = (int(ys.min()), int(ys.max()) + 1) if len(ys) else None
+        if not bk or bk[0] < Y0 + PAY or bk[1] > Y0 + KH - PAY:
+            raise SystemExit(f'DUR: {st} baski bolgesi {bk} kirpim {Y0}-{Y0 + KH} (PAY {PAY}) disina yakin')
         im = Image.open(kp).convert('RGB')
         if im.size != (2048, 2048):
             raise SystemExit(f'DUR: {st} kapak {im.size} (2048x2048 beklenir)')
@@ -52,7 +59,7 @@ def main():
         k = im.crop((0, Y0, 2048, Y0 + KH)).resize((3000, 2250), Image.LANCZOS)
         k.save(out / ad, quality=92)
         im.save(out / f'KUPA_KAPAK_KARE_{st}.jpg', quality=92)                       # karsilastirma icin mevcut kare kapak
-        R[ad] = dict(stil=st, baslik_y=by, kirpim=[0, Y0, 2048, Y0 + KH], olcek=round(3000 / 2048, 4), boyut=list(k.size),
+        R[ad] = dict(stil=st, baslik_y=by, baski_y_olcum=bk, kirpim=[0, Y0, 2048, Y0 + KH], olcek=round(3000 / 2048, 4), boyut=list(k.size),
                      kb=round((out / ad).stat().st_size / 1024))
         g.unlink(); kp.unlink()
         print(ad, R[ad], flush=True)

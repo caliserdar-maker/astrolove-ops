@@ -33,6 +33,9 @@ from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import yd_kart_ornek as K  # noqa: E402
+if "--eski-r2" not in K.main.__code__.co_consts:   # 29 Eki: yd_kart_ornek 28 Eki kart sablonuna gecti (--yedek / --sembol)
+    raise SystemExit("DUR: yd_kart_toplu eski yd_kart_ornek arayuzune bagli (--eski-r2 / --botanical / --timeless); "
+                     "28 Eki sablonuna uyarlanmadi (docs/kart_sablon/RAPOR_28EKI.md madde 9)")
 
 ALAN = ["ad", "cift", "kart_no", "design_id", "boyut", "sha256", "durum"]      # galeri_tasi.py MANIFEST
 REF_CIFT = "CANCER_LIBRA"
