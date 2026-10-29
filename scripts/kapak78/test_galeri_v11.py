@@ -94,7 +94,8 @@ def girdi(d, takas=False, kapi_bozuk=None, kart=True, fb=None, yedek17=False):
 
 def alt_csv(d, durum):
     p = d / "alt.csv"
-    p.write_text((KOK / "data/pod/galeri_v11_alt.csv").read_text().replace(",TASLAK", f",{durum}")); return p
+    t = (KOK / "data/pod/galeri_v11_alt.csv").read_text()
+    p.write_text(t.replace(",TASLAK\n", f",{durum}\n").replace(",ONAYLI\n", f",{durum}\n")); return p
 
 
 def liste(d, g, durum="ONAYLI", yazim=False):

@@ -8,7 +8,7 @@ Dosyalar (docs/kart_sablon/ONERI_W02_W06_29EKI.md, Merkez 29 Eki uygun):
   <CIFT>_W05_SUREC.jpg    S4: CI poster = ref/kapak_ci CI_<CIFT>.png (A kesimi 901,601-2107,2118)
   <CIFT>_W06_GENEL.jpg    S5 "Choose Your Color" (28 Eki sirasi MB, DB, PW, CI, WP): CI / PW = A kesimleri; MB / DB / WP = v11 W07 / W08 /
                           W10 poster kutusu PASPARTU_IC (paspartu disarida; 29 Eki olcumu asagida)
-W03 KAYNAK KAPISI (Merkez 29 Eki "once olc; tutmazsa DUR"): oran 2:3 (|g/y - 2/3| <= ORAN_TOL), renk = MB (poster medyan CIELAB en yakin
+W03 KAYNAK KAPISI (Merkez 29 Eki "once olc; tutmazsa DUR"; oran Serdar 29 Eki: 4:5, SOSYAL/78 4800x6000): oran 4:5 (|g/y - 4/5| <= ORAN_TOL), renk = MB (poster medyan CIELAB en yakin
   renk MB ve uzaklik < esik; referanslar ayni ciftin bes v11 posteri, esik = en kucuk ikili uzakligin yarisi, galeri_v11_kapi yontemi),
   isimler = CSV (tesseract: iki isim de okunur ve sol isim solda). Biri tutmazsa DUR (olcum OZET'e yazilir, kart yazilmaz).
 PASPARTU_IC: onayli CANCER_LIBRA W07 / W08 / W10 kenar olcumu 29 Eki (Pillow 11.0.0, satir 900-1800 / sutun 1200-1800 ortalamasi):
@@ -35,6 +35,7 @@ import yd_kart_ornek as K  # noqa: E402
 
 PASPARTU_IC = (984, 680, 2023, 2031)        # PIL crop (sag / alt haric)
 KENAR_ESIK = 20
+ORAN = 4 / 5                 # Serdar 29 Eki (W03 kaynagi 4:5; S2 karti 1140x1425, kapilar PASS yerel olcumu)
 ORAN_TOL = 0.002
 ALAN = ["cift", "ad", "dosya", "sha256", "boyut", "kaynak", "durum"]
 
@@ -107,7 +108,7 @@ def main(argv=None):
     kenar["CI"] = kenar_kapisi(ci, f"CI_{c}.png"); kenar["PW"] = kenar_kapisi(pw, f"PW_{c}.png")
     mb = Image.open(a.mb_poster)
     g, y = mb.size
-    w03 = dict(boyut=[g, y], oran=round(g / y, 4), oran_PASS=abs(g / y - 2 / 3) <= ORAN_TOL,
+    w03 = dict(boyut=[g, y], oran=round(g / y, 4), oran_PASS=abs(g / y - ORAN) <= ORAN_TOL,
                renk=renk_mb(mb, dict(MB=paspartu["MB"], DB=paspartu["DB"], PW=pw, CI=ci, WP=paspartu["WP"])),
                isim=isim_ocr(Path(a.mb_poster), sat["sol_isim"].upper(), sat["sag_isim"].upper()))
     ozet.update(w03_kaynak=w03, kenar=kenar)
