@@ -11,6 +11,7 @@ on:
     inputs:
       ciftler: {description: "virgullu cift anahtari ya da HEPSI (78)", required: true, default: "CANCER_LIBRA"}
       galeri_damga: {description: "TEMP/POSTER_GALERI_V11/<damga> (W01 / W07-W10)", required: true, default: "20261029_103607"}
+      onayli_kosu: {description: "onayli CANCER_LIBRA ornegi W02_W06/<kosu> (Serdar 29 Eki ok)", required: true, default: "40874497709"}
 jobs:
   kart:
     runs-on: ubuntu-latest
@@ -104,3 +105,49 @@ jobs:
           echo "Cikti: TEMP/POSTER_GALERI_V11/$G/W02_W06/${GITHUB_RUN_ID} parca $P ($(ls _out/*.jpg 2>/dev/null | wc -l) jpg)" | tee -a "$GITHUB_STEP_SUMMARY"
       - if: always()
         run: rm -rf _g _mb _out _kupa _kes ~/.config/rclone
+  kapi:
+    # dosya kapisi + sahne olcumu (scripts/kapak78/wa_kart_v11_kapi.py; esik yok, dagilim): tum parcalar bittikten sonra
+    needs: kart
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Girdi kapisi
+        env: {G: "${{ inputs.galeri_damga }}", O: "${{ inputs.onayli_kosu }}"}
+        run: '[[ "$G" =~ ^[0-9]{8}_[0-9]{6}$ && "$O" =~ ^[0-9]+$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Ortam
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0 numpy==2.1.3
+          sudo apt-get install -y -qq rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Kapi
+        env: {G: "${{ inputs.galeri_damga }}", O: "${{ inputs.onayli_kosu }}", C: "${{ inputs.ciftler }}"}
+        run: |
+          set -euo pipefail
+          K="gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V11/$G/W02_W06"
+          rclone copy "$K/${GITHUB_RUN_ID}" _d --max-depth 1 --transfers 8 -q
+          rclone copy "$K/$O" _r --max-depth 1 --transfers 8 -q
+          if [ "$C" = "HEPSI" ]; then CS=data/pod/pod78_ids.csv
+          else python3 -c "import csv,sys; r=list(csv.DictReader(open('data/pod/pod78_ids.csv'))); w=csv.DictWriter(open('_c.csv','w',newline=''),fieldnames=list(r[0])); w.writeheader(); w.writerows(x for x in r if x['cift'] in sys.argv[1].split(','))" "$C"; CS=_c.csv; fi
+          set +e; python3 scripts/kapak78/wa_kart_v11_kapi.py --dir _d --ref _r --out _k --ciftler "$CS" --olc; RC=$?; set -e
+          rclone copy _k "$K/${GITHUB_RUN_ID}/KAPI" --immutable -q
+          cat _k/KAPI_W02_W06.md >> "$GITHUB_STEP_SUMMARY"
+          echo "Cikti: TEMP/POSTER_GALERI_V11/$G/W02_W06/${GITHUB_RUN_ID}/KAPI (RC $RC)"
+          [ "$RC" = 0 ] || { echo "::error::W02-W06 kapisi PASS degil"; exit 1; }
+      - if: always()
+        run: rm -rf _d _r _k ~/.config/rclone
