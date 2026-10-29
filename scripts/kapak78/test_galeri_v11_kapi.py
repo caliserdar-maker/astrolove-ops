@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """galeri_v11_kapi.py (B3) yerel testi: sentetik kartlar (JPEG 95), ag / Etsy / Drive yok.
 Senaryolar: temiz set + onayli esik PASS; etiket kalmis FAIL; W07 / W10 sahne farki (onayli CANCER_LIBRA, K2) poster ve cift satiri
-disinda FAIL, icinde (baska cift) PASS; renk kimligi (DB kartinda WP poster) FAIL; onayli referans yok FAIL;
+disinda FAIL; BASKA CIFT (B5 29 Eki): cift satiri + poster baska cift W01 / W07-W10 FAIL (OCR + poster kimligi), yalniz poster baska
+cift FAIL (kimlik), yalniz cift satiri baska FAIL (OCR); poster 6 px kayik FAIL (pay +-3); AQUARIUS Q bandi; onayli sha farkli DUR;
+renk kimligi (DB kartinda WP poster) FAIL; onayli referans yok FAIL;
 PW / CI seritli (10 px rampa) FAIL, temiz PASS; esik yok / onay bos ESIK_YOK;
 dosya yok, boyut, PNG FAIL; --olc oneri (onayli en buyuk ile canli en kucuk arasi)."""
 import csv
+import hashlib
 import json
 import sys
 import tempfile
@@ -18,6 +21,7 @@ import galeri_v11_kapi as K  # noqa: E402
 
 SONUC = []
 CIFT = "CANCER_LIBRA"
+DIGER = "AQUARIUS_SAGITTARIUS"                       # poster kimligi icin ikinci ciftin v10 kartlari
 CIFTLER = HERE.parents[1] / "data/pod/pod78_ids.csv"
 
 
@@ -35,7 +39,7 @@ def font(n):
 
 
 def kart(yol, poster=(252, 252, 252), etiket=False, serit=0, ust="Pure White", ek=None, fmt="JPEG", boyut=K.BOYUT, cs="CANCER & LIBRA",
-         isim="EMILY  JAMES"):
+         isim="EMILY  JAMES", kay=0):
     im = Image.new("RGB", K.BOYUT, (214, 204, 192)); d = ImageDraw.Draw(im)
     for y in range(0, K.BOYUT[1], 4):                                    # duvar: yumusak dikey gecis (gercek oda sahnesi gibi)
         v = int(8 * y / K.BOYUT[1])
@@ -45,8 +49,9 @@ def kart(yol, poster=(252, 252, 252), etiket=False, serit=0, ust="Pure White", e
     for i in range(serit):                                                # cerceve ic kenari rampa (bilinen serit)
         v = int(20 + (230 - 20) * (i + 1) / (serit + 1))
         d.rectangle((x0 + i, y0 + i, x1 - 1 - i, y1 - 1 - i), outline=(v, v, v))
-    d.rectangle((x0 + serit, y0 + serit, x1 - 1 - serit, y1 - 1 - serit), fill=poster)
-    d.text((1300, 1200), isim, fill=(150, 110, 40), font=font(70))
+    d.rectangle((x0 + serit + kay, y0 + serit, x1 - 1 - serit + kay, y1 - 1 - serit), fill=poster)
+    d.text((1300 + kay, 1200), isim, fill=(150, 110, 40), font=font(70))
+    d.ellipse((1250 + kay, 800, 1750 + kay, 1100), outline=(150, 110, 40), width=14)    # poster deseni (kimlik NCC icin)
     d.text((1100, 165), ust, fill=(10, 22, 56), font=font(90))           # ust satir
     d.text((1100, 356), cs, fill=(138, 98, 30), font=font(60))           # cift satiri (bant y 341-432)
     if etiket:
@@ -68,6 +73,11 @@ def kur(t, **deg):
     kart(vg / f"{CIFT}_G7.jpg", etiket=True, serit=10)
     kart(vg / f"{CIFT}_G8.jpg", poster=(240, 232, 214), etiket=True, serit=12, ust="Champagne Ivory")
     kart(vk / f"KAPAK_{CIFT}.jpg", poster=(18, 26, 60), ust="Personalized Zodiac Couple Gift")
+    o = dict(cs="AQUARIUS & SAGITTARIUS", isim="OLIVIA      NOAH")
+    kart(vg / f"{DIGER}_G6.jpg", poster=(20, 20, 22), ust="Deep Black", **o); kart(vg / f"{DIGER}_G7.jpg", **o)
+    kart(vg / f"{DIGER}_G8.jpg", poster=(240, 232, 214), ust="Champagne Ivory", **o)
+    kart(vg / f"{DIGER}_G9.jpg", poster=(236, 222, 196), ust="Warm Parchment", **o)
+    kart(vk / f"KAPAK_{DIGER}.jpg", poster=(18, 26, 60), ust="Personalized Zodiac Couple Gift", **o)
     ayar = dict(W01_KAPAK=dict(poster=(240, 232, 214), ust="Personalized Zodiac Couple Gift"),
                 W07_MB=dict(poster=(18, 26, 60), ust="Midnight Blue"), W08_DB=dict(poster=(20, 20, 22), ust="Deep Black"),
                 W09_PW=dict(), W10_WP=dict(poster=(236, 222, 196), ust="Warm Parchment"))
@@ -83,6 +93,8 @@ def kur(t, **deg):
 def kos(t, dd, vg, vk, esik=None, onayli=True):
     e = ""
     if esik is not None:
+        if onayli and "onayli_sha256" not in esik:
+            esik = dict(esik, onayli_sha256={ad: hashlib.sha256((t / "onayli" / f"{CIFT}_{ad}.jpg").read_bytes()).hexdigest() for ad in K.ADLAR})
         e = str(t / "esik.json"); Path(e).write_text(json.dumps(esik))
     rc = K.main(["--dosya-dir", str(dd), "--v10-galeri", str(vg), "--v10-kapak", str(vk), "--ciftler", str(CIFTLER),
                  "--sadece", CIFT, "--esik", e, "--out", str(t / "out")] + (["--onayli", str(t / "onayli")] if onayli else []))
@@ -100,8 +112,13 @@ def main():
     kontrol("temiz set + onayli esik: 5/5 PASS, cikis 0", rc == 0 and all(x["durum"] == "PASS" for x in r.values()))
     b = {k: int(v) for k, v in (x.split(":") for x in r["W09_PW"]["bant"].split())}
     kontrol(f"temiz PW bant <= 1 ({r['W09_PW']['bant']})", max(b.values()) <= 1)
-    kontrol(f"DB / WP sahne + renk olculdu ({r['W08_DB']['v10_fark']})", "sahne onayli" in r["W08_DB"]["v10_fark"] and "renk DB 0" in r["W08_DB"]["v10_fark"]
-            and "renk WP" in r["W10_WP"]["v10_fark"])
+    kontrol(f"DB / WP sahne + renk olculdu ({r['W08_DB']['sahne_fark']})", "sahne onayli" in r["W08_DB"]["sahne_fark"] and "renk DB 0" in r["W08_DB"]["sahne_fark"]
+            and "renk WP" in r["W10_WP"]["sahne_fark"])
+    kontrol(f"kimlik olculdu, 2 cift ({r['W07_MB']['kimlik'][-60:]})", all("kimlik kendi" in r[x]["kimlik"] and "(2 cift)" in r[x]["kimlik"] for x in K.ADLAR))
+    e = t / "esik_sha.json"; e.write_text(json.dumps(dict(ONAY, onayli_sha256={ad: "0" * 64 for ad in K.ADLAR})))
+    rc5 = K.main(["--dosya-dir", str(dd), "--v10-galeri", str(vg), "--v10-kapak", str(vk), "--ciftler", str(CIFTLER), "--sadece", CIFT,
+                  "--esik", str(e), "--out", str(t / "out_sha"), "--onayli", str(t / "onayli")])
+    kontrol("onayli referans sha256 esik dosyasindan farkli: kapi kosmaz (cikis 2)", rc5 == 2 and not (t / "out_sha/KAPI.csv").exists())
     rc4, r4 = kos(t, dd, vg, vk, ONAY, onayli=False)
     kontrol("onayli referans yok: W07 / W08 / W10 FAIL", all("onayli referans yok" in r4[x]["neden"] for x in ("W07_MB", "W08_DB", "W10_WP")))
     rc2, r2 = kos(t, dd, vg, vk, None)
@@ -119,10 +136,28 @@ def main():
     rc, r = kos(t, dd, vg, vk, ONAY)
     kontrol("WP sahne farki (poster / cift satiri disi) FAIL", r["W10_WP"]["durum"] == "FAIL" and "sahne farki" in r["W10_WP"]["neden"])
     kontrol("MB sahne farki FAIL", r["W07_MB"]["durum"] == "FAIL" and "sahne farki" in r["W07_MB"]["neden"])
-    baska = dict(cs="SAGITTARIUS & SAGITTARIUS", isim="OLIVIA  NOAH")
-    t = t0 / "c2"; dd, vg, vk = kur(t, W07_MB=baska, W08_DB=baska, W10_WP=baska)
+    baska = dict(cs="AQUARIUS & SAGITTARIUS", isim="OLIVIA      NOAH")
+    t = t0 / "c2"; dd, vg, vk = kur(t, **{x: baska for x in K.ADLAR})
     rc, r = kos(t, dd, vg, vk, ONAY)
-    kontrol("baska cift (cift satiri + poster ici farkli) W07 / W08 / W10 PASS", all(r[x]["durum"] == "PASS" for x in ("W07_MB", "W08_DB", "W10_WP")))
+    kontrol("baska ciftin kartlari bu ciftin adiyla: 5/5 FAIL (cift satiri OCR + poster kimligi)",
+            all(r[x]["durum"] == "FAIL" and "cift satiri OCR" in r[x]["neden"] and "poster kimligi" in r[x]["neden"] for x in K.ADLAR))
+    t = t0 / "c4"; dd, vg, vk = kur(t, W07_MB=dict(isim="OLIVIA      NOAH"), W01_KAPAK=dict(isim="OLIVIA      NOAH"))
+    rc, r = kos(t, dd, vg, vk, ONAY)
+    kontrol(f"yalniz poster baska cift (W07, W01): kimlik FAIL ({r['W07_MB']['neden'][:70]})",
+            all(r[x]["durum"] == "FAIL" and "poster kimligi" in r[x]["neden"] for x in ("W07_MB", "W01_KAPAK")))
+    t = t0 / "c5"; dd, vg, vk = kur(t, W08_DB=dict(cs="CANCER & LEO"), W09_PW=dict(cs=""))
+    rc, r = kos(t, dd, vg, vk, ONAY)
+    kontrol("yalniz cift satiri baska / silinmis (W08, W09): OCR FAIL",
+            all(r[x]["durum"] == "FAIL" and "cift satiri OCR" in r[x]["neden"] for x in ("W08_DB", "W09_PW")))
+    t = t0 / "c6"; dd, vg, vk = kur(t, W07_MB=dict(kay=6))
+    rc, r = kos(t, dd, vg, vk, ONAY)
+    kontrol(f"W07 poster 6 px kayik: sahne FAIL (pay +-{K.PAY})", r["W07_MB"]["durum"] == "FAIL" and "sahne farki" in r["W07_MB"]["neden"])
+    from PIL import Image as _I
+    a = _I.new("RGB", K.BOYUT, (200, 200, 200)); b = a.copy(); _I.Image.paste(b, (0, 0, 0), (1200, 438, 1300, 446))
+    kontrol("AQUARIUS Q kuyrugu bandi (y 438-446) dislanir, CANCER_LIBRA'da sayilir",
+            K.fark(a, b, [K.cift_bant("AQUARIUS_LEO")])[1] == 0 and K.fark(a, b, [K.cift_bant("CANCER_LIBRA")])[1] == 200)
+    c = a.copy(); _I.Image.paste(c, (0, 0, 0), (300, 380, 400, 400))
+    kontrol("cift satiri bandi disinda (x 300) fark sayilir", K.fark(a, c, [K.cift_bant("CANCER_LIBRA")])[1] == 200)
     t = t0 / "c3"; dd, vg, vk = kur(t, W08_DB=dict(poster=(236, 222, 196)))
     rc, r = kos(t, dd, vg, vk, ONAY)
     kontrol(f"DB kartinda WP poster: renk kimligi FAIL ({r['W08_DB']['neden'][:80]})", r["W08_DB"]["durum"] == "FAIL" and "renk kimligi" in r["W08_DB"]["neden"])
