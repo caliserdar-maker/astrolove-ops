@@ -29,7 +29,7 @@ jobs:
           python-version: "3.12"
       - run: |
           set -euo pipefail
-          pip install -q pillow==11.0.0 numpy==2.1.3
+          pip install -q pillow==11.0.0 numpy==2.1.3 requests==2.34.2
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
       - name: rclone.conf
         env:
