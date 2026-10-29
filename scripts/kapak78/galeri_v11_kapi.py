@@ -15,8 +15,10 @@ Kapilar (dosya basina):
      ust satir bandi (y 150-300) disi.
   4) bant (W01 CI kapak, W09 PW; acik poster): poster ile siyah cerceve arasinda farkli bant. Geometri: dort kenarda poster kenarina dik
      profil (kenar boyunca, koselerden 150 px iceride ortalama gri), nominal kenar (oge 888, 588, 1226 x 1538; KARAR dosyasi) +-40 px.
-     Cerceve = profilde son KARANLIK (< 40) nokta; poster = sonraki ilk |L - ref| <= DELTA (4) nokta (ref: pencerenin en ic 15 px medyani).
-     bant = aradaki piksel sayisi. Olcum 29 Eki (canli v10 CANCER_LIBRA G7, PW, bilinen serit): sol 9, sag 11, ust 7, alt 11.
+     Cerceve = profilde son KARANLIK (< 40) nokta; bant = ondan sonra komsu fark > EGIM (5 gri/px) surdukce gecen piksel sayisi
+     (keskin gecis 0; rampa / serit sayilir; posterin yumusak kenar golgesi (vinyet, < 1 gri/px) sayilmaz).
+     29 Eki ilk yontem (|L - ic medyan| <= 4) onayli CI kapakta vinyeti 15 / 21 px bant saymisti: duzeltildi.
+     Olcum 29 Eki (canli v10 CANCER_LIBRA G7, PW, bilinen serit): sol 9, sag 12, ust 7, alt 11.
      Karar esigi bant_max_px esik dosyasindan (Serdar onayli).
 Esik dosyasi (--esik, JSON): {"etiket_hp_max": n, "bant_max_px": n, "onay": "Serdar <tarih>"}; yoksa / onay bos -> etiket ve bant kapisi
 ESIK_YOK (PASS sayilmaz). --olc: onayli CANCER_LIBRA 5 gorselden (--onayli) olcum + oneri (ESIK_ONERI.json / .md); kullanilmaz, Serdar'a sunulur.
@@ -39,7 +41,7 @@ FARK_P999, FARK_MAX = 12, 45                         # CLAUDE.md GALERI kapisi (
 MB_BANT_Y = (150, 300)
 V10_KART = {"W08_DB": "G6", "W10_WP": "G9"}
 POSTER = (888, 588, 888 + 1226, 588 + 1538)          # KARAR 29 Eki: onayli kapak posteri oge left 888, top 588, 1226 x 1538
-PENCERE, KOSE, KARANLIK, DELTA, REF_N = 40, 150, 40, 4, 15
+PENCERE, KOSE, KARANLIK, EGIM = 40, 150, 40, 5
 BANT_AD = ("W01_KAPAK", "W09_PW")
 
 
@@ -72,14 +74,14 @@ def kutu_fark(a, b):
 
 
 def profil_bant(p):
-    """p: dis -> ic yonunde profil. -> bant px (None: cerceve / poster bulunamadi)"""
-    ref = float(np.median(p[-REF_N:]))
+    """p: dis -> ic yonunde profil. -> bant px (None: cerceve bulunamadi / gecis pencerede bitmedi)"""
     kar = np.nonzero(p < KARANLIK)[0]
     if not len(kar):
         return None
-    d = int(kar[-1])
-    ic = [j for j in range(d + 1, len(p)) if abs(p[j] - ref) <= DELTA]
-    return (ic[0] - d - 1) if ic else None
+    j = d = int(kar[-1]) + 1                     # cerceveden sonraki ilk piksel
+    while j + 1 < len(p) and abs(float(p[j + 1]) - float(p[j])) > EGIM:
+        j += 1
+    return None if j + 1 >= len(p) else j - d
 
 
 def bant_olc(im):
@@ -155,7 +157,7 @@ def dosya_kapi(p, ad, cift, a, esik):
 def olc(a):
     """onayli CANCER_LIBRA 5 gorsel + canli v10 pozitif kontroller (etiketli G6 / G9, seritli G7 / G8) -> ESIK_ONERI"""
     on = Path(a.onayli); v10 = Path(a.v10_galeri)
-    O = dict(yontem=dict(hp_sigma=HP_SIGMA, hp_esik=HP_ESIK, karanlik=KARANLIK, delta=DELTA, pencere=PENCERE, poster=POSTER), onayli={}, canli={})
+    O = dict(yontem=dict(hp_sigma=HP_SIGMA, hp_esik=HP_ESIK, karanlik=KARANLIK, egim=EGIM, pencere=PENCERE, poster=POSTER), onayli={}, canli={})
     for ad in ADLAR:
         p = on / f"CANCER_LIBRA_{ad}.jpg"
         if not p.exists():
