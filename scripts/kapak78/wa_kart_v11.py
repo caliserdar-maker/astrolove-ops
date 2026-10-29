@@ -64,20 +64,43 @@ def renk_mb(poster, refs):
     return dict(uzaklik=d, esik=round(esik, 1), en_yakin=yakin, PASS=yakin == "MB" and d["MB"] < esik)
 
 
-def isim_ocr(p, sol, sag):
-    """tesseract tsv: iki isim de okunur (buyuk harf, sozcuk esitligi) ve sol isim solda"""
-    r = subprocess.run(["tesseract", str(p), "stdout", "--psm", "11", "tsv"], capture_output=True, text=True, timeout=300)
+def _ocr_tsv(im, psm):
+    import tempfile
+    with tempfile.NamedTemporaryFile(suffix=".png") as f:
+        im.save(f.name)
+        r = subprocess.run(["tesseract", f.name, "stdout", "--psm", str(psm), "tsv"], capture_output=True, text=True, timeout=300)
     if r.returncode:
         raise SystemExit(f"DUR: tesseract hata {r.stderr[-300:]}")
-    x = {}
+    out = []
     for sat in r.stdout.splitlines()[1:]:
         s = sat.split("\t")
         if len(s) == 12 and s[11].strip():
-            w = re.sub(r"[^A-Z]", "", s[11].upper())
+            out.append((re.sub(r"[^A-Z]", "", s[11].upper()), int(s[6])))
+    return out
+
+
+def isim_ocr(p, sol, sag):
+    """tesseract tsv: iki isim AYNI goruntu varyantinda okunur (buyuk harf, sozcuk esitligi) ve sol isim solda.
+    29 Eki CI 40877328600: tam sayfa (4800x6000, psm 11) iki ciftte birer ismi okuyamadi (koyu zemin, altin yazi). Varyantlar
+    (sirayla, ilk tutan): tam sayfa; isim bandi (poster yuksekliginin %50-90'i, 2400 px genislige) gri / ters / esikli, psm 11 ve 6."""
+    from PIL import ImageOps
+    im = Image.open(p).convert("RGB")
+    g, y = im.size
+    bant = im.crop((0, int(y * 0.50), g, int(y * 0.90))).convert("L")
+    bant = bant.resize((2400, round(2400 * bant.height / bant.width)))
+    ters = ImageOps.invert(bant)
+    esik = ters.point(lambda v: 0 if v < 150 else 255)
+    deneme = [("tam", im, 11), ("bant", bant, 11), ("ters", ters, 11), ("esik", esik, 11), ("ters6", ters, 6), ("esik6", esik, 6)]
+    son = {}
+    for ad, gr, psm in deneme:
+        x = {}
+        for w, xx in _ocr_tsv(gr, psm):
             if w in (sol, sag) and w not in x:
-                x[w] = int(s[6])
-    ok = sol in x and sag in x and (sol == sag or x[sol] < x[sag])
-    return dict(okunan=x, PASS=ok)
+                x[w] = xx
+        son[ad] = x
+        if sol in x and sag in x and (sol == sag or x[sol] < x[sag]):
+            return dict(okunan=x, varyant=ad, PASS=True)
+    return dict(okunan=son, PASS=False)
 
 
 def main(argv=None):

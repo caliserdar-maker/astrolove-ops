@@ -128,8 +128,8 @@ def sahte(lid, canli_n=9, **k):
     return s
 
 
-def kos(api, hazir, out, kuru=True, plan=None, damga=""):
-    args = ["--hazir", str(hazir), "--out", str(out), "--bes-x7", "zorunlu", "--kosu", "888",
+def kos(api, hazir, out, kuru=True, plan=None, damga="", bes_x7="zorunlu"):
+    args = ["--hazir", str(hazir), "--out", str(out), "--bes-x7", bes_x7, "--kosu", "888",
             "--devam", str(out / "DEVAM.json"), "--ilerleme", str(out / "ILERLEME.json")]
     args += ["--kuru"] if kuru else ["--confirm", "GALERI_V11", "--plan", str(plan), "--plan-damga", damga]
     a = V.arg(args)
@@ -211,6 +211,14 @@ def main():
     kontrol("yukle kuru: aciklamada cerceve satiri yok BLOK", nd[lid]["durum"] == "BLOK" and "cerceve satiri yok" in nd[lid]["neden"][0])
     kontrol("yukle kuru: envanter boy 12 != format karti 14 BLOK", nd["4570110641"]["durum"] == "BLOK"
             and any("boy sayisi 12 != format karti 14" in x for x in nd["4570110641"]["neden"]))
+    # Serdar 29 Eki: once galeri, 5x7 hemen ardindan: 13 boy + 5x7 eksik UYARI (BLOK degil); 14 boy 5x7'siz BLOK
+    o5 = t0 / "o5x7"; o5.mkdir()
+    api5 = T10.Coklu({lid: sahte(lid, boy=13, bes_x7=False), "4570110641": sahte("4570110641", boy=14, bes_x7=False)})
+    rc5, R5 = kos(api5, d8 / "hazir", o5, bes_x7="yok"); n5 = {x["ilan"]: x for x in R5["ilanlar"]}
+    kontrol("yukle kuru: 13 boy + 5x7 eksik -> PLAN + UYARI 5x7 bekliyor", n5[lid]["durum"] == "PLAN"
+            and any("5x7 bekliyor" in t for t in n5[lid]["neden"]))
+    kontrol("yukle kuru: 14 boy ama 5x7 yok -> BLOK", n5["4570110641"]["durum"] == "BLOK"
+            and any("5x7 yok" in t for t in n5["4570110641"]["neden"]))
     o3 = t0 / "o3"; o3.mkdir()
     api = T10.Coklu({k: sahte(k, canli_n=17) for k in ILAN})
     rc, R = kos(api, hz, o3)

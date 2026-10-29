@@ -78,7 +78,7 @@ jobs:
           set -euo pipefail
           mkdir -p _g _mb _out
           ORT=""; [ "$P" = 0 ] && ORT="--ortak"          # ORTAK_W04 yalniz parca 0'da
-          i=0; n=$N; t0=$(date +%s)
+          i=0; n=$N; t0=$(date +%s); F=""
           while read -r CF; do
             [ -n "$CF" ] || continue
             i=$((i+1))
@@ -88,11 +88,14 @@ jobs:
             read -r A B <<< "$L"
             python3 scripts/kapak78/wa_kart_v11.py --cift "$CF" --a "$A" --b "$B" --sembol "_kupa/kupa_uretim/sembol/$CF" \
               --mb-poster "_mb/${CF}.png" --isim-csv data/sosyal/instagram/IG_78_ORNEK_ISIM_TAGLINE.csv --kesim _kes/ref/kapak_ci \
-              --galeri _g --out _out --kaynak "kart_sablon@${GITHUB_SHA::8}" $ORT
-            ORT=""
+              --galeri _g --out _out --kaynak "kart_sablon@${GITHUB_SHA::8}" $ORT \
+              || { echo "::error::$CF FAIL (ayrinti yukarida, DUR satiri)"; F="$F $CF"; continue; }
+            ORT=""                                       # ORTAK ilk BASARILI ciftte uretilir (FAIL cift dosya yazmaz)
             [ "$C" = "HEPSI" ] || python3 scripts/kapak78/wa_kart_v11.py kontak _g _out "$CF" "_out/KONTAK_V11_${CF}.jpg"
             e=$(( $(date +%s) - t0 )); echo "ETA parca $P: $i/$n, gecen ${e}s, kalan $(( e * (n - i) / i ))s, %$(( 100 * i / n ))"
           done < _ciftler.txt
+          # 29 Eki 40877328600: ilk FAIL ciftte durmak parcanin kalanini uretmiyordu; artik tum ciftler denenir, sonda FAIL
+          [ -z "$F" ] || { echo "FAIL ciftler:$F" | tee -a "$GITHUB_STEP_SUMMARY"; exit 1; }
       - name: Drive'a yaz
         if: always() && env.N != '0'
         env: {G: "${{ inputs.galeri_damga }}", P: "${{ matrix.parca }}"}

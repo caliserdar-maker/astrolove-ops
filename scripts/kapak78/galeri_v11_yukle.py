@@ -8,7 +8,8 @@ Ek kapilar (ilan basina, canli okumayla; BLOK = yazma yok):
   aciklama: "Frames shown in photos are for display only and are not included." alt dizesi (html coz + bosluk tekle) yoksa BLOK
             (DUR, Serdar'a sorulur; updateListing YOK).
   boy: envanter boy sayisi = format karti boy sayisi (kart manifesti format_boy_sayisi). Alan yoksa "UYGULANAMAZ" notu (BLOK degil;
-       bilgi kartlari yokken liste zaten BLOK).
+       bilgi kartlari yokken liste zaten BLOK). Serdar 29 Eki (once galeri, 5x7 hemen ardindan): envanter = format - 1 ve eksik olan
+       5x7 ise BLOK DEGIL, UYARI notu "5x7 bekliyor (galeriden sonraki is)"; baska her fark BLOK.
   bes_x7: v10 kapisi aynen (--bes-x7).
 Alt metin: LISTE_OZET alt_sablon_durum ONAYLI degilse (TASLAK satir varsa) yukleyici Etsy istegi gondermeden DUR (kuru dahil).
 Kullanim: galeri_v10_yukle.py ile ayni argumanlar (--hazir, --out, --kuru | --confirm GALERI_V11 --plan --plan-damga, ...)."""
@@ -22,6 +23,7 @@ sys.path.insert(0, str(HERE)); sys.path.insert(0, str(HERE.parent / "etsy"))
 import galeri_v10_yukle as V  # noqa: E402
 
 CERCEVE_SATIRI = "Frames shown in photos are for display only and are not included."
+UYARI_5X7 = "UYARI: 5x7 bekliyor (galeriden sonraki is); W04 canlida 5x7 eklenene kadar 1 boy fazla gosterir"
 
 
 def norm(t):
@@ -37,8 +39,12 @@ def ek_kapi(c, man):
     fb = man.get("format_boy_sayisi")
     if fb is None:
         notlar.append("boy kapisi UYGULANAMAZ (kart manifestinde format_boy_sayisi yok; bilgi kartlari cikinca)")
+    elif c.get("boy_sayisi") == fb - 1 and not c.get("bes_x7"):
+        notlar.append(UYARI_5X7)
     elif c.get("boy_sayisi") != fb:
         neden.append(f"envanter boy sayisi {c.get('boy_sayisi')} != format karti {fb}")
+    elif not c.get("bes_x7"):   # format kartinda 5x7 var; sayi tutup 5x7 yoksa baska bir boy fazla
+        neden.append(f"envanter {fb} boy ama 5x7 yok (format karti 5x7 iceriyor)")
     return neden, notlar
 
 
