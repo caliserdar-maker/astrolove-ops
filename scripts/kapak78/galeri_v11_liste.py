@@ -10,6 +10,8 @@ Girdiler:
   --kart-manifest bilgi karti toplu uretiminin manifesti (JSON; kart uretimi bu gorevin kapsami disinda, BICIM ONERI / onay bekler):
                {"format_boy_sayisi": <int|null>, "kartlar": {"ORTAK": {"4": "<dosya>"}, "<CIFT>": {"2": .., "3": .., "5": .., "6": ..}}},
                dosyalar manifestin klasorunde. Yoksa ilan BLOK ("bilgi kartlari yok").
+               Ya da wa-kart-v11 cikti KLASORU (Merkez 29 Eki: ayri JSON tutulmaz): MANIFEST_W02_W06*.csv satirlarindan (durum PASS)
+               kurulur, --format-boy ile (Serdar 29 Eki: 14); kart dosyasinin sha256'si MANIFEST ile ayni olmali.
   --kesim-dir  ref/kapak_ci (kapak-ci-ref-20261029: CI_<CIFT>.png G8 kesimi, PW_<CIFT>.png G7 kesimi)
   --yedek-dir  B1 yedegi (TEMP/POSTER_GALERI_V11_YEDEK/<damga>: <ilan>_<CIFT>/GALERI.json + r<rank>_<id>.jpg), --yedek-ozet OZET.md,
   --yedek-liste yedek klasorunun rclone lsjson -R ciktisi.
@@ -55,10 +57,29 @@ def sablon_oku(yol):
     return sab
 
 
-def kart_oku(yol):
+KART_SIRA = {"W02_SEMBOL": 2, "W03_KISISEL": 3, "W04_FORMAT": 4, "W05_SUREC": 5, "W06_GENEL": 6}
+
+
+def kart_oku(yol, format_boy=None):
     if not yol:
         return None, None
     p = Path(yol)
+    if p.is_dir():
+        j = {"format_boy_sayisi": format_boy, "kartlar": {}, "sha256": {}}
+        for m in sorted(p.glob("MANIFEST_W02_W06*.csv")):
+            for r in csv.DictReader(open(m, encoding="utf-8")):
+                s = KART_SIRA.get(r["ad"])
+                if s is None or r.get("durum") != "PASS" or (s == 4) != (r["cift"] == "ORTAK"):
+                    raise SystemExit(f"kart manifesti {m.name}: gecersiz satir {r['cift']} {r['ad']} {r.get('durum')}")
+                k = j["kartlar"].setdefault(r["cift"], {})
+                if str(s) in k:
+                    raise SystemExit(f"kart manifesti: {r['cift']} {r['ad']} iki kez")
+                k[str(s)] = r["dosya"]; j["sha256"][r["dosya"]] = r["sha256"]
+        if not j["kartlar"]:
+            raise SystemExit(f"kart manifesti: {p} icinde MANIFEST_W02_W06*.csv yok")
+        if not isinstance(format_boy, int):
+            raise SystemExit("kart manifesti klasorden: --format-boy tam sayi olmali")
+        return j, p
     j = json.loads(p.read_text(encoding="utf-8"))
     if not isinstance(j.get("kartlar"), dict):
         raise SystemExit("kart manifesti: 'kartlar' sozlugu yok")
@@ -154,6 +175,11 @@ def ilan_hazirla(is_):
         if e:
             neden.append(f"W{s:02d} {p.name}: {e}")
     shas = {s: L.sha(p) for s, (p, _) in kay.items() if p is not None and p.exists()}
+    ksha = (d["kart"] or {}).get("sha256") or {}
+    for s in KART:
+        p = kay[s][0]
+        if p is not None and p.name in ksha and shas.get(s) != ksha[p.name]:
+            neden.append(f"W{s:02d} {p.name} kart MANIFEST sha256 ile ayni degil")
     if len(shas) == N_HEDEF and len(set(shas.values())) != N_HEDEF:
         neden.append(f"{N_HEDEF} hedef dosyadan en az ikisi ayni (sha256)")
     for s, ad in CANVA.items():
@@ -208,7 +234,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     for k in ("--ciftler", "--alt", "--galeri-dir", "--kapi-csv", "--kesim-dir", "--yedek-dir", "--yedek-ozet", "--yedek-liste", "--out"):
         ap.add_argument(k, required=True)
-    ap.add_argument("--kart-manifest", default="")
+    ap.add_argument("--kart-manifest", default="", help="JSON ya da wa-kart-v11 cikti klasoru (MANIFEST_W02_W06*.csv)")
+    ap.add_argument("--format-boy", type=int, default=None, help="kart klasorunden okurken format karti boy sayisi (Serdar 29 Eki: 14)")
     ap.add_argument("--sadece", default=""); ap.add_argument("--haric", default="")
     ap.add_argument("--yazim", action="store_true", help="yazim kosusu: alt metin sablonu ONAYLI olmali")
     ap.add_argument("--is", type=int, default=os.cpu_count() or 2, dest="is_")
@@ -216,7 +243,7 @@ def main(argv=None):
     try:
         ilanlar = L.kapsam(a.ciftler, a.sadece, a.haric)
         sab = sablon_oku(a.alt)
-        km, kd = kart_oku(a.kart_manifest)
+        km, kd = kart_oku(a.kart_manifest, a.format_boy)
         yozet = L.ozet_oku(a.yedek_ozet)
         yliste = {x["Path"]: int(x.get("Size") or 0) for x in json.loads(Path(a.yedek_liste).read_text(encoding="utf-8"))}
     except (SystemExit, OSError, ValueError, KeyError) as e:

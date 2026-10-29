@@ -21,7 +21,7 @@ on:
       galeri_damga: {description: "TEMP/POSTER_GALERI_V11/<damga> (YYYYMMDD_HHMMSS)", required: true, default: ""}
       kapi_kosu: {description: "TEMP/POSTER_GALERI_V11/<galeri_damga>/KAPI/<kosu> (B3 KAPI.csv)", required: true, default: ""}
       yedek_damga: {description: "TEMP/POSTER_GALERI_V11_YEDEK/<damga> (B1)", required: true, default: ""}
-      kart_klasor: {description: "TEMP altinda bilgi karti klasoru (KART_MANIFEST.json); bos = yok", required: false, default: ""}
+      kart_klasor: {description: "TEMP altinda bilgi karti klasoru (KART_MANIFEST.json ya da wa-kart-v11 MANIFEST_W02_W06*.csv); bos = yok", required: false, default: ""}
       bes_x7: {description: "zorunlu | yok (zorunlu: envanterde 5x7 yoksa BLOK)", required: true, default: ""}
       kuru: {description: "true = yazma yok (plan); false = yazim", required: true, default: "true"}
       confirm: {description: "yazim icin GALERI_V11", required: false, default: ""}
@@ -126,8 +126,10 @@ jobs:
           rclone lsjson -R "$Y" --files-only --include "*.jpg" > _work/yedek_ls.json
           KM=()
           if [ -n "$KA" ]; then
-            rclone copy "$T/$KA" _in/kart --max-depth 1 --include "*.jpg" --include "KART_MANIFEST.json" --transfers 8 -q
-            [ -f _in/kart/KART_MANIFEST.json ] && KM=(--kart-manifest _in/kart/KART_MANIFEST.json)
+            rclone copy "$T/$KA" _in/kart --max-depth 1 --include "*.jpg" --include "KART_MANIFEST.json" --include "MANIFEST_W02_W06*.csv" --transfers 8 -q
+            if [ -f _in/kart/KART_MANIFEST.json ]; then KM=(--kart-manifest _in/kart/KART_MANIFEST.json)
+            elif ls _in/kart/MANIFEST_W02_W06*.csv >/dev/null 2>&1; then KM=(--kart-manifest _in/kart --format-boy 14)   # Serdar 29 Eki: W04 "14 Sizes"
+            fi
           fi
           echo "indirilen: galeri $(ls _in/galeri | wc -l), yedek json $(ls _in/yedek/*/GALERI.json 2>/dev/null | wc -l), kart $(ls _in/kart | wc -l)"
           if [ "$KURU" = false ] && [ "$BO" = false ]; then

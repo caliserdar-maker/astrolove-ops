@@ -155,6 +155,27 @@ def main():
     rows = list(csv.DictReader(open(d / "hazir" / lid / f"LISTE_{lid}.csv")))
     kontrol("liste: 10 DEGISTIR + 9 CIKAR", sum(x["islem"] == "DEGISTIR" for x in rows) == 10 and sum(x["islem"] == "CIKAR" for x in rows) == 9)
 
+    def man_csv(kd, bozuk=None):                                # wa-kart-v11 MANIFEST_W02_W06 (Merkez 29 Eki: ayri JSON yok)
+        km = json.loads((kd / "KART_MANIFEST.json").read_text()); ad = {"2": "W02_SEMBOL", "3": "W03_KISISEL", "4": "W04_FORMAT",
+                                                                          "5": "W05_SUREC", "6": "W06_GENEL"}
+        sat = [dict(cift=c, ad=ad[s], dosya=f, sha256=("0" * 64 if f == bozuk else L.sha(kd / f)), boyut=1, kaynak="t", durum="PASS")
+               for c, k in km["kartlar"].items() for s, f in k.items()]
+        with open(kd / "MANIFEST_W02_W06_p0.csv", "w", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=list(sat[0])); w.writeheader(); w.writerows(sat)
+    man_csv(g["kd"])
+    args = ["--ciftler", str(T10.ciftler_csv(d)), "--alt", str(alt_csv(d, "ONAYLI")), "--galeri-dir", str(g["gd"]), "--kapi-csv", str(d / "KAPI.csv"),
+            "--kesim-dir", str(g["ks"]), "--yedek-dir", str(g["yd"]), "--yedek-ozet", str(g["yd"] / "OZET.md"), "--yedek-liste", str(g["ls"]),
+            "--out", str(d / "hazir_csv"), "--is", "2", "--kart-manifest", str(g["kd"]), "--format-boy", "14"]
+    rc = L11.main(args); oz2 = json.loads((d / "hazir_csv" / "LISTE_OZET.json").read_text())
+    kontrol("liste: kart klasoru MANIFEST_W02_W06 csv + --format-boy 14 -> 2 HAZIR, format 14",
+            rc == 0 and all(x["durum"] == "HAZIR" for x in oz2["ilanlar"].values()) and oz2["format_boy_sayisi"] == 14)
+    man_csv(g["kd"], bozuk="ORTAK_W04.jpg"); L11.main(args[:-6] + ["--out", str(d / "hazir_csv2"), "--is", "2", "--kart-manifest", str(g["kd"]),
+                                                                   "--format-boy", "14"])
+    oz3 = json.loads((d / "hazir_csv2" / "LISTE_OZET.json").read_text())
+    kontrol("liste: kart dosyasi MANIFEST sha256'sindan farkli -> BLOK",
+            all(x["durum"] == "BLOK" and any("kart MANIFEST sha256" in n_ for n_ in x["neden"]) for x in oz3["ilanlar"].values()))
+    man_csv(g["kd"])
+
     def blok(ad, d_, g_, ara, **kw):
         rc_, oz_ = liste(d_, g_, **kw)
         n = oz_["ilanlar"][lid]["neden"] if oz_ else ["liste cikisi"]
