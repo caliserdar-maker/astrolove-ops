@@ -49,7 +49,7 @@ jobs:
           set -euo pipefail
           T=gdrive:ASTROLOVE/TEMP; mkdir -p _y _s _g _k _o _b1
           rclone copy "$T/POSTER_GALERI_V11_YEDEK/$D" _y --include "*/GALERI.json" --transfers 8 -q
-          rclone copy "$T/POSTER_GALERI_V11_YEDEK/$B" _b1 --include "*/GALERI.json" --transfers 8 -q
+          rclone copy "$T/POSTER_GALERI_V11_YEDEK/$B" _b1 --include "*/GALERI.json" --include "*/r1_*.jpg" --transfers 16 -q   # r1: ONAR kapak sha / NCC
           for k in ${K//,/ }; do rclone copy "$T/POSTER_GALERI_V11_YUKLE/KOSU/$k" "_s/$k" --include "SONRA_*.json" -q; done
           find _y -name GALERI.json | sed 's#.*/[0-9]*_\([A-Z_]*\)/GALERI.json#\1#' | sort -u > _ciftler.txt
           sed 's/$/_W*.jpg/' _ciftler.txt > _g.txt

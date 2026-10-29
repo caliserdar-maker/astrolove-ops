@@ -497,7 +497,7 @@ def post_file_testleri():
         api = E.Etsy.__new__(E.Etsy); api.calls = 0; api.pace = 0; api.verbose_quota = False; api.remaining = None
         api.store = St(); api._headers = lambda *a: {}; api._istek_oncesi = lambda: None
         api._kilit, api._yenile_kilit, api._son, api._yanit = threading.Lock(), threading.Lock(), 0.0, 0   # is parcacigi guvenli istemci
-        api._yerel = threading.local()
+        api._yerel, api._sira, api._kabul = threading.local(), 0, 0
         try:
             api.post_file("/x", files={"image": ("a", io.BytesIO(b"1"), "image/jpeg")}, tekrar=tekrar); ok = True
         except SystemExit:

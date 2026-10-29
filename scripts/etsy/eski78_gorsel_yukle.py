@@ -198,6 +198,8 @@ def yukle_guvenli(api, shop, lid, yol, ad, alt_text, ids, gonderilmedi=None, ran
         except Exception as e:   # noqa: BLE001 zaman asimi / baglanti: yukleme olmus olabilir
             son_hata = str(e)[:200]
         hiz = kod == 429
+        if hiz:   # 29 Eki inceleme M5: kararli artik ilk okumada beklemez; 429 sonrasi hemen okuma yine 429 alirdi
+            G.time.sleep(G.OKUMA_BEKLE)
         g = G.kararli(lambda: G.galeri(api, lid), lambda g: bool(set(ids_of(g)) - ids), tekrar=1 if hiz else G.OKUMA_TEKRAR)
         yeni = [x for x in g if x.get("listing_image_id") not in ids]
         if len(yeni) == 1 and alt_norm(yeni[0].get("alt_text")) == alt_norm(alt_text):
@@ -655,13 +657,23 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
                     {"property_id": rv[ad][0], "value_id": rv[ad][1], "image_id": vb[ad]} for ad in sorted(hbag)]})
                 bek = {ad: vb[ad] for ad in hbag}
                 v1 = G.kararli(lambda: G.var_img(api, shop, lid), lambda vm: {x.get("value"): x.get("image_id") for x in vm} == bek)
-                if {x.get("value"): x.get("image_id") for x in v1} != bek:
-                    raise Dur(f"bag denemesi: Etsy {len(hbag)} bagli POST'u beklenen gibi uygulamadi "
-                              f"({[(x.get('value'), x.get('image_id')) for x in v1]}); yukleme yapilmadi")
+                if {x.get("value"): x.get("image_id") for x in v1} != bek:   # 29 Eki inceleme B2: onceki 5 bag geri yazilir
+                    gorulen = [(x.get("value"), x.get("image_id")) for x in v1]
+                    api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": [
+                        {"property_id": x.get("property_id"), "value_id": x.get("value_id"), "image_id": x.get("image_id")} for x in v0]})
+                    b0 = {x.get("value"): x.get("image_id") for x in v0}
+                    v2 = G.kararli(lambda: G.var_img(api, shop, lid), lambda vm: {x.get("value"): x.get("image_id") for x in vm} == b0)
+                    geri = {x.get("value"): x.get("image_id") for x in v2} == b0
+                    raise Dur(f"bag denemesi: Etsy {len(hbag)} bagli POST'u beklenen gibi uygulamadi ({gorulen}); yukleme yapilmadi; "
+                              f"onceki {len(b0)} bag geri yazildi: {'DOGRULANDI' if geri else 'DOGRULANAMADI, elle bakilmali'}")
                 log(f"  [{n + 1}/{len(adimlar)}] bag denemesi: {len(hbag)} bag oturdu, eksik renk bagsiz | kota {api.remaining}")
             elif a[0] == "dokunma_kontrol":   # silme / bag oncesi rank 1 dokunulmaz gorsel mi (29 Eki inceleme O1)
                 d1 = next(int(r["simdi_id"]) for r in hedef if r["islem"] == "DOKUNMA")
-                g = G.kararli(lambda: G.galeri(api, lid), lambda g: bool(g) and g[0].get("listing_image_id") == d1)
+                # 29 Eki inceleme M5: kosul yuklemeler galeride GORUNDUKTEN sonra (eski okuma rank 1'i yanlislikla dogrulamaz)
+                g = G.kararli(lambda: G.galeri(api, lid), lambda g: set(ids_of(g)) == ids and bool(g) and g[0].get("listing_image_id") == d1)
+                if set(ids_of(g)) != ids:
+                    raise Dur(f"dokunma kontrolu: galeri kimlik kumesi beklenen degil (+{sorted(set(ids_of(g)) - ids)} "
+                              f"-{sorted(ids - set(ids_of(g)))}); silme / bag yok")
                 if not g or g[0].get("listing_image_id") != d1:
                     raise Dur(f"dokunulmaz gorsel {d1} rank 1'de degil (rank 1 {g[0].get('listing_image_id') if g else None}); "
                               "silme / bag yok, rank 1'e yazim yasak: elle bakilmali")

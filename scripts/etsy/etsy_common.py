@@ -253,6 +253,8 @@ class Etsy:
         self._kilit = threading.Lock()          # sayac / kalan / tempo saati
         self._yenile_kilit = threading.Lock()   # token yenileme (refresh token doner; iki yenileme token bozar)
         self._son = 0.0
+        self._sira = 0                          # istek sira no (kalan kota: yalniz en yeni baslayan istegin basligi kabul)
+        self._kabul = 0
         self._yanit = 0                         # alinan yanit sayisi (kota basligi denetimi; paralelde calls ilk yanittan once artar)
         self._yerel = threading.local()
         self.esik, self.sert_taban = kota_esigi()
@@ -295,21 +297,42 @@ class Etsy:
         return getattr(self._yerel, "n", 0)
 
     def _bekle(self):
-        """Ortak tempo: istek sayaci + bu istegin baslama zamani kilit altinda ayrilir, uyku kilit disinda."""
+        """Ortak tempo: istek sayaci + bu istegin baslama zamani kilit altinda ayrilir, uyku kilit disinda. -> istek sira no.
+        Token suresi dolmak uzereyse (10 dk) istekten ONCE tek isci yeniler (29 Eki inceleme: kosu ortasinda 401, yazim yarida)."""
+        self._erken_yenile()
         with self._kilit:
             self.calls += 1
+            self._sira += 1; sira = self._sira
             self._yerel.n = getattr(self._yerel, "n", 0) + 1
             simdi = time.monotonic()
             t = max(simdi, self._son + self.pace)
             self._son = t
         if t > simdi:
             time.sleep(t - simdi)
+        return sira
 
-    def _kalan_yaz(self, rem):
+    def _erken_yenile(self):
+        nr = getattr(self.store, "needs_refresh", None)
+        if nr is None:
+            return
+        try:
+            if not nr(600):
+                return
+        except Exception:   # noqa: BLE001 token yasi okunamazsa 401 yolu yine yeniler
+            return
+        with self._yenile_kilit:
+            if nr(600):     # baska isci kilit beklerken yenilediyse tekrar yok
+                self.store.refresh()
+
+    def _kalan_yaz(self, rem, sira=None):
+        """x-remaining-today: yalniz bundan once kabul edilenden SONRA baslamis istegin basligi (yavas yukleme yaniti kalani geri
+        yukseltmez; 29 Eki inceleme)."""
         with self._kilit:
             self._yanit += 1
-            if rem is not None:
+            if rem is not None and (sira is None or sira > self._kabul):
                 self.remaining = rem
+                if sira is not None:
+                    self._kabul = sira
 
     def _yenile(self, kullanilan):
         """401: kullanilan token hala gecerliyse TEK isci yeniler; baskasi yenilediyse yeniden yenileme yok."""
@@ -348,8 +371,9 @@ class Etsy:
         (B37); 3 deneme. tekrar=1 (eski78_gorsel_yukle, Serdar 24 Eki): hata yanitinda yeniden GONDERMEZ (cift yukleme
         riski); cagiran galeriyi okuyup karar verir. 401 token yenilemesi her durumda bir kez yapilir."""
         self._istek_oncesi()
-        for attempt in range(max(tekrar, 2)):
-            self._bekle()
+        attempt, yenilendi = 0, False
+        while True:   # 401 (istek islenmedi) bir kez, hangi denemede gelirse gelsin: yenile + tekrar (deneme sayilmaz)
+            sira = self._bekle()
             for f in files.values():
                 try:
                     f[1].seek(0)
@@ -358,34 +382,37 @@ class Etsy:
             tok = self.store.access_token
             r = requests.post(API + path, files=files, data=data, headers=self._headers(tok), timeout=180)
             rem = r.headers.get("x-remaining-today")
-            self._kalan_yaz(rem)
+            self._kalan_yaz(rem, sira)
             if self.verbose_quota:
                 log(f"      kota {rem} | POST(file) {path} -> {r.status_code}")
-            if r.status_code == 401 and attempt == 0:
+            if r.status_code == 401 and not yenilendi:
+                yenilendi = True
                 self._yenile(tok)
                 continue
             if r.status_code in (200, 201):
                 return r.json()
             if attempt < tekrar - 1:
                 time.sleep(2 * (attempt + 1))
+                attempt += 1
                 continue
             raise SystemExit(f"HATA: POST(file) {path} -> {r.status_code}: {r.text[:300]}")
-        raise SystemExit(f"HATA: POST(file) {path} tekrarlar tukendi.")
 
     def _call(self, method, path, params=None, data=None, ok404=False, json_body=None):
         ru_yazim_kapisi(method, path, data, json_body)
         self._istek_oncesi()
-        for attempt in range(3):
-            self._bekle()
+        attempt, yenilendi = 0, False
+        while True:   # en fazla 3 gonderim (5xx / kisa 429); 401 (istek islenmedi) bir kez, hangi denemede gelirse gelsin, sayilmaz
+            sira = self._bekle()
             tok = self.store.access_token
             r = requests.request(method, API + path, params=params, data=data, json=json_body,
                                  headers=self._headers(tok), timeout=TIMEOUT)
             rem = r.headers.get("x-remaining-today")
-            self._kalan_yaz(rem)
+            self._kalan_yaz(rem, sira)
             if self.verbose_quota:
                 log(f"      kota {rem} | {method} {path} -> {r.status_code}")
-            if r.status_code == 401 and attempt == 0:
+            if r.status_code == 401 and not yenilendi:
                 log("401 alindi, token yenilenip tekrar denenecek.")
+                yenilendi = True
                 self._yenile(tok)
                 continue
             if r.status_code == 404 and ok404:
@@ -399,17 +426,18 @@ class Etsy:
                     wait = 0
                 if 0 < wait <= 60 and attempt < 2:
                     time.sleep(wait + 0.5)
+                    attempt += 1
                     continue
                 raise SystemExit(
                     f"HATA: 429 kota. retry-after={r.headers.get('retry-after')}"
                 )
             if r.status_code >= 500 and attempt < 2:
                 time.sleep(2 * (attempt + 1))
+                attempt += 1
                 continue
             if r.status_code == 204:
                 return {}
             if r.status_code not in (200, 201):          # 201: createShopShippingProfileDestination gibi olusturma uclari (6 Eyl)
                 raise SystemExit(f"HATA: {method} {path} -> {r.status_code}: {r.text[:300]}")
             return r.json()
-        raise SystemExit(f"HATA: {method} {path} tekrarlar tukendi.")
 

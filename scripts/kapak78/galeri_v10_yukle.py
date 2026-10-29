@@ -358,11 +358,14 @@ def calistir(api, shop, a):
             # yazim: ilana baslamadan kota. Paralelde suren ilanlarin en kotu istegi ayrilmis sayilir (rezerv; Serdar 29 Eki hiz)
             gerek = s["en_kotu"] - (KAPI_OKUMA if not bitmemis else 0) + KOTA_SINIRI
             with kilit:
+                dur0 = ortak["dur"]   # 29 Eki inceleme B1: baska ilan FAIL / DUR verdiyse kapi okumasindaki ilan YAZIMA baslamaz
                 rez = sum(ortak["rezerv"].values())
                 yeter = api.remaining is None or int(api.remaining) - rez >= gerek
                 parca = not azami_ilan or ortak["baslayan"] < azami_ilan
-                if yeter and parca:
+                if yeter and parca and not dur0:
                     ortak["rezerv"][lid] = gerek - KOTA_SINIRI; ortak["baslayan"] += 1
+            if dur0:
+                s.update(durum="KALAN", neden=[dur0], istek=ist()); return
             if not parca:
                 s.update(durum="KALAN", neden=[f"parca siniri {azami_ilan} ilan (kilit birakilir; sonraki parca devam eder)"]); return
             if not yeter:
@@ -418,13 +421,23 @@ def calistir(api, shop, a):
     for lid, o in oz["ilanlar"].items():
         s = dict(ilan=lid, cift=o["cift"], tur=o.get("tur") or "", durum="", neden=[], en_az=None, en_kotu=None, istek=None)
         satir.append(s); isler.append((lid, o, s))
+    sirali = list(isler)
+    if isci > 1 and yazim:   # 29 Eki inceleme B2: ilk YAZILAN ilan tek basina (bag denemesi + akis olculur); PASS sonrasi paralel
+        while sirali and not ortak["dur"]:
+            x = sirali.pop(0); isle(*x)
+            if x[2]["durum"] in ("PASS", "FAIL", "DUR"):
+                break
+        if ortak["dur"]:
+            for x in sirali:
+                isle(*x)   # KALAN satirlari (istek yok)
+            sirali = []
     if isci == 1:
-        for x in isler:
+        for x in sirali:
             isle(*x)
-    else:
-        log(f"ISCI {isci}: {toplam} ilan paralel (ortak tempo {1 / max(getattr(api, 'pace', 0.25) or 0.25, 1e-9):.0f} istek/sn, tek token yenileme)")
+    elif sirali:
+        log(f"ISCI {isci}: {len(sirali)} ilan paralel (ortak tempo {1 / max(getattr(api, 'pace', 0.25) or 0.25, 1e-9):.0f} istek/sn, tek token yenileme)")
         with ThreadPoolExecutor(max_workers=isci, thread_name_prefix="ilan") as ex:
-            fs = {ex.submit(isle, *x): x for x in isler}
+            fs = {ex.submit(isle, *x): x for x in sirali}
             for f in as_completed(fs):
                 e = f.exception()
                 if e is not None:   # isle kendi hatalarini yakalar; buraya dusen beklenmeyen hata: ilan DUR, kosu durur

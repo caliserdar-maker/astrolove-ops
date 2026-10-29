@@ -213,9 +213,17 @@ def onar_hazirla(lid, cift, d, g0, g, bag, neden, alt_bek, P):
     if not yp.exists() or yp.stat().st_size <= 0:
         neden.append(f"B1 MB kapak dosyasi yok ({yp.name}; yedek r1 indirilmeli)")
     else:
-        with Image.open(yp) as im:
-            if im.format != "JPEG":
-                neden.append(f"B1 MB kapak dosyasi JPEG degil ({im.format})")
+        try:   # 29 Eki inceleme M8: tam cozulmeli ve boyutu B1 kaydindaki full_width x full_height olmali (kesik / kucuk kopya yok)
+            with Image.open(yp) as im:
+                fmt, boy = im.format, im.size
+                im.load()
+            if fmt != "JPEG":
+                neden.append(f"B1 MB kapak dosyasi JPEG degil ({fmt})")
+            bek = (r1.get("full_width"), r1.get("full_height"))
+            if None in bek or boy != tuple(bek):
+                neden.append(f"B1 MB kapak dosyasi boyutu {boy[0]}x{boy[1]} != B1 kaydi {bek[0]}x{bek[1]}")
+        except Exception as e:   # noqa: BLE001
+            neden.append(f"B1 MB kapak dosyasi cozulemedi ({str(e)[:80]})")
     alt1 = r1.get("alt_text") or ""
     if not alt1 or len(alt1) > 250 or Y.YASAK_ALT.search(alt1):
         neden.append("B1 MB kapak alt metni yazilamaz (bos / >250 / yasak ifade / tire)")

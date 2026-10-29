@@ -58,8 +58,10 @@ def kaynak_yol(cift, s, galeri, kart):
     return (Path(kart) if 2 <= s <= 6 else Path(galeri)) / f"{cift}_{KAYNAK[s]}.jpg"
 
 
-def ilan(lid, r, d, sonra, sab, galeri, kart, b1_r1=None, b1_alt=None):
-    """b1_r1 / b1_alt: v11b ise B1 yedegindeki rank 1 kimligi ve alt metni (MB kapak dokunulmaz); None = v11."""
+def ilan(lid, r, d, sonra, sab, galeri, kart, b1_r1=None, b1_alt=None, b1_dosya=None):
+    """b1_r1 / b1_alt: v11b ise B1 yedegindeki rank 1 kimligi ve alt metni (MB kapak dokunulmaz); None = v11.
+    ONAR (v11 yazilmis 18 ilan, Merkez 29 Eki): rank 1 B1 kimligi degil ama yukleme kaydinda rank 1 = canli rank 1 (B1 MB kapak dosyasi
+    yeniden yuklendi): alt metni B1'deki, yuklenen sha256 = B1 r1 dosyasi (b1_dosya), NCC kaynagi B1 r1; 2-10 onceki v11 kaydindan."""
     neden, olc = [], {}
     v11b = b1_r1 is not None
     j = json.loads((d / "GALERI.json").read_text(encoding="utf-8"))
@@ -71,10 +73,17 @@ def ilan(lid, r, d, sonra, sab, galeri, kart, b1_r1=None, b1_alt=None):
         neden.append(f"kimlik sirasi SONRA son_ids ile ayni degil ({ids} != {sonra.get('son_ids')})")
     alt = L.alt_metin(sab, r["a"], r["b"])
     kotu = [x["rank"] for x in g if x.get("alt_text") != alt.get(x["rank"]) and not (v11b and x["rank"] == 1)]
-    if v11b and (not ids or ids[0] != b1_r1):
+    kay = {int(x["hedef_sira"]): x for x in sonra.get("yukleme_kaydi") or []}
+    onar = bool(v11b and ids and ids[0] != b1_r1 and (kay.get(1) or {}).get("listing_image_id") == ids[0])
+    if v11b and not onar and (not ids or ids[0] != b1_r1):
         neden.append(f"rank 1 B1 yedegindeki MB kapak degil ({ids[:1]} != {b1_r1})")
-    elif v11b and g[0].get("alt_text") != b1_alt:   # 29 Eki inceleme D2: alt metni yazilmadi
-        neden.append("rank 1 alt metni B1 yedegindekinden farkli (dokunulmaz alt metin degismis)")
+    elif v11b and g[0].get("alt_text") != b1_alt:   # 29 Eki inceleme D2: alt metni yazilmadi / ONAR'da B1 metni
+        neden.append("rank 1 alt metni B1 yedegindekinden farkli")
+    if onar:
+        if not b1_dosya or not Path(b1_dosya).exists():
+            neden.append("ONAR: B1 MB kapak dosyasi yok (sha256 / NCC olculemedi)")
+        elif kay[1].get("sha256") != sha(b1_dosya):
+            neden.append("ONAR: rank 1 yuklenen sha256 B1 MB kapak dosyasi ile ayni degil")
     if kotu:
         neden.append(f"alt metin farkli: rank {kotu}")
     rk = {x["listing_image_id"]: x["rank"] for x in g}
@@ -88,10 +97,16 @@ def ilan(lid, r, d, sonra, sab, galeri, kart, b1_r1=None, b1_alt=None):
         neden.append(f"state {st}")
     if len(j.get("videolar") or []) != 1:
         neden.append(f"video {len(j.get('videolar') or [])}")
-    kay = {int(x["hedef_sira"]): x for x in sonra.get("yukleme_kaydi") or []}
     kv, cv = {}, {}
-    if v11b and 1 in kay:
+    if v11b and not onar and 1 in kay:
         neden.append("rank 1 yukleme kaydinda (dokunulmaz MB kapak yeniden yuklenmis)")
+    if onar and b1_dosya and Path(b1_dosya).exists() and len(ids) >= 1:
+        kv[1] = vek(b1_dosya)
+        c1 = d / f"r1_{ids[0]}.jpg"
+        if c1.exists():
+            cv[1] = vek(c1)
+        else:
+            neden.append("canli gorsel indirilmemis r1")
     for s in range(2 if v11b else 1, N + 1):
         p = kaynak_yol(r["cift"], s, galeri, kart)
         if not p.exists():
@@ -111,7 +126,7 @@ def ilan(lid, r, d, sonra, sab, galeri, kart, b1_r1=None, b1_alt=None):
         olc[s] = round(m.get(s, -1.0), 4)
         if en != s:
             neden.append(f"rank {s}: canli gorsel en cok kaynak {en}'e benziyor (NCC {m[en]:.3f} > {m.get(s, -1):.3f})")
-    return dict(ilan=lid, cift=r["cift"], durum="FAIL" if neden else "PASS", neden="; ".join(neden),
+    return dict(ilan=lid, cift=r["cift"], tur="ONAR" if onar else "", durum="FAIL" if neden else "PASS", neden="; ".join(neden),
                 ncc_min=min(olc.values()) if olc else None, ncc=olc, state=st)
 
 
@@ -132,9 +147,15 @@ def main(argv=None):
     rows = {r["listing_id"]: r for r in csv.DictReader(open(a.ciftler, encoding="utf-8-sig"))}
     s = [x.strip() for x in a.sadece.split(",") if x.strip()] or list(rows)
     sonra = {}
-    for k in a.sonra:
+    def kosu_no(k):   # eski kosu once: sonraki kosunun kaydi ayni hedef sirasini ezer (ONAR rank 1; 2-10 v11 kosusundan)
+        n = "".join(ch for ch in Path(k).name if ch.isdigit())
+        return int(n) if n else 0
+    for k in sorted(a.sonra, key=kosu_no):
         for p in sorted(Path(k).rglob("SONRA_*.json")):   # KOSU/<kosu>/ilanlar/SONRA_<ilan>.json
-            sonra[p.stem.split("_", 1)[1]] = json.loads(p.read_text(encoding="utf-8"))
+            lid = p.stem.split("_", 1)[1]; j = json.loads(p.read_text(encoding="utf-8"))
+            kay = {int(x["hedef_sira"]): x for x in (sonra.get(lid) or {}).get("yukleme_kaydi") or []}
+            kay.update({int(x["hedef_sira"]): x for x in j.get("yukleme_kaydi") or []})
+            sonra[lid] = dict(j, yukleme_kaydi=[kay[s_] for s_ in sorted(kay)])
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     R = []
     for lid in s:
@@ -144,13 +165,14 @@ def main(argv=None):
             R.append(dict(ilan=lid, cift=(r or {}).get("cift", "-"), durum="FAIL", ncc_min=None, ncc={}, state=None,
                           neden="ilan listede yok" if not r else ("canli okuma yok" if not d.is_dir() else "SONRA kaydi yok")))
         else:
-            b1 = b1a = None
+            b1 = b1a = b1d = None
             if a.profil == "v11b":
                 bp = Path(a.b1) / f"{lid}_{r['cift']}" / "GALERI.json"
                 gb = sorted(json.loads(bp.read_text(encoding="utf-8")).get("gorseller") or [], key=lambda x: x.get("rank") or 0) if bp.exists() else []
                 b1 = gb[0]["listing_image_id"] if gb else -1
                 b1a = gb[0].get("alt_text") if gb else None
-            R.append(ilan(lid, r, d, sonra[lid], sab, a.galeri, a.kart, b1, b1a if a.profil == "v11b" else None))
+                b1d = bp.parent / f"r1_{b1}.jpg"
+            R.append(ilan(lid, r, d, sonra[lid], sab, a.galeri, a.kart, b1, b1a if a.profil == "v11b" else None, b1d))
         print(f"{lid} {R[-1]['cift']} {R[-1]['durum']} ncc_min {R[-1]['ncc_min']} {R[-1]['neden'][:200]}", flush=True)
     with open(out / "DOGRULA.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["ilan", "cift", "durum", "state", "ncc_min", "neden"], extrasaction="ignore")

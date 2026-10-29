@@ -106,7 +106,7 @@ def onar_kur(d, g, canli):
         alt = L.alt_metin(sab, a, b)
         y = Path(g["yd"]) / f"{lid}_{cift}"
         Image.new("RGB", (300, 225), (20, 30, 70)).save(y / f"r1_{base + 1}.jpg", "JPEG")
-        j = json.loads((y / "GALERI.json").read_text()); j["gorseller"][0]["alt_text"] = f"eski MB kapak {cift}"
+        j = json.loads((y / "GALERI.json").read_text()); j["gorseller"][0].update(alt_text=f"eski MB kapak {cift}", full_width=300, full_height=225)
         (y / "GALERI.json").write_text(json.dumps(j))
         gor = [dict(rank=r, listing_image_id=base + 50 + r, alt_text=alt[r]) for r in range(1, 11)]
         bag = [dict(property_id=200, value_id=T10.VID[k], value=k, image_id=base + 50 + r) for k, r in V11_BAG.items()]
