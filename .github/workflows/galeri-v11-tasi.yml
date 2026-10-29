@@ -11,7 +11,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      canva_damga: {description: "TEMP/WA_V11_CANVA/<damga> (CANVA.tsv + METIN_KAPI.tsv; _ONAYLI soneki olabilir)", required: true}
+      canva_damga: {description: "TEMP/WA_V11_CANVA/<damga> (CANVA.tsv + METIN_KAPI.tsv; sonek olabilir: _P1_W01a, _ONAYLI)", required: true}
       hedef_damga: {description: "bos = yeni klasor; dolu (YYYYMMDD_HHMMSS) = mevcut klasore ekle", required: false, default: ""}
 jobs:
   tasi:
@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Girdi kapisi
         env: {CD: "${{ inputs.canva_damga }}", HD: "${{ inputs.hedef_damga }}"}
-        run: '[[ "$CD" =~ ^[0-9]{8}_[0-9]{4,6}(_ONAYLI)?$ && "$HD" =~ ^([0-9]{8}_[0-9]{6})?$ ]] || { echo "::error::girdi"; exit 1; }'
+        run: '[[ "$CD" =~ ^[0-9]{8}_[0-9]{4,6}(_[A-Za-z0-9]+)*$ && "$HD" =~ ^([0-9]{8}_[0-9]{6})?$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - name: Sira kilidi (iptal yok)
         env:
