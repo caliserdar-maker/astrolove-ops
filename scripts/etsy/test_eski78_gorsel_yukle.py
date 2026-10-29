@@ -94,6 +94,7 @@ class Sahte:
         self.n_get = 0
         self.izler = []            # her yazimdan sonra (kapak id, bag sayisi)
         self.yabanci = None        # (kacinci yukleme, alt): hata aninda galeride yabanci gorsel belirir
+        self.rank_yut = False      # yuklemedeki rank parametresi yok sayilir (sona eklenir)
 
     def _k(self):   # etsy_common sert taban: istek GONDERILMEDEN durur; her istek kotadan 1 dusurur
         if self.remaining < self.sert_taban:
@@ -148,6 +149,12 @@ class Sahte:
             x = dict(rank=max([y["rank"] for y in self.img] + [0]) + 1, listing_image_id=yid,
                      alt_text=self._alt(data["alt_text"]) + (" (eski)" if self.alt_yukle_farkli else ""),
                      url_fullxfull="u")
+            rk = int((data or {}).get("rank") or 0)
+            if rk and not self.rank_yut and not h:   # Etsy: verilen rank'e eklenir, o ve sonrakiler bir kayar
+                for y in self.img:
+                    if y["rank"] >= rk:
+                        y["rank"] += 1
+                x["rank"] = rk
             if h:
                 kod, olusur, gec = h
                 if self.yabanci and self.yabanci[0] == self.n_yukle:

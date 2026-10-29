@@ -235,8 +235,32 @@ def main():
             and len(f.silinenler) == 9)
     alt1 = gal[0]["alt_text"]
     kontrol("yazim: kapak alt metni CI", "Champagne Ivory" in alt1 and "Aquarius and Aquarius" in alt1)
+    ist = [x.get("istek") for x in R.get("ilanlar") or []]
+    kontrol(f"yazim yalin: ilan basina istek {ist} <= 31 (Merkez 29 Eki karar 3; eski akis en az 71)", ist and max(ist) <= 31)
+    kontrol("yazim yalin: yukleme rank + alt metinle, sira POST'u yok", f.n_yukle == 10 and not any(y[0] in ("sira", "sira_yutuldu") for y in f.yaz))
     rc, R = kos(api, hz, o4)
     kontrol("ikinci kuru: ZATEN 2", R["sayilar"].get("ZATEN") == 2)
+    # yalin: Etsy yuklemedeki rank'i uygulamazsa sira_kontrol duzeltir
+    o6 = t0 / "o6"; o6.mkdir(); sh6 = {k: sahte(k) for k in ILAN}
+    for x in sh6.values():
+        x.rank_yut = True
+    api6 = T10.Coklu(sh6); rc, R = kos(api6, hz, o6); shutil.copyfile(o6 / "PLAN_V11.json", t0 / "PLAN6.json")
+    rc, R = kos(api6, hz, o6, kuru=False, plan=t0 / "PLAN6.json", damga=R["plan_damga"])
+    g6 = sorted(sh6[lid].img, key=lambda x: x["rank"])
+    kontrol("yalin: rank yok sayilirsa sira_kontrol sira + alt metin yazar, PASS", rc == 0 and R["sayilar"].get("PASS") == 2
+            and [x["alt_text"] for x in g6][0].startswith("Aquarius and Aquarius") and len(g6) == 10)
+    # yalin: silmeler sirasinda kota kesintisi -> devam kosusu kaldigi yerden (cift yukleme yok)
+    o7 = t0 / "o7"; o7.mkdir(); sh7 = {k: sahte(k) for k in ILAN}
+    api7 = T10.Coklu(sh7); rc, R = kos(api7, hz, o7); shutil.copyfile(o7 / "PLAN_V11.json", t0 / "PLAN7.json"); pd7 = R["plan_damga"]
+    sh7[lid].kes = api7.calls + 19                       # on okuma 1 + 10 yukleme + bag + birkac silme sonra kota 9
+    rc, R = kos(api7, hz, o7, kuru=False, plan=t0 / "PLAN7.json", damga=pd7)
+    ara = len(sh7[lid].img)
+    api7.remaining = 100000
+    rc2, R2 = kos(api7, hz, o7, kuru=False, plan=t0 / "PLAN7.json", damga=pd7)
+    g7 = sorted(sh7[lid].img, key=lambda x: x["rank"])
+    kontrol(f"yalin: kesinti ({ara} gorselde) sonrasi devam PASS, 10 gorsel, yukleme 10 (cift yok)",
+            rc != 0 and rc2 == 0 and R2["sayilar"].get("PASS") == 2 and len(g7) == 10 and sh7[lid].n_yukle == 10
+            and {k: {x["listing_image_id"]: x["rank"] for x in g7}.get(v) for k, v in sh7[lid].bag.items()} == L11.RENK_SIRA)
     p10 = json.loads((t0 / "PLAN_V11.json").read_text()); p10.pop("profil"); (t0 / "PLAN_V10x.json").write_text(json.dumps(p10))
     rc, R = kos(T10.Coklu({k: sahte(k) for k in ILAN}), hz, t0 / "o5", kuru=False, plan=t0 / "PLAN_V10x.json", damga=pd)
     kontrol("yazim: v10 planiyla DUR", rc == 9 and "profili v10" in R["hata"])

@@ -23,6 +23,7 @@ Cikti --out: PLAN_V10.json (kuru), RAPOR.json, RAPOR.md, SONUC_SATIR.json; ilanl
 Profil: varsayilan v10 (yukaridaki gibi). profil_kur("v11") galeri v11 icin (scripts/kapak78/galeri_v11_yukle.py cagirir; v10
 yolu degismez): hedef 10, canli 9, renk baglari CI->1 MB->7 DB->8 PW->9 WP->10, onay GALERI_V11, PLAN_V11.json, ek kapi EK_KAPI."""
 import argparse
+import copy
 import csv
 import hashlib
 import json
@@ -44,18 +45,19 @@ N = Y.HEDEF_V10
 CANLI_N = 17       # v10: canli 17 gorselin hepsi CIKAR
 PLAN_AD, PROFIL = "PLAN_V10.json", "v10"
 EK_KAPI = None     # v11: canli durum -> (BLOK nedenleri, notlar)
+YALIN = False      # v11: eski78 yalin plan + ilan basina GET onbellegi (Merkez 29 Eki karar 3: istek sayisi)
 RENKLER = ("Midnight Blue", "Deep Black", "Pure White", "Champagne Ivory", "Warm Parchment")
 RENK_SIRA = {"Midnight Blue": 1, "Deep Black": 6, "Pure White": 7, "Champagne Ivory": 8, "Warm Parchment": 9}
-V11 = dict(ONAY="GALERI_V11", ONAY_BAG="GALERI_V11_BAG", N=10, CANLI_N=9, PLAN_AD="PLAN_V11.json", PROFIL="v11",
+V11 = dict(ONAY="GALERI_V11", ONAY_BAG="GALERI_V11_BAG", N=10, CANLI_N=9, PLAN_AD="PLAN_V11.json", PROFIL="v11", YALIN=True,
            RENK_SIRA={"Champagne Ivory": 1, "Midnight Blue": 7, "Deep Black": 8, "Pure White": 9, "Warm Parchment": 10})
 
 
 def profil_kur(ad, ek_kapi=None):
     """v11: modul sabitleri v11 degerlerine (galeri_v11_yukle.py). v10 testleri / is akisi bu cagriyi yapmaz."""
-    global ONAY, ONAY_BAG, N, CANLI_N, PLAN_AD, PROFIL, RENK_SIRA, EK_KAPI
+    global ONAY, ONAY_BAG, N, CANLI_N, PLAN_AD, PROFIL, RENK_SIRA, EK_KAPI, YALIN
     if ad != "v11":
         raise SystemExit(f"bilinmeyen profil {ad}")
-    ONAY, ONAY_BAG, N, CANLI_N = V11["ONAY"], V11["ONAY_BAG"], V11["N"], V11["CANLI_N"]
+    ONAY, ONAY_BAG, N, CANLI_N, YALIN = V11["ONAY"], V11["ONAY_BAG"], V11["N"], V11["CANLI_N"], V11["YALIN"]
     PLAN_AD, PROFIL, RENK_SIRA, EK_KAPI = V11["PLAN_AD"], V11["PROFIL"], dict(V11["RENK_SIRA"]), ek_kapi
 RENK_PID, BOY_PID = 200, 513
 KAPI_OKUMA = 4     # ilan, galeri, variation-images, envanter
@@ -68,6 +70,51 @@ def log(m):
 
 def jdump(x):
     return json.dumps(x, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+
+
+class Onbellek:
+    """yalin (v11): ilana YAZIM BASLAMADAN ayni GET (yol + parametre) bir kez okunur (kapi okumasi + eski78 on okumasi ayni uclari
+    okuyordu). Ilk yazim cagrisinda (delete / post_file / post_json / put / patch) onbellek kapanir ve silinir; sonraki her GET
+    canli okunur. Diger ozellikler (calls, remaining, kota_kapisi, sert_taban) asil istemciden."""
+    def __init__(self, api):
+        self._a, self._c, self.acik = api, {}, True
+
+    def __getattr__(self, k):
+        return getattr(self._a, k)
+
+    def get(self, path, params=None, ok404=False):
+        key = (path, jdump(params), ok404)
+        if self.acik and key in self._c:
+            return copy.deepcopy(self._c[key])
+        r = self._a.get(path, params, ok404)
+        if self.acik:
+            self._c[key] = copy.deepcopy(r)
+        return r
+
+    def _kapat(self):
+        self.acik = False; self._c.clear()
+
+    def delete(self, *a, **k):
+        self._kapat(); return self._a.delete(*a, **k)
+
+    def post_file(self, *a, **k):
+        self._kapat(); return self._a.post_file(*a, **k)
+
+    def post_json(self, *a, **k):
+        self._kapat(); return self._a.post_json(*a, **k)
+
+    def put(self, *a, **k):
+        self._kapat(); return self._a.put(*a, **k)
+
+    def patch(self, *a, **k):
+        self._kapat(); return self._a.patch(*a, **k)
+
+
+def istek(adim, basla=0, ilk=True):
+    """(en az, en kotu): yalin (v11) ya da eski78 tam akis"""
+    if YALIN:
+        return Y.istek_yalin_en_az(adim, basla, ilk=ilk, n=N), Y.istek_yalin_en_kotu(adim, basla, ilk=ilk, n=N)
+    return Y.istek_en_az(adim, basla, ilk=ilk, n=N), Y.istek_en_kotu(adim, basla, ilk=ilk, n=N)
 
 
 def canli_durum(api, shop, lid):
@@ -147,7 +194,10 @@ def plan_kur(hazir, lid, man):
             raise Y.Dur(f"hedef dosya {h['ad']} yok ya da sha256 manifestten farkli")
     bagli0 = {v["image_id"] for v in man["yedek_baglar"].values()}
     kapak = next(r for r in yukle if int(r["hedef_sira"]) == 1)
-    adim, mx = Y.adim_plani(CANLI_N, cikar, bagli0, yukle, set(RENK_SIRA.values()), kapak_degisir=kapak, hedef_n=N)
+    if YALIN:
+        adim, mx = Y.yalin_plan(cikar, yukle, N)
+    else:
+        adim, mx = Y.adim_plani(CANLI_N, cikar, bagli0, yukle, set(RENK_SIRA.values()), kapak_degisir=kapak, hedef_n=N)
     return adim, mx, Y.sha256(liste)
 
 
@@ -157,7 +207,7 @@ def plan_girdisi(lid, man, c, adim, mx, liste_sha):
                 canli_baglar=sorted([x.get("value"), x.get("value_id"), x.get("image_id")] for x in c["baglar"]),
                 hedef=[[h["sira"], h["ad"], h["sha256"], h["alt"]] for h in sorted(man["hedef"], key=lambda h: h["sira"])],
                 adimlar=[list(a) for a in adim], en_fazla=mx,
-                en_az=KAPI_OKUMA + Y.istek_en_az(adim, n=N), en_kotu=KAPI_OKUMA + Y.istek_en_kotu(adim, n=N))
+                en_az=KAPI_OKUMA + istek(adim)[0], en_kotu=KAPI_OKUMA + istek(adim)[1])
 
 
 def plan_sha(girdiler):
@@ -205,12 +255,12 @@ def calistir(api, shop, a):
         if yazim and a.azami_dk and (time.time() - t0) / 60 > a.azami_dk:
             dur = f"zaman butcesi {a.azami_dk} dk doldu; ilan baslamadi"; s.update(durum="KALAN", neden=[dur]); continue
         c0 = api.calls; basladi = False
+        api_i = Onbellek(api) if YALIN else api   # yalin: kapi okumasi ile bir_ilan on okumasi ayni GET'i bir kez yapar
         try:
             api.kota_kapisi(f"ilan {lid}")
             if bitmemis:
                 adim = [tuple(x) for x in dv["plan"]]
-                s["en_kotu"] = Y.istek_en_kotu(adim, dv.get("adim", 0), ilk=False, n=N)
-                s["en_az"] = Y.istek_en_az(adim, dv.get("adim", 0), ilk=False, n=N)
+                s["en_az"], s["en_kotu"] = istek(adim, dv.get("adim", 0), ilk=False)
                 if not yazim:
                     s.update(durum="DEVAM", neden=[f"DEVAM kaydi adim {dv.get('adim', 0)}/{len(adim)}"
                                                    + (" (hata kaydi: kurtar gerekir)" if dv.get("hata") else "")])
@@ -218,7 +268,7 @@ def calistir(api, shop, a):
                 if str(dv.get("uretim_kosu") or "") != a.plan_damga:
                     s.update(durum="BLOK", neden=[f"DEVAM kaydi baska planla basladi ({dv.get('uretim_kosu')}); yazma yok"]); continue
             else:
-                c = canli_durum(api, shop, lid)
+                c = canli_durum(api_i, shop, lid)
                 kayit_ids = ((ilerleme.get("ilanlar") or {}).get(lid) or {}).get("son_ids")
                 if zaten(c, man, kayit_ids):
                     s.update(durum="ZATEN", istek=api.calls - c0)
@@ -252,9 +302,9 @@ def calistir(api, shop, a):
             if a.devam_hedef_kok:
                 os.environ["DEVAM_HEDEF"] = f"{a.devam_hedef_kok}/DEVAM_{lid}.json"
             try:
-                R = Y.bir_ilan(api, shop, lid, hazir / lid / f"LISTE_{lid}.csv", hazir / lid / "hedef", hazir / lid / "manifest.json",
+                R = Y.bir_ilan(api_i, shop, lid, hazir / lid / f"LISTE_{lid}.csv", hazir / lid / "hedef", hazir / lid / "manifest.json",
                                ilan_out, kuru=False, kurtar=a.kurtar and bitmemis and bool(dv.get("hata")), uretim_kosu=a.plan_damga,
-                               hedef_n=N, cdn=False, ara_tekrar=True)
+                               hedef_n=N, cdn=False, ara_tekrar=True, yalin=YALIN)
             finally:
                 os.environ.pop("DEVAM_HEDEF", None)
                 if dvp.exists():
