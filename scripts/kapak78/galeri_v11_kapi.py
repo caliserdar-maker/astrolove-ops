@@ -10,11 +10,13 @@ Kapilar (dosya basina):
      tabana sayi ekler (sentetik testte temiz kutu 1050); bu yuzden esik sabit degil, onayli temiz ciktidan olculur (--olc).
      Karar esigi etiket_hp_max esik dosyasindan (Serdar onayli).
      --onayli verilirse ayni ad icin onayli temiz ciktiyla kutu farki (p99.9, max) bilgi olarak yazilir.
-  3) W07 MB / W08 DB / W10 WP (Serdar K2, 29 Eki): sahne farki ONAYLI CANCER_LIBRA v11 kartina (--onayli; ayni ad), cifte ozel
-     bolgeler haric (poster 971-2035 x 667-2043, cift satiri bandi y 341-432), CLAUDE.md GALERI esigi p99.9 <= 12, max <= 45.
+  3) BES KART (Serdar K2, 29 Eki; W01 / W09 Merkez sorusu 29 Eki ile eklendi, dislamak icin olcum nedeni yok): sahne farki ONAYLI
+     CANCER_LIBRA v11 kartina (--onayli; ayni ad), cifte ozel bolgeler haric (poster: W07 / W08 / W10 971-2035 x 667-2043, W01 / W09
+     876-2125 x 576-2137; cift satiri bandi y 341-432), CLAUDE.md GALERI esigi p99.9 <= 12, max <= 45.
      (Canli v10 kartina fark kullanilmaz: Canva kopyasinda sahne 2-4 px kayik, onayli ornek p99.9 130 verdi; 29 Eki olcumu.)
-     + renk kimligi: poster medyan CIELAB, ayni ciftin canli v10 renk kartlarina (MB kapak, G6 DB, G7 PW, G8 CI, G9 WP) en yakin
-     beklenen renk ve uzaklik < 5 referansin en kucuk ikili uzakliginin yarisi.
+     + renk kimligi (bes kart; W01 = CI, W09 = PW): poster ici medyan CIELAB (983-2023 x 679-2031), ayni ciftin canli v10 renk
+     kartlarina (MB kapak, G6 DB, G7 PW, G8 CI, G9 WP) en yakin beklenen renk ve uzaklik < 5 referansin en kucuk ikili uzakliginin
+     yarisi. Onayli CANCER_LIBRA olcumu config/galeri_v11_esik.json "renk" alaninda.
   4) bant (W01 CI kapak, W09 PW; acik poster): poster ile siyah cerceve arasinda farkli bant. Geometri: dort kenarda poster kenarina dik
      profil (kenar boyunca, koselerden 150 px iceride ortalama gri), nominal kenar (oge 888, 588, 1226 x 1538; KARAR dosyasi) +-40 px.
      Cerceve = profilde son KARANLIK (< 40) nokta; bant = ondan sonra komsu fark > EGIM (5 gri/px) surdukce gecen piksel sayisi
@@ -40,11 +42,14 @@ ADLAR = ("W01_KAPAK", "W07_MB", "W08_DB", "W09_PW", "W10_WP")
 ETIKET_KUTU = (2150, 1960, 2410, 2110)
 HP_SIGMA, HP_ESIK = 12, 30
 FARK_P999, FARK_MAX = 12, 45                         # CLAUDE.md GALERI kapisi (onayli)
-SAHNE_AD = ("W07_MB", "W08_DB", "W10_WP")         # K2 (Serdar 29 Eki): referans onayli CANCER_LIBRA v11, cifte ozel bolgeler haric
+SAHNE_AD = ("W01_KAPAK", "W07_MB", "W08_DB", "W09_PW", "W10_WP")   # K2 (Serdar 29 Eki): referans onayli CANCER_LIBRA v11, cifte ozel haric
 RENK_POSTER = (983, 679, 2023, 2031)                 # W07 / W08 / W10 poster (paspartu ici); onayli CANCER_LIBRA olcumu 29 Eki (uc kartta ayni)
 CIFT_BANT = (0, 341, 3000, 432)                      # cift satiri ("CANCER & LIBRA" y 353-420, x 1090-1910) +-12 px, tam genislik
-POSTER_HARIC = (RENK_POSTER[0] - 12, RENK_POSTER[1] - 12, RENK_POSTER[2] + 12, RENK_POSTER[3] + 12)
-RENK_AD = {"W07_MB": "MB", "W08_DB": "DB", "W10_WP": "WP"}
+PASPARTU_POSTER = (983, 679, 2023, 2031)             # W07 / W08 / W10 (paspartulu); W01 / W09 paspartusuz poster 888-2113 x 588-2125
+POSTER_HARIC = {ad: (x0 - 12, y0 - 12, x1 + 12, y1 + 12) for ad, (x0, y0, x1, y1) in (
+    ("W07_MB", PASPARTU_POSTER), ("W08_DB", PASPARTU_POSTER), ("W10_WP", PASPARTU_POSTER),
+    ("W01_KAPAK", (888, 588, 2113, 2125)), ("W09_PW", (888, 588, 2113, 2125)))}   # onayli CANCER_LIBRA kenar olcumu 29 Eki
+RENK_AD = {"W01_KAPAK": "CI", "W07_MB": "MB", "W08_DB": "DB", "W09_PW": "PW", "W10_WP": "WP"}
 V10_RENK = {"MB": ("kapak", "KAPAK_{c}.jpg"), "DB": ("galeri", "{c}_G6.jpg"), "PW": ("galeri", "{c}_G7.jpg"),
             "CI": ("galeri", "{c}_G8.jpg"), "WP": ("galeri", "{c}_G9.jpg")}   # ayni ciftin canli v10 renk kartlari
 POSTER = (888, 588, 888 + 1226, 588 + 1538)          # KARAR 29 Eki: onayli kapak posteri oge left 888, top 588, 1226 x 1538
@@ -160,7 +165,7 @@ def dosya_kapi(p, ad, cift, a, esik):
         if not q.exists():
             r["neden"].append(f"onayli referans yok ({q.name}; --onayli)")
         else:
-            p999, mx = fark(im, Image.open(q), [POSTER_HARIC, CIFT_BANT])
+            p999, mx = fark(im, Image.open(q), [POSTER_HARIC[ad], CIFT_BANT])
             r["v10_fark"] = f"sahne onayli {q.name} p99.9 {p999} max {mx}"
             if p999 > FARK_P999 or mx > FARK_MAX:
                 r["neden"].append(f"sahne farki (onayli CANCER_LIBRA; poster + cift satiri haric) p99.9 {p999} (<= {FARK_P999}) max {mx} (<= {FARK_MAX})")

@@ -1,1 +1,16 @@
-{"etiket_hp_max": 3264, "bant_max_px": 4, "onay": "Serdar 29 Eki (K1, Merkez iletti); olcum TEMP/POSTER_GALERI_V11/20261029_101430/KAPI/40856544350"}
+{
+ "etiket_hp_max": 3264,
+ "bant_max_px": 4,
+ "onay": "Serdar 29 Eki (K1, Merkez iletti); olcum TEMP/POSTER_GALERI_V11/20261029_101430/KAPI/40856544350",
+ "renk": {
+  "kural": "poster ici medyan CIELAB (983-2023 x 679-2031); en yakin canli v10 renk karti beklenen renk VE uzaklik < esik; esik = ayni ciftin 5 v10 renk kartinin en kucuk ikili uzakliginin yarisi (ilan basina hesaplanir)",
+  "onay": "Serdar 29 Eki (Merkez: renk denetimi kalsin, degerler yazilsin)",
+  "onayli_CANCER_LIBRA": {
+   "kendi_renge_uzaklik": {"W01_KAPAK CI": 0.0, "W07_MB MB": 0.4, "W08_DB DB": 0.0, "W09_PW PW": 0.0, "W10_WP WP": 0.2},
+   "en_yakin_baska_renk": {"W01_KAPAK": "PW 14.5", "W07_MB": "DB 18.4", "W08_DB": "MB 18.2", "W09_PW": "CI 14.5", "W10_WP": "CI 19.7"},
+   "v10_ikili_en_kucuk": "PW-CI 14.5",
+   "esik": 7.25,
+   "kaynak": "yerel olcum 29 Eki, Pillow 11.0.0: onayli TEMP/POSTER_GALERI_V11/20261029_101430, canli v10 TEMP/POSTER_GALERI_V10/20261026_181944 G6-G9 + TEMP/POSTER_KAPAK_V10/20261026_153710"
+  }
+ }
+}
