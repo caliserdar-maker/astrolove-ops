@@ -1,6 +1,7 @@
 name: galeri-v11-kapi
 # Galeri v11 B3 tam boy kapi (Merkez 29 Eki, plan v2 adim 5b). ETSY YOK. scripts/kapak78/galeri_v11_kapi.py (Pillow 11.0.0).
-# mod=kapi: TEMP/POSTER_GALERI_V11/<dosya_damga> kartlari; esik config/galeri_v11_esik.json (yoksa / onay bossa etiket ve bant ESIK_YOK).
+# mod=kapi: TEMP/POSTER_GALERI_V11/<dosya_damga> kartlari; esik config/galeri_v11_esik.json (Serdar K1); W07/W08/W10 sahne referansi
+#           onayli CANCER_LIBRA v11 (onayli_damga; Serdar K2) + renk kimligi canli v10 renk kartlarina.
 # mod=olc : onayli CANCER_LIBRA 5 gorsel (TEMP/POSTER_GALERI_V11/<dosya_damga>, _ONAYLI tasimasi) + canli v10 pozitif kontroller
 #           -> ESIK_ONERI (Serdar onayina sunulur; kullanilmaz).
 # Referanslar (yalniz okuma): v10 kartlar TEMP/POSTER_GALERI_V10/20261026_181944 (G6-G9), v10 kapak TEMP/POSTER_KAPAK_V10/20261026_153710.
@@ -13,14 +14,15 @@ on:
       dosya_damga: {description: "TEMP/POSTER_GALERI_V11/<damga>", required: true}
       mod: {description: "kapi | olc", required: true, default: "kapi"}
       sadece: {description: "virgullu cift / listing_id (bos = 78)", required: false, default: ""}
+      onayli_damga: {description: "kapi: K2 sahne referansi, onayli CANCER_LIBRA v11 (TEMP/POSTER_GALERI_V11/<damga>)", required: false, default: "20261029_101430"}
 jobs:
   kapi:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - name: Girdi kapisi
-        env: {D: "${{ inputs.dosya_damga }}", M: "${{ inputs.mod }}", S: "${{ inputs.sadece }}"}
-        run: '[[ "$D" =~ ^[0-9]{8}_[0-9]{6}$ && "$M" =~ ^(kapi|olc)$ && "$S" =~ ^([A-Z0-9_]+(,[A-Z0-9_]+)*)?$ ]] || { echo "::error::girdi"; exit 1; }'
+        env: {D: "${{ inputs.dosya_damga }}", M: "${{ inputs.mod }}", S: "${{ inputs.sadece }}", OD: "${{ inputs.onayli_damga }}"}
+        run: '[[ "$D" =~ ^[0-9]{8}_[0-9]{6}$ && "$OD" =~ ^[0-9]{8}_[0-9]{6}$ && "$M" =~ ^(kapi|olc)$ && "$S" =~ ^([A-Z0-9_]+(,[A-Z0-9_]+)*)?$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -40,14 +42,15 @@ jobs:
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
             grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
       - name: Girdiler (Drive, yalniz okuma)
-        env: {D: "${{ inputs.dosya_damga }}"}
+        env: {D: "${{ inputs.dosya_damga }}", OD: "${{ inputs.onayli_damga }}"}
         run: |
           set -euo pipefail
-          mkdir -p _d _g _k
+          mkdir -p _d _g _k _o
+          rclone copy "gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V11/$OD" _o --include "CANCER_LIBRA_W[0-9][0-9]_*.jpg" --max-depth 1 -q
           rclone copy "gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V11/$D" _d --include "*_W[0-9][0-9]_*.jpg" --max-depth 1 --transfers 8 -q
           rclone copy "gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V10/20261026_181944" _g --include "*_G[6-9].jpg" --max-depth 1 --transfers 8 -q
           rclone copy "gdrive:ASTROLOVE/TEMP/POSTER_KAPAK_V10/20261026_153710" _k --include "KAPAK_*.jpg" --max-depth 1 --transfers 8 -q
-          echo "v11 $(ls _d | wc -l) | v10 kart $(ls _g | wc -l) | v10 kapak $(ls _k | wc -l)"
+          echo "v11 $(ls _d | wc -l) | v10 kart $(ls _g | wc -l) | v10 kapak $(ls _k | wc -l) | onayli $(ls _o | wc -l)"
       - name: Kapi / olcum
         env: {M: "${{ inputs.mod }}", S: "${{ inputs.sadece }}"}
         run: |
@@ -56,7 +59,7 @@ jobs:
             python3 -I scripts/kapak78/galeri_v11_kapi.py --olc --onayli _d --v10-galeri _g --out _out; RC=$?
           else
             python3 -I scripts/kapak78/galeri_v11_kapi.py --dosya-dir _d --v10-galeri _g --v10-kapak _k --ciftler data/pod/pod78_ids.csv \
-              --sadece "$S" --esik config/galeri_v11_esik.json --out _out; RC=$?
+              --sadece "$S" --esik config/galeri_v11_esik.json --onayli _o --out _out; RC=$?
           fi
           echo "RC=$RC" >> "$GITHUB_ENV"
       - name: Drive'a yaz
@@ -71,4 +74,4 @@ jobs:
       - name: Sonuc
         run: '[ "${RC:-1}" = 0 ] || { echo "::error::kapi PASS degil (RC ${RC:-?})"; exit 1; }'
       - if: always()
-        run: rm -rf _d _g _k _out ~/.config/rclone
+        run: rm -rf _d _g _k _o _out ~/.config/rclone
