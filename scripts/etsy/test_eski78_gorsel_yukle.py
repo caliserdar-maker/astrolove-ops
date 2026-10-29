@@ -95,6 +95,8 @@ class Sahte:
         self.izler = []            # her yazimdan sonra (kapak id, bag sayisi)
         self.yabanci = None        # (kacinci yukleme, alt): hata aninda galeride yabanci gorsel belirir
         self.rank_yut = False      # yuklemedeki rank parametresi yok sayilir (sona eklenir)
+        self.bag_birlestir = False  # variation-images POST'u eksik rengin eski bagini birakir (v11b Y1 olumsuz senaryo)
+        self.rank_bir = False      # yukleme her zaman rank 1'e eklenir (v11b O1 olumsuz senaryo)
 
     def _k(self):   # etsy_common sert taban: istek GONDERILMEDEN durur; her istek kotadan 1 dusurur
         if self.remaining < self.sert_taban:
@@ -152,7 +154,7 @@ class Sahte:
             x = dict(rank=max([y["rank"] for y in self.img] + [0]) + 1, listing_image_id=yid,
                      alt_text=self._alt(data["alt_text"]) + (" (eski)" if self.alt_yukle_farkli else ""),
                      url_fullxfull="u")
-            rk = int((data or {}).get("rank") or 0)
+            rk = 1 if self.rank_bir else int((data or {}).get("rank") or 0)
             if rk and not self.rank_yut and not h:   # Etsy: verilen rank'e eklenir, o ve sonrakiler bir kayar
                 for y in self.img:
                     if y["rank"] >= rk:
@@ -195,7 +197,8 @@ class Sahte:
         if self.bag_yut:
             self.bag = {}; self._iz(); return {}
         vi = {v["value_id"]: v["image_id"] for v in body["variation_images"]}   # Etsy: istek tum baglari degistirir (eksik renk bagsiz)
-        self.bag = {k: vi[RENK[k][1]] for k in RENK if RENK[k][1] in vi}
+        yeni = {k: vi[RENK[k][1]] for k in RENK if RENK[k][1] in vi}
+        self.bag = dict(self.bag, **yeni) if self.bag_birlestir else yeni
         self._iz()
 
 

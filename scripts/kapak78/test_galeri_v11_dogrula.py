@@ -82,11 +82,11 @@ def main():
             x["image_id"] = 9000 + D.RENK_SIRA_B[x["value"]]
         jb["gorseller"][0]["alt_text"] = "eski MB kapak metni"; (c / "GALERI.json").write_text(json.dumps(jb))
         b1 = t / "b1" / c.name; b1.mkdir(parents=True)
-        (b1 / "GALERI.json").write_text(json.dumps(dict(gorseller=[dict(rank=1, listing_image_id=9001)])))
+        (b1 / "GALERI.json").write_text(json.dumps(dict(gorseller=[dict(rank=1, listing_image_id=9001, alt_text="eski MB kapak metni")])))
         kontrol("v11b: rank 1 B1 MB kapak, alt metni serbest, 4 bag -> PASS", kos(t, lid, "v11b") == 0)
         (b1 / "GALERI.json").write_text(json.dumps(dict(gorseller=[dict(rank=1, listing_image_id=1234)])))
         kontrol("v11b: rank 1 B1 MB kapak degil -> FAIL", kos(t, lid, "v11b") == 1)
-        (b1 / "GALERI.json").write_text(json.dumps(dict(gorseller=[dict(rank=1, listing_image_id=9001)])))
+        (b1 / "GALERI.json").write_text(json.dumps(dict(gorseller=[dict(rank=1, listing_image_id=9001, alt_text="eski MB kapak metni")])))
         (c / "GALERI.json").write_text(json.dumps(j))
         kontrol("v11b: CI bagi var (5 bag) -> FAIL", kos(t, lid, "v11b") == 1)
     finally:

@@ -101,7 +101,7 @@ def main():
         d2 = t0 / "b"; d2.mkdir(); g2 = T11.girdi(d2); c2 = canli_kur(d2, g2, v11_yazilmis=(LID,))
         rc, oz2 = liste(d2, g2, c2)
         kontrol("liste v11b: canli galeri yedekten farkli (v11 yazilmis, MB kapak yok) -> BLOK",
-                oz2["ilanlar"][LID]["durum"] == "BLOK" and any("B1 yedeginden farkli" in n for n in oz2["ilanlar"][LID]["neden"]))
+                oz2["ilanlar"][LID]["durum"] == "BLOK" and any("ne B1 yedegi" in n for n in oz2["ilanlar"][LID]["neden"]))
         kontrol("liste v11b: --canli-dir yok -> cikis 2", liste(d2, g2, None, out="h2")[0] == 2)
 
         hz = d / "hazir"
@@ -128,6 +128,32 @@ def main():
                 rc == 0 and R["sayilar"].get("PASS") == 2 and gal[0]["listing_image_id"] == base + 1
                 and not any(y[0] == "sira" and y[1] == base + 1 for y in f.yaz if len(y) > 1)
                 and {k: rk.get(v) for k, v in f.bag.items()} == BAG_B)
+        # 29 Eki inceleme Y1: Etsy eksik rengin eski bagini birakirsa bag denemesinde DUR, yukleme / silme yok
+        rc, R, f = yaz(t0, hz, "y3", bag_birlestir=True)
+        kontrol("yazim v11b: 4 bagli POST eski CI bagini birakirsa DUR, yukleme 0, silme 0, galeri 9",
+                rc != 0 and f.n_yukle == 0 and not f.silinenler and len(f.img) == 9)
+        # 29 Eki inceleme O1: yukleme rank 1'e eklenirse silme / bag oncesi DUR, rank 1'e yazim yok, eski gorsel silinmez
+        rc, R, f = yaz(t0, hz, "y4", rank_bir=True)
+        kontrol("yazim v11b: yukleme rank 1'in onune gecerse silmeden once DUR, MB kapak silinmez, rank 1'e yazim yok",
+                rc != 0 and not f.silinenler and any(x["listing_image_id"] == base + 1 for x in f.img)
+                and not any(y[0] in ("sil", "sira") and y[1] == base + 1 for y in f.yaz if len(y) > 1))
+        # 29 Eki inceleme D1: canli rank 1 MB'ye bagli degilse liste BLOK
+        d3 = t0 / "c"; d3.mkdir(); g3 = T11.girdi(d3); c3 = canli_kur(d3, g3)
+        p3 = next(c3.glob(f"{LID}_*")) / "GALERI.json"; j3 = json.loads(p3.read_text())
+        for b in j3["baglar"]:
+            if b["value"] == "Midnight Blue":
+                b["image_id"] = base + 2
+        p3.write_text(json.dumps(j3))
+        rc, oz3 = liste(d3, g3, c3)
+        kontrol("liste v11b: canli rank 1 MB'ye bagli degil -> BLOK", oz3["ilanlar"][LID]["durum"] == "BLOK"
+                and any("Midnight Blue bagli" in n for n in oz3["ilanlar"][LID]["neden"]))
+        # O2: bag_onar yolu DOKUNMA satirini taniyor (basarili yazimdan sonra bag modu okuma PASS)
+        import eski78_gorsel_yukle as Y
+        rc, R, f = yaz(t0, hz, "y5")
+        dv = next((t0 / "y5" / "ilanlar").glob(f"DEVAM_{LID}.json"))
+        Rb = Y.bag_kur(T10.Coklu({LID: f}), "1", LID, hz / LID / f"LISTE_{LID}.csv", hz / LID / "manifest.json", dv, t0 / "y5b",
+                       yaz=False, hedef_n=10)
+        kontrol(f"bag_kur (bag_onar) DOKUNMA satiriyla calisir, okuma {Rb['sonuc']}", Rb["sonuc"] == "PASS")
     finally:
         shutil.rmtree(t0, ignore_errors=True)
     bad = [a for a, ok in SONUC if not ok]

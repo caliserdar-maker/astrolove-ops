@@ -18,6 +18,7 @@ import urllib.parse
 import json
 import os
 import re
+import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -241,10 +242,19 @@ def ru_yazim_kapisi(method, path, data=None, json_body=None):
 
 # ------------------------------------------------------------------ api
 class Etsy:
+    """Is parcacigi guvenli (Serdar 29 Eki hiz: galeri yukleyici --isci N ayni istemciyi paylasir): tempo TUM iscilere ortak tek
+    kilitli saat (istek baslangiclari en az pace sn arayla = en fazla 4 istek/sn), calls / remaining kilitli, token yenileme kilitli ve
+    TEK sefer (401 alan isci, kullandigi token hala gecerli token ise yeniler; baska isci yenilemisse yalniz yeni tokenla tekrar dener).
+    yerel_calls: bu is parcacigindan giden istek sayisi (ilan basina istek)."""
     def __init__(self, store):
         self.store = store
         self.calls = 0
         self.remaining = None
+        self._kilit = threading.Lock()          # sayac / kalan / tempo saati
+        self._yenile_kilit = threading.Lock()   # token yenileme (refresh token doner; iki yenileme token bozar)
+        self._son = 0.0
+        self._yanit = 0                         # alinan yanit sayisi (kota basligi denetimi; paralelde calls ilk yanittan once artar)
+        self._yerel = threading.local()
         self.esik, self.sert_taban = kota_esigi()
         self._kapi_bakildi = False
         if self.sert_taban is not None:
@@ -263,20 +273,49 @@ class Etsy:
         if self.sert_taban is None:
             return
         if self.remaining is None:
-            if self.calls:
+            if self._yanit:
                 raise SystemExit("DUR: kota esigi aktif ama x-remaining-today basligi okunamadi")
             return
-        if not self._kapi_bakildi:
-            self._kapi_bakildi = True
+        with self._kilit:
+            ilk, self._kapi_bakildi = not self._kapi_bakildi, True
+        if ilk:
             self.kota_kapisi("kosu")
         if int(self.remaining) < self.sert_taban:
             raise SystemExit(f"DUR: kota sert tabani: kalan {self.remaining} < {self.sert_taban}")
 
-    def _headers(self):
+    def _headers(self, token=None):
         headers = {"x-api-key": self.store.api_key_header}
-        if self.store.access_token:
-            headers["Authorization"] = f"Bearer {self.store.access_token}"
+        tok = token or self.store.access_token
+        if tok:
+            headers["Authorization"] = f"Bearer {tok}"
         return headers
+
+    @property
+    def yerel_calls(self):
+        return getattr(self._yerel, "n", 0)
+
+    def _bekle(self):
+        """Ortak tempo: istek sayaci + bu istegin baslama zamani kilit altinda ayrilir, uyku kilit disinda."""
+        with self._kilit:
+            self.calls += 1
+            self._yerel.n = getattr(self._yerel, "n", 0) + 1
+            simdi = time.monotonic()
+            t = max(simdi, self._son + self.pace)
+            self._son = t
+        if t > simdi:
+            time.sleep(t - simdi)
+
+    def _kalan_yaz(self, rem):
+        with self._kilit:
+            self._yanit += 1
+            if rem is not None:
+                self.remaining = rem
+
+    def _yenile(self, kullanilan):
+        """401: kullanilan token hala gecerliyse TEK isci yeniler; baskasi yenilediyse yeniden yenileme yok."""
+        with self._yenile_kilit:
+            if self.store.access_token == kullanilan:
+                self.store.refresh()
 
     def get(self, path, params=None, ok404=False):
         return self._call("GET", path, params=params, ok404=ok404)
@@ -310,21 +349,20 @@ class Etsy:
         riski); cagiran galeriyi okuyup karar verir. 401 token yenilemesi her durumda bir kez yapilir."""
         self._istek_oncesi()
         for attempt in range(max(tekrar, 2)):
-            self.calls += 1
-            time.sleep(self.pace)
+            self._bekle()
             for f in files.values():
                 try:
                     f[1].seek(0)
                 except Exception:
                     pass
-            r = requests.post(API + path, files=files, data=data, headers=self._headers(), timeout=180)
+            tok = self.store.access_token
+            r = requests.post(API + path, files=files, data=data, headers=self._headers(tok), timeout=180)
             rem = r.headers.get("x-remaining-today")
-            if rem is not None:
-                self.remaining = rem
+            self._kalan_yaz(rem)
             if self.verbose_quota:
                 log(f"      kota {rem} | POST(file) {path} -> {r.status_code}")
             if r.status_code == 401 and attempt == 0:
-                self.store.refresh()
+                self._yenile(tok)
                 continue
             if r.status_code in (200, 201):
                 return r.json()
@@ -338,18 +376,17 @@ class Etsy:
         ru_yazim_kapisi(method, path, data, json_body)
         self._istek_oncesi()
         for attempt in range(3):
-            self.calls += 1
-            time.sleep(self.pace)
+            self._bekle()
+            tok = self.store.access_token
             r = requests.request(method, API + path, params=params, data=data, json=json_body,
-                                 headers=self._headers(), timeout=TIMEOUT)
+                                 headers=self._headers(tok), timeout=TIMEOUT)
             rem = r.headers.get("x-remaining-today")
-            if rem is not None:
-                self.remaining = rem
+            self._kalan_yaz(rem)
             if self.verbose_quota:
                 log(f"      kota {rem} | {method} {path} -> {r.status_code}")
             if r.status_code == 401 and attempt == 0:
                 log("401 alindi, token yenilenip tekrar denenecek.")
-                self.store.refresh()
+                self._yenile(tok)
                 continue
             if r.status_code == 404 and ok404:
                 return None

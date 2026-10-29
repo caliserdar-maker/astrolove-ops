@@ -43,9 +43,11 @@ def gorsel_sil(api, shop, lid, iid):
 
 
 def kararli(fn, kosul, tekrar=OKUMA_TEKRAR, bekle=OKUMA_BEKLE):
+    """kosul tutana kadar en fazla tekrar okuma. Serdar 29 Eki (hiz): ilk okuma beklemesiz, bekle yalniz tekrarlar arasinda."""
     son = None
-    for _ in range(tekrar):
-        time.sleep(bekle)
+    for i in range(tekrar):
+        if i:
+            time.sleep(bekle)
         son = fn()
         if kosul(son):
             return son

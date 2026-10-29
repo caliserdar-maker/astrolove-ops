@@ -58,8 +58,8 @@ def kaynak_yol(cift, s, galeri, kart):
     return (Path(kart) if 2 <= s <= 6 else Path(galeri)) / f"{cift}_{KAYNAK[s]}.jpg"
 
 
-def ilan(lid, r, d, sonra, sab, galeri, kart, b1_r1=None):
-    """b1_r1: v11b ise B1 yedegindeki rank 1 kimligi (MB kapak dokunulmaz); None = v11."""
+def ilan(lid, r, d, sonra, sab, galeri, kart, b1_r1=None, b1_alt=None):
+    """b1_r1 / b1_alt: v11b ise B1 yedegindeki rank 1 kimligi ve alt metni (MB kapak dokunulmaz); None = v11."""
     neden, olc = [], {}
     v11b = b1_r1 is not None
     j = json.loads((d / "GALERI.json").read_text(encoding="utf-8"))
@@ -73,6 +73,8 @@ def ilan(lid, r, d, sonra, sab, galeri, kart, b1_r1=None):
     kotu = [x["rank"] for x in g if x.get("alt_text") != alt.get(x["rank"]) and not (v11b and x["rank"] == 1)]
     if v11b and (not ids or ids[0] != b1_r1):
         neden.append(f"rank 1 B1 yedegindeki MB kapak degil ({ids[:1]} != {b1_r1})")
+    elif v11b and g[0].get("alt_text") != b1_alt:   # 29 Eki inceleme D2: alt metni yazilmadi
+        neden.append("rank 1 alt metni B1 yedegindekinden farkli (dokunulmaz alt metin degismis)")
     if kotu:
         neden.append(f"alt metin farkli: rank {kotu}")
     rk = {x["listing_image_id"]: x["rank"] for x in g}
@@ -142,12 +144,13 @@ def main(argv=None):
             R.append(dict(ilan=lid, cift=(r or {}).get("cift", "-"), durum="FAIL", ncc_min=None, ncc={}, state=None,
                           neden="ilan listede yok" if not r else ("canli okuma yok" if not d.is_dir() else "SONRA kaydi yok")))
         else:
-            b1 = None
+            b1 = b1a = None
             if a.profil == "v11b":
                 bp = Path(a.b1) / f"{lid}_{r['cift']}" / "GALERI.json"
                 gb = sorted(json.loads(bp.read_text(encoding="utf-8")).get("gorseller") or [], key=lambda x: x.get("rank") or 0) if bp.exists() else []
                 b1 = gb[0]["listing_image_id"] if gb else -1
-            R.append(ilan(lid, r, d, sonra[lid], sab, a.galeri, a.kart, b1))
+                b1a = gb[0].get("alt_text") if gb else None
+            R.append(ilan(lid, r, d, sonra[lid], sab, a.galeri, a.kart, b1, b1a if a.profil == "v11b" else None))
         print(f"{lid} {R[-1]['cift']} {R[-1]['durum']} ncc_min {R[-1]['ncc_min']} {R[-1]['neden'][:200]}", flush=True)
     with open(out / "DOGRULA.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["ilan", "cift", "durum", "state", "ncc_min", "neden"], extrasaction="ignore")

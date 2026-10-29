@@ -141,7 +141,13 @@ class S10(T.Sahte):
 class Coklu:
     """ilan basina sahte Etsy, ortak kota ve istek sayaci"""
     def __init__(self, sahteler, kota=100000):
+        import threading
         self.s = sahteler; self.remaining = kota; self.calls = 0; self.sert_taban = 10
+        self._kilit = threading.RLock(); self._yerel = threading.local()   # galeri yukleyici --isci N testi
+
+    @property
+    def yerel_calls(self):
+        return getattr(self._yerel, "n", 0)
 
     def _sec(self, path):
         import re
@@ -152,11 +158,13 @@ class Coklu:
             raise SystemExit(f"DUR: kota esigi: kalan {self.remaining} < 10 ({ne} baslamadi)")
 
     def _cagir(self, ad, path, *a, **k):
-        f = self._sec(path); f.remaining, f.calls = self.remaining, self.calls
-        try:
-            return getattr(f, ad)(path, *a, **k)
-        finally:
-            self.remaining, self.calls = f.remaining, f.calls
+        with self._kilit:
+            f = self._sec(path); f.remaining, f.calls = self.remaining, self.calls
+            try:
+                return getattr(f, ad)(path, *a, **k)
+            finally:
+                self._yerel.n = getattr(self._yerel, "n", 0) + (f.calls - self.calls)
+                self.remaining, self.calls = f.remaining, f.calls
 
     def get(self, path, params=None, ok404=False):
         return self._cagir("get", path, params, ok404)

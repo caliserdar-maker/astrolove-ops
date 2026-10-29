@@ -30,7 +30,9 @@ import json
 import os
 import re
 import sys
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parents[1]
@@ -87,6 +89,10 @@ class Onbellek:
 
     def __getattr__(self, k):
         return getattr(self._a, k)
+
+    @property
+    def calls(self):   # --isci N: bu is parcacigindan giden istek (asil istemci yerel_calls); yoksa ortak sayac
+        return getattr(self._a, "yerel_calls", self._a.calls)
 
     def get(self, path, params=None, ok404=False):
         key = (path, jdump(params), ok404)
@@ -197,7 +203,7 @@ def zaten(c, man, kayit_ids=None):
     return len(c["baglar"]) == len(RENK_SIRA) and b == RENK_SIRA
 
 
-def plan_kur(hazir, lid, man):
+def plan_kur(hazir, lid, man, dosyasiz=False):
     liste = hazir / lid / f"LISTE_{lid}.csv"
     hedef, cikar = Y.liste_oku(liste, N)
     yukle = [r for r in hedef if r["islem"] == "DEGISTIR"]
@@ -212,13 +218,15 @@ def plan_kur(hazir, lid, man):
     for h in man["hedef"]:
         if h.get("islem") in ("KORU", "DOKUNMA"):   # v11b: yerinde kalan gorselin dosyasi yok
             continue
+        if dosyasiz and man.get("dosyasiz"):   # kuru (Serdar 29 Eki hiz): dosya indirilmez, sha256 MANIFEST / KAPI.csv'den; yazimda dosya sart
+            continue
         p = hazir / lid / "hedef" / h["ad"]
         if not p.exists() or Y.sha256(p) != h["sha256"]:
             raise Y.Dur(f"hedef dosya {h['ad']} yok ya da sha256 manifestten farkli")
     bagli0 = {v["image_id"] for v in man["yedek_baglar"].values()}
     kapak = next((r for r in yukle if int(r["hedef_sira"]) == 1), None)
     if YALIN:
-        adim, mx = Y.yalin_plan(cikar, yukle, N, koru=koru)
+        adim, mx = Y.yalin_plan(cikar, yukle, N, koru=koru, eksik_bag=int(man.get("renk_bag_sayisi") or 5) < 5)
     else:
         adim, mx = Y.adim_plani(CANLI_N, cikar, bagli0, yukle, set(RENK_SIRA.values()), kapak_degisir=kapak, hedef_n=N)
     return adim, mx, Y.sha256(liste)
@@ -264,21 +272,54 @@ def calistir(api, shop, a):
     if yazim and not oz.get("yazim"):
         raise SystemExit("DUR: liste --yazim ile uretilmemis (alt metin onayi denetlenmedi); yazma yok")
     t0 = time.time()
-    satir, girdiler, dur = [], {}, None
-    for lid, o in oz["ilanlar"].items():
-        s = dict(ilan=lid, cift=o["cift"], durum="", neden=[], en_az=None, en_kotu=None, istek=None)
-        satir.append(s)
-        if dur:
-            s.update(durum="KALAN", neden=[dur]); continue
+    isci = max(1, int(getattr(a, "isci", 1) or 1))
+    if isci > 1 and not YALIN:
+        raise SystemExit("DUR: --isci > 1 yalniz yalin profilde (v11 / v11b); v10 sirali kalir")
+    satir, girdiler = [], {}
+    kilit = threading.Lock()                 # devam / ilerleme / girdiler / dur / rezerv / ETA (Serdar 29 Eki hiz: --isci N)
+    ortak = dict(dur=None, bitti=0, rezerv={}, baslayan=0)
+    azami_ilan = int(getattr(a, "azami_ilan", 0) or 0)   # parcali yazim (Merkez 29 Eki): kosu basina en fazla N ilan, kilit birakilir
+    toplam = len(oz["ilanlar"])
+
+    def eta():
+        with kilit:
+            ortak["bitti"] += 1; n = ortak["bitti"]
+        e = time.time() - t0
+        log(f"ETA: {n}/{toplam} ilan | gecen {e / 60:.1f} dk | kalan {e / n * (toplam - n) / 60:.1f} dk | %{100 * n // toplam}")
+
+    def durdur(m):
+        with kilit:
+            ortak["dur"] = ortak["dur"] or m
+
+    def isle(lid, o, s):
+        if isci > 1:
+            Y._LOG_ONEK.on = f"[{lid}] "
+        try:
+            _isle(lid, o, s)
+        finally:
+            Y._LOG_ONEK.on = ""
+            eta()
+
+    def _isle(lid, o, s):
+        if ortak["dur"]:
+            s.update(durum="KALAN", neden=[ortak["dur"]]); return
         if o["durum"] != "HAZIR":
-            s.update(durum="BLOK", neden=list(o["neden"])); continue
+            s.update(durum="BLOK", neden=list(o["neden"])); return
+        if yazim and azami_ilan and ortak["baslayan"] >= azami_ilan:   # okuma da yapilmaz (kesin karar rezervde, kilit altinda)
+            s.update(durum="KALAN", neden=[f"parca siniri {azami_ilan} ilan (kilit birakilir; sonraki parca devam eder)"]); return
         man = json.loads((hazir / lid / "manifest.json").read_text(encoding="utf-8"))
-        dv = (devam.get("ilanlar") or {}).get(lid)
+        with kilit:
+            dv = copy.deepcopy((devam.get("ilanlar") or {}).get(lid))
+            kayit_ids = ((ilerleme.get("ilanlar") or {}).get(lid) or {}).get("son_ids")
+            ilr_pass = (ilerleme.get("ilanlar") or {}).get(lid, {}).get("durum") == "PASS"
         bitmemis = bool(dv) and dv.get("son_ids") is not None and dv.get("adim", 0) < len(dv.get("plan") or [])
         if yazim and a.azami_dk and (time.time() - t0) / 60 > a.azami_dk:
-            dur = f"zaman butcesi {a.azami_dk} dk doldu; ilan baslamadi"; s.update(durum="KALAN", neden=[dur]); continue
-        c0 = api.calls; basladi = False
+            durdur(f"zaman butcesi {a.azami_dk} dk doldu; ilan baslamadi"); s.update(durum="KALAN", neden=[ortak["dur"]]); return
         api_i = Onbellek(api) if YALIN else api   # yalin: kapi okumasi ile bir_ilan on okumasi ayni GET'i bir kez yapar
+        c0 = api_i.calls if YALIN else api.calls; basladi = False
+
+        def ist():
+            return (api_i.calls if YALIN else api.calls) - c0
         try:
             api.kota_kapisi(f"ilan {lid}")
             if bitmemis:
@@ -287,75 +328,108 @@ def calistir(api, shop, a):
                 if not yazim:
                     s.update(durum="DEVAM", neden=[f"DEVAM kaydi adim {dv.get('adim', 0)}/{len(adim)}"
                                                    + (" (hata kaydi: kurtar gerekir)" if dv.get("hata") else "")])
-                    continue
+                    return
                 if str(dv.get("uretim_kosu") or "") != a.plan_damga:
-                    s.update(durum="BLOK", neden=[f"DEVAM kaydi baska planla basladi ({dv.get('uretim_kosu')}); yazma yok"]); continue
+                    s.update(durum="BLOK", neden=[f"DEVAM kaydi baska planla basladi ({dv.get('uretim_kosu')}); yazma yok"]); return
             else:
                 c = canli_durum(api_i, shop, lid)
-                kayit_ids = ((ilerleme.get("ilanlar") or {}).get(lid) or {}).get("son_ids")
                 if zaten(c, man, kayit_ids):
-                    s.update(durum="ZATEN", istek=api.calls - c0)
-                    if yazim and (ilerleme.get("ilanlar") or {}).get(lid, {}).get("durum") != "PASS" and (dv or {}).get("durum") != "FAIL":
-                        ilerleme.setdefault("ilanlar", {})[lid] = dict(cift=o["cift"], set=N, hedef=N, durum="PASS", kosu=a.kosu, plan_damga=a.plan_damga,
-                                                                       son_ids=[x.get("listing_image_id") for x in c["galeri"]])
-                    continue
+                    s.update(durum="ZATEN", istek=ist())
+                    if yazim and not ilr_pass and (dv or {}).get("durum") != "FAIL":
+                        with kilit:
+                            ilerleme.setdefault("ilanlar", {})[lid] = dict(cift=o["cift"], set=N, hedef=N, durum="PASS", kosu=a.kosu,
+                                                                           plan_damga=a.plan_damga,
+                                                                           son_ids=[x.get("listing_image_id") for x in c["galeri"]])
+                    return
                 neden = kapilar(c, man, a.bes_x7)
                 if neden:
-                    s.update(durum="BLOK", neden=neden, istek=api.calls - c0); continue
-                adim, mx, lsha = plan_kur(hazir, lid, man)
+                    s.update(durum="BLOK", neden=neden, istek=ist()); return
+                adim, mx, lsha = plan_kur(hazir, lid, man, dosyasiz=not yazim)
                 if mx > G.IMG_LIMIT:
-                    s.update(durum="BLOK", neden=[f"plan {mx} gorsel (> {G.IMG_LIMIT})"]); continue
+                    s.update(durum="BLOK", neden=[f"plan {mx} gorsel (> {G.IMG_LIMIT})"]); return
                 gd = plan_girdisi(lid, man, c, adim, mx, lsha)
                 s.update(en_az=gd["en_az"], en_kotu=gd["en_kotu"])
                 if not yazim:
-                    girdiler[lid] = gd; s.update(durum="PLAN", neden=list(c.get("not") or []), istek=api.calls - c0); continue
+                    with kilit:
+                        girdiler[lid] = gd
+                    s.update(durum="PLAN", neden=list(c.get("not") or []), istek=ist()); return
                 if (plan.get("girdiler") or {}).get(lid) != gd:
-                    s.update(durum="BLOK", neden=["canli durum / dosyalar kuru plandan farkli; yazma yok"], istek=api.calls - c0); continue
-            # yazim: ilana baslamadan kota (kalan - en kotu < sinir -> kosu durur, ilan baslamaz)
+                    s.update(durum="BLOK", neden=["canli durum / dosyalar kuru plandan farkli; yazma yok"], istek=ist()); return
+            # yazim: ilana baslamadan kota. Paralelde suren ilanlarin en kotu istegi ayrilmis sayilir (rezerv; Serdar 29 Eki hiz)
             gerek = s["en_kotu"] - (KAPI_OKUMA if not bitmemis else 0) + KOTA_SINIRI
-            if api.remaining is not None and int(api.remaining) < gerek:
-                dur = f"kota: kalan {api.remaining} < en kotu {gerek - KOTA_SINIRI} + {KOTA_SINIRI}; ilan baslamadi"
-                s.update(durum="KALAN", neden=[dur]); continue
-            dvp = ilan_out / f"DEVAM_{lid}.json"
-            if bitmemis:   # bitmis kayit kopyalanmaz: ilan yeni plan ile ilk kez baslar (canli = yedek kapisi gecti)
-                dvp.write_text(json.dumps(dv, indent=1), encoding="utf-8")
-            elif dvp.exists():
-                dvp.unlink()
-            basladi = True
-            if a.devam_hedef_kok:
-                os.environ["DEVAM_HEDEF"] = f"{a.devam_hedef_kok}/DEVAM_{lid}.json"
+            with kilit:
+                rez = sum(ortak["rezerv"].values())
+                yeter = api.remaining is None or int(api.remaining) - rez >= gerek
+                parca = not azami_ilan or ortak["baslayan"] < azami_ilan
+                if yeter and parca:
+                    ortak["rezerv"][lid] = gerek - KOTA_SINIRI; ortak["baslayan"] += 1
+            if not parca:
+                s.update(durum="KALAN", neden=[f"parca siniri {azami_ilan} ilan (kilit birakilir; sonraki parca devam eder)"]); return
+            if not yeter:
+                durdur(f"kota: kalan {api.remaining} - suren ilanlar {rez} < en kotu {gerek - KOTA_SINIRI} + {KOTA_SINIRI}; ilan baslamadi")
+                s.update(durum="KALAN", neden=[ortak["dur"]]); return
             try:
-                R = Y.bir_ilan(api_i, shop, lid, hazir / lid / f"LISTE_{lid}.csv", hazir / lid / "hedef", hazir / lid / "manifest.json",
-                               ilan_out, kuru=False, kurtar=a.kurtar and bitmemis and bool(dv.get("hata")), uretim_kosu=a.plan_damga,
-                               hedef_n=N, cdn=False, ara_tekrar=True, yalin=YALIN)
+                dvp = ilan_out / f"DEVAM_{lid}.json"
+                if bitmemis:   # bitmis kayit kopyalanmaz: ilan yeni plan ile ilk kez baslar (canli = yedek kapisi gecti)
+                    dvp.write_text(json.dumps(dv, indent=1), encoding="utf-8")
+                elif dvp.exists():
+                    dvp.unlink()
+                basladi = True
+                hedef_kok = f"{a.devam_hedef_kok}/DEVAM_{lid}.json" if a.devam_hedef_kok else ""
+                try:
+                    R = Y.bir_ilan(api_i, shop, lid, hazir / lid / f"LISTE_{lid}.csv", hazir / lid / "hedef", hazir / lid / "manifest.json",
+                                   ilan_out, kuru=False, kurtar=a.kurtar and bitmemis and bool(dv.get("hata")), uretim_kosu=a.plan_damga,
+                                   hedef_n=N, cdn=False, ara_tekrar=True, yalin=YALIN, devam_hedef=hedef_kok)
+                finally:
+                    if dvp.exists():
+                        d = json.loads(dvp.read_text(encoding="utf-8"))
+                        bitti = bool(d.get("plan")) and d.get("adim") == len(d["plan"])
+                        with kilit:
+                            devam.setdefault("ilanlar", {})[lid] = dict(d, cift=o["cift"], durum="DUR" if not bitti else "BITTI")
             finally:
-                os.environ.pop("DEVAM_HEDEF", None)
-                if dvp.exists():
-                    d = json.loads(dvp.read_text(encoding="utf-8"))
-                    bitti = bool(d.get("plan")) and d.get("adim") == len(d["plan"])
-                    devam.setdefault("ilanlar", {})[lid] = dict(d, cift=o["cift"], durum="DUR" if not bitti else "BITTI")
-            s.update(durum=R["sonuc"], neden=R.get("sorun") or [], istek=api.calls - c0)
-            if lid in (devam.get("ilanlar") or {}):
-                devam["ilanlar"][lid]["durum"] = R["sonuc"]   # PASS / FAIL (son geri okuma); exception'da DUR / BITTI kalir
-            if R["sonuc"] == "PASS":
-                ilerleme.setdefault("ilanlar", {})[lid] = dict(cift=o["cift"], set=N, hedef=N, durum="PASS", kosu=a.kosu, plan_damga=a.plan_damga,
-                                                               son_ids=R.get("son_ids"))
-            else:
-                dur = f"ilan {lid} {R['sonuc']}; kosu durdu"
+                with kilit:
+                    ortak["rezerv"].pop(lid, None)
+            s.update(durum=R["sonuc"], neden=R.get("sorun") or [], istek=ist())
+            with kilit:
+                if lid in (devam.get("ilanlar") or {}):
+                    devam["ilanlar"][lid]["durum"] = R["sonuc"]   # PASS / FAIL (son geri okuma); exception'da DUR / BITTI kalir
+                if R["sonuc"] == "PASS":
+                    ilerleme.setdefault("ilanlar", {})[lid] = dict(cift=o["cift"], set=N, hedef=N, durum="PASS", kosu=a.kosu,
+                                                                   plan_damga=a.plan_damga, son_ids=R.get("son_ids"))
+            if R["sonuc"] != "PASS":
+                durdur(f"ilan {lid} {R['sonuc']}; kosu durdu")
         except (Y.Dur, SystemExit, Exception) as e:   # noqa: BLE001 kota tabani, Etsy / ag hatasi: kosu durur
             m = str(getattr(e, "code", None) or e)[:300]
             if not basladi and m.startswith("DUR: kota"):   # kota tabani / esigi ilan baslamadan: istek gonderilmedi
-                dur = m; s.update(durum="KALAN", neden=[m], istek=api.calls - c0)
-                log(f"{lid} {o['cift']} KALAN | {m[:140]}"); continue
-            s.update(durum="DUR", neden=[m], istek=api.calls - c0)
-            dur = f"ilan {lid} DUR; kosu durdu"
+                durdur(m); s.update(durum="KALAN", neden=[m], istek=ist())
+                log(f"{lid} {o['cift']} KALAN | {m[:140]}"); return
+            s.update(durum="DUR", neden=[m], istek=ist())
+            durdur(f"ilan {lid} DUR; kosu durdu")
             if yazim:
-                eski = (ilerleme.get("ilanlar") or {}).get(lid) or {}
-                if eski.get("durum") != "PASS":
-                    ilerleme.setdefault("ilanlar", {})[lid] = dict(eski, cift=o["cift"], set=eski.get("set") or "-", durum="DUR",
-                                                                   kosu=a.kosu, plan_damga=a.plan_damga)
+                with kilit:
+                    eski = (ilerleme.get("ilanlar") or {}).get(lid) or {}
+                    if eski.get("durum") != "PASS":
+                        ilerleme.setdefault("ilanlar", {})[lid] = dict(eski, cift=o["cift"], set=eski.get("set") or "-", durum="DUR",
+                                                                       kosu=a.kosu, plan_damga=a.plan_damga)
         log(f"{lid} {o['cift']} {s['durum']}" + (f" | en az {s['en_az']} en kotu {s['en_kotu']}" if s["en_kotu"] else "")
             + (f" | {s['neden'][0][:140]}" if s["neden"] else "") + f" | kota {api.remaining}")
+
+    isler = []
+    for lid, o in oz["ilanlar"].items():
+        s = dict(ilan=lid, cift=o["cift"], tur=o.get("tur") or "", durum="", neden=[], en_az=None, en_kotu=None, istek=None)
+        satir.append(s); isler.append((lid, o, s))
+    if isci == 1:
+        for x in isler:
+            isle(*x)
+    else:
+        log(f"ISCI {isci}: {toplam} ilan paralel (ortak tempo {1 / max(getattr(api, 'pace', 0.25) or 0.25, 1e-9):.0f} istek/sn, tek token yenileme)")
+        with ThreadPoolExecutor(max_workers=isci, thread_name_prefix="ilan") as ex:
+            fs = {ex.submit(isle, *x): x for x in isler}
+            for f in as_completed(fs):
+                e = f.exception()
+                if e is not None:   # isle kendi hatalarini yakalar; buraya dusen beklenmeyen hata: ilan DUR, kosu durur
+                    lid, o, s = fs[f]
+                    s.update(durum="DUR", neden=[f"beklenmeyen hata: {str(e)[:200]}"]); durdur(f"ilan {lid} DUR; kosu durdu")
     return satir, girdiler, devam, ilerleme
 
 
@@ -461,6 +535,8 @@ def arg(argv=None):
     ap.add_argument("--kosu", default=os.environ.get("GITHUB_RUN_ID", "0"))
     ap.add_argument("--azami-dk", type=float, default=0, help="yazim: bu sureden sonra yeni ilana baslanmaz (0 = sinirsiz)")
     ap.add_argument("--devam-hedef-kok", default="", help="her yazimdan once / sonra DEVAM_<ilan>.json kopyasi (rclone hedefi)")
+    ap.add_argument("--azami-ilan", type=int, default=0, help="yazim: kosu basina en fazla N ilan baslar (0 = sinirsiz; parcali yazim)")
+    ap.add_argument("--isci", type=int, default=1, help="paralel ilan (yalin profil; tek Etsy kilidi, ortak tempo, Serdar 29 Eki hiz)")
     a = ap.parse_args(argv)
     if a.bag_onar:
         if a.kuru or a.confirm != ONAY_BAG or not re.fullmatch(r"\d+_[0-9a-f]{12}", a.plan_damga or ""):

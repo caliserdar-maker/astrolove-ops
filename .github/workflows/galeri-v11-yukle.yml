@@ -36,6 +36,8 @@ on:
       bag_onar: {description: "true: yalniz renk baglari (DEVAM kaydi olan ilanlar; confirm GALERI_V11_BAG)", required: false, default: "false"}
       profil: {description: "v11b (Serdar 29 Eki: rank 1 canli MB kapak dokunulmaz, CI yok, 4 renk bagi) | v11", required: true, default: "v11b"}
       canli_damga: {description: "v11b: liste oncesi canli okuma TEMP/POSTER_GALERI_V11_YEDEK/<damga> (galeri-v11-yedek-oku)", required: false, default: ""}
+      isci: {description: "paralel ilan (1-4; tek Etsy kilidi, ortak tempo 4 istek/sn, tek token yenileme)", required: false, default: "4"}
+      azami_ilan: {description: "yazim: kosu basina en fazla ilan (parcali; kilit her parca sonunda birakilir, 120 dk kilit beklemesi)", required: false, default: "20"}
 
 env:
   T: "gdrive:ASTROLOVE/TEMP"
@@ -64,10 +66,13 @@ jobs:
           KA: ${{ inputs.kart_klasor }}
           PR: ${{ inputs.profil }}
           CD: ${{ inputs.canli_damga }}
+          IS: ${{ inputs.isci }}
+          AI: ${{ inputs.azami_ilan }}
         run: |
           set -euo pipefail
+          [[ "$AI" =~ ^[0-9]{1,2}$ ]] || { echo "::error::girdi (azami_ilan)"; exit 1; }
           [[ "$BO" =~ ^(true|false)$ ]] || { echo "::error::girdi (bag_onar)"; exit 1; }
-          [[ "$PR" =~ ^(v11|v11b)$ && "$CD" =~ ^([0-9]{8}_[0-9]{6})?$ ]] || { echo "::error::girdi (profil / canli_damga)"; exit 1; }
+          [[ "$PR" =~ ^(v11|v11b)$ && "$CD" =~ ^([0-9]{8}_[0-9]{6})?$ && "$IS" =~ ^[1-4]$ ]] || { echo "::error::girdi (profil / canli_damga / isci)"; exit 1; }
           [ "$PR" = v11 ] || [ -n "$CD" ] || { echo "::error::v11b icin canli_damga (galeri-v11-yedek-oku)"; exit 1; }
           OK=GALERI_V11; [ "$PR" = v11b ] && OK=GALERI_V11B
           [[ "$KK" =~ ^[0-9]+$ && "$YD" =~ ^[0-9]{8}_[0-9]{6}$ && "$KA" =~ ^([A-Za-z0-9_]+(/[A-Za-z0-9_]+)*)?$ ]] || { echo "::error::girdi (kapi_kosu / yedek_damga / kart_klasor)"; exit 1; }
@@ -129,10 +134,12 @@ jobs:
           print(f"kapsam: {len(R)} ilan")
           PY
           G="$T/POSTER_GALERI_V11/$GD"
-          rclone copy "$G" _in/galeri --files-from _work/galeri.txt --transfers 8 -q
+          # Serdar 29 Eki hiz: kuru kosu gorsel indirmez (sha256 KAPI.csv / kart MANIFEST'ten, liste --dosyasiz); yazimda paralel indirme
+          [ "$KURU" = true ] || rclone copy "$G" _in/galeri --files-from _work/galeri.txt --transfers 16 -q
           rclone copyto "$G/KAPI/$KK/KAPI.csv" _work/KAPI.csv || { echo "::error::KAPI.csv yok (POSTER_GALERI_V11/$GD/KAPI/$KK)"; exit 1; }
           Y="$T/POSTER_GALERI_V11_YEDEK/$YD"
           rclone copy "$Y" _in/yedek --files-from _work/yedek_json.txt --transfers 8 -q
+          [ "$PR" = v11b ] && rclone copy "$Y" _in/yedek --include "*/r1_*.jpg" --transfers 16 -q   # ONAR: B1 MB kapak dosyalari
           rclone copyto "$Y/OZET.md" _work/YEDEK_OZET.md
           rclone lsjson -R "$Y" --files-only --include "*.jpg" > _work/yedek_ls.json
           PA=(--profil "$PR")
@@ -141,9 +148,15 @@ jobs:
             PA+=(--canli-dir _in/canli); echo "canli okuma: $(ls _in/canli/*/GALERI.json 2>/dev/null | wc -l) GALERI.json ($CD)"
           fi
           PL=PLAN_V11.json; [ "$PR" = v11b ] && PL=PLAN_V11B.json
+          echo "$CD" > _out/CANLI_DAMGA.txt   # 29 Eki inceleme O3: yazim / devam kuru plandaki canli okumayla kosar
+          if [ "$PR" = v11b ] && { [ "$KURU" = false ] || [ "$BO" = true ]; }; then
+            K0=$(rclone cat "$O/KOSU/${PD%%_*}/CANLI_DAMGA.txt" 2>/dev/null || true)
+            [ "$K0" = "$CD" ] || { echo "::error::canli_damga ($CD) kuru plandaki ($K0) ile ayni degil; yazma yok"; exit 1; }
+          fi
           KM=()
           if [ -n "$KA" ]; then
-            rclone copy "$T/$KA" _in/kart --max-depth 1 --include "*.jpg" --include "KART_MANIFEST.json" --include "MANIFEST_W02_W06*.csv" --transfers 8 -q
+            KJ=(--include "*.jpg"); [ "$KURU" = true ] && KJ=()
+            rclone copy "$T/$KA" _in/kart --max-depth 1 "${KJ[@]}" --include "KART_MANIFEST.json" --include "MANIFEST_W02_W06*.csv" --transfers 16 -q
             if [ -f _in/kart/KART_MANIFEST.json ]; then KM=(--kart-manifest _in/kart/KART_MANIFEST.json)
             elif ls _in/kart/MANIFEST_W02_W06*.csv >/dev/null 2>&1; then KM=(--kart-manifest _in/kart --format-boy 14)   # Serdar 29 Eki: W04 "14 Sizes"
             fi
@@ -153,7 +166,7 @@ jobs:
             rclone copyto "$O/KOSU/${PD%%_*}/$PL" "_work/$PL" || { echo "::error::$PL yok (KOSU/${PD%%_*})"; exit 1; }
             YZ=--yazim
           else
-            YZ=
+            YZ=; [ "$KURU" = true ] && YZ=--dosyasiz
           fi
           python3 scripts/kapak78/galeri_v11_liste.py --ciftler data/pod/pod78_ids.csv --alt data/pod/galeri_v11_alt.csv \
             --galeri-dir _in/galeri --kapi-csv _work/KAPI.csv --kesim-dir _ref/ref/kapak_ci --yedek-dir _in/yedek \
@@ -208,14 +221,16 @@ jobs:
           AZ: ${{ inputs.azami_dk }}
           BO: ${{ inputs.bag_onar }}
           GALERI_PROFIL: ${{ inputs.profil }}
+          IS: ${{ inputs.isci }}
+          AI: ${{ inputs.azami_ilan }}
         run: |
           set +e -o pipefail
           OK=GALERI_V11; PL=PLAN_V11.json; [ "$GALERI_PROFIL" = v11b ] && OK=GALERI_V11B && PL=PLAN_V11B.json
-          args=(--hazir _hazir --out _out --devam _work/DEVAM.json --ilerleme _work/ILERLEME.json --bes-x7 "$BX")
+          args=(--hazir _hazir --out _out --devam _work/DEVAM.json --ilerleme _work/ILERLEME.json --bes-x7 "$BX" --isci "${IS:-1}")
           if [ "$KURU" = true ]; then args+=(--kuru)
           elif [ "$BO" = true ]; then args+=(--bag-onar --confirm "${OK}_BAG" --plan-damga "$PD")
           else
-            args+=(--confirm "$OK" --plan "_work/$PL" --plan-damga "$PD" --sonuc _work/SONUC.csv --azami-dk "$AZ"
+            args+=(--confirm "$OK" --plan "_work/$PL" --plan-damga "$PD" --sonuc _work/SONUC.csv --azami-dk "$AZ" --azami-ilan "${AI:-20}"
                    --devam-hedef-kok "$O/KOSU/${GITHUB_RUN_ID}/devam")
             [ "$KU" = true ] && args+=(--kurtar)
           fi

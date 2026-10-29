@@ -291,6 +291,7 @@ def main():
     p10 = json.loads((t0 / "PLAN_V11.json").read_text()); p10.pop("profil"); (t0 / "PLAN_V10x.json").write_text(json.dumps(p10))
     rc, R = kos(T10.Coklu({k: sahte(k) for k in ILAN}), hz, t0 / "o5", kuru=False, plan=t0 / "PLAN_V10x.json", damga=pd)
     kontrol("yazim: v10 planiyla DUR", rc == 9 and "profili v10" in R["hata"])
+    shutil.rmtree(t0, ignore_errors=True)   # 29 Eki: temizlenmeyen gv11_* klasorleri diski doldurdu (her kosu ~97 MB)
     bad = [a for a, ok in SONUC if not ok]
     print(f"\ngaleri_v11 testleri: {len(SONUC) - len(bad)}/{len(SONUC)} PASS" + (f" | FAIL: {bad}" if bad else ""))
     return 1 if bad else 0
