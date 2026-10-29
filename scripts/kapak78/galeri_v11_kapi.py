@@ -12,7 +12,7 @@ Kapilar (dosya basina):
      --onayli verilirse ayni ad icin onayli temiz ciktiyla kutu farki (p99.9, max) bilgi olarak yazilir.
   3) BES KART (Serdar K2, 29 Eki; W01 / W09 Merkez sorusu 29 Eki ile eklendi, dislamak icin olcum nedeni yok): sahne farki ONAYLI
      CANCER_LIBRA v11 kartina (--onayli; ayni ad), cifte ozel bolgeler haric (poster: W07 / W08 / W10 971-2035 x 667-2043, W01 / W09
-     876-2125 x 576-2137; cift satiri bandi y 341-432), CLAUDE.md GALERI esigi p99.9 <= 12, max <= 45.
+     876-2125 x 576-2137; cift satiri bandi y 341-450), CLAUDE.md GALERI esigi p99.9 <= 12, max <= 45.
      (Canli v10 kartina fark kullanilmaz: Canva kopyasinda sahne 2-4 px kayik, onayli ornek p99.9 130 verdi; 29 Eki olcumu.)
      + renk kimligi (bes kart; W01 = CI, W09 = PW): poster ici medyan CIELAB (983-2023 x 679-2031), ayni ciftin canli v10 renk
      kartlarina (MB kapak, G6 DB, G7 PW, G8 CI, G9 WP) en yakin beklenen renk ve uzaklik < 5 referansin en kucuk ikili uzakliginin
@@ -44,7 +44,7 @@ HP_SIGMA, HP_ESIK = 12, 30
 FARK_P999, FARK_MAX = 12, 45                         # CLAUDE.md GALERI kapisi (onayli)
 SAHNE_AD = ("W01_KAPAK", "W07_MB", "W08_DB", "W09_PW", "W10_WP")   # K2 (Serdar 29 Eki): referans onayli CANCER_LIBRA v11, cifte ozel haric
 RENK_POSTER = (983, 679, 2023, 2031)                 # W07 / W08 / W10 poster (paspartu ici); onayli CANCER_LIBRA olcumu 29 Eki (uc kartta ayni)
-CIFT_BANT = (0, 341, 3000, 432)                      # cift satiri ("CANCER & LIBRA" y 353-420, x 1090-1910) +-12 px, tam genislik
+CIFT_BANT = (0, 341, 3000, 450)                      # cift satiri y 353-420 ("CANCER & LIBRA"), Q kuyrugu y 438'e iner (AQUARIUS, 29 Eki olcumu) +12 px; tam genislik
 PASPARTU_POSTER = (983, 679, 2023, 2031)             # W07 / W08 / W10 (paspartulu); W01 / W09 paspartusuz poster 888-2113 x 588-2125
 POSTER_HARIC = {ad: (x0 - 12, y0 - 12, x1 + 12, y1 + 12) for ad, (x0, y0, x1, y1) in (
     ("W07_MB", PASPARTU_POSTER), ("W08_DB", PASPARTU_POSTER), ("W10_WP", PASPARTU_POSTER),
