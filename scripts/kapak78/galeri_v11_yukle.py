@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Poster 78 galeri v11 yukleyicisi (Merkez 29 Eki, plan v2 adim 5d-e; Serdar K1: 10 gorsel TEK SEFERDE). KOSTURMA AYRI ONAYLA.
-galeri_v10_yukle.py'nin v11 profili (profil_kur("v11")): kanitli yol aynen (eski78 bir_ilan: adim_plani, yukle_guvenli, stabil_galeri,
-durum_uzlas, DEVAM / --kurtar, erken bag + son bag, istek_en_kotu; kota_kapisi KOTA_SINIRI 10). Farklar:
+galeri_v10_yukle.py'nin v11 profili (profil_kur("v11")): eski78 bir_ilan YALIN yolu (Merkez 29 Eki karar 3): yalin_plan (10 yukleme rank +
+alt metinle, bag silmeden once dogrulanir, 9 silme, sira_kontrol; sira POST'u olduysa bag yeniden ve dogrulanir), yukle_guvenli,
+stabil_galeri, durum_uzlas, DEVAM / --kurtar (devamda onbellek kapali), istek_yalin_en_kotu / en_az; kota_kapisi KOTA_SINIRI 10. Farklar:
   hedef 10 / canli 9 (B1 yedegi = canli kapisi), renk baglari CI->1 MB->7 DB->8 PW->9 WP->10, onay GALERI_V11, PLAN_V11.json,
   liste galeri_v11_liste.py ciktisi (profil v11 zorunlu).
 Ek kapilar (ilan basina, canli okumayla; BLOK = yazma yok):

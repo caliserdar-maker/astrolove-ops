@@ -81,26 +81,30 @@ def istek_en_az(adimlar, basla=0, ilk=True, n=HEDEF_N):
 def istek_yalin_en_kotu(adimlar, basla=0, ilk=True, n=HEDEF_N):
     """YALIN plan (galeri v11, Merkez 29 Eki karar 3) EN KOTU istek: adim arasi galeri okumasi yok.
       sil = DELETE (5xx tekrari 3); yukle = 2 deneme x (POST + 401 yenilemesi) + hata sonrasi kararli galeri (OKUMA_TEKRAR);
-      bag = POST (3); sira_kontrol = kararli galeri + oturmazsa 2 gecis x (n POST x SIRA_TEKRAR + kararli galeri);
+      bag = POST (3) + kararli var_img (silmeden ONCE dogrulanir; 29 Eki inceleme Y2);
+      sira_kontrol = kararli galeri + oturmazsa 2 gecis x (n POST x SIRA_TEKRAR + kararli galeri) + sira POST'u bagi siler
+      (19 Eyl olcumu, pod_rank3_onar.py) -> bag yeniden POST (3) + kararli var_img (29 Eki inceleme Y1);
       on okuma ilk kosu 1 (videolar; ilan / envanter / galeri / var_img kapi okumasindan onbellekte), devam 5 + kararli galeri;
-      son = kararli var_img + korunanlar 3 (galeri sira_kontrol okumasindan)."""
+      son = kararli galeri (sira POST'u olduysa) + kararli var_img + korunanlar 3."""
     O = G.OKUMA_TEKRAR
-    birim = {"sil": 3, "yukle": (2 + 1) + (2 + O), "bag": 3, "sira_kontrol": O + 2 * (n * SIRA_TEKRAR + O)}
+    birim = {"sil": 3, "yukle": (2 + 1) + (2 + O), "bag": 3 + O, "sira_kontrol": O + 2 * (n * SIRA_TEKRAR + O) + (3 + O) + O}
     return (1 if ilk else 5 + O) + sum(birim[a[0]] for a in adimlar[basla:]) + O + 3
 
 
 def istek_yalin_en_az(adimlar, basla=0, ilk=True, n=HEDEF_N):
-    """YALIN plan EN AZ: her yazim 1 istek, sira_kontrol 1 galeri (oturdu), son var_img 1 + korunanlar 3; on okuma ilk 1 (devam 6)."""
-    return (1 if ilk else 6) + sum(1 for _ in adimlar[basla:]) + 4
+    """YALIN plan EN AZ: her yazim 1 istek, bag + 1 var_img dogrulama, sira_kontrol 1 galeri (oturdu), son var_img 1 + korunanlar 3;
+    on okuma ilk 1 (devam 6)."""
+    return (1 if ilk else 6) + sum(2 if a[0] == "bag" else 1 for a in adimlar[basla:]) + 4
 
 
 def yalin_plan(cikar, yukle, hedef_n=HEDEF_N):
     """YALIN adim plani (Merkez 29 Eki karar 3: yalniz degisen gorsel, alt metin ve sira yukleme isteginde, okuma tekrari yok):
       1. hedef gorseller hedef sirasinda yuklenir (rank = hedef sira, alt metin ayni istekte): kapak ilk yuklemeyle 1. sirada,
          yeni gorseller 1..n'de, eskiler arkada (gorsel sayisi en fazla canli + n, IMG_LIMIT altinda olmali).
-      2. renk baglari TEK variation-images cagrisi (yeni renk kartlarina).
-      3. eski gorseller silinir.
-      4. sira_kontrol: tek galeri okumasi; kimlik sirasi / rank / alt metin hedefle ayni degilse sira + alt metin POST'u (2 gecis).
+      2. renk baglari TEK variation-images cagrisi (yeni renk kartlarina), eski gorseller silinmeden ONCE okunup dogrulanir.
+      3. eski gorseller silinir (bagsiz; 404 = zaten silinmis, kimlik kumesi sira_kontrol'de dogrulanir).
+      4. sira_kontrol: tek galeri okumasi; kimlik sirasi / rank / alt metin hedefle ayni degilse sira + alt metin POST'u (2 gecis)
+         ve ardindan renk baglari YENIDEN yazilip dogrulanir (rank yazimi bagi siler, 19 Eyl olcumu; Serdar 24 Eki: bag en sonda).
     -> (adimlar, en fazla gorsel sayisi)"""
     yk = sorted(yukle, key=lambda r: int(r["hedef_sira"]))
     if [int(r["hedef_sira"]) for r in yk] != list(range(1, hedef_n + 1)):
@@ -236,7 +240,8 @@ def durum_uzlas(K, g, adimlar, alt_ad, ara_tekrar=False):
                 log(f"  kurtarma/devam: {ad} kayitsiz ama galeride -> {aday[0]} (alt metin ayni), yeniden yuklenmez")
                 olmus.append(True)
             elif K.d.get("belirsiz") == ad:
-                raise Dur(f"kurtarma/devam: belirsiz yukleme {ad} galeride bulunamadi; yukleme yapilmadi, elle bakilmali")
+                raise Dur(f"kurtarma/devam: belirsiz yukleme {ad} galeride bulunamadi; yukleme yapilmadi. --kurtar bunu ACAMAZ: "
+                          f"gorselin olusmadigi elle dogrulanip DEVAM kaydindaki 'belirsiz' alani elle silinmeli (cift yukleme riski)")
             else:
                 olmus.append(False)
         else:
@@ -525,6 +530,8 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
     else:
         kor0 = K.d["korunan0"]
         adimlar = [tuple(x) for x in K.d["plan"]]; enfazla = K.d.get("en_fazla", 0)
+        if hasattr(api, "kapat"):   # v11 Onbellek: devamda kapi okumalari canli olmali (stabil_galeri iki CANLI okuma; 29 Eki inceleme O3)
+            api.kapat()
         g0 = stabil_galeri(api, lid)
         ids, _ = durum_uzlas(K, g0, adimlar, alt_ad, ara_tekrar=ara_tekrar)
     basla = K.d.get("adim", 0)
@@ -583,7 +590,10 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
             K.d["bekleyen"] = list(a); K.yaz(ids)   # yazimdan ONCE: kosu bu adimda durursa devam / kurtarma uzlastirir
             if a[0] == "sil":
                 c = a[1]
-                G.gorsel_sil(api, shop, lid, c)
+                if yalin:   # 5xx tekrari ilk istek islendiyse 404 doner (29 Eki inceleme D10); kimlik kumesi sira_kontrol'de
+                    api.delete(f"/shops/{shop}/listings/{lid}/images/{c}", ok404=True)
+                else:
+                    G.gorsel_sil(api, shop, lid, c)
                 K.d["silinen"].append(c); ids.discard(c); K.yaz(ids)   # yazimdan HEMEN sonra
                 if not yalin:
                     g = G.kararli(lambda: G.galeri(api, lid), lambda g: set(ids_of(g)) == ids)
@@ -612,7 +622,7 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
                 g = G.kararli(lambda: G.galeri(api, lid), lambda g: bool(g) and g[0].get("listing_image_id") == son[1])
                 log(f"  [{n + 1}/{len(adimlar)}] kapak {son[1]} rank 1: {'oturdu' if g and g[0].get('listing_image_id') == son[1] else 'oturmadi (sira adimi duzeltir)'}")
             elif a[0] == "bag":
-                bag_yaz(n, dogrula=not yalin)
+                bag_yaz(n)   # yalin dahil: eski gorseller silinmeden ONCE dogrulanir (29 Eki inceleme Y2)
             elif a[0] in ("sira", "sira_kontrol"):
                 son_kur()
                 if set(son.values()) != ids or len(ids) != hedef_n:
@@ -626,6 +636,8 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
                     oturdu = not galeri_sorun(g, son, alt, hedef_n)
                     son_g[0] = g if oturdu else None
                     log(f"  [{n + 1}/{len(adimlar)}] sira kontrolu: {'oturdu (sira POST yok)' if oturdu else galeri_sorun(g, son, alt, hedef_n)[:2]}")
+                if not oturdu:
+                    K.d["sira_post"] = True; K.yaz(ids)   # devam bu adimi yeniden kosarsa bag yine yazilir
                 for gecis in ((1, 2) if not oturdu else ()):   # kapak_yukle_78 (28 Eyl): rank cagrisi bazen oturmuyor; bir kez daha, sonra DUR
                     for s in range(1, hedef_n + 1):
                         api.post_file(f"/shops/{shop}/listings/{lid}/images",
@@ -639,6 +651,8 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
                 if a[0] == "sira" or son_g[0] is None:
                     son_g[0] = None
                     log(f"  [{n + 1}/{len(adimlar)}] sira + alt metin")
+                if a[0] == "sira_kontrol" and K.d.get("sira_post"):   # rank yazimi renk bagini siler (19 Eyl): bag EN SONDA yeniden
+                    bag_yaz(n)
             K.d["adim"] = n + 1; K.d["bekleyen"] = None; K.yaz(ids)
     except SystemExit as e:   # etsy_common "DUR: kota ...": o istek gonderilmeden durur; devam kosusu uzlastirir
         if not str(e.code).startswith("DUR: kota"):

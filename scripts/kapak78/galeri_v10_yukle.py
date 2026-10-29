@@ -94,6 +94,14 @@ class Onbellek:
     def _kapat(self):
         self.acik = False; self._c.clear()
 
+    kapat = _kapat   # eski78 devam: kapi okumalari canli (29 Eki inceleme O3)
+
+    def post(self, *a, **k):
+        self._kapat(); return self._a.post(*a, **k)
+
+    def put_json(self, *a, **k):
+        self._kapat(); return self._a.put_json(*a, **k)
+
     def delete(self, *a, **k):
         self._kapat(); return self._a.delete(*a, **k)
 

@@ -257,6 +257,24 @@ def main():
     g6 = sorted(sh6[lid].img, key=lambda x: x["rank"])
     kontrol("yalin: rank yok sayilirsa sira_kontrol sira + alt metin yazar, PASS", rc == 0 and R["sayilar"].get("PASS") == 2
             and [x["alt_text"] for x in g6][0].startswith("Aquarius and Aquarius") and len(g6) == 10)
+    # 29 Eki inceleme Y1: rank yok sayilir + sira POST'u renk bagini siler -> bag sira'dan sonra yeniden yazilir, PASS
+    o8 = t0 / "o8"; o8.mkdir(); sh8 = {k: sahte(k) for k in ILAN}
+    for x in sh8.values():
+        x.rank_yut = True; x.sira_bag_sil = True
+    api8 = T10.Coklu(sh8); rc, R = kos(api8, hz, o8); shutil.copyfile(o8 / "PLAN_V11.json", t0 / "PLAN8.json")
+    rc, R = kos(api8, hz, o8, kuru=False, plan=t0 / "PLAN8.json", damga=R["plan_damga"])
+    g8 = sorted(sh8[lid].img, key=lambda x: x["rank"])
+    kontrol("yalin Y1: sira POST'u bag silerse bag yeniden yazilir, PASS, baglar CI 1 MB 7 DB 8 PW 9 WP 10",
+            rc == 0 and R["sayilar"].get("PASS") == 2
+            and {k: {x["listing_image_id"]: x["rank"] for x in g8}.get(v) for k, v in sh8[lid].bag.items()} == L11.RENK_SIRA)
+    # 29 Eki inceleme Y2: bag oturmazsa eski gorseller SILINMEDEN DUR
+    o9 = t0 / "o9"; o9.mkdir(); sh9 = {k: sahte(k) for k in ILAN}
+    for x in sh9.values():
+        x.bag_yut = True
+    api9 = T10.Coklu(sh9); rc, R = kos(api9, hz, o9); shutil.copyfile(o9 / "PLAN_V11.json", t0 / "PLAN9.json")
+    rc, R = kos(api9, hz, o9, kuru=False, plan=t0 / "PLAN9.json", damga=R["plan_damga"])
+    ilk9 = sh9[lid]
+    kontrol(f"yalin Y2: bag oturmazsa DUR, eski gorsel silinmez (silinen {len(ilk9.silinenler)})", rc != 0 and not ilk9.silinenler)
     # yalin: silmeler sirasinda kota kesintisi -> devam kosusu kaldigi yerden (cift yukleme yok)
     o7 = t0 / "o7"; o7.mkdir(); sh7 = {k: sahte(k) for k in ILAN}
     api7 = T10.Coklu(sh7); rc, R = kos(api7, hz, o7); shutil.copyfile(o7 / "PLAN_V11.json", t0 / "PLAN7.json"); pd7 = R["plan_damga"]

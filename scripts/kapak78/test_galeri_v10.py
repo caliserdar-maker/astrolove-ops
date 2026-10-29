@@ -161,8 +161,8 @@ class Coklu:
     def get(self, path, params=None, ok404=False):
         return self._cagir("get", path, params, ok404)
 
-    def delete(self, path):
-        return self._cagir("delete", path)
+    def delete(self, path, ok404=False):
+        return self._cagir("delete", path, ok404=ok404)
 
     def post_file(self, path, files=None, data=None, tekrar=3):
         return self._cagir("post_file", path, files=files, data=data, tekrar=tekrar)

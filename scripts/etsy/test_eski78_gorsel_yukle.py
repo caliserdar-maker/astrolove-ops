@@ -131,8 +131,11 @@ class Sahte:
             return {"results": []}
         return dict(state=self.state, title="T", tags=["a"], description="D")
 
-    def delete(self, path):
-        self._k(); iid = int(path.rsplit("/", 1)[1]); self.yaz.append(("sil", iid)); self.silinenler.append(iid)
+    def delete(self, path, ok404=False):
+        self._k(); iid = int(path.rsplit("/", 1)[1])
+        if ok404 and all(x["listing_image_id"] != iid for x in self.img):
+            self.yaz.append(("sil404", iid)); return None
+        self.yaz.append(("sil", iid)); self.silinenler.append(iid)
         self.bag = {k: v for k, v in self.bag.items() if v != iid}   # bagli gorsel silinince bag cozulur (cl_galeri faz1)
         self.img = [x for x in self.img if x["listing_image_id"] != iid]
         self._iz()
