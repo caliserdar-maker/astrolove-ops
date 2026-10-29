@@ -1,0 +1,56 @@
+name: galeri-v11-yedek-indir
+# Galeri v11 B1 yedek, 2. asama (Merkez 29 Eki). ETSY API YOK, Etsy kilidi YOK (KILIT SURESI: indirme kilitsiz ayri is akisinda).
+# Girdi Drive TEMP/POSTER_GALERI_V11_YEDEK/<damga>/ (galeri-v11-yedek-oku ciktisi, GALERI.json). Gorseller (url_fullxfull) ve videolar
+# (video_url) etsystatic CDN'den ayni klasore: r<rank>_<id>.jpg, video_<id>.mp4, OZET.md (--immutable: mevcut dosya degismez).
+# Kod scripts/kapak78/galeri_v11_yedek_indir.py.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      damga: {description: "TEMP/POSTER_GALERI_V11_YEDEK/<damga> (oku kosusu)", required: true}
+jobs:
+  indir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Girdi kapisi
+        env: {D: "${{ inputs.damga }}"}
+        run: '[[ "$D" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0 requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: GALERI.json (Drive)
+        env: {D: "${{ inputs.damga }}"}
+        run: |
+          set -euo pipefail
+          mkdir -p _y
+          rclone copy "gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V11_YEDEK/$D" _y --include "*/GALERI.json" --transfers 8 -q
+          echo "GALERI.json: $(find _y -name GALERI.json | wc -l)"
+      - name: Indir + kontrol (CDN)
+        run: python3 -I scripts/kapak78/galeri_v11_yedek_indir.py --in _y
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        env: {D: "${{ inputs.damga }}"}
+        run: |
+          set -euo pipefail
+          rclone copy _y "gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V11_YEDEK/$D" --immutable --transfers 8 -q
+          echo "Cikti: TEMP/POSTER_GALERI_V11_YEDEK/$D ($(find _y -type f | wc -l) dosya)" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ -f _y/OZET.md ] && sed -n 3p _y/OZET.md >> "$GITHUB_STEP_SUMMARY" || true
+      - if: always()
+        run: rm -rf _y ~/.config/rclone

@@ -1,0 +1,68 @@
+name: galeri-v11-yedek-oku
+# Galeri v11 B1 yedek, 1. asama (Merkez 29 Eki, plan v2 adim 5c). ETSY SALT OKUMA (yazma yontemleri kapali), Etsy kilidi ile.
+# KILIT SURESI (Serdar 23 Eki): bu kosu yalniz Etsy okur (ilan basina 3 GET) ve JSON'u Drive'a yazar; dosya indirme kilitsiz
+# galeri-v11-yedek-indir.yml'de. Cikti Drive TEMP/POSTER_GALERI_V11_YEDEK/<damga>/ (<ilan>_<CIFT>/GALERI.json, OKUMA.csv, OKUMA.md).
+# Kod scripts/etsy/galeri_v11_yedek_oku.py. Kota: ilan basina api.kota_kapisi (KOTA_SINIRI 10).
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      sadece: {description: "virgullu listing_id (bos = 78 ilan)", required: false, default: ""}
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 160
+    steps:
+      - name: Girdi kapisi
+        env: {S: "${{ inputs.sadece }}"}
+        run: '[[ "$S" =~ ^([0-9]+(,[0-9]+)*)?$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+      - name: Oku (salt okuma)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          S: ${{ inputs.sadece }}
+        run: python3 scripts/etsy/galeri_v11_yedek_oku.py --ciftler data/pod/pod78_ids.csv --out _out --sadece "$S"
+      - name: Token geri yaz + cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          TOKEN_RC=0; OUT_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
+          if ls _out/* >/dev/null 2>&1; then
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V11_YEDEK/${DAMGA:?}" --immutable -q && echo "Cikti: TEMP/POSTER_GALERI_V11_YEDEK/$DAMGA" | tee -a "$GITHUB_STEP_SUMMARY" || OUT_RC=1
+            [ -f _out/OKUMA.md ] && head -4 _out/OKUMA.md >> "$GITHUB_STEP_SUMMARY" || true
+          fi
+          [ "$TOKEN_RC" = 0 ] && [ "$OUT_RC" = 0 ] || exit 1
+      - if: always()
+        run: rm -rf _work _out ~/.config/rclone
