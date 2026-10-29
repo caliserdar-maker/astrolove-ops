@@ -1,0 +1,77 @@
+name: galeri-v11-tasi
+# Galeri v11 B2 (Merkez 29 Eki, plan v2 adim 5a): Canva disa aktarim linklerinden Drive'a TASIMA. ETSY YOK.
+# Girdi Drive TEMP/WA_V11_CANVA/<canva_damga>/CANVA.tsv + METIN_KAPI.tsv (bicim TEMP/WA_V11_BELGE/WA_V11_TSV_BICIM.md; yol adiyla).
+# Imzali URL yalniz TSV'de: is akisi girdisine / loga / repoya girmez (galeri_tasi ::add-mask:: ile maskeler).
+# Cikti Drive TEMP/POSTER_GALERI_V11/<damga>/<CIFT>_W01_KAPAK|W07_MB|W08_DB|W09_PW|W10_WP.jpg + OZET.md + MANIFEST.csv + IMZA.csv.
+# hedef_damga doluysa mevcut klasore eklenir (gruplar; mevcut dosyalar yalniz okunur, yeni dosyalar --immutable).
+# Ayri kilit grubu galeri-v11 (ayni klasore iki tasima ayni anda yazmaz; Etsy kosularini beklemez). scripts/kapak78/galeri_tasi.py --urun v11
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      canva_damga: {description: "TEMP/WA_V11_CANVA/<damga> (CANVA.tsv + METIN_KAPI.tsv; _ONAYLI soneki olabilir)", required: true}
+      hedef_damga: {description: "bos = yeni klasor; dolu (YYYYMMDD_HHMMSS) = mevcut klasore ekle", required: false, default: ""}
+jobs:
+  tasi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Girdi kapisi
+        env: {CD: "${{ inputs.canva_damga }}", HD: "${{ inputs.hedef_damga }}"}
+        run: '[[ "$CD" =~ ^[0-9]{8}_[0-9]{4,6}(_ONAYLI)?$ && "$HD" =~ ^([0-9]{8}_[0-9]{6})?$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - name: Sira kilidi (iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py --grup galeri-v11 --zaman-asimi-dk 15
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: TSV + METIN_KAPI + mevcut klasor (Drive)
+        env: {CD: "${{ inputs.canva_damga }}", HD: "${{ inputs.hedef_damga }}"}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _mevcut _yeni
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WA_V11_CANVA/$CD/CANVA.tsv" _work/CANVA.tsv -q
+          rclone copyto "gdrive:ASTROLOVE/TEMP/WA_V11_CANVA/$CD/METIN_KAPI.tsv" _work/METIN_KAPI.tsv -q
+          echo "CANVA satir: $(grep -c . _work/CANVA.tsv) | METIN_KAPI satir: $(grep -c . _work/METIN_KAPI.tsv)"
+          if [ -n "$HD" ]; then
+            K="gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V11/$HD"
+            rclone lsjson "$K" --max-depth 1 >/dev/null || { echo "::error::hedef klasor yok: POSTER_GALERI_V11/$HD"; exit 1; }
+            rclone copy "$K" _mevcut --include "*_W[0-9][0-9]_*.jpg" --include "MANIFEST.csv" --include "IMZA.csv" --max-depth 1 --transfers 8 -q
+            echo "mevcut: $(ls _mevcut/*.jpg 2>/dev/null | wc -l) jpg"
+            echo "DAMGA=$HD" >> "$GITHUB_ENV"
+          else
+            echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+          fi
+      - name: Indir + kontrol
+        run: python3 -I scripts/kapak78/galeri_tasi.py --urun v11 --tsv _work/CANVA.tsv --metin-kapi _work/METIN_KAPI.tsv --klasor _mevcut --yeni _yeni --ciftler data/pod/pod78_ids.csv
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          K="gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V11/${DAMGA:?}"
+          if ls _yeni/*.jpg >/dev/null 2>&1; then
+            rclone copy _yeni "$K" --include "*.jpg" --max-depth 1 --immutable --transfers 8 -q
+          fi
+          for f in OZET.md MANIFEST.csv IMZA.csv; do [ -f "_yeni/$f" ] && rclone copyto "_yeni/$f" "$K/$f" -q; done
+          echo "Cikti: TEMP/POSTER_GALERI_V11/${DAMGA} (yeni jpg: $(ls _yeni/*.jpg 2>/dev/null | wc -l))" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ -f _yeni/OZET.md ] && head -40 _yeni/OZET.md >> "$GITHUB_STEP_SUMMARY" || true
+      - if: always()
+        run: rm -rf _work _mevcut _yeni ~/.config/rclone

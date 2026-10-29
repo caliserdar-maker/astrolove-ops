@@ -14,7 +14,16 @@ Tamlik 78 x 6 + 2 = 470: eksikler listelenir, eksik olmasi FAIL degil. Satir FAI
   (cift, design_id) [METIN_KAPI'da kart_no sutunu varsa (cift, kart_no, design_id)] bir PASS satiriyla ayni degilse FAIL (ORTAK dahil). Link suresi satir basina: X-Amz-Date + X-Amz-Expires - simdi < 5 dk -> indirilmez, SURE_AZ (yeniden disa
   aktarma listesi); parametre yoksa FAIL. Imza tekrari: IMZA.csv (design_id, sha256(X-Amz-Date + imza); ham imza yazilmaz) klasorde;
   ayni tasarim icin onceki kosudaki imza aynen donerse satir DUR (onbellek dongusu yok); dosya zaten klasordeyse (ayni design_id) ATLA.
-  SURE_AZ / DUR da cikis 1. Satir kayitlari (FAIL / SURE_AZ / DUR) MANIFEST'te satir<n>:<ad> anahtariyla (dosya satirindan ayri)."""
+  SURE_AZ / DUR da cikis 1. Satir kayitlari (FAIL / SURE_AZ / DUR) MANIFEST'te satir<n>:<ad> anahtariyla (dosya satirindan ayri).
+--urun v11 (poster galeri v11, Merkez 29 Eki; bicim Drive TEMP/WA_V11_BELGE/WA_V11_TSV_BICIM.md): yd'nin ayni korumalari, farklari:
+  CANVA.tsv basligi zorunlu: cift, ad, design_id, sayfa, url, url_bitis_utc. ad W01_KAPAK | W07_MB | W08_DB | W09_PW | W10_WP ->
+  <CIFT>_<ad>.jpg (cift pod78 listesinde; ORTAK yok). sayfa W01 / W07 / W08 = 1, W09 = 2, W10 = 3. Hepsi JPEG 3000x2250.
+  Link kalan suresi = min(url_bitis_utc, varsa X-Amz-Date + X-Amz-Expires) - simdi; < 5 dk SURE_AZ; url_bitis_utc okunamazsa FAIL.
+  Imza ozeti: X-Amz-Signature varsa sha256(X-Amz-Date + imza), yoksa sha256(url); ham deger yazilmaz.
+  METIN_KAPI.tsv (cift, ad, design_id, ust_satir, cift_satiri, etiket_yok, durum): (cift, ad, design_id) satiri durum PASS olmali VE
+  alanlar yeniden denetlenir: ust_satir = ad icin beklenen metin, cift_satiri = "<A> & <B>" (pod78 a, b), etiket_yok = 1; degilse FAIL.
+  Tamlik: Canva kartlari 78 x 5 = 390. W02, W03, W05, W06 (cifte ozel) ve ORTAK W04 bilgi karti toplu uretiminden gelir; dosya adi
+  bicimi belgede yok -> tamlikta "UYGULANAMAZ" yazilir (Serdar'a soruldu), klasorde W01/W07-W10 disi jpg FAIL degil, BILINMEYEN."""
 import argparse
 import calendar
 import csv
@@ -148,6 +157,88 @@ def metin_kapi_oku(yol):
     return kapi, kartli
 
 
+V11_AD = ("W01_KAPAK", "W07_MB", "W08_DB", "W09_PW", "W10_WP")
+V11_SAYFA = {"W01_KAPAK": "1", "W07_MB": "1", "W08_DB": "1", "W09_PW": "2", "W10_WP": "3"}
+V11_UST = {"W01_KAPAK": "Personalized Zodiac Couple Gift", "W07_MB": "Midnight Blue", "W08_DB": "Deep Black", "W09_PW": "Pure White",
+           "W10_WP": "Warm Parchment"}
+V11_TSV_ALAN = ["cift", "ad", "design_id", "sayfa", "url", "url_bitis_utc"]
+V11_MK_ALAN = ["cift", "ad", "design_id", "ust_satir", "cift_satiri", "etiket_yok", "durum"]
+V11_AD_RX = re.compile(r"^(?P<c>[A-Z]+_[A-Z]+)_(?P<k>W01_KAPAK|W07_MB|W08_DB|W09_PW|W10_WP)\.jpg$")
+
+
+def iso_utc(t):
+    """'2026-10-29T14:00:00Z' / '+00:00' -> epoch sn; okunamazsa None"""
+    t = (t or "").strip()
+    try:
+        if t.endswith("Z"):
+            t = t[:-1] + "+00:00"
+        from datetime import datetime, timezone
+        d = datetime.fromisoformat(t)
+        if d.tzinfo is None or d.utcoffset().total_seconds() != 0:
+            return None
+        return d.astimezone(timezone.utc).timestamp()
+    except ValueError:
+        return None
+
+
+def v11_tsv(yol):
+    """CANVA.tsv: baslik zorunlu (V11_TSV_ALAN); her satir bu sutunlarla. -> satirlar, hata kayitlari"""
+    out, hata = [], []
+    rd = list(csv.reader(open(yol, encoding="utf-8-sig"), delimiter="\t"))
+    for r in rd:
+        for c in r:
+            if c.strip().lower().startswith("http"):
+                maskele(c.strip())
+    if not rd or [c.strip() for c in rd[0]] != V11_TSV_ALAN:
+        return [], [dict(ad="baslik", cift="-", kart_no="-", design_id="-", boyut="-", sha256="-",
+                         durum=f"FAIL CANVA.tsv basligi {V11_TSV_ALAN} degil")]
+    for n, r in enumerate(rd[1:], 2):
+        r = [c.strip() for c in r]
+        if not any(r):
+            continue
+        if len(r) != len(V11_TSV_ALAN) or not r[4].lower().startswith("http"):
+            hata.append(dict(ad=f"satir{n}", cift=r[0][:30] if r else "-", kart_no="-", design_id="-", boyut="-", sha256="-",
+                             durum=f"FAIL TSV satiri {len(r)} sutun / url 5. sutunda degil"))
+            continue
+        out.append(dict(zip(V11_TSV_ALAN, r), satir=n))
+    return out, hata
+
+
+def v11_metin_kapi(yol, ciftab):
+    """METIN_KAPI.tsv -> {(cift, ad, design_id): neden ('' = PASS)}; alanlar yeniden denetlenir."""
+    rows = list(csv.DictReader(open(yol, encoding="utf-8-sig"), delimiter="\t"))
+    if not rows or [c.strip() for c in rows[0].keys()] != V11_MK_ALAN:
+        raise SystemExit(f"FAIL: METIN_KAPI.tsv basligi {V11_MK_ALAN} degil")
+    kapi = {}
+    for r in rows:
+        r = {k.strip(): (v or "").strip() for k, v in r.items()}
+        c, ad = r["cift"].upper(), r["ad"]
+        n = []
+        if r["durum"] != "PASS":
+            n.append(f"durum {r['durum'] or '-'}")
+        if ad not in V11_UST:
+            n.append(f"ad {ad[:12]}")
+        elif r["ust_satir"] != V11_UST[ad]:
+            n.append(f"ust_satir '{r['ust_satir'][:40]}' != '{V11_UST[ad]}'")
+        if c not in ciftab:
+            n.append("cift pod78 listesinde yok")
+        elif r["cift_satiri"] != f"{ciftab[c][0]} & {ciftab[c][1]}":
+            n.append(f"cift_satiri '{r['cift_satiri'][:40]}' != '{ciftab[c][0]} & {ciftab[c][1]}'")
+        if r["etiket_yok"] != "1":
+            n.append(f"etiket_yok {r['etiket_yok'] or '-'} (1 beklenir)")
+        k = (c, ad, r["design_id"])
+        kapi[k] = "; ".join(n) if k not in kapi else "METIN_KAPI'da ayni (cift, ad, design_id) iki satir"
+    return kapi
+
+
+def v11_sure(url, bitis, simdi):
+    """-> (kalan sn | None, imza ozeti)"""
+    b = iso_utc(bitis)
+    k_amz, iz = link_suresi(url, simdi)
+    kalan = None if b is None else (b - simdi if k_amz is None else min(b - simdi, k_amz))
+    return kalan, iz or hashlib.sha256(url.encode()).hexdigest()
+
+
 def link_suresi(url, simdi):
     """S3 imzali link: kalan sn = X-Amz-Date + X-Amz-Expires - simdi; imza ozeti = sha256(X-Amz-Date + X-Amz-Signature).
     Parametre eksikse (None, None)."""
@@ -167,12 +258,14 @@ def main(argv=None):
     ap.add_argument("--klasor", required=True, help="mevcut Drive klasorunun yerel yansisi (yalniz okunur; bos olabilir)")
     ap.add_argument("--yeni", required=True, help="bu kosuda eklenen dosyalar + OZET.md + MANIFEST.csv")
     ap.add_argument("--ciftler", required=True, help="data/pod/pod78_ids.csv (poster) | data/pod/yd78_ids.csv (yd)")
-    ap.add_argument("--urun", choices=("poster", "yd"), default="poster")
-    ap.add_argument("--metin-kapi", default="", help="yd: METIN_KAPI.tsv (zorunlu)")
+    ap.add_argument("--urun", choices=("poster", "yd", "v11"), default="poster")
+    ap.add_argument("--metin-kapi", default="", help="yd / v11: METIN_KAPI.tsv (zorunlu)")
     ap.add_argument("--simdi", type=float, default=None, help="test: epoch sn (varsayilan saat)")
     a = ap.parse_args(argv)
     if a.urun == "yd":
         return main_yd(a)
+    if a.urun == "v11":
+        return main_v11(a)
     klasor, yeni = pathlib.Path(a.klasor), pathlib.Path(a.yeni)
     klasor.mkdir(parents=True, exist_ok=True); yeni.mkdir(parents=True, exist_ok=True)
     ciftler = {r["cift"].strip() for r in csv.DictReader(open(a.ciftler, encoding="utf-8-sig")) if r.get("cift")}
@@ -421,6 +514,160 @@ def main_yd(a):
         fh.write(f"## Eksik ({len(eksik)})\n" + ("".join(f"- {c_}: Y{', Y'.join(k_)}\n" for c_, k_ in sorted(ek.items())) or "- yok\n"))
     print(f"OZET: gecerli {len(beklenen) - len(eksik)}/{len(beklenen)} | YENI {say('YENI')} ATLA {say('ATLA')} FAIL {len(satir_fail)} "
           f"SURE_AZ {len(sure_az)} DUR {len(dur)} | eksik {len(eksik)}", flush=True)
+    return 1 if satir_fail or sure_az or dur else 0
+
+
+def main_v11(a):
+    """--urun v11: Canva kartlari <CIFT>_W01_KAPAK / W07_MB / W08_DB / W09_PW / W10_WP (Merkez 29 Eki, WA_V11_TSV_BICIM.md)."""
+    klasor, yeni = pathlib.Path(a.klasor), pathlib.Path(a.yeni)
+    klasor.mkdir(parents=True, exist_ok=True); yeni.mkdir(parents=True, exist_ok=True)
+    if not a.metin_kapi:
+        print("FAIL: --urun v11 icin --metin-kapi METIN_KAPI.tsv zorunlu"); return 1
+    ciftab = {r["cift"].strip(): (r["a"].strip(), r["b"].strip()) for r in csv.DictReader(open(a.ciftler, encoding="utf-8-sig")) if r.get("cift")}
+    kapi = v11_metin_kapi(a.metin_kapi, ciftab)
+    eski_manifest = {}
+    if (klasor / "MANIFEST.csv").exists():
+        eski_manifest = {r["ad"]: r for r in csv.DictReader(open(klasor / "MANIFEST.csv", encoding="utf-8"))}
+    imza_eski = {}
+    if (klasor / "IMZA.csv").exists():
+        for r in csv.DictReader(open(klasor / "IMZA.csv", encoding="utf-8")):
+            imza_eski.setdefault(r["design_id"], set()).add(r["imza_ozet"])
+    imza_yeni, kosu = [], os.environ.get("GITHUB_RUN_ID", "yerel")
+    mevcut, bilinmeyen = {}, []
+    for p in sorted(klasor.glob("*.jpg")):
+        if not V11_AD_RX.match(p.name):
+            bilinmeyen.append(p.name); continue                 # bilgi kartlari (W02-W06) / kontak: ad bicimi belgede yok
+        b = p.read_bytes(); f, bt = resim(b)
+        mevcut[p.name] = (sha(b), f"{bt[0]}x{bt[1]}" if bt else "-")
+    satir, fail, sure_az, dur = {}, [], [], []
+    rows, fail_tsv = v11_tsv(a.tsv)
+    fail += fail_tsv
+    for v in fail_tsv:
+        print(f"{v['ad']} {v['durum']}", flush=True)
+    if not rows and not fail_tsv:
+        print("FAIL: CANVA.tsv'de gecerli satir yok"); return 1
+    goruldu = set()
+    for n, r in enumerate(rows, 1):
+        c, adk = r["cift"].upper(), r["ad"]
+        ad = f"{c}_{adk}.jpg" if adk in V11_AD and c in ciftab else None
+        kayit0 = dict(ad=f"satir{r['satir']}:{ad}" if ad else f"satir{r['satir']}", cift=c[:30], kart_no=adk[:12],
+                      design_id=r["design_id"][:40], boyut="-", sha256="-")
+        if adk not in V11_AD:
+            neden = f"ad {adk[:12]} (W01_KAPAK, W07_MB, W08_DB, W09_PW, W10_WP)"
+        elif c not in ciftab:
+            neden = "cift pod78 listesinde yok"
+        elif r["sayfa"] != V11_SAYFA[adk]:
+            neden = f"sayfa {r['sayfa'][:4]} != {V11_SAYFA[adk]}"
+        elif ad in goruldu:
+            neden = "TSV'de ayni ad iki satir"
+        elif (c, adk, r["design_id"]) not in kapi:
+            neden = "METIN_KAPI'da (cift, ad, design_id) satiri yok"
+        elif kapi[(c, adk, r["design_id"])]:
+            neden = "METIN_KAPI: " + kapi[(c, adk, r["design_id"])]
+        else:
+            neden = None
+        if ad:
+            goruldu.add(ad)
+        kalan, iz = v11_sure(r["url"], r["url_bitis_utc"], time.time() if a.simdi is None else a.simdi)
+        imza_yeni.append(dict(design_id=f"{r['design_id'][:40]}#{r['sayfa'][:4]}", imza_ozet=iz, kosu=kosu))
+        if not neden and kalan is None:
+            neden = "url_bitis_utc okunamadi (ISO 8601 UTC)"
+        if neden:
+            fail.append(dict(kayit0, durum=f"FAIL {neden}"))
+            print(f"[{n}/{len(rows)}] {kayit0['ad']} FAIL {neden}", flush=True); continue
+        dk = f"{r['design_id']}#{r['sayfa']}"
+        if iz in imza_eski.get(dk, set()) and ad in mevcut and mevcut[ad][1] == "3000x2250" \
+                and eski_manifest.get(ad, {}).get("design_id") == r["design_id"]:
+            satir.setdefault(ad, dict(kayit0, ad=ad, cift=c, kart_no=adk, design_id=r["design_id"], boyut=mevcut[ad][1], sha256=mevcut[ad][0],
+                                      durum="ATLA (dosya mevcut, ayni imza; indirilmedi)"))
+            print(f"[{n}/{len(rows)}] {ad} ATLA dosya mevcut (ayni imza)", flush=True); continue
+        if iz in imza_eski.get(dk, set()):
+            dur.append(dict(kayit0, durum="DUR ayni imza onceki kosuda (onbellek linki; yeniden disa aktar)"))
+            print(f"[{n}/{len(rows)}] {ad} DUR ayni imza", flush=True); continue
+        if kalan < SURE_ALT:
+            sure_az.append(dict(kayit0, durum=f"SURE_AZ kalan {int(kalan // 60)} dk (< {SURE_ALT // 60}); indirilmedi"))
+            print(f"[{n}/{len(rows)}] {ad} SURE_AZ kalan {int(kalan)} sn", flush=True); continue
+        try:
+            veri = indir(r["url"])
+        except urllib.error.HTTPError as e:
+            neden = f"HTTP {e.code}" + (" (link suresi dolmus olabilir)" if e.code == 403 else "")
+        except Exception as e:  # noqa: BLE001
+            neden = f"indirme {type(e).__name__}"
+        if neden:
+            fail.append(dict(kayit0, durum=f"FAIL {neden}"))
+            print(f"[{n}/{len(rows)}] {ad} FAIL {neden}", flush=True); continue
+        h = sha(veri); f, bt = resim(veri)
+        boyut = f"{bt[0]}x{bt[1]}" if bt else "-"
+        kayit = dict(kayit0, ad=ad, cift=c, kart_no=adk, design_id=r["design_id"], boyut=boyut, sha256=h)
+        if not (veri[:3] == b"\xff\xd8\xff" and f == "JPEG"):
+            durum = f"FAIL JPEG degil ({f or 'okunamadi'})"
+        elif bt != HEDEF:
+            durum = f"FAIL boyut {boyut} != 3000x2250"
+        elif ad in mevcut or ad in satir:
+            onceki = mevcut[ad][0] if ad in mevcut else satir[ad]["sha256"]
+            durum = "ATLA (ayni ad, ayni sha256)" if onceki == h else "FAIL ayni ad, farkli sha256 (uzerine yazilmaz)"
+        else:
+            cak = [x for x, (s_, _) in mevcut.items() if s_ == h] + [x for x, v in satir.items() if v["sha256"] == h]
+            durum = f"FAIL sha256 baska adla ayni: {cak[0]}" if cak else "YENI"
+        if durum == "YENI":
+            (yeni / ad).write_bytes(veri)
+            satir[ad] = dict(kayit, durum=durum)
+        elif durum.startswith("ATLA"):
+            satir.setdefault(ad, dict(kayit, durum=durum))
+        else:
+            fail.append(dict(kayit, ad=kayit0["ad"], durum=durum))
+        print(f"[{n}/{len(rows)}] {ad} {f} {boyut} {durum}", flush=True)
+    hepsi = {}
+    for ad_, (h, bt) in mevcut.items():
+        m = V11_AD_RX.match(ad_); e = eski_manifest.get(ad_, {})
+        ok = m.group("c") in ciftab and bt == "3000x2250"
+        hepsi[ad_] = dict(ad=ad_, cift=m.group("c"), kart_no=m.group("k"), design_id=e.get("design_id", ""), boyut=bt, sha256=h,
+                          durum="MEVCUT" if ok else f"FAIL klasordeki dosya ({'cift' if m.group('c') not in ciftab else 'boyut ' + bt})")
+    for ad_, v in satir.items():
+        if v["durum"] == "YENI" or ad_ not in hepsi:
+            hepsi[ad_] = v
+        elif v["durum"].startswith("ATLA"):
+            hepsi[ad_] = dict(hepsi[ad_], design_id=hepsi[ad_]["design_id"] or v["design_id"], durum=v["durum"])
+    sha_ad = {}
+    for v in hepsi.values():
+        sha_ad.setdefault(v["sha256"], []).append(v["ad"])
+    for h, adlar in sha_ad.items():
+        if len(adlar) > 1:
+            for x in adlar:
+                hepsi[x]["durum"] = f"FAIL sha256 {len(adlar)} adda ayni: {', '.join(sorted(adlar))}"
+    beklenen = [f"{c}_{k}.jpg" for c in sorted(ciftab) for k in V11_AD]
+    gecerli_ad = {x for x, v in hepsi.items() if not v["durum"].startswith("FAIL")}
+    eksik = [x for x in beklenen if x not in gecerli_ad]
+    tum = sorted(hepsi.values(), key=lambda v: v["ad"]) + fail + sure_az + dur
+    with open(yeni / "MANIFEST.csv", "w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=ALAN); w.writeheader(); w.writerows({k: v.get(k, "") for k in ALAN} for v in tum)
+    gor = set()
+    with open(yeni / "IMZA.csv", "w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=IMZA_ALAN); w.writeheader()
+        eski_satir = list(csv.DictReader(open(klasor / "IMZA.csv", encoding="utf-8"))) if (klasor / "IMZA.csv").exists() else []
+        for r in eski_satir + imza_yeni:
+            k = (r["design_id"], r["imza_ozet"])
+            if k not in gor:
+                gor.add(k); w.writerow({x: r.get(x, "") for x in IMZA_ALAN})
+    satir_fail = [v for v in tum if v["durum"].startswith("FAIL")]
+    say = lambda s_: sum(1 for v in tum if v["durum"].startswith(s_))  # noqa: E731
+    with open(yeni / "OZET.md", "w", encoding="utf-8") as fh:
+        fh.write(f"# Poster galeri v11 tasima (Canva)\n\nKlasordeki gecerli Canva karti {len(beklenen) - len(eksik)} / {len(beklenen)} "
+                 f"(78 cift x 5: W01, W07-W10) | bu kosu: YENI {say('YENI')}, ATLA {say('ATLA')}, FAIL {len(satir_fail)}, "
+                 f"SURE_AZ {len(sure_az)}, DUR {len(dur)}\n"
+                 f"Tam set 78 x 9 + ORTAK W04 = 703: W02, W03, W04, W05, W06 tamligi UYGULANAMAZ (bilgi karti dosya adi bicimi belgede yok)"
+                 f" | klasorde W01/W07-W10 disi jpg {len(bilinmeyen)} (BILINMEYEN, denetlenmedi)\n\n")
+        if satir_fail:
+            fh.write("## FAIL\n" + "".join(f"- {v['ad']}: {v['durum'][5:]}\n" for v in satir_fail) + "\n")
+        if sure_az or dur:
+            fh.write("## Yeniden disa aktar (SURE_AZ / DUR)\n"
+                     + "".join(f"- {v['cift']} {v['kart_no']} {v['design_id']}: {v['durum']}\n" for v in sure_az + dur) + "\n")
+        ek = {}
+        for x in eksik:
+            m = V11_AD_RX.match(x); ek.setdefault(m.group("c"), []).append(m.group("k")[:3])
+        fh.write(f"## Eksik ({len(eksik)})\n" + ("".join(f"- {c_}: {', '.join(k_)}\n" for c_, k_ in sorted(ek.items())) or "- yok\n"))
+    print(f"OZET: gecerli {len(beklenen) - len(eksik)}/{len(beklenen)} | YENI {say('YENI')} ATLA {say('ATLA')} FAIL {len(satir_fail)} "
+          f"SURE_AZ {len(sure_az)} DUR {len(dur)} | eksik {len(eksik)} | bilinmeyen {len(bilinmeyen)}", flush=True)
     return 1 if satir_fail or sure_az or dur else 0
 
 
