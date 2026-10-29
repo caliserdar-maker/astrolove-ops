@@ -1,6 +1,6 @@
 name: galeri-v11-yedek-oku
 # Galeri v11 B1 yedek, 1. asama (Merkez 29 Eki, plan v2 adim 5c). ETSY SALT OKUMA (yazma yontemleri kapali), Etsy kilidi ile.
-# KILIT SURESI (Serdar 23 Eki): bu kosu yalniz Etsy okur (ilan basina 3 GET) ve JSON'u Drive'a yazar; dosya indirme kilitsiz
+# KILIT SURESI (Serdar 23 Eki): bu kosu yalniz Etsy okur (ilan basina 4 GET) ve JSON'u Drive'a yazar; dosya indirme kilitsiz
 # galeri-v11-yedek-indir.yml'de. Cikti Drive TEMP/POSTER_GALERI_V11_YEDEK/<damga>/ (<ilan>_<CIFT>/GALERI.json, OKUMA.csv, OKUMA.md).
 # Kod scripts/etsy/galeri_v11_yedek_oku.py. Kota: ilan basina api.kota_kapisi (KOTA_SINIRI 10).
 permissions:

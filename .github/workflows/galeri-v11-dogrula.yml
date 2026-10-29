@@ -1,0 +1,80 @@
+name: galeri-v11-dogrula
+# Galeri v11 canli dogrulama (Merkez 29 Eki: pilot 4570110121 ve kalan 77 sonrasi). ETSY API YOK, Etsy kilidi YOK.
+# Canli okuma once galeri-v11-yedek-oku ile (Etsy kilidiyle, ilan basina 4 GET: images, variation-images, videos, listing state);
+# bu is akisi o okumanin GALERI.json'larindan gorselleri CDN'den indirir (galeri_v11_yedek_indir.py; 9 gorsel kontrolu v10 icindir,
+# sonucu yok sayilir) ve scripts/kapak78/galeri_v11_dogrula.py ile 10 gorsel / sira / alt metin / renk baglari / state / video /
+# sha256 (yukleme kaydi = kaynak) / NCC kimlik (esiksiz argmax) kapilarini kosar.
+# Cikti: TEMP/POSTER_GALERI_V11_YUKLE/DOGRULA/<run_id>/ (DOGRULA.md, .csv, .json); indirilen gorseller okuma klasorune --immutable.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      damga: {description: "TEMP/POSTER_GALERI_V11_YEDEK/<damga> (yukleme SONRASI galeri-v11-yedek-oku)", required: true}
+      yukle_kosu: {description: "virgullu galeri-v11-yukle kosu no (KOSU/<kosu>/SONRA_*.json)", required: true}
+      galeri_damga: {description: "TEMP/POSTER_GALERI_V11/<damga> (W01 / W07-W10)", required: true, default: "20261029_103607"}
+      kart_kosu: {description: "TEMP/POSTER_GALERI_V11/<galeri_damga>/W02_W06/<kosu>", required: true, default: "40879133310"}
+      sadece: {description: "virgullu listing_id (bos = okumadaki tum ilanlar)", required: false, default: ""}
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Girdi kapisi
+        env: {D: "${{ inputs.damga }}", K: "${{ inputs.yukle_kosu }}", G: "${{ inputs.galeri_damga }}", W: "${{ inputs.kart_kosu }}", S: "${{ inputs.sadece }}"}
+        run: '[[ "$D" =~ ^[0-9]{8}_[0-9]{6}$ && "$G" =~ ^[0-9]{8}_[0-9]{6}$ && "$K" =~ ^[0-9]+(,[0-9]+)*$ && "$W" =~ ^[0-9]+$ && "$S" =~ ^([0-9]+(,[0-9]+)*)?$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0 numpy==2.1.3 requests==2.34.2
+          sudo apt-get install -y -qq rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Girdiler (Drive)
+        env: {D: "${{ inputs.damga }}", K: "${{ inputs.yukle_kosu }}", G: "${{ inputs.galeri_damga }}", W: "${{ inputs.kart_kosu }}"}
+        run: |
+          set -euo pipefail
+          T=gdrive:ASTROLOVE/TEMP; mkdir -p _y _s _g _k _o
+          rclone copy "$T/POSTER_GALERI_V11_YEDEK/$D" _y --include "*/GALERI.json" --transfers 8 -q
+          for k in ${K//,/ }; do rclone copy "$T/POSTER_GALERI_V11_YUKLE/KOSU/$k" "_s/$k" --include "SONRA_*.json" -q; done
+          find _y -name GALERI.json | sed 's#.*/[0-9]*_\([A-Z_]*\)/GALERI.json#\1#' | sort -u > _ciftler.txt
+          sed 's/$/_W*.jpg/' _ciftler.txt > _g.txt
+          rclone copy "$T/POSTER_GALERI_V11/$G" _g --include-from _g.txt --max-depth 1 --transfers 8 -q
+          { sed 's/$/_W*.jpg/' _ciftler.txt; echo "ORTAK_W04_FORMAT.jpg"; } > _k.txt
+          rclone copy "$T/POSTER_GALERI_V11/$G/W02_W06/$W" _k --include-from _k.txt --max-depth 1 --transfers 8 -q
+          echo "GALERI.json $(find _y -name GALERI.json | wc -l) | SONRA $(find _s -name 'SONRA_*.json' | wc -l) | galeri $(ls _g | wc -l) | kart $(ls _k | wc -l)"
+      - name: Indir (CDN)
+        run: python3 -I scripts/kapak78/galeri_v11_yedek_indir.py --in _y || echo "indirme ozeti v10 (9 gorsel) kurali; dogrulama asagida"
+      - name: Dogrula
+        env: {S: "${{ inputs.sadece }}"}
+        run: |
+          set -euo pipefail
+          SA=(); for d in _s/*/; do SA+=(--sonra "$d"); done
+          [ -n "$S" ] || S=$(find _y -name GALERI.json | sed 's#.*/\([0-9]*\)_[A-Z_]*/GALERI.json#\1#' | sort -u | paste -sd,)
+          set +e; python3 scripts/kapak78/galeri_v11_dogrula.py --canli _y "${SA[@]}" --galeri _g --kart _k --alt data/pod/galeri_v11_alt.csv \
+            --ciftler data/pod/pod78_ids.csv --sadece "$S" --out _o; RC=$?; set -e
+          echo "RC=$RC" >> "$GITHUB_ENV"
+      - name: Drive'a yaz
+        if: always()
+        env: {D: "${{ inputs.damga }}"}
+        run: |
+          set -euo pipefail
+          T=gdrive:ASTROLOVE/TEMP
+          [ -d _y ] && rclone copy _y "$T/POSTER_GALERI_V11_YEDEK/$D" --immutable --transfers 8 -q || true
+          [ -d _o ] && rclone copy _o "$T/POSTER_GALERI_V11_YUKLE/DOGRULA/${GITHUB_RUN_ID}" -q
+          echo "Cikti: TEMP/POSTER_GALERI_V11_YUKLE/DOGRULA/${GITHUB_RUN_ID}" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ -f _o/DOGRULA.md ] && cat _o/DOGRULA.md >> "$GITHUB_STEP_SUMMARY" || true
+          [ "${RC:-1}" = 0 ] || { echo "::error::dogrulama PASS degil"; exit 1; }
+      - if: always()
+        run: rm -rf _y _s _g _k _o ~/.config/rclone

@@ -2,9 +2,9 @@
 """Galeri v11 B1 yedek, KILITLI ETSY SALT OKUMA asamasi (Merkez 29 Eki, plan v2 adim 5c). ETSY'YE YAZMA YOK.
 KILIT SURESI (Serdar 23 Eki): bu kosu yalniz Etsy okur ve JSON yazar; gorsel / video dosyalari kilitsiz ayri is akisinda
 (galeri-v11-yedek-indir.yml, scripts/kapak78/galeri_v11_yedek_indir.py) CDN'den indirilir.
-Ilan listesi --ciftler (data/pod/pod78_ids.csv: listing_id, cift). Ilan basina once api.kota_kapisi, sonra 3 GET:
+Ilan listesi --ciftler (data/pod/pod78_ids.csv: listing_id, cift). Ilan basina once api.kota_kapisi, sonra 4 GET:
   /listings/{id}/images (kimlik, rank, alt metin, url_fullxfull, boyut), /shops/{shop}/listings/{id}/variation-images (renk baglari),
-  /listings/{id}/videos (video kimligi, video_url). Yazma yontemleri kapali (yd_envanter_oku.salt_okur: GET disi DUR).
+  /listings/{id}/videos (video kimligi, video_url), /listings/{id} (state, title; 29 Eki v11 canli dogrulama). Yazma yontemleri kapali (yd_envanter_oku.salt_okur: GET disi DUR).
 Kontrol (yalniz rapor; okuma durmaz): 9 gorsel, rank 1..9 tekil, 5 renk bagi property 200 (5 ad, tekil, bagli gorsel galeride),
 v10 baglari MB->1 DB->6 PW->7 CI->8 WP->9, video 1.
 Cikti <out>/: <ilan>_<CIFT>/GALERI.json (gorseller, baglar, videolar; galeri_v10_liste.yedek_oku ile ayni anahtarlar),
@@ -25,14 +25,15 @@ RENKLER = ("Midnight Blue", "Deep Black", "Pure White", "Champagne Ivory", "Warm
 V10_SIRA = {"Midnight Blue": 1, "Deep Black": 6, "Pure White": 7, "Champagne Ivory": 8, "Warm Parchment": 9}
 GORSEL_ALAN = ("rank", "listing_image_id", "alt_text", "url_fullxfull", "full_width", "full_height")
 VIDEO_ALAN = ("video_id", "video_url", "thumbnail_url", "width", "height", "video_state")
-ISTEK_ILAN = 3
+ISTEK_ILAN = 4
 
 
 def oku(api, shop, lid):
     img = sorted((api.get(f"/listings/{lid}/images", ok404=True) or {}).get("results") or [], key=lambda y: y.get("rank") or 0)
     vi = (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or []
     vid = (api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or []
-    return dict(gorseller=[{k: g.get(k) for k in GORSEL_ALAN} for g in img],
+    il = api.get(f"/listings/{lid}", ok404=True) or {}   # 29 Eki: v11 canli dogrulama state okur (galeri_v11_dogrula.py)
+    return dict(ilan={k: il.get(k) for k in ("state", "title", "last_modified_timestamp")}, gorseller=[{k: g.get(k) for k in GORSEL_ALAN} for g in img],
                 baglar=[{k: b.get(k) for k in ("property_id", "value_id", "value", "image_id")} for b in vi],
                 videolar=[{k: v.get(k) for k in VIDEO_ALAN} for v in vid])
 

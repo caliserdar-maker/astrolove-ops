@@ -33,7 +33,7 @@ class Sahte:
         self.calls, self.remaining, self.yol, self.bozuk = 0, kota, [], bozuk or {}
 
     def kota_kapisi(self, ne=""):
-        if self.remaining - 3 < 10:
+        if self.remaining - 4 < 10:
             raise SystemExit(f"DUR: kota {self.remaining} ({ne})")
 
     def _call(self, method, path, *a, **k):
@@ -51,6 +51,8 @@ class Sahte:
         if path.endswith("/videos"):
             return dict(results=[] if self.bozuk.get(lid) == "video" else [dict(video_id=b, video_url=f"https://v.etsystatic.com/v/{b}.mp4",
                                                                                  thumbnail_url="t", width=1080, height=1920, video_state="active")])
+        if path.rstrip("/").endswith(f"/listings/{lid}"):
+            return dict(state="active", title="T", last_modified_timestamp=1)
         raise AssertionError(path)
 
     def get(self, path, params=None, ok404=False):
@@ -71,16 +73,16 @@ def oku_testi(d):
     api = Sahte(bozuk={"4570110641": "bag", "4570111111": "video"}); salt_okur(api)
     a = SimpleNamespace(ciftler=str(ciftler(d)), out=str(d / "o"), sadece="")
     rc = O.calistir(api, "shop", a)
-    kontrol("oku: cikis 0, 9 istek (3 ilan x 3 GET)", rc == 0 and api.calls == 9 and all(m == "GET" for m, _ in api.yol))
+    kontrol("oku: cikis 0, 12 istek (3 ilan x 4 GET)", rc == 0 and api.calls == 12 and all(m == "GET" for m, _ in api.yol))
     j = json.loads((d / "o/4570110121_AQUARIUS_AQUARIUS/GALERI.json").read_text())
     kontrol("oku: GALERI.json rank sirali, alt metin + url + boyut, 5 bag, 1 video",
             [g["rank"] for g in j["gorseller"]] == list(range(1, 10)) and j["gorseller"][0]["alt_text"] == "alt 1"
             and len(j["baglar"]) == 5 and j["videolar"][0]["video_id"] == 12100 and "hex_code" not in j["gorseller"][0])
     r = {x["listing_id"]: x for x in csv.DictReader(open(d / "o/OKUMA.csv"))}
     kontrol("oku: UYGUN / SAPMA (bag sirasi, video yok)", r["4570110121"]["durum"] == "UYGUN" and "v10 sirasinda" in r["4570110641"]["neden"]
-            and "video 0" in r["4570111111"]["neden"] and r["4570110121"]["istek"] == "3")
+            and "video 0" in r["4570111111"]["neden"] and r["4570110121"]["istek"] == "4")
     md = (d / "o/OKUMA.md").read_text()
-    kontrol("oku: OKUMA.md istek ve kota", "istek (api.calls, bu kosu) 9" in md and "kalan kota 991" in md)
+    kontrol("oku: OKUMA.md istek ve kota", "istek (api.calls, bu kosu) 12" in md and "kalan kota 988" in md)
     try:
         api.post("/x"); ok = False
     except SystemExit:
