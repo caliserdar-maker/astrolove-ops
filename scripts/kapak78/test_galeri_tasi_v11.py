@@ -115,17 +115,19 @@ class V11Test(unittest.TestCase):
         self.mk([("ARIES_LEO", "W01_KAPAK", "DKAR", MK["W01_KAPAK"], "Aries & Leo", "1", "FAIL"),
                  ("ARIES_LIBRA", "W07_MB", "DMAR", "Midnight blue", "Aries & Libra", "1", "PASS"),
                  ("ARIES_PISCES", "W08_DB", "DRAR", "Deep Black", "Pisces & Aries", "1", "PASS"),
-                 ("ARIES_SCORPIO", "W10_WP", "DRAR", "Warm Parchment", "Aries & Scorpio", "0", "PASS")])
+                 ("ARIES_SCORPIO", "W10_WP", "DRAR", "Warm Parchment", "Aries & Scorpio", "0", "PASS"),
+                 ("ARIES_TAURUS", "W01_KAPAK", "DKAT", MK["W01_KAPAK"], "ARIES & TAURUS", "1", "PASS")])
         rc, log, m, rows = self.kos([self.satir("ARIES_LEO", "W01_KAPAK", "v1"), self.satir("ARIES_LIBRA", "W07_MB", "v2"),
                                      self.satir("ARIES_PISCES", "W08_DB", "v3"), self.satir("ARIES_SCORPIO", "W10_WP", "v4"),
-                                     self.satir("CANCER_LIBRA", "W01_KAPAK", "v5", did="BASKA")])
+                                     self.satir("CANCER_LIBRA", "W01_KAPAK", "v5", did="BASKA"), self.satir("ARIES_TAURUS", "W01_KAPAK", "v6", did="DKAT")])
         self.assertEqual(rc, 1)
         self.assertIn("durum FAIL", m["ARIES_LEO_W01_KAPAK.jpg"]["durum"])
         self.assertIn("ust_satir", m["ARIES_LIBRA_W07_MB.jpg"]["durum"])
         self.assertIn("cift_satiri", m["ARIES_PISCES_W08_DB.jpg"]["durum"])
         self.assertIn("etiket_yok 0", m["ARIES_SCORPIO_W10_WP.jpg"]["durum"])
         self.assertIn("satiri yok", m["CANCER_LIBRA_W01_KAPAK.jpg"]["durum"])
-        self.assertFalse(list(self.yeni.glob("*.jpg")))
+        self.assertEqual(m["ARIES_TAURUS_W01_KAPAK.jpg"]["durum"], "YENI")          # buyuk harf cift satiri kabul (tasarim)
+        self.assertEqual([p.name for p in self.yeni.glob("*.jpg")], ["ARIES_TAURUS_W01_KAPAK.jpg"])
 
     def test_05_sure(self):
         rc, log, m, _ = self.kos([self.satir("CANCER_LIBRA", "W01_KAPAK", "v1", sn=299),               # url_bitis 299 sn

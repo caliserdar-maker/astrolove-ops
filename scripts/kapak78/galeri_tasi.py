@@ -21,7 +21,8 @@ Tamlik 78 x 6 + 2 = 470: eksikler listelenir, eksik olmasi FAIL degil. Satir FAI
   Link kalan suresi = min(url_bitis_utc, varsa X-Amz-Date + X-Amz-Expires) - simdi; < 5 dk SURE_AZ; url_bitis_utc okunamazsa FAIL.
   Imza ozeti: X-Amz-Signature varsa sha256(X-Amz-Date + imza), yoksa sha256(url); ham deger yazilmaz.
   METIN_KAPI.tsv (cift, ad, design_id, ust_satir, cift_satiri, etiket_yok, durum): (cift, ad, design_id) satiri durum PASS olmali VE
-  alanlar yeniden denetlenir: ust_satir = ad icin beklenen metin, cift_satiri = "<A> & <B>" (pod78 a, b), etiket_yok = 1; degilse FAIL.
+  alanlar yeniden denetlenir: ust_satir = ad icin beklenen metin, cift_satiri = "<A> & <B>" (pod78 a, b; buyuk-kucuk harf duyarsiz, sira
+  duyarli: tasarim buyuk harf yaziyor, 29 Eki P1), etiket_yok = 1; degilse FAIL.
   Tamlik: Canva kartlari 78 x 5 = 390. W02, W03, W05, W06 (cifte ozel) ve ORTAK W04 bilgi karti toplu uretiminden gelir; dosya adi
   bicimi belgede yok -> tamlikta "UYGULANAMAZ" yazilir (Serdar'a soruldu), klasorde W01/W07-W10 disi jpg FAIL degil, BILINMEYEN."""
 import argparse
@@ -222,7 +223,7 @@ def v11_metin_kapi(yol, ciftab):
             n.append(f"ust_satir '{r['ust_satir'][:40]}' != '{V11_UST[ad]}'")
         if c not in ciftab:
             n.append("cift pod78 listesinde yok")
-        elif r["cift_satiri"] != f"{ciftab[c][0]} & {ciftab[c][1]}":
+        elif " ".join(r["cift_satiri"].split()).upper() != f"{ciftab[c][0]} & {ciftab[c][1]}".upper():   # tasarim buyuk harf (CANCER & LIBRA); sira denetlenir
             n.append(f"cift_satiri '{r['cift_satiri'][:40]}' != '{ciftab[c][0]} & {ciftab[c][1]}'")
         if r["etiket_yok"] != "1":
             n.append(f"etiket_yok {r['etiket_yok'] or '-'} (1 beklenir)")
