@@ -1,6 +1,6 @@
 name: galeri-v11-tasi
 # Galeri v11 B2 (Merkez 29 Eki, plan v2 adim 5a): Canva disa aktarim linklerinden Drive'a TASIMA. ETSY YOK.
-# Girdi Drive TEMP/WA_V11_CANVA/<canva_damga>/CANVA.tsv + METIN_KAPI.tsv (bicim TEMP/WA_V11_BELGE/WA_V11_TSV_BICIM.md; yol adiyla).
+# Girdi Drive TEMP/WA_V11_CANVA/<canva_damga>/CANVA.tsv + METIN_KAPI.tsv (_ONAYLI soneki: onayli CANCER_LIBRA ornegi, METIN_KAPI yok, --onayli-ornek) (bicim TEMP/WA_V11_BELGE/WA_V11_TSV_BICIM.md; yol adiyla).
 # Imzali URL yalniz TSV'de: is akisi girdisine / loga / repoya girmez (galeri_tasi ::add-mask:: ile maskeler).
 # Cikti Drive TEMP/POSTER_GALERI_V11/<damga>/<CIFT>_W01_KAPAK|W07_MB|W08_DB|W09_PW|W10_WP.jpg + OZET.md + MANIFEST.csv + IMZA.csv.
 # hedef_damga doluysa mevcut klasore eklenir (gruplar; mevcut dosyalar yalniz okunur, yeni dosyalar --immutable).
@@ -49,8 +49,13 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work _mevcut _yeni
           rclone copyto "gdrive:ASTROLOVE/TEMP/WA_V11_CANVA/$CD/CANVA.tsv" _work/CANVA.tsv -q
-          rclone copyto "gdrive:ASTROLOVE/TEMP/WA_V11_CANVA/$CD/METIN_KAPI.tsv" _work/METIN_KAPI.tsv -q
-          echo "CANVA satir: $(grep -c . _work/CANVA.tsv) | METIN_KAPI satir: $(grep -c . _work/METIN_KAPI.tsv)"
+          if [[ "$CD" == *_ONAYLI ]]; then
+            echo "MK=--onayli-ornek" >> "$GITHUB_ENV"; echo "onayli ornek: METIN_KAPI yok, yalniz CANCER_LIBRA"
+          else
+            rclone copyto "gdrive:ASTROLOVE/TEMP/WA_V11_CANVA/$CD/METIN_KAPI.tsv" _work/METIN_KAPI.tsv -q
+            echo "MK=--metin-kapi _work/METIN_KAPI.tsv" >> "$GITHUB_ENV"
+          fi
+          echo "CANVA satir: $(grep -c . _work/CANVA.tsv)"
           if [ -n "$HD" ]; then
             K="gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V11/$HD"
             rclone lsjson "$K" --max-depth 1 >/dev/null || { echo "::error::hedef klasor yok: POSTER_GALERI_V11/$HD"; exit 1; }
@@ -61,7 +66,7 @@ jobs:
             echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
           fi
       - name: Indir + kontrol
-        run: python3 -I scripts/kapak78/galeri_tasi.py --urun v11 --tsv _work/CANVA.tsv --metin-kapi _work/METIN_KAPI.tsv --klasor _mevcut --yeni _yeni --ciftler data/pod/pod78_ids.csv
+        run: python3 -I scripts/kapak78/galeri_tasi.py --urun v11 --tsv _work/CANVA.tsv $MK --klasor _mevcut --yeni _yeni --ciftler data/pod/pod78_ids.csv
       - name: Drive'a yaz
         if: ${{ always() }}
         run: |

@@ -179,6 +179,18 @@ class V11Test(unittest.TestCase):
         self.assertEqual(rc, 1)
         self.assertIn("TSV'de ayni ad iki satir", " | ".join(r["durum"] for r in rows))
 
+    def test_10_onayli_ornek(self):
+        self.kapi.unlink()
+        self.tsv.write_text("cift\tad\tdesign_id\tsayfa\turl\turl_bitis_utc\n" + "".join("\t".join(map(str, r)) + "\n" for r in [
+            self.satir("CANCER_LIBRA", "W01_KAPAK", "v1"), self.satir("AQUARIUS_ARIES", "W07_MB", "v2")]))
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = G.main(["--tsv", str(self.tsv), "--klasor", str(self.klasor), "--yeni", str(self.yeni), "--ciftler", str(CIFTLER),
+                         "--urun", "v11", "--onayli-ornek", "--simdi", str(SIMDI)])
+        m = {r["ad"].split(":", 1)[-1]: r for r in csv.DictReader(open(self.yeni / "MANIFEST.csv"))}
+        self.assertEqual(rc, 1)
+        self.assertEqual(m["CANCER_LIBRA_W01_KAPAK.jpg"]["durum"], "YENI")
+        self.assertIn("yalniz CANCER_LIBRA", m["AQUARIUS_ARIES_W07_MB.jpg"]["durum"])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=1)

@@ -261,6 +261,8 @@ def main(argv=None):
     ap.add_argument("--urun", choices=("poster", "yd", "v11"), default="poster")
     ap.add_argument("--metin-kapi", default="", help="yd / v11: METIN_KAPI.tsv (zorunlu)")
     ap.add_argument("--simdi", type=float, default=None, help="test: epoch sn (varsayilan saat)")
+    ap.add_argument("--onayli-ornek", action="store_true", help="v11: Serdar onayli CANCER_LIBRA ornegi (_ONAYLI klasoru); METIN_KAPI yok, "
+                    "yalniz CANCER_LIBRA satirlari kabul (B3 esik olcumu icin)")
     a = ap.parse_args(argv)
     if a.urun == "yd":
         return main_yd(a)
@@ -521,10 +523,13 @@ def main_v11(a):
     """--urun v11: Canva kartlari <CIFT>_W01_KAPAK / W07_MB / W08_DB / W09_PW / W10_WP (Merkez 29 Eki, WA_V11_TSV_BICIM.md)."""
     klasor, yeni = pathlib.Path(a.klasor), pathlib.Path(a.yeni)
     klasor.mkdir(parents=True, exist_ok=True); yeni.mkdir(parents=True, exist_ok=True)
-    if not a.metin_kapi:
-        print("FAIL: --urun v11 icin --metin-kapi METIN_KAPI.tsv zorunlu"); return 1
     ciftab = {r["cift"].strip(): (r["a"].strip(), r["b"].strip()) for r in csv.DictReader(open(a.ciftler, encoding="utf-8-sig")) if r.get("cift")}
-    kapi = v11_metin_kapi(a.metin_kapi, ciftab)
+    if a.onayli_ornek:                                          # Merkez 29 Eki: onayli ornek 5 gorsel (Serdar "ok"); metin kapisi yerine cift kisiti
+        kapi = None
+    elif not a.metin_kapi:
+        print("FAIL: --urun v11 icin --metin-kapi METIN_KAPI.tsv zorunlu"); return 1
+    else:
+        kapi = v11_metin_kapi(a.metin_kapi, ciftab)
     eski_manifest = {}
     if (klasor / "MANIFEST.csv").exists():
         eski_manifest = {r["ad"]: r for r in csv.DictReader(open(klasor / "MANIFEST.csv", encoding="utf-8"))}
@@ -560,6 +565,8 @@ def main_v11(a):
             neden = f"sayfa {r['sayfa'][:4]} != {V11_SAYFA[adk]}"
         elif ad in goruldu:
             neden = "TSV'de ayni ad iki satir"
+        elif kapi is None:
+            neden = None if c == "CANCER_LIBRA" else "onayli ornek modunda yalniz CANCER_LIBRA"
         elif (c, adk, r["design_id"]) not in kapi:
             neden = "METIN_KAPI'da (cift, ad, design_id) satiri yok"
         elif kapi[(c, adk, r["design_id"])]:
