@@ -1,0 +1,114 @@
+name: kapak-ci-kesim
+# Galeri v11 (Merkez 29 Eki): 78 cift CI (G8) ve PW (G7) poster kesimleri -> kapak-ci-ref-20261029 dali ref/kapak_ci/ (Canva kapak / PW karti girdisi).
+# Kaynak Drive TEMP/POSTER_GALERI_V10/20261026_181944 (yalniz okuma, rclone yol adi). ETSY YOK (Etsy kilidi gerekmez). Kod: scripts/kapak78/kapak_ci_kesim.py.
+# Kapi: 156/156 dosya, 1206x1517, raw.githubusercontent.com 200. Liste Drive TEMP/KAPAK_CI_KESIM/<damga>/KESIM.csv.
+permissions:
+  contents: write
+on:
+  workflow_dispatch:
+    inputs:
+      kaynak_damga: {description: "TEMP/POSTER_GALERI_V10/<damga>", required: true, default: "20261026_181944"}
+jobs:
+  kesim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DAL: kapak-ci-ref-20261029
+    steps:
+      - name: Girdi kapisi
+        env: {KD: "${{ inputs.kaynak_damga }}"}
+        run: '[[ "$KD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: kapak-ci-ref-20261029
+          path: _dal
+          sparse-checkout: ref/kapak_ci
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: pip
+        run: pip install -q pillow==11.0.0 numpy==2.1.3
+      - name: rclone
+        timeout-minutes: 8
+        run: |
+          sudo apt-get -qq install -y rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+          rclone version | head -1
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Kaynak (G7 + G8, yalniz okuma)
+        env: {KD: "${{ inputs.kaynak_damga }}"}
+        run: |
+          set -euo pipefail
+          mkdir -p _g
+          rclone copy "gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V10/$KD" _g --include "*_G7.jpg" --include "*_G8.jpg" --max-depth 1 --transfers 8 -q
+          echo "kaynak: $(ls _g | wc -l) dosya"
+      - name: Kesim
+        run: |
+          set -euo pipefail
+          mkdir -p _dal/ref/kapak_ci _r
+          python3 -I scripts/kapak78/kapak_ci_kesim.py _g data/pod/pod78_ids.csv _dal/ref/kapak_ci _r/KESIM.csv || echo "KESIM_RC=1" >> "$GITHUB_ENV"
+          python3 -c "import csv,collections;print(collections.Counter(r['durum'] for r in csv.DictReader(open('_r/KESIM.csv'))))"
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+      - name: Dala commit
+        run: |
+          set -euo pipefail
+          cd _dal
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A ref/kapak_ci
+          if git diff --cached --quiet; then echo "degisiklik yok"; else
+            git commit -q -m "ref: 78 cift CI (G8) + PW (G7) poster kesimleri 901,601-2107,2118 (kapak-ci-kesim ${GITHUB_RUN_ID})"
+            git push -q origin "HEAD:$DAL"; fi
+          echo "SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Kapi (156 dosya, 1206x1517, raw 200)
+        run: |
+          set -euo pipefail
+          python3 - <<'P'
+          import csv, os, time, urllib.request
+          from PIL import Image
+          R = list(csv.DictReader(open("_r/KESIM.csv"))); repo = os.environ["GITHUB_REPOSITORY"]; dal = os.environ["DAL"]; sha = os.environ["SHA"]
+          def kod(u):
+              try:
+                  return urllib.request.urlopen(urllib.request.Request(u, method="HEAD"), timeout=30).status
+              except Exception as e:                       # noqa: BLE001
+                  return getattr(e, "code", type(e).__name__)
+          for r in R:
+              p = f"_dal/ref/kapak_ci/{r['dosya']}"
+              r["dalda"] = os.path.exists(p); r["boyut_ok"] = r["dalda"] and Image.open(p).size == (1206, 1517)
+              r["raw_dal"] = r["raw_sha"] = ""
+              for i in range(6):
+                  r["raw_dal"] = kod(f"https://raw.githubusercontent.com/{repo}/{dal}/ref/kapak_ci/{r['dosya']}")
+                  r["raw_sha"] = kod(f"https://raw.githubusercontent.com/{repo}/{sha}/ref/kapak_ci/{r['dosya']}")
+                  if r["raw_dal"] == 200 and r["raw_sha"] == 200:
+                      break
+                  time.sleep(10)
+              r["kapi"] = "PASS" if r["durum"] in ("YENI", "AYNI_YENIDEN") and r["boyut_ok"] and r["raw_dal"] == 200 and r["raw_sha"] == 200 else "FAIL"
+          with open("_r/KESIM.csv", "w", newline="") as f:
+              w = csv.DictWriter(f, fieldnames=list(R[0])); w.writeheader(); w.writerows(R)
+          n = sum(r["kapi"] == "PASS" for r in R)
+          print(f"KAPI {n}/{len(R)} PASS; dal commit {sha}")
+          for r in R:
+              if r["kapi"] != "PASS":
+                  print("FAIL", r["dosya"], r["durum"], r["boyut_ok"], r["raw_dal"], r["raw_sha"])
+          open(os.environ["GITHUB_STEP_SUMMARY"], "a").write(f"KAPI {n}/{len(R)} PASS; dal commit {sha}\n")
+          open(os.environ["GITHUB_ENV"], "a").write(f"KAPI_N={n}\n")
+          P
+      - name: Drive'a KESIM.csv
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f _r/KESIM.csv ] || exit 0
+          rclone copy _r "gdrive:ASTROLOVE/TEMP/KAPAK_CI_KESIM/${DAMGA:?}" --immutable -q
+          echo "Drive: TEMP/KAPAK_CI_KESIM/$DAMGA/KESIM.csv" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Sonuc
+        run: '[ "${KAPI_N:-0}" = "156" ] && [ -z "${KESIM_RC:-}" ] || { echo "::error::KAPI ${KAPI_N:-0}/156"; exit 1; }'
+      - if: always()
+        run: rm -rf _g ~/.config/rclone
