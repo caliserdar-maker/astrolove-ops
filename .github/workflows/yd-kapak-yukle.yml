@@ -200,7 +200,8 @@ jobs:
         run: |
           set -uo pipefail
           FAIL=""
-          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "$T/ETSY_TOKEN.json" && echo "Token geri yazildi" || echo "Token yenilenmedi"
+          # ortak betik (3 deneme; basarisizsa ::error:: ve adim FAIL; inceleme 30 Eki madde 6): onceki satir hatayi "yenilenmedi" diye yutuyordu
+          TOKEN_RC=0; bash scripts/etsy/token_geri_yaz.sh _work/ETSY_TOKEN.json "$T/ETSY_TOKEN.json" || TOKEN_RC=1
           [ -f _work/kosu.log ] && python3 scripts/guvenlik/log_suz.py < _work/kosu.log > "_out/kosu_$(date -u +%Y%m%d_%H%M).txt"
           if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:' _out/ 2>/dev/null; then
             echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; exit 1; fi
@@ -217,6 +218,7 @@ jobs:
           fi
           [ -d _out ] && rclone copy _out "$O/KOSU/${GITHUB_RUN_ID}" -q && echo "::notice title=YD KAPAK::Drive TEMP/YD_KAPAK_V1_YUKLE/KOSU/${GITHUB_RUN_ID}/"
           [ -f _out/RAPOR.md ] && head -60 _out/RAPOR.md >> "$GITHUB_STEP_SUMMARY" || true
+          [ "$TOKEN_RC" = 0 ] || { echo "::error::ETSY TOKEN GERI YAZILAMADI"; exit 1; }
           [ -z "$FAIL" ] || { echo "::error::durum dosyasi kapisi FAIL"; exit 1; }
           [ "${KOD:-1}" = 0 ] || { echo "::error::cikis ${KOD:-?}"; exit 1; }
       - if: always()

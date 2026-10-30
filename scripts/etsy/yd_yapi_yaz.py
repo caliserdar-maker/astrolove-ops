@@ -8,9 +8,13 @@ Modlar:
   kontrol        : SALT OKUMA (yazma yontemleri kapali). Ilan basina 3 GET; canli = plan kapisi; ne yazilacagini raporlar.
   yaz            : ETSY'YE YAZAR (--onay SERDAR_YD_YAPI_YAZ). Ilan: kota -> 3 GET -> kapi -> YEDEK_<lid>.json -> envanter PUT ->
                    geri okuma (140 urun, imza, menu sirasi, adet) -> Style bagi (bozulduysa ada gore POST) -> ilan geri okuma (state active).
-                   Herhangi bir adim tutmazsa OTOMATIK GERI ALMA (ham envanter PUT + bag) ve kosu durur.
+                   Herhangi bir adim tutmazsa ya da istek hata verirse (5xx / zaman asimi: PUT Etsy'de uygulanmis olabilir; adim PUT'tan
+                   ONCE yazilan'a girer) OTOMATIK GERI ALMA: canli envanter okunur; ham yedekten farkliysa ham envanter PUT, sonra bag
+                   (ada gore) denetlenir / onarilir; kosu durur. --sadece yoksa --tum zorunlu (pilot once; inceleme 30 Eki madde 7).
   geri-al        : ETSY'YE YAZAR (--onay SERDAR_YD_YAPI_GERI_AL). Plandaki ham yedege doner (15 urun, eski format, baglar).
-  profil         : ETSY'YE YAZAR (--onay SERDAR_YD_PROFIL). PROFIL_PLAN yazim listesi: yalniz ucret 0 (teslim gunleri ayni).
+  profil         : ETSY'YE YAZAR (--onay SERDAR_YD_PROFIL). PROFIL_PLAN yazim listesi: yalniz ucret 0. PUT govdesi CANLI hedeften
+                   kurulur (tasiyici / mail_class / teslim gunleri / hedef aynen; yalniz ucret alanlari degisir). Yazim aninda profili
+                   kullanan ilanlar yeniden taranir (5 durum); YD listesi (--liste) disinda kullanan varsa DUR. Hata -> SONUC.json HATA.
   profil-geri-al : ETSY'YE YAZAR (--onay SERDAR_YD_PROFIL_GERI_AL). Ucretler plandaki eski degerlere.
 Ilan secimi: plandaki ilanlar; --sadece (pilot) ve --haric (plan disi kimlik -> DUR). Secilen ilan plan durumu PLAN ya da ZATEN olmali.
 Plan butunlugu (Etsy isteginden ONCE): KURU_<lid>.json + PLAN.csv ayni; ham envanterden bu kodla (yd_yapi_kuru.envanter_plani)
@@ -21,8 +25,8 @@ Canli = plan kapisi (her ilan, yazmadan once): state active; adet tek; envanter 
 Kota: KOTA_SINIRI 10 (etsy_common; her istekten once sert taban). Ilan esigi: ilana baslamadan ve yazmadan once
   kalan >= ILAN_UST + KOTA_SINIRI; tutmazsa ilana baslanmaz (KOTA, yarim ilan yok).
 Istek (kod sayimi; 5xx / 429 tekrarlari dahil degil): ILAN_TIPIK 7 = okuma 3 + PUT 1 + envanter GET 1 + bag GET 1 + ilan GET 1;
-  ILAN_BAG 9 (bag POST 1 + GET 1); ILAN_UST 22 = okuma 3 + PUT 1 + envanter GET 3 + bag GET 1 + POST 1 + GET 3 + ilan GET 1
-  + otomatik geri alma (PUT 1 + GET 3 + bag GET 1 + POST 1 + GET 3) = 22; kontrol 3.
+  ILAN_BAG 9 (bag POST 1 + GET 1); ILAN_UST 23 = okuma 3 + PUT 1 + envanter GET 3 + bag GET 1 + POST 1 + GET 3 + ilan GET 1
+  + otomatik geri alma (canli envanter GET 1 + PUT 1 + GET 3 + bag GET 1 + POST 1 + GET 3) = 23; kontrol 3.
 Cikti: <out>/SONUC.json, SONUC.csv, OZET.md, YEDEK_<lid>.json."""
 import argparse
 import csv
@@ -44,12 +48,13 @@ ONAY = {"yaz": "SERDAR_YD_YAPI_YAZ", "geri-al": "SERDAR_YD_YAPI_GERI_AL", "profi
 OKUMA, TEKRAR = 3, 3
 ILAN_TIPIK = OKUMA + 1 + 1 + 1 + 1
 ILAN_BAG = ILAN_TIPIK + 2
-GERI_UST = 1 + TEKRAR + 1 + 1 + TEKRAR
+GERI_UST = 1 + 1 + TEKRAR + 1 + 1 + TEKRAR     # canli envanter okuma + PUT + GET + bag
 ILAN_UST = OKUMA + 1 + TEKRAR + 1 + 1 + TEKRAR + 1 + GERI_UST
 BEKLE_SN = 3
 INV_PUT = "/listings/{lid}/inventory?max_variations_supported=3"
 ON_PROP = ("price_on_property", "quantity_on_property", "sku_on_property", "readiness_state_on_property")
-assert (ILAN_TIPIK, ILAN_BAG, ILAN_UST) == (7, 9, 22)
+assert (ILAN_TIPIK, ILAN_BAG, ILAN_UST) == (7, 9, 23)
+VARSAYILAN_LISTE = KOK.parents[1] / "data/pod/yd78_ids.csv"     # yd_yapi_kuru --liste varsayilani (profil kullanan taramasi)
 
 
 class Kayma(Exception):
@@ -215,8 +220,8 @@ def bag_kur(api, shop, lid, inv1, hedef_bag, R_):
     istek = [{"property_id": pid, "value_id": vid[(pid, a)], "image_id": img} for pid, a, img in hedef_bag if (pid, a) in vid]
     if len(istek) != len(hedef_bag):
         raise Fail(f"Style bagi eslesmesi kurulamadi {len(istek)}/{len(hedef_bag)}")
+    R_["yazilan"].append("bag")     # istekten ONCE (envanter_yaz ile ayni)
     api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": istek})
-    R_["yazilan"].append("bag")
     _, ok = tekrar_oku(lambda: (api.get(f"/shops/{shop}/listings/{lid}/variation-images", ok404=True) or {}).get("results") or [],
                        lambda v: K.baglar(inv1, v)[0] == hedef_bag)
     if not ok:
@@ -224,9 +229,10 @@ def bag_kur(api, shop, lid, inv1, hedef_bag, R_):
 
 
 def envanter_yaz(api, lid, govde, kaynak, pid, R_, ad):
-    """PUT (?max_variations_supported=3) + geri okuma (imza, adet, menu). -> canli envanter."""
-    api.put_json(INV_PUT.format(lid=lid), govde)
+    """PUT (?max_variations_supported=3) + geri okuma (imza, adet, menu). -> canli envanter.
+    Adim PUT'tan ONCE yazilan'a girer: Etsy PUT'u uygulayip 5xx / zaman asimi dondurse de otomatik geri alma kosar (inceleme 30 Eki 1)."""
     R_["yazilan"].append(ad)
+    api.put_json(INV_PUT.format(lid=lid), govde)
     q = adetler(govde)
     inv1, ok = tekrar_oku(lambda: api.get(f"/listings/{lid}/inventory") or {},
                           lambda x: imza(x) == imza(kaynak) and adetler(x) == q)
@@ -242,6 +248,18 @@ def geri_al_ilan(api, shop, lid, k, q, R_):
     ham = k["envanter_ham_yedek"]
     inv1 = envanter_yaz(api, lid, adet_uygula(geri_govde(ham), q), ham, None, R_, "geri_envanter")
     bag_kur(api, shop, lid, inv1, [tuple(x) for x in k["bag_ad"]], R_)
+
+
+def geri_al_gerekirse(api, shop, lid, k, q, R_):
+    """Otomatik geri alma: canli envanter okunur (GET 1). Ham yedekle ayni (imza + menu) ise envanter PUT yok, yalniz bag denetlenir /
+    onarilir; farkliysa ham envanter PUT + bag (geri_al_ilan). -> sonuc metni | Fail."""
+    ham = k["envanter_ham_yedek"]
+    inv_c = api.get(f"/listings/{lid}/inventory") or {}
+    if imza(inv_c) == imza(ham) and menu_ham(inv_c) == menu_ham(ham):
+        bag_kur(api, shop, lid, inv_c, [tuple(x) for x in k["bag_ad"]], R_)
+        return "TAMAM (canli envanter ham yedekle ayni; envanter PUT yok, bag denetlendi)"
+    geri_al_ilan(api, shop, lid, k, q, R_)
+    return "TAMAM"
 
 
 def ilan_yaz(api, shop, lid, k, geri, out, kontrol):
@@ -292,10 +310,9 @@ def ilan_yaz(api, shop, lid, k, geri, out, kontrol):
         R_.update(sonuc="TAMAM")
     except (Exception, SystemExit) as e:   # noqa: BLE001  (SystemExit: HTTP hatasi / kota tabani)
         R_.update(sonuc="FAIL", neden=f"{type(e).__name__}: {str(e)[:300]}", iz=traceback.format_exc()[-800:])
-        if not geri and R_["yazilan"]:     # otomatik geri alma: ham envanter + baglar
+        if not geri and R_["yazilan"]:     # otomatik geri alma: canli ham'dan farkliysa ham envanter + baglar
             try:
-                geri_al_ilan(api, shop, lid, k, s["adet"], R_)
-                R_["geri_alma"] = "TAMAM"
+                R_["geri_alma"] = geri_al_gerekirse(api, shop, lid, k, s["adet"], R_)
             except (Exception, SystemExit) as e2:   # noqa: BLE001
                 R_["geri_alma"] = f"FAIL {type(e2).__name__}: {str(e2)[:200]} (YEDEK_{lid}.json ile geri-al)"
     R_.update(istek=api.calls - R_["istek_once"], kota_sonra=api.remaining)
@@ -303,8 +320,31 @@ def ilan_yaz(api, shop, lid, k, geri, out, kontrol):
 
 
 # ------------------------------------------------------------------ profil
-def profil(api, shop, pplan, geri):
-    """PROFIL_PLAN yazim listesi: yalniz ucret (0 / eski); teslim gunleri ve diger hedefler ayni kalir."""
+GOVDE_SABIT = ("min_delivery_days", "max_delivery_days")
+
+
+def hedef_govde(d, primary, secondary):
+    """updateShippingProfileDestination govdesi CANLI hedeften: ucret disi alanlar aynen (inceleme 30 Eki 4).
+    shipping_carrier_id 0 / bos = Etsy varsayilani (tasiyici secilmemis): gonderilmez; doluysa mail_class ile birlikte gonderilir."""
+    g = {"primary_cost": primary, "secondary_cost": secondary}
+    g.update({x: d[x] for x in GOVDE_SABIT if d.get(x) is not None})
+    if d.get("shipping_carrier_id"):
+        g.update(shipping_carrier_id=d["shipping_carrier_id"], mail_class=d.get("mail_class"))
+    if d.get("destination_country_iso"):
+        g["destination_country_iso"] = d["destination_country_iso"]
+    else:
+        g["destination_region"] = d.get("destination_region") or "none"
+    return g
+
+
+def liste_ids(yol):
+    with open(yol, encoding="utf-8-sig") as f:
+        return {r["listing_id"].strip() for r in csv.DictReader(f) if (r.get("listing_id") or "").strip()}
+
+
+def profil(api, shop, pplan, geri, yd_ids):
+    """PROFIL_PLAN yazim listesi: yalniz ucret (0 / eski); teslim gunleri, tasiyici ve diger hedefler ayni kalir.
+    yd_ids: YD ilan listesi; yazim aninda profili bu liste disinda kullanan ilan varsa DUR (kuru plandan sonra eklenmis olabilir)."""
     if pplan.get("durum") == "UCRETSIZ":
         return {"sonuc": "ZATEN", "neden": "plan: tum hedefler ucretsiz"}
     if pplan.get("durum") != "YAZILACAK" or pplan.get("hata") or pplan.get("yd78_disi_kullanan"):
@@ -333,13 +373,19 @@ def profil(api, shop, pplan, geri):
         return {"sonuc": "ZATEN"}
     if any(ucret(h0[i]) not in (once[i], sonra[i]) for i in yaz):
         return {"sonuc": "ATLANDI_KAYMA", "neden": "ucret plan once / sonra degil"}
+    if not kota_yeter(api, len(K.DURUMLAR) + len(yaz) + 1):
+        return {"sonuc": "KOTA", "neden": f"kalan {api.remaining}"}
+    kim = K.kullananlar(api, shop, P)          # yazim aninda yeniden tarama (kuru plan eski olabilir; inceleme 30 Eki 4)
+    disari = sorted({x for x, _ in kim} - set(yd_ids))
+    if disari:
+        return {"sonuc": "DUR", "neden": f"profili YD listesi disinda {len(disari)} ilan kullaniyor ({disari[:5]}); yazim yok",
+                "yd_disi_kullanan": disari}
     if not kota_yeter(api, len(yaz) + 1):
         return {"sonuc": "KOTA", "neden": f"kalan {api.remaining}"}
-    for i, y in yaz.items():
+    for i in yaz:
         if ucret(h0[i]) == sonra[i]:
             continue
-        g = dict(y["govde"], primary_cost=sonra[i][0], secondary_cost=sonra[i][1])   # profil_ucretsiz.py kalibi
-        api.put(f"/shops/{shop}/shipping-profiles/{P}/destinations/{i}", g)
+        api.put(f"/shops/{shop}/shipping-profiles/{P}/destinations/{i}", hedef_govde(h0[i], *sonra[i]))
     h1 = hd(api.get(f"/shops/{shop}/shipping-profiles/{P}") or {})
     bek = {i: (sabit(ref[i]), sonra[i] if i in yaz else ucret(ref[i])) for i in ref}
     gel = {i: (sabit(d), ucret(d)) for i, d in h1.items()}
@@ -356,8 +402,12 @@ def calis(api, shop, a, out):
     if kontrol:
         K.K.salt_okur(api)
     if a.mod in ("profil", "profil-geri-al"):
-        pplan = json.loads((pathlib.Path(a.plan) / "PROFIL_PLAN.json").read_text(encoding="utf-8"))
-        r = profil(api, shop, pplan, a.mod == "profil-geri-al")
+        try:
+            pplan = json.loads((pathlib.Path(a.plan) / "PROFIL_PLAN.json").read_text(encoding="utf-8"))
+            r = profil(api, shop, pplan, a.mod == "profil-geri-al", liste_ids(a.liste))
+        except (Exception, SystemExit) as e:   # noqa: BLE001  (HTTP hatasi / kota tabani / plan DUR): SONUC.json yine yazilir
+            r = {"sonuc": "HATA", "neden": f"{type(e).__name__}: {str(getattr(e, 'code', None) or e)[:300]}",
+                 "iz": traceback.format_exc()[-800:]}
         r.update(mod=a.mod, plan_damga=a.plan_damga, istek=api.calls, kota=api.remaining)
         (out / "SONUC.json").write_text(json.dumps(r, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
         print(f"::notice::SONUC {r['sonuc']} {a.mod} istek {api.calls} kota {api.remaining}", flush=True)
@@ -408,6 +458,8 @@ def argumanlar(argv=None):
     ap.add_argument("--sadece", default="")
     ap.add_argument("--haric", default="")
     ap.add_argument("--onay", default="")
+    ap.add_argument("--tum", action="store_true", help="yaz: --sadece olmadan plandaki tum ilanlar (pilot sonrasi, acik secim)")
+    ap.add_argument("--liste", default=str(VARSAYILAN_LISTE), help="profil: YD ilan listesi (kullanan taramasi)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
     if not re.fullmatch(r"\d+", a.plan_damga) or pathlib.Path(a.plan).name != f"KURU_{a.plan_damga}":
@@ -417,6 +469,8 @@ def argumanlar(argv=None):
             raise SystemExit("DUR: --sadece / --haric virgullu listing_id olmali")
     if a.mod != "kontrol" and a.onay != ONAY[a.mod]:
         raise SystemExit(f"DUR: {a.mod} icin onay sozcugu yok / yanlis (yazim yok)")
+    if a.mod == "yaz" and not a.sadece and not a.tum:
+        raise SystemExit("DUR: yaz icin --sadece (pilot) ya da acik --tum gerekli (yazim yok)")
     return a
 
 

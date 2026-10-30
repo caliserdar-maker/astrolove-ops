@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""galeri_v11_dogrula.py sahte veriyle: PASS, yer degisen gorsel, alt metin, bag, state, sha. Pillow 11.0.0."""
+"""galeri_v11_dogrula.py sahte veriyle: PASS, yer degisen gorsel, alt metin, bag, state, sha. Pillow 11.0.0.
+Inceleme 30 Eki madde 5: v11b_or_ci (ilan basina 10 / 4 ya da 11 / 5, rank 11 CI bagli + CI alt metni)."""
 import csv
 import hashlib
 import json
@@ -50,7 +51,7 @@ def kur(t):
 
 
 def kos(t, lid, profil="v11"):
-    ek = ["--profil", "v11b", "--b1", str(t / "b1")] if profil == "v11b" else []
+    ek = ["--profil", profil, "--b1", str(t / "b1")] if profil in ("v11b", "v11b_or_ci") else []
     return D.main(ek + ["--canli", str(t / "c"), "--sonra", str(t / "s"), "--galeri", str(t / "g"), "--kart", str(t / "k"),
                    "--alt", str(KOK / "data/pod/galeri_v11_alt.csv"), "--ciftler", str(KOK / "data/pod/pod78_ids.csv"),
                    "--sadece", lid, "--out", str(t / "o")])
@@ -89,6 +90,22 @@ def main():
         (b1 / "GALERI.json").write_text(json.dumps(dict(gorseller=[dict(rank=1, listing_image_id=9001, alt_text="eski MB kapak metni")])))
         (c / "GALERI.json").write_text(json.dumps(j))
         kontrol("v11b: CI bagi var (5 bag) -> FAIL", kos(t, lid, "v11b") == 1)
+        # v11b_or_ci: 10 gorsel / 4 bag (v11b) PASS; 11 gorsel, rank 11 CI alt metni + CI bagi 11 PASS; bozuklar FAIL
+        (c / "GALERI.json").write_text(json.dumps(jb))
+        kontrol("v11b_or_ci: 10 gorsel / 4 bag (v11b ilani) -> PASS", kos(t, lid, "v11b_or_ci") == 0)
+        r = next(csv.DictReader(open(KOK / "data/pod/pod78_ids.csv", encoding="utf-8-sig")))
+        ci_alt = L.alt_metin({11: next(x for x in csv.DictReader(open(KOK / "data/pod/galeri_ci11_alt.csv", encoding="utf-8-sig"))
+                                       if x["sira"] == "11")}, r["a"], r["b"])[11]
+        jc = json.loads(json.dumps(jb)); jc["gorseller"].append(dict(rank=11, listing_image_id=9011, alt_text=ci_alt))
+        jc["baglar"].append(dict(property_id=200, value="Champagne Ivory", image_id=9011))
+        (c / "GALERI.json").write_text(json.dumps(jc))
+        kontrol("v11b_or_ci: 11 gorsel, rank 11 CI alt metni, CI bagi 11 (5 bag) -> PASS", kos(t, lid, "v11b_or_ci") == 0)
+        kontrol("v11b: ayni 11 gorselli ilan -> FAIL (tek profil karisik canliyi gecirmez)", kos(t, lid, "v11b") == 1)
+        for ad, boz in (("CI bagi rank 1'de", lambda y: y["baglar"][-1].update(image_id=9001)),
+                        ("rank 11 alt metni farkli", lambda y: y["gorseller"][-1].update(alt_text="x")),
+                        ("rank 11 kimligi 1-10 ile ayni", lambda y: y["gorseller"][-1].update(listing_image_id=9005))):
+            y = json.loads(json.dumps(jc)); boz(y); (c / "GALERI.json").write_text(json.dumps(y))
+            kontrol(f"v11b_or_ci: {ad} -> FAIL", kos(t, lid, "v11b_or_ci") == 1)
     finally:
         shutil.rmtree(t)
     bad = [a for a, ok in SONUC if not ok]

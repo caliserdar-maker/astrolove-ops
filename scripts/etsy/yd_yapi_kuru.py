@@ -11,8 +11,9 @@ Fiyat (hicbiri burada uydurulmadi; FIYAT_KAYNAK):
   Digital File: her boyda 3.90  (pod_5x7_kuru.FIYAT_5X7["Digital File"] = print_fiyat_v2.DIJITAL = 3.90, Serdar 25 Eki)
   Print 5x7   : 19.90           (pod_5x7_kuru.FIYAT_5X7["Print"], Serdar 26 Eki)
   Print diger : print_fiyat_v2.HEDEF (Serdar 25 Eki wall art tablosu: 8x10 24.90 ... 24x36 64.90)
-  Canli kapi: --poster-ref ilaninin (wall art) canli envanterinde her boyun Print fiyati ve Digital File fiyati bu tabloyla ayni olmali
-  (5x7 posterde yoksa not edilir); degilse KOSU BLOK (fiyat tablosu ile canli poster farkli -> Serdar karari).
+  Canli kapi: --poster-ref ilaninin (wall art) canli envanterinde her boyun Print fiyati ve Digital File fiyati bu tabloyla ayni olmali;
+  14 boyun (5x7 dahil; 30 Eki yazimi sonrasi poster 5x7 canli) her biri hem Digital File hem Print olarak posterde bulunmali, tanimsiz
+  boy etiketi / format olmamali; degilse KOSU BLOK (bos envanter ya da etiket degisikligi sessiz gecmez; inceleme 30 Eki madde 2).
 Diger urun alanlari: adet = ilandaki tek adet (999); readiness: Digital File = canli dijital urunlerin readiness'i, Print = canli
   "Shipped print 8x10" urunlerinin readiness'i (her biri tek deger olmali); SKU <BY-AAA_BBB-STIL>-<boy> (Print) ve -<boy>-DIGITAL
   (poster SKU kalibi, fiyat_kar.SKU_RX). price_on_property [514, boy], sku_on_property [513, 514, boy], readiness_on [514],
@@ -211,20 +212,28 @@ def metin_celiski(desc):
 
 # ------------------------------------------------------------------ poster ref + profil
 def poster_fiyat_kapisi(inv):
-    """Wall art (poster) canli envanteri: Print boy fiyatlari ve Digital File fiyati tabloyla ayni mi. -> (rapor, hata[])"""
-    canli, h = {}, []
+    """Wall art (poster) canli envanteri: Print boy fiyatlari ve Digital File fiyati tabloyla ayni mi; 14 boyun her biri iki formatta
+    posterde var mi (5x7 dahil). Bos envanter, tanimsiz boy etiketi ya da eksik boy -> hata (sessiz gecis yok). -> (rapor, hata[])"""
+    canli, h, tanimsiz = {}, [], set()
     for p in inv.get("products") or []:
         f, e = deger(p, 514), deger(p, 513)
         kod = dict(BOYLAR).get(e)
         if kod is None:
-            continue
+            tanimsiz.add(str(e)); continue
         canli.setdefault((f, kod), set()).update(para(o.get("price")) for o in p.get("offerings") or [])
     for (f, kod), v in sorted(canli.items()):
-        bek = DIJITAL_FIYAT if f == "Digital File" else PRINT_FIYAT[kod] if f == "Print" else None
+        bek = DIJITAL_FIYAT if f == DIJITAL else PRINT_FIYAT[kod] if f == BASKI else None
         if bek is None or v != {bek}:
             h.append(f"poster {f} {kod} canli {sorted(v)} != tablo {bek}")
-    eksik = sorted(k for _, k in BOYLAR if ("Print", k) not in canli)
-    return {"canli": {f"{f} {k}": sorted(v) for (f, k), v in sorted(canli.items())}, "posterde_yok": eksik}, h
+    tum = [k for _, k in BOYLAR]
+    eksik = {f: [k for k in tum if (f, k) not in canli] for f in FORMATLAR}
+    if any(eksik.values()):
+        h.append(f"poster boy sayisi {DIJITAL} {len(tum) - len(eksik[DIJITAL])}/{len(tum)}, {BASKI} {len(tum) - len(eksik[BASKI])}/{len(tum)} "
+                 f"(eksik {DIJITAL} {eksik[DIJITAL][:4]}, {BASKI} {eksik[BASKI][:4]}); fiyat karsilastirmasi tam degil")
+    if tanimsiz:
+        h.append(f"poster tanimsiz boy etiketi {sorted(tanimsiz)[:3]} (BOYLAR disi; etiket degismis olabilir)")
+    return {"canli": {f"{f} {k}": sorted(v) for (f, k), v in sorted(canli.items())}, "posterde_yok": eksik[BASKI],
+            "posterde_yok_dijital": eksik[DIJITAL], "tanimsiz_etiket": sorted(tanimsiz)}, h
 
 
 def hedefler(sp):
@@ -342,7 +351,7 @@ def calistir(api, shop, a, out):
     tahmin = {"kuru_istek_bu_kosu": api.calls, "kota_kalan": api.remaining, "kuru_ilan_basina": KOSU_OKUMA,
               "yazim": {"ilan_basina_tipik": YZ.ILAN_TIPIK, "ilan_basina_bag_onarimi": YZ.ILAN_BAG, "ilan_basina_en_kotu": YZ.ILAN_UST,
                         "ilan": n_plan, "toplam_tipik": YZ.ILAN_TIPIK * n_plan, "toplam_en_kotu": YZ.ILAN_UST * n_plan,
-                        "profil": 2 + len(pplan.get("yazim") or []),
+                        "profil": 2 + len(DURUMLAR) + len(pplan.get("yazim") or []),   # profil GET 2 + kullanan taramasi (en az 5) + PUT
                         "not": "kod sayimi (yd_yapi_yaz.py); 5xx / 429 tekrarlari ve token yenileme dahil degil; esik: kalan >= ILAN_UST + KOTA_SINIRI 10"}}
     (out / "ISTEK_TAHMINI.json").write_text(json.dumps(tahmin, ensure_ascii=False, indent=1), encoding="utf-8")
     say = {}

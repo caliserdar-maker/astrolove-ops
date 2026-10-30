@@ -12,6 +12,9 @@ istek_en_kotu kota kapisi. CDN yedegi alinmaz: adim 5 Drive yedegi (TEMP/YD_KAPA
 Girdi: yd_liste_uret.py liste ciktisi (--hazir: LISTE_OZET.json + <ilan>/LISTE_<ilan>.csv, manifest.json, hedef/NN_N.jpg),
 durum dosyalari (--devam DEVAM.json, --ilerleme ILERLEME.json; durum_dosyasi.py ile kilit sonrasi okunur; ILERLEME set = hedef = 10).
 Ilan basina degerlendirme SIRASI (plan v3 adim 7): once DEVAM, sonra ZATEN, en son BLOK (liste kapisi dahil; BLOK yalniz ilk kosuda, yarim ilan BLOK'a dusmez).
+  ESKI KAPAK KAPISI (Serdar 30 Eki, data/pod/yd_kapak_eski.csv; inceleme 30 Eki madde 3): UC YOLUN BASINDA (DEVAM / ZATEN / BLOK oncesi)
+  yd_liste_uret.eski_kapak_neden uygulanir: ESKI ya da yenilenmis kayitla ayni olmayan kapak -> BLOK (yarim ilan da; cikis 1), yazma yok,
+  ZATEN / ILERLEME PASS yazilmaz. DEVAM yolunda ayrica dosya_kapisi (JPEG / boyut / sha256 manifest) uygulanir.
   DEVAM: DEVAM.json'da bitmemis kayit -> kuru: rapor (kayitli plan_damga ile); yazim: bir_ilan kayitli plan + LISTE sha256 ile devam /
          --kurtar (bu kosunun plan_damga'si farkli olabilir). Yarim ilanin PASS disi sonucu cikis 1.
   ZATEN: rank 1 alt metni = yeni alt metin VE rank 1 kimligi kayitta (DEVAM yuklenen / ILERLEME son_ids[0]) VE galeri hedefle ayni
@@ -235,6 +238,7 @@ def calistir(api, shop, a):
     devam = V.oku_json(a.devam, {"ilanlar": {}}); ilerleme = V.oku_json(a.ilerleme, {"ilanlar": {}})
     yazim = not a.kuru
     plan = plan_yukle(a.plan, a.plan_damga) if yazim else None
+    eski_tablo = LU.eski_kapak_oku()       # Serdar 30 Eki: ESKI kapak listesi (kosu basina bir kez)
     t0 = time.time()
     satir, girdiler, dur = [], {}, None
     for lid, o in oz["ilanlar"].items():
@@ -255,6 +259,12 @@ def calistir(api, shop, a):
         uretim = a.plan_damga
         try:
             man = json.loads(mp.read_text(encoding="utf-8"))   # yoksa (yarim ilanda HAM eksik) DUR; kosu durumu sonlandir'da yazilir
+            k1 = next((h for h in man.get("hedef") or [] if h.get("sira") == 1), {})
+            ek = LU.eski_kapak_neden(o["cift"], k1.get("sha256"), eski_tablo)   # 0) ESKI KAPAK: DEVAM / ZATEN / BLOK'tan ONCE
+            if man.get("cift") not in (None, o["cift"]):
+                ek.append(f"manifest cifti {man.get('cift')} != liste {o['cift']}")
+            if ek:
+                s.update(durum="BLOK", neden=ek); continue
             api.kota_kapisi(f"ilan {lid}")
             if bitmemis:                                                    # 1) DEVAM (liste kapisi BLOK'u uygulanmaz)
                 adim = [tuple(x) for x in dv["plan"]]
@@ -264,6 +274,9 @@ def calistir(api, shop, a):
                 uretim = str(dv.get("uretim_kosu") or "")
                 if not re.fullmatch(r"\d+_[0-9a-f]{12}", uretim):
                     raise Y.Dur(f"DEVAM kaydi plan_damga'si gecersiz ({uretim[:30]}); elle bakilmali")
+                dk = dosya_kapisi(hazir, lid, man, eski_tablo)              # DEVAM: dosya kapisi (inceleme 30 Eki madde 3)
+                if dk:
+                    s.update(durum="BLOK", neden=dk); continue
                 if not yazim:
                     s.update(durum="DEVAM", neden=[f"DEVAM kaydi adim {dv.get('adim', 0)}/{len(adim)}, plan {uretim}"
                                                    + (" (hata kaydi: kurtar gerekir)" if dv.get("hata") else "")])
@@ -281,7 +294,7 @@ def calistir(api, shop, a):
                     continue
                 if o["durum"] != "HAZIR":                                   # 3) BLOK: liste kapisi
                     s.update(durum="BLOK", neden=list(o["neden"]), istek=api.calls - c0); continue
-                neden = ([zneden] if zneden else []) + kapilar(c, man) + dosya_kapisi(hazir, lid, man)   # 3) BLOK: canli
+                neden = ([zneden] if zneden else []) + kapilar(c, man) + dosya_kapisi(hazir, lid, man, eski_tablo)   # 3) BLOK: canli
                 if neden:
                     s.update(durum="BLOK", neden=neden, istek=api.calls - c0); continue
                 adim, mx, lsha = plan_kur(hazir, lid, man)

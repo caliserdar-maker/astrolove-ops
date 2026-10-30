@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       damga: {description: "TEMP/POSTER_GALERI_V11_YEDEK/<damga> (oku kosusu)", required: true}
-      profil: {description: "otomatik = GALERI.json profil alani | v11b | v11ci | v11 | v10", type: choice, options: [otomatik, v11b, v11ci, v11, v10], default: otomatik}
+      profil: {description: "otomatik = GALERI.json profil alani | v11b | v11ci | v11b_or_ci (ilan basina) | v11 | v10", type: choice, options: [otomatik, v11b, v11ci, v11b_or_ci, v11, v10], default: otomatik}
 jobs:
   indir:
     runs-on: ubuntu-latest
@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Girdi kapisi
         env: {D: "${{ inputs.damga }}", P: "${{ inputs.profil }}"}
-        run: '[[ "$D" =~ ^[0-9]{8}_[0-9]{6}$ && "$P" =~ ^(otomatik|v10|v11|v11b|v11ci)$ ]] || { echo "::error::girdi"; exit 1; }'
+        run: '[[ "$D" =~ ^[0-9]{8}_[0-9]{6}$ && "$P" =~ ^(otomatik|v10|v11|v11b|v11ci|v11b_or_ci)$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:

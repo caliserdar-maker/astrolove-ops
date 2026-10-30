@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       sadece: {description: "virgullu listing_id (bos = 78 ilan)", required: false, default: ""}
-      profil: {description: "beklenen galeri: v11b (10 gorsel, 4 bag) | v11ci (11, 5) | v11 (10, 5) | v10 (9, 5)", type: choice, options: [v11b, v11ci, v11, v10], default: v11b}
+      profil: {description: "beklenen galeri: v11b (10 gorsel, 4 bag) | v11ci (11, 5) | v11b_or_ci (ilan basina 10/4 ya da 11/5, 11. CI bagli) | v11 (10, 5) | v10 (9, 5)", type: choice, options: [v11b, v11ci, v11b_or_ci, v11, v10], default: v11b}
 jobs:
   oku:
     runs-on: ubuntu-latest
@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Girdi kapisi
         env: {S: "${{ inputs.sadece }}", P: "${{ inputs.profil }}"}
-        run: '[[ "$S" =~ ^([0-9]+(,[0-9]+)*)?$ && "$P" =~ ^(v10|v11|v11b|v11ci)$ ]] || { echo "::error::girdi"; exit 1; }'
+        run: '[[ "$S" =~ ^([0-9]+(,[0-9]+)*)?$ && "$P" =~ ^(v10|v11|v11b|v11ci|v11b_or_ci)$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:

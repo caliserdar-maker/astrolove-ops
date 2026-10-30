@@ -3,7 +3,9 @@
 scripts/kapak78/test_veri/HAM_4595350971.json (CANCER_LIBRA, 15 urun, 5 Style bagi); ikinci ilan ayni verinin AQUARIUS_AQUARIUS kopyasi.
 Poster fiyat referansi scripts/etsy/testdata_pod_5x7_kuru_4570143815.json (wall art canli envanteri, 28 Eki).
 Sahte Etsy: envanter PUT yalniz ?max_variations_supported=3 ile (yoksa 409), yeni deger kimligi uretir, fiyati {amount, divisor} doner;
-variation-images POST; kargo hedefi PUT; magaza ilan taramasi. Calistir: python3 scripts/etsy/test_yd_yapi.py"""
+variation-images POST; kargo hedefi PUT; magaza ilan taramasi. Hata enjeksiyonu (inceleme 30 Eki): envanter PUT uygulanip 5xx atar
+(put_hata="sonra") ya da uygulanmadan atar ("once"); kargo PUT hata atar (dest_hata). Poster ref'e 5x7 urunleri eklenir (30 Eki yazimi
+sonrasi canli poster 14 boy). Calistir: python3 scripts/etsy/test_yd_yapi.py"""
 import copy
 import csv
 import json
@@ -38,7 +40,7 @@ def hedef(i, cc, rg, ucret, a, b):
 
 
 class Sahte:
-    def __init__(s, kalan=5000, ucret_her_yer=0, disari=False):
+    def __init__(s, kalan=5000, ucret_her_yer=0, disari=False, poster_5x7=True):
         s.L, s.inv, s.vi = {}, {}, {}
         for lid, cift in ((A, "CAN_LIB"), (B, "AQU_AQU")):
             s.L[lid] = dict(copy.deepcopy(HAM["listing"]), listing_id=int(lid))
@@ -48,6 +50,16 @@ class Sahte:
             s.inv[lid] = inv
             s.vi[lid] = copy.deepcopy(HAM["variation_images"])
         s.poster = copy.deepcopy({kk: v for kk, v in POSTER["inventory"].items() if kk != "listing"})
+        if poster_5x7:          # 28 Eki verisinde 5x7 yok; 30 Eki yazimi sonrasi canli posterde 5x7 Digital 3.90 / Print 19.90
+            ek = []
+            for p in s.poster["products"]:
+                if K.deger(p, 513) == "8×10″ (20×25cm)":
+                    q = copy.deepcopy(p); K.pv(q, 513)["values"] = [K.K.ETIKET_5X7]; K.pv(q, 513).pop("value_ids", None)
+                    q["sku"] = q["sku"].replace("8x10", "5x7")
+                    for o in q["offerings"]:
+                        o["price"] = {"amount": 390 if K.deger(q, 514) == "Digital File" else 1990, "divisor": 100}
+                    ek.append(q)
+            s.poster["products"] = ek + s.poster["products"]
         s.tax = [{"property_id": 513, "name": "Custom 1", "display_name": "Custom 1", "supports_variations": True, "scales": [], "possible_values": []},
                  {"property_id": 514, "name": "Custom 2", "display_name": "Custom 2", "supports_variations": True, "scales": [], "possible_values": []},
                  {"property_id": BOY, "name": "Size", "display_name": "Size", "supports_variations": True, "scales": [], "possible_values": []},
@@ -59,6 +71,8 @@ class Sahte:
             + ([{"listing_id": 4570110121, "shipping_profile_id": PROF}] if disari else [])
         s.remaining, s.calls, s.yaz, s.sira = kalan, 0, [], 10 ** 12
         s.vi_dusur = s.inv_boz = False
+        s.put_hata = None          # "sonra": PUT uygulanir sonra 503 (zaman asimi gibi); "once": uygulanmadan 503 (tek sefer)
+        s.dest_hata, s.dest_govde = False, []
 
     @staticmethod
     def lid(path):
@@ -97,6 +111,9 @@ class Sahte:
         s._say(); lid = s.lid(path); s.yaz.append(("PUT inv", lid, path))
         if not path.endswith("/inventory?max_variations_supported=3"):
             raise SystemExit("HATA: PUT inventory -> 409: maximum number of supported variations is 2")
+        if s.put_hata == "once":
+            s.put_hata = None
+            raise SystemExit("HATA: PUT inventory -> 503 (uygulanmadi)")
         eski = {(v["property_id"], a): i for p in s.inv[lid]["products"] for v in p["property_values"]
                 for i, a in zip(v.get("value_ids") or [], v.get("values") or [])}
         pr = []
@@ -117,6 +134,9 @@ class Sahte:
         s.inv[lid] = {"products": pr, **{kk: body[kk] for kk in Y.ON_PROP}}
         if s.vi_dusur:
             s.vi[lid] = []
+        if s.put_hata == "sonra":   # Etsy degisikligi uyguladi ama yanit 5xx / zaman asimi
+            s.put_hata = None
+            raise SystemExit("HATA: PUT inventory -> 503 (Etsy uyguladi)")
 
     def post_json(s, path, body):
         s._say(); lid = s.lid(path); s.yaz.append(("POST vi", lid, path))
@@ -125,7 +145,9 @@ class Sahte:
         s.vi[lid] = [dict(x, value=ad[(x["property_id"], x["value_id"])]) for x in body["variation_images"]]
 
     def put(s, path, data):
-        s._say(); s.yaz.append(("PUT dest", path))
+        s._say(); s.yaz.append(("PUT dest", path)); s.dest_govde.append(dict(data))
+        if s.dest_hata:
+            raise SystemExit("HATA: PUT destination -> 500")
         i = int(path.rsplit("/", 1)[1])
         for d in s.profil["shipping_profile_destinations"]:
             if d["shipping_profile_destination_id"] == i:
@@ -159,12 +181,15 @@ def ac(api):
     return api
 
 
-def yaz(api, plan, mod, d, sadece="", haric="", damga="123"):
+def yaz(api, plan, mod, d, sadece="", haric="", damga="123", tum=True):
     ac(api)
     out = d / f"o_{mod}_{len(list(d.glob('o_*')))}"
-    argv = ["--mod", mod, "--plan", str(plan), "--plan-damga", damga, "--sadece", sadece, "--haric", haric, "--out", str(out)]
+    argv = ["--mod", mod, "--plan", str(plan), "--plan-damga", damga, "--sadece", sadece, "--haric", haric, "--out", str(out),
+            "--liste", str(liste(d))]
     if mod != "kontrol":
         argv += ["--onay", Y.ONAY[mod]]
+    if mod == "yaz" and not sadece and tum:
+        argv += ["--tum"]
     a = Y.argumanlar(argv)
     out.mkdir(parents=True, exist_ok=True)
     rc = Y.calis(api, SHOP, a, out)
@@ -194,7 +219,7 @@ def kuru_testleri(d):
       K.pv(pr[0], 513)["value_ids"] == [138126211616] and "value_ids" not in K.pv(pr[0], 514) and "value_ids" not in K.pv(pr[0], BOY))
     k("kuru: istek = 2 ilan x 3 + poster 1 + taksonomi 1 + profil 1 + tarama 5", api.calls == 14, api.calls)
     t = json.loads((out / "ISTEK_TAHMINI.json").read_text())
-    k("kuru: ISTEK_TAHMINI yazim 7 / 22 ilan basina", t["yazim"]["ilan_basina_tipik"] == 7 and t["yazim"]["ilan_basina_en_kotu"] == 22
+    k("kuru: ISTEK_TAHMINI yazim 7 / 23 ilan basina", t["yazim"]["ilan_basina_tipik"] == 7 and t["yazim"]["ilan_basina_en_kotu"] == 23
       and t["yazim"]["toplam_tipik"] == 14)
     pp = json.loads((out / "PROFIL_PLAN.json").read_text())
     k("kuru: profil UCRETSIZ, takip notu", pp["durum"] == "UCRETSIZ" and "takip" in pp and not pp["yazim"])
@@ -218,6 +243,18 @@ def kuru_testleri(d):
             p["offerings"][0]["price"] = {"amount": 2590, "divisor": 100}
     rc2, out2 = kuru(s, d, damga="127")
     k("kuru: poster canli fiyati tablodan farkli -> tum ilanlar BLOK", rc2 == 1 and "poster Print 8x10" in json.loads((out2 / f"KURU_{A}.json").read_text())["hata"][0])
+    # inceleme 30 Eki madde 2: bos / eksik boy / tanimsiz etiket / 5x7 fiyati sessiz gecmez
+    for ad, boz, bek in (("posterde 5x7 yok (13/14)", lambda s: None, "Print 13/14"),
+                         ("poster envanteri bos", lambda s: s.poster.update(products=[]), "Print 0/14"),
+                         ("poster 5x7 Print 24.90", lambda s: [p["offerings"][0].update(price={"amount": 2490, "divisor": 100})
+                                                              for p in s.poster["products"] if K.deger(p, 513) == K.K.ETIKET_5X7
+                                                              and K.deger(p, 514) == "Print"], "poster Print 5x7 canli [24.9]"),
+                         ("poster boy etiketi degismis", lambda s: [K.pv(p, 513).update(values=["8x10 in"]) for p in s.poster["products"]
+                                                                    if K.deger(p, 513) == "8×10″ (20×25cm)"], "tanimsiz boy etiketi")):
+        s = Sahte(poster_5x7=ad != "posterde 5x7 yok (13/14)"); boz(s)
+        rc2, out2 = kuru(s, d, damga="127")
+        h = " ".join(json.loads((out2 / f"KURU_{A}.json").read_text())["hata"])
+        k(f"kuru: {ad} -> BLOK ({bek})", rc2 == 1 and bek in h, h[:160])
     s = Sahte(); s.inv[A]["products"][0]["property_values"][1]["values"] = ["Digital card 4x6"]
     rc2, out2 = kuru(s, d, damga="128")
     k("kuru: bilinmeyen eski format -> BLOK", "bilinmeyen urun" in " ".join(json.loads((out2 / f"KURU_{A}.json").read_text())["hata"]))
@@ -247,6 +284,11 @@ def yaz_testleri(d, plan):
     except SystemExit as e:
         ok = "plan disi" in str(e)
     k("yaz: --sadece plan disi ilan -> DUR", ok)
+    try:
+        Y.argumanlar(["--mod", "yaz", "--plan", str(plan), "--plan-damga", "123", "--onay", Y.ONAY["yaz"], "--out", str(d / "x")]); ok = False
+    except SystemExit as e:
+        ok = "--tum" in str(e)
+    k("yaz: --sadece (pilot) ve --tum yok -> DUR (madde 7)", ok)
     bozuk = d / "KURU_555"; shutil.copytree(plan, bozuk)
     kb = json.loads((bozuk / f"KURU_{A}.json").read_text()); kb["envanter_yuk"]["products"][20]["offerings"][0]["price"] = 9.90
     (bozuk / f"KURU_{A}.json").write_text(json.dumps(kb))
@@ -297,13 +339,28 @@ def yaz_testleri(d, plan):
       rc == 1 and r["sonuc"] == "FAIL" and r.get("geri_alma") == "TAMAM" and s["ozet"]["yapilmadi"] == [B]
       and Y.imza(api4.inv[A]) == Y.imza(json.loads((plan / f"KURU_{A}.json").read_text())["envanter_ham_yedek"])
       and r["istek"] <= Y.ILAN_UST, r)
+    # inceleme 30 Eki madde 1: PUT Etsy'de uygulandi ama 5xx / zaman asimi -> otomatik geri alma (yazilan PUT'tan once)
+    hamA = json.loads((plan / f"KURU_{A}.json").read_text())["envanter_ham_yedek"]
+    api4b = Sahte(); api4b.put_hata = "sonra"
+    rc, s = yaz(api4b, plan, "yaz", d)
+    r = s["ilanlar"][0]
+    k("yaz: PUT uygulandi + 503 -> FAIL, otomatik geri alma TAMAM, canli ham (15 urun), Style baglari ayni, B yapilmadi",
+      rc == 1 and r["sonuc"] == "FAIL" and r.get("geri_alma") == "TAMAM" and Y.imza(api4b.inv[A]) == Y.imza(hamA)
+      and len(api4b.inv[A]["products"]) == 15 and K.baglar(api4b.inv[A], api4b.vi[A])[0] == K.baglar(hamA, HAM["variation_images"])[0]
+      and s["ozet"]["yapilmadi"] == [B] and r["istek"] <= Y.ILAN_UST, r)
+    api4c = Sahte(); api4c.put_hata = "once"
+    rc, s = yaz(api4c, plan, "yaz", d)
+    r = s["ilanlar"][0]
+    k("yaz: PUT uygulanmadan 503 -> FAIL, canli okundu (ham), ikinci PUT yok, geri alma TAMAM (envanter PUT yok)",
+      rc == 1 and r["sonuc"] == "FAIL" and str(r.get("geri_alma", "")).startswith("TAMAM (canli envanter ham")
+      and [x[0] for x in api4c.yaz] == ["PUT inv"] and Y.imza(api4c.inv[A]) == Y.imza(hamA), r)
     api5 = Sahte(kalan=Y.ILAN_UST + 10 + 3)
     rc, s = yaz(api5, plan, "yaz", d)
     k("yaz: kota esigi (ILAN_UST + 10) -> ilk ilan yazilir, ikincisi KOTA, yarim ilan yok",
       [r["sonuc"] for r in s["ilanlar"]] == ["TAMAM", "KOTA"] and len(api5.inv[B]["products"]) == 15 and rc == 1)
     api6 = Sahte(kalan=30)
     rc, s = yaz(api6, plan, "yaz", d)
-    k("yaz: kalan < 22 + 10 -> KOTA, istek yok", s["ilanlar"][0]["sonuc"] == "KOTA" and api6.calls == 0)
+    k("yaz: kalan < ILAN_UST + 10 -> KOTA, istek yok", s["ilanlar"][0]["sonuc"] == "KOTA" and api6.calls == 0)
     # yazim sonrasi kuru: ZATEN -> yaz PLAN_ZATEN
     api7 = Sahte(); yaz(api7, plan, "yaz", d, sadece=A)
     rc, out = kuru(api7, d, damga="200")
@@ -323,12 +380,38 @@ def yaz_testleri(d, plan):
     rc, s = yaz(api8, out, "profil-geri-al", d, damga="300")
     k("profil-geri-al: EVERYWHERE 12'ye", rc == 0 and s["sonuc"] == "TAMAM" and ev is not None
       and [x for x in api8.profil["shipping_profile_destinations"] if x["shipping_profile_destination_id"] == 3][0]["primary_cost"]["amount"] == 1200)
+    k("profil: PUT govdesi canli hedeften (ucret disi alanlar canliyla ayni)",
+      api8.dest_govde[0] == Y.hedef_govde(hedef(3, "", "none", 12, 7, 21), 0, 0))
     rc2, out2 = kuru(Sahte(ucret_her_yer=12, disari=True), d, damga="301")
+    a9 = Sahte(ucret_her_yer=12, disari=True)
+    rc, s = yaz(a9, out2, "profil", d, damga="301")
+    k("profil: YD disi kullanan varken (plan BLOK) yazim yok, SONUC.json HATA, cikis 1",
+      rc == 1 and s["sonuc"] == "HATA" and "PROFIL_PLAN yazilamaz" in s["neden"] and not a9.yaz)
+    # inceleme 30 Eki madde 4: tasiyici / mail_class korunur; yazim aninda yeniden tarama; PUT hatasi SONUC.json'a
+    a10 = Sahte(ucret_her_yer=12)
+    for x in a10.profil["shipping_profile_destinations"]:
+        x.update(shipping_carrier_id=27, mail_class="tracked_intl")
+    rc, out = kuru(a10, d, damga="302")
+    rc, s = yaz(a10, out, "profil", d, damga="302")
+    g = a10.dest_govde[0] if a10.dest_govde else {}
+    k("profil: PUT govdesinde canli shipping_carrier_id / mail_class / teslim gunleri korunur, yalniz ucret 0",
+      rc == 0 and s["sonuc"] == "TAMAM" and g.get("shipping_carrier_id") == 27 and g.get("mail_class") == "tracked_intl"
+      and (g.get("min_delivery_days"), g.get("max_delivery_days")) == (7, 21) and (g.get("primary_cost"), g.get("secondary_cost")) == (0, 0)
+      and g.get("destination_region") == "none", g)
+    a11 = Sahte(ucret_her_yer=12)
+    rc, out = kuru(a11, d, damga="303")
+    a11.magaza.append({"listing_id": 4570110121, "shipping_profile_id": PROF})   # kuru sonrasi profile YD disi ilan eklendi
+    rc, s = yaz(a11, out, "profil", d, damga="303")
+    k("profil: yazim aninda yeniden tarama, YD disi kullanan -> DUR, PUT yok", rc == 1 and s["sonuc"] == "DUR"
+      and s.get("yd_disi_kullanan") == ["4570110121"] and not [x for x in a11.yaz if x[0] == "PUT dest"], s)
+    a12 = Sahte(ucret_her_yer=12)
+    rc, out = kuru(a12, d, damga="304")
+    a12.dest_hata = True
     try:
-        yaz(Sahte(ucret_her_yer=12, disari=True), out2, "profil", d, damga="301"); ok = False
-    except SystemExit as e:
-        ok = "PROFIL_PLAN yazilamaz" in str(e)
-    k("profil: YD disi kullanan varken yazim DUR", ok)
+        rc, s = yaz(a12, out, "profil", d, damga="304"); ok = rc == 1 and s["sonuc"] == "HATA" and "500" in s["neden"]
+    except BaseException as e:   # noqa: BLE001  (duzeltme oncesi istisna disari tasar, SONUC.json yazilmaz)
+        ok, s = False, repr(e)
+    k("profil: PUT hatasi -> SONUC.json HATA (istisna yakalanir), cikis 1", ok, s)
 
 
 def is_akisi():
@@ -343,6 +426,8 @@ def is_akisi():
     t = (wf / "yd-yapi-yaz.yml").read_text(encoding="utf-8")
     k("is akisi yd-yapi-yaz: varsayilan mod kontrol, onay girdisi, plan TEMP/YD_YAPI/KURU_<damga>",
       'default: "kontrol"' in t and '--onay "$ONAY"' in t and "TEMP/YD_YAPI/KURU_$PD" in t)
+    k("is akisi yd-yapi-yaz: yaz modunda sadece (pilot) bos ise tum=evet zorunlu, betige --tum",
+      'tum: {description' in t and '[ "$MOD" = yaz ] && [ -z "$S" ] && [ "$TUM" != evet ]' in t and "--tum" in t)
 
 
 def main():

@@ -3,7 +3,8 @@ name: yd-yapi-yaz
 # Plan: Drive TEMP/YD_YAPI/KURU_<plan_damga>/ (yd-yapi-kuru ciktisi; plan_damga = kuru kosu no). updateListing YOK; yalniz envanter PUT
 # ?max_variations_supported=3 + Style bagi onarimi; profil modlari yalniz kargo ucreti.
 # mod kontrol: SALT OKUMA (ilan basina 3 GET). yaz / geri-al / profil / profil-geri-al: ETSY'YE YAZAR, onay sozcugu zorunlu
-# (SERDAR_YD_YAPI_YAZ / SERDAR_YD_YAPI_GERI_AL / SERDAR_YD_PROFIL / SERDAR_YD_PROFIL_GERI_AL). sadece: pilot; haric: plandan atlanir.
+# (SERDAR_YD_YAPI_YAZ / SERDAR_YD_YAPI_GERI_AL / SERDAR_YD_PROFIL / SERDAR_YD_PROFIL_GERI_AL). sadece: pilot (yaz modunda bos ise tum=evet
+# zorunlu, inceleme 30 Eki madde 7); haric: plandan atlanir.
 # Ilk FAIL (otomatik geri alma sonrasi) / KOTA / okuma hatasinda kosu durur. Cikti Drive TEMP/YD_YAPI/YAZ_<mod>_<run>_<deneme>/.
 permissions:
   actions: read
@@ -16,17 +17,20 @@ on:
       sadece: {description: "virgullu listing_id (pilot: tek ilan; bos = plandaki tum ilanlar)", required: false, default: ""}
       haric: {description: "virgullu listing_id, plandan atlanir", required: false, default: ""}
       onay: {description: "yazan modlar icin onay sozcugu", required: false, default: ""}
+      tum: {description: "mod yaz + sadece bos: plandaki TUM ilanlar icin acikca evet (pilot sonrasi; inceleme 30 Eki madde 7)", required: false, default: "hayir"}
 jobs:
   yaz:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
       - name: Girdi kapisi
-        env: {MOD: "${{ inputs.mod }}", PD: "${{ inputs.plan_damga }}", S: "${{ inputs.sadece }}", H: "${{ inputs.haric }}"}
+        env: {MOD: "${{ inputs.mod }}", PD: "${{ inputs.plan_damga }}", S: "${{ inputs.sadece }}", H: "${{ inputs.haric }}", TUM: "${{ inputs.tum }}"}
         run: |
           [[ "$MOD" =~ ^(kontrol|yaz|geri-al|profil|profil-geri-al)$ ]] || { echo "::error::mod"; exit 1; }
           [[ "$PD" =~ ^[0-9]+$ ]] || { echo "::error::plan_damga"; exit 1; }
           [[ "$S" =~ ^([0-9]+(,[0-9]+)*)?$ && "$H" =~ ^([0-9]+(,[0-9]+)*)?$ ]] || { echo "::error::sadece/haric"; exit 1; }
+          [[ "$TUM" =~ ^(evet|hayir)$ ]] || { echo "::error::tum (evet / hayir)"; exit 1; }
+          if [ "$MOD" = yaz ] && [ -z "$S" ] && [ "$TUM" != evet ]; then echo "::error::yaz: sadece (pilot) bos ise tum=evet gerekli"; exit 1; fi
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
@@ -66,14 +70,16 @@ jobs:
           S: ${{ inputs.sadece }}
           H: ${{ inputs.haric }}
           ONAY: ${{ inputs.onay }}
+          TUM: ${{ inputs.tum }}
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set +e -o pipefail
+          TA=(); [ "$TUM" = evet ] && TA=(--tum)
           python3 scripts/etsy/yd_yapi_yaz.py --mod "$MOD" --plan "_plan/KURU_$PD" --plan-damga "$PD" --sadece "$S" --haric "$H" \
-            --onay "$ONAY" --out _out 2>&1 | tee _work/kosu.log
+            --onay "$ONAY" "${TA[@]}" --out _out 2>&1 | tee _work/kosu.log
           echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
       - name: Token geri yaz + cikti Drive'a
         if: ${{ always() }}

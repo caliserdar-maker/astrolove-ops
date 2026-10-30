@@ -10,6 +10,8 @@ Kontrol (yalniz rapor; okuma durmaz) --profil ile (PROFILLER; #60, 30 Eki: 9 gor
   v11   10 gorsel, 5 bag CI->1 MB->7 DB->8 PW->9 WP->10
   v11b  10 gorsel, 4 bag MB->7 DB->8 PW->9 WP->10, CI bagsiz (Serdar 29 Eki; canli durum 30 Eki)
   v11ci 11 gorsel, 5 bag MB->7 DB->8 PW->9 WP->10 CI->11 (Serdar 30 Eki CI eklemesi sonrasi; galeri_ci11.py)
+  v11b_or_ci  ILAN BASINA: 11 gorselli ilan v11ci (11. gorsel Champagne Ivory bagli), digerleri v11b (inceleme 30 Eki madde 5: canli
+        karisik, 4570110121 11 gorsel / 5 bag, 77 ilan 10 / 4; tek profil 78/78 vermez). Ilanin cozulen profili GALERI.json "profil_ilan".
 Her profilde: rank 1..n tekil, bag property 200, ad kumesi profildeki adlar (tekil), bagli gorsel galeride, video 1.
 Profil adi her GALERI.json'a ("profil") ve OKUMA.md'ye yazilir; galeri_v11_yedek_indir.py --profil vermezse bunu kullanir.
 Cikti <out>/: <ilan>_<CIFT>/GALERI.json (gorseller, baglar, videolar; galeri_v10_liste.yedek_oku ile ayni anahtarlar),
@@ -35,6 +37,15 @@ PROFILLER = {
     "v11b": dict(gorsel=10, bag=V11B_SIRA, video=1),
     "v11ci": dict(gorsel=11, bag={**V11B_SIRA, "Champagne Ivory": 11}, video=1),
 }
+BIRLESIK = {"v11b_or_ci": ("v11b", "v11ci")}   # ilan basina profil: gorsel sayisina gore secenek (yoksa ilk secenek)
+PROFIL_ADLARI = sorted(PROFILLER) + sorted(BIRLESIK)
+
+
+def ilan_profili(profil, n_gorsel):
+    """Birlesik profilde ilanin somut profili (gorsel sayisi eslesen secenek, yoksa ilki); somut profil aynen."""
+    if profil not in BIRLESIK:
+        return profil
+    return next((x for x in BIRLESIK[profil] if PROFILLER[x]["gorsel"] == n_gorsel), BIRLESIK[profil][0])
 N = PROFILLER["v10"]["gorsel"]   # eski ad (geri uyum); kontrol profil kullanir
 GORSEL_ALAN = ("rank", "listing_image_id", "alt_text", "url_fullxfull", "full_width", "full_height")
 VIDEO_ALAN = ("video_id", "video_url", "thumbnail_url", "width", "height", "video_state")
@@ -52,6 +63,7 @@ def oku(api, shop, lid):
 
 
 def kontrol(y, profil="v10"):
+    profil = ilan_profili(profil, len(y["gorseller"]))
     P = PROFILLER[profil]
     n, bek, nv = P["gorsel"], P["bag"], P["video"]
     g, b, v = y["gorseller"], y["baglar"], y["videolar"]
@@ -79,7 +91,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--ciftler", required=True); ap.add_argument("--out", required=True)
     ap.add_argument("--sadece", default="", help="virgullu listing_id (bos = 78)")
-    ap.add_argument("--profil", required=True, choices=sorted(PROFILLER), help="beklenen galeri durumu (PROFILLER)")
+    ap.add_argument("--profil", required=True, choices=PROFIL_ADLARI, help="beklenen galeri durumu (PROFILLER / BIRLESIK)")
     a = ap.parse_args(argv)
     import etsy_common as E
     from yd_envanter_oku import salt_okur
@@ -94,8 +106,8 @@ def main(argv=None):
 
 def calistir(api, shop, a):
     profil = getattr(a, "profil", None)
-    if profil not in PROFILLER:
-        print(f"::error::profil {profil!r} yok ({sorted(PROFILLER)})"); return 1
+    if profil not in PROFIL_ADLARI:
+        print(f"::error::profil {profil!r} yok ({PROFIL_ADLARI})"); return 1
     rows = [r for r in csv.DictReader(open(a.ciftler, encoding="utf-8-sig")) if r.get("listing_id", "").strip()]
     s = {x.strip() for x in a.sadece.split(",") if x.strip()}
     if s - {r["listing_id"] for r in rows} or any(not x.isdigit() for x in s):
@@ -114,22 +126,25 @@ def calistir(api, shop, a):
             print(f"[{n}/{len(rows)}] {lid} {cift} DUR | {hata}", flush=True)
             break
         d = out / f"{lid}_{cift}"; d.mkdir(exist_ok=True)
-        (d / "GALERI.json").write_text(json.dumps(dict(listing_id=lid, cift=cift, profil=profil, **y), ensure_ascii=False, indent=1),
-                                       encoding="utf-8")
+        pi = ilan_profili(profil, len(y["gorseller"]))
+        (d / "GALERI.json").write_text(json.dumps(dict(listing_id=lid, cift=cift, profil=profil, profil_ilan=pi, **y), ensure_ascii=False,
+                                                  indent=1), encoding="utf-8")
         neden, sira = kontrol(y, profil)
-        satir.append(dict(listing_id=lid, cift=cift, gorsel=len(y["gorseller"]), bag=len(y["baglar"]),
+        satir.append(dict(listing_id=lid, cift=cift, profil=pi, gorsel=len(y["gorseller"]), bag=len(y["baglar"]),
                           bag_sira=" ".join(f"{k}:{v}" for k, v in sorted(sira.items())), video=",".join(str(v["video_id"]) for v in y["videolar"]),
                           durum="UYGUN" if not neden else "SAPMA", neden="; ".join(neden), istek=api.calls - c0))
         print(f"[{n}/{len(rows)}] {lid} {cift} gorsel {len(y['gorseller'])} bag {len(y['baglar'])} video {len(y['videolar'])} "
               f"{satir[-1]['durum']} | istek {api.calls} kota {api.remaining}", flush=True)
     with open(out / "OKUMA.csv", "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=["listing_id", "cift", "gorsel", "bag", "bag_sira", "video", "durum", "neden", "istek"])
+        w = csv.DictWriter(f, fieldnames=["listing_id", "cift", "profil", "gorsel", "bag", "bag_sira", "video", "durum", "neden", "istek"])
         w.writeheader(); w.writerows(satir)
     uy = sum(1 for x in satir if x["durum"] == "UYGUN")
-    P = PROFILLER[profil]
+    pt = lambda x: f"{PROFILLER[x]['gorsel']} gorsel, {len(PROFILLER[x]['bag'])} renk bagi, {PROFILLER[x]['video']} video"   # noqa: E731
+    say = {x: sum(1 for s_ in satir if s_["profil"] == x) for x in BIRLESIK.get(profil, ())}
     ozet = (f"# Galeri v11 yedek: Etsy salt okuma\n\nilan okundu {len(satir)}/{len(rows)} | UYGUN {uy} | SAPMA {len(satir) - uy}\n"
-            f"profil {profil}: {P['gorsel']} gorsel, {len(P['bag'])} renk bagi, {P['video']} video\n"
-            f"istek (api.calls, bu kosu) {api.calls} | ilan basina {ISTEK_ILAN} GET | kalan kota {api.remaining}\n"
+            + (f"profil {profil}: {pt(profil)}\n" if profil in PROFILLER else
+               f"profil {profil} (ilan basina): " + "; ".join(f"{x} {pt(x)} -> {say[x]} ilan" for x in BIRLESIK[profil]) + "\n")
+            + f"istek (api.calls, bu kosu) {api.calls} | ilan basina {ISTEK_ILAN} GET | kalan kota {api.remaining}\n"
             + (f"\nDUR: {hata}\n" if hata else "")
             + "".join(f"- {x['listing_id']} {x['cift']}: {x['neden']}\n" for x in satir if x["neden"]))
     (out / "OKUMA.md").write_text(ozet, encoding="utf-8")

@@ -3,7 +3,9 @@
 (sahte CDN). Senaryolar: 3 GET / ilan, salt okuma (POST DUR), kontrol sapmalari, kota DUR'unda okunanlar yazilir, sadece
 kapisi, indirme boyut kapisi, CDN disi adres, OZET.md galeri_v10_liste.ozet_oku ile okunur, workflow kilit kumesi.
 #60 (30 Eki): profil (v10 9 / v11b 10 + 4 bag / v11ci 11 + 5 bag) okuma kontrolunde ve indirmede; GALERI.json profil alani.
-#61 (30 Eki): galeri-v11-dogrula yalniz kendi rapor klasorune yazar (POSTER_GALERI_V11_YEDEK'e yazma yok)."""
+#61 (30 Eki): galeri-v11-dogrula yalniz kendi rapor klasorune yazar (POSTER_GALERI_V11_YEDEK'e yazma yok).
+Inceleme 30 Eki madde 5: canli karisik (4570110121 11 gorsel / 5 bag, digerleri 10 / 4) -> v11b_or_ci ilan basina; indirme cikis 2
+(profil celiskisi) is akisinda yutulmaz."""
 import csv
 import io
 import json
@@ -32,9 +34,13 @@ def kontrol(ad, ok):
 
 
 class Sahte:
-    def __init__(self, kota=1000, bozuk=None, profil="v10"):
+    def __init__(self, kota=1000, bozuk=None, profil="v10", ilan_profil=None):
         self.calls, self.remaining, self.yol, self.bozuk = 0, kota, [], bozuk or {}
-        self.P = O.PROFILLER[profil]
+        self.P0 = O.PROFILLER[profil]
+        self.ilan_profil = ilan_profil or {}     # ilan basina canli durum (karisik canli: 4570110121 v11ci, digerleri v11b)
+
+    def _P(self, lid):
+        return O.PROFILLER[self.ilan_profil[lid]] if lid in self.ilan_profil else self.P0
 
     def kota_kapisi(self, ne=""):
         if self.remaining - 4 < 10:
@@ -43,6 +49,7 @@ class Sahte:
     def _call(self, method, path, *a, **k):
         self.calls += 1; self.remaining -= 1; self.yol.append((method, path))
         lid = path.split("/listings/")[1].split("/")[0]; b = int(lid[-3:]) * 100
+        self.P = self._P(lid)
         if path.endswith("/images"):
             n = self.P["gorsel"] - (self.bozuk.get(lid) == "galeri")
             return dict(results=[dict(rank=r, listing_image_id=b + r, alt_text=f"alt {r}", url_fullxfull=f"https://i.etsystatic.com/x/{b + r}.jpg",
@@ -53,6 +60,8 @@ class Sahte:
                 sira["Pure White"] = 8
             if self.bozuk.get(lid) == "ci_bag":   # v11b'de CI bagi olmamali
                 sira["Champagne Ivory"] = 1
+            if self.bozuk.get(lid) == "ci_bagsiz":   # 11 gorsel ama CI bagi yok
+                sira.pop("Champagne Ivory", None)
             return dict(results=[dict(property_id=200, value_id=i, value=k, image_id=b + r) for i, (k, r) in enumerate(sira.items())])
         if path.endswith("/videos"):
             return dict(results=[] if self.bozuk.get(lid) == "video" else [dict(video_id=b, video_url=f"https://v.etsystatic.com/v/{b}.mp4",
@@ -131,6 +140,20 @@ def oku_testi(d):
              baglar=[dict(property_id=200, value=k, image_id=v) for k, v in O.PROFILLER["v11b"]["bag"].items()], videolar=[1])
     kontrol("kontrol v11ci: CI bagi eksik -> sapma; v11b'de 11 gorsel -> sapma",
             any("renk bagi 4" in x for x in O.kontrol(y, "v11ci")[0]) and any("1..10" in x for x in O.kontrol(y, "v11b")[0]))
+    # inceleme 30 Eki madde 5: karisik canli (4570110121 11 / 5, digerleri 10 / 4) -> v11b_or_ci ile 3/3 UYGUN
+    karisik = {"4570110121": "v11ci", "4570110641": "v11b", "4570111111": "v11b"}
+    rc = O.calistir(Sahte(ilan_profil=karisik), "shop", SimpleNamespace(ciftler=str(ciftler(d)), out=str(d / "mix"), sadece="",
+                                                                         profil="v11b_or_ci"))
+    r = {x["listing_id"]: x for x in csv.DictReader(open(d / "mix/OKUMA.csv"))} if (d / "mix/OKUMA.csv").exists() else {}
+    jm = json.loads((d / "mix/4570110121_AQUARIUS_AQUARIUS/GALERI.json").read_text()) if r else {}
+    kontrol("oku v11b_or_ci: karisik canli 3/3 UYGUN (11/5 v11ci + 10/4 v11b), GALERI.json profil + profil_ilan",
+            rc == 0 and r and all(x["durum"] == "UYGUN" for x in r.values()) and r["4570110121"]["profil"] == "v11ci"
+            and r["4570110641"]["profil"] == "v11b" and jm.get("profil") == "v11b_or_ci" and jm.get("profil_ilan") == "v11ci"
+            and "v11ci 11 gorsel, 5 renk bagi, 1 video -> 1 ilan" in (d / "mix/OKUMA.md").read_text())
+    rc = O.calistir(Sahte(ilan_profil=karisik, bozuk={"4570110121": "ci_bagsiz"}), "shop",
+                    SimpleNamespace(ciftler=str(ciftler(d)), out=str(d / "mix2"), sadece="4570110121", profil="v11b_or_ci"))
+    r = next(csv.DictReader(open(d / "mix2/OKUMA.csv")))
+    kontrol("oku v11b_or_ci: 11 gorsel ama CI (11.) bagsiz -> SAPMA", rc == 0 and r["durum"] == "SAPMA" and "renk bagi 4" in r["neden"])
 
 
 def jpeg(w, h):
@@ -179,6 +202,18 @@ def indir_testi(d):
     kontrol("indir: eski okuma (profil alani yok) + --profil yok -> cikis 2; --profil v11b ile calisir",
             I.main(["--in", str(kb)]) == 2 and len(istek) == n0 and I.main(["--in", str(kb), "--profil", "v11b"]) == 1
             and L.ozet_oku(kb / "OZET.md")["4570111111"][3] == "PASS")
+    # madde 5: v11b_or_ci okumasi ilan basina (11 + 10 + 10 gorsel), 3/3 PASS; v11ci okumasi --profil v11b_or_ci ile celismez
+    km = d / "mix"; n0 = len(istek)
+    I.main(["--in", str(km), "--is", "2"])
+    oz = L.ozet_oku(km / "OZET.md")
+    kontrol("indir v11b_or_ci: ilan basina beklenen (11 / 10 / 10); 10'lular PASS, 11'li yalniz sahte r5 boyutundan FAIL, r11 indirildi",
+            oz["4570110641"][3] == oz["4570111111"][3] == "PASS" and oz["4570110641"][2] == "10" and oz["4570110121"][2] == "10"
+            and oz["4570110121"][4] == "r5 boyut 300x225 != 3000x2250" and (km / "4570110121_AQUARIUS_AQUARIUS/r11_12111.jpg").exists()
+            and len(istek) - n0 == 11 + 10 + 10 + 3 and "(beklenen 31)" in (km / "OZET.md").read_text())
+    kontrol("indir: --profil v11b_or_ci + GALERI.json v11ci -> celiski yok (cikis 2 degil)",
+            I.main(["--in", str(kc), "--is", "2", "--profil", "v11b_or_ci"]) != 2 and L.ozet_oku(kc / "OZET.md")["4570111111"][3] == "PASS")
+    bos = d / "bos"; bos.mkdir()
+    kontrol("indir: GALERI.json yok -> cikis 2 (girdi hatasi)", I.main(["--in", str(bos)]) == 2)
 
 
 def is_akisi():
@@ -191,7 +226,8 @@ def is_akisi():
     t2 = (KOK / ".github/workflows/galeri-v11-yedek-indir.yml").read_text()
     kontrol("is akisi: indir Etsy sirri / token kullanmaz", "ETSY" not in t2.replace("ETSY API YOK", "").replace("Etsy", ""))
     kontrol("is akisi: oku ve indir profil girdisini betige verir (#60)",
-            '--profil "$P"' in t and "v11b, v11ci, v11, v10" in t and '--profil "$P"' in t2 and "galeri_v11_yedek_indir.py --in _y --profil" in t2)
+            '--profil "$P"' in t and "v11b, v11ci, v11b_or_ci, v11, v10" in t and '--profil "$P"' in t2 and "galeri_v11_yedek_indir.py --in _y --profil" in t2
+            and "v11b_or_ci" in t2)
     t3 = (KOK / ".github/workflows/galeri-v11-dogrula.yml").read_text()
     hedef = []   # rclone yazma komutlarinin hedefi (copy / copyto / sync / move: 3. arguman; delete / purge: 2.)
     for s in t3.splitlines():
@@ -207,6 +243,9 @@ def is_akisi():
             and not any("POSTER_GALERI_V11_YEDEK" in h for h in hedef)
             and "--immutable" not in "\n".join(s for s in t3.splitlines() if not s.strip().startswith("#"))
             and "galeri_v11_yedek_indir.py --in _y --profil \"$P\"" in t3)
+    ind = next(s for s in t3.splitlines() if "galeri_v11_yedek_indir.py" in s and not s.strip().startswith("#"))
+    kontrol("is akisi: dogrula indirme cikis 2'yi yutmaz (|| echo yok, IRC > 1 FAIL); v11b_or_ci girdisi + --b1",
+            "||" not in ind and '[ "$IRC" -le 1 ] ||' in t3 and "v11b|v11b_or_ci" in t3 and "^(v11|v11b|v11b_or_ci)$" in t3)
 
 
 def main():

@@ -78,6 +78,17 @@ def main():
     kontrol("kuru kosu: durum dosyalarina yazma yok", rc == 0 and once == {x.name: x.read_bytes() for x in U.iterdir() if x.is_file()})
     temizle(); rc, log = kos(OKU, FAKE_HATA="lsjson")
     kontrol("okuma hatasi: FAIL (bos varsayilanla devam yok)", rc != 0 and "listeleme hatasi" in log)
+    # inceleme 30 Eki madde 6: token geri yazimi ortak betikle (token_geri_yaz.sh, 3 deneme); hata adimi FAIL eder (yutulmaz)
+    (b / "sleep").write_text("#!/bin/bash\nexit 0\n"); (b / "sleep").chmod(0o755)
+    temizle(); (is_ / "_work").mkdir(); (is_ / "_work/ETSY_TOKEN.json").write_text('{"t": 2}'); (is_ / "_work/ETSY_TOKEN.json.updated").touch()
+    rc, log = kos(YAZ, KURU="true", KOD="0")
+    tok = d / "ASTROLOVE/TEMP/ETSY_TOKEN.json"
+    kontrol("token yenilendi: Drive'a geri yazildi (token_geri_yaz.sh), cikis 0",
+            rc == 0 and tok.exists() and tok.read_text() == '{"t": 2}' and "Token geri yazildi (deneme 1)" in log)
+    rc, log = kos(YAZ, KURU="true", KOD="0", FAKE_HATA="copyto_ana", FAKE_ANA="ETSY_TOKEN.json")
+    kontrol("token geri yazimi 3 denemede basarisiz: adim FAIL (::error::)", rc != 0 and "ETSY TOKEN GERI YAZILAMADI" in log)
+    kontrol("is akisi: token geri yazimi token_geri_yaz.sh + TOKEN_RC (elle rclone copyto yok)",
+            "token_geri_yaz.sh" in ADIM[YAZ]["run"] and "TOKEN_RC" in ADIM[YAZ]["run"] and 'rclone copyto _work/ETSY_TOKEN.json' not in ADIM[YAZ]["run"])
     shutil.rmtree(t, ignore_errors=True)
     print(f"yd-kapak-yukle durum adimlari: {sum(SONUC)}/{len(SONUC)} PASS")
     return 0 if all(SONUC) else 1

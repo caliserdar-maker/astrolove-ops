@@ -286,6 +286,60 @@ def bloklar(hz):
     kontrol("BLOK (liste kapisi): kapak 2400x2400", R["ilanlar"][0]["durum"] == "BLOK" and "3000x2250" in " ".join(R["ilanlar"][0]["neden"]))
 
 
+def eski_kapak(hz):
+    """inceleme 30 Eki madde 3: ESKI kapak kapisi DEVAM / ZATEN / BLOK yollarinin hepsinin basinda (liste kapisi sonradan degisirse de)."""
+    eski0 = L.eski_kapak_oku
+    tablo = {CIFT: dict(durum="ESKI", yeni_sha256="")}
+    # ZATEN yolu: bitmis ilan (DEVAM kaydi var), ILERLEME bos; kapak sonradan ESKI isaretlendi -> BLOK, ILERLEME PASS yazilmaz
+    api = SahteYD()
+    _, R, po = kuru(api, hz, "e1")
+    damga = R["plan_damga"]
+    dv, il = durum_dosyalari("de1")
+    yaz(api, hz, po, "ye1", damga, dv, il)
+    il.write_text('{"ilanlar": {}}')
+    L.eski_kapak_oku = lambda p=None: tablo
+    try:
+        n0 = len(api.yaz)
+        _, Rk, _ = kuru(api, hz, "e1b", devam=dv, ilerleme=il)
+        rc, Ry = yaz(api, hz, po, "ye1b", damga, dv, il)
+    finally:
+        L.eski_kapak_oku = eski0
+    kontrol("ESKI kapak + ZATEN yolu: kuru ve yazim BLOK (ZATEN degil; BLOK yarim degil, cikis 0), ILERLEME PASS yazilmadi, yazma yok",
+            Rk["ilanlar"][0]["durum"] == "BLOK" and "ESKI" in " ".join(Rk["ilanlar"][0]["neden"]) and Ry["ilanlar"][0]["durum"] == "BLOK"
+            and (json.loads(il.read_text()).get("ilanlar") or {}).get(LID, {}).get("durum") != "PASS" and len(api.yaz) == n0)
+    # DEVAM yolu: yarim ilan (kapak yuklendi, kota tabaninda durdu); kapak sonradan ESKI -> yazimda BLOK, ek yukleme yok, cikis 1
+    api = SahteYD()
+    _, R, po = kuru(api, hz, "e2")
+    damga = R["plan_damga"]
+    dv, il = durum_dosyalari("de2")
+    orig = api._k
+
+    def kes():
+        if any(y[0] == "yukle" for y in api.yaz) and any(y[0] == "sira" for y in api.yaz) and not any(y[0] == "bag" for y in api.yaz):
+            api.remaining = 9
+        return orig()
+    api._k = kes
+    yaz(api, hz, po, "ye2", damga, dv, il)
+    api._k = orig; api.remaining = 5000
+    n_yukle, n_yaz = api.n_yukle, len(api.yaz)
+    L.eski_kapak_oku = lambda p=None: tablo
+    try:
+        _, Rk, _ = kuru(api, hz, "e2b", devam=dv, ilerleme=il)
+        rc, Ry = yaz(api, hz, po, "ye2b", damga, dv, il)
+    finally:
+        L.eski_kapak_oku = eski0
+    kontrol(f"ESKI kapak + DEVAM yolu: kuru BLOK, yazim BLOK, cikis 1, ek yukleme / yazma yok (yukleme {n_yukle} -> {api.n_yukle})",
+            n_yukle >= 1 and Rk["ilanlar"][0]["durum"] == "BLOK" and Ry["ilanlar"][0]["durum"] == "BLOK" and rc == 1
+            and api.n_yukle == n_yukle and len(api.yaz) == n_yaz)
+    # DEVAM yolu dosya kapisi: hedef dosya bozulursa BLOK (eskiden yalniz bir_ilan'in kayitli sha kontrolu vardi)
+    import shutil
+    hz8 = DEPO / "h8"; shutil.copytree(hz, hz8)
+    (hz8 / LID / "hedef" / "05_5.jpg").write_bytes((hz8 / LID / "hedef" / "05_5.jpg").read_bytes() + b"x")
+    _, Rk, _ = kuru(api, hz8, "e2c", devam=dv, ilerleme=il)
+    kontrol("DEVAM yolu: dosya kapisi uygulanir (sha256 farkli -> BLOK)",
+            Rk["ilanlar"][0]["durum"] == "BLOK" and "sha256" in " ".join(Rk["ilanlar"][0]["neden"]))
+
+
 def kota_ve_kilit(hz):
     api = SahteYD()
     _, R, po = kuru(api, hz, "k6")
@@ -315,6 +369,7 @@ def main():
     bag_bos(hz)
     devam_zaten_blok(hz)
     bloklar(hz)
+    eski_kapak(hz)
     kota_ve_kilit(hz)
     gec = sum(1 for _, ok in SONUC if ok)
     print(f"yd_kapak_yukle testleri: {gec}/{len(SONUC)} PASS")
