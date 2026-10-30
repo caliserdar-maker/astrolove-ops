@@ -71,9 +71,12 @@ jobs:
           set -uo pipefail
           git -C _kupa rev-parse HEAD; git -C _ko rev-parse HEAD
           mkdir -p _out
+          set +e        # Actions varsayilani bash -e: FAIL ciftte adim burada kesilmesin, RC sonraki adimda (30 Eki kosu 41117222300)
           python3 scripts/kapak78/kupa_kart78.py uret --ciftler _ciftler.txt --ko _ko/kupa_orchard --sembol-kok _kupa/kupa_uretim/sembol \
             --v12 _v12/bin/python3 --is _s --out _out
           echo "RC=$?" >> "$GITHUB_ENV"
+          # is loglari proxy'de okunamiyor: FAIL nedeni annotation olarak (ilk 400 karakter, tek satir)
+          python3 -c "import json,glob; [print('::error title=' + k['cift'] + ' FAIL::' + ' '.join(k['neden'].split())[:400]) for k in (json.load(open(f)) for f in sorted(glob.glob('_out/SONUC_*.json'))) if k['durum'] != 'PASS']"
       - uses: actions/upload-artifact@v4
         if: always() && env.N != '0'
         with:
@@ -131,9 +134,11 @@ jobs:
             sha256sum _ref/*.jpg; REF="--ref _ref"
           fi
           D=$(date -u +%Y%m%d_%H%M%S); [ "$C" = "HEPSI" ] || D="${D}_ORNEK"
+          set +e        # bash -e: FAIL'de de Drive'a yazilir, sonra cikis
           python3 scripts/kapak78/kupa_kart78.py topla --dir _d --secim _secim.txt --out _o $REF --kaynak "kupa_kart78@${GITHUB_SHA::8} kosu ${GITHUB_RUN_ID}"
           RC=$?
-          sha256sum _o/*.jpg | head -20
+          set -e
+          sha256sum _o/*.jpg 2>/dev/null | head -20 || true
           rclone copy _o "gdrive:ASTROLOVE/TEMP/KUPA_KART78/$D" --immutable --transfers 8 -q || { echo "::error::Drive yazimi"; exit 1; }
           cat _o/OZET.md >> "$GITHUB_STEP_SUMMARY"
           echo "Cikti: TEMP/KUPA_KART78/$D ($(find _o -type f | wc -l) dosya), RC $RC" | tee -a "$GITHUB_STEP_SUMMARY"
