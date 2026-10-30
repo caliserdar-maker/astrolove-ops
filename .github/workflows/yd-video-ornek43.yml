@@ -62,6 +62,8 @@ jobs:
           for C in $CS; do
             I=$((I + 1))
             grep -qE "(^|,)$C(,|$)" data/pod/yd78_ids.csv || { echo "::error::$C yd78_ids.csv'de yok"; HATA=1; continue; }
+            if grep -qE "^$C,ESKI," data/pod/yd_kapak_eski.csv; then   # inceleme 30 Eki: eski Y01 kapakla video uretilmez
+              echo "::error::$C kapagi ESKI (data/pod/yd_kapak_eski.csv); yeni Y01 gelmeden video yok"; HATA=1; continue; fi
             rclone copyto "gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1/$KD/${C}_Y01.jpg" "_w/${C}_Y01.jpg" -q
             python3 -c "from PIL import Image; import sys; s = Image.open(sys.argv[1]).size; print('kapak', s); assert s == (3000, 2250), s" "_w/${C}_Y01.jpg"
             V="_w/$C.mp4"
