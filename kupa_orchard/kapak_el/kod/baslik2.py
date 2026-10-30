@@ -6,6 +6,7 @@ alt yazi 78 kapakta ayni boy ve ayni yerde (Serdar 30 Eki). Burc satirinin taban
 Satir yerleri BOY ve 12 burcun en derin harf inisine (Q kuyrugu) gore hesaplanir.
 Ortam: ALT_ORAN (alt yazi boyu / baslik boyu), ALT_AGIRLIK, IZ_ORAN (harf araligi / alt yazi boyu), GOLGE_GUC.
 Cikti once gecici dosyaya yazilir, sonra yerine konur (yarim dosya kalmaz).
+Sade kupa: burc2 yerine '-' verilirse baslik yalniz BURC1.
 Kullanim: python3 -I baslik2.py <girdi> <cikti> <burc1> <burc2> <xc> <blok_alt_y> <boy_px> <r,g,b> <alt_yazi> [golge 0/1]"""
 import os, sys
 import numpy as np
@@ -21,7 +22,8 @@ BANT = (680, 2320)                      # baslik: 4:5 kirpma x 600-2400, iki yan
 BANT_ALT = (640, 2360)                  # alt yazi (her kapakta ayni, onayli genislik): iki yanda 40 px pay
 BURCLAR = ['ARIES', 'TAURUS', 'GEMINI', 'CANCER', 'LEO', 'VIRGO', 'LIBRA', 'SCORPIO',
            'SAGITTARIUS', 'CAPRICORN', 'AQUARIUS', 'PISCES']
-assert B1.upper() in BURCLAR and B2.upper() in BURCLAR, 'bilinmeyen burc'
+TEK = B2 == '-'                                  # sade kupa: tek burc basligi (B2 = '-')
+assert B1.upper() in BURCLAR and (TEK or B2.upper() in BURCLAR), 'bilinmeyen burc'
 assert len(RENK) == 3 and all(0 <= v <= 255 for v in RENK), 'renk r,g,b olmali'
 assert not any(c in ALT_YAZI for c in '.+=—–'), 'alt yazida yasak karakter'
 ALT_ORAN = float(os.environ.get('ALT_ORAN', 0.40))
@@ -42,7 +44,7 @@ def genislik(f, t):
     return b[2] - b[0]
 
 
-baslik = f'{B1.upper()} & {B2.upper()}'
+baslik = B1.upper() if TEK else f'{B1.upper()} & {B2.upper()}'
 yari = min(XC - BANT[0], BANT[1] - XC)
 boy = BOY
 while genislik(font(boy, 650), baslik) > 2 * yari:
