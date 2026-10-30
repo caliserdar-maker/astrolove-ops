@@ -1,0 +1,142 @@
+name: kupa-kart78
+# Kupa bilgi kartlari, 78 Orchard kupa cifti, galeri 2-6 (Serdar gece istisnasi 30 Eki). ETSY API YOK (token yok, kilit yok), Canva yok.
+# Kod: scripts/kapak78/kupa_kart78.py (wa_kupa_kart_ornek.kart_isle aynen; K02=2, K03=3, K05=4, K07=5, K04=6; ayni burc K03 First / Second Name).
+# Gorunumler wa-kupa-kart-ornek.yml mod=uret yoluyla ayni (orchard_gorunum _v12 + kupa_zemin, ayni surumler); girdiler SHA ile:
+#   temiz/kupa-orchard 0196e37a (kupa_orchard), kupa-printful-sonuc ac9aa718 (kupa_uretim/sembol).
+# ciftler=CANCER_LIBRA: 28 Eki onayli ornekle kiyas (TEMP/KART_SABLON_ORNEK/<kiyas_damga>; sha esit ya da ort <= 1,0 ve max <= 16).
+# ciftler=HEPSI: 78 cift (data/pod/yd78_ids.csv), 16 parca paralel.
+# Cikti: TEMP/KUPA_KART78/<damga>/ (HEPSI disinda <damga>_ORNEK): <CIFT>_K0N.jpg, MANIFEST.csv, KONTAK_K0N.jpg, OZET.md, SONUC_<CIFT>.json,
+#        KIYAS_CANCER_LIBRA.json; --immutable.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      ciftler: {description: "virgullu cift anahtari ya da HEPSI (78)", required: true, default: "CANCER_LIBRA"}
+      kiyas_damga: {description: "TEMP/KART_SABLON_ORNEK/<damga> (28 Eki onayli CANCER_LIBRA kupa kartlari); bos = kiyas yok", required: false, default: "20261028_155614"}
+jobs:
+  kart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        parca: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    steps:
+      - name: Girdi kapisi
+        env: {C: "${{ inputs.ciftler }}"}
+        run: '[[ "$C" =~ ^(HEPSI|[A-Z]+_[A-Z]+(,[A-Z]+_[A-Z]+)*)$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - name: Bu parcanin ciftleri
+        env: {C: "${{ inputs.ciftler }}", P: "${{ matrix.parca }}"}
+        run: |
+          set -euo pipefail
+          python3 - <<'EOF' > _ciftler.txt
+          import csv, os
+          t = [r["cift"] for r in csv.DictReader(open("data/pod/yd78_ids.csv"))]
+          if len(t) != 78 or len(set(t)) != 78:
+              raise SystemExit(f"DUR: cift listesi 78 tekil degil ({len(t)})")
+          c = t if os.environ["C"] == "HEPSI" else os.environ["C"].split(",")
+          bil = [x for x in c if x not in t]
+          if bil:
+              raise SystemExit(f"bilinmeyen cift: {bil}")
+          print("\n".join(x for i, x in enumerate(c) if i % 16 == int(os.environ["P"])))
+          EOF
+          echo "N=$(grep -c . _ciftler.txt || true)" >> "$GITHUB_ENV"; cat _ciftler.txt
+      - uses: actions/checkout@v4
+        if: env.N != '0'
+        with: {ref: ac9aa7185f9d7b07903f0cb99e7f366f425a631c, path: _kupa, sparse-checkout: kupa_uretim/sembol}
+      - uses: actions/checkout@v4
+        if: env.N != '0'
+        with: {ref: 0196e37a0447d61eab42b84778a56d9261b0b201, path: _ko, sparse-checkout: kupa_orchard}
+      - uses: actions/setup-python@v5
+        if: env.N != '0'
+        with:
+          python-version: "3.12"
+      - name: libfribidi (raqm)
+        if: env.N != '0'
+        timeout-minutes: 4
+        continue-on-error: true
+        run: dpkg -s libfribidi0 >/dev/null 2>&1 || sudo apt-get install -y -qq libfribidi0 >/dev/null
+      - name: pip (kart + zemin) ve Orchard ortami (wa-kupa-kart-ornek ile ayni surumler)
+        if: env.N != '0'
+        timeout-minutes: 8
+        run: |
+          pip install -q pillow==11.0.0 numpy==2.1.3 opencv-python-headless==4.10.0.84
+          python3 -m venv _v12 && _v12/bin/pip install -q numpy==2.5.3 pillow==12.3.0 scipy==1.18.1 opencv-python-headless==5.0.0.93
+          python3 -c "from PIL import features, __version__; assert features.check('raqm'); print('pillow', __version__, 'raqm')"
+      - name: Gorunumler + kartlar
+        if: env.N != '0'
+        run: |
+          set -uo pipefail
+          git -C _kupa rev-parse HEAD; git -C _ko rev-parse HEAD
+          mkdir -p _out
+          python3 scripts/kapak78/kupa_kart78.py uret --ciftler _ciftler.txt --ko _ko/kupa_orchard --sembol-kok _kupa/kupa_uretim/sembol \
+            --v12 _v12/bin/python3 --is _s --out _out
+          echo "RC=$?" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        if: always() && env.N != '0'
+        with:
+          name: kart-p${{ matrix.parca }}
+          path: _out
+          retention-days: 3
+      - name: Sonuc
+        if: env.N != '0'
+        run: '[ "${RC:-1}" = 0 ] || { echo "::error::parca ${{ matrix.parca }} FAIL cift var (SONUC_<CIFT>.json)"; exit 1; }'
+  topla:
+    needs: kart
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Girdi kapisi
+        env: {C: "${{ inputs.ciftler }}", R: "${{ inputs.kiyas_damga }}"}
+        run: '[[ "$C" =~ ^(HEPSI|[A-Z]+_[A-Z]+(,[A-Z]+_[A-Z]+)*)$ && "$R" =~ ^([0-9]{8}_[0-9]{6})?$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Ortam
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0 numpy==2.1.3
+          sudo apt-get -qq install -y rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+          rclone version | head -1
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: kart-p*
+          path: _d
+          merge-multiple: true
+      - name: MANIFEST + KONTAK + kiyas + OZET, Drive'a yaz
+        env: {C: "${{ inputs.ciftler }}", R: "${{ inputs.kiyas_damga }}"}
+        run: |
+          set -uo pipefail
+          if [ "$C" = "HEPSI" ]; then python3 -c "import csv; print('\n'.join(r['cift'] for r in csv.DictReader(open('data/pod/yd78_ids.csv'))))" > _secim.txt
+          else echo "$C" | tr ',' '\n' > _secim.txt; fi
+          REF=""
+          if [ -n "$R" ] && grep -qx CANCER_LIBRA _secim.txt; then
+            mkdir -p _ref
+            rclone copy "gdrive:ASTROLOVE/TEMP/KART_SABLON_ORNEK/$R" _ref --include "KUPA_CANCER_LIBRA_K0*.jpg" --max-depth 1 -q
+            sha256sum _ref/*.jpg; REF="--ref _ref"
+          fi
+          D=$(date -u +%Y%m%d_%H%M%S); [ "$C" = "HEPSI" ] || D="${D}_ORNEK"
+          python3 scripts/kapak78/kupa_kart78.py topla --dir _d --secim _secim.txt --out _o $REF --kaynak "kupa_kart78@${GITHUB_SHA::8} kosu ${GITHUB_RUN_ID}"
+          RC=$?
+          sha256sum _o/*.jpg | head -20
+          rclone copy _o "gdrive:ASTROLOVE/TEMP/KUPA_KART78/$D" --immutable --transfers 8 -q || { echo "::error::Drive yazimi"; exit 1; }
+          cat _o/OZET.md >> "$GITHUB_STEP_SUMMARY"
+          echo "Cikti: TEMP/KUPA_KART78/$D ($(find _o -type f | wc -l) dosya), RC $RC" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$RC" = 0 ] || { echo "::error::kupa kart 78 PASS degil"; exit 1; }
+      - if: always()
+        run: rm -rf _d _o _ref ~/.config/rclone
