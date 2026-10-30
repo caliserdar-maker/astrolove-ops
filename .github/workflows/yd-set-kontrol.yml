@@ -1,0 +1,66 @@
+name: yd-set-kontrol
+# YD 10'lu set dosya kontrolu (Serdar onayi 30 Eki, Is C madde 3). ETSY API YOK, token yok, kilit yok; Drive yalniz okunur + yeni klasore yazilir.
+# Girdi: Drive TEMP/YD_KAPAK_V1/<kapak_damga>/*.jpg (klasor degistirilmez). Kontrol: 703 dosya (data/pod/yd78_ids.csv x Y01-Y03, Y05-Y10
+# + ORTAK_Y04), 3000x2250 (Serdar 27 Eki), bos / bozuk, sha256 tekrari (hicbiri izinli degil), cift adi = dosya adi. scripts/kapak78/yd_set_kontrol.py
+# Cikti: Drive TEMP/YD_QC/<damga>/ (OZET.md, SET_KONTROL.csv), --immutable.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      kapak_damga: {description: "TEMP/YD_KAPAK_V1/<damga> (YYYYMMDD_HHMMSS)", required: true}
+jobs:
+  kontrol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Girdi kapisi
+        env: {KD: "${{ inputs.kapak_damga }}"}
+        run: |
+          set -euo pipefail
+          [[ "$KD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::kapak_damga"; exit 1; }
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Indir + kontrol (Etsy yok)
+        env: {KD: "${{ inputs.kapak_damga }}"}
+        run: |
+          set -euo pipefail
+          mkdir -p _work/kapak _out
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+          rclone copy "gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1/$KD" _work/kapak --include "*.jpg" --include "*.jpeg" --include "*.JPG" \
+            --max-depth 1 --transfers 8 -q
+          echo "indirilen: $(ls _work/kapak | wc -l)"
+          set +e
+          python3 scripts/kapak78/yd_set_kontrol.py --dir _work/kapak --ciftler data/pod/yd78_ids.csv --out _out
+          RC=$?
+          set -e
+          sed -i "s|^kaynak: klasor _work/kapak|kaynak: klasor TEMP/YD_KAPAK_V1/$KD|" _out/OZET.md
+          head -4 _out/OZET.md >> "$GITHUB_STEP_SUMMARY"
+          echo "RC=$RC" >> "$GITHUB_ENV"
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if ls _out/* >/dev/null 2>&1; then
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/YD_QC/${DAMGA:?}" --immutable -q
+            echo "::notice title=YD SET::TEMP/YD_QC/${DAMGA}/ (cikis ${RC:-?})"
+          fi
+          [ "${RC:-1}" = 0 ]
+      - if: always()
+        run: rm -rf _work _out ~/.config/rclone
