@@ -12,18 +12,27 @@ Modlar (alt komut):
   kuru   : ETSY SALT OKUMA (yd_envanter_oku.salt_okur). Ilan basina 6 GET (ilan, galeri, video, Style baglari, envanter,
            kisisellestirme) + ayni burcta RU ceviri okumasi (yalniz bilgi). HAZIR ilanlar PLAN_KUPA78.json; plan sha256 -> plan_damga.
   yedek  : ETSY YOK (yalniz etsystatic CDN). Plandaki eski gorseller + video indirilir; <ilan>_<CIFT>/YEDEK.json (kimlik, rank, alt
-           metin, Style baglari (ad + value_id + image_id + rank), video, ayni burcta eski aciklama + kisisellestirme, dosya sha256).
-           Is akisi Drive'a --immutable yazar ve lsjson ile dogrular; Etsy kilidinden ONCE, ayri isde (KILIT SURESI kurali).
+           metin, Style baglari (ad + value_id + image_id + rank), video, ayni burcta eski aciklama + kisisellestirme, dosya sha256 +
+           md5). ZAMAN DAMGASIZ (ayni plan -> ayni bayt; --immutable devam kosusunda da gecer); kosu zamani --out/YEDEK_OZET.csv.
+           Bayt imzasi (JPEG FFD8FF / MP4 ftyp) tutmayan indirme FAIL (HTML hata sayfasi yedek sayilmaz). --yedek-liste (lsjson -R
+           --hash) + --yedek-var-dir (Drive'daki YEDEK.json'lar): Drive'da tam ve hash'i tutan yedegi olan ilan ATLANIR (VAR, CDN'e
+           gidilmez; islenmis ilanin eski adresi 404 olabilir). Ayri is akisi kupa-galeri78-hazir (KILITSIZ, Etsy token yok).
+  parti  : ETSY YOK. Plan + DEVAM (ilan basina DEVAM_<ilan>.json dahil) + ILERLEME -> bu kosunun ilanlari (--azami-ilan, varsayilan
+           15) ve yalniz onlarin dosya listeleri (is akisi yalniz partinin dosyalarini indirir).
   yaz    : ETSY'YE YAZAR (--confirm KUPA_GALERI78 + --plan + --plan-damga + alt metin ONAYLI). Ilan basina: kota (kalan - en kotu
-           istek >= KOTA_SINIRI 10) -> 6 GET -> canli == plan (DEVAM'da uzlasma) -> YEDEK KAPISI (YEDEK.json + Drive lsjson'da her
-           dosya ayni boyutta; yoksa yazim yok) -> galeri (sil / yukle 20 siniri, Style bagi yeni 7-14'e, eski bagli gorseller bag
+           istek >= KOTA_SINIRI 10; ilk ilandan once tek ucuz GET ile kalan okunur) -> 6 GET -> canli == plan (DEVAM'da uzlasma) ->
+           YEDEK KAPISI (YEDEK.json + Drive lsjson --hash'te her dosya ayni boyut + md5 / sha256; yoksa yazim yok) -> galeri (sil / yukle 20 siniri, Style bagi yeni 7-14'e, eski bagli gorseller bag
            kurulduktan SONRA silinir, sira kontrolu) -> video (yeni active olmadan eski silinmez) -> metin (state active okunur,
            PATCH description + kisisellestirme POST) -> son geri okuma. Tutmazsa GERI ALMA (YEDEK'ten: eski gorseller ayni sira ve alt
-           metinle, Style baglari ada gore, eski video, eski metin). Kota tabani durmasi geri alma yapmaz (DEVAM; sonraki kosu surdurur).
+           metinle, Style baglari ada gore, eski video, eski metin). Kota tabani durmasi geri alma yapmaz (DEVAM + kota_durdu
+           kaydi; sonraki kosu surdurur ya da geri_al modu geri alir). DEVAM_<ilan>.json her yukleme oncesi / sonrasi Drive'a
+           (--devam-hedef-kok): kosu ilan ortasinda olse de yeni gorsel kimlikleri kayitta (devam ve geri_al --devam-ilan-dir ile okur).
            Ilk PASS / ZATEN olmayan ilanda kosu durur (sonrakiler KALAN).
   geri_al: ETSY'YE YAZAR (--confirm KUPA_GALERI78_GERI + --sadece). Ayni geri alma yolu, elle (YEDEK.json + dosyalar).
-RU: kupa icin onayli RU kurucusu yok -> RU YAZILMAZ (ayni burc ciftinde RU metni okunur, raporda RU_ACIK). updateListing yalniz
-ayni burc metninde ve state active okunduktan sonra (CLAUDE.md 7 Eyl: taslagi yayina alir).
+METIN (aciklama + kisisellestirme) VARSAYILAN KAPALI (--metin-yaz): kupa icin onayli RU kurucusu yok; EN "First Name" olur RU eski
+kalirsa CLAUDE.md "RU = EN" kurali bozulur. Galeri isi metinden ayri. Metin acikken: yasak ifade kapisi pod_5x7_kuru.YASAK_EN +
+etsy_common.RU_YASAK (metin_kurali.py main'de yok), kisisellestirme canli okunur, tek soru degilse BLOK, question_id korunur.
+updateListing yalniz state active okunduktan sonra (CLAUDE.md 7 Eyl: taslagi yayina alir).
 Istek tahmini: istek_tahmini() (kod yollarindan sayim; GET 5xx / 429 kisa tekrarlari dahil degil, sert taban her istekten once)."""
 import argparse
 import copy
@@ -34,6 +43,7 @@ import itertools
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -44,7 +54,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import cl_galeri_degistir as G  # noqa: E402
 import eski78_gorsel_yukle as Y  # noqa: E402
-from etsy_common import KOTA_SINIRI  # noqa: E402  (Serdar 15 ve 24 Eki: 10; degistirilmez)
+from etsy_common import KOTA_SINIRI, RU_YASAK  # noqa: E402  (Serdar 15 ve 24 Eki: 10; degistirilmez)
+from pod_5x7_kuru import YASAK_EN  # noqa: E402  (urun metni yasaklari; metin_kurali.py main'de yok)
 
 KOK = HERE.parents[1]
 ONAY, ONAY_GERI = "KUPA_GALERI78", "KUPA_GALERI78_GERI"
@@ -63,7 +74,7 @@ URUN_N = 16                         # 8 stil x 2 boy
 BURCLAR = ["ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS", "CAPRICORN", "AQUARIUS", "PISCES"]
 CIFTLER = sorted("_".join(sorted(p)) for p in itertools.combinations_with_replacement(BURCLAR, 2))
 ALT_CSV = KOK / "data" / "pod" / "kupa_galeri78_alt.csv"
-YASAK_METIN = re.compile(r"[–—]|AstroLove(?!Art)|hahnem|photo\s*rag|gicl[eé]e|prodigi", re.I)
+YASAK_LISTE = (YASAK_EN, RU_YASAK, re.compile(r"AstroLove(?!Art)"))   # tire, Hahnemuhle, Printful, OBA, cotton, museum, omur yili
 KAPI_OKUMA = 6                      # ilan, galeri, video, Style baglari, envanter, kisisellestirme
 VIDEO_DENEME, VIDEO_BEKLE = 12, 10  # video_yukle_78 v7 (yeni video active olana dek ~2 dk)
 VIDEO_MB = 100
@@ -74,6 +85,10 @@ ISTEK_ALAN = ("en_az", "en_kotu")   # bilgi: kod surumuyle degisir; canli = plan
 
 def log(m):
     Y.log(m)
+
+
+def yasak_bul(t):
+    return sorted({m.group(0) for r in YASAK_LISTE for m in r.finditer(t or "")})
 
 
 def jdump(x):
@@ -98,20 +113,22 @@ def istek_tahmini(n_yukle=N, n_sil=N, metin=False, n_rank=N):
       bag        : en az 2 (POST + var_img) | en kotu 4 + O
       sira       : en az 1 (galeri, oturdu) | en kotu O + 2 x (n_rank x 4 + O) + bag (4 + O)
       video      : en az 5 (video okuma, POST, active okuma, DELETE, son video okuma) | en kotu 1 + (2 + O) + VIDEO_DENEME + 4 + O
-      metin      : en az 3 (ilan GET, PATCH, kisisellestirme POST) | en kotu 1 + 4 + 4
+      metin      : en az 4 (ilan GET, kisisellestirme GET, PATCH, POST) | en kotu 2 + 4 + 4
       son okuma  : en az 6 (galeri, bag, video, ilan, envanter, kisisellestirme) | en kotu 3 x O + 3
-      geri alma  : kapi 6 + 14 yukle + n_yukle sil + bag + sira + video + metin + son okuma (en kotu; FAIL yolunda bir kez)
-    -> dict(en_az, en_kotu_geri_almasiz, geri_alma, en_kotu)"""
+      geri alma  : kapi 6 + n_sil yeniden yukleme (ilanin GERCEK eski gorsel sayisi; en kotu hepsi silinmis) + n_yukle sil + bag +
+                   sira (n_sil gorsel) + video + metin + son okuma (en kotu; FAIL yolunda bir kez)
+    n_sil = plandaki eski gorsel sayisi (14 sabiti DEGIL; inceleme 30 Eki madde 5). -> dict(en_az, en_kotu_geri_almasiz, geri_alma, en_kotu)"""
     O = G.OKUMA_TEKRAR
     yk_az, yk_k = 1, (2 + 1) + (2 + O)
     bag_az, bag_k = 2, 4 + O
     sira_az, sira_k = 1, O + 2 * (n_rank * 4 + O) + bag_k
     vid_az, vid_k = 5, 1 + (2 + O) + VIDEO_DENEME + 4 + O
-    met_az, met_k = (3, 9) if metin else (0, 0)
+    met_az, met_k = (4, 10) if metin else (0, 0)
     son_az, son_k = 6, 3 * O + 3
     az = KAPI_OKUMA + n_yukle * yk_az + n_sil * 1 + bag_az + sira_az + vid_az + met_az + son_az
     kotu = KAPI_OKUMA + n_yukle * yk_k + n_sil * 4 + bag_k + sira_k + vid_k + met_k + son_k
-    geri = KAPI_OKUMA + N * yk_k + n_yukle * 4 + bag_k + sira_k + vid_k + met_k + son_k
+    geri_sira_k = O + 2 * (n_sil * 4 + O) + bag_k
+    geri = KAPI_OKUMA + n_sil * yk_k + n_yukle * 4 + bag_k + geri_sira_k + vid_k + met_k + son_k
     return dict(en_az=az, en_kotu_geri_almasiz=kotu, geri_alma=geri, en_kotu=kotu + geri, okuma_tekrar=O)
 
 
@@ -162,7 +179,7 @@ def alt_metin(r, a, b):
 
 
 def alt_gecerli(t):
-    return 0 < len(t or "") <= 250 and not Y.YASAK_ALT.search(t) and "<" not in t
+    return 0 < len(t or "") <= 250 and not Y.YASAK_ALT.search(t) and not yasak_bul(t) and "<" not in t
 
 
 # ---------------------------------------------------------------- kaynak dosyalar (ETSY YOK)
@@ -286,10 +303,13 @@ def metin_plani(L, per, a, b):
         hata.append("metin: ayni burc ama 'Name Under' kalibi da 'First Name / Second Name' de yok; elle bakilmali")
     if not per:
         hata.append("metin: kisisellestirme sorusu okunamadi (0 soru)")
-    if dd == "DEGISTI" and YASAK_METIN.search(d1):
-        hata.append("metin: yeni aciklamada uzun / orta tire ya da yasak ifade; yazim yok")
-    if any(YASAK_METIN.search(" ".join(str(q.get(k) or "") for k in ("question_text", "instructions"))) for q in q1) and q1 != q0:
-        hata.append("metin: yeni kisisellestirmede uzun / orta tire ya da yasak ifade; yazim yok")
+    if len(per or []) > 1:
+        hata.append(f"metin: {len(per)} kisisellestirme sorusu (tek soru beklenir; POST tum seti degistirir); BLOK")
+    if dd == "DEGISTI" and yasak_bul(d1):
+        hata.append(f"metin: yeni aciklamada yasak ifade / tire {yasak_bul(d1)[:5]}; yazim yok")
+    yq = yasak_bul(" ".join(str(q.get(k) or "") for q in q1 for k in ("question_text", "instructions")))
+    if yq and q1 != q0:
+        hata.append(f"metin: yeni kisisellestirmede yasak ifade / tire {yq[:5]}; yazim yok")
     return dict(yaz=yaz, durum="+".join(sorted(set(durum))), hata=hata,
                 desc_once=d0, desc_sonra=d1 if dd == "DEGISTI" else None,
                 pers_once=q0, pers_sonra=q1 if q1 != q0 else None)
@@ -458,39 +478,93 @@ def esit(a, b):
 
 
 # ---------------------------------------------------------------- yedek (ETSY YOK; CDN)
+def imza_bayt(b, video):
+    """JPEG FFD8FF / MP4 ftyp (inceleme 30 Eki madde 6: 16 bayt HTML yedek sayilmisti)"""
+    return bool(b) and (b[4:8] == b"ftyp" if video else b[:3] == b"\xff\xd8\xff")
+
+
+def md5_dosya(yol):
+    h = hashlib.md5()
+    with open(yol, "rb") as f:
+        for b in iter(lambda: f.read(1 << 20), b""):
+            h.update(b)
+    return h.hexdigest()
+
+
 def yedek_kur(gd, plan_damga, kok, indir=None):
-    """Plan girdisinden (yazimda canli == plan kapisi bunu canliya baglar) eski gorsel + video indirme + YEDEK.json."""
+    """Plan girdisinden (yazimda canli == plan kapisi bunu canliya baglar) eski gorsel + video indirme + YEDEK.json.
+    YEDEK.json zaman damgasiz ve anahtar sirali: ayni plan -> ayni bayt (devam kosusunda rclone --immutable gecer). Hata olursa ilanin
+    yerel klasoru silinir (yarim yedek Drive'a gitmez)."""
     indir = indir or Y.cdn_indir
-    d = Path(kok) / f"{gd['ilan']}_{gd['cift']}"; d.mkdir(parents=True, exist_ok=True)
+    d = Path(kok) / f"{gd['ilan']}_{gd['cift']}"
     c = gd["canli"]
     rk = {i: r for r, i, _, _ in c["galeri"]}
     vad = {v: k for k, v in gd["stil_vid"].items()}
-    Yd = dict(ilan=gd["ilan"], cift=gd["cift"], plan_damga=plan_damga, ts_utc=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
+    Yd = dict(ilan=gd["ilan"], cift=gd["cift"], plan_damga=plan_damga,
               galeri=[], baglar=[dict(stil=vad.get(v), property_id=p, value_id=v, image_id=i, rank=rk.get(i)) for p, v, i in c["bag"]],
               video=[], metin=gd["metin"] if gd["metin"].get("yaz") else dict(yaz=False, desc_sha=c["desc_sha"]))
-    for r, i, alt, u in c["galeri"]:
-        if not str(u).startswith(CDN):
-            raise Y.Dur(f"yedek: {i} CDN disi adres")
-        p = d / f"r{r:02d}_{i}.jpg"; p.write_bytes(indir(u))
-        Yd["galeri"].append(dict(rank=r, listing_image_id=i, alt_text=alt, url=u, dosya=p.name, sha256=Y.sha256(p), bayt=p.stat().st_size))
-    for vid, u in c["video"]:
-        if not str(u).startswith(CDN):
-            raise Y.Dur(f"yedek: video {vid} CDN disi adres")
-        p = d / f"video_{vid}.mp4"; p.write_bytes(indir(u))
-        Yd["video"].append(dict(video_id=vid, url=u, dosya=p.name, sha256=Y.sha256(p), bayt=p.stat().st_size))
-    if any(not x["bayt"] for x in Yd["galeri"] + Yd["video"]):
-        raise Y.Dur("yedek: bos dosya")
-    (d / "YEDEK.json").write_text(json.dumps(Yd, indent=1, ensure_ascii=False), encoding="utf-8")
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+        for r, i, alt, u in c["galeri"]:
+            if not str(u).startswith(CDN):
+                raise Y.Dur(f"yedek: {i} CDN disi adres")
+            b = indir(u)
+            if not imza_bayt(b, False):
+                raise Y.Dur(f"yedek: gorsel {i} JPEG imzasi yok ({len(b or b'')} bayt; hata sayfasi?)")
+            p = d / f"r{r:02d}_{i}.jpg"; p.write_bytes(b)
+            Yd["galeri"].append(dict(rank=r, listing_image_id=i, alt_text=alt, url=u, dosya=p.name, sha256=Y.sha256(p), md5=md5_dosya(p),
+                                     bayt=p.stat().st_size))
+        for vid, u in c["video"]:
+            if not str(u).startswith(CDN):
+                raise Y.Dur(f"yedek: video {vid} CDN disi adres")
+            b = indir(u)
+            if not imza_bayt(b, True):
+                raise Y.Dur(f"yedek: video {vid} MP4 imzasi yok ({len(b or b'')} bayt; hata sayfasi?)")
+            p = d / f"video_{vid}.mp4"; p.write_bytes(b)
+            Yd["video"].append(dict(video_id=vid, url=u, dosya=p.name, sha256=Y.sha256(p), md5=md5_dosya(p), bayt=p.stat().st_size))
+        (d / "YEDEK.json").write_text(json.dumps(Yd, indent=1, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+    except BaseException:
+        shutil.rmtree(d, ignore_errors=True)
+        raise
     return Yd
 
 
-def yedek_kapisi(gd, plan_damga, yedek_dir, drive):
-    """YEDEK.json yerelde + Drive listesinde (lsjson -R; Path -> Size) her dosya ayni boyutta. -> (yedek, neden)"""
-    alt = f"{gd['ilan']}_{gd['cift']}"
-    p = Path(yedek_dir) / alt / "YEDEK.json"
-    if not p.exists():
-        return None, ["yedek: YEDEK.json yok; yazim yok"]
-    yd = json.loads(p.read_text(encoding="utf-8"))
+def drive_liste_oku(yol):
+    """rclone lsjson -R --hash -> {Path: dict(Size, Hashes)}"""
+    if not yol or not Path(yol).exists():
+        return {}
+    return {x["Path"]: dict(Size=x.get("Size"), Hashes={k.lower(): v for k, v in (x.get("Hashes") or {}).items() if v})
+            for x in json.loads(Path(yol).read_text(encoding="utf-8") or "[]") if not x.get("IsDir")}
+
+
+def drive_dosya_ok(drive, yol, bayt, md5=None, sha=None):
+    """Drive kaydi: boyut ayni + ortak hash turlerinin (md5 / sha256) hepsi ayni; ortak hash yoksa FAIL (boyut tek basina yetmez)."""
+    x = drive.get(yol)
+    if not x or x.get("Size") != bayt:
+        return False
+    h = x.get("Hashes") or {}
+    ortak = [(h[k], v) for k, v in (("md5", md5), ("sha256", sha)) if h.get(k) and v]
+    return bool(ortak) and all(a == b for a, b in ortak)
+
+
+def yedek_drive_eksik(yd, alt, drive, yd_yol=None):
+    """YEDEK.json'daki her dosya (ve verilirse YEDEK.json'un kendisi) Drive'da ayni boyut + hash ile var mi -> eksik dosya adlari"""
+    eksik = [x["dosya"] for x in (yd.get("galeri") or []) + (yd.get("video") or [])
+             if not drive_dosya_ok(drive, f"{alt}/{x['dosya']}", x.get("bayt"), x.get("md5"), x.get("sha256"))]
+    if yd_yol is not None and not drive_dosya_ok(drive, f"{alt}/YEDEK.json", Path(yd_yol).stat().st_size, md5_dosya(yd_yol),
+                                                 Y.sha256(yd_yol)):
+        eksik.append("YEDEK.json")
+    return eksik
+
+
+def yerel_drive_eksik(yedek_dir, drive):
+    """yuklemeden sonra: yereldeki her yedek dosyasi Drive'da ayni boyut + hash ile -> eksik / farkli yollar"""
+    y = Path(yedek_dir)
+    return [str(p.relative_to(y)) for p in sorted(y.rglob("*")) if p.is_file()
+            and not drive_dosya_ok(drive, str(p.relative_to(y)), p.stat().st_size, md5_dosya(p), Y.sha256(p))]
+
+
+def yedek_plana_uygun(yd, gd, plan_damga):
     neden = []
     if yd.get("plan_damga") != plan_damga:
         neden.append("yedek baska plan damgasiyla")
@@ -501,29 +575,73 @@ def yedek_kapisi(gd, plan_damga, yedek_dir, drive):
         neden.append("yedek video kimlikleri plandan farkli")
     if yd.get("metin", {}).get("yaz") != gd["metin"].get("yaz"):
         neden.append("yedek metin kaydi plandan farkli")
-    if f"{alt}/YEDEK.json" not in drive:
-        neden.append("yedek: YEDEK.json Drive listesinde yok")
-    for x in (yd.get("galeri") or []) + (yd.get("video") or []):
-        if drive.get(f"{alt}/{x['dosya']}") != x["bayt"]:
-            neden.append(f"yedek: {x['dosya']} Drive'da yok ya da boyut farkli")
+    return neden
+
+
+def yedek_kapisi(gd, plan_damga, yedek_dir, drive):
+    """YEDEK.json yerelde (Drive'dan inmis) + Drive lsjson --hash'te YEDEK.json ve her dosya ayni boyut + md5 / sha256. -> (yedek, neden)"""
+    alt = f"{gd['ilan']}_{gd['cift']}"
+    p = Path(yedek_dir) / alt / "YEDEK.json"
+    if not p.exists():
+        return None, ["yedek: YEDEK.json yok; yazim yok"]
+    yd = json.loads(p.read_text(encoding="utf-8"))
+    neden = yedek_plana_uygun(yd, gd, plan_damga)
+    neden += [f"yedek: {x} Drive'da yok ya da boyut / hash farkli" for x in yedek_drive_eksik(yd, alt, drive, p)]
     return yd, neden
-
-
-def drive_liste_oku(yol):
-    if not yol or not Path(yol).exists():
-        return {}
-    return {x["Path"]: x.get("Size") for x in json.loads(Path(yol).read_text(encoding="utf-8")) if not x.get("IsDir")}
 
 
 def yedek_dosya(yedek_dir, alt, x, uzak=""):
     """Geri alma icin yedek dosyasi: yerelde yoksa (yazim isinde yalniz YEDEK.json iner) Drive'dan rclone ile; sha256 YEDEK ile ayni."""
     p = Path(yedek_dir) / alt / x["dosya"]
     if not p.exists() and uzak:
+        p.parent.mkdir(parents=True, exist_ok=True)
         subprocess.run([os.environ.get("RCLONE", "rclone"), "copyto", f"{uzak}/{alt}/{x['dosya']}", str(p), "-q"],
                        capture_output=True, timeout=300)
     if not p.exists() or Y.sha256(p) != x["sha256"]:
         raise Y.Dur(f"geri alma: yedek dosyasi {alt}/{x['dosya']} yok ya da sha256 farkli")
     return p
+
+
+class Kayit(Y.Kayit):
+    """DEVAM_<ilan>.json; uzak=True yazimlar Drive'a da (RCLONE ortam degiskeni; testte sahte). drive_ok: son uzak yazim basarili mi.
+    Uzak yazim: ilan basi, her yukleme oncesi (belirsiz) / sonrasi (yeni kimlik), video oncesi / sonrasi, durum degisimleri
+    (inceleme 30 Eki madde 2: kosu ilan ortasinda olurse yeni gorseller kayitsiz kalmasin). Silme / sira adimlari yalniz yerel
+    (canli galeriden yeniden kurulur)."""
+    drive_ok = True
+
+    def yaz(self, ids=None, uzak=True):
+        if ids is not None:
+            self.d["son_ids"] = sorted(ids)
+        self.p.write_text(json.dumps(self.d, indent=1, ensure_ascii=False))
+        if not (self.drive and uzak):
+            return
+        for _ in range(2):
+            try:
+                if subprocess.run([os.environ.get("RCLONE", "rclone"), "copyto", str(self.p), self.drive, "-q"],
+                                  capture_output=True, timeout=90).returncode == 0:
+                    self.drive_ok = True
+                    return
+            except Exception:   # noqa: BLE001
+                pass
+        self.drive_ok = False
+        log(f"  UYARI: DEVAM Drive'a yazilamadi ({self.drive})")
+
+
+def devam_ilan_oku(d, plan_damga):
+    """Drive'dan inen DEVAM_<ilan>.json'lar (ilan basina, her yuklemede yazilir) -> {ilan: kayit}; yalniz bu plan_damga"""
+    out = {}
+    for p in (sorted(Path(d).glob("DEVAM_*.json")) if d and Path(d).is_dir() else []):
+        try:
+            x = json.loads(p.read_text(encoding="utf-8"))
+        except ValueError:
+            raise SystemExit(f"DUR: {p.name} okunamadi (bozuk JSON); elle bakilmali")
+        if x.get("plan_damga") == plan_damga:
+            out[p.stem.split("_", 1)[1]] = x
+    return out
+
+
+def json_oku(yol):
+    return json.loads(Path(yol).read_text(encoding="utf-8")) if yol and Path(yol).exists() else {"ilanlar": {}}
 
 
 # ---------------------------------------------------------------- yazim motoru (ileri ve geri alma ayni yol)
@@ -544,7 +662,7 @@ def say_yazim(K):
 
 def bag_yaz(api, shop, lid, son, bag_sira, stil_vid, K):
     hb = {stil_vid[ad]: son[s] for ad, s in bag_sira.items()}
-    say_yazim(K); K.yaz()
+    say_yazim(K); K.yaz(uzak=False)
     api.post_json(f"/shops/{shop}/listings/{lid}/variation-images", {"variation_images": [
         {"property_id": P_STYLE, "value_id": v, "image_id": i} for v, i in sorted(hb.items())]})
     K.d["bag_yazildi"] = True
@@ -579,9 +697,9 @@ def galeri_kur(api, shop, lid, c, hedef, sil, bag_sira, stil_vid, K, anahtar, es
     log(f"  plan {anahtar}: {sum(a[0] == 'yukle' for a in adim)} yukle, {sum(a[0] == 'sil' for a in adim)} sil, bag "
         f"{'var' if bag_gerekli else 'yok'}, en fazla {mx} gorsel")
     for n, a in enumerate(adim, 1):
-        K.d["bekleyen"] = list(a); K.yaz(ids)
+        K.d["bekleyen"] = list(a); K.yaz(ids, uzak=False)
         if a[0] == "sil":
-            say_yazim(K); K.yaz(ids)
+            say_yazim(K); K.yaz(ids, uzak=False)
             api.delete(f"/shops/{shop}/listings/{lid}/images/{a[1]}", ok404=True)
             K.d.setdefault("silinen", []).append(a[1]); ids.discard(a[1])
             log(f"  [{n}/{len(adim)}] sil {a[1]} -> {len(ids)} gorsel | kota {api.remaining}")
@@ -614,7 +732,7 @@ def galeri_kur(api, shop, lid, c, hedef, sil, bag_sira, stil_vid, K, anahtar, es
                     raise Geri(f"sira 2 geciste oturmadi: {galeri_sorun(g, son, alt)[:2]}")
                 bag_yaz(api, shop, lid, son, bag_sira, stil_vid, K)   # rank yazimi bagi siler (19 Eyl olcumu): bag yeniden
             log(f"  [{n}/{len(adim)}] sira + alt metin tamam | kota {api.remaining}")
-        K.d["bekleyen"] = None; K.yaz(ids)
+        K.d["bekleyen"] = None; K.yaz(ids, uzak=a[0] == "yukle")   # yeni kimlik Drive'daki DEVAM'a hemen
     return son
 
 
@@ -670,7 +788,7 @@ def video_kur(api, shop, lid, yol, korunacak, K, anahtar):
         else:
             raise Geri(f"video {hedef} active olmadi; eski video SILINMEDI")
     for v in [v for v in canli if v != hedef]:
-        say_yazim(K); K.yaz()
+        say_yazim(K); K.yaz(uzak=False)
         api.delete(f"/shops/{shop}/listings/{lid}/videos/{v}", ok404=True)
         K.d.setdefault("silinen_video", []).append(v)
     bek = [hedef] if hedef else []
@@ -696,9 +814,17 @@ def metin_kur(api, shop, lid, desc, pers, K):
         api.patch(f"/shops/{shop}/listings/{lid}", {"description": desc})
         log(f"  aciklama PATCH | kota {api.remaining}")
     if pers is not None:
-        say_yazim(K); K.d["metin_yazim"] = True; K.yaz()
-        api.post_json(f"/shops/{shop}/listings/{lid}/personalization", {"personalization_questions": soru_govde(pers)})
-        log(f"  kisisellestirme POST | kota {api.remaining}")
+        # POST tum soru setini degistirir: canli set once okunur; tek soru degilse yazim yok, question_id korunur (inceleme 30 Eki 8)
+        canli = (api.get(f"/listings/{lid}/personalization", ok404=True) or {}).get("personalization_questions") or []
+        if len(canli) != 1 or len(pers) != 1:
+            raise Y.Dur(f"metin: canli kisisellestirme {len(canli)} soru / hedef {len(pers)} (tek soru beklenir); POST yok")
+        if soru_norm(canli[0]) != soru_norm(pers[0]):
+            govde = soru_govde(pers)
+            if canli[0].get("question_id") is not None:
+                govde[0]["question_id"] = canli[0]["question_id"]
+            say_yazim(K); K.d["metin_yazim"] = True; K.yaz()
+            api.post_json(f"/shops/{shop}/listings/{lid}/personalization", {"personalization_questions": govde})
+            log(f"  kisisellestirme POST | kota {api.remaining}")
 
 
 def son_kontrol(api, shop, lid, son, alt, bag_sira, stil_vid, video, gd_canli, desc, pers):
@@ -825,12 +951,14 @@ def yaz_ilan(api, shop, lid, gd, c, dosya_dir, yd, yedek_dir, K, out, uzak=""):
         son, vid, s = ileri(api, shop, lid, gd, c, dosya_dir, K)
         if s:
             raise Geri("; ".join(s))
-        K.d.update(durum="PASS", hata=None); K.yaz()
+        K.d.update(durum="PASS", hata=None, son_sira=[son[k] for k in sorted(son)], video=vid); K.yaz()
         return dict(sonuc="PASS", sorun=[], son_ids=[son[k] for k in sorted(son)], video=vid)
     except (Geri, Y.Dur, SystemExit, Exception) as e:   # noqa: BLE001
         m = str(getattr(e, "code", None) or e)[:300]
         if m.startswith("DUR: kota"):        # istek gonderilmeden durdu: geri alma yok (kota yok), DEVAM sonraki kosuda surer
-            K.yaz(); return dict(sonuc="DUR", sorun=[m + " (DEVAM kaydi; sonraki kosu surdurur)"])
+            K.d["kota_durdu"] = m; K.yaz()   # Drive'daki DEVAM_<ilan>.json: yuklenen kimlikler + adim; devam ya da geri_al modu
+            return dict(sonuc="DUR", sorun=[m + " (ilan ortada; DEVAM_<ilan>.json Drive'da: ayni plan_damga ile yeniden kos ya da "
+                                                "geri_al modu)" + ("" if K.drive_ok else " UYARI: DEVAM Drive'a yazilamadi")])
         if not int(K.d.get("yazim") or 0):
             K.yaz(); return dict(sonuc="DUR", sorun=[m + " (yazim gonderilmedi, ilan degismedi)"])
         K.d["hata"] = m; K.yaz()
@@ -867,6 +995,75 @@ def devam_uzlas(K, c, gd):
         K.d.pop("video_yeni_belirsiz", None)
 
 
+def kota_oku(api, shop):
+    """Kalan kota bilinmeden ilk ilan kapisi atlanirdi (etsy_common: remaining None iken kapi yok; inceleme 30 Eki madde 3).
+    Tek ucuz GET (/shops/<shop>) ile x-remaining-today okunur; okunamazsa DUR."""
+    if api.remaining is None:
+        api.get(f"/shops/{shop}")
+    if api.remaining is None:
+        raise SystemExit("DUR: x-remaining-today okunamadi; kota kapisi uygulanamaz, ilan baslamadi")
+    log(f"kota: kalan {api.remaining} (kosu basi okuma)")
+
+
+def ilan_tahmini(gd):
+    """Ilan basi en kotu istek, GUNCEL kodla ve plandaki GERCEK eski gorsel sayisiyla (planin eski en_kotu degeri degil)."""
+    return istek_tahmini(n_sil=len(gd["canli"]["galeri"]), metin=bool(gd["metin"].get("yaz")))
+
+
+def devam_birlestir(a, devam):
+    """Toplu DEVAM.json + Drive'daki ilan basina DEVAM_<ilan>.json (her yuklemede yazilir, daha yeni) -> {ilan: kayit}"""
+    dvi = devam_ilan_oku(getattr(a, "devam_ilan_dir", ""), a.plan_damga)
+    for lid, x in dvi.items():
+        devam.setdefault("ilanlar", {})[lid] = dict(x, set=0, hedef=N)
+    return {lid: x for lid, x in (devam.get("ilanlar") or {}).items() if x.get("plan_damga") == a.plan_damga}
+
+
+def pass_kaydi(dv):
+    """ILERLEME'ye gecmemis (kosu sonda oldu) ama DEVAM_<ilan>.json'da PASS olan ilan -> ILERLEME kaydi bicimi"""
+    if dv.get("durum") == "PASS" and dv.get("son_sira"):
+        return dict(durum="PASS", son_ids=dv["son_sira"], video=dv.get("video"), plan_damga=dv.get("plan_damga"))
+    return None
+
+
+def parti_sec(R, plan, dvs, ilerleme, plan_damga, azami):
+    """Bu kosunun ilanlari: planda olan, PASS / GERI_ALINDI olmayan (DEVAM_<ilan> ya da ILERLEME), liste sirasiyla en fazla azami."""
+    out = []
+    for r in R:
+        lid = r["listing_id"]
+        dv = dvs.get(lid) or {}
+        il = (ilerleme.get("ilanlar") or {}).get(lid) or {}
+        if lid not in (plan.get("girdiler") or {}):
+            continue
+        if dv.get("durum") in ("PASS", "GERI_ALINDI") or (il.get("durum") == "PASS" and il.get("plan_damga") == plan_damga):
+            continue
+        out.append(r)
+        if azami and len(out) >= azami:
+            break
+    return out
+
+
+def parti_mod(a):
+    """ETSY YOK: parti ilanlari + yalniz onlarin dosya listeleri (is akisi bunlari indirir)."""
+    out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
+    plan = plan_yukle(a.plan, a.plan_damga)
+    devam = json_oku(a.devam)
+    dvs = devam_birlestir(a, devam)
+    P = parti_sec(kapsam(liste_oku(a.liste), a.sadece, a.haric), plan, dvs, json_oku(a.ilerleme), a.plan_damga, a.azami_ilan)
+    ad = {"kapak": [], "kart": [], "stil": [], "video": []}
+    yedek = []
+    for r in P:
+        g = plan["girdiler"][r["listing_id"]]
+        for d in [h[1] for h in g["hedef"]] + [g["video"][0]]:
+            k, f = d.split("/", 1); ad[k].append(f)
+        yedek.append(f"{g['ilan']}_{g['cift']}/YEDEK.json")
+    for k, v in ad.items():
+        (out / f"{k}.txt").write_text("".join(x + "\n" for x in v), encoding="utf-8")
+    (out / "yedek.txt").write_text("".join(x + "\n" for x in yedek), encoding="utf-8")
+    (out / "PARTI.txt").write_text(",".join(r["listing_id"] for r in P), encoding="utf-8")
+    log(f"PARTI: {len(P)} ilan (azami {a.azami_ilan}): {','.join(r['listing_id'] for r in P)}")
+    return 0
+
+
 def calistir(api, shop, a):
     out = Path(a.out); ilan_out = out / "ilanlar"; ilan_out.mkdir(parents=True, exist_ok=True)
     yazim = a.mod == "yaz"
@@ -876,10 +1073,13 @@ def calistir(api, shop, a):
     plan = plan_yukle(a.plan, a.plan_damga) if yazim else None
     kaynak = kaynak_oku(a.kaynak)
     drive = drive_liste_oku(a.yedek_liste) if yazim else {}
-    devam = json.loads(Path(a.devam).read_text(encoding="utf-8")) if a.devam and Path(a.devam).exists() else {"ilanlar": {}}
-    ilerleme = json.loads(Path(a.ilerleme).read_text(encoding="utf-8")) if a.ilerleme and Path(a.ilerleme).exists() else {"ilanlar": {}}
+    devam = json_oku(a.devam)
+    dvs = devam_birlestir(a, devam) if yazim else {}
+    ilerleme = json_oku(a.ilerleme)
     R = kapsam(liste_oku(a.liste), a.sadece, a.haric)
     satir, girdiler, dur, t0, baslayan = [], {}, None, time.time(), 0
+    if R:
+        kota_oku(api, shop)
     for n, r in enumerate(R, 1):
         lid, cift = r["listing_id"], r["cift"]
         s = dict(ilan=lid, cift=cift, durum="", neden=[], en_az=None, en_kotu=None, istek=None, metin="", ru="")
@@ -892,31 +1092,37 @@ def calistir(api, shop, a):
                 s.update(durum="KALAN", neden=[f"parca siniri {a.azami_ilan} ilan"]); continue
             hedef, video, kneden = hedef_kur(r, kaynak, alt)
             pg = (plan.get("girdiler") or {}).get(lid) if yazim else None
-            dv = (devam.get("ilanlar") or {}).get(lid) or {}
-            bitmemis = yazim and dv.get("plan_damga") == a.plan_damga and dv.get("durum") not in ("PASS", "GERI_ALINDI", None)
+            dv = dvs.get(lid) or {}
+            bitmemis = yazim and dv.get("durum") not in ("PASS", "GERI_ALINDI", None)
             if yazim and pg is None and not bitmemis:   # kuru planda HAZIR olmayan (BLOK / ZATEN) ilan: okunmaz, yazilmaz
                 s.update(durum="ATLA", neden=[f"kuru planda yok (kuru durum {(plan.get('durumlar') or {}).get(lid, '-')})"]); continue
             if yazim:
-                t = pg["en_kotu"] if pg else istek_tahmini()["en_kotu"]
-                if api.remaining is not None and int(api.remaining) - t < KOTA_SINIRI:
+                if pg is None:
+                    s.update(durum="BLOK", neden=["DEVAM kaydi var ama plan girdisi yok"]); continue
+                t = ilan_tahmini(pg)["en_kotu"]
+                if int(api.remaining) - t < KOTA_SINIRI:
                     dur = f"kota: kalan {api.remaining} - en kotu {t} < {KOTA_SINIRI}; ilan baslamadi"
                     s.update(durum="KALAN", neden=[dur]); continue
-            elif api.remaining is not None and int(api.remaining) - KAPI_OKUMA - 1 < KOTA_SINIRI:
+            elif int(api.remaining) - KAPI_OKUMA - 1 < KOTA_SINIRI:
                 dur = f"kota: kalan {api.remaining} - {KAPI_OKUMA + 1} okuma < {KOTA_SINIRI}; ilan baslamadi"
                 s.update(durum="KALAN", neden=[dur]); continue
             api.kota_kapisi(f"ilan {lid}")
             c = canli_oku(api, shop, lid)
             mp = metin_plani(c["L"], c["per"], r["a"], r["b"])
+            if not a.metin_yaz:   # VARSAYILAN KAPALI: RU = EN kurali (kupa RU kurucusu yok); galeri metinden ayri
+                mp = dict(yaz=False, durum=mp["durum"] if mp["durum"] == "FARKLI_BURC" else "KAPALI:" + mp["durum"], hata=[])
             s["metin"] = mp["durum"]
             if r["a"] == r["b"] and not yazim:
                 ru = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
                 s["ru"] = ("RU_ACIK: RU aciklama var (" + sha_metin(html.unescape(ru.get("description") or ""))[:12] + "); kupa RU kurucusu yok, "
                            "RU YAZILMAZ") if ru.get("description") else "RU yok"
-            kayit = (ilerleme.get("ilanlar") or {}).get(lid)
+            kayit = (ilerleme.get("ilanlar") or {}).get(lid) or pass_kaydi(dv)
             if not bitmemis:
                 z = zaten_durum(c, hedef, mp, kayit)
                 if z == "ZATEN":
-                    s.update(durum="ZATEN", neden=["14 gorsel + 8 bag + video + metin hedefte (ILERLEME kaydi ayni)"]); continue
+                    if yazim and lid not in (ilerleme.get("ilanlar") or {}):
+                        ilerleme.setdefault("ilanlar", {})[lid] = dict(kayit, cift=cift, set=N, hedef=N, kosu=a.kosu, metin=False)
+                    s.update(durum="ZATEN", neden=["14 gorsel + 8 bag + video + metin hedefte (ILERLEME / DEVAM kaydi ayni)"]); continue
                 if z == "KAYITSIZ":
                     s.update(durum="BLOK", neden=["hedef galeri gorunuyor ama ILERLEME kaydi / video / bag / metin tutmuyor; elle bakilmali"]); continue
                 neden = kapilar(c, lid) + kneden + mp["hata"]
@@ -931,8 +1137,6 @@ def calistir(api, shop, a):
                     s.update(durum="BLOK", neden=["canli durum / dosyalar / metin kuru plandan farkli (canli != plan); yazma yok"]); continue
             else:
                 gd = pg
-                if gd is None:
-                    s.update(durum="BLOK", neden=["DEVAM kaydi var ama plan girdisi yok"]); continue
                 if dv.get("hata") and not a.kurtar:
                     s.update(durum="BLOK", neden=[f"onceki kosu hatayla durdu ({str(dv['hata'])[:100]}); --kurtar gerekir"]); continue
                 if kapilar(c, lid):
@@ -940,17 +1144,21 @@ def calistir(api, shop, a):
             yd, yn = yedek_kapisi(gd, a.plan_damga, a.yedek_dir, drive)
             if yn:
                 s.update(durum="BLOK", neden=yn); continue
-            K = Y.Kayit(ilan_out, lid, drive=a.devam_hedef_kok and f"{a.devam_hedef_kok}/DEVAM_{lid}.json" or "")
+            K = Kayit(ilan_out, lid, drive=a.devam_hedef_kok and f"{a.devam_hedef_kok}/DEVAM_{lid}.json" or "")
             if bitmemis:
                 K.d = copy.deepcopy(dv)
                 if a.kurtar and K.d.get("hata"):
                     K.d.setdefault("hata_gecmis", []).append(K.d.pop("hata"))
+                if K.d.get("kota_durdu"):
+                    K.d.setdefault("kota_gecmis", []).append(K.d.pop("kota_durdu"))
                 devam_uzlas(K, c, gd)
             else:
                 K.d = dict(plan_damga=a.plan_damga, cift=cift, set=0, hedef=N, durum="BASLADI", yuklenen={}, silinen=[], son_ids=None)
             K.yaz()
+            if K.drive and not K.drive_ok:   # ilk yazimdan once DEVAM Drive'da olmali (kosu olurse kayit kalsin)
+                s.update(durum="DUR", neden=["DEVAM_<ilan>.json Drive'a yazilamadi; yazim yok"]); dur = f"ilan {lid} DUR; kosu durdu"; continue
             baslayan += 1
-            s.update(en_az=gd["en_az"], en_kotu=gd["en_kotu"])
+            s.update(en_az=gd["en_az"], en_kotu=ilan_tahmini(gd)["en_kotu"])
             Rz = yaz_ilan(api, shop, lid, gd, c, a.dosya_dir, yd, a.yedek_dir, K, ilan_out, a.yedek_uzak)
             # DEVAM: set 0 (durum_dosyasi json-ilanlar: PASS + set >= hedef geri donmez kurali DEVAM'a uygulanmaz; geri alma kaydi yazilabilir)
             devam.setdefault("ilanlar", {})[lid] = dict(K.d, cift=cift, set=0, hedef=N, durum=K.d.get("durum") or Rz["sonuc"])
@@ -973,11 +1181,15 @@ def calistir(api, shop, a):
 
 
 def geri_al_kos(api, shop, a):
-    """elle geri alma: --sadece ilanlar, YEDEK.json + dosyalar (yerel ya da --yedek-uzak)."""
+    """elle geri alma: --sadece ilanlar, YEDEK.json + dosyalar (yerel ya da --yedek-uzak) + DEVAM (toplu + Drive'daki DEVAM_<ilan>.json:
+    kosu ilan ortasinda olduyse yeni gorsel / video kimlikleri buradan)."""
     out = Path(a.out) / "ilanlar"; out.mkdir(parents=True, exist_ok=True)
     R = kapsam(liste_oku(a.liste), a.sadece, a.haric)
-    devam = json.loads(Path(a.devam).read_text(encoding="utf-8")) if a.devam and Path(a.devam).exists() else {"ilanlar": {}}
+    devam = json_oku(a.devam)
+    dvs = devam_birlestir(a, devam)
     satir = []
+    if R:
+        kota_oku(api, shop)
     for r in R:
         lid = r["listing_id"]
         s = dict(ilan=lid, cift=r["cift"], durum="", neden=[], en_az=None, en_kotu=None, istek=None, metin="", ru="")
@@ -988,14 +1200,15 @@ def geri_al_kos(api, shop, a):
         yd = json.loads(p.read_text(encoding="utf-8"))
         if yd.get("plan_damga") != a.plan_damga:
             s.update(durum="BLOK", neden=["YEDEK baska plan damgasiyla"]); continue
-        if api.remaining is not None and int(api.remaining) - istek_tahmini()["geri_alma"] < KOTA_SINIRI:
-            s.update(durum="KALAN", neden=["kota"]); break
-        K = Y.Kayit(out, lid)
-        K.d = copy.deepcopy((devam.get("ilanlar") or {}).get(lid) or dict(yuklenen={}, silinen=[]))
+        t = istek_tahmini(n_sil=len(yd.get("galeri") or []), metin=bool((yd.get("metin") or {}).get("yaz")))["geri_alma"]
+        if int(api.remaining) - t < KOTA_SINIRI:
+            s.update(durum="KALAN", neden=[f"kota: kalan {api.remaining} - geri alma en kotu {t} < {KOTA_SINIRI}"]); break
+        K = Kayit(out, lid, drive=a.devam_hedef_kok and f"{a.devam_hedef_kok}/DEVAM_{lid}.json" or "")
+        K.d = copy.deepcopy(dvs.get(lid) or dict(plan_damga=a.plan_damga, cift=r["cift"], yuklenen={}, silinen=[]))
         gs = geri_al(api, shop, lid, yd, a.yedek_dir, K, a.yedek_uzak)
         s.update(durum="PASS" if not gs else "DUR", neden=gs, istek=api.calls - c0)
-        devam.setdefault("ilanlar", {})[lid] = dict(K.d, cift=r["cift"], set=0, hedef=N,
-                                                     durum="GERI_ALINDI" if not gs else "DUR")
+        K.d.update(durum="GERI_ALINDI" if not gs else "DUR", geri_alma="TAMAM" if not gs else "BASARISIZ"); K.yaz()
+        devam.setdefault("ilanlar", {})[lid] = dict(K.d, cift=r["cift"], set=0, hedef=N)
         if gs:
             break
     return satir, {}, devam, {"ilanlar": {}}
@@ -1035,7 +1248,7 @@ def rapor(satir, girdiler, a, api, out):
 
 def arg(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("mod", choices=("kaynak", "kuru", "yedek", "yaz", "geri_al"))
+    ap.add_argument("mod", choices=("kaynak", "kuru", "yedek", "parti", "yaz", "geri_al"))
     ap.add_argument("--liste", required=True, help="KUPA_TASLAK_LISTE.csv (cift, listing_id)")
     ap.add_argument("--out", required=True)
     ap.add_argument("--sadece", default=""); ap.add_argument("--haric", default="")
@@ -1045,18 +1258,23 @@ def arg(argv=None):
     ap.add_argument("--alt", default=str(ALT_CSV))
     ap.add_argument("--plan", default=""); ap.add_argument("--plan-damga", default=""); ap.add_argument("--confirm", default="")
     ap.add_argument("--yedek-dir", default="", help="yedek ciktisi / yazimda <ilan>_<CIFT>/YEDEK.json")
-    ap.add_argument("--yedek-liste", default="", help="yaz: rclone lsjson -R (Drive yedek klasoru)")
+    ap.add_argument("--yedek-liste", default="", help="yaz / yedek: rclone lsjson -R --hash (Drive yedek klasoru)")
+    ap.add_argument("--yedek-var-dir", default="", help="yedek: Drive'da zaten olan <ilan>_<CIFT>/YEDEK.json'lar (tam ise ilan ATLANIR)")
     ap.add_argument("--yedek-uzak", default="", help="geri alma: yedek dosyasi yerelde yoksa rclone kaynagi")
     ap.add_argument("--devam", default=""); ap.add_argument("--ilerleme", default="")
-    ap.add_argument("--devam-hedef-kok", default="", help="her yazimdan once / sonra DEVAM_<ilan>.json kopyasi (rclone hedefi)")
+    ap.add_argument("--devam-hedef-kok", default="", help="her yukleme oncesi / sonrasi DEVAM_<ilan>.json kopyasi (rclone hedefi)")
+    ap.add_argument("--devam-ilan-dir", default="", help="Drive'dan inen DEVAM_<ilan>.json'lar (devam / geri_al; toplu DEVAM'dan yeni)")
+    ap.add_argument("--metin-yaz", action="store_true", help="aciklama + kisisellestirme yazimi (VARSAYILAN KAPALI: RU = EN kurali)")
     ap.add_argument("--kurtar", action="store_true", help="hata kaydi olan DEVAM'i surdur")
-    ap.add_argument("--azami-ilan", type=int, default=0)
+    ap.add_argument("--azami-ilan", type=int, default=15, help="yaz / parti: kosu basina en fazla ilan (0 = sinirsiz)")
     ap.add_argument("--kosu", default=os.environ.get("GITHUB_RUN_ID", "0"))
     a = ap.parse_args(argv)
     if a.mod == "yaz" and (a.confirm != ONAY or not a.plan or not a.plan_damga or not a.dosya_dir or not a.yedek_dir or not a.yedek_liste):
         raise SystemExit(f"DUR: yazim icin --confirm {ONAY} + --plan + --plan-damga + --dosya-dir + --yedek-dir + --yedek-liste")
     if a.mod == "geri_al" and (a.confirm != ONAY_GERI or not a.sadece or not a.yedek_dir or not a.plan_damga):
         raise SystemExit(f"DUR: geri alma icin --confirm {ONAY_GERI} + --sadece + --yedek-dir + --plan-damga")
+    if a.mod in ("yedek", "parti") and (not a.plan or not a.plan_damga):
+        raise SystemExit("DUR: yedek / parti icin --plan + --plan-damga")
     if a.mod in ("kuru", "yaz") and not a.kaynak:
         raise SystemExit("DUR: --kaynak KAYNAK.csv gerekli")
     return a
@@ -1074,23 +1292,42 @@ def kaynak_mod(a):
 
 
 def yedek_mod(a, indir=None):
-    """ETSY YOK: plan girdilerinden (kapsamdaki) eski medya + YEDEK.json; YEDEK_OZET.csv."""
+    """ETSY YOK: plan girdilerinden (kapsamdaki) eski medya + YEDEK.json. Drive'da (--yedek-liste lsjson --hash + --yedek-var-dir)
+    tam ve hash'i tutan yedegi olan ilan VAR (CDN'e gidilmez). YEDEK_OZET.csv --out'a (yedek klasoru --immutable; zamanli dosya
+    oraya konmaz)."""
     p = plan_yukle(a.plan, a.plan_damga)
     R = {r["listing_id"] for r in kapsam(liste_oku(a.liste), a.sadece, a.haric)}
+    drive = drive_liste_oku(a.yedek_liste)
     ozet, t0 = [], time.time()
     gl = [(lid, gd) for lid, gd in sorted((p.get("girdiler") or {}).items()) if lid in R]
     for n, (lid, gd) in enumerate(gl, 1):
+        alt = f"{lid}_{gd['cift']}"
+        ts = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        vy = Path(a.yedek_var_dir or "/yok") / alt / "YEDEK.json"
         try:
+            if f"{alt}/YEDEK.json" in drive and vy.exists():
+                yv = json.loads(vy.read_text(encoding="utf-8"))
+                ne = yedek_plana_uygun(yv, gd, a.plan_damga) + yedek_drive_eksik(yv, alt, drive, vy)
+                if not ne:
+                    ozet.append(dict(ilan=lid, cift=gd["cift"], gorsel=len(yv["galeri"]), video=len(yv["video"]), durum="VAR",
+                                     neden="Drive'da tam (boyut + hash); CDN'e gidilmedi", ts_utc=ts))
+                    continue
+                log(f"  {alt}: Drive'daki yedek eksik / farkli ({ne[:3]}); yeniden kuruluyor (ayni bayt beklenir, --immutable denetler)")
             yd = yedek_kur(gd, a.plan_damga, a.yedek_dir, indir)
-            ozet.append(dict(ilan=lid, cift=gd["cift"], gorsel=len(yd["galeri"]), video=len(yd["video"]), durum="PASS", neden=""))
+            ozet.append(dict(ilan=lid, cift=gd["cift"], gorsel=len(yd["galeri"]), video=len(yd["video"]), durum="PASS", neden="", ts_utc=ts))
         except Exception as e:   # noqa: BLE001
-            ozet.append(dict(ilan=lid, cift=gd["cift"], gorsel=0, video=0, durum="FAIL", neden=str(e)[:200]))
+            ozet.append(dict(ilan=lid, cift=gd["cift"], gorsel=0, video=0, durum="FAIL", neden=str(e)[:200], ts_utc=ts))
         g = time.time() - t0
         log(f"ETA yedek: {n}/{len(gl)} | gecen {g:.0f} sn | kalan {g / n * (len(gl) - n):.0f} sn | %{100 * n // len(gl)}")
     Path(a.yedek_dir).mkdir(parents=True, exist_ok=True)
-    with open(Path(a.yedek_dir) / "YEDEK_OZET.csv", "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=["ilan", "cift", "gorsel", "video", "durum", "neden"]); w.writeheader(); w.writerows(ozet)
-    return 1 if not ozet or any(x["durum"] != "PASS" for x in ozet) else 0
+    Path(a.out).mkdir(parents=True, exist_ok=True)
+    with open(Path(a.out) / "YEDEK_OZET.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=["ilan", "cift", "gorsel", "video", "durum", "neden", "ts_utc"]); w.writeheader(); w.writerows(ozet)
+    say = {}
+    for x in ozet:
+        say[x["durum"]] = say.get(x["durum"], 0) + 1
+    log("YEDEK: " + " ".join(f"{k}={v}" for k, v in sorted(say.items())))
+    return 1 if not ozet or any(x["durum"] == "FAIL" for x in ozet) else 0
 
 
 def sonlandir(api, shop, a):
@@ -1112,6 +1349,8 @@ def main(argv=None):
         return kaynak_mod(a)
     if a.mod == "yedek":
         return yedek_mod(a)
+    if a.mod == "parti":
+        return parti_mod(a)
     from etsy_common import Etsy, TokenStore, mask
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", ""); mask(k); mask(s)
     st = TokenStore(os.environ["TOKEN_FILE"], k, s)

@@ -121,6 +121,19 @@ def main() -> int:
     for x in ("durum_dosyasi.py oku --uzak \"$O/DEVAM.json\"", "durum_dosyasi.py oku --uzak \"$O/ILERLEME.json\""):
         assert x in yy and kilit < yy.index(x) < yy.index("python3 scripts/kapak78/yd_kapak_yukle.py"), f"yd-kapak-yukle: {x}"
     assert "default: \"true\"" in yy and "[ \"$ONAY\" = YD_KAPAK ]" in yy and "plan_damga" in yy, "yd-kapak-yukle yazim kapisi"
+    # 30 Eki inceleme (8d8c66a8, KILIT SURESI): kupa galeri 78 hazirlik (kaynak + CDN yedegi) ayri, kilitsiz ve Etsy'siz is akisi;
+    # yukleyici Etsy kilidinde, yalniz partinin dosyalari kilitten once, durum + token kilitten sonra
+    kh = (WORKFLOWS / "kupa-galeri78-hazir.yml").read_text(encoding="utf-8")
+    assert "ETSY_" not in kh and "kilit_bekle" not in kh and "--immutable" in kh and "lsjson -R --hash" in kh, "kupa-galeri78-hazir"
+    assert ".github/workflows/kupa-galeri78-hazir.yml" not in kilit_bekle.kilit_kumesi(str(ROOT)), "kupa-galeri78-hazir Etsy kumesinde"
+    ky = (WORKFLOWS / "kupa-galeri78-yukle.yml").read_text(encoding="utf-8")
+    assert ".github/workflows/kupa-galeri78-yukle.yml" in kilit_bekle.kilit_kumesi(str(ROOT)), "kupa-galeri78-yukle Etsy kilidinde degil"
+    assert "concurrency:" not in ky and "actions: read" in ky and "schedule" not in ky and "needs:" not in ky, "kupa-galeri78-yukle kilit"
+    assert "--immutable" not in ky and "kupa_galeri78.py yedek" not in ky, "kupa-galeri78-yukle: yedek kilitli kosuda"
+    kilit = ky.index("python3 scripts/etsy/kilit_bekle.py")
+    assert ky.index("--out _work/parti_on") < kilit < ky.index("durum_dosyasi.py oku --uzak \"$O/DEVAM.json\"") \
+        < ky.index("rclone copyto \"$T/ETSY_TOKEN.json\" _work") < ky.index("python3 scripts/etsy/kupa_galeri78.py yaz"), "kupa-galeri78-yukle sira"
+    assert ky.count("--devam-hedef-kok \"$O/DEVAM_ILAN/$PD\"") == 2 and "[ -z \"$PARTI\" ]" in ky, "kupa-galeri78-yukle DEVAM / parti"
     # #61 (30 Eki): galeri-v11-dogrula yalniz kendi rapor klasorune yazar; okuma yedegi POSTER_GALERI_V11_YEDEK degismez
     import shlex
     dg = (WORKFLOWS / "galeri-v11-dogrula.yml").read_text(encoding="utf-8")

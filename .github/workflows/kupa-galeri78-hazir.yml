@@ -1,0 +1,154 @@
+name: kupa-galeri78-hazir
+
+# Kupa galeri 78 HAZIRLIK: KILITSIZ ve Etsy'siz (Etsy anahtari / token yok, Etsy API yok). KILIT SURESI (Serdar 23 Eki): Drive / CDN
+# toplu indirme ve yukleme Etsy kilidini tutan kosuda yapilmaz; yukleyici (kupa-galeri78-yukle) yalniz Etsy okuma / yazma yapar.
+# plan_damga BOS  : kaynak dosyalar (kapak, kart, stil, video) indirilir -> KAYNAK.csv + GIRDI.txt -> TEMP/KUPA_GALERI78/HAZIR/<run_id>/.
+#                   Kuru ve yazim bu kosu numarasini (hazir_kosu) girdi alir.
+# plan_damga DOLU : kuru planin (KOSU/<kuru>/PLAN_KUPA78.json; Etsy okumasi kilitli kosuda yapildi) eski gorsel + video adreslerinden
+#                   etsystatic CDN yedegi (herkese acik adres, Etsy API degil) -> TEMP/KUPA_GALERI78_YEDEK/<plan_damga>/ --immutable.
+#                   Drive'da tam (boyut + hash) yedegi olan ilan ATLANIR (VAR; CDN'e gidilmez: devam kosusunda islenmis ilanin eski
+#                   adresi 404 olabilir). YEDEK.json zaman damgasiz (ayni plan -> ayni bayt); kosu zamani HAZIR/<run_id>/YEDEK_OZET.csv.
+#                   Yukleme sonrasi lsjson --hash: her yerel dosya Drive'da ayni boyut + md5 / sha256. Bayt imzasi tutmayan (HTML) FAIL.
+# KOSTURMA AYRI ONAYLA. scripts/etsy/kupa_galeri78.py (kaynak / yedek modlari).
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      plan_damga: {description: "bos = kaynak hazirligi; dolu = bu kuru planin eski medya yedegi (<kosu>_<sha12>)", required: false, default: ""}
+      kart_damga: {description: "kaynak: TEMP/KUPA_KART78/<damga> (MANIFEST.csv)", required: false, default: ""}
+      kaynak_damga: {description: "kaynak: TEMP/KUPA_GALERI_KAYNAK/<damga> (kapak + video)", required: false, default: "20261030_192647"}
+      stil_damga: {description: "kaynak: TEMP/KUPA_STIL78/<damga>", required: false, default: "20261030_192647"}
+      sadece: {description: "yalniz bu ilanlar (virgullu listing_id); bos = 78", required: false, default: ""}
+      haric: {description: "bu ilanlar haric (virgullu listing_id)", required: false, default: ""}
+
+env:
+  T: "gdrive:ASTROLOVE/TEMP"
+  O: "gdrive:ASTROLOVE/TEMP/KUPA_GALERI78"
+  Y: "gdrive:ASTROLOVE/TEMP/KUPA_GALERI78_YEDEK"
+
+jobs:
+  hazir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Girdi kapisi
+        env:
+          PD: ${{ inputs.plan_damga }}
+          KD: ${{ inputs.kart_damga }}
+          GD: ${{ inputs.kaynak_damga }}
+          SD: ${{ inputs.stil_damga }}
+          SA: ${{ inputs.sadece }}
+          HA: ${{ inputs.haric }}
+        run: |
+          set -euo pipefail
+          [[ "$SA" =~ ^([0-9]+(,[0-9]+)*)?$ && "$HA" =~ ^([0-9]+(,[0-9]+)*)?$ ]] || { echo "::error::girdi (sadece / haric)"; exit 1; }
+          if [ -z "$PD" ]; then
+            [[ "$KD" =~ ^[0-9]{8}_[0-9]{6}$ && "$GD" =~ ^[0-9]{8}_[0-9]{6}$ && "$SD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi (damgalar)"; exit 1; }
+          else
+            [[ "$PD" =~ ^[0-9]+_[0-9a-f]{12}$ ]] || { echo "::error::plan_damga (<kosu>_<sha12>)"; exit 1; }
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2   # betik etsy_common'u ice aktarir (Etsy cagrisi yok)
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Liste
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work
+          rclone copyto "$T/KUPA_ORCHARD_TASLAK_20261019/KUPA_TASLAK_LISTE.csv" _work/liste.csv
+      - name: Kaynak dosyalar
+        if: ${{ inputs.plan_damga == '' }}
+        env:
+          KD: ${{ inputs.kart_damga }}
+          GD: ${{ inputs.kaynak_damga }}
+          SD: ${{ inputs.stil_damga }}
+          SA: ${{ inputs.sadece }}
+          HA: ${{ inputs.haric }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _k _d/kapak _d/kart _d/stil _d/video
+          rclone copyto "$T/KUPA_KART78/$KD/MANIFEST.csv" _work/MANIFEST.csv || { echo "::error::KUPA_KART78/$KD/MANIFEST.csv yok"; exit 1; }
+          rclone copyto "$T/KUPA_GALERI_KAYNAK/$GD/kapak/KAYIT.tsv" _work/KAYIT.tsv || { echo "::error::kapak KAYIT.tsv yok"; exit 1; }
+          python3 - <<'PY'
+          import os, sys
+          sys.path.insert(0, "scripts/etsy")
+          import kupa_galeri78 as K
+          R = K.kapsam(K.liste_oku("_work/liste.csv"), os.environ["SA"], os.environ["HA"])
+          ad = {"kapak": [], "kart": [], "stil": [], "video": []}
+          for r in R:
+              for s, rel in K.kaynak_yollari(r["cift"]).items():
+                  k, f = rel.split("/", 1); ad[k].append(f)
+          for k, v in ad.items():
+              open(f"_work/{k}.txt", "w").writelines(x + "\n" for x in v)
+          print(f"kapsam: {len(R)} ilan")
+          PY
+          rclone copy "$T/KUPA_GALERI_KAYNAK/$GD/kapak" _d/kapak --files-from _work/kapak.txt --transfers 16 -q || true
+          rclone copy "$T/KUPA_GALERI_KAYNAK/$GD/video" _d/video --files-from _work/video.txt --transfers 16 -q || true
+          rclone copy "$T/KUPA_KART78/$KD" _d/kart --files-from _work/kart.txt --transfers 16 -q || true
+          rclone copy "$T/KUPA_STIL78/$SD" _d/stil --files-from _work/stil.txt --transfers 16 -q || true
+          set +e
+          python3 scripts/etsy/kupa_galeri78.py kaynak --liste _work/liste.csv --out _k --sadece "$SA" --haric "$HA" --dosya-dir _d \
+            --kart-manifest _work/MANIFEST.csv --kapak-kayit _work/KAYIT.tsv 2>&1 | tee _k/kaynak.log
+          KK=${PIPESTATUS[0]}
+          set -e
+          echo "$KD $GD $SD" > _k/GIRDI.txt
+          rclone copy _k "$O/HAZIR/${GITHUB_RUN_ID}" -q
+          echo "::notice title=KAYNAK::cikis $KK (FAIL satirli ilan kuruda BLOK); hazir_kosu = ${GITHUB_RUN_ID} (HAZIR/${GITHUB_RUN_ID}/KAYNAK.csv)"
+      - name: Eski medya yedegi (CDN, Etsy API yok)
+        if: ${{ inputs.plan_damga != '' }}
+        env:
+          PD: ${{ inputs.plan_damga }}
+          SA: ${{ inputs.sadece }}
+          HA: ${{ inputs.haric }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _yedek _yedek_var _yo
+          rclone copyto "$O/KOSU/${PD%%_*}/PLAN_KUPA78.json" _work/PLAN_KUPA78.json || { echo "::error::PLAN_KUPA78.json yok (KOSU/${PD%%_*})"; exit 1; }
+          # Drive'da zaten olan yedek (devam): liste + YEDEK.json'lar; tam ve hash'i tutan ilan CDN'e gidilmeden VAR
+          if rclone lsf --dirs-only "$Y" 2>/dev/null | grep -qx "$PD/"; then
+            rclone lsjson -R --hash "$Y/$PD" > _work/ONCE_LSJSON.json
+            rclone copy "$Y/$PD" _yedek_var --include "*/YEDEK.json" -q
+          else
+            echo '[]' > _work/ONCE_LSJSON.json
+          fi
+          set +e
+          python3 scripts/etsy/kupa_galeri78.py yedek --liste _work/liste.csv --out _yo --plan _work/PLAN_KUPA78.json --plan-damga "$PD" \
+            --yedek-dir _yedek --yedek-liste _work/ONCE_LSJSON.json --yedek-var-dir _yedek_var --sadece "$SA" --haric "$HA" 2>&1 | tee _yo/yedek.log
+          YK=${PIPESTATUS[0]}
+          set -e
+          # basarili ilanlar her durumda Drive'a (FAIL ilanin yerel klasoru yok); ayni yolda farkli bayt varsa --immutable hata verir
+          rclone copy _yedek "$Y/$PD" --immutable --transfers 16 -q
+          rclone lsjson -R --hash "$Y/$PD" > _work/YEDEK_LSJSON.json
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, "scripts/etsy")
+          import kupa_galeri78 as K
+          eksik = K.yerel_drive_eksik("_yedek", K.drive_liste_oku("_work/YEDEK_LSJSON.json"))
+          if eksik:
+              raise SystemExit(f"yedek Drive'da eksik / boyut / hash farkli: {len(eksik)} dosya {eksik[:5]}")
+          print("yedek Drive'da dogrulandi (boyut + md5 / sha256)")
+          PY
+          cp _work/YEDEK_LSJSON.json _yo/
+          rclone copy _yo "$O/HAZIR/${GITHUB_RUN_ID}" -q
+          echo "::notice title=YEDEK::cikis $YK; HAZIR/${GITHUB_RUN_ID}/YEDEK_OZET.csv (VAR / PASS / FAIL); FAIL ilan yazimda BLOK"
+          exit "$YK"
+      - if: always()
+        run: rm -rf _work _k _d _yedek _yedek_var _yo ~/.config/rclone
