@@ -1,0 +1,110 @@
+name: wa-hazirlik-oku
+# Wall art hazirlik, SALT OKUMA (Merkez 30 Eki; ETSY API YOK, Etsy kotasi gerekmez; Drive yalniz okunur, cikti yeni klasore).
+# video_kapak: 78 videonun kapagi canli rank 1 kapakla ayni mi (scripts/kapak78/video_kapak_kontrol.py). Canli = B1 yedegi r1
+#   (TEMP/POSTER_GALERI_V11_YEDEK/<b1>), video girdisi = TEMP/POSTER_KAPAK_V10/20261026_153710, video = TEMP/VIDEO_V7_DUZELTME/<tam78>/TAM78
+#   (Serdar onayli 28 Eki, kosu 40699879314). Cikti TEMP/VIDEO_KAPAK_KONTROL/<damga>/.
+# printful_5x7: Printful varyant 16364 baski dosyasi gereksinimi (scripts/printful/pf_5x7_oku.py; yalniz GET). Token Drive
+#   TEMP/PRINTFUL_TOKEN.json (maskeli). Cikti TEMP/POD_5X7_PRINTFUL_ORNEK/<damga>/PRINTFUL/.
+on:
+  workflow_dispatch:
+    inputs:
+      b1: {description: "TEMP/POSTER_GALERI_V11_YEDEK/<damga>", default: "20261029_121704"}
+      tam78: {description: "TEMP/VIDEO_V7_DUZELTME/<damga>/TAM78", default: "20261028_134859"}
+      is: {description: "video | printful | hepsi", default: "hepsi"}
+permissions:
+  contents: read
+jobs:
+  video_kapak:
+    if: inputs.is != 'printful'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Girdi
+        env: {B: "${{ inputs.b1 }}", T: "${{ inputs.tam78 }}"}
+        run: '[[ "$B" =~ ^[0-9]{8}_[0-9]{6}$ && "$T" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Ortam
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0 numpy==2.1.3 opencv-python-headless==4.10.0.84
+          sudo apt-get install -y -qq rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Girdiler + kontrol
+        env: {B: "${{ inputs.b1 }}", T: "${{ inputs.tam78 }}"}
+        run: |
+          set -euo pipefail
+          G=gdrive:ASTROLOVE/TEMP; mkdir -p _b1 _k _v
+          rclone copy "$G/POSTER_GALERI_V11_YEDEK/$B" _b1 --include "*/GALERI.json" --include "*/r1_*.jpg" --transfers 16 -q
+          rclone copy "$G/POSTER_KAPAK_V10/20261026_153710" _k --include "KAPAK_*.jpg" --max-depth 1 --transfers 16 -q
+          rclone copy "$G/VIDEO_V7_DUZELTME/$T/TAM78" _v --include "*.mp4" --max-depth 1 --transfers 16 -q
+          echo "girdi: B1 GALERI.json $(find _b1 -name GALERI.json | wc -l), r1 $(find _b1 -name 'r1_*.jpg' | wc -l), V10 kapak $(ls _k | wc -l), video $(ls _v | wc -l)"
+          set +e; python3 -I scripts/kapak78/video_kapak_kontrol.py --b1 _b1 --kapak _k --video _v --ciftler data/pod/pod78_ids.csv --out _o; RC=$?; set -e
+          echo "RC=$RC" >> "$GITHUB_ENV"
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -d _o ] || exit 1
+          D=$(date -u +%Y%m%d_%H%M%S)
+          rclone copy _o "gdrive:ASTROLOVE/TEMP/VIDEO_KAPAK_KONTROL/$D" --immutable -q
+          echo "Cikti: TEMP/VIDEO_KAPAK_KONTROL/$D (RC ${RC:-?})" | tee -a "$GITHUB_STEP_SUMMARY"; cat _o/KONTROL.md >> "$GITHUB_STEP_SUMMARY"
+      - if: always()
+        run: rm -rf _b1 _k _v _o ~/.config/rclone
+  printful_5x7:
+    if: inputs.is != 'video'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: rclone
+        timeout-minutes: 5
+        run: sudo apt-get install -y -qq rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+      - name: rclone.conf + Printful token (maskeli)
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
+          T=$(rclone cat "gdrive:ASTROLOVE/TEMP/PRINTFUL_TOKEN.json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["api_token"].strip())')
+          [ -n "$T" ] || { echo "HATA: PRINTFUL_TOKEN.json api_token bos"; exit 1; }
+          echo "::add-mask::$T"
+          echo "PRINTFUL_TOKEN=$T" >> "$GITHUB_ENV"
+      - name: Printful 5x7 oku
+        run: |
+          set -o pipefail
+          python3 -I scripts/printful/pf_5x7_oku.py _out 2>&1 | sed -u "s|${PRINTFUL_TOKEN}|***|g" | tee _log.txt
+          echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          set -uo pipefail
+          [ -d _out ] || exit 1
+          cp _log.txt _out/kosu_log.txt 2>/dev/null || true
+          if [ -n "${PRINTFUL_TOKEN:-}" ] && grep -rlF "$PRINTFUL_TOKEN" _out; then echo "::error::ciktida token"; exit 1; fi
+          D=$(date -u +%Y%m%d_%H%M%S)
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/POD_5X7_PRINTFUL_ORNEK/$D/PRINTFUL" --immutable -q
+          echo "Cikti: TEMP/POD_5X7_PRINTFUL_ORNEK/$D/PRINTFUL" | tee -a "$GITHUB_STEP_SUMMARY"
+          cat _out/PF_5X7.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          [ "${KOD:-1}" = 0 ]
+      - if: always()
+        run: rm -rf _out ~/.config/rclone
