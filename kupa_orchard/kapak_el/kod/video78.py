@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """78 kupa videosu (video_el43.py) paralel uretim. Girdi: kapak klasoru (KUPA_KAPAK_<CIFT>.jpg). Cikti: KUPA_VIDEO_<CIFT>.mp4.
 Her video once gecici adla yazilir, bitince yerine konur. Hata olursa o cift raporlanir, digerleri devam eder.
+Var olan video atlanir (kesintiden devam). Kapak ya da kod degistiyse YENIDEN=1 ile tum set silinip yeniden uretilir.
 Kullanim: python3 -I video78.py <kapak_klasoru> <cikti_klasoru> [isci]"""
 import os, pathlib, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -12,21 +13,28 @@ OUT.mkdir(parents=True, exist_ok=True)
 ciftler = sorted(p.stem.replace('KUPA_KAPAK_', '') for p in KAP.glob('KUPA_KAPAK_*.jpg'))
 if len(ciftler) != 78:
     sys.exit(f'HATA: 78 kapak bekleniyordu, {len(ciftler)} bulundu')
+if os.environ.get('YENIDEN') == '1':          # tum seti bastan uret (kapak ya da kod degistiyse zorunlu)
+    for f in list(OUT.glob('KUPA_VIDEO_*')) + list(OUT.glob('.gecici_*')):
+        f.unlink()
 yap = [c for c in ciftler if not (OUT / f'KUPA_VIDEO_{c}.mp4').exists()]
+ENV = dict(os.environ, KAYIT=str(KAP / 'KAYIT.tsv'))
+if not (KAP / 'KAYIT.tsv').exists():
+    sys.exit('HATA: kapak klasorunde KAYIT.tsv yok (sembol surumu dogrulanamaz)')
 print(f'{len(ciftler)} cift, {len(ciftler) - len(yap)} hazir, {len(yap)} uretilecek, isci {ISCI}', flush=True)
 
 
 def tek(c):
     gecici = OUT / f'.gecici_{c}.mp4'
     r = subprocess.run(['python3', '-I', str(BURASI / 'video_el43.py'), c, str(KAP / f'KUPA_KAPAK_{c}.jpg'), str(gecici)],
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, env=ENV)
     if r.returncode:
         gecici.unlink(missing_ok=True)
         return c, False, r.stderr[-400:]
     for j in OUT.glob(f'.gecici_{c}_*.jpg'):
         j.rename(OUT / j.name.replace('.gecici_', 'KUPA_VIDEO_'))
     os.replace(gecici, OUT / f'KUPA_VIDEO_{c}.mp4')
-    return c, True, [l for l in r.stdout.splitlines() if 'maske' in l][-1][-90:]
+    bilgi = [l for l in r.stdout.splitlines() if 'maske' in l]
+    return c, True, (bilgi[-1][-90:] if bilgi else '')
 
 
 t0, bitti, hata = time.time(), 0, []

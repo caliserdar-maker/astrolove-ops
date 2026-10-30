@@ -6,8 +6,9 @@ tek kupa on yuz sahnesine uyarlanmistir:
 - Toz iki kucuk burc isaretinden ozgun semobole akar; sembol ilk varislarla sifirdan olusur; BITIS sn'de tam, sonra kapak sabit.
 - Mesaj kupanin ARKA yuzunde oldugu icin bu sahnede gorunmez; mesaj yazilma adimi yoktur (maske bossa atlanir).
 Katmanlar (bos kupa, sembolsuz, maskeler) baski_kes.py bayraklariyla uretilip kapak_canva4.py ile ayni sahneye giydirilir.
+Ortam: KAYIT=<kapak78 KAYIT.tsv> verilirse sembol surumu kapaklarla ayni olmali, degilse durur.
 Kullanim: python3 -I video_el43.py <CIFT> <kapak_jpg> <cikti_mp4> [bitis_sn]"""
-import os, subprocess, sys, time, pathlib, tempfile
+import os, shutil, subprocess, sys, time, pathlib, tempfile
 import numpy as np, cv2
 from PIL import Image
 
@@ -22,7 +23,8 @@ W, H, FPS, SURE, SILME = 1440, 1080, 30, 6.0, 0.3
 N, SIGMA = 20800, 0.45                # toz: onayli V6 (10400) x 2 (Serdar 30 Eki); sigma V6
 rng = np.random.default_rng(11)
 t0 = time.time()
-ENV = {k: v for k, v in os.environ.items() if k not in ('D_IN', 'SABIT_YUKSEKLIK', 'SEMBOL_YOK', 'GLIF_YOK', 'MESAJ_YOK')}
+TEMIZ = ('D_IN', 'SABIT_YUKSEKLIK', 'SEMBOL_YOK', 'GLIF_YOK', 'MESAJ_YOK', 'IMZA_YOK', 'BURC_YOK', 'BURC_DY', 'BURC_MIN')
+ENV = {k: v for k, v in os.environ.items() if k not in TEMIZ}
 ENV.update(GOLGE_US='1.0', PARLA='0.7')
 
 
@@ -36,6 +38,13 @@ def kos(*a, ek=None):
     if r.returncode:
         sys.exit(f'HATA {pathlib.Path(str(a[0])).name}: {r.stderr[-800:]}')
 
+
+# 0) sembol surumu kapaklarla ayni olmali (KAYIT ortam degiskeni: kapak78 KAYIT.tsv yolu)
+_sha = subprocess.run(['git', '-C', str(REPO), 'rev-parse', REF], capture_output=True, text=True).stdout.strip()
+if os.environ.get('KAYIT'):
+    _ilk = pathlib.Path(os.environ['KAYIT']).read_text().splitlines()[0].split()
+    if not _sha or _ilk[-1] != _sha:
+        sys.exit(f'HATA: sembol surumu kapaklarla farkli (ref {_sha[:7]}, kapak kaydi {_ilk[-1][:7]})')
 
 # 1) katmanlar
 TMP = pathlib.Path(tempfile.mkdtemp(prefix=f'vid_{CIFT}_'))
@@ -120,7 +129,7 @@ nT, nB, nS = int(round(SURE * FPS)), int(round(BITIS * FPS)), int(round(SILME * 
 p = subprocess.Popen(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}',
                       '-r', str(FPS), '-i', '-', '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '17',
                       '-preset', 'slow', '-movflags', '+faststart', OUT], stdin=subprocess.PIPE)
-anlar = {0: '0.0', int(0.15 * FPS): '0.15', int(1.4 * FPS): '1.4', int(2.8 * FPS): '2.8', nT - 1: 'son'}
+anlar = {0: '0.0', round(0.15 * FPS): '0.15', round(1.4 * FPS): '1.4', round(2.8 * FPS): '2.8', nT - 1: 'son'}
 for i in range(nT):
     if i == 0 or i >= nB:
         f = KAP
@@ -161,4 +170,5 @@ for i in range(nT):
 p.stdin.close()
 if p.wait():
     sys.exit('HATA ffmpeg')
+shutil.rmtree(TMP, ignore_errors=True)
 print('tamam', OUT, f'{time.time() - t0:.0f}s')

@@ -44,7 +44,8 @@ if eski:
         f.unlink()
 shutil.rmtree(OUT / 'ara', ignore_errors=True)
 
-ENV = {k: v for k, v in os.environ.items() if k not in ('D_IN', 'SABIT_YUKSEKLIK')}
+ENV = {k: v for k, v in os.environ.items() if k not in ('D_IN', 'SABIT_YUKSEKLIK', 'SEMBOL_YOK', 'GLIF_YOK', 'MESAJ_YOK',
+                                                    'IMZA_YOK', 'BURC_YOK', 'BURC_DY', 'BURC_MIN')}
 ENV.update(GOLGE_US='1.0', PARLA='0.7', ALT_ORAN='0.55', IZ_ORAN='0.05', ALT_AGIRLIK='600', GOLGE_GUC='1.6')
 kayit = OUT / 'KAYIT.tsv'
 kayit.write_text(f'# sembol {DAL} {SHA}\ncift\tbaslik\n')
