@@ -1,0 +1,168 @@
+name: galeri-ci11-yukle
+
+# Poster 78 galeri v11b: Champagne Ivory gorseli rank 11 + CI renk bagi (Serdar 30 Eki karari). KOSTURMA AYRI ONAYLA (kuru da).
+# scripts/kapak78/galeri_ci11.py: kuru=true (varsayilan) ETSY SALT OKUMA (ilan basina 4 GET), PLAN_CI11.json + plan_damga.
+# ETSY'YE YAZAR yalniz kuru=false + confirm=GALERI_CI11 + plan_damga (+ data/pod/galeri_ci11_alt.csv ONAYLI): ilan basina rank 11
+# yukleme + TEK variation-images POST'u (4 eski bag aynen + CI), geri okuma, tutmazsa geri alma (bag eski 4, yeni gorsel silinir).
+# Rank 1-10 ve 4 eski bag degismez; updateListing YOK. Ilk PASS olmayan ilanda kosu durur. Pilot: sadece=<tek ilan>.
+# Girdiler: dosya kapisi galeri-ci11-dosya-kapi TEMP/POSTER_GALERI_CI11/DOSYA_KAPI/<dosya_kapi_kosu>/CI_KAPI.csv (kilitsiz ayri is
+# akisi; OCR orada), yazimda CI dosyalari TEMP/POSTER_GALERI_V11/<galeri_damga>/<CIFT>_W01_KAPAK.jpg, istege bagli canli okuma
+# TEMP/POSTER_GALERI_V11_YEDEK/<canli_damga> (galeri-v11-yedek-oku). Kosu ciktisi TEMP/POSTER_GALERI_CI11/KOSU/<run_id>/.
+# Etsy kilidi (CLAUDE.md): checkout'tan hemen sonra, token indirmeden ONCE; concurrency grubu yok.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      galeri_damga: {description: "TEMP/POSTER_GALERI_V11/<damga> (CI W01 dosyalari)", required: true, default: "20261029_103607"}
+      dosya_kapi_kosu: {description: "galeri-ci11-dosya-kapi kosu no (CI_KAPI.csv)", required: true, default: ""}
+      canli_damga: {description: "istege bagli: TEMP/POSTER_GALERI_V11_YEDEK/<damga> canli okuma (bos = yok)", required: false, default: ""}
+      kuru: {description: "true = yazma yok (plan); false = yazim", required: true, default: "true"}
+      confirm: {description: "yazim icin GALERI_CI11", required: false, default: ""}
+      plan_damga: {description: "yazim: kuru kosunun plan_damga degeri (<kosu>_<sha12>)", required: false, default: ""}
+      sadece: {description: "yalniz bu ilanlar (virgullu listing_id); bos = 78", required: false, default: ""}
+      haric: {description: "bu ilanlar haric (virgullu listing_id)", required: false, default: ""}
+      azami_ilan: {description: "yazim: kosu basina en fazla ilan (0 = sinirsiz)", required: false, default: "0"}
+
+env:
+  T: "gdrive:ASTROLOVE/TEMP"
+  O: "gdrive:ASTROLOVE/TEMP/POSTER_GALERI_CI11"
+
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Girdi kapisi
+        env:
+          GD: ${{ inputs.galeri_damga }}
+          DK: ${{ inputs.dosya_kapi_kosu }}
+          CD: ${{ inputs.canli_damga }}
+          KURU: ${{ inputs.kuru }}
+          ONAY: ${{ inputs.confirm }}
+          PD: ${{ inputs.plan_damga }}
+          SA: ${{ inputs.sadece }}
+          HA: ${{ inputs.haric }}
+          AI: ${{ inputs.azami_ilan }}
+        run: |
+          set -euo pipefail
+          [[ "$GD" =~ ^[0-9]{8}_[0-9]{6}$ && "$DK" =~ ^[0-9]+$ && "$CD" =~ ^([0-9]{8}_[0-9]{6})?$ ]] || { echo "::error::girdi (galeri_damga / dosya_kapi_kosu / canli_damga)"; exit 1; }
+          [[ "$KURU" =~ ^(true|false)$ && "$AI" =~ ^[0-9]{1,2}$ ]] || { echo "::error::girdi (kuru / azami_ilan)"; exit 1; }
+          [[ "$SA" =~ ^([0-9]+(,[0-9]+)*)?$ && "$HA" =~ ^([0-9]+(,[0-9]+)*)?$ ]] || { echo "::error::girdi (sadece / haric)"; exit 1; }
+          if [ "$KURU" = false ]; then
+            [ "$ONAY" = GALERI_CI11 ] || { echo "::error::yazim icin confirm GALERI_CI11"; exit 1; }
+            [[ "$PD" =~ ^[0-9]+_[0-9a-f]{12}$ ]] || { echo "::error::yazim icin plan_damga (<kosu>_<sha12>)"; exit 1; }
+          fi
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==11.0.0
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Girdiler (Drive)
+        env:
+          GD: ${{ inputs.galeri_damga }}
+          DK: ${{ inputs.dosya_kapi_kosu }}
+          CD: ${{ inputs.canli_damga }}
+          KURU: ${{ inputs.kuru }}
+          PD: ${{ inputs.plan_damga }}
+          SA: ${{ inputs.sadece }}
+          HA: ${{ inputs.haric }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out _in/dosya _in/canli
+          K="$O/DOSYA_KAPI/$DK"
+          rclone copyto "$K/CI_KAPI.csv" _work/CI_KAPI.csv || { echo "::error::CI_KAPI.csv yok (DOSYA_KAPI/$DK)"; exit 1; }
+          K0=$(rclone cat "$K/GALERI_DAMGA.txt" 2>/dev/null || true)
+          [ "$K0" = "$GD" ] || { echo "::error::dosya kapisi galeri_damga ($K0) bu kosuyla ($GD) ayni degil"; exit 1; }
+          cp _work/CI_KAPI.csv _out/CI_KAPI.csv
+          echo "$GD $DK $CD" > _out/GIRDI.txt
+          python3 - <<'PY'
+          import csv, os
+          sa = {x for x in os.environ["SA"].split(",") if x}; ha = {x for x in os.environ["HA"].split(",") if x}
+          R = [r for r in csv.DictReader(open("data/pod/pod78_ids.csv")) if (not sa or r["listing_id"] in sa) and r["listing_id"] not in ha]
+          open("_work/dosya.txt", "w").writelines(f"{r['cift']}_W01_KAPAK.jpg\n" for r in R)
+          open("_work/canli.txt", "w").writelines(f"{r['listing_id']}_{r['cift']}/GALERI.json\n" for r in R)
+          print(f"kapsam: {len(R)} ilan")
+          PY
+          if [ -n "$CD" ]; then
+            rclone copy "$T/POSTER_GALERI_V11_YEDEK/$CD" _in/canli --files-from _work/canli.txt --transfers 8 -q
+            echo "canli okuma: $(ls _in/canli/*/GALERI.json 2>/dev/null | wc -l) GALERI.json ($CD)"
+          fi
+          if [ "$KURU" = false ]; then
+            rclone copyto "$O/KOSU/${PD%%_*}/PLAN_CI11.json" _work/PLAN_CI11.json || { echo "::error::PLAN_CI11.json yok (KOSU/${PD%%_*})"; exit 1; }
+            K1=$(rclone cat "$O/KOSU/${PD%%_*}/GIRDI.txt" 2>/dev/null || true)
+            [ "$K1" = "$GD $DK $CD" ] || { echo "::error::kuru plan girdileri ($K1) bu kosuyla ($GD $DK $CD) ayni degil; yazma yok"; exit 1; }
+            rclone copy "$T/POSTER_GALERI_V11/$GD" _in/dosya --files-from _work/dosya.txt --transfers 16 -q
+            echo "indirilen CI dosyasi: $(ls _in/dosya | wc -l)"
+          fi
+      - name: Token
+        run: |
+          set -euo pipefail
+          umask 077
+          rclone copyto "$T/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Galeri CI rank 11
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          KURU: ${{ inputs.kuru }}
+          PD: ${{ inputs.plan_damga }}
+          CD: ${{ inputs.canli_damga }}
+          SA: ${{ inputs.sadece }}
+          HA: ${{ inputs.haric }}
+          AI: ${{ inputs.azami_ilan }}
+        run: |
+          set +e -o pipefail
+          args=(--dosya-kapi _work/CI_KAPI.csv --out _out --sadece "$SA" --haric "$HA")
+          [ -n "$CD" ] && args+=(--canli-dir _in/canli)
+          if [ "$KURU" = true ]; then args+=(--kuru)
+          else args+=(--confirm GALERI_CI11 --plan _work/PLAN_CI11.json --plan-damga "$PD" --dosya-dir _in/dosya --azami-ilan "${AI:-0}"); fi
+          python3 scripts/kapak78/galeri_ci11.py "${args[@]}" 2>&1 | tee _work/kosu.log
+          echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+      - name: Token + cikti Drive'a
+        if: always()
+        run: |
+          set -uo pipefail
+          # Token geri yazimi (Serdar 27 Eki): yenilenen refresh token kaybolursa tum Etsy kosulari durur. 3 deneme.
+          TOKEN_FAIL=""
+          if [ -f _work/ETSY_TOKEN.json.updated ]; then
+            TOKEN_FAIL=1
+            for n in 1 2 3; do
+              if rclone copyto _work/ETSY_TOKEN.json "$T/ETSY_TOKEN.json"; then TOKEN_FAIL=""; echo "Token geri yazildi (deneme $n)"; break; fi
+              echo "Token geri yazimi basarisiz (deneme $n)"; sleep 10
+            done
+            [ -z "$TOKEN_FAIL" ] || echo "::error::ETSY TOKEN GERI YAZILAMADI (3 deneme). Yeni refresh token kaybolabilir; Etsy kosulari baslatma, Merkez'e bildir."
+          else
+            echo "Token yenilenmedi (yenileme yok)"
+          fi
+          [ -f _work/kosu.log ] && python3 scripts/guvenlik/log_suz.py < _work/kosu.log > "_out/kosu_$(date -u +%Y%m%d_%H%M).txt"
+          if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:' _out/ 2>/dev/null; then
+            echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; exit 1; fi
+          [ -d _out ] && rclone copy _out "$O/KOSU/${GITHUB_RUN_ID}" -q && echo "::notice title=GALERI CI11::Drive TEMP/POSTER_GALERI_CI11/KOSU/${GITHUB_RUN_ID}/"
+          [ -f _out/RAPOR.md ] && head -60 _out/RAPOR.md >> "$GITHUB_STEP_SUMMARY" || true
+          [ -z "$TOKEN_FAIL" ] || exit 1
+          [ "${KOD:-1}" = 0 ] || { echo "::error::cikis ${KOD:-?}"; exit 1; }
+      - if: always()
+        run: rm -rf _work _in ~/.config/rclone
