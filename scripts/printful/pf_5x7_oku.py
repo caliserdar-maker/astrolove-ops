@@ -59,7 +59,7 @@ def main():
         k3, c = get(f"/v2/catalog-variants/{VARYANT}", token); (out / "v2_variant_16364.json").write_text(json.dumps(c, indent=1))
         md.append(f"- /v2/catalog-variants/{VARYANT}: HTTP {k3}")
         k4, c2 = get(f"/v2/catalog-products/{pid}", token); (out / f"v2_product_{pid}.json").write_text(json.dumps(c2, indent=1))
-        d2 = (c2.get("data") or {})
+        d2 = c2.get("data") if isinstance(c2.get("data"), dict) else {}
         md.append(f"- /v2/catalog-products/{pid}: HTTP {k4} | teknik {d2.get('techniques')} | yerlesim "
                   f"{[(x.get('placement'), x.get('technique')) for x in d2.get('placements') or []]}")
     (out / "PF_5X7.md").write_text("\n".join(md) + "\n", encoding="utf-8")

@@ -3,6 +3,9 @@ name: wa-hazirlik-oku
 # video_kapak: 78 videonun kapagi canli rank 1 kapakla ayni mi (scripts/kapak78/video_kapak_kontrol.py). Canli = B1 yedegi r1
 #   (TEMP/POSTER_GALERI_V11_YEDEK/<b1>), video girdisi = TEMP/POSTER_KAPAK_V10/20261026_153710, video = TEMP/VIDEO_V7_DUZELTME/<tam78>/TAM78
 #   (Serdar onayli 28 Eki, kosu 40699879314). Cikti TEMP/VIDEO_KAPAK_KONTROL/<damga>/.
+# onizle: CANCER_LIBRA 5 renk 5x7 (siparis hatti test fisleri 9000000531/522/523 GPT, 524/525 DIJITAL; ornek isimler) Printful
+#   printfile 414'e (JSON'dan) cover yerlesimi + gercek oran onizleme (scripts/printful/pf_5x7_onizle.py). Printful/Etsy istegi yok.
+#   Cikti TEMP/POD_5X7_PRINTFUL_ORNEK/<damga>/ (BASKI, ONIZLEME, KONTAK.jpg, ORNEK.md/csv).
 # printful_5x7: Printful varyant 16364 baski dosyasi gereksinimi (scripts/printful/pf_5x7_oku.py; yalniz GET). Token Drive
 #   TEMP/PRINTFUL_TOKEN.json (maskeli). Cikti TEMP/POD_5X7_PRINTFUL_ORNEK/<damga>/PRINTFUL/.
 on:
@@ -10,12 +13,13 @@ on:
     inputs:
       b1: {description: "TEMP/POSTER_GALERI_V11_YEDEK/<damga>", default: "20261029_121704"}
       tam78: {description: "TEMP/VIDEO_V7_DUZELTME/<damga>/TAM78", default: "20261028_134859"}
-      is: {description: "video | printful | hepsi", default: "hepsi"}
+      is: {description: "video | printful | onizle | hepsi", default: "hepsi"}
+      pf_damga: {description: "onizle: printfiles JSON TEMP/POD_5X7_PRINTFUL_ORNEK/<damga>/PRINTFUL", default: "20261030_110925"}
 permissions:
   contents: read
 jobs:
   video_kapak:
-    if: inputs.is != 'printful'
+    if: inputs.is == 'video' || inputs.is == 'hepsi'
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -64,7 +68,7 @@ jobs:
       - if: always()
         run: rm -rf _b1 _k _v _o ~/.config/rclone
   printful_5x7:
-    if: inputs.is != 'video'
+    if: inputs.is == 'printful' || inputs.is == 'hepsi'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -108,3 +112,53 @@ jobs:
           [ "${KOD:-1}" = 0 ]
       - if: always()
         run: rm -rf _out ~/.config/rclone
+  onizle:
+    if: inputs.is == 'onizle' || inputs.is == 'hepsi'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Girdi
+        env: {P: "${{ inputs.pf_damga }}"}
+        run: '[[ "$P" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Ortam
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0 numpy==2.1.3
+          sudo apt-get install -y -qq rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Girdiler + onizleme
+        env: {P: "${{ inputs.pf_damga }}"}
+        run: |
+          set -euo pipefail
+          S=gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM; mkdir -p _in _pf
+          for r in GPT/AstroLoveArt_9000000531 GPT/AstroLoveArt_9000000522 GPT/AstroLoveArt_9000000523 DIJITAL/9000000524 DIJITAL/9000000525; do
+            rclone copy "$S/$r" "_in/${r##*/}" --include "/AstroLoveArt_*_5x7.jpg" --include "/siparis.json" --include "/OZET.json" -q; done
+          rclone copy "gdrive:ASTROLOVE/TEMP/POD_5X7_PRINTFUL_ORNEK/$P/PRINTFUL" _pf --include "printfiles_*.json" -q
+          echo "girdi: 5x7 $(find _in -name 'AstroLoveArt_*_5x7.jpg' | wc -l), printfiles $(ls _pf | wc -l)"
+          set +e; python3 -I scripts/printful/pf_5x7_onizle.py --printfiles "$(ls _pf/printfiles_*.json | head -1)" --in _in --out _o; RC=$?; set -e
+          echo "RC=$RC" >> "$GITHUB_ENV"
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -d _o ] || exit 1
+          D=$(date -u +%Y%m%d_%H%M%S)
+          rclone copy _o "gdrive:ASTROLOVE/TEMP/POD_5X7_PRINTFUL_ORNEK/$D" --immutable -q
+          echo "Cikti: TEMP/POD_5X7_PRINTFUL_ORNEK/$D (RC ${RC:-?})" | tee -a "$GITHUB_STEP_SUMMARY"; cat _o/ORNEK.md >> "$GITHUB_STEP_SUMMARY"
+          [ "${RC:-1}" = 0 ]
+      - if: always()
+        run: rm -rf _in _pf _o ~/.config/rclone
