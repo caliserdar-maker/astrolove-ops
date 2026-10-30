@@ -5,7 +5,7 @@ arka planda o stilin meyvesi; aynali, 11 oz oranina uzatilmis: sahne/stil/STIL_<
 Baslik: 1. satir 'BURC1 & BURC2', 2. satir stil adi; kapakla ayni yerlesim (ALT_REF kapak alt yazisi), krem, guclu golge.
 Sembol kaynagi kapak78.py ile ayni ref (refs/kapak78/sembol); kapak KAYIT.tsv SHA'si ile ayni olmali.
 Cikti: <cikti>/KUPA_STIL_<CIFT>_<NN>_<STIL>.jpg (NN = 07..14 galeri sirasi) + KAYIT.tsv.
-Tum set uretiminde (cift verilmezse) eski gorsel varsa durur; YENIDEN=1 ile silinir. Baskida tasma uyarisi hata sayilir.
+Tum set uretiminde (cift verilmezse) eski gorsel varsa durur; YENIDEN=1 ile silinir. Baskida tasma uyarisi hata sayilir (TASMA_IZIN=1 ile yalniz uyari, KAYIT'ta gorunur).
 Kullanim: python3 -I stil78.py <kapak_klasoru(KAYIT.tsv)> <cikti_klasoru> [CIFT ...]"""
 import os, shutil, subprocess, sys, time, pathlib, tempfile
 
@@ -87,7 +87,9 @@ for c in ciftler:
             bk = kos(c, KOD / 'baski_kes.py', KOD.parent / f'varlik/kes/{k}', tmp / 'sem', 'Emily', 'James', b1, b2,
                      'My favorite place is with you', renk, tmp / k)
             if 'True' in bk:
-                sys.exit(f'HATA {c} {s}: baskida tasma: {bk}')
+                if os.environ.get('TASMA_IZIN') != '1':
+                    sys.exit(f'HATA {c} {s}: baskida tasma: {bk}')
+                print(f'UYARI {c} {s}: baskida tasma (TASMA_IZIN=1, kayda yazildi): {bk[-50:]}', flush=True)
             kos(c, BURASI / 'kapak_canva4.py', IS / f'sahne/stil/STIL_{s}_uzun.png', tmp / f'{k}_baski_11oz.png',
                 IS / 'sahne/geo_A3b.json', tmp / f'{k}.png')
             bs = kos(c, BURASI / 'baslik2.py', tmp / f'{k}.png', OUT / f'KUPA_STIL_{c}_{no}_{s}.jpg', b1, b2, 1500, 535,
