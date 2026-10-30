@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 MB, W01, OUT = sys.argv[1:4]
 BURASI = os.path.dirname(os.path.abspath(__file__))
-FONT = '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
+FONT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'LiberationSans-Bold.ttf')   # SIL OFL 1.1, depoda
 BANT = np.asarray(Image.open(os.path.join(BURASI, 'ci_duvar_bant_150_330.png')).convert('RGB'))
 REF_MB_BANT = os.path.join(BURASI, 'ref_mb_bant_150_330.png')
 Y0, Y1, KES = 150, 330, 450
