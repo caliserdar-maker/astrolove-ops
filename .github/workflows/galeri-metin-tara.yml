@@ -1,6 +1,6 @@
 name: galeri-metin-tara
 # Galeri v11b gorsellerinde boy sayisi yazisi taramasi (Serdar 30 Eki, 5x7 isi madde 4). ETSY API YOK, token yok, kilit yok.
-# Girdi: Drive TEMP/POSTER_GALERI_V11_YEDEK/<damga>/<lid>_<CIFT>/r<rank>_<id>.jpg (yedek-oku + indir / dogrula ciktisi; klasor degismez).
+# Girdi: Drive TEMP/POSTER_GALERI_V11_YEDEK/<damga>/<lid>_<CIFT>/r<rank>_<id>.jpg (yedek-oku + yedek-indir ciktisi; klasor degismez; #61: dogrula buraya yazmaz).
 # tesseract OCR: "<n> sizes", "thirteen sizes", boy listesi (5x7 var / yok). scripts/kapak78/galeri_metin_tara.py
 # Cikti: Drive TEMP/GALERI_METIN_TARA/<damga>/ (TARAMA.csv, OZET.md), --immutable.
 # Hiz (30 Eki): OCR oncesi 2000 px gri kucultme (Pillow), isci = cpu sayisi, tesseract OMP_THREAD_LIMIT=1, gorsel basina 90 sn.

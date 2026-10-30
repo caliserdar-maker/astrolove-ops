@@ -102,6 +102,19 @@ def main() -> int:
     assert "--ilk-kayit-izni" not in vv and "--surum v7" in vv and "updateListing YOK" in vv, "video-v7-yukle galeri / surum"
     assert "kuru: {description: \"true = yazma yok (plan); false = yazim\", required: true, default: \"true\"}" in vv \
         and "[ \"$ONAY\" = VIDEO_V7_YUKLE ]" in vv, "video-v7-yukle yazim kapisi"
+    # #61 (30 Eki): galeri-v11-dogrula yalniz kendi rapor klasorune yazar; okuma yedegi POSTER_GALERI_V11_YEDEK degismez
+    import shlex
+    dg = (WORKFLOWS / "galeri-v11-dogrula.yml").read_text(encoding="utf-8")
+    hedef = []
+    for s in dg.splitlines():
+        if "rclone " in s and not s.strip().startswith("#"):
+            a = shlex.split(s.split("rclone ", 1)[1], comments=True)
+            if a and a[0] in ("copy", "copyto", "sync", "move", "moveto") and len(a) > 2:
+                hedef.append(a[2])
+            elif a and a[0] in ("delete", "deletefile", "purge", "rmdir", "touch") and len(a) > 1:
+                hedef.append(a[1])
+    uzak = [h for h in hedef if h.startswith(("$T/", "gdrive:"))]
+    assert uzak == ["$T/POSTER_GALERI_V11_YUKLE/DOGRULA/${GITHUB_RUN_ID}"], f"galeri-v11-dogrula: rapor klasoru disina yazim {uzak}"
     print(f"PASS: {len(files)} workflow YAML, {len(PUBLIC_AUDITS)} public denetim sozlesmesi")
     return 0
 

@@ -3,6 +3,8 @@ name: galeri-v11-yedek-oku
 # KILIT SURESI (Serdar 23 Eki): bu kosu yalniz Etsy okur (ilan basina 4 GET) ve JSON'u Drive'a yazar; dosya indirme kilitsiz
 # galeri-v11-yedek-indir.yml'de. Cikti Drive TEMP/POSTER_GALERI_V11_YEDEK/<damga>/ (<ilan>_<CIFT>/GALERI.json, OKUMA.csv, OKUMA.md).
 # Kod scripts/etsy/galeri_v11_yedek_oku.py. Kota: ilan basina api.kota_kapisi (KOTA_SINIRI 10).
+# profil (#60): beklenen galeri (PROFILLER) v11b 10 gorsel / 4 bag (30 Eki canli), v11ci 11 gorsel / 5 bag (CI eklemesi sonrasi),
+# v11 10 / 5 (CI kapak), v10 9 / 5 (eski). Yalniz rapordaki UYGUN / SAPMA'yi belirler; okuma ve istek sayisi degismez.
 permissions:
   actions: read
   contents: read
@@ -10,14 +12,15 @@ on:
   workflow_dispatch:
     inputs:
       sadece: {description: "virgullu listing_id (bos = 78 ilan)", required: false, default: ""}
+      profil: {description: "beklenen galeri: v11b (10 gorsel, 4 bag) | v11ci (11, 5) | v11 (10, 5) | v10 (9, 5)", type: choice, options: [v11b, v11ci, v11, v10], default: v11b}
 jobs:
   oku:
     runs-on: ubuntu-latest
     timeout-minutes: 160
     steps:
       - name: Girdi kapisi
-        env: {S: "${{ inputs.sadece }}"}
-        run: '[[ "$S" =~ ^([0-9]+(,[0-9]+)*)?$ ]] || { echo "::error::girdi"; exit 1; }'
+        env: {S: "${{ inputs.sadece }}", P: "${{ inputs.profil }}"}
+        run: '[[ "$S" =~ ^([0-9]+(,[0-9]+)*)?$ && "$P" =~ ^(v10|v11|v11b|v11ci)$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
@@ -53,7 +56,8 @@ jobs:
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
           S: ${{ inputs.sadece }}
-        run: python3 scripts/etsy/galeri_v11_yedek_oku.py --ciftler data/pod/pod78_ids.csv --out _out --sadece "$S"
+          P: ${{ inputs.profil }}
+        run: python3 scripts/etsy/galeri_v11_yedek_oku.py --ciftler data/pod/pod78_ids.csv --out _out --sadece "$S" --profil "$P"
       - name: Token geri yaz + cikti Drive'a
         if: ${{ always() }}
         run: |

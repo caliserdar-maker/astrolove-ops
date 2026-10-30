@@ -3,7 +3,10 @@
 Girdi --in: galeri_v11_yedek_oku.py ciktisi (<ilan>_<CIFT>/GALERI.json, OKUMA.csv; Drive TEMP/POSTER_GALERI_V11_YEDEK/<damga>).
 Ilan basina: her gorsel url_fullxfull -> r<rank>_<listing_image_id>.jpg (boyut = JSON full_width x full_height), her video
 video_url -> video_<video_id>.mp4 (bayt > 0). OZET.md galeri_v10_liste.ozet_oku bicimi: | listing_id | cift | dosya | durum | not |
-(dosya = gorsel dosyasi sayisi; PASS = 9 gorsel dosyasi tam + video dosyalari tam). ETA sayaci (islenen/toplam, gecen, kalan).
+(dosya = gorsel dosyasi sayisi; PASS = profilin gorsel sayisi kadar dosya, rank 1..n, + video dosyalari tam). ETA sayaci.
+Profil (#60, 30 Eki; 9 gorsel varsayimi kaldirildi): --profil v10 | v11 | v11b | v11ci (galeri_v11_yedek_oku.PROFILLER: v10 9, v11 10,
+v11b 10, v11ci 11 gorsel). --profil verilmezse GALERI.json "profil" alani (yedek-oku yazar) kullanilir; alan yok / ilanlar arasi farkli /
+--profil ile celisirse DUR (cikis 2, indirme yok).
 Cikti ayni klasore (--in) yazilir; is akisi yalniz yeni dosyalari Drive'a --immutable ile ekler. Cikis 0 = 78/78 PASS."""
 import argparse
 import json
@@ -15,7 +18,9 @@ from pathlib import Path
 import requests
 from PIL import Image
 
-BEKLENEN = 9
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "etsy"))
+from galeri_v11_yedek_oku import PROFILLER  # noqa: E402  (tek kaynak; modul ust duzeyde yalniz stdlib)
+
 CDN = ("https://i.etsystatic.com/", "https://v.etsystatic.com/")
 
 
@@ -41,14 +46,32 @@ def isler_kur(kok):
     return ilanlar, isler
 
 
+def profil_sec(arg, jler):
+    """(profil, hata). arg bos ise GALERI.json 'profil' alanlari tek ve gecerli olmali; arg verilmisse alanla celismemeli."""
+    kayit = {j.get("profil") for j in jler}
+    if arg:
+        diger = sorted(map(str, kayit - {arg, None}))
+        return (arg, None) if not diger else (None, f"--profil {arg} ama GALERI.json profil {diger}")
+    if len(kayit) != 1 or None in kayit:
+        return None, f"--profil yok ve GALERI.json profil alani tek degil / eksik ({sorted(map(str, kayit))})"
+    p = kayit.pop()
+    return (p, None) if p in PROFILLER else (None, f"GALERI.json profil {p!r} bilinmiyor")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--in", dest="kok", required=True); ap.add_argument("--is", dest="is_", type=int, default=8)
+    ap.add_argument("--profil", default="", choices=["", *sorted(PROFILLER)], help="bos = GALERI.json 'profil' alani")
     a = ap.parse_args(argv)
     kok = Path(a.kok)
     ilanlar, isler = isler_kur(kok)
     if not ilanlar:
         print("::error::GALERI.json yok"); return 1
+    profil, hata_p = profil_sec(a.profil, [j for _, j in ilanlar])
+    if hata_p:
+        print(f"::error::profil: {hata_p}"); return 2
+    BEKLENEN = PROFILLER[profil]["gorsel"]
+    print(f"profil {profil}: ilan basina {BEKLENEN} gorsel", flush=True)
     t0, hata = time.time(), {}
     with ThreadPoolExecutor(a.is_) as ex:
         for n, ((_, p), h) in enumerate(zip(isler, ex.map(lambda x: indir(*x), isler)), 1):
@@ -61,8 +84,8 @@ def main(argv=None):
     for d, j in ilanlar:
         neden, say = [], 0
         g = j.get("gorseller") or []
-        if len(g) != BEKLENEN:
-            neden.append(f"JSON'da {len(g)} gorsel (beklenen {BEKLENEN})")
+        if len(g) != BEKLENEN or sorted(x.get("rank") for x in g) != list(range(1, BEKLENEN + 1)):
+            neden.append(f"JSON'da {len(g)} gorsel / rank {sorted(x.get('rank') for x in g)} (beklenen {BEKLENEN}, 1..{BEKLENEN})")
         for x in g:
             p = d / f"r{x['rank']}_{x['listing_image_id']}.jpg"
             if str(p) in hata or not p.exists():
@@ -82,7 +105,7 @@ def main(argv=None):
         satir.append([j["listing_id"], j["cift"], say, "PASS" if not neden and say == BEKLENEN else "FAIL", "; ".join(neden)])
     gecti = sum(1 for s in satir if s[3] == "PASS")
     with open(kok / "OZET.md", "w", encoding="utf-8") as f:
-        f.write(f"# Poster 78 galeri v11 yedegi (dosyalar)\n\nilan PASS {gecti}/{len(satir)} | gorsel dosyasi {sum(s[2] for s in satir)} "
+        f.write(f"# Poster 78 galeri v11 yedegi (dosyalar, profil {profil})\n\nilan PASS {gecti}/{len(satir)} | gorsel dosyasi {sum(s[2] for s in satir)} "
                 f"(beklenen {BEKLENEN * len(satir)}) | indirme hatasi {len(hata)}\n\n"
                 "| listing_id | cift | dosya | durum | not |\n|---|---|---|---|---|\n")
         f.writelines(f"| {' | '.join(map(str, s))} |\n" for s in satir)

@@ -2,21 +2,23 @@ name: galeri-v11-yedek-indir
 # Galeri v11 B1 yedek, 2. asama (Merkez 29 Eki). ETSY API YOK, Etsy kilidi YOK (KILIT SURESI: indirme kilitsiz ayri is akisinda).
 # Girdi Drive TEMP/POSTER_GALERI_V11_YEDEK/<damga>/ (galeri-v11-yedek-oku ciktisi, GALERI.json). Gorseller (url_fullxfull) ve videolar
 # (video_url) etsystatic CDN'den ayni klasore: r<rank>_<id>.jpg, video_<id>.mp4, OZET.md (--immutable: mevcut dosya degismez).
-# Kod scripts/kapak78/galeri_v11_yedek_indir.py.
+# Kod scripts/kapak78/galeri_v11_yedek_indir.py. profil (#60): otomatik = oku kosusunun GALERI.json "profil" alani (eski okumada alan
+# yoksa DUR: profil acikca verilir); v11b 10 gorsel, v11ci 11, v11 10, v10 9.
 permissions:
   contents: read
 on:
   workflow_dispatch:
     inputs:
       damga: {description: "TEMP/POSTER_GALERI_V11_YEDEK/<damga> (oku kosusu)", required: true}
+      profil: {description: "otomatik = GALERI.json profil alani | v11b | v11ci | v11 | v10", type: choice, options: [otomatik, v11b, v11ci, v11, v10], default: otomatik}
 jobs:
   indir:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - name: Girdi kapisi
-        env: {D: "${{ inputs.damga }}"}
-        run: '[[ "$D" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
+        env: {D: "${{ inputs.damga }}", P: "${{ inputs.profil }}"}
+        run: '[[ "$D" =~ ^[0-9]{8}_[0-9]{6}$ && "$P" =~ ^(otomatik|v10|v11|v11b|v11ci)$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -43,7 +45,10 @@ jobs:
           rclone copy "gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V11_YEDEK/$D" _y --include "*/GALERI.json" --transfers 8 -q
           echo "GALERI.json: $(find _y -name GALERI.json | wc -l)"
       - name: Indir + kontrol (CDN)
-        run: python3 -I scripts/kapak78/galeri_v11_yedek_indir.py --in _y
+        env: {P: "${{ inputs.profil }}"}
+        run: |
+          [ "$P" = otomatik ] && P=""
+          python3 -I scripts/kapak78/galeri_v11_yedek_indir.py --in _y --profil "$P"
       - name: Drive'a yaz
         if: ${{ always() }}
         env: {D: "${{ inputs.damga }}"}

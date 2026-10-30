@@ -1,10 +1,12 @@
 name: galeri-v11-dogrula
 # Galeri v11 canli dogrulama (Merkez 29 Eki: pilot 4570110121 ve kalan 77 sonrasi). ETSY API YOK, Etsy kilidi YOK.
 # Canli okuma once galeri-v11-yedek-oku ile (Etsy kilidiyle, ilan basina 4 GET: images, variation-images, videos, listing state);
-# bu is akisi o okumanin GALERI.json'larindan gorselleri CDN'den indirir (galeri_v11_yedek_indir.py; 9 gorsel kontrolu v10 icindir,
-# sonucu yok sayilir) ve scripts/kapak78/galeri_v11_dogrula.py ile 10 gorsel / sira / alt metin / renk baglari / state / video /
-# sha256 (yukleme kaydi = kaynak) / NCC kimlik (esiksiz argmax) kapilarini kosar.
-# Cikti: TEMP/POSTER_GALERI_V11_YUKLE/DOGRULA/<run_id>/ (DOGRULA.md, .csv, .json); indirilen gorseller okuma klasorune --immutable.
+# bu is akisi o okumanin GALERI.json'larindan gorselleri CDN'den runner'a indirir (galeri_v11_yedek_indir.py --profil <profil>;
+# ozeti bilgi icindir, kapi dogrulamadir) ve scripts/kapak78/galeri_v11_dogrula.py ile 10 gorsel / sira / alt metin / renk baglari /
+# state / video / sha256 (yukleme kaydi = kaynak) / NCC kimlik (esiksiz argmax) kapilarini kosar.
+# Cikti YALNIZ kendi rapor klasorune: TEMP/POSTER_GALERI_V11_YUKLE/DOGRULA/<run_id>/ (DOGRULA.md, .csv, .json, INDIR_OZET.md).
+# #61 (30 Eki): okuma klasoru TEMP/POSTER_GALERI_V11_YEDEK/<damga> DEGISMEZ (yedek); bu is akisi oraya YAZMAZ (onceki kosu oraya
+# --immutable kopyada 859 rclone hatasi verdi). Gorsel dosyalari yedege galeri-v11-yedek-indir.yml ekler.
 permissions:
   contents: read
 on:
@@ -58,7 +60,10 @@ jobs:
           rclone copy "$T/POSTER_GALERI_V11/$G/W02_W06/$W" _k --include-from _k.txt --max-depth 1 --transfers 8 -q
           echo "GALERI.json $(find _y -name GALERI.json | wc -l) | SONRA $(find _s -name 'SONRA_*.json' | wc -l) | galeri $(ls _g | wc -l) | kart $(ls _k | wc -l)"
       - name: Indir (CDN)
-        run: python3 -I scripts/kapak78/galeri_v11_yedek_indir.py --in _y || echo "indirme ozeti v10 (9 gorsel) kurali; dogrulama asagida"
+        env: {P: "${{ inputs.profil }}"}
+        run: |
+          python3 -I scripts/kapak78/galeri_v11_yedek_indir.py --in _y --profil "$P" || echo "indirme ozeti PASS degil (bilgi); kapi dogrulama asagida"
+          mkdir -p _o; [ -f _y/OZET.md ] && cp _y/OZET.md _o/INDIR_OZET.md || true
       - name: Dogrula
         env: {S: "${{ inputs.sadece }}", P: "${{ inputs.profil }}"}
         run: |
@@ -71,11 +76,10 @@ jobs:
           echo "RC=$RC" >> "$GITHUB_ENV"
       - name: Drive'a yaz
         if: always()
-        env: {D: "${{ inputs.damga }}"}
         run: |
           set -euo pipefail
           T=gdrive:ASTROLOVE/TEMP
-          [ -d _y ] && rclone copy _y "$T/POSTER_GALERI_V11_YEDEK/$D" --immutable --transfers 8 -q || true
+          # #61: yalniz kendi rapor klasoru; okuma yedegine (POSTER_GALERI_V11_YEDEK) yazma yok
           [ -d _o ] && rclone copy _o "$T/POSTER_GALERI_V11_YUKLE/DOGRULA/${GITHUB_RUN_ID}" -q
           echo "Cikti: TEMP/POSTER_GALERI_V11_YUKLE/DOGRULA/${GITHUB_RUN_ID}" | tee -a "$GITHUB_STEP_SUMMARY"
           [ -f _o/DOGRULA.md ] && cat _o/DOGRULA.md >> "$GITHUB_STEP_SUMMARY" || true
