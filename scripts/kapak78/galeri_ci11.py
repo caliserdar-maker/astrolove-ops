@@ -72,15 +72,15 @@ def istek_tahmini():
     """Kod yollarindan sayim (O = cl_galeri_degistir.OKUMA_TEKRAR). Yazim istekleri (POST / DELETE) en kotu 3 gonderim (etsy_common
     5xx tekrari) + 1 (401 token yenilemesi); post_file tekrar=1 + 401 = 2 gonderim / deneme. GET 5xx / 429 kisa tekrarlari dahil degil.
       kuru            : 4 GET (ilan, galeri, var_img, envanter).
-      yaz en az       : 4 GET + yukleme 1 + stabil galeri 2 + bag POST 1 + var_img 1 + son stabil galeri 2 + son var_img 1 + ilan 1 = 13.
-      yaz en kotu     : 4 + yukleme (2 + 1 [429 okumasi]) + (2 + O) + stabil O + bag POST 4 + kararli var_img O + son stabil O + 1 + 1.
+      yaz en az       : 4 GET + yukleme 1 + yeni gorsel gorunur 1 + stabil galeri 2 + bag POST 1 + var_img 1 + son stabil galeri 2 + son var_img 1 + ilan 1 = 13.
+      yaz en kotu     : 4 + yukleme (2 + 1 [429 okumasi]) + (2 + O) + gorunur O + stabil O + bag POST 4 + kararli var_img O + son stabil O + 1 + 1.
       geri alma       : var_img 1 + bag POST 4 + kararli var_img O + DELETE 4 + kararli galeri O + son var_img 1.
     """
     O = G.OKUMA_TEKRAR
     yukle = (2 + 1) + (2 + O)
-    basari_kotu = KAPI_OKUMA + yukle + O + 4 + O + O + 1 + 1
+    basari_kotu = KAPI_OKUMA + yukle + O + O + 4 + O + O + 1 + 1   # +O: yeni gorsel gorunur bekleme (inceleme 30 Eki 3)
     geri = 1 + 4 + O + 4 + O + 1
-    return dict(kuru=KAPI_OKUMA, yaz_en_az=KAPI_OKUMA + 1 + 2 + 1 + 1 + 2 + 1 + 1, yaz_en_kotu_geri_almasiz=basari_kotu,
+    return dict(kuru=KAPI_OKUMA, yaz_en_az=KAPI_OKUMA + 1 + 1 + 2 + 1 + 1 + 2 + 1 + 1, yaz_en_kotu_geri_almasiz=basari_kotu,
                 geri_alma=geri, yaz_en_kotu=basari_kotu + geri, okuma_tekrar=O)
 
 
@@ -195,6 +195,9 @@ def durum_tur(c, alt_bek, alt_ci):
     return "ZATEN" if ok else "YARIM"
 
 
+ISTEK_ALAN = ("en_az", "en_kotu")   # bilgi: kod surumuyle degisir; canli = plan karsilastirmasina girmez (galeri, bag, dosya, alt girer)
+
+
 def plan_girdisi(lid, cift, c, dosya, sha, alt_ci):
     t = istek_tahmini()
     ad = {v: k for k, v in c["renk"].items()}
@@ -273,6 +276,7 @@ def yaz_ilan(api, shop, lid, gd, yol, out):
     try:
         yid, _ = Y.yukle_guvenli(api, shop, lid, yol, gd["dosya"], gd["alt"], set(ids0), rank=HEDEF_RANK)
         log(f"    {lid} yuklendi: {yid} (rank {HEDEF_RANK})")
+        G.kararli(lambda: G.galeri(api, lid), lambda g: any(x.get("listing_image_id") == yid for x in g))   # inceleme 30 Eki 3: yeni gorsel gorunsun
         g = Y.stabil_galeri(api, lid)
         s = galeri_sorun(g, gd, yid)
         if s:
@@ -386,7 +390,7 @@ def calistir(api, shop, a):
             pg = (plan.get("girdiler") or {}).get(lid)
             if pg is None:
                 s.update(durum="BLOK", neden=["ilan kuru planda yok; yazma yok"]); continue
-            if pg != gd:
+            if {k: v for k, v in pg.items() if k not in ISTEK_ALAN} != {k: v for k, v in gd.items() if k not in ISTEK_ALAN}:
                 s.update(durum="BLOK", neden=["canli durum / dosya / alt metin kuru plandan farkli (canli != plan); yazma yok"]); continue
             gerek = t["yaz_en_kotu"] - KAPI_OKUMA + KOTA_SINIRI
             if api.remaining is not None and int(api.remaining) < gerek:
@@ -466,6 +470,8 @@ def sonlandir(api, shop, a):
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     satir, girdiler = calistir(api, shop, a)
     rapor(satir, girdiler, a, api, out)
+    if not a.kuru:   # inceleme 30 Eki 1: yazimda PASS / ZATEN disi her satir (BLOK, KALAN dahil) kirmizi
+        return 1 if any(s["durum"] not in ("PASS", "ZATEN") for s in satir) else 0
     return 1 if any(s["durum"] in ("DUR", "FAIL") for s in satir) else 0
 
 
