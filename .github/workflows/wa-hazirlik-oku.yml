@@ -149,11 +149,12 @@ jobs:
           set -euo pipefail
           S=gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM; mkdir -p _in _pf
           for f in ${F//,/ }; do for r in "GPT/AstroLoveArt_$f" "DIJITAL/$f"; do
-            rclone copy "$S/$r" "_in/${r//\//_}" --include "/AstroLoveArt_*_5x7.jpg" --include "/siparis.json" --include "/OZET.json" -q 2>/dev/null || true; done; done
+            if ! rclone copy "$S/$r" "_in/${r//\//_}" --include "/AstroLoveArt_*_5x7.jpg" --include "/siparis.json" --include "/OZET.json" -q 2>_rc.err; then
+              grep -q "directory not found" _rc.err || { echo "::error::rclone $r"; tail -c 300 _rc.err; exit 1; }; fi; done; done
           [ -n "$N" ] || N=$(echo "$F" | tr ',' '\n' | wc -l)
           rclone copy "gdrive:ASTROLOVE/TEMP/POD_5X7_PRINTFUL_ORNEK/$P/PRINTFUL" _pf --include "printfiles_*.json" -q
           echo "girdi: 5x7 $(find _in -name 'AstroLoveArt_*_5x7.jpg' | wc -l), printfiles $(ls _pf | wc -l)"
-          set +e; python3 -I scripts/printful/pf_5x7_onizle.py --printfiles "$(ls _pf/printfiles_*.json | head -1)" --in _in --out _o --beklenen "$N"; RC=$?; set -e
+          set +e; python3 -I scripts/printful/pf_5x7_onizle.py --printfiles "$(ls _pf/printfiles_*.json | head -1)" --in _in --out _o --beklenen "$N" --fisler "$F"; RC=$?; set -e
           echo "RC=$RC" >> "$GITHUB_ENV"
       - name: Drive'a yaz
         if: always()

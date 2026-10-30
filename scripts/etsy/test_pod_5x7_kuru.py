@@ -28,8 +28,11 @@ en0, en, ru, kr, satir, celiski, hata = P.aciklama_plani(F["listing"]["descripti
 k("K1 EN 9 degisiklik, hata yok", len(satir) == 9 and not hata, (len(satir), hata))
 k("K1 EN once PACKAGING var, sonra yok", "PACKAGING" in en0 and "PACKAGING" not in en and "rolled in tissue" not in en
   and "\n\n\n" not in en and "\n\nCHANGES\n" in en)
-k("K1 kaldirilan satir: PACKAGING paragrafi, yeni bos",
-  any(s["eski"].startswith("PACKAGING\nPrints are rolled") and s["yeni"] == "" for s in satir))
+k("K1 kaldirilan satir: PACKAGING paragrafi (CHANGES basligi korunur)",
+  any(s["eski"].startswith("PACKAGING\nPrints are rolled") and s["yeni"] == "\n\nCHANGES\n" for s in satir))
+_, _, _, _, _, _, h_ek = P.aciklama_plani(F["listing"]["description"].replace(
+    "flat envelope.", "flat envelope. Framed prints come in a sturdy box."), boylar)
+k("K1b PACKAGING paragrafinda ek cumle -> 0 eslesme, FAIL", any("PACKAGING" in h and "0 kez" in h for h in h_ek), h_ek[:1])
 k("K2 RU kur PASS, ambalaj paragrafi yok", kr.get("pass_") and not any(w in ru for w in ("УПАКОВКА", "тубус", "конверт")),
   kr.get("hata"))
 k("K2 RU paragraf sayisi EN ile ayni", kr.get("paragraf_en") == kr.get("paragraf_ru"), (kr.get("paragraf_en"), kr.get("paragraf_ru")))
@@ -98,7 +101,7 @@ k("K5 PROFIL_PLAN AU govdesi 7-22, yalniz AU hedefi",
   [x["govde"]["min_delivery_days"] for x in pp["yazim_istegi"]] == [7] and [x["govde"]["max_delivery_days"] for x in pp["yazim_istegi"]] == [22]
   and len(pp["yazim_istegi"]) == 1 and pp["yazim_istegi"][0]["yol"].endswith("/destinations/11"), pp["yazim_istegi"])
 k("K5 OZET: AU -> (7, 22) + 30 Eki satiri + uyari", "-> (7, 22)" in oz and "Serdar 30 Eki degisiklikleri" in oz and "20-22 gun" in oz)
-k("K5 OZET ilan satiri: ambalaj kaldirilir", "EN eski: PACKAGING" in oz and "(satir kaldirilir)" in oz)
+k("K5 OZET ilan satiri: ambalaj kaldirilir", "EN eski: PACKAGING" in oz and "EN yeni: \n\nCHANGES" in oz)
 k("K5 PLAN.csv en_degisiklik 9", pl and pl[0]["en_degisiklik"] == "9", pl[0] if pl else None)
 k("K5 KURU json RU ambalajsiz", "УПАКОВКА" not in kj["ru_yeni"] and "УПАКОВКА" in kj["ru_simdi"])
 k("K5 Etsy'ye yazma cagrisi 0", not yazma, yazma)

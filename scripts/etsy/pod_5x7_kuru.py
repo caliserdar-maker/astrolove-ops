@@ -62,8 +62,9 @@ EN_DEGISIKLIK = [
      "poster, or send your digital file as a download link in Etsy Messages."),
     # Serdar 30 Eki: ambalaj paragrafi (baslik dahil) kaldirilir; Printful 5x7 ambalaji dogrulanmadi. RU, EN'den paragraf paragraf
     # kurulur (ru_poster.kur): UPAKOVKA paragrafi da duser.
+    # Eslesme CHANGES basligiyla sinirli: paragrafta ek cumle varsa (or. 27 Eyl v3 "Framed prints come...") 0 eslesme -> ilan FAIL.
     ("\n\nPACKAGING\nPrints are rolled in tissue paper and sent in a thick cardboard tube. Small prints to Europe may come in a stiff "
-     "flat envelope.", ""),
+     "flat envelope.\n\nCHANGES\n", "\n\nCHANGES\n"),
 ]
 # Serdar 28 Eki (kapali not): "your file is emailed" + "If email doesn't suit you" metni DEGISMEZ; e-posta adresi siparis akisinda
 # onizleme mesajinda musteriden istenir, cevap yoksa Etsy Messages ile indirme linki gider (astrolove-siparis akisi).
@@ -262,7 +263,7 @@ def main():
                   "govde": {"primary_cost": para(d.get("primary_cost")), "secondary_cost": para(d.get("secondary_cost")),
                             "min_delivery_days": AU_YENI[0], "max_delivery_days": AU_YENI[1]}} for d in au]   # profil_ucretsiz.py:126 kalibi
     pplan = {"profil": PROFIL, "baslik": sp.get("title"), "hedef_sayisi": len(hed), "once_tum_hedefler": hed, "yazim_istegi": yaz_govde,
-             "uyari": "Printful 5x7 AU teslim 20-22 gun (Printful API, kosu 40179982544; uretim haric); profil AU 7-22 (Serdar 30 Eki, "
+             "uyari": "Printful 5x7 AU teslim 20-22 gun (Printful API shipping/rates, kosu 40179982544); profil AU 7-22 (Serdar 30 Eki, "
                       "ust sinir 21 -> 22); alt sinir 7 degismedi (gercek AU tasima 20-22; alt sinir karari Serdar'in)",
              "au_once": [{k: d.get(k) for k in ("shipping_profile_destination_id", "min_delivery_days", "max_delivery_days",
                                                "primary_cost", "secondary_cost", "mail_class", "shipping_carrier_id")} for d in au],

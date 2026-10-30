@@ -7,6 +7,8 @@ ayni boyuttaysa baski dosyasi bayt bayt kopyadir (sha256 esit). Onizleme 5:7 ger
 kirmizi, 1/8 in referans cizgisi sari (Printful kesim toleransi API'de yok: dogrulanmadi). Icerik kenar payi: koselerden alinan zemin
 rengine gore satir/sutun profili (fark > 40 olan piksel orani > %1).
 PASS: kaynak >= printfile (buyutme yok) ve her eksende kirpma <= %1 ve JPEG RGB.
+--fisler verilirse her receipt klasorunde (<yol>_<receipt>) en az 1 dosya sart (Printful'a yukleme oncesi kapi, Serdar 30 Eki).
+Isimler yalniz ORNEK.csv ve onizleme gorselinde (Drive); ORNEK.md ve stdout'a yazilmaz (is akisi ozeti / log).
 Cikti <out>/: BASKI/<ad>.jpg, ONIZLEME/<ad>_ONIZLEME.jpg, KONTAK.jpg, ORNEK.csv, ORNEK.md."""
 import argparse, csv, hashlib, json, re, shutil, sys
 from pathlib import Path
@@ -133,7 +135,7 @@ def onizle(im, sk, kk, pp, pay, s, out, dpi):
         f"icerik kenar payi (in): ust {s['pay_ust_in']}  alt {s['pay_alt_in']}  sol {s['pay_sol_in']}  sag {s['pay_sag_in']}",
         "kirmizi = baski kenari 5x7 in | sari = 1/8 in referans (Printful toleransi dogrulanmadi)",
         f"baski dosyasi {s['baski_bayt'] / 1e6:.2f} MB, kaynakla ayni bayt: {s['baski_ayni_bayt']}",
-        f"isimler (test fisi): {s['isimler']}"]
+        f"isimler: {s['isimler']}"]
     for t in satirlar:
         y += 27; d.text((kn, y), t, fill=(0, 0, 0), font=f)
     p = out / "ONIZLEME" / (Path(s["dosya"]).stem + "_ONIZLEME.jpg")
@@ -158,6 +160,7 @@ def main():
     ap.add_argument("--printfiles", required=True); ap.add_argument("--varyant", type=int, default=16364)
     ap.add_argument("--in", dest="giris", required=True); ap.add_argument("--out", required=True)
     ap.add_argument("--beklenen", type=int, default=5)
+    ap.add_argument("--fisler", default="", help="virgullu receipt; her biri icin en az 1 dosya (klasor adi _<receipt> ile biter)")
     a = ap.parse_args()
     pf = printfile(json.loads(Path(a.printfiles).read_text()), a.varyant)
     dpi = int(pf["dpi"])
@@ -173,13 +176,19 @@ def main():
           f"@ {dpi} dpi, fill_mode {pf.get('fill_mode')}, can_rotate {pf.get('can_rotate')})\n",
           f"- dosya {len(rows)} / beklenen {a.beklenen} | PASS {npas} | FAIL {len(rows) - npas}",
           f"- kapi: kaynak >= printfile, eksen basina kirpma <= {KIRP_MAX:.0%}, JPEG RGB", "",
-          "| renk | kaynak | kirpma x/y (%) | pay ust/alt/sol/sag (in) | MB | ayni bayt | isimler | sonuc |", "|---|---|---|---|---|---|---|---|"]
+          "| renk | kaynak | kirpma x/y (%) | pay ust/alt/sol/sag (in) | MB | ayni bayt | isim alani | sonuc |", "|---|---|---|---|---|---|---|---|"]
     for r in rows:
         md.append(f"| {r['renk']} | {r['kaynak_px']} | {r['kirp_x_yuzde']} / {r['kirp_y_yuzde']} | {r['pay_ust_in']} / {r['pay_alt_in']} / "
-                  f"{r['pay_sol_in']} / {r['pay_sag_in']} | {r['baski_bayt'] / 1e6:.2f} | {r['baski_ayni_bayt']} | {r['isimler']} | {r['sonuc']} |")
+                  f"{r['pay_sol_in']} / {r['pay_sag_in']} | {r['baski_bayt'] / 1e6:.2f} | {r['baski_ayni_bayt']} | {'var' if r['isimler'] != '-' else '-'} | {r['sonuc']} |")
     (out / "ORNEK.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print("\n".join(md), flush=True)
-    return 0 if rows and npas == len(rows) == a.beklenen else 1
+    fis = [x.strip() for x in a.fisler.split(",") if x.strip()]
+    eksik = [f for f in fis if not any(p.parent.name.endswith(f"_{f}") for p in dosyalar)]
+    if fis:
+        md.append(f"\n- fis kapisi: {len(fis) - len(eksik)}/{len(fis)} fiste 5x7 dosyasi" + (f" | EKSIK: {eksik}" if eksik else ""))
+        (out / "ORNEK.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+        print(md[-1], flush=True)
+    return 0 if rows and npas == len(rows) == a.beklenen and not eksik else 1
 
 
 if __name__ == "__main__":

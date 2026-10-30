@@ -74,8 +74,9 @@ def calis(inv_yol, katalog=None):
     urunler = envanter_oku(inv_yol)
     kat = katalog_skulari(katalog)
     kotu, say, ornek = [], Counter(), {}
-    if len(urunler) != 390:
-        kotu.append(f"urun sayisi {len(urunler)} != 390")
+    n5 = sum(1 for p in urunler if (p.get("sku") or "").count("-") >= 2 and (p.get("sku") or "").split("-")[2] in R.PRINTFUL_ELLE)
+    if len(urunler) - n5 != 390:                     # Serdar 30 Eki: 5x7 urunleri (Printful elle) sayim disi
+        kotu.append(f"urun sayisi {len(urunler)} (5x7 haric {len(urunler) - n5}) != 390")
     for i, p in enumerate(urunler, 1):
         fmt, renk, sku = pv(p, FORMAT_ADI), pv(p, "Primary color"), p.get("sku") or ""
         boy = sku.split("-")[2] if sku.count("-") >= 2 else ""
@@ -86,6 +87,11 @@ def calis(inv_yol, katalog=None):
                 kotu.append(f"dijital Prodigi'ye gidiyor/isaretlenmedi: {anahtar} {sku} -> {items} {other}")
             say["Digital File -> dijital teslim"] += 1
             ornek.setdefault("Digital File", f"{sku} -> dijital teslim (Prodigi yok)")
+            continue
+        if boy in R.PRINTFUL_ELLE:                  # Serdar 30 Eki: 5x7 PRINTFUL, ELLE -> Prodigi kalemi yok
+            if items or len(other) != 1 or not other[0].startswith("PRINTFUL_ELLE:"):
+                kotu.append(f"5x7 Prodigi'ye gidiyor/isaretlenmedi: {anahtar} {sku} -> {items} {other}")
+            say["5x7 -> PRINTFUL elle"] += 1
             continue
         if len(items) != 1 or other or atl:
             kotu.append(f"kalem cozulmedi: {anahtar} {sku} -> items {len(items)} other {other}")

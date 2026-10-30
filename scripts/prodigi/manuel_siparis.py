@@ -72,6 +72,8 @@ def main():
     ap.add_argument("--confirm", default="")
     ap.add_argument("--is-dizin", default="_work/manuel")
     a = ap.parse_args()
+    if a.mod in ("hazirla", "gonder") and "5X7" in a.sku.upper():
+        raise SystemExit(f"DUR: {a.sku}: 5x7 PRINTFUL, ELLE (Serdar 30 Eki); Prodigi 5x7 siparisi kapali")
     if a.mod == "gonder" and a.confirm != a.ref:
         raise SystemExit(f"DUR: gonder icin --confirm {a.ref} gerekir")
     isd = pathlib.Path(a.is_dizin)

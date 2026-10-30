@@ -36,8 +36,9 @@ on:
         type: boolean
         default: false
       boy:
-        description: "A1 (5x7 KAPALI, Serdar 30 Eki: 5x7 PRINTFUL, ELLE)"
-        default: "A1"
+        description: "A1 yazilmali (5x7 KAPALI, Serdar 30 Eki: 5x7 PRINTFUL, ELLE)"
+        required: true
+        default: ""
 
 concurrency:
   group: pod-print-5x7-a1
@@ -171,8 +172,8 @@ jobs:
         run: rm -rf ~/.config/rclone
 
   merge:
-    needs: build
-    if: ${{ always() }}
+    needs: [plan, build]
+    if: ${{ always() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

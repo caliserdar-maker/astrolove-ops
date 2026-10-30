@@ -52,7 +52,7 @@ on:
         type: boolean
         default: false
       only_size:
-        description: "Yalniz bu boyun kalemleri islenir (or. 5x7); bos = tum boylar"
+        description: "Yalniz bu boyun kalemleri islenir (or. A1; 5x7 Printful elle, Prodigi kalemi olmaz); bos = tum boylar"
         required: false
         default: ""
       otomatik:

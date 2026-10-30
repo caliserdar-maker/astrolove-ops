@@ -593,8 +593,11 @@ def submit_package(a, prod, st, rid, report):
     body = pkg["order"]
     if len(body.get("items") or []) != len(pkg.get("items") or []):
         return False, f"{rid}: paket bozuk (kalem sayisi uyusmuyor)"
+    yasak_sku = {f"GLOBAL-HPR-{b}".upper() for b in PRINTFUL_ELLE}
     pf = [i.get("sku") for i in pkg.get("items") or [] if i.get("size") in PRINTFUL_ELLE
-          or str(i.get("prodigi_sku") or "").upper() in {f"GLOBAL-HPR-{b}".upper() for b in PRINTFUL_ELLE}]
+          or str(i.get("prodigi_sku") or "").upper() in yasak_sku]
+    pf += [i.get("sku") for i in body.get("items") or [] if str(i.get("sku") or "").upper() in yasak_sku
+           or any(f"-{b}".upper() in str(i.get("sku") or "").upper() for b in PRINTFUL_ELLE)]
     if pf:          # Serdar 30 Eki: eski pakette kalmis 5x7 kalemi de Prodigi'ye gonderilmez
         return False, f"{rid}: {PRINTFUL_ETIKET} kalemi pakette ({pf}); Prodigi'ye GONDERILMEDI"
     # Drive TEMP/SIPARIS_ONAY yerel/senkron kopyasindaki tam cozunurluk
@@ -835,11 +838,11 @@ def main():
                           f"Prodigi'ye GITMEZ, dijital teslim elle")
         pf = [x.split(":", 1)[1] for x in other if x.startswith("PRINTFUL_ELLE:")]
         if pf:
-            satir = (f"- {PRINTFUL_ETIKET}: receipt {receipt_kod(r.get('receipt_id'))} ({', '.join(pf)}); Prodigi'ye GITMEZ, "
-                     f"Printful siparisi Serdar elle (dosya: siparis hatti _5x7.jpg + pf_5x7_onizle kapisi)")
-            report.append(satir)
-            DIKKAT_EK.append(satir)
-    pod = [(r, items, other, atlanan) for r, items, other, atlanan in pod if items]
+            report.append(f"- {PRINTFUL_ETIKET}: receipt {receipt_kod(r.get('receipt_id'))} ({', '.join(pf)}); Prodigi'ye GITMEZ, "
+                          f"Printful siparisi Serdar elle (dosya: siparis hatti _5x7.jpg + pf_5x7_onizle kapisi)")
+    # yalniz 5x7 (PRINTFUL_ELLE) iceren fis de dongude kalir: kisisellestirme karti / ISIM_YENI / kanal bekcisi + STATE kaydi
+    pod = [(r, items, other, atlanan) for r, items, other, atlanan in pod
+           if items or any(x.startswith("PRINTFUL_ELLE:") for x in other)]
     report.append(f"- POD urunlu receipt: {len(pod)}"
                   + (f" (yalniz {a.only_size} kalemleri)" if a.only_size else ""))
     kanal_bekci = kanal_kisisel_bekci(a, prod, st, idx, pod, report, errors) if not a.test_receipt else {}
@@ -849,7 +852,7 @@ def main():
     if not a.test_receipt:
         for r, items, _o, _a in pod:
             rid = str(r.get("receipt_id"))
-            if kanal_durumu(idx, rid, items)[0] == "" and (st.get(rid) or {}).get("stage") not in ("ordered", "shipped", "tracked"):
+            if items and kanal_durumu(idx, rid, items)[0] == "" and (st.get(rid) or {}).get("stage") not in ("ordered", "shipped", "tracked"):
                 satir = (f"- PRODIGI BEKLEYEN (paused, API gostermez) kanal siparisi olasi: receipt {rid} "
                          f"({', '.join(i['sku'] for i in items)}) - ONAYLAR.json onayi olmadan panelden serbest birakma")
                 report.append(satir)
@@ -874,7 +877,8 @@ def main():
         if r.get("is_shipped"):
             report.append(f"- {rid}: ATLA (Etsy'de gonderilmis)")
             continue
-        desc0 = ", ".join(f"{i['sku']}x{i['qty']}" for i in items)
+        pf_elle = [x.split(":", 1)[1] for x in other if x.startswith("PRINTFUL_ELLE:")]
+        desc0 = ", ".join([f"{i['sku']}x{i['qty']}" for i in items] + pf_elle)
         eslemesiz = [i["sku"] for i in items if i.get("mapping_error")]
         if eslemesiz:
             mesaj = f"CERCEVE_ESLEME_YOK: {', '.join(eslemesiz)}"
@@ -901,6 +905,13 @@ def main():
             report.append(f"- {rid}: ISIM_BEKLIYOR ({not_k})")
             DIKKAT_EK.append(f"- ISIM_BEKLIYOR {rid}: kart TEMP/SIPARIS_ISIM/{rid}.md" + (f" | {kanal_notu}" if kanal_notu else ""))
             errors.append(f"{rid}: ISIM_BEKLIYOR - yeni kisisellestirmeli siparis (kosu bilincli basarisiz: bildirim)")
+            continue
+        if not items:                         # yalniz 5x7: Prodigi adimi yok; STATE bir kez yazilir (sonraki kosu ATLA)
+            not_p = f"{PRINTFUL_ETIKET}: {', '.join(pf_elle)}; Prodigi'ye GONDERILMEDI, Printful siparisi Serdar elle"
+            upd(st, a.state, rid, stage="manual", country=(r.get("country_iso") or "").upper(), items=desc0,
+                warn="PRINTFUL_ELLE", note=not_p)
+            report.append(f"- {rid}: MANUAL ({not_p})")
+            DIKKAT_EK.append(f"- {rid}: {not_p}")
             continue
         yas_dk = (time.time() - float(r.get("created_timestamp") or r.get("create_timestamp") or 0)) / 60 \
             if (r.get("created_timestamp") or r.get("create_timestamp")) else 1e9
@@ -940,7 +951,6 @@ def main():
         etsy_total = round(sum(i["price"] * i["qty"] for i in items), 2)
         desc = ", ".join(f"{i['sku']}x{i['qty']}" for i in items)
         warn = []
-        pf_elle = [x.split(":", 1)[1] for x in other if x.startswith("PRINTFUL_ELLE:")]
         if pf_elle:
             warn.append(f"{PRINTFUL_ETIKET}: {pf_elle}")
         if [x for x in other if not x.startswith("PRINTFUL_ELLE:")]:
