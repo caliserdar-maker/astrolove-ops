@@ -1,0 +1,59 @@
+name: ci-renk-karti
+# 78 cift Champagne Ivory renk karti W11_CI (Serdar 30 Eki). ETSY API YOK, token yok, kilit yok.
+# Girdi: Drive TEMP/POSTER_GALERI_V11/<kaynak_damga>/<CIFT>_W07_MB.jpg + <CIFT>_W01_KAPAK.jpg.
+# scripts/kapak78/ci_renk/ci_renk_toplu.py -> ci_renk_karti.py (cift basina; kapi FAIL = dosya yok). Pillow 11.0.0 (galeri kart kurali).
+# Cikti: Drive TEMP/WA_CI_KART/<damga>/ (<CIFT>_W11_CI.jpg, MANIFEST.csv, KONTAK_W11_CI.jpg, OZET.md), --immutable.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      kaynak_damga: {description: "TEMP/POSTER_GALERI_V11/<damga> (W07_MB + W01_KAPAK)", required: true, default: "20261029_103607"}
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Girdi kapisi
+        env: {D: "${{ inputs.kaynak_damga }}"}
+        run: '[[ "$D" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::kaynak_damga"; exit 1; }'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0 numpy==2.1.3
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Indir + uret (Etsy yok)
+        env: {D: "${{ inputs.kaynak_damga }}"}
+        run: |
+          set -uo pipefail
+          mkdir -p _s _out
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+          rclone copy "gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V11/$D" _s --include "*_W07_MB.jpg" --include "*_W01_KAPAK.jpg" --max-depth 1 --transfers 8 -q || exit 1
+          echo "indirilen: $(ls _s | wc -l)"
+          python3 scripts/kapak78/ci_renk/ci_renk_toplu.py --src _s --out _out --kaynak "TEMP/POSTER_GALERI_V11/$D"
+          echo "KOD=$?" >> "$GITHUB_ENV"
+          cat _out/OZET.md >> "$GITHUB_STEP_SUMMARY" || true
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          if ls _out/* >/dev/null 2>&1; then
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/WA_CI_KART/${DAMGA:?}" --immutable -q
+            echo "::notice title=WA CI KART::TEMP/WA_CI_KART/${DAMGA}/ $(head -3 _out/OZET.md | tail -1)"
+          fi
+          [ "${KOD:-1}" = 0 ] || { echo "::error::FAIL olan cift var (OZET.md)"; exit 1; }
+      - if: always()
+        run: rm -rf _s _out ~/.config/rclone
