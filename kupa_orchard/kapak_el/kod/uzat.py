@@ -4,7 +4,7 @@ Agiz bandi (BANT_UST..BANT_ALT) aynen yukari otelenir, altindaki govde (BANT_ALT
 ESNET_SON sapin ust birlesiminin USTUNDE secilir; boylece sap ve birlesim yeri hic degismez.
 Yalniz govde sutunlari (xl-6..xr+7) islenir.
 Kullanim: python3 -I uzat.py <sahne> <cikti> <xl> <xr> <yt_kenar> <yb_kenar> <bant_ust> <bant_alt> <esnet_son>"""
-import sys, json
+import os, sys, json
 import numpy as np
 from PIL import Image
 from scipy import ndimage
@@ -24,8 +24,13 @@ src = np.where(yy < BA - d, yy + d,                                   # agiz ban
 Y, X = np.meshgrid(src, np.arange(x0, x1, dtype=np.float32), indexing='ij')
 blok = np.stack([ndimage.map_coordinates(a[..., c], [Y, X], order=1) for c in range(3)], -1)
 w = np.ones(x1 - x0, np.float32); w[:4] = np.linspace(0, 1, 4); w[-4:] = np.linspace(1, 0, 4)
+UST_YUM = int(os.environ.get('UST_YUM', 0))       # blok ustunde dikey yumusak gecis (satir); 0 = onayli kapak davranisi
+wy = np.ones(ES - ust, np.float32)
+if UST_YUM:
+    wy[:UST_YUM] = np.linspace(0, 1, UST_YUM)
+W2 = wy[:, None, None] * w[None, :, None]
 out = a.copy()
-out[ust:ES, x0:x1] = out[ust:ES, x0:x1] * (1 - w[None, :, None]) + blok * w[None, :, None]
+out[ust:ES, x0:x1] = out[ust:ES, x0:x1] * (1 - W2) + blok * W2
 Image.fromarray(np.clip(out, 0, 255).astype(np.uint8)).save(C)
 print(json.dumps({"kayma": d, "esneme_kati": round((ES - (BA - d)) / (ES - BA), 3), "yeni_yt": yt - d,
                   "oran": round((yb - (yt - d)) / (xr - xl), 4)}))

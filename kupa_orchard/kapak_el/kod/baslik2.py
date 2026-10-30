@@ -52,7 +52,8 @@ fs = font(round(BOY * ALT_ORAN), ALT_AGIRLIK)                  # alt yazi: 78 ka
 iz = round(BOY * ALT_ORAN * IZ_ORAN)
 fB = font(BOY, 650)
 alt_b = max(fB.getbbox(b, anchor='ls')[3] for b in BURCLAR)     # en derin inis (Q kuyrugu), standart boyda
-s_ust, s_alt = fs.getbbox(ALT_YAZI, anchor='ls')[1], fs.getbbox(ALT_YAZI, anchor='ls')[3]
+ALT_REF = os.environ.get('ALT_REF', ALT_YAZI)   # dikey yerlesim olcu metni (stil gorselleri: kapak alt yazisi; Q kuyrugu baslik konumunu oynatmasin)
+s_ust, s_alt = fs.getbbox(ALT_REF, anchor='ls')[1], fs.getbbox(ALT_REF, anchor='ls')[3]
 y2 = ALT - s_alt                                                # alt yazi tabani
 y1 = y2 + s_ust - round(BOY * ARA_ORAN) - alt_b                 # baslik tabani (78'de sabit)
 s_gen = sum(fs.getlength(ch) for ch in ALT_YAZI) + iz * (len(ALT_YAZI) - 1)
