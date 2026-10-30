@@ -11,15 +11,28 @@ name: video-v7-yukle
 #   Ilan basi: yukle (tek gonderim) -> geri oku -> eski videoyu sil -> geri oku; updateListing YOK; ilk FAIL'de durur.
 #   Yedegi Drive'da olmayan (mp4 degilse yedek sayilmaz), galerisi v10 olmayan, canli videosu plandan farkli ilana yazilmaz.
 #   Not: kilit_bekle olusturma sirasina bakar; sonradan acilan Etsy kosulari kilit oncesi indirmeleri de bekler (~1-2 dk).
+# v7d (Serdar onayi 30 Eki): kaynak=tam78. Video TEMP/VIDEO_V7_DUZELTME/<tam78_damga>/TAM78/<CIFT>.mp4 (Serdar onayli, klasor DEGISMEZ),
+#   MANIFEST TEMP/VIDEO_V7D_YUKLE_KAYNAK/<manifest_damga>/MANIFEST.csv; --surum v7d; galeri kapisi yalniz
+#   TEMP/POSTER_GALERI_V11_YUKLE/ILERLEME.json (PASS, hedef 10, son_ids; canli rank 1 + kume). Plan kilidi: surum v7d + TAM78 klasoru +
+#   MANIFEST sha256. v7 kapilarinin hicbiri gevsetilmez.
+#   adim=kaynak_uret: ETSY'YE ISTEK YOK, kilit / token yok. TAM78 olculur (video_yukle_78.py --manifest-uret: cozunurluk, sure, fps,
+#   bayt, ses ffprobe, RAPOR/QC.csv) -> TEMP/VIDEO_V7D_YUKLE_KAYNAK/<damga>/ (MANIFEST.csv yalniz kapilar PASS ise; OLCUM.md/json),
+#   --immutable. ornek (virgullu cift): TAM78'den TEMP/VIDEO_V7D_ORNEK/<damga>/'ya KOPYA (tasima yok) + 0.0 / 1.0 / 2.5 / 4.0 sn ve
+#   son kare JPG (1440x1080, yeniden boyutlandirma yok).
 
 on:
   workflow_dispatch:
     inputs:
-      birlesik_damga: {description: "TEMP/VIDEO_V7_78/BIRLESIK_<damga> (YYYYMMDD_HHMMSS); apply'da plandaki ile ayni olmali", required: true, default: ""}
+      birlesik_damga: {description: "kaynak=birlesik: TEMP/VIDEO_V7_78/BIRLESIK_<damga> (YYYYMMDD_HHMMSS); apply'da plandaki ile ayni olmali", required: false, default: ""}
       kuru: {description: "true = yazma yok (plan); false = yazim", required: true, default: "true"}
       confirm: {description: "yazim icin VIDEO_V7_YUKLE", required: false, default: ""}
       plan_damga: {description: "yazim: kuru kosunun damgasi (TEMP/VIDEO_V7_YUKLE/KURU_<damga>)", required: false, default: ""}
       haric: {description: "virgullu cift listesi (plana alinmaz / apply'da dokunulmaz)", required: false, default: ""}
+      kaynak: {description: "birlesik (v7, varsayilan) | tam78 (v7d, Serdar 30 Eki)", required: false, default: "birlesik"}
+      tam78_damga: {description: "kaynak=tam78: TEMP/VIDEO_V7_DUZELTME/<damga>/TAM78", required: false, default: ""}
+      manifest_damga: {description: "kaynak=tam78 kuru/yazim: TEMP/VIDEO_V7D_YUKLE_KAYNAK/<damga>/MANIFEST.csv", required: false, default: ""}
+      adim: {description: "yukle (kuru / yazim) | kaynak_uret (yalniz tam78: MANIFEST + ornek, ETSY YOK)", required: false, default: "yukle"}
+      ornek: {description: "adim=kaynak_uret: virgullu cift (TEMP/VIDEO_V7D_ORNEK'e kopya + kareler); bos = yok", required: false, default: ""}
 
 permissions:
   actions: read
@@ -32,8 +45,12 @@ jobs:
     env:
       V: gdrive:ASTROLOVE/TEMP/VIDEO_V7_78
       Y: gdrive:ASTROLOVE/TEMP/VIDEO_V7_YUKLE
-      G: gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V10_YUKLE
       BD: ${{ inputs.birlesik_damga }}
+      KAYNAK: ${{ inputs.kaynak }}
+      TD: ${{ inputs.tam78_damga }}
+      MD: ${{ inputs.manifest_damga }}
+      ADIM: ${{ inputs.adim }}
+      ORNEK: ${{ inputs.ornek }}
       KURU: ${{ inputs.kuru }}
       ONAY: ${{ inputs.confirm }}
       PD: ${{ inputs.plan_damga }}
@@ -42,8 +59,27 @@ jobs:
       - name: Onay kapisi
         run: |
           set -euo pipefail
-          [[ "$BD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::birlesik_damga YYYYMMDD_HHMMSS olmali. DUR."; exit 1; }
           [[ "$HARIC" =~ ^[A-Z_,]*$ ]] || { echo "::error::haric yalniz CIFT adlari. DUR."; exit 1; }
+          [[ "$ORNEK" =~ ^([A-Z_]+(,[A-Z_]+){0,1})?$ ]] || { echo "::error::ornek 1-2 CIFT adi (virgullu, bos oge yok). DUR."; exit 1; }
+          case "$KAYNAK" in
+            birlesik)
+              [[ "$BD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::birlesik_damga YYYYMMDD_HHMMSS olmali. DUR."; exit 1; }
+              [ "$ADIM" = yukle ] || { echo "::error::adim=$ADIM yalniz kaynak=tam78 ile. DUR."; exit 1; }
+              { echo "SUR=v7"; echo "G=gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V10_YUKLE"; echo "KLASOR=TEMP/VIDEO_V7_78/BIRLESIK_${BD}/"; } >> "$GITHUB_ENV" ;;
+            tam78)
+              [[ "$TD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::tam78_damga YYYYMMDD_HHMMSS olmali. DUR."; exit 1; }
+              { echo "SUR=v7d"; echo "G=gdrive:ASTROLOVE/TEMP/POSTER_GALERI_V11_YUKLE"; echo "KLASOR=TEMP/VIDEO_V7_DUZELTME/${TD}/TAM78/"; } >> "$GITHUB_ENV" ;;
+            *) echo "::error::kaynak birlesik ya da tam78 olmali. DUR."; exit 1 ;;
+          esac
+          echo "STAMP=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+          if [ "$ADIM" = kaynak_uret ]; then
+            echo "MOD=KAYNAK" >> "$GITHUB_ENV"; exit 0      # Etsy'ye istek yok: kilit / token / yukleme adimlari atlanir
+          fi
+          [ "$ADIM" = yukle ] || { echo "::error::adim yukle ya da kaynak_uret olmali. DUR."; exit 1; }
+          [ -z "$ORNEK" ] || { echo "::error::ornek yalniz adim=kaynak_uret ile. DUR."; exit 1; }
+          if [ "$KAYNAK" = tam78 ]; then
+            [[ "$MD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::kaynak=tam78 kuru/yazim icin manifest_damga gerekli. DUR."; exit 1; }
+          fi
           if [ "$KURU" = "false" ]; then
             [ "$ONAY" = VIDEO_V7_YUKLE ] || { echo "::error::yazim icin confirm tam olarak VIDEO_V7_YUKLE olmali. DUR."; exit 1; }
             [[ "$PD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::yazim icin plan_damga (kuru kosu damgasi) gerekli. DUR."; exit 1; }
@@ -53,7 +89,6 @@ jobs:
           else
             echo "::error::kuru true ya da false olmali. DUR."; exit 1
           fi
-          echo "STAMP=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -65,6 +100,7 @@ jobs:
           # pillow: video_yukle_78 -> pod_cover_from_video 'from PIL import Image' (28 Eki kuru kosu 40638126253: ModuleNotFoundError PIL)
           pip install -q requests==2.32.3 numpy==2.1.3 opencv-python-headless==4.10.0.84 pillow==11.0.0
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          if [ "$MOD" = KAYNAK ] && ! command -v ffprobe >/dev/null; then sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null; fi
       - name: rclone.conf olustur
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -86,19 +122,29 @@ jobs:
           set -euo pipefail
           mkdir -p _work
           rclone copyto "$Y/KURU_${PD}/PLAN.json" _work/PLAN.json
-          K=$(python3 -c 'import json;p=json.load(open("_work/PLAN.json"));print(p.get("surum"),p["kaynak"]["klasor"])')
-          [ "$K" = "v7 TEMP/VIDEO_V7_78/BIRLESIK_${BD}/" ] || { echo "::error::plan kaynagi/surumu '$K' != v7 BIRLESIK_${BD}. DUR."; exit 1; }
-      - name: BIRLESIK videolar (kilit oncesi)
+          K=$(python3 -c 'import json;p=json.load(open("_work/PLAN.json"));print(p.get("surum"),p["kaynak"]["klasor"],p["kaynak"].get("manifest",""))')
+          if [ "$SUR" = v7d ]; then B="v7d $KLASOR TEMP/VIDEO_V7D_YUKLE_KAYNAK/${MD}/MANIFEST.csv"; else B="v7 $KLASOR "; fi
+          [ "$K" = "$B" ] || { echo "::error::plan kaynagi/surumu '$K' != '$B'. DUR."; exit 1; }   # v7d: MANIFEST sha256 ayrica python
+      - name: Kaynak videolar (kilit oncesi)
+        if: env.MOD != 'KAYNAK'
         run: |
           set -euo pipefail
           mkdir -p _work/video
-          rclone copy "$V/BIRLESIK_${BD}" _work/video --max-depth 1 --include "*.mp4" --include "MANIFEST.csv" --include "OZET.md" --transfers 8 -q
+          if [ "$SUR" = v7 ]; then
+            rclone copy "$V/BIRLESIK_${BD}" _work/video --max-depth 1 --include "*.mp4" --include "MANIFEST.csv" --include "OZET.md" --transfers 8 -q
+            OZET=$(grep -m1 '^PASS video' _work/video/OZET.md || echo '?'); MAN=""
+          else   # v7d: TAM78 mp4 (klasor degismez) + ayri kaynak MANIFEST
+            rclone copy "gdrive:ASTROLOVE/$KLASOR" _work/video --max-depth 1 --include "*.mp4" --transfers 8 -q
+            MAN="TEMP/VIDEO_V7D_YUKLE_KAYNAK/${MD}/MANIFEST.csv"
+            rclone copyto "gdrive:ASTROLOVE/$MAN" _work/video/MANIFEST.csv
+            rclone copyto "gdrive:ASTROLOVE/TEMP/VIDEO_V7D_YUKLE_KAYNAK/${MD}/OLCUM.md" _work/OLCUM.md
+            OZET=$(grep -m1 '^PASS video' _work/OLCUM.md || echo '?')
+          fi
           N=$(ls _work/video/*.mp4 | wc -l); M=$(( $(wc -l < _work/video/MANIFEST.csv) - 1 ))
-          OZET=$(grep -m1 '^PASS video' _work/video/OZET.md || echo '?')
-          echo "kaynak: TEMP/VIDEO_V7_78/BIRLESIK_${BD} | mp4 $N | MANIFEST $M satir | $OZET"
-          [ "$N" = 78 ] && [ "$M" = 78 ] || { echo "::error::BIRLESIK 78 mp4 / 78 MANIFEST satiri degil. DUR."; exit 1; }
-          python3 -c 'import json,sys;json.dump({"klasor":"TEMP/VIDEO_V7_78/BIRLESIK_"+sys.argv[1]+"/","ozet":sys.argv[2],"plan":sys.argv[3]},open("_work/kaynak.json","w"))' \
-            "$BD" "$OZET" "TEMP/VIDEO_V7_YUKLE/KURU_${PD:-}/PLAN.json"
+          echo "kaynak: $KLASOR | mp4 $N | MANIFEST $M satir | $OZET"
+          [ "$N" = 78 ] && [ "$M" = 78 ] || { echo "::error::kaynak 78 mp4 / 78 MANIFEST satiri degil. DUR."; exit 1; }
+          python3 -c 'import json,sys;d={"klasor":sys.argv[1],"ozet":sys.argv[2],"plan":sys.argv[3]};d.update({"manifest":sys.argv[4]} if sys.argv[4] else {});json.dump(d,open("_work/kaynak.json","w"))' \
+            "$KLASOR" "$OZET" "TEMP/VIDEO_V7_YUKLE/KURU_${PD:-}/PLAN.json" "$MAN"
       - name: Eski video yedegi (yalniz apply, kilit oncesi; plan URL'lerinden)
         if: env.MOD == 'APPLY'
         run: |
@@ -130,10 +176,12 @@ jobs:
           rclone lsf "gdrive:ASTROLOVE/TEMP/VIDEO_V7_YEDEK_${PD}/" --files-only > _work/yedek.txt 2>/dev/null || : > _work/yedek.txt
           echo "yedek Drive'da: $(wc -l < _work/yedek.txt) dosya (TEMP/VIDEO_V7_YEDEK_${PD}/)"
       - name: Etsy kilidi (sira bekle, iptal yok)
+        if: env.MOD == 'KURU' || env.MOD == 'APPLY'
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/etsy/kilit_bekle.py
       - name: Token + galeri ILERLEME (kilit sonrasi)
+        if: env.MOD == 'KURU' || env.MOD == 'APPLY'
         run: |
           set -euo pipefail
           umask 077; mkdir -p _out
@@ -142,6 +190,7 @@ jobs:
           python3 scripts/ops/durum_dosyasi.py oku --uzak "$G/ILERLEME.json" --yerel _work/ILERLEME.json --durum _work/DURUM_ILERLEME \
             --tur json-ilanlar
       - name: Video yukleme (kuru / apply)
+        if: env.MOD == 'KURU' || env.MOD == 'APPLY'
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
@@ -149,14 +198,50 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
-          args=(--surum v7 --video-dir _work/video --manifest _work/video/MANIFEST.csv --galeri-ilerleme _work/ILERLEME.json
+          args=(--surum "$SUR" --video-dir _work/video --manifest _work/video/MANIFEST.csv --galeri-ilerleme _work/ILERLEME.json
                 --kaynak-bilgi _work/kaynak.json --out _out --haric "$HARIC")
           if [ "$MOD" = "APPLY" ]; then
             args+=(--plan _work/PLAN.json --yedek-liste _work/yedek.txt --apply --confirm "$ONAY")
           fi
           python3 scripts/etsy/video_yukle_78.py "${args[@]}"
+      - name: TAM78 olcum + MANIFEST + ornek (yalniz adim=kaynak_uret; ETSY YOK)
+        if: env.MOD == 'KAYNAK'
+        run: |
+          set -euo pipefail
+          mkdir -p _work/video _work/qc _out
+          rclone copy "gdrive:ASTROLOVE/$KLASOR" _work/video --max-depth 1 --include "*.mp4" --transfers 8 -q
+          rclone copyto "gdrive:ASTROLOVE/${KLASOR}RAPOR/QC.csv" _work/qc/QC.csv
+          echo "kaynak: $KLASOR | mp4 $(ls _work/video/*.mp4 | wc -l) | QC.csv $(( $(wc -l < _work/qc/QC.csv) - 1 )) satir"
+          set +e; python3 scripts/etsy/video_yukle_78.py --manifest-uret --video-dir _work/video --qc-csv _work/qc/QC.csv \
+            --out _out 2>&1 | tee _work/olcum.log; KOD=${PIPESTATUS[0]}; set -e
+          printf -- '- kaynak %s | commit %s | kosu %s\n' "$KLASOR" "$GITHUB_SHA" "$GITHUB_RUN_ID" >> _out/OLCUM.md
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/VIDEO_V7D_YUKLE_KAYNAK/${STAMP}" --immutable -q
+          echo "::notice title=V7D KAYNAK::TEMP/VIDEO_V7D_YUKLE_KAYNAK/${STAMP}/ ($(head -1 _out/OLCUM.md))"
+          cat _out/OLCUM.md >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$ORNEK" ]; then
+            mkdir -p _work/ornek
+            for c in ${ORNEK//,/ }; do
+              [ -f "_work/video/$c.mp4" ] || { echo "::error::ornek $c TAM78'de yok"; exit 1; }
+              rclone copyto "gdrive:ASTROLOVE/${KLASOR}$c.mp4" "gdrive:ASTROLOVE/TEMP/VIDEO_V7D_ORNEK/${STAMP}/$c.mp4" --immutable -q   # kopya, tasima yok
+            done
+            python3 - "$ORNEK" <<'PY'
+          import sys, cv2
+          for c in sys.argv[1].split(","):
+              v = cv2.VideoCapture(f"_work/video/{c}.mp4")
+              n, fps = int(v.get(cv2.CAP_PROP_FRAME_COUNT)), v.get(cv2.CAP_PROP_FPS)
+              for ad, i in [("0.0", 0), ("1.0", round(1.0 * fps)), ("2.5", round(2.5 * fps)), ("4.0", round(4.0 * fps)), ("son", n - 1)]:
+                  v.set(cv2.CAP_PROP_POS_FRAMES, i)
+                  ok, k = v.read()
+                  assert ok and k.shape[:2] == (1080, 1440), (c, ad, ok, None if not ok else k.shape)
+                  cv2.imwrite(f"_work/ornek/{c}_{ad}s.jpg" if ad != "son" else f"_work/ornek/{c}_son_kare.jpg", k, [cv2.IMWRITE_JPEG_QUALITY, 95])
+              print(c, "kare", n, "fps", fps)
+          PY
+            rclone copy _work/ornek "gdrive:ASTROLOVE/TEMP/VIDEO_V7D_ORNEK/${STAMP}" --immutable -q
+            echo "::notice title=V7D ORNEK::TEMP/VIDEO_V7D_ORNEK/${STAMP}/ ($ORNEK)"
+          fi
+          exit $KOD
       - name: Token + cikti Drive'a
-        if: ${{ always() }}
+        if: ${{ always() && env.MOD != 'KAYNAK' }}
         run: |
           set -euo pipefail
           TOK=0
@@ -164,7 +249,10 @@ jobs:
           if grep -rIqE 'x-api-key|refresh_token|"access_token"' _out/ 2>/dev/null; then
             echo "::error::ciktida sir benzeri anahtar bulundu, Drive'a yazilmadi"; exit 1
           fi
-          [ -d _out ] && rclone copy _out "$Y/${MOD:-KURU}_${STAMP}" -q && echo "::notice title=VIDEO V7 ${MOD:-KURU}::TEMP/VIDEO_V7_YUKLE/${MOD:-KURU}_${STAMP}/ (plan_damga ${STAMP})"
+          if [ -d _out ]; then   # yukleme hatasi gizlenmez (inceleme 30 Eki)
+            rclone copy _out "$Y/${MOD:-KURU}_${STAMP}" -q
+            echo "::notice title=VIDEO V7 ${MOD:-KURU}::TEMP/VIDEO_V7_YUKLE/${MOD:-KURU}_${STAMP}/ (plan_damga ${STAMP})"
+          fi
           [ -f _out/report.md ] && cat _out/report.md >> "$GITHUB_STEP_SUMMARY" || true
           exit $TOK
       - if: ${{ always() }}

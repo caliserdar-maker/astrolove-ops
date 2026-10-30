@@ -42,6 +42,18 @@ APPLY (Serdar onayi 28 Eyl: 75 ilan, kuru KURU_20260928_1359 PASS):
   - SONUC.json her ilandan sonra yazilir (kosu kesilirse yarim ilan kaydi kalir). Sifir yazilacak satirli apply FAIL.
   - Kilit oncesi Drive indirmeleri (BIRLESIK, yedek) is akisinda kilit_bekle'den ONCE; kilit_bekle olusturma sirasina gore
     bekledigi icin sonradan acilan Etsy kosulari bu indirmeleri de bekler (bilinen; indirme ~1-2 dk).
+
+--surum v7d (Serdar onayi 30 Eki; v7 kapilarinin hepsi AYNEN, yalniz kaynak ve galeri kapisi farkli):
+  - kaynak TEMP/VIDEO_V7_DUZELTME/<damga>/TAM78/<CIFT>.mp4 (Serdar onayli v7d) + ayri klasordeki MANIFEST
+    (TEMP/VIDEO_V7D_YUKLE_KAYNAK/<damga>/MANIFEST.csv; --manifest-uret ile, Etsy'siz). MANIFEST satiri ayrica listing_id, dosya,
+    bayt, genislik, yukseklik ile de olcumle ayni olmali; MANIFEST cift / listing_id kumesi ilan listesiyle iki yonlu birebir.
+  - plan kilidi: PLAN.json kaynak.klasor (TAM78 klasoru) + kaynak.manifest_sha256; apply ayni MANIFEST ister.
+  - GALERI KAPISI: yalniz galeri v11 ILERLEME (TEMP/POSTER_GALERI_V11_YUKLE/ILERLEME.json) ilan kaydi: durum PASS, hedef 10,
+    son_ids dolu (hedef kadar), set >= hedef; canli rank 1 = son_ids[0] ve canli kimlik kumesi = son_ids. v10 kaydi ve SONUC.csv
+    kullanilmaz. Gecmeyen ilan BLOK "galeri bekliyor" (kuru SONUC'u bozmaz; apply'da ATLANDI).
+  - --manifest-uret: Etsy'ye istek YOK (token okunmaz). --video-dir (TAM78 mp4), --qc-csv (TAM78/RAPOR/QC.csv), --ids ->
+    <out>/MANIFEST.csv + OLCUM.md + OLCUM.json. mp4 adlari, QC.csv ve ilan listesi cift kumeleri birebir degilse, ya da
+    1440x1080 / QC PASS / ses yok / 5-15 sn / < 100 MB disi video varsa MANIFEST YAZILMAZ (DUR, cikis 1).
 """
 import argparse
 import csv
@@ -75,7 +87,12 @@ ILAN_CAGRI_UST = 2 + 3 + OKUMA_DENEME + 3 + OKUMA_DENEME
 OKUMA_DENEME_V7, OKUMA_BEKLE_V7 = 12, 10   # yeni video active olana dek ~2 dk (eski silinmeden once)
 ILAN_CAGRI_UST_V7 = 3 * (3 + OKUMA_DENEME_V7 + OKUMA_DENEME_V7 + OKUMA_DENEME) + 2 + 3
 PROFIL = {"v5": dict(boyut=VIDEO_BOYUT, ad="VIDEO_{c}.mp4", onay=ONAY, kuru_cagri=KURU_CAGRI_ILAN, ust=ILAN_CAGRI_UST),
-          "v7": dict(boyut=(1440, 1080), ad="{c}.mp4", onay="VIDEO_V7_YUKLE", kuru_cagri=3, ust=ILAN_CAGRI_UST_V7)}
+          "v7": dict(boyut=(1440, 1080), ad="{c}.mp4", onay="VIDEO_V7_YUKLE", kuru_cagri=3, ust=ILAN_CAGRI_UST_V7),
+          "v7d": dict(boyut=(1440, 1080), ad="{c}.mp4", onay="VIDEO_V7_YUKLE", kuru_cagri=3, ust=ILAN_CAGRI_UST_V7)}
+V7 = ("v7", "v7d")                      # v7 yolu (tek gonderim, active bekleme, galeri kapisi); v7d yalniz kaynak + galeri v11
+GALERI_AD = {"v7": "v10", "v7d": "v11"}
+HEDEF_V11 = 10
+MANIFEST_ALAN = ["cift", "listing_id", "dosya", "sha256", "bayt", "genislik", "yukseklik", "sure_sn", "fps", "qc_sonuc", "ses_akisi"]
 
 
 def surum(a):
@@ -99,8 +116,8 @@ def video_bilgi(p):
     return {"w": w, "h": h, "kare": n, "fps": round(fps, 2), "sure": round(n / fps, 2) if fps else 0.0}
 
 
-def yerel_kontrol(vdir, c, sr="v5", manifest=None):
-    """(bilgi, sorunlar) - yerel video + QC json (v5) ya da BIRLESIK MANIFEST satiri (v7)."""
+def yerel_kontrol(vdir, c, sr="v5", manifest=None, lid=None):
+    """(bilgi, sorunlar) - yerel video + QC json (v5) ya da MANIFEST satiri (v7 BIRLESIK, v7d TAM78 kaynak MANIFEST)."""
     pr = PROFIL[sr]
     p, q = vdir / pr["ad"].format(c=c), vdir / f"QC_{c}.json"
     if not p.is_file():
@@ -108,11 +125,16 @@ def yerel_kontrol(vdir, c, sr="v5", manifest=None):
     b = {"dosya": p.name, "bayt": p.stat().st_size, "mb": round(p.stat().st_size / 1e6, 2), "sha256": sha(p)}
     b.update(video_bilgi(p))
     sorun = []
-    if sr == "v7":
+    if sr in V7:
         m = (manifest or {}).get(c) or {}
         if m.get("qc_sonuc") != "PASS" or m.get("sha256") != b["sha256"] or str(m.get("ses_akisi")) != "False":
             sorun.append(f"MANIFEST: QC {m.get('qc_sonuc') or 'yok'} / sha256 {'ayni' if m.get('sha256') == b['sha256'] else 'farkli'} / "
                          f"ses {m.get('ses_akisi')}")
+        if sr == "v7d":
+            fark = [k for k, v in (("listing_id", lid), ("dosya", p.name), ("bayt", b["bayt"]), ("genislik", b["w"]),
+                                   ("yukseklik", b["h"])) if str(m.get(k)) != str(v)]
+            if fark:
+                sorun.append(f"MANIFEST v7d alanlari olcumle farkli: {fark}")
     else:
         qc = json.loads(q.read_text()) if q.is_file() else {}
         if not qc.get("pass"):
@@ -134,7 +156,7 @@ def kuru(a, api, out, satirlar):
     sr = surum(a)
     for i, s in enumerate(satirlar, 1):
         lid, c = str(s["listing_id"]), s["cift"]
-        b, neden = yerel_kontrol(vdir, c, sr, getattr(a, "manifest_rows", None))
+        b, neden = yerel_kontrol(vdir, c, sr, getattr(a, "manifest_rows", None), lid)
         st = (api.get(f"/listings/{lid}", ok404=True) or {}).get("state")
         if kota_bas is None and api.remaining is not None:
             kota_bas = int(api.remaining) + 1
@@ -146,16 +168,16 @@ def kuru(a, api, out, satirlar):
             neden.append(f"state {st}")
         if len(vid) > 1:
             neden.append(f"{len(vid)} video (beklenen en fazla 1)")
-        if sr == "v7":
+        if sr in V7:
             g_neden = []
-            row["kapak_id"] = galeri_kapisi(api, lid, (a.galeri or {}).get(lid), g_neden)
+            row["kapak_id"] = GALERI_KAPI[sr](api, lid, (a.galeri or {}).get(lid), g_neden)
             row["galeri_bekliyor"] = bool(g_neden) and not neden
             neden += g_neden
             for v in row["eski_video"]:
                 if not v.get("url"):
                     neden.append(f"eski video {v['video_id']} URL yok (yedek alinamaz)")
                 v["yedek"] = f"{lid}_{v['video_id']}.mp4"
-        for v in ([] if sr == "v7" else row["eski_video"]):
+        for v in ([] if sr in V7 else row["eski_video"]):
             yol = yedek / f"{lid}_{v['video_id']}.mp4"
             try:
                 r = requests.get(v["url"], timeout=120)
@@ -176,7 +198,7 @@ def kuru(a, api, out, satirlar):
 
     say = {d: sum(r["durum"] == d for r in plan) for d in ("YUKLE", "DEGISTIR", "BLOK")}
     ok = say["BLOK"] == 0 and len(plan) == BEKLENEN - len(a.haric)
-    if sr == "v7":   # galeri gruplar halinde biter: yalniz galeri kapisi BLOK'u gecerli; baska BLOK nedeni FAIL
+    if sr in V7:   # galeri gruplar halinde biter: yalniz galeri kapisi BLOK'u gecerli; baska BLOK nedeni FAIL
         say["GALERI_BEKLIYOR"] = sum(1 for r in plan if r["durum"] == "BLOK" and r.get("galeri_bekliyor"))
         ok = len(plan) == BEKLENEN - len(a.haric) and say["BLOK"] == say["GALERI_BEKLIYOR"]
     (out / "PLAN.json").write_text(json.dumps({"olusturma": simdi(), "surum": sr, "kaynak": a.kaynak, "satirlar": plan},
@@ -190,12 +212,12 @@ def kuru(a, api, out, satirlar):
                          " ".join(str(x["video_id"]) for x in r["eski_video"]), v.get("dosya"), v.get("mb"),
                          v.get("sure"), v.get("sha256")])
     kota = int(api.remaining) if api.remaining is not None else None
-    gerek = (say["YUKLE"] + say["DEGISTIR"]) * (CAGRI_ILAN + (1 if sr == "v7" else 0))
+    gerek = (say["YUKLE"] + say["DEGISTIR"]) * (CAGRI_ILAN + (1 if sr in V7 else 0))
     mbs = [r["video"]["mb"] for r in plan if r["video"]]
     kb = a.kaynak or {}
     sat = [f"# VIDEO78 yukleme: KURU KOSU ({simdi()}) - Etsy'ye yazma YOK", "",
            f"- YUKLE {say['YUKLE']} | DEGISTIR {say['DEGISTIR']} | BLOK {say['BLOK']}"
-           f"{' (galeri v10 bekliyor ' + str(say['GALERI_BEKLIYOR']) + ', diger ' + str(say['BLOK'] - say['GALERI_BEKLIYOR']) + ')' if sr == 'v7' else ''}"
+           f"{' (galeri ' + GALERI_AD[sr] + ' bekliyor ' + str(say['GALERI_BEKLIYOR']) + ', diger ' + str(say['BLOK'] - say['GALERI_BEKLIYOR']) + ')' if sr in V7 else ''}"
            f" | toplam {len(plan)} | "
            f"SONUC: {'PASS' if ok else 'FAIL'}",
            f"- Haric (Serdar): {', '.join(a.haric) or '-'} | Kaynak: {kb.get('klasor')} | {kb.get('ozet')} | video {len(mbs)} dosya, "
@@ -236,6 +258,31 @@ def galeri_kapisi(api, lid, kayit, neden):
     elif set(ids) != set(son):
         neden.append(f"canli galeri ({len(ids)} gorsel) galeri v10 kaydindan farkli")
     return kapak
+
+
+def galeri_kapisi_v11(api, lid, kayit, neden):
+    """v7d: yalniz galeri v11 ILERLEME kaydi (durum PASS, hedef 10, son_ids hedef kadar, set >= hedef) + canli rank 1 = son_ids[0]
+    + canli kimlik kumesi = son_ids. v10 kaydi / SONUC.csv kullanilmaz. -> canli kapak id"""
+    g = sorted((api.get(f"/listings/{lid}/images", ok404=True) or {}).get("results") or [], key=lambda x: x.get("rank") or 0)
+    ids = [str(x.get("listing_image_id")) for x in g]
+    kapak = g[0].get("listing_image_id") if g else None
+    k = kayit or {}
+    son = [str(x) for x in k.get("son_ids") or []]
+    try:
+        hedef, kset = int(k.get("hedef") or 0), int(k.get("set") or 0)
+    except (TypeError, ValueError):
+        hedef, kset = 0, 0
+    if k.get("durum") != "PASS" or hedef != HEDEF_V11 or len(son) != hedef or kset < hedef:
+        neden.append(f"galeri v11 kaydi PASS degil ({k.get('durum') or 'kayit yok'}, set {k.get('set')}/{k.get('hedef')}, "
+                     f"son_ids {len(son)}; beklenen hedef {HEDEF_V11})")
+    elif str(kapak) != son[0]:
+        neden.append(f"canli kapak {kapak} galeri v11 kapagi {son[0]} degil")
+    elif set(ids) != set(son):
+        neden.append(f"canli galeri ({len(ids)} gorsel) galeri v11 kaydindan farkli")
+    return kapak
+
+
+GALERI_KAPI = {"v7": galeri_kapisi, "v7d": galeri_kapisi_v11}
 
 
 def yukle_tek(api, shop, lid, p, eski):
@@ -297,6 +344,105 @@ def kota(api):
     return int(api.remaining) if api.remaining is not None else None
 
 
+def ses_akisi(p):
+    """ffprobe ile ses akisi var mi (True / False). ffprobe yoksa ya da okunamazsa None (MANIFEST yazilmaz)."""
+    import shutil
+    import subprocess
+    if not shutil.which("ffprobe"):
+        return None
+    r = subprocess.run(["ffprobe", "-v", "error", "-show_streams", "-of", "json", str(p)], capture_output=True, text=True)
+    if r.returncode != 0:
+        return None
+    try:
+        return any(x.get("codec_type") == "audio" for x in json.loads(r.stdout).get("streams") or [])
+    except ValueError:
+        return None
+
+
+def manifest_uret(a):
+    """v7d kaynak MANIFEST'i (Etsy'ye istek YOK). Doner: cikis kodu (0 = MANIFEST yazildi)."""
+    vdir, out = pathlib.Path(a.video_dir), pathlib.Path(a.out)
+    out.mkdir(parents=True, exist_ok=True)
+    ilan = list(csv.DictReader(open(a.ids, encoding="utf-8")))
+    qc = list(csv.DictReader(open(a.qc_csv, encoding="utf-8")))
+    mp4 = sorted(x.stem for x in vdir.glob("*.mp4"))
+    k_ilan, k_qc = [r["cift"] for r in ilan], [r["cift"] for r in qc]
+    lids = [str(r["listing_id"]) for r in ilan]
+    dur = []
+    for ad, kume in (("ilan listesi", k_ilan), ("QC.csv", k_qc), ("mp4", mp4)):
+        if len(kume) != BEKLENEN or len(set(kume)) != len(kume):
+            dur.append(f"{ad}: {len(kume)} kayit, tekil {len(set(kume))} (beklenen {BEKLENEN})")
+    if len(set(lids)) != len(lids):
+        dur.append("ilan listesinde tekrarlanan listing_id")
+    for ad, kume in (("QC.csv", k_qc), ("mp4", mp4)):
+        if set(kume) != set(k_ilan):
+            dur.append(f"{ad} ile ilan listesi farkli: eksik {sorted(set(k_ilan) - set(kume))[:5]}, fazla {sorted(set(kume) - set(k_ilan))[:5]}")
+    qcs = {r["cift"]: r for r in qc}
+    rows, t0 = [], time.time()
+    for i, r in enumerate(ilan, 1):
+        c, p = r["cift"], vdir / f"{r['cift']}.mp4"
+        if not p.is_file():
+            continue
+        b = video_bilgi(p)
+        ses = ses_akisi(p)
+        rows.append({"cift": c, "listing_id": str(r["listing_id"]), "dosya": p.name, "sha256": sha(p), "bayt": p.stat().st_size,
+                     "genislik": b["w"], "yukseklik": b["h"], "sure_sn": b["sure"], "fps": b["fps"],
+                     "qc_sonuc": (qcs.get(c) or {}).get("sonuc") or "yok", "ses_akisi": ses})
+        gec = time.time() - t0
+        if i % 13 == 0 or i == len(ilan):
+            log(f"[{i}/{len(ilan)}] olcum | gecen {gec:.0f}s | kalan ~{gec / i * (len(ilan) - i):.0f}s | %{i * 100 // len(ilan)}")
+    kotu = []
+    for x in rows:
+        n = []
+        if (x["genislik"], x["yukseklik"]) != PROFIL["v7d"]["boyut"]:
+            n.append(f"cozunurluk {x['genislik']}x{x['yukseklik']}")
+        if x["qc_sonuc"] != "PASS":
+            n.append(f"QC {x['qc_sonuc']}")
+        if x["ses_akisi"] is not False:
+            n.append(f"ses {x['ses_akisi']}")
+        if not SURE_MIN <= x["sure_sn"] <= SURE_MAX:
+            n.append(f"sure {x['sure_sn']}")
+        if x["bayt"] / 1e6 >= MB_MAX:
+            n.append(f"{x['bayt'] / 1e6:.2f} MB")
+        if n:
+            kotu.append(f"{x['cift']}: {', '.join(n)}")
+    if len({x['sha256'] for x in rows}) != len(rows):
+        dur.append("tekrarlanan sha256 (iki cift ayni video)")
+
+    def dag(f):
+        from collections import Counter
+        return dict(sorted(Counter(str(f(x)) for x in rows).items()))
+    bayt = sorted(x["bayt"] for x in rows)
+    ozet = {"video": len(rows), "cozunurluk": dag(lambda x: f"{x['genislik']}x{x['yukseklik']}"),
+            "sure_sn": dag(lambda x: x["sure_sn"]), "fps": dag(lambda x: x["fps"]), "qc_sonuc": dag(lambda x: x["qc_sonuc"]),
+            "ses_akisi": dag(lambda x: x["ses_akisi"]),
+            "bayt_min": bayt[0] if bayt else None, "bayt_medyan": bayt[len(bayt) // 2] if bayt else None,
+            "bayt_max": bayt[-1] if bayt else None, "dur": dur, "kotu": kotu}
+    ok = not dur and not kotu and len(rows) == BEKLENEN
+    if ok:
+        with open(out / "MANIFEST.csv", "w", newline="", encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fieldnames=MANIFEST_ALAN)
+            w.writeheader()
+            w.writerows(rows)
+        yaz = list(csv.DictReader(open(out / "MANIFEST.csv", encoding="utf-8")))   # iki yonlu birebir: yazilan dosyayi geri oku
+        if {(x["cift"], x["listing_id"]) for x in yaz} != {(r["cift"], str(r["listing_id"])) for r in ilan} or \
+                {x["dosya"][:-4] for x in yaz} != set(mp4):
+            (out / "MANIFEST.csv").unlink()
+            ok, ozet["dur"] = False, ozet["dur"] + ["yazilan MANIFEST ilan listesi / mp4 adlariyla birebir degil"]
+    ozet["sonuc"] = "PASS" if ok else "DUR"
+    (out / "OLCUM.json").write_text(json.dumps(ozet, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
+    sat = [f"PASS video {len(rows)} / {BEKLENEN} | MANIFEST {'yazildi' if ok else 'YAZILMADI (DUR)'}" if ok else
+           f"DUR video {len(rows)} / {BEKLENEN} | MANIFEST YAZILMADI", "",
+           f"- cozunurluk: {ozet['cozunurluk']}", f"- sure_sn: {ozet['sure_sn']}", f"- fps: {ozet['fps']}",
+           f"- bayt: en az {ozet['bayt_min']}, medyan {ozet['bayt_medyan']}, en cok {ozet['bayt_max']}",
+           f"- QC.csv sonuc: {ozet['qc_sonuc']}", f"- ses akisi (ffprobe): {ozet['ses_akisi']}",
+           f"- DUR nedenleri: {'; '.join(dur) or 'yok'}", f"- kapi disi video: {'; '.join(kotu) or 'yok'}"]
+    (out / "OLCUM.md").write_text("\n".join(sat) + "\n", encoding="utf-8")
+    for x in sat:
+        log(x)
+    return 0 if ok else 1
+
+
 def apply(a, api, out, plan):
     """Plana kilitli yukleme. Doner: (sonuclar, sonuc_ok)."""
     shop = os.environ["ETSY_SHOP_ID"]
@@ -347,15 +493,18 @@ def apply(a, api, out, plan):
                 canli = _vid_idler(api, lid)
                 if canli != eski:
                     neden.append(f"canli video {canli} != plan {eski}")
-                if sr == "v7":
+                if sr in V7:
                     g_neden = []
-                    kapak = galeri_kapisi(api, lid, (a.galeri or {}).get(lid), g_neden)
+                    kapak = GALERI_KAPI[sr](api, lid, (a.galeri or {}).get(lid), g_neden)
                     if g_neden or kapak != r.get("kapak_id"):
                         neden.append("galeri: " + ("; ".join(g_neden) or f"canli kapak {kapak} plandaki {r.get('kapak_id')} degil"))
+                    if sr == "v7d" and g_neden and len(neden) == 1:   # yalniz galeri v11 kapisi: hata degil, galeri bekliyor
+                        rec["sonuc"], rec["neden"] = "GALERI_BEKLIYOR", neden[0] + " (yazma yok)"
+                        continue
             if neden:
                 rec["sonuc"], rec["neden"] = "ATLANDI", "; ".join(neden) + " (yazma yok)"
                 continue
-            if sr == "v7":
+            if sr in V7:
                 yeni = yukle_tek(api, shop, lid, p, eski)
             else:
                 with open(p, "rb") as fh:
@@ -365,7 +514,7 @@ def apply(a, api, out, plan):
             if not yeni or yeni in eski:
                 raise RuntimeError(f"yeni video id gecersiz ({yeni or 'bos'})")
             rec["yeni_video"] = yeni
-            if sr == "v7":
+            if sr in V7:
                 ids, ok, vd = _aktif(api, lid, yeni)
                 if not ok:
                     raise RuntimeError(f"yeni video {yeni} active olmadi (video_state {vd}, ilanda {ids}); eski SILINMEDI")
@@ -375,7 +524,7 @@ def apply(a, api, out, plan):
                     raise RuntimeError(f"yukleme geri okuma: yeni {yeni} ilanda yok {ids} (eski SILINMEDI)")
             for e in eski:
                 if e in ids:
-                    if sr == "v7":
+                    if sr in V7:
                         api.delete(f"/shops/{shop}/listings/{lid}/videos/{e}", ok404=True)
                     else:
                         api.delete(f"/shops/{shop}/listings/{lid}/videos/{e}")
@@ -393,11 +542,11 @@ def apply(a, api, out, plan):
             log(f"[{i}/{len(satir)}] {lid} {c} {rec['sonuc']} {rec['neden']} | gecen {gec:.0f}s | "
                 f"kalan ~{gec / i * (len(satir) - i):.0f}s | %{i * 100 // len(satir)} | kota {rec['kota']}")
 
-    say = {d: sum(x["sonuc"] == d for x in sonuc) for d in ("YUKLENDI", "ATLANDI", "FAIL")}
-    ok = say["YUKLENDI"] == len(satir) and (len(satir) > 0 or sr == "v5")   # v7: yazilacak satir yoksa PASS denmez
+    say = {d: sum(x["sonuc"] == d for x in sonuc) for d in ("YUKLENDI", "ATLANDI", "FAIL", "GALERI_BEKLIYOR")}
+    ok = say["YUKLENDI"] + say["GALERI_BEKLIYOR"] == len(satir) and (say["YUKLENDI"] > 0 or sr == "v5")   # yazilan yoksa PASS denmez
     sonuc_yaz()
     sat = [f"# VIDEO78 yukleme: APPLY ({simdi()})", "",
-           f"- YUKLENDI {say['YUKLENDI']} | ATLANDI {say['ATLANDI']} | FAIL {say['FAIL']} | toplam {len(satir)} | "
+           f"- YUKLENDI {say['YUKLENDI']} | ATLANDI {say['ATLANDI']} | FAIL {say['FAIL']} | galeri bekliyor {say['GALERI_BEKLIYOR']} | toplam {len(satir)} | "
            f"SONUC: {'PASS' if ok else 'EKSIK'}",
            f"- Plan: {a.kaynak.get('plan', a.plan)} ({plan.get('olusturma')}) | Kaynak: {(plan.get('kaynak') or {}).get('klasor')} | "
            f"Haric: {', '.join(a.haric) or '-'}",
@@ -430,20 +579,30 @@ def main():
     ap.add_argument("--yedek-liste", help="apply: Drive VIDEO78_YEDEK_<plan> dosya adlari (satir basi bir)")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--confirm", default="")
-    ap.add_argument("--surum", choices=sorted(PROFIL), default="v5", help="v5 (varsayilan, 2880x2160) | v7 (1440x1080, BIRLESIK)")
-    ap.add_argument("--manifest", help="v7: BIRLESIK MANIFEST.csv")
-    ap.add_argument("--galeri-ilerleme", help="v7: TEMP/POSTER_GALERI_V10_YUKLE/ILERLEME.json (galeri kapisi)")
+    ap.add_argument("--surum", choices=sorted(PROFIL), default="v5",
+                    help="v5 (varsayilan, 2880x2160) | v7 (1440x1080, BIRLESIK) | v7d (1440x1080, TAM78 + kaynak MANIFEST)")
+    ap.add_argument("--manifest", help="v7: BIRLESIK MANIFEST.csv | v7d: TEMP/VIDEO_V7D_YUKLE_KAYNAK/<damga>/MANIFEST.csv")
+    ap.add_argument("--galeri-ilerleme", help="v7: TEMP/POSTER_GALERI_V10_YUKLE/ILERLEME.json | v7d: TEMP/POSTER_GALERI_V11_YUKLE/ILERLEME.json")
+    ap.add_argument("--manifest-uret", action="store_true", help="v7d kaynak MANIFEST'i uret (Etsy YOK); --qc-csv gerekli")
+    ap.add_argument("--qc-csv", help="--manifest-uret: TAM78/RAPOR/QC.csv")
     a = ap.parse_args()
+    if a.manifest_uret:                      # Etsy'ye istek yok: token okunmaz
+        if not a.qc_csv:
+            raise SystemExit("HATA: --manifest-uret icin --qc-csv gerekli. DUR.")
+        sys.exit(manifest_uret(a))
     a.haric = sorted({x.strip() for x in a.haric.split(",") if x.strip()})
     onay = PROFIL[a.surum]["onay"]
     if a.apply and (a.confirm != onay or not a.plan or not a.yedek_liste):
         raise SystemExit(f"HATA: apply icin --confirm {onay}, --plan ve --yedek-liste gerekli. DUR.")
-    if a.surum == "v7":
+    if a.surum in V7:
         if not a.manifest or not a.galeri_ilerleme:
-            raise SystemExit("HATA: v7 icin --manifest ve --galeri-ilerleme gerekli. DUR.")
-        a.manifest_rows = {r["cift"]: r for r in csv.DictReader(open(a.manifest, encoding="utf-8"))}
+            raise SystemExit(f"HATA: {a.surum} icin --manifest ve --galeri-ilerleme gerekli. DUR.")
+        m_satir = list(csv.DictReader(open(a.manifest, encoding="utf-8")))
+        a.manifest_rows = {r["cift"]: r for r in m_satir}
         a.galeri = json.loads(pathlib.Path(a.galeri_ilerleme).read_text(encoding="utf-8")).get("ilanlar") or {}
     a.kaynak = json.loads(pathlib.Path(a.kaynak_bilgi).read_text()) if a.kaynak_bilgi else {}
+    if a.surum == "v7d":
+        a.kaynak["manifest_sha256"] = sha(a.manifest)
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     satirlar = list(csv.DictReader(open(a.ids, encoding="utf-8")))
@@ -452,24 +611,37 @@ def main():
     bilinmeyen = set(a.haric) - {s["cift"] for s in satirlar}
     if bilinmeyen:
         raise SystemExit(f"HATA: haric listesinde bilinmeyen cift: {sorted(bilinmeyen)}. DUR.")
+    if a.surum == "v7d":   # MANIFEST (cift, listing_id) kumesi ilan listesiyle iki yonlu birebir; degilse Etsy'ye hic gidilmez
+        m_k = [(r.get("cift"), str(r.get("listing_id"))) for r in m_satir]
+        i_k = [(s_["cift"], str(s_["listing_id"])) for s_ in satirlar]
+        if len(m_k) != len(set(m_k)) or set(m_k) != set(i_k):
+            raise SystemExit(f"HATA: v7d MANIFEST ilan listesiyle birebir degil (MANIFEST {len(m_k)}, eksik "
+                             f"{sorted(set(i_k) - set(m_k))[:3]}, fazla {sorted(set(m_k) - set(i_k))[:3]}). DUR.")
     satirlar = [s for s in satirlar if s["cift"] not in a.haric]
+    plan = None
+    if a.apply:   # plan kapilari token okunmadan ONCE (Etsy'ye hic gidilmeden DUR)
+        plan = json.loads(pathlib.Path(a.plan).read_text(encoding="utf-8"))
+        rows = plan.get("satirlar") or []
+        blok = [r["cift"] for r in rows if r.get("durum") not in ("YUKLE", "DEGISTIR")]
+        if (plan.get("surum") or "v5") != a.surum:
+            raise SystemExit(f"HATA: plan surumu {plan.get('surum') or 'v5'} != --surum {a.surum}. DUR.")
+        if a.surum == "v7d":   # plan kilidi: ayni TAM78 klasoru + ayni MANIFEST
+            pk = plan.get("kaynak") or {}
+            if pk.get("klasor") != a.kaynak.get("klasor") or pk.get("manifest_sha256") != a.kaynak.get("manifest_sha256"):
+                raise SystemExit(f"HATA: v7d plan kaynagi ({pk.get('klasor')}, MANIFEST {str(pk.get('manifest_sha256'))[:12]}) != "
+                                 f"verilen ({a.kaynak.get('klasor')}, {str(a.kaynak.get('manifest_sha256'))[:12]}). DUR.")
+        if a.surum in V7:   # yalniz galeri kapisi BLOK'u (galeri bitmemis) olan plan kullanilir; baska BLOK = kuru FAIL -> DUR (inceleme 30 Eki)
+            blok = [c for c in blok if not any(r["cift"] == c and r.get("durum") == "BLOK" and r.get("galeri_bekliyor") for r in rows)]
+        bilinen = {(str(s["listing_id"]), s["cift"]) for s in satirlar}
+        yabanci = [r["cift"] for r in rows if (str(r["listing_id"]), r["cift"]) not in bilinen]
+        if blok or yabanci or not rows:
+            raise SystemExit(f"HATA: plan kullanilamaz (BLOK {blok}, ilan listesi disi {yabanci}). DUR.")
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
     mask(k); mask(s)
     store = TokenStore(os.environ["TOKEN_FILE"], k, s)
     if store.needs_refresh():
         store.refresh()
     if a.apply:
-        plan = json.loads(pathlib.Path(a.plan).read_text(encoding="utf-8"))
-        rows = plan.get("satirlar") or []
-        blok = [r["cift"] for r in rows if r.get("durum") not in ("YUKLE", "DEGISTIR")]
-        if (plan.get("surum") or "v5") != a.surum:
-            raise SystemExit(f"HATA: plan surumu {plan.get('surum') or 'v5'} != --surum {a.surum}. DUR.")
-        if a.surum == "v7":   # BLOK satirlar (galeri bitmemis) uygulanmaz; plan yine kullanilir
-            blok = [c for c in blok if not any(r["cift"] == c and r.get("durum") == "BLOK" for r in rows)]
-        bilinen = {(str(s["listing_id"]), s["cift"]) for s in satirlar}
-        yabanci = [r["cift"] for r in rows if (str(r["listing_id"]), r["cift"]) not in bilinen]
-        if blok or yabanci or not rows:
-            raise SystemExit(f"HATA: plan kullanilamaz (BLOK {blok}, ilan listesi disi {yabanci}). DUR.")
         _, ok = apply(a, Etsy(store), out, plan)
         sys.exit(0 if ok else 1)
     sys.exit(0 if kuru(a, Etsy(store), out, satirlar) else 1)
