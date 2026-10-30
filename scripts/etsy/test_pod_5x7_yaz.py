@@ -81,6 +81,8 @@ class Sahte:
 
     def put_json(s, path, body):
         s._say(); lid = s.lid(path); s.yaz.append(("PUT inv", lid))
+        if not path.endswith("/inventory?max_variations_supported=3"):   # gercek Etsy: 3 varyasyonda parametresiz PUT 409
+            raise SystemExit("HATA: PUT inventory -> 409: maximum number of supported variations is 2")
         eski = {(v["property_id"], a): i for p in s.inv[lid]["products"] for v in p["property_values"]
                 for i, a in zip(v.get("value_ids") or [], v.get("values") or [])}
         pr = []

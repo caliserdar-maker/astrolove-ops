@@ -357,7 +357,7 @@ def ilan_yaz(api, shop, lid, k, geri, out, kontrol):
         if s["envanter"] == "yaz":
             kaynak = ham if geri else k["envanter_yuk"]
             govde = adet_uygula(geri_govde(ham) if geri else kaynak, s["adet"])   # adet: canli (kuru sonrasi satis korunur)
-            api.put_json(f"/listings/{lid}/inventory", govde)
+            api.put_json(f"/listings/{lid}/inventory?max_variations_supported=3", govde)   # 3 menu (Format, Renk, Boy); yoksa 409 (pilot 30 Eki 41105387368)
             R_["yazilan"].append("envanter")
             inv1 = api.get(f"/listings/{lid}/inventory") or {}
             if imza(inv1) != imza(kaynak) or adetler(inv1) != {s["adet"]}:
