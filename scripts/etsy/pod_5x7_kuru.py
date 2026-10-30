@@ -10,8 +10,9 @@ Plan (yazim ayri betik + Serdar onayi):
     yontemi; menu sirasi dizi sirasiyla, pod_boy_15.py:8-11). Print 19.90, Digital File 3.90, adet = ilandaki adet (999/998),
     readiness = blogun readiness_state_id'si, SKU POD-<CIFT>-5x7 / POD-<CIFT>-5x7-DIGITAL. Mevcut 130 urun (SKU, deger, value_id,
     fiyat, adet, acik, readiness) AYNEN. price/quantity/sku/readiness_on_property aynen.
- 2) Kargo profili 314711751541: yalniz AU hedefi min/max teslim 7-21 (Serdar 26 Eki); diger her alan ayni.
- 3) Aciklama EN (8 degisiklik: 26 Eki 4 + 28 Eki celiski 4, her biri tam 1 kez) + RU ru_poster.kur (5x7 dahil boy listesi) + kapilar.
+ 2) Kargo profili 314711751541: yalniz AU hedefi min/max teslim 7-22 (Serdar 26 Eki 7-21; 30 Eki ust sinir 22: Printful 5x7 AU
+    20-22 gun, kosu 40179982544); diger her alan ayni.
+ 3) Aciklama EN (9 degisiklik: 26 Eki 4 + 28 Eki celiski 4 + 30 Eki ambalaj paragrafi silinir, her biri tam 1 kez) + RU ru_poster.kur (5x7 dahil boy listesi) + kapilar.
 Kapilar (ilan basina): state active (CLAUDE.md: updateListing taslagi yayina alir -> taslak ATLANIR), 130 urun / 13 bilinen boy /
 5 renk / 2 format, 5x7 yok; once/sonra karsilastirma; aciklama yasak ifade + tire; RU kur PASS + RU_YASAK + ru_yazim_kapisi.
 Cikti: <out>/KURU_<lid>.json, PLAN.csv, OZET.md (ilan basina degisiklik listesi), PROFIL_PLAN.json, ISTEK_TAHMINI.json."""
@@ -30,7 +31,7 @@ import ru_poster as R  # noqa: E402
 from beyan_marka_yaz import norm  # noqa: E402
 
 PROFIL = 314711751541
-AU_YENI = (7, 21)
+AU_YENI = (7, 22)   # Serdar 30 Eki: ust sinir 21 -> 22 (Printful API kosu 40179982544: 5x7 AU 20-22 gun)
 ETIKET_5X7 = "5×7″ (13×18cm)"
 BOYLAR = {"8×10″ (20×25cm)": "8x10", "11×14″ (28×36cm)": "11x14", "12×16″ (30×41cm)": "12x16", "12×18″ (30×46cm)": "12x18",
           "16×20″ (41×51cm)": "16x20", "16×24″ (41×61cm)": "16x24", "18×24″ (46×61cm)": "18x24", "20×30″ (51×76cm)": "20x30",
@@ -59,25 +60,27 @@ EN_DEGISIKLIK = [
     ("If we don't hear from you within 24 hours of receiving the preview, we print the design as shown.",
      "If we don't hear from you within 24 hours of receiving the preview, we go ahead with the design as shown: we print your "
      "poster, or send your digital file as a download link in Etsy Messages."),
+    # Serdar 30 Eki: ambalaj paragrafi (baslik dahil) kaldirilir; Printful 5x7 ambalaji dogrulanmadi. RU, EN'den paragraf paragraf
+    # kurulur (ru_poster.kur): UPAKOVKA paragrafi da duser.
+    ("\n\nPACKAGING\nPrints are rolled in tissue paper and sent in a thick cardboard tube. Small prints to Europe may come in a stiff "
+     "flat envelope.", ""),
 ]
 # Serdar 28 Eki (kapali not): "your file is emailed" + "If email doesn't suit you" metni DEGISMEZ; e-posta adresi siparis akisinda
 # onizleme mesajinda musteriden istenir, cevap yoksa Etsy Messages ile indirme linki gider (astrolove-siparis akisi).
 # Yazim betigi (henuz yok, Serdar 28 Eki): onayli kuru kosunun PLAN'ina kilitli (plan_damga + ilan basina once / sonra metin sha256);
 # canli metin plandakinden farkliysa o ilan yazilmaz ve raporlanir; yarim uygulanmis metin PASS sayilmaz.
 # Karar sonrasi celisen satirlar: DEGISTIRILMEZ, liste olarak raporlanir (Serdar karar verecek). Serdar 28 Eki: indirme, onizleme,
-# 'Short on time' ve onay gelmezse cumleleri EN_DEGISIKLIK'e alindi; ambalaj (5x7 karariyla) ve 'Nothing is shipped' (dogru) kalir.
+# 'Short on time' ve onay gelmezse cumleleri EN_DEGISIKLIK'e alindi; 'Nothing is shipped' (dogru) kalir. Ambalaj: Serdar 30 Eki kaldirildi.
 CELISKI = [
-    ("Prints are rolled in tissue paper and sent in a thick cardboard tube. Small prints to Europe may come in a stiff flat envelope.",
-     "PACKAGING Printful 5x7 icin dogrulanmadi"),
     ("- Nothing is shipped. For personal use only.",
-     "dijital varyant fiziksel ilanda: AU alicisi kargo profili tahminini (7-21 + hazirlik) gorur, metin 'Nothing is shipped' der"),
+     "dijital varyant fiziksel ilanda: AU alicisi kargo profili tahminini (7-22 + hazirlik) gorur, metin 'Nothing is shipped' der"),
 ]
 # Galeri kartlari (canli, scripts/pod/eski78_gorsel_uret.py:45-50; 17 Eki hatti): metinle celisen kart yazilari (gorsel, aciklamada degil)
 KART_CELISKI = [("kart 8", "Five colors and thirteen sizes.", "5x7 ile 14 boy"),
                 ("kart 9", "Every color comes in all thirteen sizes.", "5x7 ile 14 boy"),
                 ("kart 13", "US orders are tracked.", "takip satiri aciklamadan kaldiriliyor (Serdar 26 Eki)"),
                 ("boy kilavuzu karesi", "See the size guide photo.", "kilavuz gorselinde 5x7 yok (olculmedi)")]
-YASAK_EN = re.compile(r"Hahnem|Photo Rag|\b308\b|g/m2|gicl[eé]e|Prodigi|100% cotton|museum|ISO 9706|\bOBA\b|bright white|12-colou?r|[—–]", re.I)
+YASAK_EN = re.compile(r"Hahnem|Photo Rag|\b308\b|g/m2|gicl[eé]e|Prodigi|Printful|100% cotton|museum|ISO 9706|\bOBA\b|bright white|12-colou?r|[—–]", re.I)
 
 
 def para(p):
@@ -259,7 +262,8 @@ def main():
                   "govde": {"primary_cost": para(d.get("primary_cost")), "secondary_cost": para(d.get("secondary_cost")),
                             "min_delivery_days": AU_YENI[0], "max_delivery_days": AU_YENI[1]}} for d in au]   # profil_ucretsiz.py:126 kalibi
     pplan = {"profil": PROFIL, "baslik": sp.get("title"), "hedef_sayisi": len(hed), "once_tum_hedefler": hed, "yazim_istegi": yaz_govde,
-             "uyari": "Printful 5x7 AU teslim 20-22 gun (API, kosu 40179982544); 7-21 ust siniri asabilir; Etsy tahminine hazirlik 4-7 eklenir",
+             "uyari": "Printful 5x7 AU teslim 20-22 gun (Printful API, kosu 40179982544; uretim haric); profil AU 7-22 (Serdar 30 Eki, "
+                      "ust sinir 21 -> 22); alt sinir 7 degismedi (gercek AU tasima 20-22; alt sinir karari Serdar'in)",
              "au_once": [{k: d.get(k) for k in ("shipping_profile_destination_id", "min_delivery_days", "max_delivery_days",
                                                "primary_cost", "secondary_cost", "mail_class", "shipping_carrier_id")} for d in au],
              "au_sonra": {"min_delivery_days": AU_YENI[0], "max_delivery_days": AU_YENI[1]},
@@ -301,7 +305,9 @@ def main():
                f"- istek {api.calls}, kota {api.remaining}; yazim tahmini {tahmin['yazim_tahmini']['toplam']}-{tahmin['yazim_tahmini']['toplam_en_cok']}",
                "- Celisen satirlar (DEGISTIRILMEDI, Serdar karari): " + "; ".join(f"'{c}' ({n})" for c, n in CELISKI),
                "- Celisen galeri kartlari (gorsel; ayri is, CLAUDE.md GALERI kurali): " + "; ".join(f"{k} '{c}' ({n})" for k, c, n in KART_CELISKI),
-               f"- AU uyarisi: {pplan['uyari']}", ""]
+               f"- AU uyarisi: {pplan['uyari']}",
+               "- Serdar 30 Eki degisiklikleri: YASAK_EN'e 'Printful' eklendi; EN ambalaj paragrafi (PACKAGING) kaldirilir, RU UPAKOVKA "
+               f"paragrafi da duser; AU teslim {AU_YENI[0]}-{AU_YENI[1]} gun (ust sinir 21 -> 22)", ""]
     (out / "OZET.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print("\n".join(md[:6]))
     return 0 if gecen == len(plan) and not pplan["hata"] else 1

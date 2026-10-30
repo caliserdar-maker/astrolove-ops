@@ -3,7 +3,8 @@ name: wa-hazirlik-oku
 # video_kapak: 78 videonun kapagi canli rank 1 kapakla ayni mi (scripts/kapak78/video_kapak_kontrol.py). Canli = B1 yedegi r1
 #   (TEMP/POSTER_GALERI_V11_YEDEK/<b1>), video girdisi = TEMP/POSTER_KAPAK_V10/20261026_153710, video = TEMP/VIDEO_V7_DUZELTME/<tam78>/TAM78
 #   (Serdar onayli 28 Eki, kosu 40699879314). Cikti TEMP/VIDEO_KAPAK_KONTROL/<damga>/.
-# onizle: CANCER_LIBRA 5 renk 5x7 (siparis hatti test fisleri 9000000531/522/523 GPT, 524/525 DIJITAL; ornek isimler) Printful
+# onizle (Serdar 30 Eki: Printful'a yukleme oncesi kapi; siparisi Serdar elle verir): fisler girdisindeki receipt'lerin 5x7
+#   ciktisi (varsayilan CANCER_LIBRA 5 renk test fisleri 9000000531/522/523 GPT, 524/525 DIJITAL; ornek isimler) Printful
 #   printfile 414'e (JSON'dan) cover yerlesimi + gercek oran onizleme (scripts/printful/pf_5x7_onizle.py). Printful/Etsy istegi yok.
 #   Cikti TEMP/POD_5X7_PRINTFUL_ORNEK/<damga>/ (BASKI, ONIZLEME, KONTAK.jpg, ORNEK.md/csv).
 # printful_5x7: Printful varyant 16364 baski dosyasi gereksinimi (scripts/printful/pf_5x7_oku.py; yalniz GET). Token Drive
@@ -15,6 +16,8 @@ on:
       tam78: {description: "TEMP/VIDEO_V7_DUZELTME/<damga>/TAM78", default: "20261028_134859"}
       is: {description: "video | printful | onizle | hepsi", default: "hepsi"}
       pf_damga: {description: "onizle: printfiles JSON TEMP/POD_5X7_PRINTFUL_ORNEK/<damga>/PRINTFUL", default: "20261030_110925"}
+      fisler: {description: "onizle: virgullu receipt (SIPARIS_ISIM/GPT/AstroLoveArt_<r> + DIJITAL/<r>); Printful'a yukleme oncesi kapi", default: "9000000531,9000000522,9000000523,9000000524,9000000525"}
+      beklenen: {description: "onizle: beklenen 5x7 dosya sayisi (bos = fis sayisi)", default: ""}
 permissions:
   contents: read
 jobs:
@@ -118,8 +121,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Girdi
-        env: {P: "${{ inputs.pf_damga }}"}
-        run: '[[ "$P" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
+        env: {P: "${{ inputs.pf_damga }}", F: "${{ inputs.fisler }}", N: "${{ inputs.beklenen }}"}
+        run: '[[ "$P" =~ ^[0-9]{8}_[0-9]{6}$ && "$F" =~ ^[0-9]+(,[0-9]+)*$ && "$N" =~ ^[0-9]*$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -141,15 +144,16 @@ jobs:
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
             grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
       - name: Girdiler + onizleme
-        env: {P: "${{ inputs.pf_damga }}"}
+        env: {P: "${{ inputs.pf_damga }}", F: "${{ inputs.fisler }}", N: "${{ inputs.beklenen }}"}
         run: |
           set -euo pipefail
           S=gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM; mkdir -p _in _pf
-          for r in GPT/AstroLoveArt_9000000531 GPT/AstroLoveArt_9000000522 GPT/AstroLoveArt_9000000523 DIJITAL/9000000524 DIJITAL/9000000525; do
-            rclone copy "$S/$r" "_in/${r##*/}" --include "/AstroLoveArt_*_5x7.jpg" --include "/siparis.json" --include "/OZET.json" -q; done
+          for f in ${F//,/ }; do for r in "GPT/AstroLoveArt_$f" "DIJITAL/$f"; do
+            rclone copy "$S/$r" "_in/${r//\//_}" --include "/AstroLoveArt_*_5x7.jpg" --include "/siparis.json" --include "/OZET.json" -q 2>/dev/null || true; done; done
+          [ -n "$N" ] || N=$(echo "$F" | tr ',' '\n' | wc -l)
           rclone copy "gdrive:ASTROLOVE/TEMP/POD_5X7_PRINTFUL_ORNEK/$P/PRINTFUL" _pf --include "printfiles_*.json" -q
           echo "girdi: 5x7 $(find _in -name 'AstroLoveArt_*_5x7.jpg' | wc -l), printfiles $(ls _pf | wc -l)"
-          set +e; python3 -I scripts/printful/pf_5x7_onizle.py --printfiles "$(ls _pf/printfiles_*.json | head -1)" --in _in --out _o; RC=$?; set -e
+          set +e; python3 -I scripts/printful/pf_5x7_onizle.py --printfiles "$(ls _pf/printfiles_*.json | head -1)" --in _in --out _o --beklenen "$N"; RC=$?; set -e
           echo "RC=$RC" >> "$GITHUB_ENV"
       - name: Drive'a yaz
         if: always()

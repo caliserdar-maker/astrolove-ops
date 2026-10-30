@@ -36,8 +36,8 @@ on:
         type: boolean
         default: false
       boy:
-        description: "5x7 | A1"
-        default: "5x7"
+        description: "A1 (5x7 KAPALI, Serdar 30 Eki: 5x7 PRINTFUL, ELLE)"
+        default: "A1"
 
 concurrency:
   group: pod-print-5x7-a1
@@ -50,6 +50,9 @@ jobs:
     outputs:
       shards: ${{ steps.m.outputs.shards }}
     steps:
+      - name: Boy kapisi (5x7 kapali)
+        env: {BOY: "${{ inputs.boy }}"}
+        run: '[ "$BOY" = "A1" ] || { echo "::error::boy $BOY kapali; yalniz A1 (Serdar 30 Eki: 5x7 PRINTFUL, ELLE, Prodigi 5x7 yolu kapandi)"; exit 1; }'
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -144,14 +147,13 @@ jobs:
                 --rclone-src "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES" --rclone-out "gdrive:ASTROLOVE/TEMP/POD_PRINT")
           [ "$FORCE" = "true" ] && args+=(--force)
           [ -n "${ONIZLEME:-}" ] && args+=(--onizleme-cift "$ONIZLEME")
-          if [ "${BOY:-5x7}" = "A1" ]; then
+          if [ "${BOY:-}" = "A1" ]; then
             python scripts/pod/pod_print_a1.py --pairs-file _work/pairs.txt --sizes-json _work/sizes.json \
               --state _work/state.csv --shard "${{ matrix.shard }}" --shards "${{ inputs.shards }}" \
               --rclone-src "gdrive:ASTROLOVE/WALL_ART/POSTERS/ORIGINAL_HIGH_RES" \
               --rclone-out "gdrive:ASTROLOVE/TEMP/POD_PRINT" $([ "$FORCE" = "true" ] && echo --force)
           else
-            [ "${TANI:-false}" = "true" ] && args+=(--tani)
-            python scripts/pod/pod_print_5x7.py "${args[@]}"
+            echo "::error::boy ${BOY:-bos} kapali (5x7 PRINTFUL, ELLE)"; exit 1
           fi
       - name: STATE'i Drive'a yaz
         if: ${{ always() }}

@@ -66,8 +66,13 @@ CERCEVE_ESLEME = Path(__file__).resolve().parents[2] / "data/pod/prodigi_cerceve
 EKLER_USD = 5.00        # hesap ayarindaki ekler (postcard 2.50 + 2 sticker 1.25x2); referans siparis olcumu (25 Eyl)
 # SKU semasi pod_sku.py: POD-<burc3>_<burc3>-<edisyon2>-<boyut>
 STAGES = ["dryrun", "bekliyor", "manual", "atlandi", "ordered", "shipped", "tracked", "error", "ISIM_BEKLIYOR"]
-TUM_BOYLAR = ["5x7", "8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30",
-              "24x36", "30x40", "A4", "A3", "A2", "A1"]      # 13 mevcut + 5x7 + A1
+TUM_BOYLAR = ["8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30",
+              "24x36", "30x40", "A4", "A3", "A2", "A1"]      # 13 mevcut + A1 (5x7 Printful: PRINTFUL_ELLE)
+# Serdar 30 Eki: 5x7 tedarikcisi PRINTFUL (varyant 16364), siparisi Serdar elle verir. Bu boyun kalemi Prodigi'ye
+# GITMEZ (paket/teklif/gonderim yok), raporda "5x7 PRINTFUL, ELLE" diye isaretlenir. Baski dosyasi siparis hattinin
+# _5x7.jpg ciktisi (1500x2100), yuklemeden once scripts/printful/pf_5x7_onizle.py kapisi.
+PRINTFUL_ELLE = {"5x7"}
+PRINTFUL_ETIKET = "5x7 PRINTFUL, ELLE"
 COLS = ["receipt_id", "stage", "country", "items", "etsy_total", "prodigi_cost", "margin", "warn", "prodigi_order_id",
         "prodigi_status", "asset_perms", "tracking", "carrier", "carrier_service", "tracking_url", "tracking_son_ayak",
         "carrier_etsy", "sent_tx", "kanal_iptal", "kanal_oid", "alarm_kosu", "ts_utc", "note"]
@@ -501,7 +506,8 @@ def prodigi_item(item, url=None, merchant_reference=None):
 
 def parse_items(receipt, only_size=""):
     """(gonderilecek kalemler, POD disi SKU'lar, atlanan POD kalemleri).
-    only_size virgulle birden cok boy alir (or. '5x7,A1'): YALNIZ bu boylarin kalemleri
+    PRINTFUL_ELLE boylari (5x7) gonderilecek kalemlere girmez: other'a 'PRINTFUL_ELLE:<sku>x<adet>' (only_size'dan once).
+    only_size virgulle birden cok boy alir (or. '8x10,A1'): YALNIZ bu boylarin kalemleri
     gonderilir, ayni sepetteki diger boylar atlanir (onlari Prodigi entegrasyonu ceker).
     Secilen boylar TEK Prodigi siparisinde birlesir (kargo tek sefer)."""
     boylar = {b.strip() for b in (only_size or "").split(",") if b.strip()}
@@ -515,6 +521,8 @@ def parse_items(receipt, only_size=""):
         if not parsed:
             other.append(sku or f"tx{t.get('transaction_id')}"); continue
         pair, ed, size, cerceve, sku = parsed      # sku = kanonik (renkli) anahtar
+        if size in PRINTFUL_ELLE:
+            other.append(f"PRINTFUL_ELLE:{sku}x{int(t.get('quantity') or 1)}"); continue
         if boylar and size not in boylar:
             atlanan.append(f"{sku}x{int(t.get('quantity') or 1)}"); continue
         pr = t.get("price") or {}
@@ -585,6 +593,10 @@ def submit_package(a, prod, st, rid, report):
     body = pkg["order"]
     if len(body.get("items") or []) != len(pkg.get("items") or []):
         return False, f"{rid}: paket bozuk (kalem sayisi uyusmuyor)"
+    pf = [i.get("sku") for i in pkg.get("items") or [] if i.get("size") in PRINTFUL_ELLE
+          or str(i.get("prodigi_sku") or "").upper() in {f"GLOBAL-HPR-{b}".upper() for b in PRINTFUL_ELLE}]
+    if pf:          # Serdar 30 Eki: eski pakette kalmis 5x7 kalemi de Prodigi'ye gonderilmez
+        return False, f"{rid}: {PRINTFUL_ETIKET} kalemi pakette ({pf}); Prodigi'ye GONDERILMEDI"
     # Drive TEMP/SIPARIS_ONAY yerel/senkron kopyasindaki tam cozunurluk
     # dosyalarinin guncel ozeti, API yazmasindan once zorunlu olarak denetlenir.
     onay_dosyalari = [Path(a.onay_dizin) / rid / Path(i["asset_remote"]).name for i in pkg["items"]]
@@ -735,7 +747,7 @@ def main():
                          "takip.YENI_SIPARIS_BASLANGIC_UTC'den yalniz ILERI tasinabilir")
     ap.add_argument("--sablonlar", default="_work/MUSTERI_MESAJLARI.md",
                     help="kisisel musteri mesaji sablonlari (Drive TEMP/SIPARIS_ISIM/MUSTERI_MESAJLARI.md)")
-    ap.add_argument("--only-size", default="", help="yalniz bu boyun kalemlerini isle (or. 5x7); "
+    ap.add_argument("--only-size", default="", help="yalniz bu boyun kalemlerini isle (or. A1; 5x7 Printful elle, islenmez); "
                                                    "ayni sepetteki diger boylar atlanir")
     g = ap.add_mutually_exclusive_group(required=False)
     g.add_argument("--dry-run", action="store_true")
@@ -821,6 +833,12 @@ def main():
         if dij:
             report.append(f"- DIJITAL - teslim paketi: receipt {receipt_kod(r.get('receipt_id'))} ({', '.join(dij)}); "
                           f"Prodigi'ye GITMEZ, dijital teslim elle")
+        pf = [x.split(":", 1)[1] for x in other if x.startswith("PRINTFUL_ELLE:")]
+        if pf:
+            satir = (f"- {PRINTFUL_ETIKET}: receipt {receipt_kod(r.get('receipt_id'))} ({', '.join(pf)}); Prodigi'ye GITMEZ, "
+                     f"Printful siparisi Serdar elle (dosya: siparis hatti _5x7.jpg + pf_5x7_onizle kapisi)")
+            report.append(satir)
+            DIKKAT_EK.append(satir)
     pod = [(r, items, other, atlanan) for r, items, other, atlanan in pod if items]
     report.append(f"- POD urunlu receipt: {len(pod)}"
                   + (f" (yalniz {a.only_size} kalemleri)" if a.only_size else ""))
@@ -922,8 +940,11 @@ def main():
         etsy_total = round(sum(i["price"] * i["qty"] for i in items), 2)
         desc = ", ".join(f"{i['sku']}x{i['qty']}" for i in items)
         warn = []
-        if other:
-            warn.append(f"POD disi urun: {other}")
+        pf_elle = [x.split(":", 1)[1] for x in other if x.startswith("PRINTFUL_ELLE:")]
+        if pf_elle:
+            warn.append(f"{PRINTFUL_ETIKET}: {pf_elle}")
+        if [x for x in other if not x.startswith("PRINTFUL_ELLE:")]:
+            warn.append(f"POD disi urun: {[x for x in other if not x.startswith('PRINTFUL_ELLE:')]}")
         if atlanan:
             warn.append(f"Prodigi entegrasyonunda kalan boylar: {atlanan}")
         if country not in ALLOWED:

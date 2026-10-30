@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""5x7 (GLOBAL-HPR-5x7, 13x18 cm) baski dosyalari: 78 cift x 5 edisyon = 390 JPEG.
+"""KAPALI (Serdar 30 Eki): 5x7 tedarikcisi Printful (varyant 16364, 1500x2100), siparis elle; Prodigi 5x7 yolu kapandi.
+5x7 baski dosyasi siparis hattinin _5x7.jpg ciktisidir (motor_gpt/olcu.py, tek_jpg.py) ve scripts/printful/pf_5x7_onizle.py
+kapisindan gecer. Bu betik calistirilirsa is yapmadan cikar (kod 2). Asagisi eski aciklama.
+
+5x7 (GLOBAL-HPR-5x7, 13x18 cm) baski dosyalari: 78 cift x 5 edisyon = 390 JPEG.
 
 Kaynak: ORIGINAL_HIGH_RES/<ED>/A_SERIES/<PAIR>.jpg (ISO ustasi, 10962x15503).
 Yontem: YALNIZ dikey merkez kirpma (usta cozunurlugu korunur, yeniden boyutlandirma yok);
@@ -231,7 +235,13 @@ def onizleme(dosyalar, yol):
     log(f"ONIZLEME_5X7.jpg {tuval.size[0]}x{tuval.size[1]} {yol.stat().st_size / 1024:.0f} KB")
 
 
+KAPALI = ("pod_print_5x7 KAPALI (Serdar 30 Eki): 5x7 PRINTFUL, ELLE. Baski dosyasi siparis hatti _5x7.jpg "
+          "(1500x2100) + scripts/printful/pf_5x7_onizle.py kapisi; Prodigi GLOBAL-HPR-5x7 yolu kullanilmaz.")
+
+
 def main():
+    print(f"::error::{KAPALI}", flush=True)
+    return 2
     ap = argparse.ArgumentParser()
     ap.add_argument("--pairs-file", required=True)
     ap.add_argument("--sizes-json", required=True)
