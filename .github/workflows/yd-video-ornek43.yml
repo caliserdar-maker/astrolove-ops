@@ -1,0 +1,103 @@
+name: yd-video-ornek43
+# YD (1st Anniversary) ilan videosu, 3 ORNEK, 4:3 1440x1080 (gece is 7, Serdar sabah bakar). ETSY API YOK, token yok, kilit yok,
+# Etsy'ye yukleme yok. Kapak = YD setinin Y01'i (Botanical 4:3, 3000x2250): Drive TEMP/YD_KAPAK_V1/<kapak_damga>/<CIFT>_Y01.jpg
+# (yd-set-kontrol girdisiyle ayni set). Uretim sosyal/poster_video/yd_video.py (v7d motoru; toz kurgusu poster v7d ile ayni ortam:
+# V7_DOLGU=nk, V6_C, V6_N 58000, V6_BOLGE_REF 44274, V6_N_REF 58000; video-v7d-78.yml ile ayni; V7_HALKASIZ YD'de kullanilmaz).
+# Surumler yd-video-ornek.yml / video-v7d-78.yml ile ayni (python 3.12, pillow 11.0.0). Kapi: her mp4 1440x1080, 30 fps, 180 kare.
+# QC v7_qc.py (TOZSUZ kopyasiyla) yalniz BILGI, LOG/'a yazilir (d kutu orani esigi v7 posterine ozgu; YD kapisi tanimli degil).
+# Cikti: Drive TEMP/YD_VIDEO_ORNEK43/<damga>/ <CIFT>_yd_video_43.mp4 + <CIFT>_kare_{00.0s,01.0s,02.5s,04.0s,son}.jpg, LOG/ (--immutable).
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      kapak_damga: {description: "TEMP/YD_KAPAK_V1/<damga>", required: true, default: "20261027_141146"}
+      ciftler: {description: "bosluklu CIFT listesi (yd78_ids.csv)", required: true, default: "CANCER_LIBRA LEO_LEO SAGITTARIUS_SAGITTARIUS"}
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Girdi kapisi
+        env: {KD: "${{ inputs.kapak_damga }}", CS: "${{ inputs.ciftler }}"}
+        run: |
+          set -euo pipefail
+          [[ "$KD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::kapak_damga"; exit 1; }
+          for C in $CS; do [[ "$C" =~ ^[A-Z]+_[A-Z]+$ ]] || { echo "::error::cift $C"; exit 1; }; done
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: pip
+        timeout-minutes: 6
+        run: pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
+      - name: ffmpeg
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          sudo apt-get -qq install -y --no-install-recommends ffmpeg >/dev/null 2>&1 \
+            || { sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y --no-install-recommends ffmpeg >/dev/null; }
+          ffmpeg -version | sed -n 1p
+      - name: rclone
+        timeout-minutes: 6
+        run: curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Uretim + kareler (+ bilgi QC)
+        env: {KD: "${{ inputs.kapak_damga }}", CS: "${{ inputs.ciftler }}"}
+        run: |
+          set -euo pipefail
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+          mkdir -p _w _o/LOG
+          ORT="V7_DOLGU=nk V6_C=sosyal/poster_video/v6_c_egri.json V6_N=58000 V6_BOLGE_REF=44274 V6_N_REF=58000"
+          N=$(echo $CS | wc -w); I=0; T0=$(date +%s); HATA=0
+          for C in $CS; do
+            I=$((I + 1))
+            grep -qE "(^|,)$C(,|$)" data/pod/yd78_ids.csv || { echo "::error::$C yd78_ids.csv'de yok"; HATA=1; continue; }
+            rclone copyto "gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1/$KD/${C}_Y01.jpg" "_w/${C}_Y01.jpg" -q
+            python3 -c "from PIL import Image; import sys; s = Image.open(sys.argv[1]).size; print('kapak', s); assert s == (3000, 2250), s" "_w/${C}_Y01.jpg"
+            V="_w/$C.mp4"
+            if env $ORT python3 -I sosyal/poster_video/yd_video.py "_w/${C}_Y01.jpg" "$V" > "_o/LOG/${C}_uretim.log" 2>&1 \
+               && env $ORT TOZSUZ=1 python3 -I sosyal/poster_video/yd_video.py "_w/${C}_Y01.jpg" "$V.tozsuz.mp4" > "_o/LOG/${C}_tozsuz.log" 2>&1; then
+              grep -v '^  kare' "_o/LOG/${C}_uretim.log" | tail -8
+            else
+              echo "::error::$C uretim hatasi"; tail -20 "_o/LOG/${C}_uretim.log" "_o/LOG/${C}_tozsuz.log" 2>/dev/null; HATA=1; continue
+            fi
+            P=$(ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=width,height,r_frame_rate,nb_read_frames -of csv=p=0 "$V")
+            echo "$C ffprobe: $P"
+            [ "$P" = "1440,1080,30/1,180" ] || { echo "::error::$C video ozelligi $P (1440,1080,30/1,180 beklenir)"; HATA=1; }
+            NK=$(echo "$P" | cut -d, -f4)
+            for k in "00.0s:0" "01.0s:30" "02.5s:75" "04.0s:120" "son:$((NK - 1))"; do
+              ffmpeg -v error -y -i "$V" -vf "select=eq(n\,${k#*:})" -frames:v 1 -q:v 2 "_o/${C}_kare_${k%%:*}.jpg"
+            done
+            cp "$V" "_o/${C}_yd_video_43.mp4"
+            set +e; python3 -I sosyal/poster_video/v7_qc.py "$V" "_w/${C}_Y01.jpg" "_o/LOG/${C}_uretim.log" "_w/qc_$C" > "_o/LOG/${C}_qc.txt" 2>&1; set -e
+            [ -f "_w/qc_$C/QC.json" ] && cp "_w/qc_$C/QC.json" "_o/LOG/${C}_QC.json"
+            [ -f "$V.ic.json" ] && cp "$V.ic.json" "_o/LOG/${C}_ic.json"
+            G=$(( $(date +%s) - T0 )); echo "[$I/$N %$((100 * I / N))] $C (gecen ${G}s, kalan ~$(( G * (N - I) / I ))s)"
+          done
+          NM=$(ls _o/*_yd_video_43.mp4 2>/dev/null | wc -l); NJ=$(ls _o/*_kare_*.jpg 2>/dev/null | wc -l)
+          echo "mp4 $NM / $N, kare jpg $NJ / $((5 * N))" | tee -a "$GITHUB_STEP_SUMMARY"
+          for f in _o/LOG/*_QC.json; do
+            [ -f "$f" ] && python3 -c "import json, sys; q = json.load(open(sys.argv[1])); f = [k for k, v in q['kontrol'].items() if not v['gecti']]; print(sys.argv[1].split('/')[-1], 'bilgi QC:', 'FAIL (' + ', '.join(f) + ')' if f else 'PASS')" "$f" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+          [ "$NM" = "$N" ] && [ "$NJ" = "$((5 * N))" ] || HATA=1
+          echo "HATA=$HATA" >> "$GITHUB_ENV"
+      - name: Drive'a yaz
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          [ -n "${DAMGA:-}" ] || exit 1
+          rclone copy _o "gdrive:ASTROLOVE/TEMP/YD_VIDEO_ORNEK43/$DAMGA" --immutable -q
+          echo "Cikti: TEMP/YD_VIDEO_ORNEK43/$DAMGA" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "${HATA:-1}" = 0 ] || { echo "::error::eksik / hatali cikti"; exit 1; }
+      - if: always()
+        run: rm -rf _w _o ~/.config/rclone

@@ -1,0 +1,212 @@
+name: kupa-stil78
+# Kupa stil gorselleri (galeri 7-14): 78 cift x 8 stil = 624 (Serdar onayi 30 Eki, gece is 2). ETSY API YOK, token yok, kilit yok,
+# musteriye dokunmaz; yalniz Drive'a yeni klasore yazar (--immutable).
+# Kod: kupa-orchard dali, SHA ile (kod_sha); kupa_orchard/kapak_el/kod/stil78.py, kapak klasoru kupa_orchard/kapak_el/cikti (KAYIT.tsv),
+# TASMA_IZIN=1 (tasma yalniz uyari, KAYIT'ta gorunur). Sembol: KAYIT.tsv ilk satirindaki kupa-printful-sonuc SHA'si
+# refs/kapak78/sembol'e cekilir (stil78 surum kapisi). Surumler kupa-orchard78.yml ile ayni (python 3.13, pillow 12.3.0).
+# Paralel: 13 grup x 6 cift (stil78 cift listesiyle; grup basina KAYIT_g<NN>.tsv).
+# Cikti: Drive TEMP/KUPA_STIL78/<damga>/ KUPA_STIL_<CIFT>_<NN>_<STIL>.jpg (624), KONTAK_<NN>_<STIL>.jpg (8, scripts/kupa_stil78/stil_kontak.py,
+#        yd_kontak.pafta), OZET.md, KAYIT.tsv, LOG/. Sayi 624 degilse kontak isi FAIL.
+# Ayrica: ayni SHA'daki 78 kapak (kupa_orchard/kapak_el/cikti) ve 78 video (kupa_orchard/kapak_el/video) ->
+#        Drive TEMP/KUPA_GALERI_KAYNAK/<damga>/{kapak,video}/ (--immutable), sayilar step summary'de.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      kod_sha: {description: "kupa-orchard dalinda tam commit SHA (40 hex)", required: true, default: "6b9008bfa2894e53d3f8508e6cdcfab6b75de711"}
+      grup: {description: "paralel is sayisi (78 cift bolunur)", required: true, default: "13"}
+jobs:
+  liste:
+    runs-on: ubuntu-latest
+    outputs:
+      matris: ${{ steps.m.outputs.matris }}
+      damga: ${{ steps.m.outputs.damga }}
+    steps:
+      - id: m
+        env: {KS: "${{ inputs.kod_sha }}", GRUP: "${{ inputs.grup }}"}
+        run: |
+          set -euo pipefail
+          [[ "$KS" =~ ^[0-9a-f]{40}$ && "$GRUP" =~ ^[0-9]{1,2}$ ]] || { echo "::error::girdi (kod_sha 40 hex, grup sayi)"; exit 1; }
+          echo "damga=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_OUTPUT"
+          python3 - <<'EOF'
+          import itertools, json, os
+          Z = ['ARIES', 'TAURUS', 'GEMINI', 'CANCER', 'LEO', 'VIRGO', 'LIBRA', 'SCORPIO', 'SAGITTARIUS', 'CAPRICORN', 'AQUARIUS', 'PISCES']
+          tum = sorted({'_'.join(sorted(p)) for p in itertools.combinations_with_replacement(Z, 2)})
+          assert len(tum) == 78
+          n = max(1, min(int(os.environ['GRUP']), 78))
+          m = {'include': [{'no': f'{i + 1:02d}', 'ciftler': ' '.join(tum[i::n])} for i in range(n)]}
+          print(json.dumps(m, indent=1))
+          open(os.environ['GITHUB_OUTPUT'], 'a').write('matris=' + json.dumps(m) + '\n')
+          EOF
+
+  uret:
+    needs: liste
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.liste.outputs.matris) }}
+    name: uret ${{ matrix.no }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.kod_sha }}
+          fetch-depth: 1
+          sparse-checkout: kupa_orchard
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: pip (kupa-orchard78 ile ayni surumler)
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          sudo apt-get -qq install -y --no-install-recommends libraqm0 >/dev/null 2>&1 \
+            || { sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y --no-install-recommends libraqm0 >/dev/null; }
+          python -m pip install -q numpy==2.5.3 pillow==12.3.0 scipy==1.18.1
+          python -c "from PIL import features, __version__ as v; assert features.check('raqm'), 'raqm yok'; print('pillow', v, 'raqm', features.version('raqm'))"
+      - name: rclone
+        timeout-minutes: 6
+        run: curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: stil78 (Etsy yok)
+        env: {CIFTLER: "${{ matrix.ciftler }}", NO: "${{ matrix.no }}"}
+        run: |
+          set -euo pipefail
+          SEM=$(head -1 kupa_orchard/kapak_el/cikti/KAYIT.tsv | awk '{print $NF}')
+          [[ "$SEM" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::kapak KAYIT.tsv sembol SHA okunamadi"; exit 1; }
+          git fetch -q --depth 1 origin "+$SEM:refs/kapak78/sembol"
+          echo "sembol $SEM, kod $(git rev-parse HEAD)"
+          mkdir -p _o _log _th
+          TASMA_IZIN=1 python3 -I kupa_orchard/kapak_el/kod/stil78.py kupa_orchard/kapak_el/cikti _o $CIFTLER 2>&1 | tee "_log/uretim_g$NO.log"
+          K=$(ls _o/KAYIT_*.tsv); [ "$(echo "$K" | wc -l)" = 1 ] || { echo "::error::KAYIT sayisi"; exit 1; }
+          mv "$K" "_log/KAYIT_g$NO.tsv"
+          N=$(ls _o/KUPA_STIL_*.jpg | wc -l); B=$(( $(echo $CIFTLER | wc -w) * 8 ))
+          echo "grup $NO: $N / $B gorsel, tasma uyarisi $(grep -c '^UYARI' "_log/uretim_g$NO.log" || true)" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$N" = "$B" ] || { echo "::error::grup $NO gorsel sayisi $N != $B"; exit 1; }
+          python3 - <<'EOF'
+          from pathlib import Path
+          from PIL import Image
+          for p in sorted(Path('_o').glob('KUPA_STIL_*.jpg')):
+              with Image.open(p) as im:
+                  assert im.size == (3000, 2250), (p.name, im.size)
+                  im = im.convert('RGB'); im.thumbnail((440, 330), Image.LANCZOS); im.save(Path('_th') / p.name, quality=85)
+          EOF
+      - name: Drive'a yaz
+        env: {NO: "${{ matrix.no }}", DAMGA: "${{ needs.liste.outputs.damga }}"}
+        run: |
+          set -euo pipefail
+          rclone copy _o "gdrive:ASTROLOVE/TEMP/KUPA_STIL78/$DAMGA" --immutable --include "KUPA_STIL_*.jpg" --transfers 8 -q
+          rclone copy _log "gdrive:ASTROLOVE/TEMP/KUPA_STIL78/$DAMGA/LOG" --immutable -q
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kucuk-${{ matrix.no }}
+          path: _th
+          retention-days: 3
+      - if: always()
+        run: rm -rf _o _th ~/.config/rclone
+
+  kontak:
+    needs: [liste, uret]
+    if: ${{ always() && needs.liste.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/kapak78
+            scripts/kupa_stil78
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: pip + rclone
+        run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: kucuk-*
+          merge-multiple: true
+          path: _th
+      - name: Sayi + KONTAK + KAYIT
+        env: {DAMGA: "${{ needs.liste.outputs.damga }}", KS: "${{ inputs.kod_sha }}"}
+        run: |
+          set -euo pipefail
+          D="gdrive:ASTROLOVE/TEMP/KUPA_STIL78/$DAMGA"
+          mkdir -p _k _log
+          ND=$(rclone lsf "$D" --files-only --include "KUPA_STIL_*.jpg" | wc -l)
+          rclone copy "$D/LOG" _log --include "KAYIT_g*.tsv" -q || true
+          { head -1 "$(ls _log/KAYIT_g*.tsv | head -1)"; printf 'cift\tstil\tbaski\tbaslik\n'; for f in _log/KAYIT_g*.tsv; do tail -n +3 "$f"; done; } > _k/KAYIT.tsv || true
+          TASMA=$(awk -F'\t' 'NR > 2 && $3 ~ /True/' _k/KAYIT.tsv | wc -l)
+          set +e
+          python3 scripts/kupa_stil78/stil_kontak.py --dir _th --out _k --kaynak "TEMP/KUPA_STIL78/$DAMGA"
+          RC=$?
+          set -e
+          { echo; echo "Drive sayimi: $ND KUPA_STIL_*.jpg (beklenen 624); KAYIT satiri $(( $(wc -l < _k/KAYIT.tsv) - 2 )), tasma True $TASMA";
+            echo "kod kupa-orchard $KS; TASMA_IZIN=1"; } >> _k/OZET.md
+          cat _k/OZET.md >> "$GITHUB_STEP_SUMMARY"
+          rclone copy _k "$D" --immutable -q
+          [ "$ND" = 624 ] && [ "$RC" = 0 ] || { echo "::error::sayi $ND / 624 ya da kontak FAIL (rc $RC). DUR."; exit 1; }
+          echo "::notice title=KUPA STIL78::TEMP/KUPA_STIL78/$DAMGA 624/624, KONTAK 8"
+      - if: always()
+        run: rm -rf _th _k ~/.config/rclone
+
+  galeri_kaynak:
+    needs: liste
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.kod_sha }}
+          fetch-depth: 1
+          sparse-checkout: |
+            kupa_orchard/kapak_el/cikti
+            kupa_orchard/kapak_el/video
+      - run: curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Kapak + video -> Drive
+        env: {DAMGA: "${{ needs.liste.outputs.damga }}"}
+        run: |
+          set -euo pipefail
+          C=kupa_orchard/kapak_el/cikti; V=kupa_orchard/kapak_el/video
+          NK=$(ls $C/KUPA_KAPAK_*.jpg | wc -l); NV=$(ls $V/KUPA_VIDEO_*.mp4 | wc -l)
+          G="gdrive:ASTROLOVE/TEMP/KUPA_GALERI_KAYNAK/$DAMGA"
+          rclone copy $C "$G/kapak" --immutable --transfers 8 -q
+          rclone copy $V "$G/video" --immutable --transfers 8 -q
+          DK=$(rclone lsf "$G/kapak" --files-only --include "KUPA_KAPAK_*.jpg" | wc -l)
+          DV=$(rclone lsf "$G/video" --files-only --include "KUPA_VIDEO_*.mp4" | wc -l)
+          echo "galeri kaynak: yerel kapak $NK / video $NV; Drive kapak $DK / video $DV (TEMP/KUPA_GALERI_KAYNAK/$DAMGA)" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$DK" = 78 ] && [ "$DV" = 78 ] || { echo "::error::kapak $DK / video $DV (78 beklenir)"; exit 1; }
+      - if: always()
+        run: rm -rf ~/.config/rclone
