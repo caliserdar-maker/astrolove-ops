@@ -1,0 +1,66 @@
+name: kupa-sade-dal
+# Sade kupa (Serdar 30 Eki onayi): Drive TEMP/<klasor>/baski_sade3.py (sha256 + boyut kapisi) + DAL_URL.tsv'deki 8 Canva dal gorseli.
+# Imzali linkler yalniz Drive TSV'de: is akisi girdisine / loga / depoya girmez (scripts/kupa/sade_dal_indir.py ::add-mask::).
+# ETSY YOK. Cikti: Drive TEMP/<klasor>/IND/<run_id>/ (dal3950, dal_sade, OZET.md) + dal kupa-sade-dal-<run_id>
+# (kupa_orchard/kod/baski_sade3.py + kupa_orchard/varlik/dal_sade/<stil>.jpg; main'e alma testten sonra elle).
+permissions:
+  contents: write
+on:
+  workflow_dispatch:
+    inputs:
+      klasor: {description: "Drive TEMP altinda klasor", required: true, default: "KUPA_SADE_DAL_20261030"}
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Girdi kapisi
+        env: {K: "${{ inputs.klasor }}"}
+        run: '[[ "$K" =~ ^[A-Z0-9_]+$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Ortam
+        run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0 requests==2.34.2
+          sudo apt-get install -y -qq rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Indir + kapi
+        env: {K: "${{ inputs.klasor }}"}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _in
+          rclone copy "gdrive:ASTROLOVE/TEMP/$K" _in --include DAL_URL.tsv --include baski_sade3.py --max-depth 1 -q
+          ls -l _in | sed 's/^/  /'
+          python3 -I scripts/kupa/sade_dal_indir.py --tsv _in/DAL_URL.tsv --cikti _o --betik _in/baski_sade3.py \
+            --betik-boyut 16643 --betik-sha b57acf34397f958e3c1e11e9b83804db97cd4b64e95fbfd2bb0834d9b8198aea
+          cp _in/baski_sade3.py _o/
+      - name: Drive + dal
+        env: {K: "${{ inputs.klasor }}"}
+        run: |
+          set -euo pipefail
+          rclone copy _o "gdrive:ASTROLOVE/TEMP/$K/IND/${GITHUB_RUN_ID}" --immutable -q
+          echo "Drive: TEMP/$K/IND/${GITHUB_RUN_ID}" | tee -a "$GITHUB_STEP_SUMMARY"; cat _o/OZET.md >> "$GITHUB_STEP_SUMMARY"
+          B="kupa-sade-dal-${GITHUB_RUN_ID}"
+          git checkout -q -b "$B"
+          mkdir -p kupa_orchard/kod kupa_orchard/varlik/dal_sade
+          cp _o/baski_sade3.py kupa_orchard/kod/baski_sade3.py
+          cp _o/dal_sade/*.jpg kupa_orchard/varlik/dal_sade/
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kupa_orchard/kod/baski_sade3.py kupa_orchard/varlik/dal_sade/*.jpg
+          git commit -q -m "kupa_orchard: baski_sade3 + 8 dal (1600, kosu ${GITHUB_RUN_ID}; test bekliyor)"
+          git push -q origin "$B"
+          echo "Dal: $B" | tee -a "$GITHUB_STEP_SUMMARY"
+      - if: always()
+        run: rm -rf _in _o ~/.config/rclone
