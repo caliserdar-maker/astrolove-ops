@@ -96,7 +96,7 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work _out _in/dosya _in/canli
           case "$KY" in v11) SRC="POSTER_GALERI_V11/$GD"; ET="$GD"; KART=W01_KAPAK;; wa_ci) SRC="WA_CI_KART/$GD"; ET="WA_CI_KART:$GD"; KART=W11_CI;; *) echo "::error::kaynak"; exit 1;; esac
-          echo "KART=$KART" >> "$GITHUB_ENV"
+          export KART; echo "KART=$KART" >> "$GITHUB_ENV"
           K="$O/DOSYA_KAPI/$DK"
           rclone copyto "$K/CI_KAPI.csv" _work/CI_KAPI.csv || { echo "::error::CI_KAPI.csv yok (DOSYA_KAPI/$DK)"; exit 1; }
           K0=$(rclone cat "$K/GALERI_DAMGA.txt" 2>/dev/null || true)
