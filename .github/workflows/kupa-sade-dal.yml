@@ -1,8 +1,9 @@
 name: kupa-sade-dal
 # Sade kupa (Serdar 30 Eki onayi): Drive TEMP/<klasor>/baski_sade3.py (sha256 + boyut kapisi) + DAL_URL.tsv'deki 8 Canva dal gorseli.
 # Imzali linkler yalniz Drive TSV'de: is akisi girdisine / loga / depoya girmez (scripts/kupa/sade_dal_indir.py ::add-mask::).
-# ETSY YOK. Cikti: Drive TEMP/<klasor>/IND/<run_id>/ (dal3950, dal_sade, OZET.md) + dal kupa-sade-dal-<run_id>
-# (kupa_orchard/kod/baski_sade3.py + kupa_orchard/varlik/dal_sade/<stil>.jpg; main'e alma testten sonra elle).
+# ETSY YOK. Kapi JPEG 1264x1264 (Serdar 30 Eki), yeniden boyutlandirma yok. Cikti: Drive TEMP/<klasor>/IND/<run_id>/ (dal_sade, OZET.md)
+# + gecici dal kupa-sade-dal-<run_id> (kupa-orchard ustune: kupa_orchard/kod/baski_sade3.py + kupa_orchard/varlik/dal_sade/<stil>.jpg);
+# kupa-orchard'a alma testten sonra elle (Serdar 30 Eki: commit yeri kupa-orchard, main'e yalniz bu arac).
 permissions:
   contents: write
 on:
@@ -53,7 +54,8 @@ jobs:
           rclone copy _o "gdrive:ASTROLOVE/TEMP/$K/IND/${GITHUB_RUN_ID}" --immutable -q
           echo "Drive: TEMP/$K/IND/${GITHUB_RUN_ID}" | tee -a "$GITHUB_STEP_SUMMARY"; cat _o/OZET.md >> "$GITHUB_STEP_SUMMARY"
           B="kupa-sade-dal-${GITHUB_RUN_ID}"
-          git checkout -q -b "$B"
+          git fetch -q origin kupa-orchard
+          git checkout -q -b "$B" FETCH_HEAD
           mkdir -p kupa_orchard/kod kupa_orchard/varlik/dal_sade
           cp _o/baski_sade3.py kupa_orchard/kod/baski_sade3.py
           cp _o/dal_sade/*.jpg kupa_orchard/varlik/dal_sade/

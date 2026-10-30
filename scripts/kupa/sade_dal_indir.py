@@ -3,8 +3,9 @@
 Girdi --tsv DAL_URL.tsv (stil, sayfa, bitis_utc, url; Canva imzali disa aktarma linkleri; Drive TEMP/KUPA_SADE_DAL_20261030).
 Imzali URL'ler loga / depoya / is akisi girdisine YAZILMAZ: once ::add-mask:: ile maskelenir, ciktida yalniz stil adi.
 Satir basina kalan sure = X-Amz-Date + X-Amz-Expires - simdi; < 5 dk ise indirilmez (SURE_AZ). En fazla 2 indirme denemesi.
-Kapi (her dosya): JPEG, 3950x3950; 8 dosyanin sha256'si birbirinden farkli; 8 stil tam.
-Cikti --cikti: dal3950/<stil>.jpg (ham), dal_sade/<stil>.jpg (LANCZOS 1600x1600, JPEG kalite 95), OZET.md (sha256 tablosu).
+Kapi (her dosya): JPEG, 1264x1264 (Serdar 30 Eki: Canva kaynak gorseli 1264 px; 3950 indirmede buyutme); 8 dosyanin sha256'si
+birbirinden farkli; 8 stil tam. Yeniden boyutlandirma YOK: dosya oldugu gibi.
+Cikti --cikti: dal_sade/<stil>.jpg (indirilen bayt aynen), OZET.md (sha256 tablosu).
 --betik / --betik-sha: Drive'daki uretim betiginin sha256 ve boyut kapisi (DUR = cikis 2). Cikis 0 = hepsi PASS."""
 import argparse
 import csv
@@ -20,7 +21,7 @@ import requests
 from PIL import Image
 
 STILLER = ("orange", "fig", "olive", "pomegranate", "almond", "lemon", "grape", "loquat")
-BOY, KUCUK, SURE_ALT = (3950, 3950), (1600, 1600), 300
+BOY, SURE_ALT = (1264, 1264), 300
 
 
 def kalan_sn(url, simdi):
@@ -46,7 +47,7 @@ def main(argv=None):
         if sig:
             print(f"::add-mask::{sig}", flush=True)
     stiller = [r["stil"] for r in rows]
-    out = Path(a.cikti); (out / "dal3950").mkdir(parents=True, exist_ok=True); (out / "dal_sade").mkdir(exist_ok=True)
+    out = Path(a.cikti); (out / "dal_sade").mkdir(parents=True, exist_ok=True)
     sonuc, sorun = [], []
     if sorted(stiller) != sorted(STILLER):
         sorun.append(f"TSV stilleri {stiller} (8 stil beklenir)")
@@ -71,20 +72,18 @@ def main(argv=None):
             sorun.append(f"{st}: indirilemedi (2 deneme)"); continue
         im = Image.open(io.BytesIO(icerik))
         if im.format != "JPEG" or im.size != BOY:
-            sorun.append(f"{st}: {im.format} {im.size} (JPEG 3950x3950 beklenir)"); continue
-        (out / "dal3950" / f"{st}.jpg").write_bytes(icerik)
-        k = im.convert("RGB").resize(KUCUK, Image.LANCZOS)
-        kp = out / "dal_sade" / f"{st}.jpg"; k.save(kp, "JPEG", quality=95)
-        s1, s2 = hashlib.sha256(icerik).hexdigest(), hashlib.sha256(kp.read_bytes()).hexdigest()
-        sonuc.append((st, s1, len(icerik), s2, kp.stat().st_size, int(kal // 60)))
-        print(f"{st}: JPEG 3950x3950 {len(icerik)} B sha256 {s1} -> 1600 sha256 {s2} (link kalan {int(kal // 60)} dk)", flush=True)
+            sorun.append(f"{st}: {im.format} {im.size} (JPEG {BOY[0]}x{BOY[1]} beklenir)"); continue
+        (out / "dal_sade" / f"{st}.jpg").write_bytes(icerik)
+        s1 = hashlib.sha256(icerik).hexdigest()
+        sonuc.append((st, s1, len(icerik), int(kal // 60)))
+        print(f"{st}: JPEG {BOY[0]}x{BOY[1]} {len(icerik)} B sha256 {s1} (link kalan {int(kal // 60)} dk)", flush=True)
     if len({s[1] for s in sonuc}) != len(sonuc):
-        sorun.append("3950 dosyalarin sha256'si birbirinden farkli degil")
+        sorun.append("dosyalarin sha256'si birbirinden farkli degil")
     if len(sonuc) != len(STILLER):
         sorun.append(f"{len(sonuc)}/8 dosya gecti")
     md = ["# Sade kupa dal gorselleri (8)\n", f"PASS {len(sonuc)}/8 | sorun {len(sorun)}\n",
-          "| stil | 3950 sha256 | 3950 bayt | 1600 sha256 | 1600 bayt |", "|---|---|---|---|---|"]
-    md += [f"| {s[0]} | {s[1]} | {s[2]} | {s[3]} | {s[4]} |" for s in sonuc] + [f"\n- SORUN: {x}" for x in sorun]
+          "| stil | sha256 | bayt |", "|---|---|---|"]
+    md += [f"| {s[0]} | {s[1]} | {s[2]} |" for s in sonuc] + [f"\n- SORUN: {x}" for x in sorun]
     (out / "OZET.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print("\n".join(md), flush=True)
     return 1 if sorun else 0
