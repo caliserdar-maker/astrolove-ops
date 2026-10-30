@@ -237,6 +237,26 @@ def main():
         t = t0 / "dky"; rc, k, _, _ = dosya_kapi(t, bozuk=dict(ARIES_LEO=dict(yok=1)))
         kontrol("dosya kapisi: dosya yok FAIL", k["ARIES_LEO"]["neden"] == "dosya yok" and k["CANCER_CANCER"]["durum"] == "PASS")
 
+        # ---- W11_CI (CI renk karti, Serdar 30 Eki): ci_renk_toplu MANIFEST (cift, dosya, sha256, durum, neden) + --kart W11_CI
+        t = t0 / "w11"; dd = t / "dosya"; dd.mkdir(parents=True)
+        cf = t / "ciftler.csv"
+        with open(cf, "w", newline="") as f:
+            w = csv.writer(f); w.writerow(["listing_id", "cift", "a", "b"]); w.writerows(ILAN)
+        man = []
+        for lid, cift, a_, b_ in ILAN:
+            kapak(dd / f"{cift}_W11_CI.jpg", a_, b_)
+            man.append([cift, f"{cift}_W11_CI.jpg", D.sha256(dd / f"{cift}_W11_CI.jpg") if cift != "LIBRA_VIRGO" else "0" * 64, "PASS", ""])
+        kapak(dd / "ARIES_LEO_W01_KAPAK.jpg", "Aries", "Leo")      # W11 kosusunda W01 dosyasi sayilmaz
+        with open(t / "MANIFEST.csv", "w", newline="") as f:
+            w = csv.writer(f); w.writerow(["cift", "dosya", "sha256", "durum", "neden"]); w.writerows(man)
+        rc = D.main(["--dir", str(dd), "--ciftler", str(cf), "--manifest", str(t / "MANIFEST.csv"), "--kart", "W11_CI", "--out", str(t / "k"),
+                     "--ocr-yok"])
+        k = {r["cift"]: r for r in csv.DictReader(open(t / "k" / "CI_KAPI.csv"))}
+        kontrol("W11_CI kapisi: dosya adi W11_CI, MANIFEST (dosya) PASS, sha farkli FAIL",
+                rc == 1 and k["ARIES_LEO"]["dosya"] == "ARIES_LEO_W11_CI.jpg" and k["ARIES_LEO"]["durum"] == "PASS"
+                and "MANIFEST" in k["LIBRA_VIRGO"]["neden"])
+        D.KAPAK_KART = "W01_KAPAK"
+
         # ---- yukleyici: ortak girdi (gecerli dosyalar)
         t = t0 / "y"; dosya_kapi(t)
         api = dunya(); ilk = copy.deepcopy(api.L)

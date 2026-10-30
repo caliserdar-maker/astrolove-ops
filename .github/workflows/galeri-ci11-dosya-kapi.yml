@@ -12,7 +12,8 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      galeri_damga: {description: "TEMP/POSTER_GALERI_V11/<damga> (CI W01 dosyalari)", required: true, default: "20261029_103607"}
+      galeri_damga: {description: "kaynak klasor damgasi (v11: TEMP/POSTER_GALERI_V11/<damga>; wa_ci: TEMP/WA_CI_KART/<damga>)", required: true, default: "20261029_103607"}
+      kaynak: {description: "v11 = <CIFT>_W01_KAPAK.jpg (eski) | wa_ci = <CIFT>_W11_CI.jpg CI renk karti (Serdar 30 Eki)", required: false, default: "v11"}
       kapi_kosu: {description: "B3 KAPI/<kosu> (KAPI.csv W01_KAPAK PASS + sha256 kapisi; bos = yok)", required: false, default: ""}
       sadece: {description: "yalniz bu ilanlar (virgullu listing_id); bos = 78", required: false, default: ""}
       haric: {description: "bu ilanlar haric (virgullu listing_id)", required: false, default: ""}
@@ -60,25 +61,27 @@ jobs:
       - name: CI dosyalari (Drive) + dosya kapisi
         env:
           GD: ${{ inputs.galeri_damga }}
+          KY: ${{ inputs.kaynak }}
           KK: ${{ inputs.kapi_kosu }}
           SA: ${{ inputs.sadece }}
           HA: ${{ inputs.haric }}
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work _out _in
-          G="$T/POSTER_GALERI_V11/$GD"
-          rclone copy "$G" _in --max-depth 1 --include "*_W01_KAPAK.jpg" --transfers 16 -q
-          rclone copyto "$G/MANIFEST.csv" _work/MANIFEST.csv || { echo "::error::MANIFEST.csv yok (POSTER_GALERI_V11/$GD)"; exit 1; }
+          case "$KY" in v11) SRC="POSTER_GALERI_V11/$GD"; ET="$GD"; KART=W01_KAPAK;; wa_ci) SRC="WA_CI_KART/$GD"; ET="WA_CI_KART:$GD"; KART=W11_CI;; *) echo "::error::kaynak"; exit 1;; esac
+          G="$T/$SRC"
+          rclone copy "$G" _in --max-depth 1 --include "*_${KART}.jpg" --transfers 16 -q
+          rclone copyto "$G/MANIFEST.csv" _work/MANIFEST.csv || { echo "::error::MANIFEST.csv yok ($SRC)"; exit 1; }
           KA=()
           if [ -n "$KK" ]; then
             rclone copyto "$G/KAPI/$KK/KAPI.csv" _work/KAPI.csv || { echo "::error::KAPI.csv yok (KAPI/$KK)"; exit 1; }
             KA=(--kapi-csv _work/KAPI.csv)
           fi
-          echo "indirilen W01: $(ls _in | wc -l)"
-          echo "$GD" > _out/GALERI_DAMGA.txt
+          echo "indirilen $KART: $(ls _in | wc -l)"
+          echo "$ET" > _out/GALERI_DAMGA.txt
           set +e
           python3 scripts/kapak78/ci11_dosya_kapi.py --dir _in --ciftler data/pod/pod78_ids.csv --manifest _work/MANIFEST.csv "${KA[@]}" \
-            --sadece "$SA" --haric "$HA" --out _out 2>&1 | tee _work/kosu.log
+            --sadece "$SA" --haric "$HA" --kart "$KART" --out _out 2>&1 | tee _work/kosu.log
           echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
       - name: Cikti Drive'a
         if: always()

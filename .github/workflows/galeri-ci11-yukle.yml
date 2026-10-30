@@ -17,7 +17,8 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      galeri_damga: {description: "TEMP/POSTER_GALERI_V11/<damga> (CI W01 dosyalari)", required: true, default: "20261029_103607"}
+      galeri_damga: {description: "kaynak klasor damgasi (v11: TEMP/POSTER_GALERI_V11/<damga>; wa_ci: TEMP/WA_CI_KART/<damga>)", required: true, default: "20261029_103607"}
+      kaynak: {description: "v11 = W01_KAPAK (eski) | wa_ci = W11_CI CI renk karti (Serdar 30 Eki)", required: false, default: "v11"}
       dosya_kapi_kosu: {description: "galeri-ci11-dosya-kapi kosu no (CI_KAPI.csv)", required: true, default: ""}
       canli_damga: {description: "istege bagli: TEMP/POSTER_GALERI_V11_YEDEK/<damga> canli okuma (bos = yok)", required: false, default: ""}
       kuru: {description: "true = yazma yok (plan); false = yazim", required: true, default: "true"}
@@ -39,6 +40,7 @@ jobs:
       - name: Girdi kapisi
         env:
           GD: ${{ inputs.galeri_damga }}
+          KY: ${{ inputs.kaynak }}
           DK: ${{ inputs.dosya_kapi_kosu }}
           CD: ${{ inputs.canli_damga }}
           KURU: ${{ inputs.kuru }}
@@ -49,6 +51,7 @@ jobs:
           AI: ${{ inputs.azami_ilan }}
         run: |
           set -euo pipefail
+          [[ "$KY" =~ ^(v11|wa_ci)$ ]] || { echo "::error::kaynak (v11 | wa_ci)"; exit 1; }
           [[ "$GD" =~ ^[0-9]{8}_[0-9]{6}$ && "$DK" =~ ^[0-9]+$ && "$CD" =~ ^([0-9]{8}_[0-9]{6})?$ ]] || { echo "::error::girdi (galeri_damga / dosya_kapi_kosu / canli_damga)"; exit 1; }
           [[ "$KURU" =~ ^(true|false)$ && "$AI" =~ ^[0-9]{1,2}$ ]] || { echo "::error::girdi (kuru / azami_ilan)"; exit 1; }
           [[ "$SA" =~ ^([0-9]+(,[0-9]+)*)?$ && "$HA" =~ ^([0-9]+(,[0-9]+)*)?$ ]] || { echo "::error::girdi (sadece / haric)"; exit 1; }
@@ -82,6 +85,7 @@ jobs:
       - name: Girdiler (Drive)
         env:
           GD: ${{ inputs.galeri_damga }}
+          KY: ${{ inputs.kaynak }}
           DK: ${{ inputs.dosya_kapi_kosu }}
           CD: ${{ inputs.canli_damga }}
           KURU: ${{ inputs.kuru }}
@@ -91,17 +95,19 @@ jobs:
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work _out _in/dosya _in/canli
+          case "$KY" in v11) SRC="POSTER_GALERI_V11/$GD"; ET="$GD"; KART=W01_KAPAK;; wa_ci) SRC="WA_CI_KART/$GD"; ET="WA_CI_KART:$GD"; KART=W11_CI;; *) echo "::error::kaynak"; exit 1;; esac
+          echo "KART=$KART" >> "$GITHUB_ENV"
           K="$O/DOSYA_KAPI/$DK"
           rclone copyto "$K/CI_KAPI.csv" _work/CI_KAPI.csv || { echo "::error::CI_KAPI.csv yok (DOSYA_KAPI/$DK)"; exit 1; }
           K0=$(rclone cat "$K/GALERI_DAMGA.txt" 2>/dev/null || true)
-          [ "$K0" = "$GD" ] || { echo "::error::dosya kapisi galeri_damga ($K0) bu kosuyla ($GD) ayni degil"; exit 1; }
+          [ "$K0" = "$ET" ] || { echo "::error::dosya kapisi kaynagi ($K0) bu kosuyla ($ET) ayni degil"; exit 1; }
           cp _work/CI_KAPI.csv _out/CI_KAPI.csv
-          echo "$GD $DK $CD" > _out/GIRDI.txt
+          echo "$ET $DK $CD" > _out/GIRDI.txt
           python3 - <<'PY'
           import csv, os
           sa = {x for x in os.environ["SA"].split(",") if x}; ha = {x for x in os.environ["HA"].split(",") if x}
           R = [r for r in csv.DictReader(open("data/pod/pod78_ids.csv")) if (not sa or r["listing_id"] in sa) and r["listing_id"] not in ha]
-          open("_work/dosya.txt", "w").writelines(f"{r['cift']}_W01_KAPAK.jpg\n" for r in R)
+          open("_work/dosya.txt", "w").writelines(f"{r['cift']}_{os.environ['KART']}.jpg\n" for r in R)
           open("_work/canli.txt", "w").writelines(f"{r['listing_id']}_{r['cift']}/GALERI.json\n" for r in R)
           print(f"kapsam: {len(R)} ilan")
           PY
@@ -112,8 +118,8 @@ jobs:
           if [ "$KURU" = false ]; then
             rclone copyto "$O/KOSU/${PD%%_*}/PLAN_CI11.json" _work/PLAN_CI11.json || { echo "::error::PLAN_CI11.json yok (KOSU/${PD%%_*})"; exit 1; }
             K1=$(rclone cat "$O/KOSU/${PD%%_*}/GIRDI.txt" 2>/dev/null || true)
-            [ "$K1" = "$GD $DK $CD" ] || { echo "::error::kuru plan girdileri ($K1) bu kosuyla ($GD $DK $CD) ayni degil; yazma yok"; exit 1; }
-            rclone copy "$T/POSTER_GALERI_V11/$GD" _in/dosya --files-from _work/dosya.txt --transfers 16 -q
+            [ "$K1" = "$ET $DK $CD" ] || { echo "::error::kuru plan girdileri ($K1) bu kosuyla ($ET $DK $CD) ayni degil; yazma yok"; exit 1; }
+            rclone copy "$T/$SRC" _in/dosya --files-from _work/dosya.txt --transfers 16 -q
             echo "indirilen CI dosyasi: $(ls _in/dosya | wc -l)"
           fi
       - name: Token
@@ -135,7 +141,7 @@ jobs:
           AI: ${{ inputs.azami_ilan }}
         run: |
           set +e -o pipefail
-          args=(--dosya-kapi _work/CI_KAPI.csv --out _out --sadece "$SA" --haric "$HA")
+          args=(--dosya-kapi _work/CI_KAPI.csv --kart "$KART" --out _out --sadece "$SA" --haric "$HA")
           [ -n "$CD" ] && args+=(--canli-dir _in/canli)
           if [ "$KURU" = true ]; then args+=(--kuru)
           else args+=(--confirm GALERI_CI11 --plan _work/PLAN_CI11.json --plan-damga "$PD" --dosya-dir _in/dosya --azami-ilan "${AI:-0}"); fi

@@ -26,10 +26,14 @@ from pathlib import Path
 from PIL import Image
 
 BOYUT = (3000, 2250)
-AD_RX = re.compile(r"^(?P<c>[A-Z]+_[A-Z]+)_W01_KAPAK\.jpg$")
+KARTLAR = ("W01_KAPAK", "W11_CI")   # W11_CI: Champagne Ivory renk karti (Serdar 30 Eki; TEMP/WA_CI_KART/<damga>, ci_renk_toplu MANIFEST)
 FRAME_RX = re.compile(r"FRAME\s*N[O0]T\s*[I1L]NCLU")   # OCR kenar kirpmasina dayanikli (INCLUDE / INCLUDED)
 ETIKET_KUTU = (2050, 1900, 2600, 2180)   # renk kartlarindaki "Frame not included" etiket bolgesi (galeri_v11_kapi: x 2150-2410, y 1960-2110)
-KAPAK_KART = "W01_KAPAK"
+KAPAK_KART = "W01_KAPAK"   # --kart ile degisir
+
+
+def ad_rx():
+    return re.compile(r"^(?P<c>[A-Z]+_[A-Z]+)_" + re.escape(KAPAK_KART) + r"\.jpg$")
 
 
 def log(m):
@@ -71,7 +75,7 @@ def kontrol(r, d, man, kapi, ocr_ac):
     if not p.exists():
         s["neden"] = "dosya yok"
         return s
-    m = AD_RX.match(p.name)
+    m = ad_rx().match(p.name)
     if not m or m.group("c") != cift:
         neden.append(f"dosya adindaki cift {m.group('c') if m else '?'} != ilan {cift}")
     with open(p, "rb") as f:
@@ -90,8 +94,10 @@ def kontrol(r, d, man, kapi, ocr_ac):
         mr = man.get(ad)
         if not mr:
             neden.append("MANIFEST satiri yok")
-        elif mr.get("cift") != cift or mr.get("kart_no") != KAPAK_KART or mr.get("sha256") != s["sha256"]:
+        elif mr.get("cift") != cift or (mr.get("kart_no") or KAPAK_KART) != KAPAK_KART or mr.get("sha256") != s["sha256"]:
             neden.append("MANIFEST cift / kart_no / sha256 farkli")
+        elif "kart_no" not in mr and mr.get("durum") != "PASS":   # ci_renk_toplu MANIFEST (cift, dosya, sha256, durum, neden)
+            neden.append(f"MANIFEST durum {mr.get('durum')}")
     if kapi is not None:
         kr = kapi.get((cift, KAPAK_KART))
         if not kr:
@@ -116,11 +122,14 @@ def main(argv=None):
     ap.add_argument("--sadece", default=""); ap.add_argument("--haric", default="")
     ap.add_argument("--ocr-yok", action="store_true", help="OCR raporu atlanir")
     ap.add_argument("--is", type=int, default=4, dest="isci")
+    ap.add_argument("--kart", default="W01_KAPAK", choices=KARTLAR)
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
+    global KAPAK_KART
+    KAPAK_KART = a.kart
     sa = {x for x in a.sadece.split(",") if x}; ha = {x for x in a.haric.split(",") if x}
     R = [r for r in csv.DictReader(open(a.ciftler, encoding="utf-8")) if (not sa or r["listing_id"] in sa) and r["listing_id"] not in ha]
-    man = {r["ad"]: r for r in csv.DictReader(open(a.manifest, encoding="utf-8-sig"))} if a.manifest else None
+    man = {r.get("ad") or r.get("dosya"): r for r in csv.DictReader(open(a.manifest, encoding="utf-8-sig"))} if a.manifest else None
     kapi = {(r["cift"], r["ad"]): r for r in csv.DictReader(open(a.kapi_csv, encoding="utf-8-sig"))} if a.kapi_csv else None
     t0, sonuc = time.time(), []
     with ThreadPoolExecutor(max_workers=max(1, a.isci)) as ex:
@@ -132,7 +141,7 @@ def main(argv=None):
             log(f"ETA: {n}/{len(R)} | gecen {e:.0f} sn | kalan {e / n * (len(R) - n):.0f} sn | %{100 * n // max(1, len(R))}")
     ciftler = {r["cift"] for r in csv.DictReader(open(a.ciftler, encoding="utf-8"))}
     fazla = sorted(p.name for p in Path(a.dir).glob(f"*_{KAPAK_KART}.jpg")
-                   if not AD_RX.match(p.name) or AD_RX.match(p.name).group("c") not in ciftler)
+                   if not ad_rx().match(p.name) or ad_rx().match(p.name).group("c") not in ciftler)
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     alan = ["listing_id", "cift", "dosya", "sha256", "genislik", "yukseklik", "bicim", "durum", "neden", "ocr_frame", "ocr_cift", "ocr_metin"]
     with open(out / "CI_KAPI.csv", "w", newline="", encoding="utf-8") as f:

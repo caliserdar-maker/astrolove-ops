@@ -349,7 +349,7 @@ def calistir(api, shop, a):
                 s.update(durum="KALAN", neden=[f"parca siniri {a.azami_ilan} ilan"]); continue
             d = dk.get(lid)
             s["ocr_frame"] = (d or {}).get("ocr_frame", "")
-            if not d or d.get("durum") != "PASS" or d.get("cift") != cift or d.get("dosya") != f"{cift}_W01_KAPAK.jpg":
+            if not d or d.get("durum") != "PASS" or d.get("cift") != cift or d.get("dosya") != f"{cift}_{a.kart}.jpg":
                 s.update(durum="BLOK", neden=[f"dosya kapisi: {('satir yok' if not d else d.get('durum') + ' ' + (d.get('neden') or ''))[:160]}"])
                 continue
             alt_bek = {k: alt_metin(v, r["a"], r["b"]) for k, v in v11.items()}
@@ -447,6 +447,7 @@ def arg(argv=None):
     ap.add_argument("--ciftler", default=str(KOK.parents[0] / "data" / "pod" / "pod78_ids.csv"))
     ap.add_argument("--alt-v11", default=str(VARSAYILAN_ALT_V11)); ap.add_argument("--alt-ci", default=str(VARSAYILAN_ALT_CI))
     ap.add_argument("--dosya-kapi", required=True, help="ci11_dosya_kapi.py CI_KAPI.csv")
+    ap.add_argument("--kart", default="W01_KAPAK", choices=("W01_KAPAK", "W11_CI"), help="CI dosyasi turu (W11_CI: renk karti, Serdar 30 Eki)")
     ap.add_argument("--dosya-dir", default="", help="yazim: <CIFT>_W01_KAPAK.jpg dosyalari")
     ap.add_argument("--canli-dir", default="", help="istege bagli: galeri-v11-yedek-oku <ilan>_<cift>/GALERI.json")
     ap.add_argument("--out", required=True)
