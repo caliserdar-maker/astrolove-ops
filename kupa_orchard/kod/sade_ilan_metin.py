@@ -33,8 +33,8 @@ Back: matching branches, an evil eye bead (nazar) and your message in italics.
 Orange Blossom, Purple Fig, Olive Breeze, Pomegranate Bloom, Almond Blossom, Lemon Grove, Blue Grape or Golden Loquat. Each style has its own fruit branches, and the symbol and text are printed in a matching color. See the style photos.
 
 [ TWO SIZES ]
-- 11 oz (325 ml)
-- 15 oz (444 ml)
+- 11 oz (325 ml): about 9.6 cm tall, 8.2 cm across (3.8 x 3.2 in)
+- 15 oz (444 ml): about 11.9 cm tall, 8.5 cm across (4.7 x 3.3 in)
 Same design on both.
 
 [ HOW TO PERSONALIZE ]
