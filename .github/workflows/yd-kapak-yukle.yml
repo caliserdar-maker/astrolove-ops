@@ -12,7 +12,8 @@ name: yd-kapak-yukle
 # Durum dosyalari (scripts/ops/durum_dosyasi.py; okuma kilit SONRASI, yazma yalniz yazim / bag kosusunda):
 #   TEMP/YD_KAPAK_V1_YUKLE/DEVAM.json, ILERLEME.json (json-ilanlar; set = hedef = 10), SONUC.csv (csv, anahtar ilan).
 # Kosu ciktisi TEMP/YD_KAPAK_V1_YUKLE/KOSU/<run_id>/. bag_onar=true (onay YD_KAPAK_BAG + plan_damga): yalniz Style baglari.
-# Kilit suresi: azami_dk (varsayilan 90) sonrasi yeni ilana baslanmaz.
+# Kilit suresi: azami_dk (varsayilan 90, en fazla 100) KILIT ALINDIGI ANDAN sayilir; sonrasinda yeni ilana baslanmaz. Kilit is akisinin
+# en basinda (Serdar 31 Eki karar 6b; CLAUDE.md KILIT SURESI istisnasi): girdi indirme (en fazla 15 dk) kilit altinda.
 
 permissions:
   actions: read
@@ -66,6 +67,7 @@ jobs:
           [[ "$KURU" =~ ^(true|false)$ && "$KU" =~ ^(true|false)$ ]] || { echo "::error::girdi (kuru / kurtar)"; exit 1; }
           [[ "$AL" =~ ^[A-Za-z0-9_-]{20,80}$ ]] || { echo "::error::girdi (alt_id)"; exit 1; }
           [[ "$SA" =~ ^([0-9]+(,[0-9]+)*)?$ && "$DK" =~ ^([0-9]+)?$ && "$AZ" =~ ^[0-9]{1,3}$ ]] || { echo "::error::girdi (sadece / devam_kosu / azami_dk)"; exit 1; }
+          [ "$AZ" -ge 1 ] && [ "$AZ" -le 100 ] || { echo "::error::azami_dk 1-100 (kilit en basta; bekleyen Etsy kosulari en fazla 120 dk bekler)"; exit 1; }
           if [ "$BO" = true ]; then
             [ "$KURU" = false ] && [ "$ONAY" = YD_KAPAK_BAG ] || { echo "::error::bag onarimi icin kuru=false + confirm YD_KAPAK_BAG"; exit 1; }
             [[ "$PD" =~ ^[0-9]+_[0-9a-f]{12}$ ]] || { echo "::error::bag onarimi icin plan_damga"; exit 1; }
@@ -74,6 +76,12 @@ jobs:
             [[ "$PD" =~ ^[0-9]+_[0-9a-f]{12}$ ]] || { echo "::error::yazim icin plan_damga (<kosu>_<sha12>)"; exit 1; }
           fi
       - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok; Serdar 31 Eki karar 6b, is akisinin en basinda)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/etsy/kilit_bekle.py
+          echo "KILIT_T0=$(date +%s)" >> "$GITHUB_ENV"   # zaman butcesi kilit alindigi andan sayilir
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -92,7 +100,8 @@ jobs:
           chmod 600 ~/.config/rclone/rclone.conf
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - name: Girdiler (Drive, kilit oncesi) + liste kapilari
+      - name: Girdiler (Drive, kilit altinda; en fazla 15 dk) + liste kapilari
+        timeout-minutes: 15
         env:
           KD: ${{ inputs.kapak_damga }}
           QD: ${{ inputs.qc_damga }}
@@ -134,10 +143,6 @@ jobs:
             --ham-dir _in/HAM --kapak-dir _in/kapak --qc _work/QC_RAPOR.json --alt _work/ALT.csv --yedek-ozet _work/YEDEK_OZET.md \
             --yedek-liste _work/yedek_ls.json --out _hazir --sadece "$SA"
           cp _hazir/LISTE_OZET.md _hazir/LISTE_OZET.json _hazir/ESLEME.csv _out/
-      - name: Etsy kilidi (sira bekle, iptal yok)
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/etsy/kilit_bekle.py
       - name: Durum dosyalari oku (kilit sonrasi)
         env:
           DK: ${{ inputs.devam_kosu }}
@@ -183,11 +188,14 @@ jobs:
           BO: ${{ inputs.bag_onar }}
         run: |
           set +e -o pipefail
+          GEC=$(( ($(date +%s) - ${KILIT_T0:?}) / 60 )); AZE=$(( AZ - GEC ))   # kilitten bu yana gecen sure butceden duser
+          echo "kilit suresi: $GEC dk gecti, kalan butce $AZE dk (azami_dk $AZ)"
+          [ "$AZE" -ge 1 ] || { echo "::error::zaman butcesi kilit altinda doldu ($GEC dk >= $AZ); ilan baslamadi"; echo "KOD=1" >> "$GITHUB_ENV"; exit 1; }
           args=(--hazir _hazir --out _out --devam _work/DEVAM.json --ilerleme _work/ILERLEME.json)
           if [ "$KURU" = true ]; then args+=(--kuru)
           elif [ "$BO" = true ]; then args+=(--bag-onar --confirm YD_KAPAK_BAG --plan-damga "$PD")
           else
-            args+=(--confirm YD_KAPAK --plan _work/PLAN_YD.json --plan-damga "$PD" --sonuc _work/SONUC.csv --azami-dk "$AZ"
+            args+=(--confirm YD_KAPAK --plan _work/PLAN_YD.json --plan-damga "$PD" --sonuc _work/SONUC.csv --azami-dk "$AZE"
                    --devam-hedef-kok "$O/KOSU/${GITHUB_RUN_ID}/devam")
             [ "$KU" = true ] && args+=(--kurtar)
           fi

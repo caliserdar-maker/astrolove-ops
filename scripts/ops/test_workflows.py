@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Workflow YAML'larini ve IS_0025 salt-okur/log sozlesmesini denetle."""
 
+import os
 from pathlib import Path
 import subprocess
 
@@ -115,9 +116,23 @@ def main() -> int:
     assert ".github/workflows/yd-kapak-yukle.yml" in kilit_bekle.kilit_kumesi(str(ROOT)), "yd-kapak-yukle Etsy kilidinde degil"
     assert "concurrency:" not in yy and "actions: read" in yy and "schedule" not in yy, "yd-kapak-yukle kilit sozlesmesi"
     kilit = yy.index("python3 scripts/etsy/kilit_bekle.py")
-    for x in ("rclone copy \"$K\" _in/kapak", "QC_RAPOR.json", "rclone copy \"$T/$EN/HAM\"", "rclone lsjson -R \"$Y\"",
-              "python3 scripts/kapak78/yd_liste_uret.py liste"):
-        assert x in yy and yy.index(x) < kilit, f"yd-kapak-yukle: kilitten once degil: {x}"
+    # Serdar 31 Eki karar 6b (CLAUDE.md KILIT SURESI istisnasi): kilit is akisinin en basinda (checkout'tan hemen sonra), girdi indirme kilit
+    # altinda en fazla 15 dk; zaman butcesi kilit anindan (KILIT_T0) sayilir, azami_dk <= 100 (bekleyen Etsy kosulari en fazla 120 dk bekler)
+    assert yy.index("uses: actions/checkout@v4") < kilit < yy.index("name: rclone.conf") < yy.index("rclone copy \"$K\" _in/kapak"), \
+        "yd-kapak-yukle: kilit en basta degil"
+    for x in ("rclone copy \"$K\" _in/kapak", "rclone copyto \"$K/QC_$QD/QC_RAPOR.json\"", "rclone copy \"$T/$EN/HAM\"",
+              "rclone lsjson -R \"$Y\"", "python3 scripts/kapak78/yd_liste_uret.py liste"):
+        assert x in yy and kilit < yy.index(x), f"yd-kapak-yukle: kilitten once: {x}"
+    assert "KILIT_T0=$(date +%s)" in yy and "AZE=$(( AZ - GEC ))" in yy and "--azami-dk \"$AZE\"" in yy and "-le 100" in yy \
+        and "timeout-minutes: 15" in yy, "yd-kapak-yukle: kilit suresi butcesi"
+    assert kilit_bekle.ZAMAN_ASIMI_DK >= 100 + 15, "kilit bekleme siniri butceden kisa"
+    import subprocess, time as _t
+    sn = [x for x in yy.splitlines() if "GEC=$((" in x or x.strip().startswith('[ "$AZE" -ge 1 ]')]
+    betik = "\n".join(x.strip() for x in sn).replace('echo "KOD=1" >> "$GITHUB_ENV"; ', "") + '\necho "AZE=$AZE"'
+    for gecen, bek_rc, bek in ((5, 0, "AZE=85"), (95, 1, "")):   # azami_dk 90: 5 dk sonra 85 dk butce; 95 dk sonra ilan baslamaz
+        r = subprocess.run(["bash", "-c", betik], capture_output=True, text=True,
+                           env={"KILIT_T0": str(int(_t.time()) - gecen * 60), "AZ": "90", "PATH": os.environ.get("PATH", "")})
+        assert r.returncode == bek_rc and bek in r.stdout, f"yd-kapak-yukle kilit butcesi ({gecen} dk): {r.returncode} {r.stdout} {r.stderr}"
     for x in ("durum_dosyasi.py oku --uzak \"$O/DEVAM.json\"", "durum_dosyasi.py oku --uzak \"$O/ILERLEME.json\""):
         assert x in yy and kilit < yy.index(x) < yy.index("python3 scripts/kapak78/yd_kapak_yukle.py"), f"yd-kapak-yukle: {x}"
     assert "default: \"true\"" in yy and "[ \"$ONAY\" = YD_KAPAK ]" in yy and "plan_damga" in yy, "yd-kapak-yukle yazim kapisi"

@@ -26,6 +26,9 @@ bolumu okunmadan baslanmaz.
   KILIT SURESI (Serdar 23 Eki): Etsy kilidini tutan kosuda uzun Etsy disi is (OCR, goruntu isleme, toplu indirme) yapilmaz;
   Etsy okumasi biter bitmez kosu biter (ham veri Drive'a), isleme kilitsiz ayri is akisinda yapilir (kagit-tara 39947456694
   OCR boyunca kilidi 90+ dk tuttu, pilot kuru plani bekletti).
+  ISTISNA (Serdar 31 Eki, karar 6b): yd-kapak-yukle.yml (1st Anniversary galeri yukleyicisi) kilidi is akisinin EN BASINDA alir; girdi
+  indirme (en fazla 15 dk) kilit altindadir. Sure butcesi kilit anindan sayilir (KILIT_T0; azami_dk <= 100), boylece bekleyen Etsy
+  kosularinin 120 dk siniri asilmaz. Baska is akisina genellenmez.
 - KURAL (tum oturumlar): Etsy kosusunu istedigin an baslat; kilit sirayi kendisi tutar,
   hicbir kosu iptal edilmez (bekleme en fazla 120 dk, asilirsa is yapmadan FAIL).
 - Hicbir sir loga yazilmaz; token degerleri `::add-mask::` ile maskelenir.
