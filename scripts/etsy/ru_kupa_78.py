@@ -57,9 +57,14 @@ def main(argv=None):
             hata.append(f"cift adi {c!r}")
             en, deg, ru, kon = R.norm(x.get("description")), "?", "", dict(pass_=False, hata=[], paragraf_en=0, paragraf_ru=0)
         else:
-            en, deg = R.kupa_en(x.get("description"), b1, b2)
+            try:
+                en, deg = R.kupa_en(x.get("description"), b1, b2)
+            except ValueError as e:   # foto / Latin capasi bulunamadi: canli EN beklenen kalipta degil
+                en, deg = R.norm(x.get("description")), "?"
+                hata.append(f"hedef EN kurulamadi: {e}")
             if b1 == b2 and deg == "YOK":
                 hata.append("ayni burc: isim satiri cevrilemedi (Left / Right ya da Name Under bulunmadi)")
+            hata += R.hedef_kapisi(en)   # Serdar 31 Eki 5a / 6a: yeni foto numaralari + Latin notu
             ru, kon = R.kur(en)
             if kon.get("burc") != [b1, b2]:
                 hata.append(f"EN burclari {kon.get('burc')} != cift {c}")

@@ -6,6 +6,8 @@ karsiligi olmali; kalip disi paragraf ya da beklenmeyen deger = FAIL (eksik / fa
 Kaynak: kupa-orchard dali kupa_orchard/kod/ilan_metin.py (EN sablonu) + ilan_metin_ru.py (19 Eki RU sablonu); RU cumleler EN ile
 birebir ayni bilgiyi verecek sekilde duzeltildi (19 Eki RU'da EN'de olmayan "перед оформлением заказа" yok; EN'deki "A thoughtful
 choice..." cumlesinin karsiligi var).
+GALERI (Serdar 31 Eki 5a / 6a): kupa_en canli EN'deki foto numaralarini yeni galeri sirasina cevirir (stil 6-14, boy 4, kisisellestirme 3)
+ve kisisellestirme bolumune sade kupa Latin harf notunu ekler; ru_kupa_78 hedef_kapisi ile denetler.
 AYNI BURC (12 cift, Serdar 30 Eki): isim satirlari "First Name" / "Second Name". kupa_en() canli EN'deki "Left name" / "Right name"
 ya da "Name Under <Burc>" ciftini bu ada cevirir (hedef EN); farkli burcta EN degismez. EN degisikligi de Serdar onayina tabidir.
 kur(en) -> (ru, kontrol: dict(pass_, hata, paragraf_en, paragraf_ru)). Yasak ifade etsy_common.RU_YASAK (RU yazim kapisiyla ayni)."""
@@ -21,7 +23,7 @@ from ru_poster import BURC, DATIF  # noqa: E402  burc adlari ve datif tek kaynak
 
 B_RX = "(" + "|".join(BURC) + ")"
 KUYRUK = re.compile(r"(?:an? )?" + B_RX + r" gifts?(?: or (?:an? )?" + B_RX + r" gifts?)?")
-FOTO = re.compile(r"\d+(?: and \d+)?")
+FOTO = re.compile(r"\d+(?: and \d+| to \d+)?")
 AYNI_EN = ("First Name", "Second Name")
 ISIM_RU = {"Left name": "Имя слева", "Right name": "Имя справа", "First Name": "Первое имя", "Second Name": "Второе имя"}
 
@@ -32,6 +34,11 @@ FOTO_MAX = 20   # Etsy galeri siniri
 def foto_ru(s):
     if not FOTO.fullmatch(s) or any(not 1 <= int(n) <= FOTO_MAX for n in re.findall(r"\d+", s)):
         raise ValueError(f"foto numarasi kalip / aralik disi: {s!r}")
+    m = re.fullmatch(r"(\d+) to (\d+)", s)
+    if m:
+        if int(m.group(1)) >= int(m.group(2)):
+            raise ValueError(f"foto araligi ters: {s!r}")
+        return f"с {m.group(1)} по {m.group(2)}"
     return s.replace(" and ", " и ")
 
 
@@ -98,8 +105,16 @@ def isim_ru(s, ctx, sira):
     return ISIM_RU[s]
 
 
+LATIN_EN = "Please use Latin letters, numbers and simple punctuation, no emoji."   # sade kupa metni (kupa-orchard 1ed1122)
+LATIN_RU = "Пожалуйста, используйте латинские буквы, цифры и простые знаки препинания, без эмодзи."
+# Yeni galeri sirasi (Serdar 31 Eki karar 5a; kupa_kart78 / kupa_galeri78): 1 kapak, 2 K02 sembol, 3 K03 kisisellestirme, 4 K05 boyut,
+# 5 K07 surec, 6 K04 stil genel bakis, 7-14 stil gorselleri, video. Eski canli numaralar -> yeni.
+FOTO_YENI = {"stil": ("an evil eye on the back. See photo 4.", "an evil eye on the back. See photos 6 to 14."), "boy": ("Same design on both. See photo 5.", "Same design on both. See photo 4."),
+             "kisisel": ("Please check your spelling. See photos 3 and 6.", "Please check your spelling. See photo 3.")}
+
+
 def p_kisisel(m, ctx):
-    i1, n1, i2, n2, msj, bos, foto = m.groups()
+    i1, n1, i2, n2, msj, bos, latin, foto = m.groups()
     if n1 != n2:
         raise ValueError(f"isim sinirlari farkli {n1} / {n2}")
     if not re.fullmatch(r"[A-Za-z][A-Za-z ,.'!&]*", bos) or len(bos) > int(msj):
@@ -110,7 +125,7 @@ def p_kisisel(m, ctx):
             f"2. {isim_ru(i2, ctx, 2)} (до {n2} {cogul(n2, 'буквы', 'букв', 'букв')})\n"
             f"3. Надпись (одна строка, до {msj} {cogul(msj, 'символа', 'символов', 'символов')}, включая пробелы и знаки препинания)\n"
             "Если вы оставите надпись пустой, мы напечатаем:\n"
-            f"{bos}\n"
+            + (f"{bos}\n{LATIN_RU}\n" if latin else f"{bos}\n") +
             f"Пожалуйста, проверьте написание. Смотрите фото {foto_ru(foto)}.")
 
 
@@ -150,7 +165,7 @@ KALIP = [
     (re.compile(r"\[ TWO SIZES \]\n- 11 oz \(325 ml\)\n- 15 oz \(444 ml\)\nSame design on both\. See photos? ([\d a-z]+)\."), p_boy),
     (re.compile(r"\[ HOW TO PERSONALIZE \]\nWrite three lines in the personalization box:\n1\. " + ISIM_RX + r" \(up to (\d+) "
                 r"letters\)\n2\. " + ISIM_RX + r" \(up to (\d+) letters\)\n3\. Message \(one line, up to (\d+) characters including "
-                r"spaces and punctuation\)\nLeave the message blank and we print:\n([^\n]+)\nPlease check your spelling\. See "
+                r"spaces and punctuation\)\nLeave the message blank and we print:\n([^\n]+)\n(" + re.escape(LATIN_EN) + r"\n)?Please check your spelling\. See "
                 r"photos? ([\d a-z]+)\."), p_kisisel),
 ]
 
@@ -159,9 +174,37 @@ def norm(s):
     return html.unescape(s or "").replace("\r\n", "\n").strip()
 
 
+def galeri_en(d):
+    """Serdar 31 Eki 5a + 6a: foto numaralari yeni galeri sirasina, kisisellestirme bolumune Latin harf notu. Idempotan.
+    -> (en, degisen[]) ; eski / yeni kalip tam 1 kez bulunmazsa ValueError."""
+    deg = []
+    for ad, (eski, yeni) in FOTO_YENI.items():
+        if d.count(yeni) == 1 and d.count(eski) == 0:
+            continue
+        if d.count(eski) != 1:
+            raise ValueError(f"foto {ad}: eski kalip {d.count(eski)} kez, yeni {d.count(yeni)} kez")
+        d = d.replace(eski, yeni); deg.append(f"foto_{ad}")
+    capa = "\nPlease check your spelling. See photo 3."
+    if LATIN_EN not in d:
+        if d.count(capa) != 1:
+            raise ValueError("Latin notu capasi bulunamadi")
+        d = d.replace(capa, "\n" + LATIN_EN + capa); deg.append("latin")
+    return d, deg
+
+
+def hedef_kapisi(en):
+    """Hedef EN'de yeni foto numaralari + Latin notu var, eski numara yok (31 Eki 5a / 6a)."""
+    h = [f"foto {ad}: yeni '{y}' yok" for ad, (e, y) in FOTO_YENI.items() if en.count(y) != 1]
+    h += [f"foto {ad}: eski '{e}' kaldi" for ad, (e, y) in FOTO_YENI.items() if e in en]
+    if en.count(LATIN_EN) != 1:
+        h.append("Latin harf notu yok / birden cok")
+    return h
+
+
 def kupa_en(desc, a, b):
-    """Hedef EN (Serdar 30 Eki): ayni burcta isim satirlari First Name / Second Name. -> (en, durum DEGISTI | AYNI | YOK)."""
-    d = norm(desc)
+    """Hedef EN: galeri_en (foto numaralari + Latin notu, 31 Eki) + ayni burcta isim satirlari First Name / Second Name (30 Eki).
+    -> (en, durum DEGISTI | AYNI | YOK); DEGISTI/AYNI yalniz isim satiri icin."""
+    d, _ = galeri_en(norm(desc))
     if a != b:
         return d, "AYNI"
     if AYNI_EN[0] in d and AYNI_EN[1] in d:

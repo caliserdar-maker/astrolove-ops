@@ -87,5 +87,25 @@ _, kon = R.kur(e.replace("My favorite place is with you", "Buy now at example do
 k("bos mesaj metni siniri asarsa FAIL", not kon["pass_"])
 _, kon = R.kur("\n\n".join(p[1:]).replace("1. Name for Cancer", "1. Left name").replace("2. Name for Libra", "2. Right name"))
 k("giris paragrafi yoksa isim satiri FAIL", not kon["pass_"])
+# Serdar 31 Eki 5a / 6a: yeni galeri foto numaralari + Latin harf notu
+e0 = en("Cancer", "Libra", "Cancer gifts or Libra gifts")
+e1, deg = R.galeri_en(e0)
+k("galeri_en: stil 6-14, boy 4, kisisellestirme 3, Latin notu; eski numara yok", deg == ["foto_stil", "foto_boy", "foto_kisisel", "latin"]
+  and "back. See photos 6 to 14." in e1 and "both. See photo 4." in e1 and "spelling. See photo 3." in e1
+  and "no emoji.\nPlease check your spelling. See photo 3." in e1 and not R.hedef_kapisi(e1) and R.hedef_kapisi(e0), deg)
+k("galeri_en idempotan (ikinci kosu degisiklik yok)", R.galeri_en(e1) == (e1, []))
+ru, kon = R.kur(e1)
+k("RU: фото с 6 по 14, фото 4, фото 3, Latin RU satiri, PASS", kon["pass_"] and "Смотрите фото с 6 по 14." in ru and "Смотрите фото 4." in ru
+  and "Смотрите фото 3." in ru and R.LATIN_RU + "\nПожалуйста, проверьте написание." in ru, kon["hata"])
+k("RU tire / yasak yok", not any(c in ru for c in "—–") and not R.E.RU_YASAK.search(ru))
+e2, d2 = R.kupa_en(en("Leo", "Leo", "Leo gifts"), "Leo", "Leo")
+k("ayni burc: kupa_en hem isim hem galeri", d2 == "DEGISTI" and not R.hedef_kapisi(e2) and R.kur(e2)[1]["pass_"])
+try:
+    R.galeri_en(e0.replace("See photo 4.", "See photo 9."))
+    k("bilinmeyen foto numarasi -> ValueError", False)
+except ValueError:
+    k("bilinmeyen foto numarasi -> ValueError", True)
+_, kon = R.kur(e1.replace("6 to 14", "14 to 6"))
+k("ters foto araligi FAIL", not kon["pass_"])
 print(f"SONUC: {sum(sonuc)}/{len(sonuc)} PASS")
 sys.exit(0 if all(sonuc) else 1)
