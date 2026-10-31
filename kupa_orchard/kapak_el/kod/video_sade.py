@@ -156,7 +156,7 @@ try:
             a3 = np.clip(al, 0, 0.9)[..., None]
             f = f * (1 - a3) + rk * a3
         if 0 < i < nB and i > nB - 1 - nK:    # inceleme 31 Eki: son 0,3 sn kapaga yumusak gecis (sembol kenari ve toz sicramasin)
-            e = ease((i - (nB - 1 - nK)) / (nK + 1))
+            e = ease((i - (nB - 1 - nK)) / nK)      # son animasyon karesinde tam kapak
             f = f * (1 - e) + KAP * e
         p.stdin.write(np.clip(f, 0, 255).astype(np.uint8).tobytes())
         if i in anlar:
