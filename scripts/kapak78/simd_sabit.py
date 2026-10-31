@@ -5,7 +5,9 @@ fark gorunum -> GrabCut maskesi zincirinde buyur (kart farki en cok 237 / 255). 
 AVX512'li Intel 8573C / AMD 9V74 / 9V45 / yerel ile farkli; AVX512 kapatilinca yerel sonuc AVX2 yoluyla birebir (ayni olcum dizisi sha
 e8794ab836, numpy 2.1.3 ve 2.5.3).
 ayarla(env): NumPy (surume gore ozellik adlari) ve OpenCV AVX512 yolunu kapatan ortam degiskenlerini env'e yazar (numpy import edilmeden
-once). prob(python, env): o python + env ile olcum dizisinin sha'si; REF ile esit degilse uretim DUR (kapi)."""
+once). prob(python, env): o python + env ile olcum dizisinin sha'si; REF ile esit degilse uretim DUR (kapi).
+IMAJ: kart is akislari ubuntu-24.04'e sabit (Ubuntu 26.04 / glibc 2.43 koşucusunda AVX512 kapaliyken bile gorunum farkli cikti,
+kart-determinizm 41188852196); olcum dizisi ust / us / exp icerdigi icin libm farki da kapida yakalanir."""
 import os
 import subprocess
 import sys
@@ -14,10 +16,15 @@ import sys
 NPY = {"2.1": "AVX512F AVX512CD AVX512_KNL AVX512_KNM AVX512_SKX AVX512_CLX AVX512_CNL AVX512_ICL",
        "2.5": "X86_V4 AVX512_ICL AVX512_SPR"}
 OPENCV = "AVX512-SKX"      # cv2.getCPUFeaturesLine adi (4.10 ve 5.0); kapaninca satirda 'AVX512-SKX?' gorunur
-REF = "e8794ab836"         # olcum dizisinin AVX512 kapali (ve AVX2 / taban) sha'si; yerel olcum 31 Eki
+BLAS = "Haswell"           # OpenBLAS cekirdegi sabit: Intel varsayilani SkylakeX, AMD Zen = Haswell cekirdegi; zemin (a @ v) farki
+                           # yerel Intel SkylakeX 42291882 / Haswell 68ccab78 = AMD 7763 ubuntu-24.04 68ccab78 (z_stil_almond, 31 Eki)
+# olcum dizisi: arcsin / cos / us / exp + float32 matris-vektor (BLAS); AVX512 kapali, Haswell, glibc 2.39 (ubuntu-24.04) yerel olcum 31 Eki
+REF = "e8794ab836-a38ffcf3ae-8c8af32bc5-d25123e70c-8d81ca0f2b"
 PROB = ("import numpy as np, hashlib\n"
         "x = np.linspace(-0.999, 0.999, 2_000_003)\n"
-        "print(hashlib.sha256(np.arcsin(x).tobytes()).hexdigest()[:10])")
+        "h = lambda a: hashlib.sha256(np.ascontiguousarray(a).tobytes()).hexdigest()[:10]\n"
+        "m = (np.arange(3_000_000, dtype=np.float32).reshape(-1, 3) % 251) @ np.float32([0.299, 0.587, 0.114])\n"
+        "print('-'.join([h(np.arcsin(x)), h(np.cos(np.arcsin(x))), h(np.clip(x, 0, 1) ** 0.6), h(np.exp(x)), h(m)]))")
 
 
 def numpy_surum(python):
@@ -35,6 +42,7 @@ def ayarla(env, python=sys.executable):
         raise SystemExit(f"DUR: numpy {s} icin AVX512 ozellik listesi tanimsiz (simd_sabit.NPY); olcmeden eklenmez")
     env["NPY_DISABLE_CPU_FEATURES"] = NPY[s]
     env["OPENCV_CPU_DISABLE"] = OPENCV
+    env["OPENBLAS_CORETYPE"] = BLAS
     return env
 
 

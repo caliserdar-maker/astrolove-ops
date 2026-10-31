@@ -156,9 +156,10 @@ def zemin(sahne_dir, cikti):
 def uret(a):
     # Serdar 31 Eki 8a: NumPy / OpenCV AVX512 yolu kapali; numpy bu surecte henuz yuklenmemis olmali (ortam degiskeni import aninda okunur)
     import simd_sabit
-    if "numpy" in sys.modules and os.environ.get("NPY_DISABLE_CPU_FEATURES") != simd_sabit.NPY.get(".".join(
-            __import__("importlib.metadata").metadata.version("numpy").split(".")[:2])):
-        raise SystemExit("DUR: numpy SIMD ayarindan once yuklenmis (simd_sabit)")
+    if "numpy" in sys.modules:
+        bek = simd_sabit.ayarla({})
+        if any(os.environ.get(k) != v for k, v in bek.items()):
+            raise SystemExit("DUR: numpy SIMD / BLAS ayarindan once yuklenmis (simd_sabit)")
     simd_sabit.ayarla(os.environ)
     simd_sabit.kapi(sys.executable, dict(os.environ), "kupa_kart78")
     import wa_kupa_kart_ornek as W

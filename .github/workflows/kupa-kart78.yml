@@ -19,7 +19,7 @@ on:
       onceki_damga: {description: "TEMP/KUPA_KART78/<damga> gece kosusu; verilirse yeniden uretilmeyen ciftler oradan, 78 birlestirilir + sha kaniti", required: false, default: ""}
 jobs:
   kart:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # Serdar 31 Eki 8a: imaj sabit (Ubuntu 26 glibc farki, simd_sabit)
     timeout-minutes: 90
     strategy:
       fail-fast: false

@@ -18,8 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {is: u2404, os: ubuntu-24.04}
-          - {is: latest, os: ubuntu-latest}
+          - {is: u2404a, os: ubuntu-24.04}
+          - {is: u2404b, os: ubuntu-24.04}
     steps:
       - name: Girdi kapisi
         env: {C: "${{ inputs.cift }}", G: "${{ inputs.gece }}", E: "${{ inputs.env_ek }}"}
