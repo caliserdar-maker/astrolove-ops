@@ -124,6 +124,7 @@ def yontem_b(a, bg, r, seed=7):
 
 
 def aile_png(kod, stil, scale, tmp, pair):
+    kod = str(Path(kod).resolve())          # kosu 41189786727: goreli yol cwd=kod ile ikilendi
     env = dict(os.environ); env.update(BY_ROOT=str(Path(kod).resolve()), PAIR=pair, STYLE=stil, NAME1="EMILY", NAME2="JAMES",
                                       DATE="12 JUNE 2025", HEADING="Paper Anniversary", LINE="", SCALE=str(scale), OUT=str(tmp))
     r = subprocess.run([sys.executable, str(Path(kod, "kod", "by_poster.py"))], env=env, cwd=kod, capture_output=True, text=True)
