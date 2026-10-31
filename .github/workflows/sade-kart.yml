@@ -172,6 +172,12 @@ jobs:
                   if p.exists():
                       s.paste(Image.open(p).resize((w, h), Image.LANCZOS), (10 + j * (w + 10), 10 + i * (h + 10)))
           s.save("KONTAK_SADE_12.jpg", quality=85)
+          # Sade 1a (Serdar 31 Eki): K02 sembol kontagi, 12 burc ortak kutu karsilastirmasi icin buyuk (4 x 3, kart 900x675)
+          w2, h2 = 900, 675
+          s2 = Image.new("RGB", (4 * (w2 + 10) + 10, 3 * (h2 + 10) + 10), (230, 230, 230))
+          for i, b in enumerate(B):
+              s2.paste(Image.open(f"_k/SADE_{b}_K02_SEMBOL.jpg").resize((w2, h2), Image.LANCZOS), (10 + (i % 4) * (w2 + 10), 10 + (i // 4) * (h2 + 10)))
+          s2.save("KONTAK_K02_12.jpg", quality=90)
           print(len(B), "burc")
           EOF
       - name: Drive'a yaz
@@ -187,5 +193,6 @@ jobs:
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
           rclone copyto KONTAK_SADE_12.jpg "gdrive:ASTROLOVE/TEMP/SADE_KART_V2/$DAMGA/KONTAK_SADE_12.jpg" --immutable -q
+          rclone copyto KONTAK_K02_12.jpg "gdrive:ASTROLOVE/TEMP/SADE_KART_V2/$DAMGA/KONTAK_K02_12.jpg" --immutable -q
           rm -rf ~/.config/rclone
           echo "::notice title=SADE KART 12::TEMP/SADE_KART_V2/$DAMGA/"
