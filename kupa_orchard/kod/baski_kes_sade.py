@@ -157,7 +157,7 @@ _satirlar = np.where(MASK_ON.any(1))[0]
 y_sem = ((_satirlar.min() - TH) + (_satirlar.max() - TH)) / 2
 ISIM_ARA = float(os.environ.get('ISIM_ARA', 4.0)) * MM          # sembol alti ile isim ustu arasi en az (mm)
 SEMBOL_K = float(os.environ.get('SEMBOL_K', 1.30))    # en buyuk sembol boyu: cift sembol kutusunun 1,30 kati (Serdar 31 Eki "daha buyuk")
-KALIN = float(os.environ.get('KALIN', 1.45))          # cizgi kalinligi carpani (Serdar 31 Eki "daha kalin")
+KALIN = float(os.environ.get('KALIN', 1.24))          # cizgi kalinligi: en kalin cizgi / sembol eni ~0,124 (Serdar 31 Eki referans gorsel)
 BOSLUK = float(os.environ.get('BOSLUK', 2.5)) * MM     # sembol ile susleme dali arasi en az (mm); sigmazsa sembol kuculur
 UZAK = ndimage.distance_transform_edt(~MASK_ON)
 g0 = alfa(GLIF)
@@ -198,7 +198,9 @@ adim(f'merkez: sembol y {y_sem:.0f} / cerceve y {((_satirlar.min() + _satirlar.m
 # isim satiri: tek isim, cift kupadaki isim satiri yerinde ve boyunda
 _, t_isim = T('on', 0, L['isim_taban'])
 ISIM_CAP = L['isim_cap'] * s
-isim_cap, isim_tasti = satir(on, MASK_ON, ISIM.upper(), GAR, ISIM_CAP, 680, cx, t_isim, aralik=ISIM_CAP * 0.06,
+ISIM_AG = float(os.environ.get('ISIM_AGIRLIK', 450))          # Serdar 31 Eki: ince (referans gorsel), cift kupada 680
+ISIM_AR = float(os.environ.get('ISIM_ARALIK', 0.30))          # harf araligi, buyuk harf yuksekliginin orani (referans: acik)
+isim_cap, isim_tasti = satir(on, MASK_ON, ISIM.upper(), GAR, ISIM_CAP, ISIM_AG, cx, t_isim, aralik=ISIM_CAP * ISIM_AR,
                              min_cap=2.2 * MM, mesafe=ndimage.distance_transform_edt(~MASK_ON))
 burc_tasti = False
 adim(f'on: sembol {ana.shape[1] / MM:.1f}x{ana.shape[0] / MM:.1f} mm (K {k:.2f}, kalin {KALIN}, cizgi {_cizgi:.0f}->{_cizgi2:.0f} px, dala {_uzak:.0f} px), isim cap {isim_cap / MM:.2f} mm')
