@@ -1,5 +1,5 @@
 name: sade12-uret
-# Sade kupa 12 burc yeniden uretimi + dogrulama (Serdar 31 Eki ek is, Merkez 3a). ETSY YOK.
+# Sade kupa 12 burc yeniden uretimi + dogrulama. v2 (Serdar 31 Eki): varsayilan kupa-orchard dc4a432 (baski_kes_sade.py); v1 ceeb648 GECERSIZ. ETSY YOK.
 # Kod: kupa-orchard ceeb648 kupa_orchard/kapak_el/kod/sade12.sh (+ video_sade.py, baski_sade3.py) AYNEN; yalniz iki yol degisir (R kok yolu,
 # glif kaynagi: kupa-printful-sonuc ac9aa718 kupa_uretim/sembol/<B>_<B>/sol.png; yerel CANCER denemesinde 9/9 JPG manifestle bayt esit).
 # Dogrulama: scripts/kapak78/sade12_dogrula.py (JPG bayt = SADE12_MANIFEST.tsv; PNG piksel sha; MP4 framemd5). Surumler yerel denemeyle ayni.
@@ -10,6 +10,8 @@ on:
   workflow_dispatch:
     inputs:
       burclar: {description: "virgullu (bos = 12)", required: false, default: ""}
+      ko_ref: {description: "kupa-orchard commit (v2: dc4a432...; v1 ceeb648 GECERSIZ)", required: false, default: "dc4a4323c9218200447979a06ec7557e6f194e6d"}
+      avx512_gerek: {description: "true = AVX512'siz kosucuda uretim yok (v1 manifesti AVX512 yoluyla uretilmisti)", required: false, default: "false"}
 jobs:
   plan:
     runs-on: ubuntu-24.04
@@ -36,16 +38,17 @@ jobs:
       - uses: actions/checkout@v4
         with: { fetch-depth: 1 }
       - name: Kod ve glif
-        env: {B: "${{ matrix.burc }}"}
+        env: {B: "${{ matrix.burc }}", KO_REF: "${{ inputs.ko_ref }}"}
         run: |
           set -euo pipefail
-          git fetch -q --depth 1 origin ceeb648ffd06d1850ed2c6acda7cde274eca5fd0 && git worktree add -q _ko FETCH_HEAD
+          [[ "$KO_REF" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::ko_ref (40 karakter sha)"; exit 1; }
+          git fetch -q --depth 1 origin "$KO_REF" && git worktree add -q _ko FETCH_HEAD && echo "kupa-orchard $KO_REF"
           git fetch -q --depth 1 origin ac9aa7185f9d7b07903f0cb99e7f366f425a631c
           git show "FETCH_HEAD:kupa_uretim/sembol/${B}_${B}/sol.png" > _glif.png
           sed -e "s#^R=/home/claude/caliserdar-maker/astrolove-ops#R=$PWD/_ko#" \
               -e "s#git -C \$R show refs/kapak78/sembol:kupa_uretim/sembol/\${B}_\${B}/sol.png > is/glif.png#cp $PWD/_glif.png is/glif.png#" \
               _ko/kupa_orchard/kapak_el/kod/sade12.sh > _s12.sh
-          diff <(sed -n '1,4p;6,17p;19,99p' _ko/kupa_orchard/kapak_el/kod/sade12.sh) <(sed -n '1,4p;6,17p;19,99p' _s12.sh)   # yalniz 2 satir degisir
+          [ "$(diff _ko/kupa_orchard/kapak_el/kod/sade12.sh _s12.sh | grep -c '^[<>]')" = 4 ] || { echo "::error::sade12.sh yalniz 2 satir degismeli"; diff _ko/kupa_orchard/kapak_el/kod/sade12.sh _s12.sh; exit 1; }
           grep -c "_glif.png" _s12.sh
       - uses: actions/setup-python@v5
         with:
@@ -77,7 +80,7 @@ jobs:
             python3 -c "import PIL, numpy, cv2, scipy, fontTools; print(PIL.__version__, numpy.__version__, cv2.__version__, scipy.__version__, fontTools.version)"; } > MAKINE_$B.txt 2>&1
           # inceleme 31 Eki: manifest AVX512'li makinede uretilmis; AVX512'siz (AMD EPYC 7763) koşucuda JPG / video farkli cikiyor
           # (24 isin 12'si, hepsi 0/9 JPG). Bu yuzden AVX512 yoksa uretim yapilmaz, is acikca FAIL (yeniden kosulur).
-          if ! grep -qw avx512f /proc/cpuinfo; then echo "AVX512_YOK" > LOG_$B.txt; echo "URET=1" >> "$GITHUB_ENV"
+          if [ "${{ inputs.avx512_gerek }}" = true ] && ! grep -qw avx512f /proc/cpuinfo; then echo "AVX512_YOK" > LOG_$B.txt; echo "URET=1" >> "$GITHUB_ENV"
             echo "::error::$B: kosucuda AVX512 yok (manifest AVX512 yoluyla uretildi); bu burc icin yeniden kosun"; exit 1; fi
           bash ../_s12.sh "$B" > LOG_$B.txt 2>&1; echo "URET=$?" >> "$GITHUB_ENV"
           python3 ../scripts/kapak78/sade12_dogrula.py ozet --dir "$B" --manifest ../_ko/kupa_orchard/ilan/SADE12_MANIFEST.tsv --json V_$B.json
@@ -87,7 +90,7 @@ jobs:
         env: {B: "${{ matrix.burc }}"}
         run: |
           set -euo pipefail
-          [ -d _o ] && rclone copy _o "gdrive:ASTROLOVE/TEMP/SADE12/${{ github.run_id }}" --exclude "*/is/*_onizleme.jpg" --immutable -q
+          [ -d _o ] && rclone copy _o "gdrive:ASTROLOVE/TEMP/SADE12_V2/${{ github.run_id }}" --exclude "*/is/*_onizleme.jpg" --immutable -q
           [ "${URET:-1}" = 0 ] && [ "${DOGRULA:-1}" = 0 ] || { echo "::error::$B uretim ${URET:-?} / dogrulama ${DOGRULA:-?} (LOG, V json)"; exit 1; }
       - uses: actions/upload-artifact@v4
         if: always()
@@ -123,6 +126,6 @@ jobs:
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
-          rclone copy OZET.json "gdrive:ASTROLOVE/TEMP/SADE12/${{ github.run_id }}" --immutable -q
+          rclone copy OZET.json "gdrive:ASTROLOVE/TEMP/SADE12_V2/${{ github.run_id }}" --immutable -q
           rm -rf ~/.config/rclone
-          echo "::notice title=SADE12::TEMP/SADE12/${{ github.run_id }}/"
+          echo "::notice title=SADE12::TEMP/SADE12_V2/${{ github.run_id }}/"

@@ -56,6 +56,10 @@ def ozet(a):
                 km = kare_md5(p)
                 k["kare_sayisi"] = len(km) if km else None
                 k["kareler_sha"] = sha("\n".join(km).encode()) if km else None
+                k["ilk_son_kare_md5"] = [km[0], km[-1]] if km else None
+                r_ = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height,r_frame_rate",
+                                     "-of", "csv=p=0", str(p)], capture_output=True, text=True)
+                k["cozunurluk_fps"] = r_.stdout.strip()
         dos[yol] = k
     tur = lambda s: [k for y, k in dos.items() if y.endswith(s)]
     r = dict(burc=b, dosya=dos,
