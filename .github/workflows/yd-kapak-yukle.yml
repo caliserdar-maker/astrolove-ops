@@ -36,7 +36,7 @@ on:
       kurtar: {description: "true: hata kaydi olan ilanda kayitli plan + canli galeriyle surdur", required: false, default: "false"}
       azami_dk: {description: "yazim: kilitten bu sure sonra yeni ilana baslanmaz (dk, 1-75)", required: false, default: "75"}
       bag_onar: {description: "true: yalniz Style baglari (DEVAM kaydi olan ilanlar; confirm YD_KAPAK_BAG)", required: false, default: "false"}
-      tek_gecis: {description: "F-B madde 2: bos = yalniz galeri; dolu = 'YAPI;METIN;VIDEO' TEMP altinda yollar (yd_yapi_kuru klasoru; metin json; video klasoru, VIDEO_MANIFEST.json). Bos parca = yok. Kuru ve yazim AYNI deger (plana bagli)", required: false, default: ""}
+      tek_gecis: {description: "F-B madde 2: bos = yalniz galeri; dolu = 'YAPI;METIN;VIDEO' TEMP altinda yollar (yd_yapi_kuru klasoru; metin json; video klasoru, VIDEO_MANIFEST.json). YAPI zorunlu; METIN / VIDEO bos = yok. Kuru ve yazim AYNI deger (plana bagli)", required: false, default: ""}
 
 env:
   T: "gdrive:ASTROLOVE/TEMP"
@@ -144,9 +144,14 @@ jobs:
           rclone lsjson -R "$Y" --files-only --include "*.jpg" > _work/yedek_ls.json
           if [ -n "$TG" ]; then   # tek gecis girdileri (F-B madde 2): yapi plani, metin json, video klasoru (kilit altinda, 15 dk butcesi)
             IFS=';' read -r TGY TGM TGV <<< "$TG"; mkdir -p _in/tg
+            [ -n "$TGY" ] || { echo "::error::tek_gecis: YAPI parcasi zorunlu (yd_yapi_kuru klasoru)"; exit 1; }
             [ -n "$TGY" ] && rclone copy "$T/$TGY" _in/tg/yapi --include "KURU_*.json" --include "PLAN.csv" -q
             [ -n "$TGM" ] && rclone copyto "$T/$TGM" _in/tg/metin.json -q
-            [ -n "$TGV" ] && rclone copy "$T/$TGV" _in/tg/video -q
+            if [ -n "$TGV" ]; then   # yalniz kapsamdaki ilanlarin videolari (inceleme madde 12: 15 dk butcesi)
+              rclone copyto "$T/$TGV/VIDEO_MANIFEST.json" _in/tg/video/VIDEO_MANIFEST.json -q
+              python3 -c "import json,sys;m=json.load(open('_in/tg/video/VIDEO_MANIFEST.json'));h=set(l.strip()[:-5] for l in open('_work/ham.txt'));print('\n'.join(v['dosya'] for k,v in m.items() if k in h))" > _work/video.txt
+              rclone copy "$T/$TGV" _in/tg/video --files-from _work/video.txt -q
+            fi
             echo "tek gecis: yapi $(ls _in/tg/yapi 2>/dev/null | wc -l) dosya, metin $([ -f _in/tg/metin.json ] && echo var || echo yok), video $(ls _in/tg/video 2>/dev/null | wc -l)"
           fi
           echo "indirilen: kapak $(ls _in/kapak/*.jpg | wc -l), HAM $(ls _in/HAM | wc -l), yedek dosya $(python3 -c 'import json;print(len(json.load(open("_work/yedek_ls.json"))))')"

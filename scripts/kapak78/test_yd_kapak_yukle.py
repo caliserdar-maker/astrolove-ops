@@ -252,6 +252,7 @@ class SahteTG(SahteYD):
         super().__init__(**kw)
         self.inv = copy.deepcopy(HAM["inventory"]); self.L = dict(state="active", title="Eski baslik", description="Eski aciklama")
         self.vid = [dict(video_id=900001, video_state="active")]; self.patch_hata = 0; self.patchler = []
+        self.put_sonra_hata = 0; self.patch_sonra_hata = 0; self.video_hata = False; self.stil_kaydir = 0   # inceleme madde 13: gercekci hatalar
 
     def get(self, path, params=None, ok404=False):
         if path == "/listings/batch/inventory":
@@ -264,21 +265,59 @@ class SahteTG(SahteYD):
             self._k(); self.n_get += 1; return {"results": copy.deepcopy(self.vid)}
         if path == f"/listings/{LID}":
             self._k(); self.n_get += 1; return dict(copy.deepcopy(self.L), listing_id=int(LID))
+        if path.endswith("/variation-images"):
+            self._k(); self.n_get += 1; return self.get_vi()
         return super().get(path, params, ok404)
 
     def put_json(self, path, body):
         self._k(); self.yaz.append(("envanter",))
-        self.inv = dict(copy.deepcopy(body), products=[dict(p, is_deleted=False) for p in copy.deepcopy(body["products"])]); return self.inv
+        inv = dict(copy.deepcopy(body), products=[dict(p, is_deleted=False) for p in copy.deepcopy(body["products"])])
+        if self.stil_kaydir:          # Etsy Style deger kimliklerini degistirir (inceleme madde 7)
+            for pr in inv["products"]:
+                for pv in pr.get("property_values") or []:
+                    if pv.get("property_id") == 513:
+                        pv["value_ids"] = [v + self.stil_kaydir for v in pv.get("value_ids") or []]
+        self.inv = inv
+        if self.put_sonra_hata:       # PUT UYGULANDI ama 500 dondu (madde 1)
+            self.put_sonra_hata -= 1; raise SystemExit("HATA: PUT inventory -> 500 (test, uygulandi)")
+        return self.inv
+
+    def _vid_ad(self):
+        out = {}
+        for pr in self.inv.get("products") or []:
+            for pv in pr.get("property_values") or []:
+                if pv.get("property_id") == 513:
+                    for i, a in zip(pv.get("value_ids") or [], pv.get("values") or []):
+                        out[i] = a
+        return out
+
+    def post_json(self, path, body):   # gercek Etsy: olmayan gorsele / bilinmeyen deger kimligine bag 400 (madde 3 / 13)
+        ids = {x["listing_image_id"] for x in self.img}; va = self._vid_ad()
+        for v in body.get("variation_images") or []:
+            if v["image_id"] not in ids or v["value_id"] not in va:
+                self._k(); raise SystemExit(f"HATA: POST variation-images -> 400 (test: image {v['image_id']} / value {v['value_id']})")
+        self._k(); self.vi_cagri += 1; self.yaz.append(("bag",))
+        self.bag = {va[v["value_id"]]: v["image_id"] for v in body["variation_images"]}; self._iz()
+
+    def get_vi(self):
+        ad_vid = {a: i for i, a in self._vid_ad().items()}
+        return {"results": [dict(property_id=513, value_id=ad_vid.get(k), value=k, image_id=v) for k, v in self.bag.items()]}
 
     def patch(self, path, data):
         self._k(); self.yaz.append(("patch", tuple(sorted(data)))); self.patchler.append(dict(data))
         if self.patch_hata:
             self.patch_hata -= 1; raise SystemExit("HATA: PATCH -> 500 (test)")
-        self.L.update(data); return dict(self.L)
+        self.L.update(data)
+        if self.patch_sonra_hata:     # PATCH UYGULANDI ama 500 dondu (madde 2)
+            self.patch_sonra_hata -= 1; raise SystemExit("HATA: PATCH -> 500 (test, uygulandi)")
+        return dict(self.L)
 
     def post_file(self, path, files=None, data=None, tekrar=3):
         if "video" in (files or {}):
-            self._k(); self.yaz.append(("video",)); self.vid.append(dict(video_id=900002, video_state="active")); return {"video_id": 900002}
+            self._k(); self.yaz.append(("video",))
+            if self.video_hata:
+                raise SystemExit("HATA: POST video -> 400 (test)")
+            self.vid.append(dict(video_id=900002, video_state="active")); return {"video_id": 900002}
         return super().post_file(path, files=files, data=data, tekrar=tekrar)
 
     def delete(self, path, ok404=False):
@@ -332,6 +371,47 @@ def tek_gecis(hz):
     kontrol(f"tek gecis geri alma: galeri eski 13 + alt metin, envanter eski 15 urun ({len(api2.inv['products'])}), metin eski, video eski",
             [x["alt_text"] for x in g] == [x["alt_text"] for x in g0] and len(api2.inv["products"]) == len(HAM["inventory"]["products"])
             and api2.L["title"] == "Eski baslik" and api2.L["description"] == "Eski aciklama" and [v["video_id"] for v in api2.vid] == [900001])
+
+    def senaryo(ad, **ayar):
+        x = SahteTG()
+        for kk, vv in ayar.items():
+            setattr(x, kk, vv)
+        _, Rk, pk = kuru(x, hz, f"k{ad}", None, None, *tg)
+        dvx, ilx = durum_dosyalari(f"d{ad}")
+        rcx, Rx = yaz(x, hz, pk, f"y{ad}", Rk["plan_damga"], dvx, ilx, *ek)
+        return x, rcx, Rx["ilanlar"][0], dvx, ilx, pk, Rk["plan_damga"]
+
+    def eski_hal(x):
+        g = sorted(x.img, key=lambda y: (y["rank"], y["listing_image_id"])); rk_ = {y["listing_image_id"]: y["rank"] for y in g}
+        eski_rk = {b_["value"]: next(y["rank"] for y in g0 if y["listing_image_id"] == b_["image_id"]) for b_ in HAM["variation_images"]}
+        return ([y["alt_text"] for y in g] == [y["alt_text"] for y in g0] and len(x.inv["products"]) == len(HAM["inventory"]["products"])
+                and {kk: rk_.get(vv) for kk, vv in x.bag.items()} == eski_rk and x.L["title"] == "Eski baslik")
+    x, rcx, sx, *_ = senaryo("pu", put_sonra_hata=1)
+    kontrol(f"madde 1: envanter PUT uygulandi + 500 -> envanter de geri alindi, galeri eski, baglar eski siralarda ({sx['durum']})",
+            rcx == 1 and sx["durum"] == "FAIL" and eski_hal(x))
+    x, rcx, sx, *_ = senaryo("pa", patch_sonra_hata=1)
+    kontrol(f"madde 2: metin PATCH uygulandi + 500 -> baslik / aciklama eski, envanter + galeri eski ({sx['durum']})",
+            rcx == 1 and sx["durum"] == "FAIL" and eski_hal(x) and x.L["description"] == "Eski aciklama")
+    x, rcx, sx, *_ = senaryo("sk", patch_hata=1, stil_kaydir=1000)
+    kontrol(f"madde 3 + 7: Style deger kimligi PUT ile degisir + metin hatasi -> geri alma baglari canli kimlikle, sorun yok ({sx['durum']} "
+            f"{str(sx['neden'])[-140:]})", rcx == 1 and sx["durum"] == "FAIL" and eski_hal(x))
+    x, rcx, sx, dvx, ilx, pk, pdx = senaryo("vh", video_hata=True)
+    kontrol(f"video hatasi: DUR, galeri / envanter / metin yeni kalir, eski video yerinde ({sx['durum']})",
+            rcx == 1 and sx["durum"] == "DUR" and [v["video_id"] for v in x.vid] == [900001] and len(x.inv["products"]) == 140)
+    with contextlib.redirect_stdout(io.StringIO()):
+        rcy = K.sonlandir(x, "1", arg(hz, DEPO / "yvh2", "--confirm", "YD_KAPAK", "--plan", str(pk / "PLAN_YD.json"), "--plan-damga", pdx,
+                                      "--devam", str(dvx), "--ilerleme", str(ilx), "--kosu", "223", *ek))
+    s2 = json.loads((DEPO / "yvh2" / "RAPOR.json").read_text())["ilanlar"][0]
+    kontrol(f"madde 4: video hatasindan sonra ikinci kosu ZATEN / PASS DEGIL (BLOK, tek gecis tamamlanmamis) ({s2['durum']})",
+            rcy == 1 and s2["durum"] == "BLOK" and "tek gecis" in s2["neden"][0])
+    mk = {LID: dict(title="Print on Hahnemuhle paper", description="Text without disclosure.")}
+    (d / "metin_kotu.json").write_text(json.dumps(mk))
+    tg2 = ("--tek-gecis", "--yapi-plan", str(yplan), "--metin-json", str(d / "metin_kotu.json"))
+    x = SahteTG()
+    _, Rk, _ = kuru(x, hz, "kmk", None, None, *tg2)
+    sk = Rk["ilanlar"][0]
+    kontrol(f"madde 5: kuruda metin kapisi (yasak ifade + AI beyani yok) -> BLOK, yazim yok ({sk['durum']} {str(sk['neden'])[:120]})",
+            sk["durum"] == "BLOK" and "metin kapisi" in sk["neden"][0] and not x.yaz)
 
 
 def yukleme_hatasi(hz):
