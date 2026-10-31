@@ -5,7 +5,7 @@ Yalniz GET; yazma yontemleri kapali (pod_5x7_kuru.salt_okur: put/patch/post/dele
 Hedef yapi (ilan basina 3 varyasyon: Style x Format x Size = 5 x 2 x 14 = 140 urun):
   Style  (513, canli): Starlit, Timeless, First Page, Layers, Botanical (value_id canlidan; stil-gorsel baglari bu degerlere bagli kalir)
   Format (514, canli): FORMATLAR = "Digital File", "Print" (eski: Digital card 5x7, Digital file 8x10, Shipped print 8x10)
-  Size   (--boy-pid; 3. varyasyon Etsy taksonomi ozelligi olmak zorunda, pod_3var_hazirlik.py): 14 boy, poster ile ayni liste/sira:
+  Size   (--boy-pid, varsayilan BOY_PID 516 = taksonomi 121 Custom3, menu adi "Size"; 31 Eki salt okuma): 14 boy, poster ile ayni liste/sira:
          5x7 (pod_5x7_kuru.ETIKET_5X7) + pod_5x7_kuru.BOYLAR (8x10 ... 24x36, A4, A3, A2).
 Fiyat (hicbiri burada uydurulmadi; FIYAT_KAYNAK):
   Digital File: her boyda 3.90  (pod_5x7_kuru.FIYAT_5X7["Digital File"] = print_fiyat_v2.DIJITAL = 3.90, Serdar 25 Eki)
@@ -47,6 +47,11 @@ import pod_5x7_kuru as K  # noqa: E402
 import print_fiyat_v2 as PF  # noqa: E402
 
 STIL_PID, FORMAT_PID = 513, 514
+# Size (Serdar 31 Eki karar 5a): taksonomi 121'de "Size" adli ozellik yok (21 ozellik; boy adayi 0). Varyasyon destekleyen 3. ozel
+# ozellik 516 (name Custom3, display "Custom Property", olceksiz, sabit deger yok). Kaynak: kupa-yd-oku kosu 41180774733 YD_BOY.json
+# (pilot 4595350971, salt okuma 4 istek). Etsy'nin 513 + 514 + 516 ucluzunu kabul ettigi YAZIMLA dogrulanmadi (ilk pilot yazimda olculur).
+BOY_PID = 516
+OZEL_PID = (513, 514, 515, 516)   # Etsy ozel (Custom) ozellikleri: menu adi property_name ile verilir
 STILLER = ("Starlit", "Timeless", "First Page", "Layers", "Botanical")          # canli sira (yd_kapak_yukle.STILLER)
 ESKI_FORMAT = {"Digital card 5x7": "dijital", "Digital file 8x10": "dijital", "Shipped print 8x10": "baski"}   # by_baski_ekle
 ESKI_SKU_EK = {"Digital card 5x7": "CARD5X7", "Digital file 8x10": "FILE8X10", "Shipped print 8x10": "PRINT8X10"}
@@ -103,7 +108,8 @@ def boy_ozellik(tax, boy_pid, boy_scale=None):
     olcek = {s.get("scale_id") for s in p.get("scales") or []}
     if olcek and boy_scale not in olcek:
         h.append(f"ozellik {boy_pid} olcekli ({sorted(olcek)}); --boy-scale-id gerekli")
-    sab = {"property_id": boy_pid, "property_name": p.get("display_name") or p.get("name") or "Size"}
+    ozel = boy_pid in OZEL_PID or str(p.get("name") or "").lower().startswith("custom")
+    sab = {"property_id": boy_pid, "property_name": "Size" if ozel else (p.get("display_name") or p.get("name") or "Size")}
     if boy_scale is not None:
         sab["scale_id"] = boy_scale
     return sab, h
@@ -380,7 +386,7 @@ def argumanlar(argv=None):
     ap.add_argument("--sadece", default="")
     ap.add_argument("--pilot", default="4595350971")
     ap.add_argument("--poster-ref", default="4570110121", help="wall art fiyat merdiveni canli kapisi (pod78 pilot)")
-    ap.add_argument("--boy-pid", type=int, default=None, help="Size icin taksonomi ozelligi (bos = plan BLOK, adaylar TAKSONOMI.json)")
+    ap.add_argument("--boy-pid", type=int, default=BOY_PID, help="Size ozelligi (varsayilan 516 Custom3, Serdar 31 Eki 5a; 0 = secilmedi, BLOK)")
     ap.add_argument("--boy-scale-id", type=int, default=None)
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)

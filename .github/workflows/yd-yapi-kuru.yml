@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       sadece: {description: "virgullu listing_id (bos = data/pod/yd78_ids.csv)", required: false, default: ""}
-      boy_pid: {description: "Size icin taksonomi ozelligi property_id (bos = plan BLOK, adaylar TAKSONOMI.json)", required: false, default: ""}
+      boy_pid: {description: "Size ozelligi property_id (516 = taksonomi 121 Custom3, Serdar 31 Eki 5a; bos = betik varsayilani 516)", required: false, default: "516"}
       boy_scale_id: {description: "boy ozelligi olcekliyse scale_id (bos = yok)", required: false, default: ""}
 jobs:
   oku:

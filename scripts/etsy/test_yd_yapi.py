@@ -430,9 +430,21 @@ def is_akisi():
       'tum: {description' in t and '[ "$MOD" = yaz ] && [ -z "$S" ] && [ "$TUM" != evet ]' in t and "--tum" in t)
 
 
+def boy_516():
+    """Serdar 31 Eki 5a: canli taksonomi 121 kaydi (kupa-yd-oku 41180774733 YD_BOY.json) 516 Custom3 -> menu adi Size, hata yok."""
+    tax = [{"property_id": 516, "name": "Custom3", "display_name": "Custom Property", "supports_variations": True, "scales": [],
+            "possible_values": []}]
+    sab, h = K.boy_ozellik(tax, K.BOY_PID)
+    k("boy: varsayilan BOY_PID 516, menu adi Size (Custom Property degil), hata yok",
+      K.BOY_PID == 516 and sab == {"property_id": 516, "property_name": "Size"} and not h, (sab, h))
+    k("boy: --boy-pid varsayilani 516, 0 = secilmedi", K.argumanlar(["--out", "x"]).boy_pid == 516
+      and K.boy_ozellik(tax, 0)[0] is None)
+
+
 def main():
     d = Path(tempfile.mkdtemp(prefix="ydyapi_"))
     try:
+        boy_516()
         plan = kuru_testleri(d)
         yaz_testleri(d, plan)
         is_akisi()
