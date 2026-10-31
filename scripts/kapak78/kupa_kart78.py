@@ -11,7 +11,7 @@ sarmalayicida: K03 cizime giden etiketler ve metin kapisinin beklenen listesi bi
 AYNI BURC K02 (Serdar 31 Eki karar 2b): alt baslik "<A> and <A> joined in an original AstroLoveArt design" yerine galeri alt metniyle
 harfi harfine ayni cumle (data/pod/kupa_galeri78_alt.csv sira 2 alt_ayni_burc, <A> yerine burc). Yalniz o satir degisir (cizim yeri,
 punto, renk ayni; K.yaz tek satir, sigmazsa DUR); metin kapisinin beklenen listesi birlikte degisir.
-ISTISNA (Serdar 31 Eki karar 1a): yalniz GEMINI_SCORPIO K05 kopuk ton kapisi; olcum BIREBIR (3 px, parca [2393, 1489, 20, 10, 3], en buyuk
+ISTISNA (Serdar 31 Eki karar 1a; 31 Eki F-A sonrasi AQUARIUS_CANCER ve CAPRICORN_TAURUS eklendi): yalniz bu ciftlerin K05 kopuk ton kapisi; olcum BIREBIR (3 px, parca [2393, 1489, 20, 10, 3], en buyuk
 fark 4/255) ise kapi gecer ve istisna SONUC / MANIFEST / OZET'e yazilir. Olcum farkliysa kapi aynen FAIL. Kapi kurali ve ortak kod degismez.
 Her cift try/except: bir kart FAIL ise ciftin HICBIR karti yazilmaz; neden SONUC_<CIFT>.json'a yazilir.
 Kullanim:
@@ -42,7 +42,11 @@ MANIFEST_ALAN = ["cift", "kart", "galeri_no", "dosya", "sha256", "durum", "neden
 KOK = HERE.parents[1]
 GALERI_ALT = KOK / "data/pod/kupa_galeri78_alt.csv"
 ISTISNA = {("GEMINI_SCORPIO", "K05"): dict(kapi="kopuk_ton", px=3, parca=[[2393, 1489, 20, 10, 3]], max_fark=4,
-                                           karar="Serdar 31 Eki karar 1a: yalniz bu cift + kart; olculen 3 px, en buyuk fark 4/255")}
+                                           karar="Serdar 31 Eki karar 1a: yalniz bu cift + kart; olculen 3 px, en buyuk fark 4/255"),
+           # Serdar 31 Eki (F-A sonrasi, kupa_kart78 kosu 41217334904): ayni olcum birebir; yalniz bu iki cift + K05
+           **{(c, "K05"): dict(kapi="kopuk_ton", px=3, parca=[[2393, 1489, 20, 10, 3]], max_fark=4,
+                               karar="Serdar 31 Eki (F-A): yalniz bu cift + kart; GEMINI_SCORPIO ile ayni olcum, 3 px, en buyuk fark 4/255")
+              for c in ("AQUARIUS_CANCER", "CAPRICORN_TAURUS")}}
 
 
 def k02_ayni_metin(a):
