@@ -375,6 +375,21 @@ def canli_oku(api, shop, lid, onb=None):
     return dict(L=L, galeri=g, video=v, bag=vi, stil=stil, urun_n=len(urun), inv_sha=sha_metin(jdump(sorted(urun))), per=per)
 
 
+TOPLU_ILAN = 2   # ilan basina taze toplu okuma: /listings/batch + /listings/batch/inventory
+
+
+def toplu_tekil_fark(a, b):
+    """canli_ozet alanlari + aciklama / baslik / etiket / kisisellestirme ham karsilastirmasi; -> farkli alan adlari"""
+    x, y = canli_ozet(a), canli_ozet(b)
+    fk = [k for k in x if x[k] != y.get(k)]
+    for k in ("description", "title", "tags", "materials", "state", "shop_section_id", "shipping_profile_id"):
+        if a["L"].get(k) != b["L"].get(k):
+            fk.append("L." + k)
+    if [soru_norm(q) for q in a["per"]] != [soru_norm(q) for q in b["per"]]:
+        fk.append("per")
+    return sorted(set(fk))
+
+
 def canli_ozet(c):
     L = c["L"]
     return dict(state=L.get("state"), bolum=L.get("shop_section_id"), title_sha=sha_metin(L.get("title")), tags=list(L.get("tags") or []),
@@ -948,7 +963,8 @@ def geri_al(api, shop, lid, yd, yedek_dir, K, uzak=""):
         bag_sira = {b["stil"]: sira_eski[b["image_id"]] for b in yd.get("baglar") or [] if b.get("image_id") in sira_eski}
         if len(bag_sira) != len(yd.get("baglar") or []) or not set(bag_sira) <= set(c["stil"]):
             return ["geri alma: yedek Style baglari canli envanterle eslenemedi; elle bakilmali"]
-        sil = sorted(canli - eski_ids)
+        geri_yk = set((K.d.get("geri_yuklenen") or {}).values())
+        sil = sorted(canli - eski_ids - geri_yk)   # onceki geri almada yeniden yuklenen eski gorsel yerinde kalir (inceleme 31 Eki madde 2)
         son = galeri_kur(api, shop, lid, c, hedef, sil, bag_sira, c["stil"], K, "geri_yuklenen", esnek=True)
         ev = [x["video_id"] for x in yd.get("video") or []]
         vyol = yedek_dosya(yedek_dir, alt_d, yd["video"][0], uzak) if ev and ev[0] not in [str(x.get("video_id")) for x in c["video"]] else None
@@ -1113,14 +1129,21 @@ def calistir(api, shop, a):
     ilerleme = json_oku(a.ilerleme)
     R = kapsam(liste_oku(a.liste), a.sadece, a.haric)
     satir, girdiler, dur, t0, baslayan = [], {}, None, time.time(), 0
-    onb, ru_onb = {}, {}
+    onb, ru_onb, esit_kalan = {}, {}, (a.toplu_esit_n if not yazim else 0)
     if R:
         kota_oku(api, shop)
-        oku_ids = [r["listing_id"] for r in R if not yazim or (plan.get("girdiler") or {}).get(r["listing_id"])
-                   or (dvs.get(r["listing_id"]) or {}).get("durum") not in ("PASS", "GERI_ALINDI", None)]
-        if oku_ids and int(api.remaining) - 2 * (-(-len(oku_ids) // TO.TOPLU_N)) >= KOTA_SINIRI:
+    if R and not yazim:
+        # KURU: koşu basi TOPLU okuma (100'luk parca 2 istek). YAZIM: ilan basina yazmadan HEMEN once taze toplu okuma (2 istek, asagida):
+        # koşu basi anlik goruntu yazim kararinda kullanilmaz (inceleme 31 Eki madde 4: satis / elle duzenleme koşu sirasinda olur)
+        oku_ids = [r["listing_id"] for r in R]
+        if int(api.remaining) - 2 * (-(-len(oku_ids) // TO.TOPLU_N)) >= KOTA_SINIRI:
             c_t = api.calls
-            onb = TO.toplu(api, oku_ids)
+            try:
+                onb = TO.toplu(api, oku_ids)
+            except Exception as e:   # noqa: BLE001  toplu hata: tekil okumaya dus (inceleme madde 12), kota DUR'u yukari
+                if "kota" in str(getattr(e, "code", None) or e).lower():
+                    raise
+                log(f"UYARI: toplu kapi okumasi hata ({str(e)[:120]}); tekil okuma"); onb = {}
             ru_onb = {k: v.get("ru") or {} for k, v in onb.items()}
             log(f"toplu kapi okumasi: {len(onb)}/{len(oku_ids)} ilan, {api.calls - c_t} istek | kota {api.remaining}")
     for n, r in enumerate(R, 1):
@@ -1142,16 +1165,25 @@ def calistir(api, shop, a):
             if yazim:
                 if pg is None:
                     s.update(durum="BLOK", neden=["DEVAM kaydi var ama plan girdisi yok"]); continue
-                # koddaki en kotu: toplu kapi okumasi bu ilan icin yapildiysa kalan kapi okumasi 1 (Style baglari), 6 degil
-                t = ilan_tahmini(pg)["en_kotu"] - ((KAPI_OKUMA - 1) if lid in onb else 0)
+                # koddaki en kotu: taze toplu okuma 2 istek + (toplu yanitta ilan yoksa) tekil kapi okumasi 6 -> en kotu +2
+                t = ilan_tahmini(pg)["en_kotu"] + TOPLU_ILAN
                 if int(api.remaining) - t < KOTA_SINIRI:
                     dur = f"kota: kalan {api.remaining} - en kotu {t} < {KOTA_SINIRI}; ilan baslamadi"
                     s.update(durum="KALAN", neden=[dur]); continue
-            elif int(api.remaining) - KAPI_OKUMA - 1 < KOTA_SINIRI:
+            elif int(api.remaining) - KAPI_OKUMA - 1 - (KAPI_OKUMA if esit_kalan else 0) < KOTA_SINIRI:
                 dur = f"kota: kalan {api.remaining} - {KAPI_OKUMA + 1} okuma < {KOTA_SINIRI}; ilan baslamadi"
                 s.update(durum="KALAN", neden=[dur]); continue
             api.kota_kapisi(f"ilan {lid}")
+            if yazim:   # yazmadan hemen once taze toplu okuma (2 istek); yanitta yoksa canli_oku tekil okur
+                onb = TO.toplu(api, [lid])
+            esit_n = esit_kalan and str(lid) in onb
             c = canli_oku(api, shop, lid, onb)
+            if esit_n:   # KURU: toplu == tekil olcumu (inceleme 31 Eki madde 5): plan toplu yanittan, son kontrol tekil okumayla kurulur
+                esit_kalan -= 1
+                fk = toplu_tekil_fark(c, canli_oku(api, shop, lid))
+                s["toplu_tekil"] = "ESIT" if not fk else f"FARK {fk}"
+                if fk:
+                    s.update(durum="BLOK", neden=[f"toplu okuma tekil okumayla ayni degil: {fk}; toplu yol kullanilmaz"]); continue
             mp = metin_plani(c["L"], c["per"], r["a"], r["b"])
             if not a.metin_yaz:   # VARSAYILAN KAPALI: RU = EN kurali (kupa RU kurucusu yok); galeri metinden ayri
                 mp = dict(yaz=False, durum=mp["durum"] if mp["durum"] == "FARKLI_BURC" else "KAPALI:" + mp["durum"], hata=[])
@@ -1311,6 +1343,7 @@ def arg(argv=None):
     ap.add_argument("--metin-yaz", action="store_true", help="aciklama + kisisellestirme yazimi (VARSAYILAN KAPALI: RU = EN kurali)")
     ap.add_argument("--kurtar", action="store_true", help="hata kaydi olan DEVAM'i surdur")
     ap.add_argument("--azami-ilan", type=int, default=15, help="yaz / parti: kosu basina en fazla ilan (0 = sinirsiz)")
+    ap.add_argument("--toplu-esit-n", type=int, default=2, help="kuru: ilk N ilanda toplu okuma tekil okumayla karsilastirilir (fark -> BLOK)")
     ap.add_argument("--kosu", default=os.environ.get("GITHUB_RUN_ID", "0"))
     a = ap.parse_args(argv)
     if a.mod == "yaz" and (a.confirm != ONAY or not a.plan or not a.plan_damga or not a.dosya_dir or not a.yedek_dir or not a.yedek_liste):
