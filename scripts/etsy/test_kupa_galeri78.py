@@ -177,6 +177,19 @@ class Sahte:
 
     def get(self, path, params=None, ok404=False):
         self._say()
+        if path in ("/listings/batch", "/listings/batch/inventory"):   # 31 Eki yoklamasinda olculen sekil
+            ids = [i for i in str((params or {}).get("listing_ids") or "").split(",") if i in self.L]
+            assert len(ids) <= 100
+            if path.endswith("/inventory"):
+                return {"count": len(ids), "results": [dict(listing_id=int(i), images=None, inventory=copy.deepcopy(self.L[i]["inv"])) for i in ids]}
+            res = []
+            for i in ids:
+                x = self.L[i]
+                res.append(dict(listing_id=int(i), inventory=None, images=copy.deepcopy(x["images"]), videos=copy.deepcopy(x["videos"]),
+                                personalization=dict(personalization_questions=copy.deepcopy(x["per"])),
+                                translations={"en-US": {"description": x["description"]}, "ru": copy.deepcopy(x["ru"]), "de": None},
+                                **{k: copy.deepcopy(x[k]) for k in ("state", "shop_section_id", "title", "tags", "description")}))
+            return {"count": len(res), "results": res}
         if "/listings/" not in path:
             return {"shop_id": int(SHOP)}
         x = self.L[self._lid(path)]
@@ -504,8 +517,8 @@ def ana(tmp):
     hepsi = ",".join(LID[c] for c in TEST)
     api, pd, S, R = hazirla(kok, hepsi)
     kontrol("kuru: 3 ilan PLAN, yazim yok", all(S[LID[c]]["durum"] == "PLAN" for c in TEST) and not api.yazimlar)
-    kontrol("kuru: istek ilan basina 6 (ayni burc +1 RU okumasi)",
-            S[LID["ARIES_LEO"]]["istek"] == 6 and S[LID["LEO_LEO"]]["istek"] == 7, f"{[S[LID[c]]['istek'] for c in TEST]}")
+    kontrol("kuru (TOPLU kapi okumasi, Serdar 31 Eki 1a): ilan basina 1 istek (Style baglari); ilan / galeri / video / envanter / "
+            "kisisellestirme / RU koşu basi 2 toplu istekte", all(S[LID[c]]["istek"] == 1 for c in TEST), f"{[S[LID[c]]['istek'] for c in TEST]}")
     kontrol("kuru: metin varsayilan KAPALI (ayni burc durum KAPALI:DEGISTI, RU_ACIK raporda)",
             S[LID["LEO_LEO"]]["ru"].startswith("RU_ACIK") and S[LID["LEO_LEO"]]["metin"].startswith("KAPALI:")
             and "DEGISTI" in S[LID["LEO_LEO"]]["metin"], S[LID["LEO_LEO"]]["metin"])
@@ -554,7 +567,8 @@ def ana(tmp):
     c0 = api.calls; api.salt = True
     kod, Sh, _ = kos(api, kok, "kuru", "--sadece", hepsi, "--haric", LID["LEO_LEO"], ad="kuru_haric")
     api.salt = False
-    kontrol("haric: ilan raporda yok, okunmadi", LID["LEO_LEO"] not in Sh and len(Sh) == 2 and api.calls - c0 == 12)
+    kontrol(f"haric: ilan raporda yok, okunmadi (istek {api.calls - c0} = toplu 2 + 2 ilan x 1)",
+            LID["LEO_LEO"] not in Sh and len(Sh) == 2 and api.calls - c0 == 4)
     api.salt = True; _, _, R2 = kos(api, kok, "kuru", "--sadece", hepsi, ad="kuru_tekrar"); api.salt = False
     kontrol("kuru tekrar: ayni canli durum -> ayni plan_damga", R2["plan_damga"] == pd)
 
@@ -588,11 +602,12 @@ def ana(tmp):
     gd = json.loads((kok / "out_kuru" / K.PLAN_AD).read_text())["girdiler"][lid]
     t = K.istek_tahmini(n_sil=16)["en_kotu"]
     kontrol("tahmin: plandaki 16 eski gorselle (plan en_kotu degeri eski kodla daha dusuk kalabilir)", K.ilan_tahmini(gd)["en_kotu"] == t)
-    api.remaining = None; api.gercek = t + 10        # ucuz GET sonrasi kalan t + 9: en kotu + 10 tutmaz
+    t1 = t - (K.KAPI_OKUMA - 1)                         # toplu kapi okumasi sonrasi koddaki en kotu (kapi 1 Style okumasi)
+    api.remaining = None; api.gercek = t1 + 12         # ucuz GET + 2 toplu okuma sonrasi kalan t1 + 9: en kotu + 10 tutmaz
     kod, S, _ = kos(api, kok, "yaz", *yaz_arg(kok, pd, "--sadece", lid), ad="out_kota")
-    kontrol("kota None ile baslangic: tek ucuz GET, kalan - en kotu < 10 -> KALAN, ilan okunmadi, yazim yok",
+    kontrol("kota None ile baslangic: ucuz GET + toplu okuma, kalan - en kotu < 10 -> KALAN, ilan tekil okunmadi, yazim yok",
             S[lid]["durum"] == "KALAN" and S[lid]["istek"] == 0 and not api.yazimlar
-            and api.remaining == t + 9, f"{S[lid]} kalan {api.remaining}")
+            and api.remaining == t1 + 9, f"{S[lid]} kalan {api.remaining}")
 
     # pilot (kota None, sinirda baslar): yedek silmeden ONCE ve Drive'da BAYT olarak
     once = {c: copy.deepcopy(api.L[LID[c]]) for c in TEST}
@@ -615,9 +630,9 @@ def ana(tmp):
                 api.ihlal.append((lid_, "video", i))
             sayac["video"] += 1
     api.silme_oncesi = silme_kontrol
-    api.remaining = None; api.gercek = t + 11
+    api.remaining = None; api.gercek = t1 + 13
     kod, S, R = kos(api, kok, "yaz", *yaz_arg(kok, pd, "--sadece", lid))
-    kontrol("pilot (kota None, kalan = en kotu + 10): PASS, cikis 0", S[lid]["durum"] == "PASS" and kod == 0, str(S[lid]["neden"])[:300])
+    kontrol("pilot (kota None, toplu okuma sonrasi kalan = en kotu + 10): PASS, cikis 0", S[lid]["durum"] == "PASS" and kod == 0, str(S[lid]["neden"])[:300])
     api.remaining = 100000
     kontrol("pilot: 14 gorsel hedef sira + alt metin, 8 Style bagi 7-14, yeni video", galeri_hedefte(api, lid, "ARIES_LEO"))
     kontrol("pilot: yuklenen baytlar kaynak dosyalarla ayni", [api.gorsel_bayt(i) for i in api.L[lid]["images"]]
@@ -628,7 +643,8 @@ def ana(tmp):
     kontrol("pilot: metin yazilmadi (farkli burc), PATCH yok", not any(y[0] == "PATCH" for y in api.yazimlar)
             and api.L[lid]["description"] == once["ARIES_LEO"]["description"])
     t0 = K.istek_tahmini(n_sil=16)
-    kontrol("pilot: istek <= en kotu (geri almasiz) ve >= en az", t0["en_az"] <= S[lid]["istek"] <= t0["en_kotu_geri_almasiz"],
+    kontrol("pilot: istek <= en kotu (geri almasiz) ve >= en az (toplu kapi okumasi koşu basinda: ilan basina kapi 1)",
+            t0["en_az"] - (K.KAPI_OKUMA - 1) <= S[lid]["istek"] <= t0["en_kotu_geri_almasiz"],
             f"istek {S[lid]['istek']} en az {t0['en_az']}")
     print(f"  bilgi: pilot istek {S[lid]['istek']} (16 eski; en az {t0['en_az']}, en kotu geri almasiz {t0['en_kotu_geri_almasiz']}, "
           f"geri alma +{t0['geri_alma']})")
