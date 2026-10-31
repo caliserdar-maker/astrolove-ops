@@ -33,6 +33,7 @@ on:
       haric: {description: "bu ilanlar haric (virgullu listing_id)", required: false, default: ""}
       azami_ilan: {description: "yaz: kosu basina en fazla ilan", required: false, default: "15"}
       kurtar: {description: "true = hata kaydi olan DEVAM ilanini surdur", required: false, default: "false"}
+      metin_yaz: {description: "true = EN aciklama galeriyle birlikte (Serdar 31 Eki onayi; RU yazilmaz). kuru ve yaz AYNI deger (plana bagli)", required: false, default: "false"}
 
 env:
   T: "gdrive:ASTROLOVE/TEMP"
@@ -54,8 +55,10 @@ jobs:
           HA: ${{ inputs.haric }}
           AI: ${{ inputs.azami_ilan }}
           KT: ${{ inputs.kurtar }}
+          MY: ${{ inputs.metin_yaz }}
         run: |
           set -euo pipefail
+          [[ "$MY" =~ ^(true|false)$ ]] || { echo "::error::girdi (metin_yaz)"; exit 1; }
           [[ "$MOD" =~ ^(kuru|yaz|geri_al)$ && "$KT" =~ ^(true|false)$ && "$AI" =~ ^[0-9]{1,2}$ ]] || { echo "::error::girdi (mod / kurtar / azami_ilan)"; exit 1; }
           [[ "$SA" =~ ^([0-9]+(,[0-9]+)*)?$ && "$HA" =~ ^([0-9]+(,[0-9]+)*)?$ ]] || { echo "::error::girdi (sadece / haric)"; exit 1; }
           if [ "$MOD" != geri_al ]; then [[ "$HK" =~ ^[0-9]+$ ]] || { echo "::error::kuru / yaz icin hazir_kosu (run_id)"; exit 1; }; fi
@@ -177,6 +180,7 @@ jobs:
           MOD: ${{ inputs.mod }}
           PD: ${{ inputs.plan_damga }}
           SA: ${{ inputs.sadece }}
+          MY: ${{ inputs.metin_yaz }}
           HA: ${{ inputs.haric }}
           AI: ${{ inputs.azami_ilan }}
           KT: ${{ inputs.kurtar }}
@@ -184,7 +188,7 @@ jobs:
           set +e -o pipefail
           if [ "$MOD" = kuru ]; then
             python3 scripts/etsy/kupa_galeri78.py kuru --liste _work/liste.csv --kaynak _work/KAYNAK.csv --out _out --sadece "$SA" --haric "$HA" \
-              --ilerleme _work/ILERLEME.json 2>&1 | tee _work/kosu.log
+              --ilerleme _work/ILERLEME.json $([ "$MY" = true ] && echo --metin-yaz) 2>&1 | tee _work/kosu.log
             echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
           elif [ "$MOD" = yaz ]; then
             if [ -z "$PARTI" ]; then
@@ -195,6 +199,7 @@ jobs:
                   --yedek-liste _work/YEDEK_LSJSON.json --yedek-uzak "$Y/$PD" --devam _work/DEVAM.json --ilerleme _work/ILERLEME.json
                   --devam-ilan-dir _work/devam_ilan --devam-hedef-kok "$O/DEVAM_ILAN/$PD" --azami-ilan "$AI")
             [ "$KT" = true ] && args+=(--kurtar)
+            [ "$MY" = true ] && args+=(--metin-yaz)
             python3 scripts/etsy/kupa_galeri78.py yaz "${args[@]}" 2>&1 | tee _work/kosu.log
             echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
           else
