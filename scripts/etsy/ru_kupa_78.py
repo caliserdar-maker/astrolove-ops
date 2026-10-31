@@ -101,7 +101,7 @@ def main(argv=None):
         for s in satir:
             if s["durum"] != "PASS":
                 f.write(f"- FAIL {s['cift']}: {s['hata']}\n")
-        f.write("\nHedef EN: foto atiflari numarasiz, gorsel adiyla (See the style photos / See the sizes photo / See the personalization photo; Serdar 31 Eki 2a) + Latin harf notu (6a); "
+        f.write("\nHedef EN: foto atiflari numarasiz, gorsel adiyla (See the style photos / See the sizes photo / See the names and message photo; Serdar 31 Eki 2a) + Latin harf notu (6a); "
                 "ayni burcta isim satirlari Left name / Right name -> First Name / Second Name (Serdar 30 Eki). "
                 "EN ve RU yazimi Serdar + Lena onayindan sonra, ayri onayla.\n")
     print(f"KUPA RU 78: PASS {n_pass}/{len(satir)}")

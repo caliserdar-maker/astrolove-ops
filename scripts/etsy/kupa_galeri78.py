@@ -296,7 +296,7 @@ def hedef_en(d0, a, b):
     -> (yeni, durum, hata[])."""
     import ru_kupa as RK
     deg = []
-    if re.search(r"See (?:photos? |the [a-z]+ photos?)", d0):
+    if re.search(r"See (?:photos? |the [a-z]+(?: [a-z]+)* photos?)", d0):
         try:
             d0, deg = RK.galeri_en(d0)
         except ValueError as e:

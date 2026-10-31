@@ -29,8 +29,8 @@ ISIM_RU = {"Left name": "Имя слева", "Right name": "Имя справа"
 
 
 FOTO_AD_RU = {"the style photos": "фото стилей", "the sizes photo": "фото с размерами",
-              "the personalization photo": "фото с персонализацией"}   # Serdar 31 Eki 2a: numara yok, gorsel adi
-FOTO_BOLUM = {"stil": "the style photos", "boy": "the sizes photo", "kisisel": "the personalization photo"}
+              "the names and message photo": "фото с именами и надписью"}   # Serdar 31 Eki 2a: numara yok, gorsel adi
+FOTO_BOLUM = {"stil": "the style photos", "boy": "the sizes photo", "kisisel": "the names and message photo"}
 
 
 def foto_ru(s, bolum):
@@ -111,7 +111,7 @@ LATIN_RU = "Пожалуйста, используйте латинские бу
 # Serdar 31 Eki 2a: aciklamada foto NUMARASI yok (Etsy videoyu 2. siraya koyuyor, numara kayar); gorsel adiyla atif.
 FOTO_YENI = {"stil": ("an evil eye on the back. See photo 4.", "an evil eye on the back. See the style photos."),
              "boy": ("Same design on both. See photo 5.", "Same design on both. See the sizes photo."),
-             "kisisel": ("Please check your spelling. See photos 3 and 6.", "Please check your spelling. See the personalization photo.")}
+             "kisisel": ("Please check your spelling. See photos 3 and 6.", "Please check your spelling. See the names and message photo.")}
 
 
 def p_kisisel(m, ctx):
@@ -163,12 +163,12 @@ KALIP = [
                 r"the two of you\.(?: A thoughtful choice when you are looking for (.+)\.)?"), p_giris),
     (re.compile(r"\[ 8 STYLES: THE ORCHARD WE KEEP \]\nOrange Blossom, Purple Fig, Olive Breeze, Pomegranate Bloom, Almond Blossom, "
                 r"Lemon Grove, Blue Grape or Golden Loquat\. Every style of this zodiac couple mug has the same " + B_RX + " and "
-                + B_RX + r" symbol and an evil eye on the back\. See (photos? [\d a-z]+|the [a-z]+ photos?)\."), p_stil),
-    (re.compile(r"\[ TWO SIZES \]\n- 11 oz \(325 ml\)\n- 15 oz \(444 ml\)\nSame design on both\. See (photos? [\d a-z]+|the [a-z]+ photos?)\."), p_boy),
+                + B_RX + r" symbol and an evil eye on the back\. See (photos? [\d a-z]+|the [a-z]+(?: [a-z]+)* photos?)\."), p_stil),
+    (re.compile(r"\[ TWO SIZES \]\n- 11 oz \(325 ml\)\n- 15 oz \(444 ml\)\nSame design on both\. See (photos? [\d a-z]+|the [a-z]+(?: [a-z]+)* photos?)\."), p_boy),
     (re.compile(r"\[ HOW TO PERSONALIZE \]\nWrite three lines in the personalization box:\n1\. " + ISIM_RX + r" \(up to (\d+) "
                 r"letters\)\n2\. " + ISIM_RX + r" \(up to (\d+) letters\)\n3\. Message \(one line, up to (\d+) characters including "
                 r"spaces and punctuation\)\n(" + re.escape(LATIN_EN) + r"\n)?Leave the message blank and we print:\n([^\n]+)\nPlease check your spelling\. See "
-                r"(photos? [\d a-z]+|the [a-z]+ photos?)\."), p_kisisel),
+                r"(photos? [\d a-z]+|the [a-z]+(?: [a-z]+)* photos?)\."), p_kisisel),
 ]
 
 
@@ -200,7 +200,7 @@ def hedef_kapisi(en):
     h += [f"foto {ad}: eski '{e}' kaldi" for ad, (e, y) in FOTO_YENI.items() if e in en]
     if en.count(LATIN_EN) != 1:
         h.append("Latin harf notu yok / birden cok")
-    ref = re.findall(r"See (photos? [\d a-z]+|the [a-z]+ photos?)\.", en)
+    ref = re.findall(r"See (photos? [\d a-z]+|the [a-z]+(?: [a-z]+)* photos?)\.", en)
     if len(ref) != 3:
         h.append(f"'See ...' foto atfi {len(ref)} (3 beklenir)")
     if any(re.search(r"\d", r) or r not in FOTO_AD_RU for r in ref):

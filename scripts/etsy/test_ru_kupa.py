@@ -34,7 +34,7 @@ k("giris kuyrugu datif (Раку или Весам)", "подарок Раку �
 k("beyan RU 2. paragraf", ru.split("\n\n")[1] == RU_BEYAN)
 k("isim satirlari burca gore", "1. Имя для знака «Рак» (до 10 букв)\n2. Имя для знака «Весы» (до 10 букв)" in ru)
 k("foto atiflari gorsel adiyla, RU'da rakam yok", "Смотрите фото стилей." in ru and "Смотрите фото с размерами." in ru
-  and "Смотрите фото с персонализацией." in ru and not __import__("re").search(r"фото \d", ru))
+  and "Смотрите фото с именами и надписью." in ru and not __import__("re").search(r"фото \d", ru))
 k("bos mesaj metni Ingilizce aynen", "\nMy favorite place is with you\n" in ru)
 k("tire yok, yasak yok", not any(c in ru for c in "—–") and not R.E.RU_YASAK.search(ru))
 e = en("Leo", "Leo", "Leo gifts")
@@ -85,13 +85,13 @@ k("giris paragrafi yoksa isim satiri FAIL", not kon["pass_"])
 e0 = en_eski("Cancer", "Libra", "Cancer gifts or Libra gifts")
 e1, deg = R.galeri_en(e0)
 k("galeri_en: foto numarasi yok, gorsel adi (Serdar 31 Eki 2a) + Latin notu", deg == ["foto_stil", "foto_boy", "foto_kisisel", "latin"]
-  and "back. See the style photos." in e1 and "both. See the sizes photo." in e1 and "spelling. See the personalization photo." in e1
+  and "back. See the style photos." in e1 and "both. See the sizes photo." in e1 and "spelling. See the names and message photo." in e1
   and not __import__("re").search(r"See photos? \d", e1)
   and "punctuation)\n" + R.LATIN_EN + "\nLeave the message blank" in e1 and not R.hedef_kapisi(e1) and R.hedef_kapisi(e0), deg)
 k("galeri_en idempotan (ikinci kosu degisiklik yok)", R.galeri_en(e1) == (e1, []))
 ru, kon = R.kur(e1)
-k("RU: фото стилей / с размерами / с персонализацией, Latin RU satiri, PASS", kon["pass_"] and "Смотрите фото стилей." in ru
-  and "Смотрите фото с размерами." in ru and "Смотрите фото с персонализацией." in ru and "знаки препинания)\n" + R.LATIN_RU + "\nЕсли вы оставите" in ru, kon["hata"])
+k("RU: фото стилей / с размерами / с именами и надписью, Latin RU satiri, PASS", kon["pass_"] and "Смотрите фото стилей." in ru
+  and "Смотрите фото с размерами." in ru and "Смотрите фото с именами и надписью." in ru and "знаки препинания)\n" + R.LATIN_RU + "\nЕсли вы оставите" in ru, kon["hata"])
 k("RU tire / yasak yok", not any(c in ru for c in "—–") and not R.E.RU_YASAK.search(ru))
 e2, d2 = R.kupa_en(en_eski("Leo", "Leo", "Leo gifts"), "Leo", "Leo")
 k("ayni burc: kupa_en hem isim hem galeri", d2 == "DEGISTI" and not R.hedef_kapisi(e2) and R.kur(e2)[1]["pass_"])
