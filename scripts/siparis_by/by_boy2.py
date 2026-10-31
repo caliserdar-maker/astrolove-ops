@@ -4,11 +4,12 @@ olceklenmez; yalniz esit oranli olcek; aynalama / desen kopyasi yok; urun sembol
 Iki yontem, 8x10 (4:5) cizimden (bizim-yilimiz-v3 by_poster, KOD_REF; dosya degistirilmez):
   a) KIRP : tasarim esit olcekle yeni orani kaplayacak kadar buyur, tasan yan kenarlar kirpilir. Kapi: kirpilan bantta oge pikseli (yazi /
            sembol farki + zemin uzerindeki cizgisel ogeler: yay, cerceve, yaprak, yildiz) 0 olmali.
-  b) UZAT : tasarim olcek 1 (birebir) ortada; eksik ust / alt bant YALNIZ zeminin duz rengi / gecisi + olculu cok olcekli gren ile dolar
+  b) GENISLET : tasarim olcek 1 (birebir) ortada; eksik ust / alt bant YALNIZ zeminin duz rengi / gecisi + olculu cok olcekli gren ile dolar
            (kopya / ayna yok). Renk: kenar seridinde ogeler haric sutun medyani, yatayda W/6 yumusak; dikis: 2 x m satirlik gecis, ozgun
            piksele dokunmadan. Kapali sekiller (cerceve, yay) olceklenmez. Kenar satirina oge degiyorsa (yaprak) ek o kenara konmaz
            (tamami diger kenarda); iki kenar da temasliysa FAIL (dikiste kesik gorunur). Kapi: tasarim blogu birebir.
-Olcum (her ornek): yay ve sembol cevre kutusu en / boy orani 8x10 ile (son ornek master olcegine indirilerek) +-%1; x ve y olcegi esit.
+Olcum (inceleme 31 Eki): CIKTI dosyasi ile 8x10 arasinda SIFT + RANSAC afin, x ve y olcegi ayri (fark <= %1); b icin dikis kapisi
+(kanal ortalamasi, bant gecis std orani; ONERI esik). Her stil x boy icin hicbir yontem PASS degilse cikis 1.
 Kullanim: by_boy2.py --kod <bizim-yilimiz> --pair CANCER_LIBRA --stiller 1,2 --boylar 12x18,A2 --scale 2 --out <dir>"""
 import argparse
 import json
@@ -91,20 +92,29 @@ def yontem_b(a, bg, r, seed=7):
     def gren(sat, msk, n, tohum):
         """cok olcekli gren: kaynak seridin bant gecis std'leri (sigma 1-3, 3-10, 10-30) olculur, ayni std'li sentetik gurultu."""
         rng = np.random.default_rng(tohum)
-        L = sat.mean(2)
-        out = np.zeros((n, W), np.float32)
+        out = np.zeros((n, W, 3), np.float32)
         for s1, s2 in ((1, 3), (3, 10), (10, 30)):
-            bp = cv2.GaussianBlur(L, (0, 0), s1) - cv2.GaussianBlur(L, (0, 0), s2)
-            std = float(bp[~msk].std()) if (~msk).any() else 0.0
             no = rng.normal(0, 1, (n, W)).astype(np.float32)
             no = cv2.GaussianBlur(no, (0, 0), s1) - cv2.GaussianBlur(no, (0, 0), s2)
-            out += no / max(float(no.std()), 1e-6) * std
-        return out[..., None]
+            no /= max(float(no.std()), 1e-6)
+            for ch in range(3):                                # kanal basina std (inceleme 31 Eki: tek parlaklik greni renksizdi)
+                L = sat[..., ch]
+                bp = cv2.GaussianBlur(L, (0, 0), s1) - cv2.GaussianBlur(L, (0, 0), s2)
+                std = float(bp[~msk].std()) if (~msk).any() else 0.0
+                out[..., ch] += no * std
+        return out
 
     def bant(sat, msk, n, tohum, ust):
         c = renk(sat, msk)
         dol = np.repeat(c[None], n, 0) + gren(sat, msk, n, tohum)
-        kenar = cv2.GaussianBlur(sat.mean(0, keepdims=True), (0, 0), sigmaX=W / 60, sigmaY=0.1)[0]   # ozgun kenarin yumusak rengi
+        # ozgun kenarin yumusak rengi: yalniz kenara en yakin m/3 satir, ogeler (cerceve, yildiz) HARIC (inceleme 31 Eki: maskesiz ortalama
+        # cerceve / yildiz pikselini bant rengine sizdiriyordu, Starlit dRGB ~5)
+        q = max(4, m // 3)
+        ks, km = (sat[-q:], msk[-q:]) if ust else (sat[:q], msk[:q])
+        v = ks.copy(); v[km] = np.nan
+        kn = np.nanmean(v, axis=0)
+        kn = np.where(np.isnan(kn), np.nanmean(kn, axis=0), kn)
+        kenar = cv2.GaussianBlur(kn[None].astype(np.float32), (0, 0), sigmaX=W / 60, sigmaY=0.1)[0]
         k = min(n, 2 * m)
         for i in range(k):                                     # dikise yakin satirlar ozgun kenar rengine yaklasir
             t = (i + 1) / (k + 1)
@@ -115,12 +125,66 @@ def yontem_b(a, bg, r, seed=7):
     ust = bant(f[:m], ozel[:m], eu, seed, True) if eu else np.zeros((0, W, 3), np.float32)
     alt = bant(f[H - m:], ozel[H - m:], ea, seed + 1, False) if ea else np.zeros((0, W, 3), np.float32)
     out = np.clip(np.round(np.concatenate([ust, f, alt], 0)), 0, 255).astype(np.uint8)
-    birebir = bool(np.array_equal(out[eu:eu + H], a))
+    birebir = bool(np.array_equal(out[eu:eu + H], a))          # kurgu geregi True (bilgi; kanit degil, inceleme 31 Eki)
     kesik = (tu > esik and eu) or (ta > esik and ea)
-    return out, dict(ek_ust=eu, ek_alt=ea, tasarim_birebir=birebir, kenara_degen_oge_px=dict(ust=tu, alt=ta, esik=esik),
-                     pass_=birebir and not kesik,
+    dk = dikis_kapisi(out, ozel, eu, ea, H)
+    return out, dict(ek_ust=eu, ek_alt=ea, tasarim_birebir=birebir, kenara_degen_oge_px=dict(ust=tu, alt=ta, esik=esik), dikis=dk,
+                     pass_=birebir and not kesik and dk["pass_"],
                      not_=("kenara degen oge dikiste kesik gorunur" if kesik else
                            "ek yalniz temiz kenarda (asimetrik)" if eu in (0, ek) and ek else ""))
+
+
+DIKIS_ORT = 1.5            # kanal ortalamasi farki (seviye)    -- ONERI esik (bagimsiz inceleme 31 Eki); onayli dosyadan olculmedi,
+DIKIS_STD = (0.85, 1.15)   # bant gecis std orani sentetik/ozgun  Serdar onayi olmadan uretim esigi degildir
+
+
+def dikis_kapisi(out, ozel, eu, ea, H):
+    """Eklenen bant ile ozgun blok arasindaki her dikiste, iki yanda w satir (oge pikselleri haric): kanal ortalamasi farki ve
+    bant gecis (1-3, 3-10, 10-30 px) std orani. Kurgu geregi gecen olcu degil: dolgu dokusunu ozgun dokuyla kiyaslar."""
+    f = out.astype(np.float32)
+    W = out.shape[1]
+    w = max(24, round(0.01 * H))
+    tam = np.zeros(out.shape[:2], bool); tam[eu:eu + H] = cv2.dilate(ozel.astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
+    sonuc = {}
+    for ad, y in (("ust", eu if eu else None), ("alt", eu + H if ea else None)):
+        if y is None:
+            continue
+        A, B = slice(y - w, y), slice(y, y + w)        # A ustte, B altta
+        mA, mB = ~tam[A], ~tam[B]
+        ort = [round(float(f[A][..., c][mA].mean() - f[B][..., c][mB].mean()), 2) for c in range(3)]
+        oran = {}
+        y0, y1 = max(0, y - w - 100), min(f.shape[0], y + w + 100)      # yalniz dikis cevresi (hiz)
+        P = f[y0:y1]
+        A2, B2 = slice(y - w - y0, y - y0), slice(y - y0, y + w - y0)
+        for s1, s2 in ((1, 3), (3, 10), (10, 30)):
+            L = cv2.GaussianBlur(P, (0, 0), s1) - cv2.GaussianBlur(P, (0, 0), s2)
+            sa, sb = float(L[A2][mA].std()), float(L[B2][mB].std())
+            sen, oz = (sa, sb) if ad == "ust" else (sb, sa)
+            oran[f"{s1}-{s2}"] = round(sen / max(oz, 1e-6), 3)
+        ok = max(abs(v) for v in ort) <= DIKIS_ORT and all(DIKIS_STD[0] <= v <= DIKIS_STD[1] for v in oran.values())
+        sonuc[ad] = dict(satir=y, ort_fark=ort, std_oran=oran, pass_=ok)
+    return dict(pass_=all(v["pass_"] for v in sonuc.values()), **sonuc)
+
+
+def afin_olcek(son, master):
+    """Cikti dosyasi ile 8x10 master arasinda SIFT eslesme + RANSAC afin: x ve y olcegi AYRI olculur (kurgudan bagimsiz kanit)."""
+    def kucuk(i):
+        k = 1200 / i.shape[1]
+        return cv2.cvtColor(cv2.resize(i, (1200, round(i.shape[0] * k)), interpolation=cv2.INTER_AREA), cv2.COLOR_RGB2GRAY), k
+    (g1, k1), (g2, k2) = kucuk(son), kucuk(master)
+    sift = cv2.SIFT_create(4000)
+    p1, d1 = sift.detectAndCompute(g1, None); p2, d2 = sift.detectAndCompute(g2, None)
+    if d1 is None or d2 is None:
+        return None
+    es = [m for m, n in cv2.BFMatcher().knnMatch(d2, d1, k=2) if m.distance < 0.75 * n.distance]
+    if len(es) < 20:
+        return None
+    a = np.float32([p2[m.queryIdx].pt for m in es]) / k2; b = np.float32([p1[m.trainIdx].pt for m in es]) / k1
+    M, inl = cv2.estimateAffine2D(a, b, ransacReprojThreshold=2.0 / k1)
+    if M is None:
+        return None
+    sx, sy = float(np.hypot(M[0, 0], M[1, 0])), float(np.hypot(M[0, 1], M[1, 1]))
+    return dict(sx=round(sx, 5), sy=round(sy, 5), sx_sy_fark=round(abs(sx / sy - 1), 5), eslesme=int(inl.sum()))
 
 
 def aile_png(kod, stil, scale, tmp, pair):
@@ -152,10 +216,9 @@ def main(argv=None):
                             .resize((W, H), Image.LANCZOS))
             Image.fromarray(master).save(out / f"{STIL[st]}_8x10.jpg", quality=95, subsampling=0, dpi=(300, 300))
             kontak.append((f"{STIL[st]} 8x10", master))
-            d0, z0 = maskeler(master, bg)
             for boy in a.boylar.split(","):
                 tw, th = BB.hedef_px(boy)
-                for yon, fn in (("a_kirp", yontem_a), ("b_uzat", yontem_b)):
+                for yon, fn in (("a_kirp", yontem_a), ("b_genislet", yontem_b)):
                     im, r = fn(master, bg, tw / th)
                     kayit = dict(stil=STIL[st], boy=boy, yontem=yon, **r)
                     if im is not None:
@@ -163,35 +226,30 @@ def main(argv=None):
                         son = cv2.resize(im, (tw, th), interpolation=cv2.INTER_LANCZOS4 if sx > 1 else cv2.INTER_AREA)
                         ad = f"{STIL[st]}_{boy}_{yon}.jpg"
                         Image.fromarray(son).save(out / ad, quality=95, subsampling=0, dpi=(300, 300))
-                        # olcum: sondaki yay / sembol kutusu (master genisligine indirip; b'de dikey kayma eu)
-                        k = cv2.resize(son, (W, round(th * W / tw)), interpolation=cv2.INTER_AREA)
-                        dy = r.get("ek_ust", 0) if yon == "b_uzat" else 0
-                        olc = {}
-                        for oad, m0 in (("yay_cerceve", z0), ("sembol_yazi", d0)):
-                            r0, b0 = kutu_orani(m0)
-                            if yon == "b_uzat" and b0:
-                                ms = np.zeros(k.shape[:2], bool); ms[dy:dy + H] = m0[:k.shape[0] - dy]
-                                r1, b1 = kutu_orani(ms)
-                            else:
-                                r1, b1 = r0, b0
-                            olc[oad] = dict(oran_8x10=round(r0, 4) if r0 else None, oran_ornek=round(r1, 4) if r1 else None,
-                                            fark=round(abs(r1 / r0 - 1), 5) if r0 and r1 else None)
-                        kayit.update(dosya=ad, px=[tw, th], dpi=300, olcek_x=round(sx, 5), olcek_y=round(sy, 5),
-                                     tek_yonlu_olcek=round(abs(sx / sy - 1), 5), olcum=olc,
-                                     pass_=bool(r["pass_"] and abs(sx / sy - 1) <= 0.002
-                                                and all(v["fark"] is not None and v["fark"] <= ORAN_TOL for v in olc.values())))
+                        # olcum (inceleme 31 Eki): CIKTI dosyasi ile master arasinda SIFT afin; x ve y olcegi ayri olculur
+                        af = afin_olcek(son, master)
+                        kayit.update(dosya=ad, px=[tw, th], dpi=300, afin=af,
+                                     pass_=bool(r["pass_"] and af and af["sx_sy_fark"] <= ORAN_TOL))
                         kontak.append((f"{STIL[st]} {boy} {yon}", son))
+                        for kn, dk in (r.get("dikis") or {}).items():     # dikis yakin plani (gercek piksel, 1200 x 600)
+                            if isinstance(dk, dict):
+                                y = round(dk["satir"] * th / im.shape[0]); x0 = tw // 2 - 600
+                                Image.fromarray(son[max(0, y - 300):y + 300, x0:x0 + 1200]).save(
+                                    out / f"DIKIS_{STIL[st]}_{boy}_{kn}.jpg", quality=92)
                     R.append(kayit)
                     print(f"{STIL[st]} {boy} {yon}: {'PASS' if kayit['pass_'] else 'FAIL'} {kayit.get('hata') or ''} {kayit.get('not_') or ''}",
                           flush=True)
     (out / "OLCUM.json").write_text(json.dumps(R, indent=1, default=str), encoding="utf-8")
     with open(out / "TABLO.csv", "w", encoding="utf-8") as f:
-        f.write("stil,boy,yontem,sonuc,piksel,tek_yonlu_olcek,yay_oran_fark,sembol_oran_fark,kirpilan_oge_px,kenara_degen_oge_px,not\n")
+        f.write("stil,boy,yontem,sonuc,piksel,afin_sx,afin_sy,sx_sy_fark,afin_eslesme,dikis_ust,dikis_alt,kirpilan_oge_px,ek_ust_alt,not\n")
         for r in R:
-            o = r.get("olcum") or {}
+            af = r.get("afin") or {}
+            dk = r.get("dikis") or {}
+            dd = lambda k: "" if k not in dk else ("PASS" if dk[k]["pass_"] else "FAIL") + f" ort{dk[k]['ort_fark']} std{list(dk[k]['std_oran'].values())}"
             f.write(f"{r['stil']},{r['boy']},{r['yontem']},{'PASS' if r['pass_'] else 'FAIL'},{'x'.join(map(str, r.get('px', [])))},"
-                    f"{r.get('tek_yonlu_olcek', '')},{(o.get('yay_cerceve') or {}).get('fark', '')},{(o.get('sembol_yazi') or {}).get('fark', '')},"
-                    f"{r.get('kirpilan_oge_px', '')},\"{r.get('kenara_degen_oge_px', '')}\",{r.get('hata') or r.get('not_') or ''}\n")
+                    f"{af.get('sx', '')},{af.get('sy', '')},{af.get('sx_sy_fark', '')},{af.get('eslesme', '')},\"{dd('ust')}\",\"{dd('alt')}\","
+                    f"{r.get('kirpilan_oge_px', '')},{str(r.get('ek_ust', '')) + '/' + str(r.get('ek_alt', '')) if 'ek_ust' in r else ''},"
+                    f"{r.get('hata') or r.get('not_') or ''}\n")
     Hk = 900
     hs = [Image.fromarray(i).resize((round(i.shape[1] * Hk / i.shape[0]), Hk), Image.LANCZOS) for _, i in kontak]
     Kt = Image.new("RGB", (sum(h.size[0] for h in hs) + 20 * len(hs), Hk), (236, 236, 236)); x = 0
@@ -199,7 +257,9 @@ def main(argv=None):
         Kt.paste(h, (x, 0)); x += h.size[0] + 20
     Kt.save(out / "KONTAK_YONTEM.jpg", quality=88)
     print("OZET", sum(r["pass_"] for r in R), "/", len(R), "PASS")
-    return 0
+    # her stil x boy icin en az bir yontem PASS olmali; yoksa cikis 1 (inceleme 31 Eki: hep 0 donuyordu)
+    ok = all(any(x["pass_"] for x in R if (x["stil"], x["boy"]) == k) for k in {(x["stil"], x["boy"]) for x in R})
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":
