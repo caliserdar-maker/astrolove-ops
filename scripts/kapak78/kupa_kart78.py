@@ -8,6 +8,11 @@ Gorunumler wa-kupa-kart-ornek.yml mod=uret yoluyla ayni: orchard_gorunum.py (_v1
 kartlarda kullanilmaz). Sembol kupa-printful-sonuc ac9aa71.
 AYNI BURC CIFTLERI (12, orn. LEO_LEO; Serdar 30 Eki): K03 etiketleri "Name Under X" cifti yerine "First Name" / "Second Name". Yalniz bu
 sarmalayicida: K03 cizime giden etiketler ve metin kapisinin beklenen listesi birlikte degisir (diger satirlar W.beklenen'den aynen).
+AYNI BURC K02 (Serdar 31 Eki karar 2b): alt baslik "<A> and <A> joined in an original AstroLoveArt design" yerine galeri alt metniyle
+harfi harfine ayni cumle (data/pod/kupa_galeri78_alt.csv sira 2 alt_ayni_burc, <A> yerine burc). Yalniz o satir degisir (cizim yeri,
+punto, renk ayni; K.yaz tek satir, sigmazsa DUR); metin kapisinin beklenen listesi birlikte degisir.
+ISTISNA (Serdar 31 Eki karar 1a): yalniz GEMINI_SCORPIO K05 kopuk ton kapisi; olcum BIREBIR (3 px, parca [2393, 1489, 20, 10, 3], en buyuk
+fark 4/255) ise kapi gecer ve istisna SONUC / MANIFEST / OZET'e yazilir. Olcum farkliysa kapi aynen FAIL. Kapi kurali ve ortak kod degismez.
 Her cift try/except: bir kart FAIL ise ciftin HICBIR karti yazilmaz; neden SONUC_<CIFT>.json'a yazilir.
 Kullanim:
   kupa_kart78.py uret --ciftler <dosya, satir basina CIFT> --ko <kupa_orchard> --sembol-kok <kupa_uretim/sembol> --v12 <python> --is <dir> --out <dir>
@@ -33,7 +38,20 @@ ZEMIN_SAHNE = ("tek_on", "tek_arka", "m15") + tuple(f"stil_{s}" for s in ("orang
                                                                              "grape", "loquat"))
 AYNI_ETIKET = ("First Name", "Second Name")
 KIYAS_ORT, KIYAS_MAX = 1.0, 16          # gorev: sha farkliysa ortalama mutlak fark <= 1,0 ve en buyuk fark <= 16
-MANIFEST_ALAN = ["cift", "kart", "galeri_no", "dosya", "sha256", "durum", "neden"]
+MANIFEST_ALAN = ["cift", "kart", "galeri_no", "dosya", "sha256", "durum", "neden", "istisna"]
+KOK = HERE.parents[1]
+GALERI_ALT = KOK / "data/pod/kupa_galeri78_alt.csv"
+ISTISNA = {("GEMINI_SCORPIO", "K05"): dict(kapi="kopuk_ton", px=3, parca=[[2393, 1489, 20, 10, 3]], max_fark=4,
+                                           karar="Serdar 31 Eki karar 1a: yalniz bu cift + kart; olculen 3 px, en buyuk fark 4/255")}
+
+
+def k02_ayni_metin(a):
+    """Ayni burc K02 alt basligi = galeri alt metni sira 2 alt_ayni_burc (tek kaynak)."""
+    r = next(x for x in csv.DictReader(open(GALERI_ALT, encoding="utf-8")) if x["sira"] == "2")
+    t = (r["alt_ayni_burc"] or "").strip()
+    if not t.startswith("Two <A> signs joined"):
+        raise SystemExit(f"DUR: galeri alt metni sira 2 alt_ayni_burc beklenen kalipta degil: {t!r}")
+    return t.replace("<A>", a)
 
 
 def ayni_burc(a, b):
@@ -44,6 +62,10 @@ def beklenen_cift(W, a, b):
     """W.beklenen + ayni burcta K03 etiketleri First Name / Second Name (yalniz o iki oge degisir)"""
     bek = W.beklenen(a, b)
     if ayni_burc(a, b):
+        k2 = list(bek["K02_SEMBOL"])
+        assert k2[1] == f"{a} and {b} joined in an original AstroLoveArt design", k2
+        k2[1] = k02_ayni_metin(a)
+        bek["K02_SEMBOL"] = k2
         k = list(bek["K03_KISISEL"])
         i = k.index(f"Name Under {a}")
         assert k[i + 1] == f"Name Under {b}", k
@@ -60,19 +82,66 @@ def k03_ayni(W, S, a, b, sd, bek):
     return im, dict(o, kirpim=dict(tek_on=ko, tek_arka=ka)), kut
 
 
-def kartlar(W, S, K, c, a, b, sem, sd):
+def sembol_ayni(S, K, a, b, sem, alt, yeni, olcu):
+    """S.sembol_kart AYNEN; yalniz alt baslik satiri (K.yaz cagrisi) yeni metinle. Genislik olcusu olcu'ya yazilir."""
+    eski, asil = f"{a} and {b} joined in an original AstroLoveArt design", K.yaz
+
+    def yaz(d, st, satirlar, x, y, hiza="left", gen=None):
+        if satirlar == [eski]:
+            satirlar = [yeni]
+            olcu.update(metin=yeni, genislik_px=round(K.genislik(st, yeni)), izin_px=round(gen) if gen else None, satir=1,
+                        eski_genislik_px=round(K.genislik(st, eski)))
+        return asil(d, st, satirlar, x, y, hiza, gen)
+    K.yaz = yaz
+    try:
+        r = S.sembol_kart(a, b, sem, alt)
+    finally:
+        K.yaz = asil
+    if olcu.get("metin") != yeni:
+        raise SystemExit("DUR: K02 alt baslik satiri bulunamadi (kart_sablon degismis olabilir)")
+    return r
+
+
+def kartlar(W, S, K, c, a, b, sem, sd, kayit=None):
     """-> {kart: jpeg bayt}, rapor. kart_isle kapilarindan biri FAIL ise SystemExit (hicbir kart donmez)"""
+    import numpy as np
+    kayit = {} if kayit is None else kayit
     bek = beklenen_cift(W, a, b)
     yok = lambda f: (lambda: (*f(), ()))
     k03 = (lambda: k03_ayni(W, S, a, b, sd, bek)) if ayni_burc(a, b) else (lambda: W.k03(a, b, sd))
     alt = bek["K02_SEMBOL"][-1]
-    islem = [(f"KUPA_{c}_K02_SEMBOL.jpg", "K02_SEMBOL", lambda: S.sembol_kart(a, b, sem, alt)),
+    k02o = {}
+    k02 = (lambda: sembol_ayni(S, K, a, b, sem, alt, bek["K02_SEMBOL"][1], k02o)) if ayni_burc(a, b) else (lambda: S.sembol_kart(a, b, sem, alt))
+    islem = [(f"KUPA_{c}_K02_SEMBOL.jpg", "K02_SEMBOL", k02),
              (f"KUPA_{c}_K03_KISISEL.jpg", "K03_KISISEL", yok(k03)),
              (f"KUPA_{c}_K05_BOYUT.jpg", "K05_BOYUT", yok(lambda: W.k05(sd))),
              (f"KUPA_{c}_K07_SUREC.jpg", "K07_SUREC", yok(lambda: W.k07(sd))),
              (f"KUPA_{c}_K04_STIL.jpg", "K04_STIL", yok(lambda: W.k04(sd)))]      # ad "KUPA_" ile baslar: kart_isle zemin kapisi
     K.YAZILAR.clear(); K.SATIRLAR.clear(); K.KUTULAR.clear()
-    _, rapor, jb = W.kart_isle(islem, bek)
+    simdi, istisna, asil = {}, [], W.kopuk_ton
+    islem = [(ad, an, (lambda f, k: (lambda: (simdi.update(kart=k), f())[1]))(fn, ad.split("_")[-2])) for ad, an, fn in islem]
+
+    def kopuk(im, kutular, **kw):                       # yalniz ISTISNA'daki cift + kart + birebir olcum
+        n, liste = asil(im, kutular, **kw)
+        ist = ISTISNA.get((c, simdi.get("kart")))
+        if ist and n == ist["px"] and liste == ist["parca"]:
+            x, y, w_, h, _ = liste[0]
+            f = np.abs(np.asarray(im.convert("RGB")).astype(np.int16)[y:y + h, x:x + w_] - np.int16(K.rgb(K.ZEMIN))).max()
+            if int(f) <= ist["max_fark"]:
+                istisna.append(dict(kart=simdi["kart"], kapi=ist["kapi"], px=n, parca=liste, max_fark=int(f), karar=ist["karar"]))
+                return 0, []
+        return n, liste
+    W.kopuk_ton = kopuk
+    try:
+        _, rapor, jb = W.kart_isle(islem, bek)
+    finally:
+        W.kopuk_ton = asil
+    eksik = [k for (cc, k) in ISTISNA if cc == c and k not in {i["kart"] for i in istisna}]
+    if eksik:   # istisna tanimli ama olcum farkli: kapi zaten FAIL verirdi; burada yalniz bilgi
+        kayit["istisna_kullanilmadi"] = eksik
+    kayit["istisna"] = istisna
+    if k02o:
+        kayit["k02_ayni_burc"] = k02o
     return {ad.split("_")[-2]: v for ad, v in jb.items()}, rapor
 
 
@@ -102,11 +171,12 @@ def uret(a):
             if p.returncode:
                 raise SystemExit(f"DUR: orchard_gorunum rc {p.returncode}: {(p.stdout + p.stderr)[-600:]}")
             kayit["zemin"] = zemin(sd / "gorunum", sd)
-            jb, rapor = kartlar(W, S, K, c, A, B, sem, sd)
+            jb, rapor = kartlar(W, S, K, c, A, B, sem, sd, kayit)
             for kart, _, _ in KARTLAR:                        # hepsi PASS: simdi yaz
                 (out / f"{c}_{kart}.jpg").write_bytes(jb[kart])
+            ist = {i["kart"]: f"{i['kapi']} {i['px']} px max {i['max_fark']}/255 ({i['karar']})" for i in kayit.get("istisna") or []}
             kayit.update(durum="PASS", kartlar=[dict(kart=k, galeri_no=GALERI[k], dosya=f"{c}_{k}.jpg",
-                                                     sha256=hashlib.sha256(jb[k]).hexdigest()) for k, _, _ in KARTLAR],
+                                                     sha256=hashlib.sha256(jb[k]).hexdigest(), istisna=ist.get(k, "")) for k, _, _ in KARTLAR],
                          ayni_burc=ayni_burc(A, B), surum=K.SURUM,
                          olcu={ad.split("_")[-2]: {x: v for x, v in o.items() if x in ("olcek", "yerlesim", "zemin_kenar_p90_max",
                                                                                          "kopuk_ton_px", "kb")} for ad, o in rapor.items()})
@@ -146,7 +216,8 @@ REF_AD = {"K02": "SEMBOL", "K03": "KISISEL", "K05": "BOYUT", "K07": "SUREC", "K0
 def topla(a):
     import yd_kontak
     d, out = Path(a.dir), Path(a.out); out.mkdir(parents=True, exist_ok=True)
-    tum = [r["cift"] for r in csv.DictReader(open(a.ciftler_csv, encoding="utf-8-sig"))]
+    ab = {r["cift"]: (r["a"], r["b"]) for r in csv.DictReader(open(a.ciftler_csv, encoding="utf-8-sig"))}
+    tum = list(ab)
     secim = [x.strip() for x in Path(a.secim).read_text().split() if x.strip()]
     sira = [c for c in tum if c in set(secim)]
     satirlar, fail, pas = [], [], []
@@ -158,13 +229,13 @@ def topla(a):
                 p = d / x["dosya"]
                 ok = p.is_file() and hashlib.sha256(p.read_bytes()).hexdigest() == x["sha256"]
                 satirlar.append(dict(cift=c, kart=x["kart"], galeri_no=x["galeri_no"], dosya=x["dosya"], sha256=x["sha256"],
-                                     durum="PASS" if ok else "FAIL", neden="" if ok else "dosya yok / sha farkli"))
+                                     durum="PASS" if ok else "FAIL", neden="" if ok else "dosya yok / sha farkli", istisna=x.get("istisna", "")))
                 if ok:
                     subprocess.run(["cp", str(p), str(out / x["dosya"])], check=True)
             (pas if all(s["durum"] == "PASS" for s in satirlar if s["cift"] == c) else fail).append(c)
         else:
             fail.append(c)
-            satirlar += [dict(cift=c, kart=kk, galeri_no=g, dosya="", sha256="", durum="FAIL", neden=k.get("neden", "")[:400])
+            satirlar += [dict(cift=c, kart=kk, galeri_no=g, dosya="", sha256="", durum="FAIL", neden=k.get("neden", "")[:400], istisna="")
                          for kk, g, _ in KARTLAR]
         if f.exists():
             subprocess.run(["cp", str(f), str(out / f.name)], check=True)
@@ -176,6 +247,24 @@ def topla(a):
         kontak.append(dict(kart=kk, galeri_no=g, **yd_kontak.pafta(og, out / f"KONTAK_{kk}.jpg", 320, 10,
                                                                      f"KUPA {kk} galeri {g} | {len(sira)} cift | {a.kaynak}")))
         print(f"KONTAK_{kk}: hucre {kontak[-1]['hucre']} eksik {len(kontak[-1]['eksik'])}", flush=True)
+    ayni = [c for c in sira if ayni_burc(*ab[c])]
+    og = [(c, out / f"{c}_K02.jpg" if (out / f"{c}_K02.jpg").is_file() else None) for c in ayni]
+    if og:   # Serdar 31 Eki karar 2b: ayni burc K02 (12 kart) ayri KONTAK
+        k = yd_kontak.pafta(og, out / "KONTAK_K02_AYNI_BURC.jpg", 320, 6, f"KUPA K02 ayni burc {len(og)} cift | {a.kaynak}")
+        kontak.append(dict(kart="K02 ayni burc", galeri_no=2, **k))
+    degisim, deg_fail = [], []
+    if a.onceki:   # gece MANIFEST'iyle sha kaniti: yalniz izinli degisiklik (ayni burc K02 + gece FAIL olan cift)
+        once = {(r["cift"], r["kart"]): r for r in csv.DictReader(open(a.onceki, encoding="utf-8"))}
+        for r in satirlar:
+            o = once.get((r["cift"], r["kart"]))
+            ayni_sha = bool(o) and o["durum"] == "PASS" and o["sha256"] == r["sha256"]
+            izin = (r["kart"] == "K02" and r["cift"] in ayni) or (o is not None and o["durum"] != "PASS")
+            tur = "AYNI" if ayni_sha else ("IZINLI_DEGISIM" if izin else "IZINSIZ_DEGISIM")
+            degisim.append(dict(cift=r["cift"], kart=r["kart"], once=(o or {}).get("sha256", ""), simdi=r["sha256"], tur=tur))
+            if tur == "IZINSIZ_DEGISIM" or (izin and r["kart"] == "K02" and r["cift"] in ayni and ayni_sha):
+                deg_fail.append(f"{r['cift']} {r['kart']} {tur if tur != 'AYNI' else 'K02 degismedi'}")
+        with open(out / "DEGISIM.csv", "w", newline="", encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fieldnames=["cift", "kart", "once", "simdi", "tur"]); w.writeheader(); w.writerows(degisim)
     kiy = {}
     if a.ref:
         for kk, _, _ in KARTLAR:
@@ -183,7 +272,8 @@ def topla(a):
             kiy[kk] = kiyas(y, r) if y.is_file() and r.is_file() else dict(durum="FAIL", neden=f"dosya yok: yeni {y.is_file()} ref {r.is_file()}")
         (out / "KIYAS_CANCER_LIBRA.json").write_text(json.dumps(kiy, indent=1), encoding="utf-8")
     kiyas_ok = all(v["durum"] == "PASS" for v in kiy.values())
-    durum = "PASS" if not fail and kiyas_ok else "FAIL"
+    durum = "PASS" if not fail and kiyas_ok and not deg_fail else "FAIL"
+    istisnalar = [r for r in satirlar if r.get("istisna")]
     with open(out / "OZET.md", "w", encoding="utf-8") as fh:
         fh.write(f"# Kupa bilgi kartlari 78 (galeri 2-6)\n\n**{durum}** | cift {len(sira)} | PASS {len(pas)} | FAIL {len(fail)}\n\n"
                  f"Kaynak: {a.kaynak}. Etsy istegi yok. Kart: K02=2, K03=3, K05=4, K07=5, K04=6. Ayni burc K03: First Name / Second Name.\n"
@@ -192,6 +282,21 @@ def topla(a):
             fh.write("## FAIL ciftler (kart yazilmadi)\n\n")
             fh.writelines(f"- {c}: {next((s['neden'] for s in satirlar if s['cift'] == c and s['neden']), '')[:300]}\n" for c in fail)
             fh.write("\n")
+        fh.write("## Istisnalar (kapi kurali ve ortak kod degismedi)\n\n" + ("".join(f"- {r['cift']} {r['kart']}: {r['istisna']}\n"
+                                                                                     for r in istisnalar) or "- yok\n") + "\n")
+        if a.onceki:
+            from collections import Counter
+            say = Counter(d["tur"] for d in degisim)
+            fh.write(f"## Gece kosusuyla sha kiyasi ({a.onceki_ad or a.onceki})\n\nAYNI {say['AYNI']} | IZINLI_DEGISIM {say['IZINLI_DEGISIM']} | "
+                     f"IZINSIZ_DEGISIM {say['IZINSIZ_DEGISIM']}\n\n" + "".join(f"- {d['cift']} {d['kart']}: {d['tur']}\n" for d in degisim
+                                                                          if d["tur"] != "AYNI") + ("".join(f"- FAIL: {x}\n" for x in deg_fail)) + "\n")
+        if ayni:
+            fh.write("## Ayni burc K02 alt basligi (galeri alt metni sira 2)\n\n| cift | metin | genislik / izin px |\n|---|---|---|\n")
+            for c in ayni:
+                f = d / f"SONUC_{c}.json"
+                k2 = (json.loads(f.read_text(encoding="utf-8")).get("k02_ayni_burc") or {}) if f.exists() else {}
+                fh.write(f"| {c} | {k2.get('metin', '-')} | {k2.get('genislik_px', '-')} / {k2.get('izin_px', '-')} |\n")
+            fh.write("\n")
         if kiy:
             fh.write(f"## CANCER_LIBRA kiyasi (28 Eki onayli ornek; esik ort <= {KIYAS_ORT}, max <= {KIYAS_MAX})\n\n"
                      "| kart | sha esit | ort | max | durum |\n|---|---|---|---|---|\n")
@@ -199,7 +304,8 @@ def topla(a):
             fh.write("\n")
         fh.write("## KONTAK\n\n| dosya | galeri | hucre | boyut | eksik |\n|---|---|---|---|---|\n")
         fh.writelines(f"| {k['dosya']} | {k['galeri_no']} | {k['hucre']} | {k['boyut']} | {len(k['eksik'])} |\n" for k in kontak)
-    print(f"TOPLA {durum}: cift {len(sira)} PASS {len(pas)} FAIL {len(fail)} {' '.join(fail)} | kiyas "
+    print(f"TOPLA {durum}: cift {len(sira)} PASS {len(pas)} FAIL {len(fail)} {' '.join(fail)} | istisna {len(istisnalar)} | degisim FAIL "
+          f"{deg_fail[:5]} | kiyas "
           + " ".join(f"{k}:{v['durum']}(ort {v.get('ort')}, max {v.get('max')}, sha {v.get('sha_esit')})" for k, v in kiy.items()))
     return 0 if durum == "PASS" else 1
 
@@ -219,6 +325,8 @@ def main(argv=None):
     t.add_argument("--ciftler-csv", default="data/pod/yd78_ids.csv")
     t.add_argument("--ref", default="")
     t.add_argument("--kaynak", default="")
+    t.add_argument("--onceki", default="", help="gece MANIFEST.csv (sha kaniti)")
+    t.add_argument("--onceki-ad", default="")
     a = ap.parse_args(argv)
     return uret(a) if a.komut == "uret" else topla(a)
 

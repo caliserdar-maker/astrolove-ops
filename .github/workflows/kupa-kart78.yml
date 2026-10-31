@@ -5,6 +5,8 @@ name: kupa-kart78
 #   temiz/kupa-orchard 0196e37a (kupa_orchard), kupa-printful-sonuc ac9aa718 (kupa_uretim/sembol).
 # ciftler=CANCER_LIBRA: 28 Eki onayli ornekle kiyas (TEMP/KART_SABLON_ORNEK/<kiyas_damga>; sha esit ya da ort <= 1,0 ve max <= 16).
 # ciftler=HEPSI: 78 cift (data/pod/yd78_ids.csv), 16 parca paralel.
+# onceki_damga (Serdar 31 Eki): yalniz ciftler yeniden uretilir; diger ciftlerin kart + SONUC'u TEMP/KUPA_KART78/<onceki_damga>'dan alinir,
+#   78 cift birlestirilir ve gece MANIFEST'iyle sha kaniti (DEGISIM.csv; izinli: ayni burc K02 + gece FAIL cift; baska degisim FAIL).
 # Cikti: TEMP/KUPA_KART78/<damga>/ (HEPSI disinda <damga>_ORNEK): <CIFT>_K0N.jpg, MANIFEST.csv, KONTAK_K0N.jpg, OZET.md, SONUC_<CIFT>.json,
 #        KIYAS_CANCER_LIBRA.json; --immutable.
 permissions:
@@ -14,6 +16,7 @@ on:
     inputs:
       ciftler: {description: "virgullu cift anahtari ya da HEPSI (78)", required: true, default: "CANCER_LIBRA"}
       kiyas_damga: {description: "TEMP/KART_SABLON_ORNEK/<damga> (28 Eki onayli CANCER_LIBRA kupa kartlari); bos = kiyas yok", required: false, default: "20261028_155614"}
+      onceki_damga: {description: "TEMP/KUPA_KART78/<damga> gece kosusu; verilirse yeniden uretilmeyen ciftler oradan, 78 birlestirilir + sha kaniti", required: false, default: ""}
 jobs:
   kart:
     runs-on: ubuntu-latest
@@ -93,8 +96,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Girdi kapisi
-        env: {C: "${{ inputs.ciftler }}", R: "${{ inputs.kiyas_damga }}"}
-        run: '[[ "$C" =~ ^(HEPSI|[A-Z]+_[A-Z]+(,[A-Z]+_[A-Z]+)*)$ && "$R" =~ ^([0-9]{8}_[0-9]{6})?$ ]] || { echo "::error::girdi"; exit 1; }'
+        env: {C: "${{ inputs.ciftler }}", R: "${{ inputs.kiyas_damga }}", OD: "${{ inputs.onceki_damga }}"}
+        run: '[[ "$C" =~ ^(HEPSI|[A-Z]+_[A-Z]+(,[A-Z]+_[A-Z]+)*)$ && "$R" =~ ^([0-9]{8}_[0-9]{6})?$ && "$OD" =~ ^([0-9]{8}_[0-9]{6})?$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -122,20 +125,30 @@ jobs:
           path: _d
           merge-multiple: true
       - name: MANIFEST + KONTAK + kiyas + OZET, Drive'a yaz
-        env: {C: "${{ inputs.ciftler }}", R: "${{ inputs.kiyas_damga }}"}
+        env: {C: "${{ inputs.ciftler }}", R: "${{ inputs.kiyas_damga }}", OD: "${{ inputs.onceki_damga }}"}
         run: |
           set -uo pipefail
-          if [ "$C" = "HEPSI" ]; then python3 -c "import csv; print('\n'.join(r['cift'] for r in csv.DictReader(open('data/pod/yd78_ids.csv'))))" > _secim.txt
+          if [ "$C" = "HEPSI" ] || [ -n "$OD" ]; then python3 -c "import csv; print('\n'.join(r['cift'] for r in csv.DictReader(open('data/pod/yd78_ids.csv'))))" > _secim.txt
           else echo "$C" | tr ',' '\n' > _secim.txt; fi
+          ONC=""
+          if [ -n "$OD" ]; then   # gece kosusu: yeniden uretilmeyen ciftler (yeni uretilenin USTUNE yazilmaz)
+            mkdir -p _gece
+            rclone copy "gdrive:ASTROLOVE/TEMP/KUPA_KART78/$OD" _gece --include "*_K0*.jpg" --include "SONUC_*.json" --include "MANIFEST.csv" \
+              --exclude "KONTAK_*" --max-depth 1 --transfers 8 -q || { echo "::error::gece klasoru indirilemedi"; exit 1; }
+            for f in _gece/*_K0*.jpg _gece/SONUC_*.json; do b=$(basename "$f"); c=${b%%_K0*}; c=${c#SONUC_}; c=${c%.json}
+              [ -f "_d/SONUC_${c}.json" ] || cp -n "$f" "_d/$b"; done
+            echo "gece: $(ls _gece | wc -l) dosya; birlesik _d: $(ls _d/SONUC_*.json | wc -l) SONUC"
+            ONC="--onceki _gece/MANIFEST.csv --onceki-ad TEMP/KUPA_KART78/$OD"
+          fi
           REF=""
           if [ -n "$R" ] && grep -qx CANCER_LIBRA _secim.txt; then
             mkdir -p _ref
             rclone copy "gdrive:ASTROLOVE/TEMP/KART_SABLON_ORNEK/$R" _ref --include "KUPA_CANCER_LIBRA_K0*.jpg" --max-depth 1 -q
             sha256sum _ref/*.jpg; REF="--ref _ref"
           fi
-          D=$(date -u +%Y%m%d_%H%M%S); [ "$C" = "HEPSI" ] || D="${D}_ORNEK"
+          D=$(date -u +%Y%m%d_%H%M%S); [ "$C" = "HEPSI" ] || [ -n "$OD" ] || D="${D}_ORNEK"
           set +e        # bash -e: FAIL'de de Drive'a yazilir, sonra cikis
-          python3 scripts/kapak78/kupa_kart78.py topla --dir _d --secim _secim.txt --out _o $REF --kaynak "kupa_kart78@${GITHUB_SHA::8} kosu ${GITHUB_RUN_ID}"
+          python3 scripts/kapak78/kupa_kart78.py topla --dir _d --secim _secim.txt --out _o $REF $ONC --kaynak "kupa_kart78@${GITHUB_SHA::8} kosu ${GITHUB_RUN_ID}"
           RC=$?
           set -e
           sha256sum _o/*.jpg 2>/dev/null | head -20 || true
@@ -144,4 +157,4 @@ jobs:
           echo "Cikti: TEMP/KUPA_KART78/$D ($(find _o -type f | wc -l) dosya), RC $RC" | tee -a "$GITHUB_STEP_SUMMARY"
           [ "$RC" = 0 ] || { echo "::error::kupa kart 78 PASS degil"; exit 1; }
       - if: always()
-        run: rm -rf _d _o _ref ~/.config/rclone
+        run: rm -rf _d _o _ref _gece ~/.config/rclone
