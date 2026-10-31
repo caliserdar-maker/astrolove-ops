@@ -15,6 +15,11 @@ OUT = os.path.abspath(OUT); SEM = os.path.abspath(SEM)
 os.makedirs(OUT + '/baski', exist_ok=True); os.makedirs(OUT + '/gorunum', exist_ok=True)
 ENV = {'GOLGE_US': '0.4', 'PARLA': '0.7', 'PATH': os.environ.get('PATH', '/usr/bin:/bin')}
 PY = sys.executable
+# Serdar 31 Eki 8a: NumPy / OpenCV AVX512 yolu kapali (simd_sabit); alt surec ortami sifirdan kuruldugu icin acikca eklenir + kapi
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import simd_sabit  # noqa: E402
+simd_sabit.ayarla(ENV, PY)
+simd_sabit.kapi(PY, ENV, "orchard_gorunum")
 
 
 def calis(a, env):

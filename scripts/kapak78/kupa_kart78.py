@@ -154,6 +154,13 @@ def zemin(sahne_dir, cikti):
 
 
 def uret(a):
+    # Serdar 31 Eki 8a: NumPy / OpenCV AVX512 yolu kapali; numpy bu surecte henuz yuklenmemis olmali (ortam degiskeni import aninda okunur)
+    import simd_sabit
+    if "numpy" in sys.modules and os.environ.get("NPY_DISABLE_CPU_FEATURES") != simd_sabit.NPY.get(".".join(
+            __import__("importlib.metadata").metadata.version("numpy").split(".")[:2])):
+        raise SystemExit("DUR: numpy SIMD ayarindan once yuklenmis (simd_sabit)")
+    simd_sabit.ayarla(os.environ)
+    simd_sabit.kapi(sys.executable, dict(os.environ), "kupa_kart78")
     import wa_kupa_kart_ornek as W
     import kart_sablon as S
     import yd_kart_ornek as K
@@ -177,7 +184,7 @@ def uret(a):
             ist = {i["kart"]: f"{i['kapi']} {i['px']} px max {i['max_fark']}/255 ({i['karar']})" for i in kayit.get("istisna") or []}
             kayit.update(durum="PASS", kartlar=[dict(kart=k, galeri_no=GALERI[k], dosya=f"{c}_{k}.jpg",
                                                      sha256=hashlib.sha256(jb[k]).hexdigest(), istisna=ist.get(k, "")) for k, _, _ in KARTLAR],
-                         ayni_burc=ayni_burc(A, B), surum=K.SURUM,
+                         ayni_burc=ayni_burc(A, B), surum=K.SURUM, simd=f"AVX512 kapali, olcum {simd_sabit.REF}",
                          olcu={ad.split("_")[-2]: {x: v for x, v in o.items() if x in ("olcek", "yerlesim", "zemin_kenar_p90_max",
                                                                                          "kopuk_ton_px", "kb")} for ad, o in rapor.items()})
         except (Exception, SystemExit) as e:                   # cift basina: FAIL cift dosya yazmaz
