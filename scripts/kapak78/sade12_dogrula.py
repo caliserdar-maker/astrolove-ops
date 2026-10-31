@@ -82,8 +82,10 @@ def kiyas(dosyalar):
                 if alan in k:
                     sonuc.append(dict(dosya=yol, alan=alan, esit=k[alan] == o.get(alan)))
     ozet_ = {a: f"{sum(s['esit'] for s in sonuc if s['alan'] == a)}/{sum(1 for s in sonuc if s['alan'] == a)}" for a in ("bayt", "piksel", "kareler_sha")}
-    print(json.dumps(dict(ozet=ozet_, farkli=[s for s in sonuc if not s["esit"]]), indent=1))
-    return 0
+    farkli = [s for s in sonuc if not s["esit"]]
+    print(json.dumps(dict(ozet=ozet_, farkli=farkli), indent=1))
+    print("KIYAS", "PASS" if sonuc and not farkli else "FAIL")
+    return 0 if sonuc and not farkli else 1      # inceleme 31 Eki: kiyas da PASS / FAIL verir (her zaman 0 donuyordu)
 
 
 def main(argv=None):

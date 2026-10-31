@@ -243,7 +243,7 @@ def kart_isle(islem, bek):
         if sapj:
             raise SystemExit(f"DUR: {ad} renk kapisi (JPEG) {sapj}")
         zk = zo = kp = kl = None
-        if ad.startswith("KUPA_") and pk:                    # ZEMIN KAPISI: fotograf kutusu kenar seritleri kart zeminine esit (panel yok)
+        if ad.startswith(("KUPA_", "SADE_")) and pk:         # ZEMIN KAPISI (SADE_: inceleme 31 Eki): fotograf kutusu kenar seritleri kart zeminine esit (panel yok)
             (zk, zo), (kp, kl) = zemin_kenar(im, pk), kopuk_ton(im, pk)
             if zk > ZEMIN_ESIK:
                 raise SystemExit(f"DUR: {ad} fotograf kenari zeminden farkli (p90 {zk:.1f} > {ZEMIN_ESIK}, fark > 3 orani {zo})")

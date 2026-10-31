@@ -1,9 +1,9 @@
 name: sade12-uret
 # Sade kupa 12 burc yeniden uretimi + dogrulama. v2 (Serdar 31 Eki): varsayilan kupa-orchard dc4a432 (baski_kes_sade.py); v1 ceeb648 GECERSIZ. ETSY YOK.
-# Kod: kupa-orchard ceeb648 kupa_orchard/kapak_el/kod/sade12.sh (+ video_sade.py, baski_sade3.py) AYNEN; yalniz iki yol degisir (R kok yolu,
-# glif kaynagi: kupa-printful-sonuc ac9aa718 kupa_uretim/sembol/<B>_<B>/sol.png; yerel CANCER denemesinde 9/9 JPG manifestle bayt esit).
+# Kod: kupa-orchard <ko_ref> kupa_orchard/kapak_el/kod/sade12.sh (+ video_sade.py, baski_kes_sade.py) AYNEN; yalniz iki yol degisir (R kok yolu,
+# glif kaynagi: kupa-printful-sonuc ac9aa718 kupa_uretim/sembol/<B>_<B>/sol.png). PASS = manifest 18 satir, 9 JPG bayt esit (PNG / MP4 bilgi).
 # Dogrulama: scripts/kapak78/sade12_dogrula.py (JPG bayt = SADE12_MANIFEST.tsv; PNG piksel sha; MP4 framemd5). Surumler yerel denemeyle ayni.
-# Cikti Drive TEMP/SADE12/<run_id>/<BURC>/ + V_<BURC>.json + OZET.json.
+# Cikti Drive TEMP/SADE12_V2/<run_id>/<BURC>/ + V_<BURC>.json + OZET.json.
 permissions:
   contents: read
 on:

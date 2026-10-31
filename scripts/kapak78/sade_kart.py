@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """SADE kupa bilgi kartlari (tek burc; Serdar 31 Eki is 9; ornek CANCER, EMILY / "My favorite place is with you"). ETSY YOK, toplu uretim yok.
 Cift kartlariyla AYNI sira ve stil (galeri 2 K02, 3 K03, 4 K05, 5 K07, 6 K04; 3000x2250): cizim, kapilar (metin, Title Case, yasak karakter,
-renk, yerlesim, zemin, kopuk ton) wa_kupa_kart_ornek.kart_isle + kart_sablon AYNEN; K05 ve K04 cift kartlarinin fonksiyonlari (metin ayni).
+renk, yerlesim, zemin, kopuk ton) wa_kupa_kart_ornek.kart_isle + kart_sablon AYNEN (zemin / kopuk ton kapisi SADE_ adlarinda da kosar,
+inceleme 31 Eki); K05 ve K04 cift kartlarinin fonksiyonlari (metin ayni).
 Degisen yalniz: K02 tek burc sembol karti (iki burc + baglac yerine tek buyuk sembol + burc adi), K03 / K07 metinleri (SADE12_METIN.csv
 CANCER aciklamasi ve kisisellestirme talimati ile ayni bilgi), sahneler sade baskiyla.
 Sahne (mod sahne, _v12 ortami = orchard_gorunum ile ayni surumler + simd_sabit kapisi, Serdar 31 Eki 8a):
   baski  : v2 (Serdar 31 Eki) kupa-orchard dc4a432 kod/baski_kes_sade.py (sade12.sh ile ayni arguman: kes/<STIL>R, glif, on yazi, mesaj, renk)
   gorunum: temiz/kupa-orchard 0196e37a kod/kapak_canva3.py, orchard_gorunum ile ayni sahneler / geo / ortam (GOLGE_US 0.4, PARLA 0.7):
-           tek_on, tek_arka (Orange Blossom baskisi), m15 (sahne15, D_IN 3.35, ayni 11 oz baski; cift kartlarindaki gibi), stil_<st> (tek on)
+           tek_on, tek_arka (Orange Blossom baskisi), m15 (sahne15, D_IN 3.35, gercek BOY=15 baski satir 45:1095), stil_<st> (tek on)
   zemin  : kupa_zemin.py (kart ortami) -> z_<ad>.png
 Kullanim: sade_kart.py sahne --ko <0196e37a kupa_orchard> --kos <dc4a432 kupa_orchard (v2)> --glif <sol.png> --on EMILY --mesaj ... --out <dir>
           sade_kart.py kart --burc Cancer --glif <sol.png> --gorunum <sahne/gorunum> --sahne <z_*.png dir> --out <dir>"""
@@ -22,15 +23,16 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-# sade12.sh STIL tablosu (v1, GECERSIZ)
 # v2 (Serdar 31 Eki, kupa-orchard dc4a432 sade12.sh STIL tablosu): kisa ad -> (kes klasoru, baski rengi). v1 (baski_sade3) GECERSIZ.
 SADE_V2 = {"orange": ("ORANGER", "67,87,42"), "fig": ("FIGR", "126,43,113"), "olive": ("OLIVER", "78,84,30"),
            "pomegranate": ("POMEGRANATER", "139,46,60"), "almond": ("ALMONDR", "112,58,72"), "lemon": ("LEMONR", "93,76,31"),
            "grape": ("GRAPER", "72,59,172"), "loquat": ("LOQUATR", "105,69,35")}
 SADE_RENK = {k: v[1] for k, v in SADE_V2.items()}
-_V1_RENK = {"orange": "30,92,52", "fig": "82,28,74", "olive": "78,84,30", "pomegranate": "132,20,36", "almond": "150,78,96",
-             "lemon": "150,112,10", "grape": "46,38,110", "loquat": "176,96,20"}
-K02_KUTU_H, K02_KUTU_ORAN = 514, 44.0 / 33.5        # K02 sembol kutusu (px yukseklik, en / boy = baski_sade3 SEM_GEN / SEM_YUK)
+# K02 sembol kutusu (inceleme 31 Eki): en / boy = v2 baski kutusu (dc4a432 varlik/kes/<STIL>R_kes.json yerlesim sembol_w / sembol_h
+# = 136 / 127, 8 stilde ayni; v1 baski_sade3 44 / 33,5 GECERSIZ). Cizgi baskidaki gibi KALIN 1,24 ile kalinlastirilir (baski_kes_sade.py
+# sembol_yap: dis kenar r = (KALIN - 1) x cizgi / 2). Kutu yuksekligi 430: 12 glifin hepsinde en kalin cizgi <= 56 px (renk kapisi 61x61)
+# olan en buyuk deger (olcum 31 Eki: 430 -> ARIES 55 px, 440 -> 59 px). Cizgi / en (DIST_C): K02 CANCER 0,100, baski 0,103-0,109.
+K02_KUTU_H, K02_KUTU_ORAN, K02_KALIN = 430, 136 / 127, 1.24
 SAHNE_AD = ("tek_on", "tek_arka", "m15") + tuple(f"stil_{s}" for s in SADE_RENK)
 
 
@@ -80,6 +82,27 @@ def sahne(a):
     return 0
 
 
+def k02_glif(yol, rgb):
+    """K02 sembolu: glif K02_KUTU_H x K02_KUTU_ORAN kutusuna sigar (baski_kes_sade olcek), cizgi K02_KALIN ile kalinlasir (baski_kes_sade
+    sembol_yap ile ayni formul; EDT opencv DIST_L2 PRECISE), sonra kart_sablon.maske ile ayni keskinlestirme (alfa 0,2-0,8) -> RGBA."""
+    import cv2
+    import numpy as np
+    from PIL import Image
+    edt = lambda m: cv2.distanceTransform(m.astype(np.uint8), cv2.DIST_L2, cv2.DIST_MASK_PRECISE)
+    a = Image.open(yol).convert("RGBA").getchannel("A"); a = a.crop(a.getbbox())
+    k = min(K02_KUTU_H * K02_KUTU_ORAN / a.width, K02_KUTU_H / a.height)
+    a = np.asarray(a.resize((max(1, round(a.width * k)), max(1, round(a.height * k))), Image.LANCZOS)).astype(np.float32) / 255
+    r = max(0.0, (K02_KALIN - 1) * 2 * float(edt(a > 0.5).max()) / 2)
+    p = int(np.ceil(r)) + 2
+    a = np.pad(a, p)
+    a = np.clip(np.maximum(a, 1 - (edt(a < 0.5) - r)), 0, 1)
+    ys, xs = np.where(a > 0.02)
+    a = a[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+    al = np.clip((a - 0.2) / 0.6, 0, 1)
+    rgba = np.zeros(al.shape + (4,), np.uint8); rgba[..., :3] = rgb; rgba[..., 3] = (al * 255).astype(np.uint8)   # kart_sablon.maske ile ayni (kesme)
+    return Image.fromarray(rgba)
+
+
 # ---------------------------------------------------------------- kartlar (kart ortami: pillow 11.0.0, numpy 2.1.3)
 def kart(a):
     import simd_sabit                                                 # Serdar 31 Eki 8a: numpy yuklenmeden once
@@ -109,14 +132,11 @@ def kart(a):
         kay.blok("alt_baslik"); K.yaz(d, K.METIN, [f"The {b} symbol, designed by AstroLoveArt"], W / 2, ay, "center", W - 2 * K.KENAR)
         ust = ay + K.METIN["boy"] + 160                                   # alt baslik ile sembol arasi (cift kartinda glif ust bosluguna yakin)
         et_y = K.NOT_Y - 160 - K.ETIKET["boy"]                            # burc adi alt nottan 160 px yukarida
-        # 12 burcta AYNI kutu (inceleme 31 Eki): kupadaki gibi sembol SEM_YUK x SEM_GEN (33,5 x 44 mm, baski_sade3) oranli kutuya sigar.
-        # Kutu yuksekligi K02_KUTU_H: 12 glifin hepsinde en kalin cizgi <= 56 px (renk kapisi 3: 61x61 dolu blok yok) olacak en buyuk
-        # deger (olcum 31 Eki: siniri CANCER veriyor, 514 px; onayli CANCER kartindaki 515 px ile ayni). Asilirsa DUR (sessiz kucultme yok).
+        # 12 burcta AYNI kutu, baskidaki oran ve kalinlik (K02_* aciklamasi). Asilirsa DUR (sessiz kucultme yok).
         import cv2
         import numpy as np
-        a_ = Image.open(glif).convert("RGBA").getchannel("A"); a_ = a_.crop(a_.getbbox())
-        gh = round(min(K02_KUTU_H, K02_KUTU_H * K02_KUTU_ORAN * a_.height / a_.width))
-        g = S.maske(glif, gh)
+        g = k02_glif(glif, K.rgb(K.MUREKKEP))
+        gh = g.height
         c = (np.asarray(g.getchannel("A")) > 153).astype(np.uint8)
         kal = float(cv2.distanceTransform(c, cv2.DIST_C, 3).max()) * 2 - 1
         if kal > 56:
