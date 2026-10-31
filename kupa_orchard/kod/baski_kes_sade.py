@@ -149,7 +149,37 @@ MASK_ON = on.min(-1) < 245
 L = g['yerlesim']
 cx, _ = T('on', L['on_merkez_x'], 0)
 _, y_sem = T('on', 0, L['sembol_y'])
-ana = olcek(alfa(GLIF), kutu=(L['sembol_w'] * s, L['sembol_h'] * s))
+SEMBOL_K = float(os.environ.get('SEMBOL_K', 1.30))    # en buyuk sembol boyu: cift sembol kutusunun 1,30 kati (Serdar 31 Eki "daha buyuk")
+KALIN = float(os.environ.get('KALIN', 1.45))          # cizgi kalinligi carpani (Serdar 31 Eki "daha kalin")
+BOSLUK = float(os.environ.get('BOSLUK', 2.5)) * MM     # sembol ile susleme dali arasi en az (mm); sigmazsa sembol kuculur
+UZAK = ndimage.distance_transform_edt(~MASK_ON)
+g0 = alfa(GLIF)
+
+
+def sembol_yap(k):
+    a = olcek(g0, kutu=(L['sembol_w'] * s * k, L['sembol_h'] * s * k))
+    ciz = 2 * ndimage.distance_transform_edt(a > 0.5).max()
+    r = max(0.0, (KALIN - 1) * ciz / 2)
+    if r > 0:                                                    # dis kenari esit kalinlastir (yumusak kenar korunur)
+        p_ = int(np.ceil(r)) + 2
+        a = np.pad(a, p_)
+        a = np.clip(np.maximum(a, 1 - (ndimage.distance_transform_edt(a < 0.5) - r)), 0, 1)
+        ys, xs = np.where(a > 0.02)
+        a = a[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+    m = np.zeros(MASK_ON.shape, bool)
+    x0, y0 = int(round(cx - a.shape[1] / 2 + TW)), int(round(y_sem - a.shape[0] / 2 + TH))
+    m[y0:y0 + a.shape[0], x0:x0 + a.shape[1]] = a > 0.3
+    return a, ciz, ciz + 2 * r, UZAK[m].min()
+
+
+k = SEMBOL_K
+while True:
+    ana, _cizgi, _cizgi2, _uzak = sembol_yap(k)
+    if _uzak >= BOSLUK or k <= 0.8:
+        break
+    k -= 0.02
+if _uzak < PAY:
+    sys.exit(f'HATA: sembol susleme dalina {_uzak:.0f} px (en az {PAY})')
 bas(on, ana, cx, y_sem)
 # isim satiri: tek isim, cift kupadaki isim satiri yerinde ve boyunda
 _, t_isim = T('on', 0, L['isim_taban'])
@@ -157,7 +187,7 @@ ISIM_CAP = L['isim_cap'] * s
 isim_cap, isim_tasti = satir(on, MASK_ON, ISIM.upper(), GAR, ISIM_CAP, 680, cx, t_isim, aralik=ISIM_CAP * 0.06,
                              min_cap=2.2 * MM, mesafe=ndimage.distance_transform_edt(~MASK_ON))
 burc_tasti = False
-adim(f'on: sembol kutu {ana.shape[1] / MM:.1f}x{ana.shape[0] / MM:.1f} mm, isim cap {isim_cap / MM:.2f} mm')
+adim(f'on: sembol {ana.shape[1] / MM:.1f}x{ana.shape[0] / MM:.1f} mm (K {k:.2f}, kalin {KALIN}, cizgi {_cizgi:.0f}->{_cizgi2:.0f} px, dala {_uzak:.0f} px), isim cap {isim_cap / MM:.2f} mm')
 
 # ---------------- ARKA ----------------
 arka = susleme_tuval('arka', f'{KES}_arka.png')
