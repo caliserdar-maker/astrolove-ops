@@ -12,7 +12,7 @@ on:
       yedek_damga: {description: "TEMP/YD_KAPAK_V1_YEDEK/<damga>", required: true, default: "20261027_105540"}
 jobs:
   toplu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # Serdar 31 Eki 8a / onay 3: kart determinizmi (simd_calistir)
     timeout-minutes: 60
     steps:
       - name: Girdi kapisi
@@ -64,7 +64,7 @@ jobs:
           echo "indirilen jpg: $(find _y -name '*.jpg' | wc -l)"
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
       - name: Kartlar (78 cift)
-        run: python3 scripts/kapak78/yd_kart_toplu.py --yedek _y --ciftler data/pod/yd78_ids.csv --out _out --kod-ref "$GITHUB_SHA" --is-sayisi 4
+        run: python3 -I scripts/kapak78/simd_calistir.py scripts/kapak78/yd_kart_toplu.py --yedek _y --ciftler data/pod/yd78_ids.csv --out _out --kod-ref "$GITHUB_SHA" --is-sayisi 4
       - name: Drive'a yaz
         if: ${{ always() }}
         run: |

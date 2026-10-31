@@ -17,7 +17,7 @@ on:
       mod: {description: "girdi | uret", required: true, default: "uret"}
 jobs:
   kart:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # Serdar 31 Eki 8a / onay 3: kart determinizmi (simd_calistir)
     timeout-minutes: 45
     permissions:
       contents: write
@@ -102,13 +102,13 @@ jobs:
           read -r A B <<< "$L"
           mkdir -p _s _out
           _v12/bin/python3 -I scripts/kapak78/orchard_gorunum.py _ko/kupa_orchard "_kupa/kupa_uretim/sembol/$C" "$A" "$B" _s
-          python3 -I scripts/kapak78/kupa_zemin.py _s/gorunum _s
-          python3 scripts/kapak78/wa_kupa_kart_ornek.py --cift "$C" --a "$A" --b "$B" --sembol "_kupa/kupa_uretim/sembol/$C" \
+          python3 -I scripts/kapak78/simd_calistir.py scripts/kapak78/kupa_zemin.py _s/gorunum _s
+          python3 -I scripts/kapak78/simd_calistir.py scripts/kapak78/wa_kupa_kart_ornek.py --cift "$C" --a "$A" --b "$B" --sembol "_kupa/kupa_uretim/sembol/$C" \
             --poster _g/POSTER_MB_2000.jpg --mb45 data/sosyal/instagram/cl_ornek_20261003/AstroLoveArt_Emily_James_Cancer_Libra_Midnight_Blue_4x5.png \
             --poster-kaynak _ref/ref/kart_sablon_20261028/poster_kaynak --sahne _s --out _out
-          python3 scripts/kapak78/yd_kart_ornek.py --cift "$C" --a "$A" --b "$B" --yedek _g/yd --sembol "_kupa/kupa_uretim/sembol/$C" --out _out --ortak
+          python3 -I scripts/kapak78/simd_calistir.py scripts/kapak78/yd_kart_ornek.py --cift "$C" --a "$A" --b "$B" --yedek _g/yd --sembol "_kupa/kupa_uretim/sembol/$C" --out _out --ortak
           cp _s/zemin_olcum.json _out/
-          _v12/bin/python3 -I scripts/kapak78/kupa_kapak43.py _ko/kupa_orchard _s/baski "$A" "$B" _out/KAPAK43 --stiller orange,fig
+          _v12/bin/python3 -I scripts/kapak78/simd_calistir.py scripts/kapak78/kupa_kapak43.py _ko/kupa_orchard _s/baski "$A" "$B" _out/KAPAK43 --stiller orange,fig
           mkdir -p _g/k43eski   # 28 Eki ornegi (ayni kod): fark olcumu
           rclone copy "gdrive:ASTROLOVE/TEMP/WA_KUPA_KART_ORNEK/20261027_192528/20261028_065730/KAPAK43" _g/k43eski --include "KUPA_KAPAK43_*.jpg" -q || true
           python3 scripts/kapak78/kart_sablon.py kapak _out/KAPAK43 _g/k43eski

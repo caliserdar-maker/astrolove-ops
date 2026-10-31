@@ -12,7 +12,7 @@ on:
       yedek_damga: {description: "TEMP/YD_KAPAK_V1_YEDEK/<damga>", required: true, default: "20261027_105540"}
 jobs:
   kart:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # Serdar 31 Eki 8a / onay 3: kart determinizmi (simd_calistir)
     timeout-minutes: 20
     steps:
       - name: Girdi kapisi
@@ -62,7 +62,7 @@ jobs:
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
       - name: Kartlar
         env: {CF: "${{ inputs.cift }}"}
-        run: python3 scripts/kapak78/yd_kart_ornek.py --cift "$CF" --a "$A" --b "$B" --eski-r2 "$R2" --botanical "$BOT" --timeless "$TIM" --out _out --ortak
+        run: python3 -I scripts/kapak78/simd_calistir.py scripts/kapak78/yd_kart_ornek.py --cift "$CF" --a "$A" --b "$B" --eski-r2 "$R2" --botanical "$BOT" --timeless "$TIM" --out _out --ortak
       - name: Drive'a yaz
         if: ${{ always() }}
         run: |
