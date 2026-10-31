@@ -1,0 +1,60 @@
+name: yd-zemin-indir
+# YD yeni zemin (Merkez 31 Eki): Drive TEMP/<tsv> icindeki sureli Canva indirme adresinden PNG'yi indirir -> Drive TEMP/YD_ZEMIN_YENI/<ad>
+# (+ .sha256.txt). Adres DEPOYA YAZILMAZ ve loga basilmaz (yalniz Drive'daki TSV'den okunur, ::add-mask::). ETSY YOK.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      tsv: {description: "Drive TEMP altindaki TSV adi", required: true, default: "YD_ZEMIN_YENI_LINK_20261031.tsv"}
+      stil: {description: "TSV stil sutunu degeri", required: true, default: "1_Starlit"}
+      oran: {description: "TSV oran sutunu degeri", required: true, default: "2:3"}
+      ad: {description: "Drive TEMP/YD_ZEMIN_YENI/ altindaki dosya adi", required: true, default: "1_Starlit_2x3_kaynak.png"}
+jobs:
+  indir:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Girdi kapisi
+        env: {T: "${{ inputs.tsv }}", S: "${{ inputs.stil }}", O: "${{ inputs.oran }}", A: "${{ inputs.ad }}"}
+        run: '[[ "$T" =~ ^[A-Za-z0-9_.-]+\.tsv$ && "$S" =~ ^[0-9]_[A-Za-z]+$ && "$O" =~ ^[0-9]+:[0-9]+$ && "$A" =~ ^[A-Za-z0-9_.-]+\.png$ ]] || { echo "::error::girdi"; exit 1; }'
+      - name: rclone
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Indir + dogrula + Drive
+        env: {T: "${{ inputs.tsv }}", S: "${{ inputs.stil }}", O: "${{ inputs.oran }}", A: "${{ inputs.ad }}"}
+        run: |
+          set -euo pipefail
+          rclone copyto "gdrive:ASTROLOVE/TEMP/$T" _l.tsv
+          U=$(python3 - "$S" "$O" <<'EOF'
+          import csv, sys
+          r = [x for x in csv.DictReader(open("_l.tsv", encoding="utf-8"), delimiter="\t") if x["stil"] == sys.argv[1] and x["oran"] == sys.argv[2]]
+          if len(r) != 1:
+              sys.exit(f"satir sayisi {len(r)}")
+          print(r[0]["url"].strip())
+          EOF
+          )
+          echo "::add-mask::$U"
+          [[ "$U" == https://* ]] || { echo "::error::adres https degil"; exit 1; }
+          curl -fsS --retry 3 -o _z.png "$U" || { echo "::error::indirme basarisiz (sure dolmus olabilir)"; exit 1; }
+          rm -f _l.tsv; unset U
+          python3 -c "
+          import struct,sys
+          d=open('_z.png','rb').read(32)
+          assert d[:8]==b'\x89PNG\r\n\x1a\n', 'PNG degil'
+          w,h=struct.unpack('>II',d[16:24]); print('boyut',w,h)
+          "
+          sha256sum _z.png | awk -v a="$A" '{print $1"  "a}' > _z.sha256.txt; cat _z.sha256.txt; ls -l _z.png
+          rclone copyto _z.png "gdrive:ASTROLOVE/TEMP/YD_ZEMIN_YENI/$A" --immutable
+          rclone copyto _z.sha256.txt "gdrive:ASTROLOVE/TEMP/YD_ZEMIN_YENI/$A.sha256.txt" --immutable
+          echo "::notice title=YD ZEMIN::TEMP/YD_ZEMIN_YENI/$A $(cut -c1-16 _z.sha256.txt)"
+      - if: always()
+        run: rm -rf _z.png _l.tsv ~/.config/rclone
