@@ -556,7 +556,10 @@ def ana(tmp):
     kontrol("kuru tekrar: ayni canli durum -> ayni plan_damga", R2["plan_damga"] == pd)
 
     # alt metin TASLAK -> yazim yok
-    taslak = kok / "alt_taslak.csv"; shutil.copy(K.ALT_CSV, taslak)
+    taslak = kok / "alt_taslak.csv"                                   # depo CSV'si ONAYLI (Serdar 31 Eki); test icin TASLAK kopya
+    _r = list(csv.DictReader(open(K.ALT_CSV, encoding="utf-8")))
+    with open(taslak, "w", newline="") as f:
+        _w = csv.DictWriter(f, fieldnames=list(_r[0])); _w.writeheader(); _w.writerows(dict(r, durum="TASLAK") for r in _r)
     try:
         K.sonlandir(api, SHOP, K.arg(["yaz", "--liste", str(kok / "liste.csv"), "--out", str(kok / "o"), "--alt", str(taslak),
                                       "--kaynak", str(kok / "k" / "KAYNAK.csv"), *yaz_arg(kok, pd, "--sadece", LID["ARIES_LEO"])]))
