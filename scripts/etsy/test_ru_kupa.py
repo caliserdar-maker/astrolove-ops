@@ -81,10 +81,17 @@ _, kon = R.kur(e.replace("My favorite place is with you", "Buy now at example do
 k("bos mesaj metni siniri asarsa FAIL", not kon["pass_"])
 _, kon = R.kur("\n\n".join(p[1:]).replace("1. Name for Cancer", "1. Left name").replace("2. Name for Libra", "2. Right name"))
 k("giris paragrafi yoksa isim satiri FAIL", not kon["pass_"])
+# Serdar 31 Eki A4: boy satirlari Printful /products/19 olculeriyle; idempotan; kapi eski satiri reddeder; RU ayni bilgi
+_e1, _ = R.galeri_en(en_eski("Cancer", "Libra", "Cancer gifts or Libra gifts"))
+k("A4: galeri_en idempotan (ikinci gecis degisiklik yok, olcu tek)", R.galeri_en(_e1) == (_e1, []) and _e1.count(R.OLCU_YENI) == 1)
+k("A4: hedef kapisi eski (olcusuz) boy satirini reddeder", any("boy satirlari" in h for h in R.hedef_kapisi(_e1.replace(R.OLCU_YENI, R.OLCU_ESKI))))
+k("A4: EN satirlari Serdar metniyle birebir", "- 11 oz (325 ml): about 9.6 cm tall, 8.2 cm across (3.8 x 3.2 in)\n" in _e1
+  and "- 15 oz (444 ml): about 11.9 cm tall, 8.5 cm across (4.7 x 3.3 in)\n" in _e1 and not __import__("re").search("[\u2014\u2013]", _e1))
 # Serdar 31 Eki 5a / 6a: yeni galeri foto numaralari + Latin harf notu
 e0 = en_eski("Cancer", "Libra", "Cancer gifts or Libra gifts")
 e1, deg = R.galeri_en(e0)
-k("galeri_en: foto numarasi yok, gorsel adi (Serdar 31 Eki 2a) + Latin notu", deg == ["foto_stil", "foto_boy", "foto_kisisel", "kapak", "latin"]
+k("galeri_en: foto numarasi yok, gorsel adi (Serdar 31 Eki 2a) + olculu boy satirlari (A4) + Latin notu",
+  deg == ["foto_stil", "foto_boy", "foto_kisisel", "kapak", "olcu", "latin"] and R.OLCU_YENI in e1 and R.OLCU_ESKI not in e1
   and "The cover shows" not in e1 and "One mug, printed on both sides.\nFront:" in e1
   and "back. See the style photos." in e1 and "both. See the sizes photo." in e1 and "spelling. See the names and message photo." in e1
   and not __import__("re").search(r"See photos? \d", e1)

@@ -82,8 +82,9 @@ def p_stil(m, ctx):
 
 
 def p_boy(m, ctx):
-    return ("[ ДВА РАЗМЕРА ]\n- 11 oz (325 мл)\n- 15 oz (444 мл)\nОдинаковый дизайн в обоих размерах. "
-            f"Смотрите {foto_ru(m.group(1), 'boy')}.")
+    """Serdar 31 Eki (A4): boy satirlari Printful API /products/19 olculeriyle (K05 karti ile ayni); RU ayni bilgiyi verir."""
+    return ("[ ДВА РАЗМЕРА ]\n" + OLCU_RU + "Одинаковый дизайн в обоих размерах. "
+            f"Смотрите {foto_ru(m.group('foto'), 'boy')}.")
 
 
 def isim_ru(s, ctx, sira):
@@ -162,6 +163,13 @@ SABIT = {
     "Questions? Send us a message, we're happy to help.": "Есть вопросы? Напишите нам, мы будем рады помочь.",
 }
 
+# Serdar 31 Eki (A4 onayi): kupa boy satirlari olcuyle; kaynak Printful API /products/19 (kosu 40642887254, K05 karti ile ayni);
+# ml = fl oz x 29,5735. RU ayni bilgi (ondalik virgul).
+OLCU_ESKI = "- 11 oz (325 ml)\n- 15 oz (444 ml)\n"
+OLCU_YENI = ("- 11 oz (325 ml): about 9.6 cm tall, 8.2 cm across (3.8 x 3.2 in)\n"
+             "- 15 oz (444 ml): about 11.9 cm tall, 8.5 cm across (4.7 x 3.3 in)\n")
+OLCU_RU = ("- 11 oz (325 мл): высота около 9,6 см, диаметр 8,2 см (3,8 x 3,2 дюйма)\n"
+           "- 15 oz (444 мл): высота около 11,9 см, диаметр 8,5 см (4,7 x 3,3 дюйма)\n")
 BN = "(?:" + "|".join(BURC) + ")"
 ISIM_RX = r"(Name for " + BN + r"|Name Under " + BN + r"|Left name|Right name|First Name|Second Name)"
 KALIP = [
@@ -171,7 +179,8 @@ KALIP = [
     (re.compile(r"\[ 8 STYLES: THE ORCHARD WE KEEP \]\nOrange Blossom, Purple Fig, Olive Breeze, Pomegranate Bloom, Almond Blossom, "
                 r"Lemon Grove, Blue Grape or Golden Loquat\. Every style of this zodiac couple mug has the same " + B_RX + " and "
                 + B_RX + r" symbol and an evil eye on the back\. See (photos? [\d a-z]+|the [a-z]+(?: [a-z]+)* photos?)\."), p_stil),
-    (re.compile(r"\[ TWO SIZES \]\n- 11 oz \(325 ml\)\n- 15 oz \(444 ml\)\nSame design on both\. See (photos? [\d a-z]+|the [a-z]+(?: [a-z]+)* photos?)\."), p_boy),
+    (re.compile(r"\[ TWO SIZES \]\n(?:" + re.escape(OLCU_ESKI) + "|" + re.escape(OLCU_YENI) + r")Same design on both\. "
+                r"See (?P<foto>photos? [\d a-z]+|the [a-z]+(?: [a-z]+)* photos?)\."), p_boy),
     (re.compile(r"\[ HOW TO PERSONALIZE \]\nWrite three lines in the personalization box:\n1\. " + ISIM_RX + r" \(up to (\d+) "
                 r"letters\)\n2\. " + ISIM_RX + r" \(up to (\d+) letters\)\n3\. Message \(one line, up to (\d+) characters including "
                 r"spaces and punctuation\)\n(" + re.escape(LATIN_EN) + r"\n)?Leave the message blank and we print:\n([^\n]+)\nPlease check your spelling\. See "
@@ -200,6 +209,10 @@ def galeri_en(d):
         raise ValueError("kapak cumlesi birden cok")
     if KAPAK_EN in d:                                       # Serdar 31 Eki 2: yeni kapak yalniz on yuz
         d = d.replace(KAPAK_EN, ""); deg.append("kapak")
+    if d.count(OLCU_YENI) != 1:                             # Serdar 31 Eki A4: boy satirlari olcuyle
+        if d.count(OLCU_ESKI) != 1:
+            raise ValueError(f"boy satirlari: eski kalip {d.count(OLCU_ESKI)} kez, yeni {d.count(OLCU_YENI)} kez")
+        d = d.replace(OLCU_ESKI, OLCU_YENI); deg.append("olcu")
     capa = " characters including spaces and punctuation)\nLeave the message blank and we print:"
     if LATIN_EN not in d:   # inceleme 31 Eki: not mesaj satirindan hemen sonra (bos mesaj metniyle karismasin)
         if d.count(capa) != 1:
@@ -216,6 +229,8 @@ def hedef_kapisi(en):
         h.append("Latin harf notu yok / birden cok")
     if KAPAK_EN.strip() in en:
         h.append("kapak cumlesi kaldi (Serdar 31 Eki 2: yeni kapak yalniz on yuz)")
+    if en.count(OLCU_YENI) != 1 or OLCU_ESKI in en:
+        h.append("boy satirlari olculu degil (Serdar 31 Eki A4)")
     ref = re.findall(r"See (photos? [\d a-z]+|the [a-z]+(?: [a-z]+)* photos?)\.", en)
     if len(ref) != 3:
         h.append(f"'See ...' foto atfi {len(ref)} (3 beklenir)")
