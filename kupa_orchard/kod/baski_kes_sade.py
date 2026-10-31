@@ -148,6 +148,8 @@ on = susleme_tuval('on', f'{KES}_on.png')
 MASK_ON = on.min(-1) < 245
 L = g['yerlesim']
 cx, _ = T('on', L['on_merkez_x'], 0)
+_c = np.where(MASK_ON.any(0))[0] - TW
+cx = (_c.min() + _c.max()) / 2                                  # Serdar 31 Eki: sembol ve isim cercevenin yatay ortasinda
 _, y_sem = T('on', 0, L['sembol_y'])
 # Serdar 31 Eki: sembol dikeyde tam ortada: susleme cercevesinin (dallar) ust ve alt kenarinin ortasi
 _, _t_isim0 = T('on', 0, L['isim_taban'])
@@ -191,6 +193,8 @@ if _alt > _isim_ust - ISIM_ARA:                                  # isme cok yakl
 if _uzak < PAY:
     sys.exit(f'HATA: sembol susleme dalina {_uzak:.0f} px (en az {PAY})')
 bas(on, ana, cx, y_sem)
+_cols = np.where(MASK_ON.any(0))[0] - TW
+adim(f'merkez: sembol y {y_sem:.0f} / cerceve y {((_satirlar.min() + _satirlar.max()) / 2 - TH):.0f}; sembol x {cx:.0f} / cerceve x {((_cols.min() + _cols.max()) / 2):.0f} (on tuval px)')
 # isim satiri: tek isim, cift kupadaki isim satiri yerinde ve boyunda
 _, t_isim = T('on', 0, L['isim_taban'])
 ISIM_CAP = L['isim_cap'] * s
