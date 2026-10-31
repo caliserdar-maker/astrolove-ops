@@ -27,8 +27,10 @@ bolumu okunmadan baslanmaz.
   Etsy okumasi biter bitmez kosu biter (ham veri Drive'a), isleme kilitsiz ayri is akisinda yapilir (kagit-tara 39947456694
   OCR boyunca kilidi 90+ dk tuttu, pilot kuru plani bekletti).
   ISTISNA (Serdar 31 Eki, karar 6b): yd-kapak-yukle.yml (1st Anniversary galeri yukleyicisi) kilidi is akisinin EN BASINDA alir; girdi
-  indirme (en fazla 15 dk) kilit altindadir. Sure butcesi kilit anindan sayilir (KILIT_T0; azami_dk <= 100), boylece bekleyen Etsy
-  kosularinin 120 dk siniri asilmaz. Baska is akisina genellenmez.
+  indirme (en fazla 15 dk) kilit altindadir. Gerekce (bagimsiz inceleme 30 Eki): canli okuma ile yazim arasinda baska Etsy kosusu
+  araya girmesin. Sure butcesi kilit anindan sayilir (KILIT_T0; azami_dk <= 75) ve YD kapak adimi 95 dk ile sert sinirlidir; kilit
+  tutma ~120 dk altinda kalir. Bu yalniz TEK bekleyen kosu icin gecerlidir: kuyrukta arka arkaya bekleyen kosularin beklemesi
+  toplanir (kilit_bekle.py onceki her aktif kosuyu bekler). Baska is akisina genellenmez.
 - KURAL (tum oturumlar): Etsy kosusunu istedigin an baslat; kilit sirayi kendisi tutar,
   hicbir kosu iptal edilmez (bekleme en fazla 120 dk, asilirsa is yapmadan FAIL).
 - Hicbir sir loga yazilmaz; token degerleri `::add-mask::` ile maskelenir.

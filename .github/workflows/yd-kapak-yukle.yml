@@ -3,17 +3,18 @@ name: yd-kapak-yukle
 # YD (1st Anniversary) 78 kapak yukleyicisi (plan v3 adim 7; Merkez 27 Eki). KOSTURMA: kuru kosu, pilot ve yukleme ayri Serdar onayiyla,
 # poster galerisi 78/78 bittikten sonra. kuru=true (varsayilan): Etsy salt okuma, PLAN_YD.json + plan_damga. ETSY'YE YAZAR yalniz
 # kuru=false + confirm=YD_KAPAK + plan_damga (kuru kosunun plani; canli durum plandan farkliysa o ilana yazma yok).
-# scripts/kapak78/yd_liste_uret.py (kilit oncesi: HAM, dosya / sha / QC / yedek kapilari) + scripts/kapak78/yd_kapak_yukle.py
+# scripts/kapak78/yd_liste_uret.py (kilit altinda, en fazla 15 dk: HAM, dosya / sha / QC / yedek kapilari) + scripts/kapak78/yd_kapak_yukle.py
 # (yazim yolu eski78_gorsel_yukle.bir_ilan, YD profili: hedef 10, Style 513, eski 13 silinir, cdn=False).
-# Drive girdileri Etsy kilidi ALINMADAN once indirilir (KILIT SURESI kurali; cdn_yedek kilit altinda YOK, adim 5 yedegi
+# Drive girdileri kilit ALTINDA indirilir (Serdar 31 Eki karar 6b; cdn_yedek kilit altinda YOK, adim 5 yedegi
 # TEMP/YD_KAPAK_V1_YEDEK/<yedek_damga> liste kapisinda dogrulanir): 10'lu galeri TEMP/YD_KAPAK_V1/<kapak_damga> (<CIFT>_Y<NN>.jpg,
 # ORTAK_Y04 + MANIFEST.csv), QC .../QC_<qc_damga>/QC_RAPOR.json, Canva alt metinleri (alt_id: ALT.csv cift, kart_no, alt),
 # HAM TEMP/<envanter>/HAM/<ilan>.json. Serdar 27 Eki: kapak + galeri tek seferde, ilan basina 10 gorsel, eski 13 silinir.
 # Durum dosyalari (scripts/ops/durum_dosyasi.py; okuma kilit SONRASI, yazma yalniz yazim / bag kosusunda):
 #   TEMP/YD_KAPAK_V1_YUKLE/DEVAM.json, ILERLEME.json (json-ilanlar; set = hedef = 10), SONUC.csv (csv, anahtar ilan).
 # Kosu ciktisi TEMP/YD_KAPAK_V1_YUKLE/KOSU/<run_id>/. bag_onar=true (onay YD_KAPAK_BAG + plan_damga): yalniz Style baglari.
-# Kilit suresi: azami_dk (varsayilan 90, en fazla 100) KILIT ALINDIGI ANDAN sayilir; sonrasinda yeni ilana baslanmaz. Kilit is akisinin
-# en basinda (Serdar 31 Eki karar 6b; CLAUDE.md KILIT SURESI istisnasi): girdi indirme (en fazla 15 dk) kilit altinda.
+# Kilit suresi: azami_dk (varsayilan ve en fazla 75) KILIT ALINDIGI ANDAN sayilir; sonrasinda yeni ilana baslanmaz. YD kapak adimi sert
+# sinir 95 dk (baslamis son ilan dahil; yarim ilan DEVAM ile surer). Kilit tutma ust siniri ~ kurulum + indirme 15 + 95 + kapanis < 120 dk
+# (bekleyen TEK Etsy kosusunun bekleme siniri). Kilit is akisinin en basinda (Serdar 31 Eki karar 6b; CLAUDE.md KILIT SURESI istisnasi).
 
 permissions:
   actions: read
@@ -33,7 +34,7 @@ on:
       sadece: {description: "yalniz bu ilanlar (virgullu listing_id); bos = 78", required: false, default: ""}
       devam_kosu: {description: "runner kaybi: o kosunun ilan DEVAM kopyalari (bos = yok)", required: false, default: ""}
       kurtar: {description: "true: hata kaydi olan ilanda kayitli plan + canli galeriyle surdur", required: false, default: "false"}
-      azami_dk: {description: "yazim: bu sureden sonra yeni ilana baslanmaz (dk)", required: false, default: "90"}
+      azami_dk: {description: "yazim: kilitten bu sure sonra yeni ilana baslanmaz (dk, 1-75)", required: false, default: "75"}
       bag_onar: {description: "true: yalniz Style baglari (DEVAM kaydi olan ilanlar; confirm YD_KAPAK_BAG)", required: false, default: "false"}
 
 env:
@@ -67,7 +68,7 @@ jobs:
           [[ "$KURU" =~ ^(true|false)$ && "$KU" =~ ^(true|false)$ ]] || { echo "::error::girdi (kuru / kurtar)"; exit 1; }
           [[ "$AL" =~ ^[A-Za-z0-9_-]{20,80}$ ]] || { echo "::error::girdi (alt_id)"; exit 1; }
           [[ "$SA" =~ ^([0-9]+(,[0-9]+)*)?$ && "$DK" =~ ^([0-9]+)?$ && "$AZ" =~ ^[0-9]{1,3}$ ]] || { echo "::error::girdi (sadece / devam_kosu / azami_dk)"; exit 1; }
-          [ "$AZ" -ge 1 ] && [ "$AZ" -le 100 ] || { echo "::error::azami_dk 1-100 (kilit en basta; bekleyen Etsy kosulari en fazla 120 dk bekler)"; exit 1; }
+          [ "$AZ" -ge 1 ] && [ "$AZ" -le 75 ] || { echo "::error::azami_dk 1-75 (kilit en basta; YD kapak adimi 95 dk; bekleyen Etsy kosusu en fazla 120 dk bekler)"; exit 1; }
           if [ "$BO" = true ]; then
             [ "$KURU" = false ] && [ "$ONAY" = YD_KAPAK_BAG ] || { echo "::error::bag onarimi icin kuru=false + confirm YD_KAPAK_BAG"; exit 1; }
             [[ "$PD" =~ ^[0-9]+_[0-9a-f]{12}$ ]] || { echo "::error::bag onarimi icin plan_damga"; exit 1; }
@@ -176,6 +177,7 @@ jobs:
           umask 077
           rclone copyto "$T/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
       - name: YD kapak
+        timeout-minutes: 95
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}

@@ -123,15 +123,20 @@ def main() -> int:
     for x in ("rclone copy \"$K\" _in/kapak", "rclone copyto \"$K/QC_$QD/QC_RAPOR.json\"", "rclone copy \"$T/$EN/HAM\"",
               "rclone lsjson -R \"$Y\"", "python3 scripts/kapak78/yd_liste_uret.py liste"):
         assert x in yy and kilit < yy.index(x), f"yd-kapak-yukle: kilitten once: {x}"
-    assert "KILIT_T0=$(date +%s)" in yy and "AZE=$(( AZ - GEC ))" in yy and "--azami-dk \"$AZE\"" in yy and "-le 100" in yy \
-        and "timeout-minutes: 15" in yy, "yd-kapak-yukle: kilit suresi butcesi"
-    assert kilit_bekle.ZAMAN_ASIMI_DK >= 100 + 15, "kilit bekleme siniri butceden kisa"
+    assert "KILIT_T0=$(date +%s)" in yy and "AZE=$(( AZ - GEC ))" in yy and "--azami-dk \"$AZE\"" in yy, "yd-kapak-yukle: kilit suresi butcesi"
+    adim = {x.split("\n", 1)[0].strip(): x for x in yy.split("\n      - name: ")[1:]}           # adim bazinda (ad -> blok)
+    ind = next(v for k, v in adim.items() if k.startswith("Girdiler (Drive, kilit altinda"))
+    yk = adim["YD kapak"]
+    assert "timeout-minutes: 15" in ind and "rclone copy \"$K\" _in/kapak" in ind, "yd-kapak-yukle: indirme adimi 15 dk"
+    assert "timeout-minutes: 95" in yk and "AZE=$(( AZ - GEC ))" in yk, "yd-kapak-yukle: YD kapak adimi 95 dk + butce"
+    assert '[ "$AZ" -le 75 ]' in yy and 'default: "75"' in adim.get("Girdi kapisi", yy) + yy, "yd-kapak-yukle: azami_dk <= 75"
+    assert 15 + 95 + 10 <= kilit_bekle.ZAMAN_ASIMI_DK, "kilit tutma ust siniri (indirme + YD kapak + kurulum/kapanis 10) bekleme sinirini asiyor"
     import subprocess, time as _t
     sn = [x for x in yy.splitlines() if "GEC=$((" in x or x.strip().startswith('[ "$AZE" -ge 1 ]')]
     betik = "\n".join(x.strip() for x in sn).replace('echo "KOD=1" >> "$GITHUB_ENV"; ', "") + '\necho "AZE=$AZE"'
-    for gecen, bek_rc, bek in ((5, 0, "AZE=85"), (95, 1, "")):   # azami_dk 90: 5 dk sonra 85 dk butce; 95 dk sonra ilan baslamaz
+    for gecen, bek_rc, bek in ((5, 0, "AZE=70"), (74, 0, "AZE=1"), (75, 1, ""), (95, 1, "")):   # azami_dk 75; sinir durumlari dahil
         r = subprocess.run(["bash", "-c", betik], capture_output=True, text=True,
-                           env={"KILIT_T0": str(int(_t.time()) - gecen * 60), "AZ": "90", "PATH": os.environ.get("PATH", "")})
+                           env={"KILIT_T0": str(int(_t.time()) - gecen * 60 - 1), "AZ": "75", "PATH": os.environ.get("PATH", "")})
         assert r.returncode == bek_rc and bek in r.stdout, f"yd-kapak-yukle kilit butcesi ({gecen} dk): {r.returncode} {r.stdout} {r.stderr}"
     for x in ("durum_dosyasi.py oku --uzak \"$O/DEVAM.json\"", "durum_dosyasi.py oku --uzak \"$O/ILERLEME.json\""):
         assert x in yy and kilit < yy.index(x) < yy.index("python3 scripts/kapak78/yd_kapak_yukle.py"), f"yd-kapak-yukle: {x}"
