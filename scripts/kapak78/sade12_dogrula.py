@@ -64,7 +64,8 @@ def ozet(a):
                         mp4_bayt_esit=sum(k.get("bayt_esit", False) for k in tur(".mp4")), eksik=sum(k.get("durum") == "YOK" for k in dos.values())))
     Path(a.json).write_text(json.dumps(r, indent=1))
     print(b, r["sayim"])
-    return 0 if r["sayim"]["eksik"] == 0 and r["sayim"]["jpg_esit"] == r["sayim"]["jpg"] else 1
+    tam = r["sayim"]["manifest"] == 18 and r["sayim"]["jpg"] == 9        # inceleme 31 Eki: manifest satiri yoksa PASS vermesin
+    return 0 if tam and r["sayim"]["eksik"] == 0 and r["sayim"]["jpg_esit"] == r["sayim"]["jpg"] else 1
 
 
 def kiyas(dosyalar):

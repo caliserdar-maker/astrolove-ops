@@ -75,6 +75,10 @@ jobs:
           { echo "cpu: $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2)"; echo "simd: $(grep -m1 -o 'avx512f' /proc/cpuinfo || echo yok)";
             echo "nproc: $(nproc)"; ldd --version | head -1; python3 -V; ffmpeg -version | head -1;
             python3 -c "import PIL, numpy, cv2, scipy, fontTools; print(PIL.__version__, numpy.__version__, cv2.__version__, scipy.__version__, fontTools.version)"; } > MAKINE_$B.txt 2>&1
+          # inceleme 31 Eki: manifest AVX512'li makinede uretilmis; AVX512'siz (AMD EPYC 7763) koşucuda JPG / video farkli cikiyor
+          # (24 isin 12'si, hepsi 0/9 JPG). Bu yuzden AVX512 yoksa uretim yapilmaz, is acikca FAIL (yeniden kosulur).
+          if ! grep -qw avx512f /proc/cpuinfo; then echo "AVX512_YOK" > LOG_$B.txt; echo "URET=1" >> "$GITHUB_ENV"
+            echo "::error::$B: kosucuda AVX512 yok (manifest AVX512 yoluyla uretildi); bu burc icin yeniden kosun"; exit 1; fi
           bash ../_s12.sh "$B" > LOG_$B.txt 2>&1; echo "URET=$?" >> "$GITHUB_ENV"
           python3 ../scripts/kapak78/sade12_dogrula.py ozet --dir "$B" --manifest ../_ko/kupa_orchard/ilan/SADE12_MANIFEST.tsv --json V_$B.json
           echo "DOGRULA=$?" >> "$GITHUB_ENV"
