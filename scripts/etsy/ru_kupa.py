@@ -26,10 +26,23 @@ AYNI_EN = ("First Name", "Second Name")
 ISIM_RU = {"Left name": "Имя слева", "Right name": "Имя справа", "First Name": "Первое имя", "Second Name": "Второе имя"}
 
 
+FOTO_MAX = 20   # Etsy galeri siniri
+
+
 def foto_ru(s):
-    if not FOTO.fullmatch(s):
-        raise ValueError(f"foto numarasi kalip disi: {s!r}")
+    if not FOTO.fullmatch(s) or any(not 1 <= int(n) <= FOTO_MAX for n in re.findall(r"\d+", s)):
+        raise ValueError(f"foto numarasi kalip / aralik disi: {s!r}")
     return s.replace(" and ", " и ")
+
+
+def cogul(n, bir, iki, bes):
+    """Rusca sayi ile isim uyumu: 1 буква, 2-4 буквы, 5+ букв (11-14 букв)."""
+    n = int(n)
+    if n % 10 == 1 and n % 100 != 11:
+        return bir
+    if 2 <= n % 10 <= 4 and not 12 <= n % 100 <= 14:
+        return iki
+    return bes
 
 
 def ikili(a, b):
@@ -58,8 +71,8 @@ def p_stil(m, ctx):
     if ctx.get("burc") and (a, b) != ctx["burc"]:
         raise ValueError("stil paragrafi burclari girisle ayni degil")
     return ("[ 8 СТИЛЕЙ: THE ORCHARD WE KEEP ]\nOrange Blossom, Purple Fig, Olive Breeze, Pomegranate Bloom, Almond Blossom, "
-            "Lemon Grove, Blue Grape или Golden Loquat. Во всех стилях этой зодиакальной кружки для пары один и тот же символ "
-            f"{ikili(a, b)} и турецкий глаз (назар) на обратной стороне. Смотрите фото {foto_ru(m.group(3))}.")
+            "Lemon Grove, Blue Grape или Golden Loquat. Во всех стилях этой зодиакальной кружки для пары один и тот же символ знаков "
+            f"{ikili(a, b)} и турецкий глаз на обратной стороне. Смотрите фото {foto_ru(m.group(3))}.")
 
 
 def p_boy(m, ctx):
@@ -68,7 +81,9 @@ def p_boy(m, ctx):
 
 
 def isim_ru(s, ctx, sira):
-    a, b = ctx.get("burc") or (None, None)
+    if not ctx.get("burc"):
+        raise ValueError("isim satiri: giris paragrafi (burclar) once gelmeli")
+    a, b = ctx["burc"]
     hedef = a if sira == 1 else b
     m = re.fullmatch(r"Name (for|Under) " + B_RX, s)
     if m:
@@ -87,12 +102,13 @@ def p_kisisel(m, ctx):
     i1, n1, i2, n2, msj, bos, foto = m.groups()
     if n1 != n2:
         raise ValueError(f"isim sinirlari farkli {n1} / {n2}")
-    if re.search("[Ѐ-ӿ]", bos):
-        raise ValueError("bos mesaj metni Kiril")
+    if not re.fullmatch(r"[A-Za-z][A-Za-z ,.'!&]*", bos) or len(bos) > int(msj):
+        raise ValueError(f"bos mesaj metni kalip disi ya da {msj} karakterden uzun: {bos!r}")
     ctx.update(isim=int(n1), mesaj=int(msj))
     return ("[ КАК ПЕРСОНАЛИЗИРОВАТЬ ]\nНапишите три строки в поле персонализации:\n"
-            f"1. {isim_ru(i1, ctx, 1)} (до {n1} букв)\n2. {isim_ru(i2, ctx, 2)} (до {n2} букв)\n"
-            f"3. Надпись (одна строка, до {msj} символов, включая пробелы и знаки препинания)\n"
+            f"1. {isim_ru(i1, ctx, 1)} (до {n1} {cogul(n1, 'буквы', 'букв', 'букв')})\n"
+            f"2. {isim_ru(i2, ctx, 2)} (до {n2} {cogul(n2, 'буквы', 'букв', 'букв')})\n"
+            f"3. Надпись (одна строка, до {msj} {cogul(msj, 'символа', 'символов', 'символов')}, включая пробелы и знаки препинания)\n"
             "Если вы оставите надпись пустой, мы напечатаем:\n"
             f"{bos}\n"
             f"Пожалуйста, проверьте написание. Смотрите фото {foto_ru(foto)}.")
@@ -161,6 +177,9 @@ def kur(en):
     d = norm(en)
     par = [p.strip() for p in d.split("\n\n") if p.strip()]
     ctx, ru, hata = {}, [], []
+    tekrar = sorted({p[:40] for p in par if par.count(p) > 1})
+    if tekrar:
+        hata.append(f"tekrarlanan paragraf: {tekrar}")
     for i, p in enumerate(par, 1):
         if p in SABIT:
             ru.append(SABIT[p]); continue

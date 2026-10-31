@@ -2,7 +2,7 @@ name: kupa-ru
 
 # KUPA ORCHARD 78 ilan RU katmani (Serdar 19 Eki 2026). Kod: scripts/etsy/kupa_ru.py
 # apply=false (varsayilan): SALT OKUMA (state, bolum, mevcut RU) + metin kontrolu. Etsy'ye yazmaz.
-# apply=true + confirm=CANLI: yalniz state=active ilanlara translations/ru PUT + geri okuma. Serdar onayi gerekir.
+# apply=true KAPALI (31 Eki inceleme: eski 19 Eki RU CSV'si canli RU'yu eski metinle ezer). Yalniz kuru.
 # Metin: kupa-orchard dali kupa_orchard/ilan/KUPA78_ORCHARD_METIN_RU.csv (ru_ref). Liste: Drive TEMP/KUPA_ORCHARD_TASLAK_20261019.
 # Cikti: Drive ASTROLOVE/TEMP/KUPA_ORCHARD_TASLAK_20261019/RU_<zaman>/ (KUPA_RU.csv, KUPA_RU.json). Kota tabani 10.
 
@@ -37,6 +37,9 @@ jobs:
           CONFIRM: ${{ inputs.confirm }}
         run: |
           set -euo pipefail
+          if [ "$APPLY_IN" = "true" ]; then   # 31 Eki: eski 19 Eki RU CSV'si (beyansiz, Left/Right) yazilmaz; yeni kurucu ru_kupa.py
+            echo "::error::kupa-ru apply KAPALI (eski 19 Eki RU metni; yeni RU scripts/etsy/ru_kupa.py, Serdar + Lena onayi sonrasi ayri yazici). DUR."; exit 1
+          fi
           if [ "$APPLY_IN" = "true" ] && [ "$CONFIRM" != "CANLI" ]; then
             echo "::error::apply=true icin confirm tam olarak 'CANLI' olmali. DUR."; exit 1
           fi

@@ -43,6 +43,8 @@ def main(argv=None):
     a = ap.parse_args(argv)
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     canli = json.loads(open(a.canli, encoding="utf-8").read())
+    if len({x["cift"] for x in canli}) != len(canli) or len({x["listing_id"] for x in canli}) != len(canli):
+        raise SystemExit("DUR: cift / listing_id tekil degil")
     satir, tam = [], []
     for x in sorted(canli, key=lambda y: y["cift"]):
         c = x["cift"]
