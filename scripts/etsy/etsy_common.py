@@ -12,12 +12,15 @@ Ortak Etsy v3 istemcisi (token deposu + GET/PATCH sarmali).
 Hicbir sir loga yazilmaz; okunan her token degeri ::add-mask:: ile
 maskelenir.
 """
+import atexit
 import hashlib
+import html
 import posixpath
 import urllib.parse
 import json
 import os
 import re
+import sys
 import threading
 import time
 from datetime import datetime, timezone
@@ -240,6 +243,76 @@ def ru_yazim_kapisi(method, path, data=None, json_body=None):
         raise SystemExit(f"DUR: RU yazim kapisi: poster ilan {lid} RU aciklamasi ru_poster sablon kurucusundan gelmiyor; yazim yok")
 
 
+
+# AI BEYAN KAPISI (Merkez 31 Eki, Serdar "ok"): Etsy kurali "Sellers must disclose within their listing description if an item is created
+# with the use of AI." Aciklama (description) yazan HER istek (updateListing PATCH/PUT, createDraftListing POST, ceviri PUT/POST) gondermeden
+# once SON metinde beyan cumlesi aranir; tum betikler Etsy._call'dan gectigi icin kapi tek yerde (kopya kod yok). description anahtari
+# olmayan kismi yazim (yalniz baslik / etiket / fiyat) aciklamayi degistirmez, kapiya takilmaz. Beyan yoksa: o ilan YAZILMAZ (istek
+# gonderilmez, BeyanYok = SystemExit, mesajda ilan id), ilan BEYAN_HATA listesine girer ve surec cikisinda kosu FAIL olur (betik
+# SystemExit'i ilan bazinda yakalayip devam etse bile; cikis kodu 1, "::error::" satirinda ilan id'leri).
+AI_BEYAN = {"en": "We use AI tools to help create the artwork",
+            "ru": "При создании изображений мы используем инструменты искусственного интеллекта"}   # beyan_marka_yaz.RU_BEYAN ile ayni
+_BEYAN_ILAN = re.compile(r"/shops/[^/]+/listings(?:/0*(\d+))?$")                    # updateListing / createDraftListing (kanonik yol)
+_BEYAN_CEVIRI = re.compile(r"/listings/0*(\d+)/translations/([a-z]{2})(?:[-_][a-z]{2})?$")
+BEYAN_HATA = []          # [(ilan, dil, neden)] bu surecte beyan kapisina takilan yazimlar
+
+
+class BeyanYok(SystemExit):
+    pass
+
+
+def _beyan_norm(t):
+    return re.sub(r"\s+", " ", html.unescape(str(t or ""))).strip()
+
+
+def beyan_var(metin, dil):
+    """Son aciklama metninde o dilin beyan cumlesi var mi (bosluk / satir sonu ve HTML varligi normalize)."""
+    c = AI_BEYAN.get(dil)
+    return bool(c) and _beyan_norm(c) in _beyan_norm(metin)
+
+
+def ai_beyan_kapisi(method, path, data=None, json_body=None, params=None):
+    """Aciklama yazimindan once (GET/HEAD/OPTIONS disi). description yoksa gecer; varsa son metinde dilin beyan cumlesi zorunlu."""
+    if str(method or "").upper() in ("GET", "HEAD", "OPTIONS"):
+        return
+    yol = _kanonik_yol(path)
+    m_c, m_i = _BEYAN_CEVIRI.search(yol), _BEYAN_ILAN.search(yol)
+    if not (m_c or m_i):
+        return
+    ilan = str(int(m_c.group(1))) if m_c else (str(int(m_i.group(1))) if m_i.group(1) else "yeni ilan (createDraftListing)")
+    dil = m_c.group(2) if m_c else "en"
+    govdeler = [_govde(data), _govde(json_body), _govde(params)]
+    if any(g is None for g in govdeler):
+        neden = "istek govdesi okunamadi"
+    else:
+        aciklamalar = [g["description"] for g in govdeler if "description" in g]
+        if not aciklamalar:
+            return                                                       # kismi yazim: aciklama degismiyor
+        if len({_beyan_norm(x) for x in aciklamalar}) > 1:
+            neden = "data / json / params aciklamalari celisiyor"
+        elif dil not in AI_BEYAN:
+            neden = f"'{dil}' dili icin beyan cumlesi tanimli degil"
+        elif beyan_var(aciklamalar[0], dil):
+            return
+        else:
+            neden = f"aciklamada AI beyani yok ({dil.upper()}: \"{AI_BEYAN[dil]}\")"
+    BEYAN_HATA.append((ilan, dil, neden))
+    raise BeyanYok(f"HATA: AI beyan kapisi: ilan {ilan} {dil.upper()} {neden}; yazim yok")
+
+
+def _beyan_cikis():
+    if BEYAN_HATA:
+        try:
+            sys.stdout.flush()
+        except Exception:   # noqa: BLE001
+            pass
+        print("::error::AI beyan kapisi: aciklamasi beyansiz oldugu icin YAZILMAYAN ilanlar: "
+              + "; ".join(f"{i} {d.upper()} ({n})" for i, d, n in BEYAN_HATA), file=sys.stderr, flush=True)
+        os._exit(1)        # betik SystemExit'i yakalayip 0 ile bitse de kosu FAIL (token aninda yazilir, atexit kullanan baska kod yok)
+
+
+atexit.register(_beyan_cikis)
+
 # ------------------------------------------------------------------ api
 class Etsy:
     """Is parcacigi guvenli (Serdar 29 Eki hiz: galeri yukleyici --isci N ayni istemciyi paylasir): tempo TUM iscilere ortak tek
@@ -399,6 +472,7 @@ class Etsy:
 
     def _call(self, method, path, params=None, data=None, ok404=False, json_body=None):
         ru_yazim_kapisi(method, path, data, json_body)
+        ai_beyan_kapisi(method, path, data, json_body, params)
         self._istek_oncesi()
         attempt, yenilendi = 0, False
         while True:   # en fazla 3 gonderim (5xx / kisa 429); 401 (istek islenmedi) bir kez, hangi denemede gelirse gelsin, sayilmaz

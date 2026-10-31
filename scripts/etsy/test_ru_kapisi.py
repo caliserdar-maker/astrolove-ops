@@ -39,8 +39,9 @@ def main():
     api = E.Etsy(Depo())
     POSTER, KUPA = "4570110121", "4598517993"
     ESKI = "Печатаем на хлопковой бумаге Hahnemühle Photo Rag 308 г/м²."
-    YENI = "Именной постер для пары. Печать на премиальной матовой художественной бумаге."
-    KUPA_RU = "Именная кружка для пары. Оригинальные символы от AstroLoveArt. 11 oz (325 мл)."
+    BR = " " + E.AI_BEYAN["ru"] + "."           # AI beyan kapisi (31 Eki): gidecek RU metinde beyan zorunlu; bu test yalniz RU kapisini sinar
+    YENI = "Именной постер для пары. Печать на премиальной матовой художественной бумаге." + BR
+    KUPA_RU = "Именная кружка для пары. Оригинальные символы от AstroLoveArt. 11 oz (325 мл)." + BR
     s = []
     s.append(("poster: eski RU (yasak ifade) PUT gonderilmez", dene(lambda: api.put(f"/shops/1/listings/{POSTER}/translations/ru",
               {"title": "t", "description": ESKI, "tags": "a"})) == "durdu"))
@@ -68,7 +69,7 @@ def main():
     s.append(("data + json celisirse durur", dene(lambda: api._call("PUT", f"/shops/1/listings/{KUPA}/translations/ru",
               data={"description": "a"}, json_body={"description": "b"})) == "durdu"))
     s.append(("GET ve EN PATCH kapidan etkilenmez", dene(lambda: api.get(f"/shops/1/listings/{POSTER}/translations/ru")) == "gitti"
-              and dene(lambda: api.patch(f"/shops/1/listings/{POSTER}", {"description": "x"})) == "gitti"))
+              and dene(lambda: api.patch(f"/shops/1/listings/{POSTER}", {"description": "x " + E.AI_BEYAN["en"]})) == "gitti"))
     s.append(("poster listesi 78 ilan", len(E.poster_idler()) == 78 and POSTER in E.poster_idler()))
     s.append(("yasak desen eski genislikte (Serdar 23 Eki 2b): omur yili ifadeleri yakalanir, 11 букв yakalanmaz",
               all(E.RU_YASAK.search(x) for x in ("100-200 years", "более 100 лет", "служит 100 лет", "lasts 200 years"))
