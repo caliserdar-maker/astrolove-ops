@@ -4,7 +4,7 @@ name: by-siparis-ornek
 # Kod: bizim-yilimiz-v3 sabit commit (KOD_REF); sarmalayici scripts/siparis_by/by_siparis.py (main).
 # Cikti: Drive ASTROLOVE/SIPARIS_ISIM/BIZIM_YILIMIZ/<siparis_no | ONIZLEME_YYYYMMDD_ISIM1_ISIM2>/
 # Repo herkese acik: isim/tarih/satir ilk adimda maskelenir (loga acik yazilmaz).
-run-name: by-siparis ${{ inputs.tur }} ${{ inputs.pair }} stil ${{ inputs.style }} ${{ inputs.format }}
+run-name: by-siparis ${{ inputs.tur }} ${{ inputs.pair }} stil ${{ inputs.style }} ${{ inputs.format }} ${{ inputs.boy }}
 on:
   workflow_dispatch:
     inputs:
@@ -17,7 +17,8 @@ on:
       heading: { description: "Poster basligi (kartta her zaman Happy First Anniversary)", type: choice, options: ["Paper Anniversary", "Our First Year"], default: "Paper Anniversary" }
       line: { description: "Kisa satir, en fazla 20 (bos = YEAR ONE)", required: false, default: "" }
       style: { description: "1 Starlit | 2 Timeless | 3 First Page | 4 Layers | 5 Botanical", type: choice, options: ["1", "2", "3", "4", "5"], default: "1" }
-      format: { description: "poster 8x10 | kart 5x7 | ikisi", type: choice, options: [poster, kart, ikisi], default: ikisi }
+      format: { description: "poster 8x10 | kart 5x7 | ikisi (boy verilirse poster)", type: choice, options: [poster, kart, ikisi], default: ikisi }
+      boy: { description: "yeni yapi boyu (Serdar 31 Eki 2a): bos = eski 8x10/5x7; 5x7 8x10 11x14 12x16 12x18 16x20 16x24 18x24 20x30 24x30 24x36 A4 A3 A2", type: choice, options: ["", "5x7", "8x10", "11x14", "12x16", "12x18", "16x20", "16x24", "18x24", "20x30", "24x30", "24x36", "A4", "A3", "A2"], default: "" }
 permissions:
   contents: read
 concurrency:            # ayni anda tek kosu (14 Eki: paralel iki kosu ayni Drive klasorunu iki kez acti); iptal yok, sira
@@ -81,6 +82,7 @@ jobs:
           LINE: ${{ inputs.line }}
           STYLE: ${{ inputs.style }}
           FORMAT: ${{ inputs.format }}
+          BOY: ${{ inputs.boy }}
         run: |
           set -euo pipefail
           KOD=_kod KOD_SHA="$KOD_REF" CIKTI=_out python3 scripts/siparis_by/by_siparis.py

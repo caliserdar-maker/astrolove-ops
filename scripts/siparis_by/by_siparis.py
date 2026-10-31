@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Bizim Yilimiz musteri dosyasi (14 Eki 2026, Serdar onayi). Akis ELLE baslatilir; Etsy'ye yazma ve musteriye gonderim YOK.
 Girdi (env): TUR (ONIZLEME | NIHAI), SIPARIS_NO (NIHAI: yalniz rakam; ONIZLEME: bos), PAIR, NAME1, NAME2, DATE, HEADING,
-LINE (bos = YEAR ONE), STYLE (1..5), FORMAT (poster | kart | ikisi), KOD (bizim-yilimiz-v3 kopyasi), CIKTI (klasor).
+LINE (bos = YEAR ONE), STYLE (1..5), FORMAT (poster | kart | ikisi), KOD (bizim-yilimiz-v3 kopyasi), CIKTI (klasor),
+BOY (yeni yapi, Serdar 31 Eki 2a: 14 boydan biri; verilirse FORMAT poster, dosya by_boy.py aile sayfasindan, 300 dpi).
 Ön kontrol: PAIR alfabetik + kaynak alfa var; isim/tarih/satir BUYUK harf; isim <= 11, tarih/satir <= 20 karakter;
 uzun/orta tire yok; her harf stilin fontlarinda var (yoksa FAIL, dosya uretilmez).
 NIHAI  : tam dosya 8x10 2400x3000 / 5x7 1500x2100, 300 dpi -> AstroLoveArt_<Burc1>_<Burc2>_<Stil>_<8x10|5x7>.jpg
@@ -21,6 +22,9 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import by_boy as BB  # noqa: E402  14 boy (Serdar 31 Eki 2a)
+
 BURCLAR = ["ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS", "CAPRICORN",
            "AQUARIUS", "PISCES"]
 STIL = {"1": "1_Starlit", "2": "2_Timeless", "3": "3_FirstPage", "4": "4_Layers", "5": "5_Botanical"}
@@ -29,7 +33,7 @@ FONT = {"1": ["Cinzel.ttf"], "2": ["Cinzel.ttf"],
         "3": ["cormorant-garamond-latinext-700-normal.ttf", "Cinzel.ttf"],
         "4": ["montserrat-latinext-600-normal.ttf"],
         "5": ["cormorant-garamond-latinext-700-normal.ttf", "Cinzel.ttf"]}
-OLCU = {"8x10": (2400, 3000), "5x7": (1500, 2100)}
+OLCU = {"8x10": (2400, 3000), "5x7": (1500, 2100)}   # eski yol (by_poster 8x10 / by_kart 5x7)
 ONIZLEME_UZUN = 1000
 
 
@@ -44,7 +48,7 @@ def girdiler(hata):
     g = {"tur": e("TUR").upper(), "siparis_no": e("SIPARIS_NO"), "pair": e("PAIR").upper().replace(" ", "_"),
          "name1": e("NAME1").upper(), "name2": e("NAME2").upper(), "date": e("DATE").upper(),
          "heading": e("HEADING", "Paper Anniversary"), "line": e("LINE").upper() or "YEAR ONE",
-         "style": e("STYLE"), "format": e("FORMAT").lower()}
+         "style": e("STYLE"), "format": e("FORMAT").lower(), "boy": e("BOY")}
     if g["tur"] not in ("ONIZLEME", "NIHAI"):
         hata.append(f"tur ONIZLEME ya da NIHAI olmali: {g['tur']!r}")
     if g["tur"] == "NIHAI" and not g["siparis_no"].isdigit():
@@ -69,6 +73,10 @@ def girdiler(hata):
         hata.append(f"style 1..5: {g['style']!r}")
     if g["format"] not in ("poster", "kart", "ikisi"):
         hata.append(f"format poster | kart | ikisi: {g['format']!r}")
+    if g["boy"] and g["boy"] not in BB.BOY:   # Serdar 31 Eki 2a: yeni yapi 14 boy (Digital File ve Print ayni dosya)
+        hata.append(f"boy 14 boydan biri olmali ({', '.join(BB.BOY)}): {g['boy']!r}")
+    if g["boy"] and g["format"] != "poster":
+        hata.append("boy verildiginde format poster olmali (yeni yapida kart yok)")
     return g
 
 
@@ -139,21 +147,31 @@ def main():
                HEADING=g["heading"], LINE=g["line"], STYLE=g["style"])
     isler = [("poster", "by_poster.py", "8x10"), ("kart", "by_kart.py", "5x7")]
     isler = [i for i in isler if g["format"] in (i[0], "ikisi")]
+    if g["boy"]:   # yeni yapi: tek boy, aile sayfasi (by_boy.py; 24 inc genislige kadar SCALE 2)
+        isler = [("poster", "by_boy", g["boy"])]
     tmp = Path(tempfile.mkdtemp(prefix="by_"))
     dosyalar = []
     for tur, betik, boy in isler:
-        r = subprocess.run([sys.executable, str(kod / "kod" / betik)], env=dict(env, OUT=str(tmp)), cwd=kod,
-                           capture_output=True, text=True)
-        if r.returncode != 0:
-            print(f"URETIM FAIL {betik}:", (r.stderr or r.stdout).strip().splitlines()[-1:] or "?")
-            print("KONTROL FAIL")
-            sys.exit(1)
+        if betik == "by_boy":
+            aile = BB.BOY_AILE[boy]
+            sayfa = BB.aile_sayfasi(kod, aile, dict(env, SCALE="2"), tmp)
+            br = BB.boy_dosyasi(sayfa, aile, boy, tmp / f"{stil}_{boy}.jpg")
+            print(f"BOY {boy}: aile {aile} {br}")
+            hedef_olcu = tuple(BB.hedef_px(boy))
+        else:
+            r = subprocess.run([sys.executable, str(kod / "kod" / betik)], env=dict(env, OUT=str(tmp)), cwd=kod,
+                               capture_output=True, text=True)
+            if r.returncode != 0:
+                print(f"URETIM FAIL {betik}:", (r.stderr or r.stdout).strip().splitlines()[-1:] or "?")
+                print("KONTROL FAIL")
+                sys.exit(1)
+            hedef_olcu = OLCU[boy]
         tam = tmp / f"{stil}_{boy}.jpg"
         ad = f"AstroLoveArt_{b1}_{b2}_{stil_ad}_{boy}"
         im = Image.open(tam)
         dpi = tuple(round(v) for v in im.info.get("dpi", (0, 0)))
-        ok = im.size == OLCU[boy] and dpi == (300, 300)
-        print(f"OLCU {'PASS' if ok else 'FAIL'} tam {boy}: {im.size[0]}x{im.size[1]} {dpi[0]} dpi (beklenen {OLCU[boy][0]}x{OLCU[boy][1]} 300)")
+        ok = im.size == hedef_olcu and dpi == (300, 300)
+        print(f"OLCU {'PASS' if ok else 'FAIL'} tam {boy}: {im.size[0]}x{im.size[1]} {dpi[0]} dpi (beklenen {hedef_olcu[0]}x{hedef_olcu[1]} 300)")
         if g["tur"] == "NIHAI":
             yol = hedef / f"{ad}.jpg"
             shutil.copyfile(tam, yol)

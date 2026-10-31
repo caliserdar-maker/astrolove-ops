@@ -88,7 +88,7 @@ def main(argv=None):
                          router=sinifla(t), router_dijital=R.dijital_mi(t), router_mesajli=sinifla(t_msj),
                          tur_dogru=R.dijital_mi(t) == dig_bek and R.dijital_mi(t_msj) == dig_bek,
                          gift_baski_sayimi=G.baski_mi(t, {"4595350971"}), gift_dogru=G.baski_mi(t_msj, {"4595350971"}) == (not dig_bek),
-                         pod_sku=bool(P.parse_sku(sku)), kupa=kupa_coz(sku), uretim_boyu_var=bk in BS.OLCU))
+                         pod_sku=bool(P.parse_sku(sku)), kupa=kupa_coz(sku), uretim_boyu_var=(bk in BS.BB.BOY) if not tur.startswith("eski (") else (bk in BS.OLCU)))
     with open(out / "SKU_KURU.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
     alanlar = ("cozucu", "router", "router_mesajli", "tur_dogru", "gift_baski_sayimi", "gift_dogru", "pod_sku", "kupa", "sku_32_asar",
@@ -99,7 +99,7 @@ def main(argv=None):
         for alan in alanlar:
             grup[k][alan].add(str(r[alan]).split(" (")[0] if alan.startswith("router") else str(r[alan]))
     hata = [r for r in rows if r["cozucu"] != "TANIR" or not r["tur_dogru"] or not r["gift_dogru"] or r["kupa"] != "TANIMAZ"
-            or (r["tur"] == "yeni (kisa kod)" and r["sku_32_asar"])]
+            or (r["tur"] == "yeni (kisa kod)" and r["sku_32_asar"]) or not r["uretim_boyu_var"]]
     # inceleme 31 Eki: eksik / yanlis SKU, eski menu adlari, buyuk harf SKU (beklenen: dijital mi, gift baski mi)
     def ek(ad, sku, menu, deger, msj, dijital, baski):
         t = dict(transaction_id=1, listing_id=4595350971, sku=sku, quantity=1, variations=[
@@ -126,9 +126,9 @@ def main(argv=None):
                 "| senaryo | dijital_mi | gift baski | dogru |\n|---|---|---|---|\n"
                 + "".join(f"| {e['senaryo']} | {e['dijital']} | {e['baski']} | {e['dogru']} |\n" for e in ekler))
         f.write(f"\nYeni kisa kod SKU > 32: {sum(r['sku_32_asar'] for r in rows if r['tur'] == 'yeni (kisa kod)')} "
-                f"(en uzun {max(r['sku_uzunluk'] for r in rows if r['tur'] == 'yeni (kisa kod)')}). Uretim boyu (by_siparis.OLCU): "
-                f"{sorted(BS.OLCU)}.\nKAPI: {'PASS' if not hata else 'FAIL ' + str(len(hata))} (cozucu TANIR, tur ve gift mesajdan bagimsiz, "
-                f"kupa TANIMAZ, yeni SKU <= 32).\n")
+                f"(en uzun {max(r['sku_uzunluk'] for r in rows if r['tur'] == 'yeni (kisa kod)')}). Uretim boyu: yeni yapi by_boy.BOY "
+                f"({len(BS.BB.BOY)} boy), eski yol by_siparis.OLCU {sorted(BS.OLCU)}.\nKAPI: {'PASS' if not hata else 'FAIL ' + str(len(hata))} (cozucu TANIR, tur ve gift mesajdan bagimsiz, "
+                f"kupa TANIMAZ, yeni SKU <= 32, her boyun uretim yolu var).\n")
     print(open(out / "OZET.md", encoding="utf-8").read())
     return 0 if not hata else 1
 
