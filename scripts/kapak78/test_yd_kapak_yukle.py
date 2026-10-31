@@ -112,9 +112,9 @@ def arg(hazir, out, *ek):
     return K.arg(["--hazir", str(hazir), "--out", str(out), *ek])
 
 
-def kuru(api, hazir, ad, devam=None, ilerleme=None):
+def kuru(api, hazir, ad, devam=None, ilerleme=None, *ek2):
     out = DEPO / ad
-    ek = (["--devam", str(devam)] if devam else []) + (["--ilerleme", str(ilerleme)] if ilerleme else [])
+    ek = (["--devam", str(devam)] if devam else []) + (["--ilerleme", str(ilerleme)] if ilerleme else []) + list(ek2)
     with contextlib.redirect_stdout(io.StringIO()):
         rc = K.sonlandir(api, "1", arg(hazir, out, "--kuru", "--kosu", "111", *ek))
     R = json.loads((out / "RAPOR.json").read_text())
@@ -244,6 +244,94 @@ def geri_alma(hz):
     rc3, R3 = yaz(api2, hz, pob, "yga3", Rb["plan_damga"], dvb, ilb)     # HAM / yedek verilmedi: geri alma yapamaz -> DUR (sessiz PASS yok)
     kontrol(f"geri alma girdisi yok: DUR, neden 'HAM' ({R3['ilanlar'][0]['durum']})",
             rc3 == 1 and R3["ilanlar"][0]["durum"] == "DUR" and any("HAM" in n for n in R3["ilanlar"][0]["neden"]))
+
+
+class SahteTG(SahteYD):
+    """tek gecis (F-B madde 2): envanter PUT / GET, ilan PATCH (baslik + aciklama), video POST / GET / DELETE; PATCH hatasi enjekte edilebilir"""
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        self.inv = copy.deepcopy(HAM["inventory"]); self.L = dict(state="active", title="Eski baslik", description="Eski aciklama")
+        self.vid = [dict(video_id=900001, video_state="active")]; self.patch_hata = 0; self.patchler = []
+
+    def get(self, path, params=None, ok404=False):
+        if path == "/listings/batch/inventory":
+            self._k(); self.n_get += 1; self.n_toplu += 1
+            ids = str((params or {}).get("listing_ids") or "").split(",")
+            return {"count": 1, "results": [dict(listing_id=int(LID), images=None, inventory=copy.deepcopy(self.inv))] if LID in ids else []}
+        if path.endswith("/inventory"):
+            self._k(); self.n_get += 1; return copy.deepcopy(self.inv)
+        if path.endswith("/videos"):
+            self._k(); self.n_get += 1; return {"results": copy.deepcopy(self.vid)}
+        if path == f"/listings/{LID}":
+            self._k(); self.n_get += 1; return dict(copy.deepcopy(self.L), listing_id=int(LID))
+        return super().get(path, params, ok404)
+
+    def put_json(self, path, body):
+        self._k(); self.yaz.append(("envanter",))
+        self.inv = dict(copy.deepcopy(body), products=[dict(p, is_deleted=False) for p in copy.deepcopy(body["products"])]); return self.inv
+
+    def patch(self, path, data):
+        self._k(); self.yaz.append(("patch", tuple(sorted(data)))); self.patchler.append(dict(data))
+        if self.patch_hata:
+            self.patch_hata -= 1; raise SystemExit("HATA: PATCH -> 500 (test)")
+        self.L.update(data); return dict(self.L)
+
+    def post_file(self, path, files=None, data=None, tekrar=3):
+        if "video" in (files or {}):
+            self._k(); self.yaz.append(("video",)); self.vid.append(dict(video_id=900002, video_state="active")); return {"video_id": 900002}
+        return super().post_file(path, files=files, data=data, tekrar=tekrar)
+
+    def delete(self, path, ok404=False):
+        if "/videos/" in path:
+            self._k(); self.yaz.append(("video_sil",)); i = int(path.rsplit("/", 1)[1]); self.vid = [v for v in self.vid if v["video_id"] != i]; return {}
+        return super().delete(path, ok404)
+
+
+def tek_gecis(hz):
+    """F-B madde 2 (Serdar 31 Eki 1a): envanter (140 urun, bag yok) -> galeri (bag EN SON tek) -> baslik + aciklama TEK PATCH -> video EN SON;
+    metin hatasinda galeri + envanter + metin geri alinir."""
+    import io as _io
+    import test_yd_yapi as TY
+    from beyan_marka_yaz import BEYAN
+    d = DEPO / "tg"; d.mkdir()
+    with contextlib.redirect_stdout(io.StringIO()):
+        _, yplan = TY.kuru(TY.Sahte(), d)
+    m = {LID: dict(title="Cancer and Libra 1st Anniversary Print", description="Yeni aciklama.\n\n" + BEYAN)}
+    (d / "metin.json").write_text(json.dumps(m))
+    vd = d / "video"; vd.mkdir(); (vd / "v.mp4").write_bytes(b"\x00\x00\x00\x18ftypmp42test")
+    (vd / "VIDEO_MANIFEST.json").write_text(json.dumps({LID: dict(dosya="v.mp4", sha256=Y.sha256(vd / "v.mp4"))}))
+    yd = DEPO / "yedek_ga"
+    tg = ("--tek-gecis", "--yapi-plan", str(yplan), "--metin-json", str(d / "metin.json"), "--video-dir", str(vd))
+    ek = tg + ("--ham-dir", str(hz.parent / "HAM"), "--yedek-dir", str(yd), "--yedek-liste", str(DEPO / "yl_ga.json"))
+    api = SahteTG()
+    _, R, po = kuru(api, hz, "ktg", None, None, *tg)
+    pd = R["plan_damga"]; s = R["ilanlar"][0]
+    kontrol(f"tek gecis kuru: PLAN, en kotu = galeri + geri alma + tek gecis ({s['en_kotu']})",
+            s["durum"] == "PLAN" and s["en_kotu"] == EN_KOTU + K.tg_istek())
+    dv, il = durum_dosyalari("dtg")
+    rc, R = yaz(api, hz, po, "ytg", pd, dv, il, *ek)
+    s = R["ilanlar"][0]; w = [x[0] for x in api.yaz]
+    kontrol(f"tek gecis: PASS ({s['durum']} {str(s['neden'])[:150]})", rc == 0 and s["durum"] == "PASS")
+    kontrol(f"tek gecis sira: envanter PUT ilk yazim, bag tek ve galeri sonunda, PATCH bagdan sonra, video en son ({w[:2]}..{w[-5:]})",
+            w[0] == "envanter" and w.count("envanter") == 1 and w.count("bag") == 1 and w.index("bag") < w.index("patch") < w.index("video")
+            and w[-1] == "video_sil")
+    kontrol(f"tek gecis: envanter 140 urun ({len(api.inv['products'])}), TEK PATCH (title + description), yeni video tek",
+            len(api.inv["products"]) == 140 and len(api.patchler) == 1 and set(api.patchler[0]) == {"title", "description"}
+            and [v["video_id"] for v in api.vid] == [900002])
+    rk = {x["listing_image_id"]: x["rank"] for x in api.img}
+    kontrol(f"tek gecis: 10 gorsel, Style bagi 6-10 ({({k: rk.get(v) for k, v in api.bag.items()})})",
+            len(api.img) == 10 and {k: rk.get(v) for k, v in api.bag.items()} == K.STIL_SIRA)
+    api2 = SahteTG(); api2.patch_hata = 1
+    g0 = sorted(HAM["images"], key=lambda x: x["rank"])
+    _, R, po2 = kuru(api2, hz, "ktg2", None, None, *tg)
+    dv2, il2 = durum_dosyalari("dtg2")
+    rc, R = yaz(api2, hz, po2, "ytg2", R["plan_damga"], dv2, il2, *ek)
+    s = R["ilanlar"][0]; g = sorted(api2.img, key=lambda x: (x["rank"], x["listing_image_id"]))
+    kontrol(f"tek gecis metin PATCH hatasi: FAIL + geri alma ({s['durum']} {str(s['neden'])[-160:]})",
+            rc == 1 and s["durum"] == "FAIL" and any("GERI ALINDI" in n for n in s["neden"]))
+    kontrol(f"tek gecis geri alma: galeri eski 13 + alt metin, envanter eski 15 urun ({len(api2.inv['products'])}), metin eski, video eski",
+            [x["alt_text"] for x in g] == [x["alt_text"] for x in g0] and len(api2.inv["products"]) == len(HAM["inventory"]["products"])
+            and api2.L["title"] == "Eski baslik" and api2.L["description"] == "Eski aciklama" and [v["video_id"] for v in api2.vid] == [900001])
 
 
 def yukleme_hatasi(hz):
@@ -433,6 +521,7 @@ def main():
     hz = normal_akis()
     yukleme_hatasi(hz)
     geri_alma(hz)
+    tek_gecis(hz)
     bag_bos(hz)
     devam_zaten_blok(hz)
     bloklar(hz)

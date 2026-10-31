@@ -36,6 +36,7 @@ on:
       kurtar: {description: "true: hata kaydi olan ilanda kayitli plan + canli galeriyle surdur", required: false, default: "false"}
       azami_dk: {description: "yazim: kilitten bu sure sonra yeni ilana baslanmaz (dk, 1-75)", required: false, default: "75"}
       bag_onar: {description: "true: yalniz Style baglari (DEVAM kaydi olan ilanlar; confirm YD_KAPAK_BAG)", required: false, default: "false"}
+      tek_gecis: {description: "F-B madde 2: bos = yalniz galeri; dolu = 'YAPI;METIN;VIDEO' TEMP altinda yollar (yd_yapi_kuru klasoru; metin json; video klasoru, VIDEO_MANIFEST.json). Bos parca = yok. Kuru ve yazim AYNI deger (plana bagli)", required: false, default: ""}
 
 env:
   T: "gdrive:ASTROLOVE/TEMP"
@@ -61,9 +62,11 @@ jobs:
           KU: ${{ inputs.kurtar }}
           AZ: ${{ inputs.azami_dk }}
           BO: ${{ inputs.bag_onar }}
+          TG: ${{ inputs.tek_gecis }}
         run: |
           set -euo pipefail
           [[ "$BO" =~ ^(true|false)$ ]] || { echo "::error::girdi (bag_onar)"; exit 1; }
+          [[ "$TG" =~ ^([A-Za-z0-9_./-]+)?(\;([A-Za-z0-9_./-]+)?){0,2}$ && "$TG" != *..* ]] || { echo "::error::girdi (tek_gecis)"; exit 1; }
           [[ "$KD" =~ ^[0-9]{8}_[0-9]{6}$ && "$QD" =~ ^[0-9]{8}_[0-9]{6}$ && "$YD" =~ ^[0-9]{8}_[0-9]{6}$ && "$EN" =~ ^YD_ENVANTER_[0-9]{8}(_[0-9]{6})?$ ]] || { echo "::error::girdi (kapak / qc / yedek damga, envanter)"; exit 1; }
           [[ "$KURU" =~ ^(true|false)$ && "$KU" =~ ^(true|false)$ ]] || { echo "::error::girdi (kuru / kurtar)"; exit 1; }
           [[ "$AL" =~ ^[A-Za-z0-9_-]{20,80}$ ]] || { echo "::error::girdi (alt_id)"; exit 1; }
@@ -113,6 +116,7 @@ jobs:
           KURU: ${{ inputs.kuru }}
           PD: ${{ inputs.plan_damga }}
           BO: ${{ inputs.bag_onar }}
+          TG: ${{ inputs.tek_gecis }}
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work _out _in/kapak _in/HAM
@@ -136,6 +140,13 @@ jobs:
           Y="$T/YD_KAPAK_V1_YEDEK/$YD"
           rclone copyto "$Y/OZET.md" _work/YEDEK_OZET.md
           rclone lsjson -R "$Y" --files-only --include "*.jpg" > _work/yedek_ls.json
+          if [ -n "$TG" ]; then   # tek gecis girdileri (F-B madde 2): yapi plani, metin json, video klasoru (kilit altinda, 15 dk butcesi)
+            IFS=';' read -r TGY TGM TGV <<< "$TG"; mkdir -p _in/tg
+            [ -n "$TGY" ] && rclone copy "$T/$TGY" _in/tg/yapi --include "KURU_*.json" --include "PLAN.csv" -q
+            [ -n "$TGM" ] && rclone copyto "$T/$TGM" _in/tg/metin.json -q
+            [ -n "$TGV" ] && rclone copy "$T/$TGV" _in/tg/video -q
+            echo "tek gecis: yapi $(ls _in/tg/yapi 2>/dev/null | wc -l) dosya, metin $([ -f _in/tg/metin.json ] && echo var || echo yok), video $(ls _in/tg/video 2>/dev/null | wc -l)"
+          fi
           echo "indirilen: kapak $(ls _in/kapak/*.jpg | wc -l), HAM $(ls _in/HAM | wc -l), yedek dosya $(python3 -c 'import json;print(len(json.load(open("_work/yedek_ls.json"))))')"
           if [ "$KURU" = false ] && [ "$BO" = false ]; then
             rclone copyto "$O/KOSU/${PD%%_*}/PLAN_YD.json" _work/PLAN_YD.json || { echo "::error::PLAN_YD.json yok (KOSU/${PD%%_*})"; exit 1; }
@@ -189,6 +200,7 @@ jobs:
           AZ: ${{ inputs.azami_dk }}
           BO: ${{ inputs.bag_onar }}
           YD: ${{ inputs.yedek_damga }}
+          TG: ${{ inputs.tek_gecis }}
         run: |
           set +e -o pipefail
           GEC=$(( ($(date +%s) - ${KILIT_T0:?}) / 60 )); AZE=$(( AZ - GEC ))   # kilitten bu yana gecen sure butceden duser
@@ -202,6 +214,11 @@ jobs:
                    --devam-hedef-kok "$O/KOSU/${GITHUB_RUN_ID}/devam"
                    --ham-dir _in/HAM --yedek-uzak "$T/YD_KAPAK_V1_YEDEK/$YD" --yedek-liste _work/yedek_ls.json --yedek-dir _yedek)   # geri alma (inceleme 31 Eki madde 1)
             [ "$KU" = true ] && args+=(--kurtar)
+          fi
+          if [ -n "$TG" ] && [ "$BO" = false ]; then   # tek gecis: kuru ve yazim ayni girdiler (plan girdisinde sha256)
+            IFS=';' read -r TGY TGM TGV <<< "$TG"; args+=(--tek-gecis --yapi-plan _in/tg/yapi)
+            [ -n "$TGM" ] && args+=(--metin-json _in/tg/metin.json)
+            [ -n "$TGV" ] && args+=(--video-dir _in/tg/video)
           fi
           python3 scripts/kapak78/yd_kapak_yukle.py "${args[@]}" 2>&1 | tee _work/kosu.log
           echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
