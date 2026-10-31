@@ -16,19 +16,19 @@ BASLIK = '{B} Gifts, Personalized {B} Zodiac Mug with Name or Date, Custom Coffe
 ETIKET_BURC = ['{b} gifts', '{b} mug', '{b} zodiac', '{b} birthday']
 ETIKET = ['zodiac mug', 'personalized mug', 'custom name mug', 'star sign mug', 'astrology mug', 'zodiac gift',
           'astrology gift', 'star sign gift', 'horoscope mug']   # 78 cift kupayla ortak etiket 5 (inceleme 31 Eki)
-TALIMAT = '1. Front: a name or a date (max 12 characters)\n2. Back: your message (required, max 30 characters)'
-ACIKLAMA = """{B} gifts made personal: a mug with the {B} zodiac symbol, a name or a date on the front and your own message on the back.
+TALIMAT = '1. Front: name or date, printed in capitals (max 12)\n2. Back: your message, printed as typed (required, max 30)'
+ACIKLAMA = """{B} gifts made personal: a mug with the {B} zodiac symbol and a name or date on the front, and your own message on the back.
 
 [ A ZODIAC BIRTHDAY GIFT ]
 A birthday gift for the {B} in your life: a friend, a partner, a mom or a dad. Or a little treat for yourself in {B} season. A zodiac gift for every morning.
 
 [ WHAT YOU GET ]
 One mug, printed on both sides.
-Front: the {B} symbol in the middle and the name or date you choose below it, framed by fruit and flower branches.
-Back: matching branches, a nazar (evil eye) and your message in italics.
+Front: the {B} symbol in the middle and the name or date you choose below it, framed by fruit branches.
+Back: matching branches, an evil eye bead (nazar) and your message in italics.
 
 [ 8 STYLES: THE ORCHARD WE KEEP ]
-Orange Blossom, Purple Fig, Olive Breeze, Pomegranate Bloom, Almond Blossom, Lemon Grove, Blue Grape or Golden Loquat. Each style has its own fruit and flower branches, and the symbol and text are printed in a color to match. See the style photos.
+Orange Blossom, Purple Fig, Olive Breeze, Pomegranate Bloom, Almond Blossom, Lemon Grove, Blue Grape or Golden Loquat. Each style has its own fruit branches, and the symbol and text are printed in a matching color. See the style photos.
 
 [ TWO SIZES ]
 - 11 oz (325 ml)
@@ -40,13 +40,15 @@ Write two lines in the personalization box:
 1. Front: a name or a date (up to 12 characters)
 2. Back: your message (one line, up to 30 characters including spaces and punctuation). The message is required.
 For a date, keep it short, for example 12 JUL 2025. Please use Latin letters, numbers and simple punctuation, no emoji.
-Please check your spelling. We send you a preview via Etsy Messages before we print.
+Names and dates are printed in capital letters; your message is printed exactly as you type it. Long text prints smaller, and if it does not fit, we will message you before printing.
+Please check your spelling. We send you a preview via Etsy Messages and print once you approve it.
 
 [ DETAILS ]
 - Glossy white ceramic, white inside
 - Dishwasher and microwave safe
 - Made to order, just for you
-- Zodiac symbols designed by AstroLoveArt
+- Zodiac symbol designed by AstroLoveArt
+- The fruit branch artwork was made with the help of AI tools and finished by AstroLoveArt
 
 [ RETURNS ]
 Every mug is personalized, so we can't accept returns or exchanges for a change of mind. If your mug arrives damaged, send us a photo within 7 days of delivery and we'll replace it at no cost.
