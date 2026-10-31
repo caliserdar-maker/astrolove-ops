@@ -1,0 +1,61 @@
+name: by-zemin-8x10
+# 1st Anniversary (YD / Bizim Yilimiz v3) 5 stil 8x10 zemin PNG'si (2400x3000, sembol / yazi YOK; kaynak dosya oldugu gibi kopyalanir)
+# + ogelerin 8x10 yerlesim olcusu (scripts/siparis_by/by_yerlesim_olc.py) -> Drive TEMP/YD_ZEMIN_8x10/<damga>/. Merkez 31 Eki 1a ek. ETSY YOK.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+jobs:
+  zemin:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      KOD_REF: e3d168cef6821d0bd6b6ae5b4dfba503025c5753   # by-siparis-ornek.yml / by-boy-ornek2.yml ile ayni
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1 }
+      - name: Kod
+        run: |
+          set -euo pipefail
+          git fetch -q --depth 1 origin "$KOD_REF"
+          git worktree add -q _kod FETCH_HEAD
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kurulum (by-boy-ornek2 ile ayni surumler)
+        run: |
+          set -euo pipefail
+          pip install -q numpy==2.5.3 opencv-python-headless==5.0.0.93 pillow==12.3.0 fonttools==4.60.1
+          python3 -c "from PIL import features; import sys; sys.exit(0 if features.check('raqm') else 1)"
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Zemin + yerlesim
+        run: |
+          set -uo pipefail
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+          mkdir -p _o
+          cp _kod/z/Baski_2400x3000_Buyutulmus/*_8x10_300ppi.png _o/
+          (cd _o && sha256sum *.png > SHA256.txt)
+          BY_ROOT="$PWD/_kod" python3 scripts/siparis_by/by_yerlesim_olc.py --out _o > _o/LOG.txt 2>&1
+          echo "KOD=$?" >> "$GITHUB_ENV"
+          tail -8 _o/LOG.txt; cat _o/SHA256.txt
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          if ls _o/* >/dev/null 2>&1; then
+            rclone copy _o "gdrive:ASTROLOVE/TEMP/YD_ZEMIN_8x10/${DAMGA:?}" --immutable -q
+            echo "::notice title=YD ZEMIN 8x10::TEMP/YD_ZEMIN_8x10/${DAMGA}/"
+          fi
+          [ "${KOD:-1}" = 0 ] || { echo "::error::by_yerlesim_olc hata (LOG.txt)"; exit 1; }
+      - if: always()
+        run: rm -rf _o ~/.config/rclone
