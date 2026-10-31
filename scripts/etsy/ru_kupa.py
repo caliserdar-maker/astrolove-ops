@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+"""Kupa (Orchard, 78 ilan) RU aciklamasini canli EN aciklamadan kurar (Serdar 31 Eki karar 3b). ETSY YOK; yazim bu dosyada YOK.
+Yapi poster kurucusuyla ayni (ru_poster.py, Serdar 23 Eki sablon yontemi): EN'deki HER paragraf bilinen bir kalibin birebir
+karsiligi olmali; kalip disi paragraf ya da beklenmeyen deger = FAIL (eksik / fazla bilgi uretilmez). Degiskenler EN'den alinir
+(burclar, giris kuyrugu, foto numaralari, isim / mesaj siniri, bos mesajda basilan metin).
+Kaynak: kupa-orchard dali kupa_orchard/kod/ilan_metin.py (EN sablonu) + ilan_metin_ru.py (19 Eki RU sablonu); RU cumleler EN ile
+birebir ayni bilgiyi verecek sekilde duzeltildi (19 Eki RU'da EN'de olmayan "перед оформлением заказа" yok; EN'deki "A thoughtful
+choice..." cumlesinin karsiligi var).
+AYNI BURC (12 cift, Serdar 30 Eki): isim satirlari "First Name" / "Second Name". kupa_en() canli EN'deki "Left name" / "Right name"
+ya da "Name Under <Burc>" ciftini bu ada cevirir (hedef EN); farkli burcta EN degismez. EN degisikligi de Serdar onayina tabidir.
+kur(en) -> (ru, kontrol: dict(pass_, hata, paragraf_en, paragraf_ru)). Yasak ifade etsy_common.RU_YASAK (RU yazim kapisiyla ayni)."""
+import html
+import pathlib
+import re
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import etsy_common as E  # noqa: E402
+from beyan_marka_yaz import BEYAN, RU_BEYAN  # noqa: E402  tek kaynak (beyan kupada da 1. paragraftan sonra)
+from ru_poster import BURC, DATIF  # noqa: E402  burc adlari ve datif tek kaynak
+
+B_RX = "(" + "|".join(BURC) + ")"
+KUYRUK = re.compile(r"(?:an? )?" + B_RX + r" gifts?(?: or (?:an? )?" + B_RX + r" gifts?)?")
+FOTO = re.compile(r"\d+(?: and \d+)?")
+AYNI_EN = ("First Name", "Second Name")
+ISIM_RU = {"Left name": "Имя слева", "Right name": "Имя справа", "First Name": "Первое имя", "Second Name": "Второе имя"}
+
+
+def foto_ru(s):
+    if not FOTO.fullmatch(s):
+        raise ValueError(f"foto numarasi kalip disi: {s!r}")
+    return s.replace(" and ", " и ")
+
+
+def ikili(a, b):
+    return f"«{BURC[a]}» и «{BURC[b]}»"
+
+
+def p_giris(m, ctx):
+    a, b, kuyruk = m.group(1), m.group(2), m.group(3)
+    ctx["burc"] = (a, b)
+    s = (f"Именная кружка для пары со знаками зодиака {ikili(a, b)}: ваши два знака зодиака объединяются в один оригинальный "
+         f"символ, с вашими именами и вашей надписью. Кофейная кружка на заказ и персональный подарок для пары, созданный "
+         f"специально для вас двоих.")
+    if kuyruk is None:
+        return s
+    k = KUYRUK.fullmatch(kuyruk)
+    if not k:
+        raise ValueError(f"giris kuyrugu kalip disi: {kuyruk!r}")
+    ad = [x for x in k.groups() if x]
+    if set(ad) - {a, b}:
+        raise ValueError(f"giris kuyrugu burclari {ad}")
+    return s + f" Удачный выбор, если вы ищете подарок {' или '.join(dict.fromkeys(DATIF[x] for x in ad))}."
+
+
+def p_stil(m, ctx):
+    a, b = m.group(1), m.group(2)
+    if ctx.get("burc") and (a, b) != ctx["burc"]:
+        raise ValueError("stil paragrafi burclari girisle ayni degil")
+    return ("[ 8 СТИЛЕЙ: THE ORCHARD WE KEEP ]\nOrange Blossom, Purple Fig, Olive Breeze, Pomegranate Bloom, Almond Blossom, "
+            "Lemon Grove, Blue Grape или Golden Loquat. Во всех стилях этой зодиакальной кружки для пары один и тот же символ "
+            f"{ikili(a, b)} и турецкий глаз (назар) на обратной стороне. Смотрите фото {foto_ru(m.group(3))}.")
+
+
+def p_boy(m, ctx):
+    return ("[ ДВА РАЗМЕРА ]\n- 11 oz (325 мл)\n- 15 oz (444 мл)\nОдинаковый дизайн в обоих размерах. "
+            f"Смотрите фото {foto_ru(m.group(1))}.")
+
+
+def isim_ru(s, ctx, sira):
+    a, b = ctx.get("burc") or (None, None)
+    hedef = a if sira == 1 else b
+    m = re.fullmatch(r"Name (for|Under) " + B_RX, s)
+    if m:
+        if m.group(2) != hedef:
+            raise ValueError(f"{sira}. isim satiri burcu {m.group(2)} != {hedef}")
+        return f"Имя для знака «{BURC[hedef]}»" if m.group(1) == "for" else f"Имя под знаком «{BURC[hedef]}»"
+    beklenen = {1: ("Left name", "First Name"), 2: ("Right name", "Second Name")}[sira]
+    if s not in beklenen:
+        raise ValueError(f"{sira}. isim satiri kalip disi: {s!r}")
+    if a != b:
+        raise ValueError(f"farkli burcta {s!r} (ayni burc adi)")
+    return ISIM_RU[s]
+
+
+def p_kisisel(m, ctx):
+    i1, n1, i2, n2, msj, bos, foto = m.groups()
+    if n1 != n2:
+        raise ValueError(f"isim sinirlari farkli {n1} / {n2}")
+    if re.search("[Ѐ-ӿ]", bos):
+        raise ValueError("bos mesaj metni Kiril")
+    ctx.update(isim=int(n1), mesaj=int(msj))
+    return ("[ КАК ПЕРСОНАЛИЗИРОВАТЬ ]\nНапишите три строки в поле персонализации:\n"
+            f"1. {isim_ru(i1, ctx, 1)} (до {n1} букв)\n2. {isim_ru(i2, ctx, 2)} (до {n2} букв)\n"
+            f"3. Надпись (одна строка, до {msj} символов, включая пробелы и знаки препинания)\n"
+            "Если вы оставите надпись пустой, мы напечатаем:\n"
+            f"{bos}\n"
+            f"Пожалуйста, проверьте написание. Смотрите фото {foto_ru(foto)}.")
+
+
+SABIT = {
+    BEYAN: RU_BEYAN,
+    "[ A GIFT FOR COUPLES ]\nA wedding gift for couples who love astrology, an engagement gift for couples, an anniversary surprise "
+    "or a newlywed gift. A zodiac gift for every morning.":
+        "[ ПОДАРОК ДЛЯ ПАРЫ ]\nПодарок на свадьбу для пары, которая любит астрологию, подарок на помолвку для пары, сюрприз на "
+        "годовщину или подарок молодожёнам. Зодиакальный подарок на каждое утро.",
+    "[ WHAT YOU GET ]\nOne mug, printed on both sides. The cover shows its front and back.\nFront: the fusion symbol, two small zodiac "
+    "signs, your names in capitals joined by ∞, and your zodiac sign names.\nBack: your message in italics, your names and a small "
+    "nazar (evil eye).":
+        "[ ЧТО ВЫ ПОЛУЧИТЕ ]\nОдна кружка с печатью с двух сторон. На главном фото показаны её лицевая и обратная стороны.\n"
+        "Лицевая сторона: объединённый символ, два небольших знака зодиака, ваши имена заглавными буквами, соединённые знаком ∞, "
+        "и названия ваших знаков зодиака.\nОбратная сторона: ваша надпись курсивом, ваши имена и небольшой назар (турецкий глаз).",
+    "[ DETAILS ]\n- Glossy white ceramic, white inside\n- Dishwasher and microwave safe\n- Made to order, just for you\n- Original "
+    "zodiac fusion symbols designed by AstroLoveArt":
+        "[ ХАРАКТЕРИСТИКИ ]\n- Глянцевая белая керамика, белая внутри\n- Можно мыть в посудомоечной машине и использовать в "
+        "микроволновой печи\n- Изготавливаем на заказ, специально для вас\n- Оригинальные объединённые символы зодиака, созданные "
+        "AstroLoveArt",
+    "[ RETURNS ]\nEvery mug is personalized, so we can't accept returns or exchanges for a change of mind. If your mug arrives "
+    "damaged, send us a photo within 7 days of delivery and we'll replace it at no cost.":
+        "[ ВОЗВРАТ И ОБМЕН ]\nКаждая кружка персонализирована, поэтому мы не принимаем возврат или обмен, если вы передумали. "
+        "Если кружка пришла повреждённой, пришлите нам фото в течение 7 дней с момента доставки, и мы бесплатно заменим её.",
+    "Questions? Send us a message, we're happy to help.": "Есть вопросы? Напишите нам, мы будем рады помочь.",
+}
+
+BN = "(?:" + "|".join(BURC) + ")"
+ISIM_RX = r"(Name for " + BN + r"|Name Under " + BN + r"|Left name|Right name|First Name|Second Name)"
+KALIP = [
+    (re.compile(r"A personalized mug for " + B_RX + " and " + B_RX + r" couples: your two zodiac symbols join into one original "
+                r"fusion symbol, with your names and your message\. A custom coffee mug and personalized couple gift made just for "
+                r"the two of you\.(?: A thoughtful choice when you are looking for (.+)\.)?"), p_giris),
+    (re.compile(r"\[ 8 STYLES: THE ORCHARD WE KEEP \]\nOrange Blossom, Purple Fig, Olive Breeze, Pomegranate Bloom, Almond Blossom, "
+                r"Lemon Grove, Blue Grape or Golden Loquat\. Every style of this zodiac couple mug has the same " + B_RX + " and "
+                + B_RX + r" symbol and an evil eye on the back\. See photos? ([\d a-z]+)\."), p_stil),
+    (re.compile(r"\[ TWO SIZES \]\n- 11 oz \(325 ml\)\n- 15 oz \(444 ml\)\nSame design on both\. See photos? ([\d a-z]+)\."), p_boy),
+    (re.compile(r"\[ HOW TO PERSONALIZE \]\nWrite three lines in the personalization box:\n1\. " + ISIM_RX + r" \(up to (\d+) "
+                r"letters\)\n2\. " + ISIM_RX + r" \(up to (\d+) letters\)\n3\. Message \(one line, up to (\d+) characters including "
+                r"spaces and punctuation\)\nLeave the message blank and we print:\n([^\n]+)\nPlease check your spelling\. See "
+                r"photos? ([\d a-z]+)\."), p_kisisel),
+]
+
+
+def norm(s):
+    return html.unescape(s or "").replace("\r\n", "\n").strip()
+
+
+def kupa_en(desc, a, b):
+    """Hedef EN (Serdar 30 Eki): ayni burcta isim satirlari First Name / Second Name. -> (en, durum DEGISTI | AYNI | YOK)."""
+    d = norm(desc)
+    if a != b:
+        return d, "AYNI"
+    if AYNI_EN[0] in d and AYNI_EN[1] in d:
+        return d, "AYNI"
+    for x, y in (("Left name", "Right name"), (f"Name Under {a}", f"Name Under {a}"), (f"Name for {a}", f"Name for {a}")):
+        rx = re.compile(r"(\n1\. )" + re.escape(x) + r"( \(up to \d+ letters\)\n2\. )" + re.escape(y) + r"( \(up to)")
+        if len(rx.findall(d)) == 1:
+            return rx.sub(lambda m: m.group(1) + AYNI_EN[0] + m.group(2) + AYNI_EN[1] + m.group(3), d), "DEGISTI"
+    return d, "YOK"
+
+
+def kur(en):
+    d = norm(en)
+    par = [p.strip() for p in d.split("\n\n") if p.strip()]
+    ctx, ru, hata = {}, [], []
+    for i, p in enumerate(par, 1):
+        if p in SABIT:
+            ru.append(SABIT[p]); continue
+        for rx, f in KALIP:
+            m = rx.fullmatch(p)
+            if m:
+                try:
+                    ru.append(f(m, ctx))
+                except ValueError as e:
+                    hata.append(f"paragraf {i}: {e}")
+                break
+        else:
+            hata.append(f"paragraf {i} kalip disi: {p[:80]!r}")
+    a, b = ctx.get("burc") or (None, None)
+    if a and a == b and not all(x in d for x in AYNI_EN):
+        hata.append("ayni burc: EN isim satirlari First Name / Second Name degil (once kupa_en)")
+    gerekli = {"[ A GIFT FOR COUPLES ]", "[ WHAT YOU GET ]", "[ 8 STYLES", "[ TWO SIZES ]", "[ HOW TO PERSONALIZE ]", "[ DETAILS ]",
+               "[ RETURNS ]"}
+    eksik = sorted(g for g in gerekli if not any(p.startswith(g) for p in par))
+    if eksik:
+        hata.append(f"EN'de bolum yok: {eksik}")
+    out = "\n\n".join(ru)
+    if re.search("[—–―‒−]", out):
+        hata.append("RU'da uzun/orta tire")
+    yasak = sorted({m.group(0) for m in E.RU_YASAK.finditer(out)})
+    if yasak:
+        hata.append(f"RU'da yasak ifade: {yasak}")
+    if re.search(r"[{}]|lena|serdar", out, re.I):
+        hata.append("RU'da yer tutucu / kisi adi")
+    return out, dict(pass_=not hata and len(ru) == len(par), hata=hata, paragraf_en=len(par), paragraf_ru=len(ru), burc=[a, b])
