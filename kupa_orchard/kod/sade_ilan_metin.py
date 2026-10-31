@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sade kupa 12 ilan metni TASLAGI (Serdar onayi bekliyor, 31 Eki 2026). Cikti: kupa_orchard/ilan/SADE12_METIN.csv
+"""Sade kupa 12 ilan metni TASLAGI, tasarim v2 (canli Orchard susleme, on tek sembol + isim, arka nazar + mesaj; 31 Eki 2026). Cikti: kupa_orchard/ilan/SADE12_METIN.csv
 Kurallar: tek burc hediye ifadesi ("Cancer Gifts") baslik, aciklama ve etiketlerde birebir (Serdar 22 Eki);
 marka AstroLoveArt; ilanda kisi adi yok; uzun/orta tire yok; baslik <= 140; 13 tekrarsiz etiket <= 20;
 kisisellestirme talimati <= 120 (Etsy panel siniri). On yazi en fazla 12, mesaj en fazla 30 karakter, mesaj zorunlu
@@ -24,11 +24,11 @@ A birthday gift for the {B} in your life: a friend, a partner, a mom or a dad. O
 
 [ WHAT YOU GET ]
 One mug, printed on both sides.
-Front: the {B} symbol, with the name or date you choose between two small sprigs.
-Back: a small sprig, a nazar (evil eye) and your message in italics.
+Front: the {B} symbol in the middle and the name or date you choose below it, framed by fruit and flower branches.
+Back: matching branches, a nazar (evil eye) and your message in italics.
 
 [ 8 STYLES: THE ORCHARD WE KEEP ]
-Orange Blossom, Purple Fig, Olive Breeze, Pomegranate Bloom, Almond Blossom, Lemon Grove, Blue Grape or Golden Loquat. Each style has its own color and its own small fruit or flower sprig. See the style photos.
+Orange Blossom, Purple Fig, Olive Breeze, Pomegranate Bloom, Almond Blossom, Lemon Grove, Blue Grape or Golden Loquat. Each style has its own fruit and flower branches, and the symbol and text are printed in a color to match. See the style photos.
 
 [ TWO SIZES ]
 - 11 oz (325 ml)

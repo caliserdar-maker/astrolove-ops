@@ -5,11 +5,14 @@ canli cift kupayla AYNI (kes_suslme.py katmani). ON: cift sembolu yerine tek bur
 ve mesaj (imza YOK; Serdar 31 Eki: nazar canli kupadaki yerinde). Sembol boyu 8 stilde AYNI (sabit K), dikey yeri 8 stilde
 AYNI (SEMBOL_Y); yatayda cercevenin (dallar) ortasinda, isim ayni eksende. baski_kes.py'den turetilmistir; olculer onayli gorselden (kes json, yerlesim).
 KATMAN=1 ortam degiskeni: video icin <cikti_onek>_sembolsuz_11oz.png ve <cikti_onek>_isim_11oz.png de yazilir.
+Ortam: BOY=15 -> 15 oz (2700x1140). Girdi kontrolu baski_sade3.py ile ayni (NFC, Turkce buyuk harf, 12/30 sinir, font,
+gorunmez karakter); hata olursa cikti yazilmaz, ayni onekli eski ciktilar silinir.
 Kullanim: python3 -I baski_kes_sade.py <kes_onek> <glif_png> <isim> <mesaj> <renk r,g,b> <cikti_onek>
 Mesaj canli cift kupadaki mesaj tabaninda (yeri degismez).
 """
-import json, math, os, sys, time
+import json, math, os, sys, time, unicodedata
 import numpy as np
+from fontTools.ttLib import TTFont
 from PIL import Image, ImageDraw, ImageFont
 from scipy import ndimage
 
@@ -17,15 +20,64 @@ t0 = time.time()
 if len(sys.argv) != 7:
     sys.exit(__doc__)
 KES, GLIF, ISIM, MESAJ, RENK_S, OUT = sys.argv[1:7]
-ISIM, MESAJ = ' '.join(ISIM.split()), ' '.join(MESAJ.split())
-if not ISIM or not MESAJ:
-    sys.exit('HATA: isim ve mesaj zorunlu')
 V_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'varlik')) + '/'
 GAR, ITA = V_DIR + 'font/EBGaramond[wght].ttf', V_DIR + 'font/EBGaramond-Italic[wght].ttf'
-RENK = np.array([int(v) for v in RENK_S.split(',')], float)
+ON_MAX, MESAJ_MAX = 12, 30                          # karakter siniri (Serdar 30.10 onay; ilan metni ayni)
+
+# ---------------- girdi kontrolu (cizmeden once; baski_sade3.py korumalari, inceleme 31 Eki) ----------------
+try:
+    RENK = np.array([int(v) for v in RENK_S.split(',')], float)
+except ValueError:
+    sys.exit(f'HATA: renk r,g,b olmali ({RENK_S})')
+if RENK.shape != (3,) or RENK.min() < 0 or RENK.max() > 255:
+    sys.exit(f'HATA: renk 0-255 arasi 3 deger olmali ({RENK_S})')
+if 0.299 * RENK[0] + 0.587 * RENK[1] + 0.114 * RENK[2] > 160:
+    sys.exit(f'HATA: renk beyaz kupada okunmayacak kadar acik ({RENK_S})')
+ISIM = unicodedata.normalize('NFC', ISIM).strip()
+MESAJ = unicodedata.normalize('NFC', MESAJ).strip()
+if not ISIM or not MESAJ:
+    sys.exit('HATA: on yazi (isim/tarih) ve arka mesaj zorunlu')
+TR = any(c in ISIM for c in 'ıİşŞğĞ')              # Turkce yazi: i -> İ, ı -> I (Ingilizce isimde dokunulmaz)
+ON_BUYUK = unicodedata.normalize('NFC', (ISIM.replace('i', 'İ').replace('ı', 'I') if TR else ISIM).upper())
+if len(ON_BUYUK) > ON_MAX:
+    sys.exit(f'HATA: on yazi buyuk harfle {len(ON_BUYUK)} karakter, sinir {ON_MAX}')
+if len(MESAJ) > MESAJ_MAX:
+    sys.exit(f'HATA: mesaj {len(MESAJ)} karakter, sinir {MESAJ_MAX}')
+
+
+def metin_kontrol(metin, font, ad):
+    cmap = TTFont(font).getBestCmap()
+    for c in metin:
+        kat = unicodedata.category(c)
+        if kat in ('Cc', 'Cf', 'Zl', 'Zp') or (c.isspace() and c != ' '):
+            sys.exit(f'HATA: {ad} gorunmez/satir sonu karakteri iceriyor (U+{ord(c):04X})')
+        if kat in ('Mn', 'Mc', 'Me'):
+            sys.exit(f'HATA: {ad} ayri birlesik isaret iceriyor (U+{ord(c):04X}); musteriyle konusulur')
+        if ord(c) not in cmap:
+            sys.exit(f'HATA: {ad} fontta olmayan karakter iceriyor: {c!r} (U+{ord(c):04X}); musteriyle konusulur')
+    if not any(unicodedata.category(c) in ('Lu', 'Ll', 'Lt', 'Lo', 'Nd') for c in metin):
+        sys.exit(f'HATA: {ad} en az bir harf ya da rakam icermeli ({metin!r})')
+
+
+metin_kontrol(ON_BUYUK, GAR, 'on yazi')
+metin_kontrol(MESAJ, ITA, 'mesaj')
+for _p in (GLIF, GAR, ITA, V_DIR + 'ORCHARD_nazar.png', f'{KES}_kes.json', f'{KES}_on.png', f'{KES}_arka.png'):
+    if not os.path.isfile(_p):
+        sys.exit(f'HATA: dosya yok: {_p}')
 
 DPI, FW, FH = 300, 2700, 1050
-D_IN = float(os.environ.get('D_IN', 3.23))          # 11 oz cap 8,2 cm
+BOY = os.environ.get('BOY', '11')
+if BOY not in ('11', '15'):
+    sys.exit(f'HATA: BOY 11 ya da 15 olmali ({BOY})')
+if BOY == '15' and os.environ.get('KATMAN'):
+    sys.exit('HATA: KATMAN yalniz 11 oz icin')
+D_IN = {'11': 3.23, '15': 3.35}[BOY]               # cap: 11 oz 8,2 cm, 15 oz 8,5 cm (cift kupayla ayni)
+CIKTI = [OUT + f'_baski_{BOY}oz.png', OUT + '_onizleme.jpg'] + \
+    ([OUT + '_sembolsuz_11oz.png', OUT + '_isim_11oz.png'] if os.environ.get('KATMAN') else [])
+for _e in [f'{OUT}_baski_11oz.png', f'{OUT}_baski_15oz.png', f'{OUT}_onizleme.jpg', f'{OUT}_sembolsuz_11oz.png',
+           f'{OUT}_isim_11oz.png'] + [c + '.yaziliyor' for c in CIKTI]:
+    if os.path.isfile(_e):                          # girdi gecerli: ayni onekli eski / yarim dosyalar silinir
+        os.remove(_e)
 RK = D_IN / 2 * DPI
 QUARTER = D_IN * math.pi / 4 * DPI
 FACE = {'on': FW / 2 - QUARTER, 'arka': FW / 2 + QUARTER}
@@ -205,7 +257,7 @@ _, t_isim = T('on', 0, L['isim_taban'])
 ISIM_CAP = L['isim_cap'] * s * float(os.environ.get('ISIM_BOY', 1.25))   # Serdar 31 Eki: isim daha belirgin
 ISIM_AG = float(os.environ.get('ISIM_AGIRLIK', 560))          # Serdar 31 Eki: referans gorsel gibi ince ama belirgin (cift kupada 680)
 ISIM_AR = float(os.environ.get('ISIM_ARALIK', 0.26))          # harf araligi, buyuk harf yuksekliginin orani (referans: acik)
-isim_cap, isim_tasti = satir(on, MASK_ON, ISIM.upper(), GAR, ISIM_CAP, ISIM_AG, cx, t_isim, aralik=ISIM_CAP * ISIM_AR,
+isim_cap, isim_tasti = satir(on, MASK_ON, ON_BUYUK, GAR, ISIM_CAP, ISIM_AG, cx, t_isim, aralik=ISIM_CAP * ISIM_AR,
                              min_cap=2.2 * MM, mesafe=ndimage.distance_transform_edt(~MASK_ON))
 burc_tasti = False
 # video katmanlari: sembol pikselleri ve isim pikselleri (ayni kosudan, birebir)
@@ -248,19 +300,41 @@ def silindir(on_tv, arka_tv):
     return baski
 
 
-baski = silindir(on, arka)
-Image.fromarray(np.clip(baski, 0, 255).astype(np.uint8)).save(OUT + '_baski_11oz.png', dpi=(300, 300))
+def kaydet_hepsi(isler):
+    """isler: [(dizi, yol, kw)]. Hepsi once gecici adla yazilir, hepsi bitince yerine konur; hata olursa cikti kalmaz."""
+    try:
+        for im, yol, kw in isler:
+            Image.fromarray(np.clip(im, 0, 255).astype(np.uint8)).save(
+                yol + '.yaziliyor', format='PNG' if yol.endswith('.png') else 'JPEG', **kw)
+        for im, yol, kw in isler:
+            os.replace(yol + '.yaziliyor', yol)
+    except Exception:
+        for im, yol, kw in isler:
+            for f in (yol + '.yaziliyor', yol):
+                if os.path.isfile(f):
+                    os.remove(f)
+        raise
+
+
+def boyla(b):
+    if BOY == '15':                                 # 15 oz: 2700x1050 cizim 2700x1140'a dikeyde ortalanir (cift kupayla ayni)
+        b15 = np.full((1140, FW, 3), 255.0)
+        b15[45:45 + FH] = b
+        return b15
+    return b
+
+
+isler = [(boyla(silindir(on, arka)), CIKTI[0], dict(dpi=(300, 300)))]
 if os.environ.get('KATMAN'):                                     # video icin: sembolsuz baski ve yalniz isim baskisi
     _sz = on.copy()
     _sz[_SEM] = _on_sembolsuz[_SEM]
     _iz = np.full_like(on, 255.0)
     _iz[_ISM] = on[_ISM]
-    _bos = np.full_like(arka, 255.0)
-    Image.fromarray(np.clip(silindir(_sz, arka), 0, 255).astype(np.uint8)).save(OUT + '_sembolsuz_11oz.png', dpi=(300, 300))
-    Image.fromarray(np.clip(silindir(_iz, _bos), 0, 255).astype(np.uint8)).save(OUT + '_isim_11oz.png', dpi=(300, 300))
-    adim('katmanlar: _sembolsuz_11oz.png, _isim_11oz.png')
+    isler += [(silindir(_sz, arka), CIKTI[2], dict(dpi=(300, 300))),
+              (silindir(_iz, np.full_like(arka, 255.0)), CIKTI[3], dict(dpi=(300, 300)))]
 pv = np.full((2 * TH + 40, 4 * TW + 60, 3), 235.0)
 pv[20:20 + 2 * TH, 20:20 + 2 * TW] = on
 pv[20:20 + 2 * TH, 40 + 2 * TW:40 + 4 * TW] = arka
-Image.fromarray(np.clip(pv, 0, 255).astype(np.uint8)).save(OUT + '_onizleme.jpg', quality=92)
-adim(f'kaydedildi {OUT}_baski_11oz.png; tasma: isim {isim_tasti}, mesaj {mes_tasti}')
+isler.append((pv, CIKTI[1], dict(quality=92)))
+kaydet_hepsi(isler)
+adim(f'kaydedildi {CIKTI[0]}; tasma: isim {isim_tasti}, mesaj {mes_tasti}' + ('; katmanlar' if len(CIKTI) > 2 else ''))
