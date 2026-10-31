@@ -12,11 +12,11 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "tarama = tek ilan + 78 POD uretim/kargo | kiyas = 77 POD ilani referansla (GOREV 0017) | canli_qc = galerisi yuklenen ilanlarin canli gorsel/video QC (GOREV 0019)"
+        description: "tarama = tek ilan + 78 POD uretim/kargo | kiyas = 77 POD ilani referansla (GOREV 0017) | canli_qc = galerisi yuklenen ilanlarin canli gorsel/video QC (GOREV 0019) | toplu_yokla = toplu okuma yanit sekli (Serdar 31 Eki 1a; tek_ilan virgullu 1-5 kimlik)"
         required: true
         default: "tarama"
         type: choice
-        options: [tarama, kiyas, canli_qc]
+        options: [tarama, kiyas, canli_qc, toplu_yokla]
       tek_ilan:
         description: "tarama: tek okunacak ilan id | kiyas: referans ilan id (canli Cancer-Libra 4570143815)"
         required: true
@@ -80,6 +80,15 @@ jobs:
             [ -f out/CANLI_SERIT.jpg ] && rclone copyto out/CANLI_SERIT.jpg "$H/CANLI_QC_KIRPIM/CANLI_SERIT.jpg" -q || true
             rclone copy out/kirpim "$H/CANLI_QC_KIRPIM" -q || true
             echo "Drive: TEMP/DIJITAL_78/CANLI_QC.csv + CANLI_QC_KIRPIM/"
+            exit 0
+          fi
+          if [ "$MOD" = "toplu_yokla" ]; then   # Serdar 31 Eki 1a (istek azaltma madde 3-4): toplu okuma yanit sekli; YALNIZ GET
+            if grep -nE "\.(patch|put|post|delete|post_json|put_json|post_file)\(" scripts/etsy/toplu_oku_yokla.py; then
+              echo "::error::yoklama betiginde yazma metodu"; exit 1; fi
+            python scripts/etsy/toplu_oku_yokla.py --ilan "$TEK" --out _yok
+            D="gdrive:ASTROLOVE/TEMP/TOPLU_OKU_YOKLA/$(date -u +%Y%m%d_%H%M%S)"
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _yok || { echo "::error::ciktida sir"; exit 1; }
+            rclone copy _yok "$D" -q; echo "Drive: ${D#gdrive:}"
             exit 0
           fi
           if [ "$MOD" = "kiyas" ]; then

@@ -125,7 +125,15 @@ def durum_dosyalari(ad):
 
 ESKI = [g["listing_image_id"] for g in HAM["images"]]
 BAGLI0 = {v["image_id"] for v in HAM["variation_images"]}
-EN_KOTU = 4 + 7 + 10 * 21 + 11 + 13 * 11 + 2 * 11 + 2 * (10 * 3 + 8) + 19   # kod okumasi: kapi 4 + on okuma 7 + yukle + kapak + sil + bag + sira + son
+# SIRALI plan (Serdar 31 Eki 1a) kod okumasi: kapi 4 + on okuma 1 + 13 sil x 3 + 10 yukle x 13 + sira_bag (8 + 2 x (10 x 3 + 8) + 3 + 8)
+# + son (8 + 8 + 3); eski adim_plani 492 idi
+EN_KOTU = 4 + 1 + 13 * 3 + 10 * 13 + (8 + 2 * (10 * 3 + 8) + 3 + 8) + 8 + 8 + 3
+
+
+def kapak_tamam(api):
+    """sirali plan: ilk yukleme (kapak) yapildi, 13 eski silindi, bag henuz yazilmadi"""
+    return (sum(y[0] == "yukle" for y in api.yaz) >= 1 and sum(y[0] == "sil" for y in api.yaz) == 13
+            and not any(y[0] == "bag" for y in api.yaz))
 
 
 def normal_akis():
@@ -136,11 +144,9 @@ def normal_akis():
     kontrol("kuru: PLAN, yazma yok, plan_damga", rc == 0 and s["durum"] == "PLAN" and not api.yaz and R["plan_damga"].startswith("111_"))
     plan = json.loads((po / "PLAN_YD.json").read_text())["girdiler"][LID]
     ad = [a[0] for a in plan["adimlar"]]
-    kontrol(f"plan: yukle kapak -> kapak; 10 yukle, 13 sil, 2 bag, 1 sira; erken bag 5 stil kartindan sonra; en fazla {plan['en_fazla']}",
-            plan["adimlar"][:2] == [["yukle", "01_1.jpg"], ["kapak"]] and ad.count("yukle") == 10 and ad.count("sil") == 13
-            and ad.count("bag") == 2 and ad[-2:] == ["sira", "bag"] and plan["en_fazla"] == 14
-            and [a[1] for a in plan["adimlar"] if a[0] == "yukle"][1:6] == [f"{k:02d}_{k}.jpg" for k in range(6, 11)]
-            and ad.index("bag") > max(i for i, a in enumerate(plan["adimlar"]) if a[0] == "yukle" and a[1] == "10_10.jpg"))
+    bek = [["sil", c] for c in ESKI[:-1]] + [["yukle", "01_1.jpg"], ["sil", ESKI[-1]]] + [["yukle", f"{k:02d}_{k}.jpg"] for k in range(2, 11)] + [["sira_bag"]]
+    kontrol(f"plan (SIRALI, Serdar 31 Eki 1a): 12 eski sil, kapak yukle, son eski sil, 02..10 sirayla, sira_bag (bag EN SON tek); en fazla {plan['en_fazla']}",
+            plan["adimlar"] == bek and plan["en_fazla"] == 13)
     kontrol(f"en kotu istek {EN_KOTU} (kod okumasi; 4 kapi okumasi dahil) | olculen {s['en_kotu']}", s["en_kotu"] == EN_KOTU)
     dv, il = durum_dosyalari("d1")
     rc, R = yaz(api, hz, po, "y1", R["plan_damga"], dv, il)
@@ -155,11 +161,13 @@ def normal_akis():
     rk = {x["listing_image_id"]: x["rank"] for x in g}
     kontrol(f"5 Style bagi yeni kartlarda (Starlit 6 ... Botanical 10), kapak bagsiz | {({k: rk.get(v) for k, v in api.bag.items()})}",
             {k: rk.get(v) for k, v in api.bag.items()} == K.STIL_SIRA and g[0]["listing_image_id"] not in api.bag.values())
-    kontrol(f"gorsel sayisi en fazla 14 (olculen {api.max_n})", api.max_n == 14)
-    ilk_bag = next(i for i, y in enumerate(api.yaz) if y[0] == "bag")
-    kontrol("bagli eski stil gorselleri ancak erken bagdan sonra silindi",
-            all(i > ilk_bag for i, y in enumerate(api.yaz) if y[0] == "sil" and y[1] in BAGLI0))
-    kontrol(f"izler: kapak yazimindan sonra bag hic 0 degil (en az {min(b for _, b in api.izler)})", min(b for _, b in api.izler) == 5)
+    kontrol(f"gorsel sayisi en fazla 13 (olculen {api.max_n})", api.max_n == 13)
+    bi = [i for i, y in enumerate(api.yaz) if y[0] == "bag"]
+    kontrol(f"Style bagi TEK KEZ ve EN SON (tum sil / yukle / sira yazimlarindan sonra) | bag yazim sirasi {bi}/{len(api.yaz)}",
+            len(bi) == 1 and bi[0] == len(api.yaz) - 1)
+    kontrol(f"izler: son durumda 5 bag (bag 0 penceresi silmelerden son baga kadar, Serdar 1a kabul; en az {min(b for _, b in api.izler)})",
+            api.izler[-1][1] == 5)
+    kontrol(f"sira gecisi tetiklenmedi (rank / sira POST yok): {sum(y[0] == 'sira' for y in api.yaz)}", not any(y[0] == "sira" for y in api.yaz))
     kontrol(f"sira POST'larinda alt_text hep var ({api.alt_yok} eksik)", api.alt_yok == 0)
     ilr = json.loads(il.read_text())["ilanlar"][LID]
     kontrol("ILERLEME set 10 hedef 10 PASS", ilr["set"] == 10 and ilr["hedef"] == 10 and ilr["durum"] == "PASS")
@@ -224,21 +232,22 @@ def devam_zaten_blok(hz):
 
     def kes():
         say["n"] += 1
-        if any(y[0] == "yukle" for y in api.yaz) and any(y[0] == "sira" for y in api.yaz) and not any(y[0] == "bag" for y in api.yaz):
-            api.remaining = 9                                          # kapak rank 1 yazildi, erken bag gonderilmeden kota tabani
+        if kapak_tamam(api):
+            api.remaining = 9                                          # kapak yuklendi, 13 eski silindi, bag gonderilmeden kota tabani
         return orig()
     api._k = kes
     rc, R = yaz(api, hz, po, "y4", damga, dv, il)
     api._k = orig; api.remaining = 5000
     g = sorted(api.img, key=lambda x: (x["rank"], x["listing_image_id"]))   # sahte Etsy sirasi (Sahte.get)
-    kontrol(f"yarim ilan: kota tabaninda durdu, galeri {len(g)}, rank 1 yeni alt metin", len(g) == 14 and g[0]["alt_text"] == YENI_ALT
+    kontrol(f"yarim ilan: kota tabaninda durdu, galeri {len(g)} (yalniz yeni kapak), rank 1 yeni alt metin", len(g) == 1 and g[0]["alt_text"] == YENI_ALT
             and R["ilanlar"][0]["durum"] in ("DUR", "KALAN"))
     _, Rk, pk = kuru(api, hz, "k4b", devam=dv, ilerleme=il)
-    kontrol("yarim ilan kuru: DEVAM (BLOK'a dusmez; galeri 14 / yeni alt metin), kayitli plan raporda",
+    kontrol("yarim ilan kuru: DEVAM (BLOK'a dusmez; galeri 1 / yeni alt metin), kayitli plan raporda",
             Rk["ilanlar"][0]["durum"] == "DEVAM" and damga in Rk["ilanlar"][0]["neden"][0])
     kontrol(f"DEVAM kota tahmini son tamamlanan sil/yukle'den (devam_basla 1; en kotu {Rk['ilanlar'][0]['en_kotu']})",
             K.devam_basla([("yukle",), ("kapak",), ("bag",), ("sil", 1), ("sira",), ("bag",)], 3) == 1
-            and Rk["ilanlar"][0]["en_kotu"] == Y.istek_en_kotu([tuple(x) for x in json.loads(dv.read_text())["ilanlar"][LID]["plan"]], 1, ilk=False, n=10))
+            and Rk["ilanlar"][0]["en_kotu"] == K.istek(pl := [tuple(x) for x in json.loads(dv.read_text())["ilanlar"][LID]["plan"]], "en_kotu",
+                                                        K.devam_basla(pl, json.loads(dv.read_text())["ilanlar"][LID]["adim"]), ilk=False))
     rc, R = yaz(api, hz, pk, "y4b", Rk["plan_damga"], dv, il)                # YENI kuru damgasiyla (inceleme 27 Eki bulgu 1)
     kontrol(f"yarim ilan, yeni kuru damgasi: kayitli planla DEVAM, PASS, ikinci yukleme yok (yukleme {api.n_yukle})",
             R["ilanlar"][0]["durum"] == "PASS" and api.n_yukle == 10 and Rk["plan_damga"] != damga)
@@ -247,7 +256,7 @@ def devam_zaten_blok(hz):
     orig = api3._k
 
     def kes3():
-        if any(y[0] == "yukle" for y in api3.yaz) and not any(y[0] == "bag" for y in api3.yaz) and any(y[0] == "sira" for y in api3.yaz):
+        if kapak_tamam(api3):
             api3.remaining = 9
         return orig()
     api3._k = kes3
@@ -315,7 +324,7 @@ def eski_kapak(hz):
     orig = api._k
 
     def kes():
-        if any(y[0] == "yukle" for y in api.yaz) and any(y[0] == "sira" for y in api.yaz) and not any(y[0] == "bag" for y in api.yaz):
+        if kapak_tamam(api):
             api.remaining = 9
         return orig()
     api._k = kes

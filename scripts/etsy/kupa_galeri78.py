@@ -110,8 +110,8 @@ def istek_tahmini(n_yukle=N, n_sil=N, metin=False, n_rank=N):
       kapi       : 6 GET (ilan, galeri, video, bag, envanter, kisisellestirme)
       yukle      : en az 1 | en kotu (2 + 1) + (2 + O)
       sil        : en az 1 | en kotu 4
-      bag        : en az 2 (POST + var_img) | en kotu 4 + O
-      sira       : en az 1 (galeri, oturdu) | en kotu O + 2 x (n_rank x 4 + O) + bag (4 + O)
+      bag        : en az 2 (POST + var_img) | en kotu 4 + O   (SIRALI plan, Serdar 31 Eki 1a: EN SONDA TEK KEZ)
+      sira       : en az 1 (galeri, oturdu) | en kotu O + 2 x (n_rank x 4 + O)   (sira gecisi bagi ayrica yazmaz; bag sonda)
       video      : en az 5 (video okuma, POST, active okuma, DELETE, son video okuma) | en kotu 1 + (2 + O) + VIDEO_DENEME + 4 + O
       metin      : en az 4 (ilan GET, kisisellestirme GET, PATCH, POST) | en kotu 2 + 4 + 4
       son okuma  : en az 6 (galeri, bag, video, ilan, envanter, kisisellestirme) | en kotu 3 x O + 3
@@ -121,13 +121,13 @@ def istek_tahmini(n_yukle=N, n_sil=N, metin=False, n_rank=N):
     O = G.OKUMA_TEKRAR
     yk_az, yk_k = 1, (2 + 1) + (2 + O)
     bag_az, bag_k = 2, 4 + O
-    sira_az, sira_k = 1, O + 2 * (n_rank * 4 + O) + bag_k
+    sira_az, sira_k = 1, O + 2 * (n_rank * 4 + O)
     vid_az, vid_k = 5, 1 + (2 + O) + VIDEO_DENEME + 4 + O
     met_az, met_k = (4, 10) if metin else (0, 0)
     son_az, son_k = 6, 3 * O + 3
     az = KAPI_OKUMA + n_yukle * yk_az + n_sil * 1 + bag_az + sira_az + vid_az + met_az + son_az
     kotu = KAPI_OKUMA + n_yukle * yk_k + n_sil * 4 + bag_k + sira_k + vid_k + met_k + son_k
-    geri_sira_k = O + 2 * (n_sil * 4 + O) + bag_k
+    geri_sira_k = O + 2 * (n_sil * 4 + O)
     geri = KAPI_OKUMA + n_sil * yk_k + n_yukle * 4 + bag_k + geri_sira_k + vid_k + met_k + son_k
     return dict(en_az=az, en_kotu_geri_almasiz=kotu, geri_alma=geri, en_kotu=kotu + geri, okuma_tekrar=O)
 
@@ -431,40 +431,33 @@ def zaten_durum(c, gd_hedef, mp, kayit):
 
 # ---------------------------------------------------------------- adim plani (durum tabanli; devam ayni yoldan)
 def adim_kur(n_canli, sil, bagli, eksik, bag_siralar, bag_gerekli, limit=LIMIT, n_hedef=N, esnek=False):
-    """n_canli: galerideki gorsel; sil: cikacak kimlikler; bagli: su an Style bagli kimlikler; eksik: yuklenecek siralar;
-    bag_siralar: bag hedef siralari. Kural: yuklemeden once gorsel sayisi limitteyse bir gorsel silinir (once bagsizlar; bagli eski
-    gorsel YALNIZ yeni bag kurulduktan sonra). Kapak (1) ilk, sonra bag siralari, sonra digerleri. esnek (geri alma): bagsiz silinecek
-    kalmadiysa bagli gorsel de silinir (o stil bir sure gorselsiz kalir; silme bagli gorselde olculmedi). -> (adimlar, en fazla gorsel)"""
-    bag_siralar = list(bag_siralar)
-    sira = [s for s in [1] + sorted(bag_siralar) + list(range(2, n_hedef + 1)) if s in eksik]
-    sira = list(dict.fromkeys(sira))
-    var = set(range(1, n_hedef + 1)) - set(eksik)
-    serbest = deque(c for c in sil if c not in bagli or not bag_gerekli)
-    bekleyen = [c for c in sil if c in bagli and bag_gerekli]
-    adim, n, mx, bag_tamam = [], n_canli, n_canli, not bag_gerekli
-
-    def bag_kontrol():
-        nonlocal bag_tamam
-        if not bag_tamam and set(bag_siralar) <= var:
-            adim.append(("bag",)); bag_tamam = True
-            serbest.extend(bekleyen); bekleyen.clear()
-    bag_kontrol()
-    for s in sira:
-        if n >= limit:
-            if not serbest and esnek and bekleyen:
-                serbest.append(bekleyen.pop(0))
-            if not serbest:
-                raise Y.Dur(f"plan: {limit} gorsel siniri; yuklemeden once silinecek bagsiz gorsel yok")
-            adim.append(("sil", serbest.popleft())); n -= 1
-        adim.append(("yukle", s)); n += 1; mx = max(mx, n); var.add(s)
-        bag_kontrol()
-    if not bag_tamam:
-        raise Y.Dur("plan: Style bag hedefleri tamamlanmadi")
-    while serbest:
-        adim.append(("sil", serbest.popleft())); n -= 1
+    """SIRALI plan (Merkez / Serdar 31 Eki "1a", Etsy istek azaltma madde 1): n_canli: galerideki gorsel; sil: cikacak kimlikler (canli
+    sirasinda); eksik: yuklenecek hedef siralari; bag_gerekli: Style bagi yazilmali mi. Kural:
+      1. eski gorseller ONCE silinir; galeride en az 1 gorsel kalir (aktif ilan gorselsiz olamaz): yerinde kalan hedef gorsel yoksa
+         cikarlarin SONUNCUSU ilk yuklemeden hemen sonra silinir;
+      2. yeni gorseller 1..n hedef sirasinda (rank + alt metin ayni istekte) yuklenir: eski gorsel sonradan silinmedigi icin rank
+         boslugu olusmaz (v11b 40925894166: araya serpistirilen silmeler her ilanda sira gecisini tetikliyordu, ilan basina ~13 fazla);
+      3. sira_kontrol: tek galeri okumasi, sira gecisi YALNIZ bozuksa;
+      4. Style bagi EN SON tek kez (rank yazimi bagi siler, 19 Eyl olcumu). Bagli eski gorsel silinince o stil son bag yazilana kadar
+         gorselsiz kalir (Serdar 31 Eki 1a ile kabul; bagli gorsel silme canlida olculmedi: reddedilirse HATA -> geri alma).
+    bagli / bag_siralar / esnek: eski cagrilarla uyum icin (siralamayi etkilemez). -> (adimlar, en fazla gorsel)"""
+    sira = sorted(set(eksik))
+    sil = list(dict.fromkeys(sil))
+    yerinde = n_canli - len(sil)
+    bekle = [sil[-1]] if (sira and sil and yerinde == 0) else []
+    adim = [("sil", c) for c in sil if c not in bekle]
+    n, mx = n_canli - len(adim), n_canli
+    for i, s in enumerate(sira):
+        adim.append(("yukle", s)); n += 1; mx = max(mx, n)
+        if i == 0 and bekle:
+            adim.append(("sil", bekle[0])); n -= 1
     adim.append(("sira_kontrol",))
+    if bag_gerekli:
+        adim.append(("bag",))
     if n != n_hedef:
         raise Y.Dur(f"plan sonu {n} gorsel ({n_hedef} beklenir)")
+    if mx > limit:
+        raise Y.Dur(f"plan: {mx} gorsel (> {limit})")
     return adim, mx
 
 
@@ -743,8 +736,8 @@ def galeri_kur(api, shop, lid, c, hedef, sil, bag_sira, stil_vid, K, anahtar, es
                                       gonderilmedi=lambda: K.d.pop("belirsiz", None), rank=a[1])
             yk[h["ad"]] = yid; son[a[1]] = yid; ids.add(yid); K.d.pop("belirsiz", None)
             log(f"  [{n}/{len(adim)}] yukle {h['ad']} -> {yid} (rank {a[1]}, deneme {dn}) | {len(ids)} gorsel | kota {api.remaining}")
-        elif a[0] == "bag":
-            bag_yaz(api, shop, lid, son, bag_sira, stil_vid, K)
+        elif a[0] == "bag":   # sirali plan: tum yukleme / silme / sira yazimlarindan SONRA tek kez
+            bag_yaz(api, shop, lid, son, bag_sira, stil_vid, K); K.d.pop("sira_post", None)
         elif a[0] == "sira_kontrol":
             bek = set(son.values())
             g = G.kararli(lambda: G.galeri(api, lid), lambda g: {x.get("listing_image_id") for x in g} == bek)
@@ -752,6 +745,7 @@ def galeri_kur(api, shop, lid, c, hedef, sil, bag_sira, stil_vid, K, anahtar, es
                 raise Geri(f"sira kontrolu: galeri kimlik kumesi beklenen degil (+{sorted({x.get('listing_image_id') for x in g} - bek)} "
                            f"-{sorted(bek - {x.get('listing_image_id') for x in g})})")
             if galeri_sorun(g, son, alt):
+                K.d["sira_post"] = True; K.yaz(ids, uzak=False)   # rank yazimi bagi siler: bag sonda yeniden (asagida)
                 for gecis in (1, 2):
                     for s in sorted(son):
                         say_yazim(K)
@@ -763,9 +757,10 @@ def galeri_kur(api, shop, lid, c, hedef, sil, bag_sira, stil_vid, K, anahtar, es
                     log(f"  sira gecis {gecis} oturmadi: {galeri_sorun(g, son, alt)[:2]}")
                 if galeri_sorun(g, son, alt):
                     raise Geri(f"sira 2 geciste oturmadi: {galeri_sorun(g, son, alt)[:2]}")
-                bag_yaz(api, shop, lid, son, bag_sira, stil_vid, K)   # rank yazimi bagi siler (19 Eyl olcumu): bag yeniden
             log(f"  [{n}/{len(adim)}] sira + alt metin tamam | kota {api.remaining}")
         K.d["bekleyen"] = None; K.yaz(ids, uzak=a[0] == "yukle")   # yeni kimlik Drive'daki DEVAM'a hemen
+    if K.d.pop("sira_post", False) and not any(a[0] == "bag" for a in adim):   # bag gerekmiyordu ama sira yazimi bagi sildi
+        bag_yaz(api, shop, lid, son, bag_sira, stil_vid, K)
     return son
 
 

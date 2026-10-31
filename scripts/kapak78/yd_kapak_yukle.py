@@ -192,7 +192,7 @@ def plan_kur(hazir, lid, man):
         raise Y.Dur(f"manifest Style bag siralari {hbag} (beklenen {STIL_SIRA})")
     bagli0 = {v["image_id"] for v in man["yedek_baglar"].values()}
     kapak = next(r for r in yukle if int(r["hedef_sira"]) == 1)
-    adim, mx = Y.adim_plani(N_ESKI, cikar, bagli0, yukle, set(hbag.values()), kapak_degisir=kapak, hedef_n=N)
+    adim, mx = Y.sirali_plan(cikar, yukle, hedef_n=N)   # Serdar 31 Eki 1a (istek azaltma madde 1): once sil, sirayla yukle, bag sonda
     return adim, mx, Y.sha256(liste)
 
 
@@ -202,7 +202,15 @@ def plan_girdisi(lid, man, c, adim, mx, liste_sha):
                 canli_baglar=sorted([x.get("value"), x.get("value_id"), x.get("image_id")] for x in c["baglar"]),
                 hedef=[[h["sira"], h["ad"], h["sha256"], h["alt"]] for h in sorted(man["hedef"], key=lambda h: h["sira"])],
                 adimlar=[list(a) for a in adim], en_fazla=mx,
-                en_az=KAPI_OKUMA + Y.istek_en_az(adim, n=N), en_kotu=KAPI_OKUMA + Y.istek_en_kotu(adim, n=N))
+                en_az=KAPI_OKUMA + istek(adim, "en_az"), en_kotu=KAPI_OKUMA + istek(adim, "en_kotu"))
+
+
+def istek(adim, tur, basla=0, ilk=True):
+    """plan turune gore istek sayaci (sira_bag adimi = SIRALI plan; eski DEVAM kaydi adim_plani ile kalmis olabilir)"""
+    sirali = any(a[0] == "sira_bag" for a in adim)
+    f = {("en_az", True): Y.istek_sirali_en_az, ("en_kotu", True): Y.istek_sirali_en_kotu,
+         ("en_az", False): Y.istek_en_az, ("en_kotu", False): Y.istek_en_kotu}[(tur, sirali)]
+    return f(adim, basla, ilk=ilk, n=N)
 
 
 def plan_sha(girdiler):
@@ -269,8 +277,8 @@ def calistir(api, shop, a):
             if bitmemis:                                                    # 1) DEVAM (liste kapisi BLOK'u uygulanmaz)
                 adim = [tuple(x) for x in dv["plan"]]
                 b = devam_basla(adim, dv.get("adim", 0))
-                s["en_kotu"] = Y.istek_en_kotu(adim, b, ilk=False, n=N)
-                s["en_az"] = Y.istek_en_az(adim, b, ilk=False, n=N)
+                s["en_kotu"] = istek(adim, "en_kotu", b, ilk=False)
+                s["en_az"] = istek(adim, "en_az", b, ilk=False)
                 uretim = str(dv.get("uretim_kosu") or "")
                 if not re.fullmatch(r"\d+_[0-9a-f]{12}", uretim):
                     raise Y.Dur(f"DEVAM kaydi plan_damga'si gecersiz ({uretim[:30]}); elle bakilmali")
@@ -321,7 +329,7 @@ def calistir(api, shop, a):
             try:
                 R = Y.bir_ilan(api, shop, lid, hazir / lid / f"LISTE_{lid}.csv", hazir / lid / "hedef", hazir / lid / "manifest.json",
                                ilan_out, kuru=False, kurtar=a.kurtar and bitmemis and bool(dv.get("hata")), uretim_kosu=uretim,
-                               hedef_n=N, cdn=False, ara_tekrar=True, degerler=stil_degerleri)
+                               hedef_n=N, cdn=False, ara_tekrar=True, degerler=stil_degerleri, sirali=True)
             finally:
                 os.environ.pop("DEVAM_HEDEF", None)
                 if dvp.exists():

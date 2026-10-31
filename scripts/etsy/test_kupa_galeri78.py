@@ -474,8 +474,11 @@ def birim():
     kontrol("alt metin: YASAK_EN / RU_YASAK kapisi", not K.alt_gecerli("mug printed by Printful") and not K.alt_gecerli("lasts 50 years")
             and K.alt_gecerli("Two mug sizes: 11 oz and 15 oz"))
     ad, mx = K.adim_kur(14, list(range(1, 15)), {1, 8, 9, 10, 11, 12, 13, 14}, list(range(1, 15)), range(7, 15), True)
-    sil_once = [a[1] for a in ad[:ad.index(("bag",))] if a[0] == "sil"]
-    kontrol("plan: en fazla 20 gorsel, bag oncesi yalniz bagsiz eski silinir", mx == 20 and set(sil_once) <= set(range(2, 8)))
+    bek = [("sil", i) for i in range(1, 14)] + [("yukle", 1), ("sil", 14)] + [("yukle", s) for s in range(2, 15)] + [("sira_kontrol",), ("bag",)]
+    kontrol("plan (SIRALI, Serdar 31 Eki 1a): once 13 eski sil, 1. yukleme, son eski sil, 2..14 sirayla, sira kontrolu, bag EN SON tek kez; "
+            "en fazla 14 gorsel", ad == bek and mx == 14, str(ad[:4]))
+    ad0, _ = K.adim_kur(14, [], set(), [], range(7, 15), False)
+    kontrol("plan: yukleme / silme yok, bag gerekmiyor -> yalniz sira kontrolu", ad0 == [("sira_kontrol",)])
     t14, t20 = K.istek_tahmini(n_sil=14), K.istek_tahmini(n_sil=20)
     yk_k = (2 + 1) + (2 + G.OKUMA_TEKRAR)
     kontrol("istek tahmini: en az < en kotu geri almasiz < en kotu", 0 < t14["en_az"] < t14["en_kotu_geri_almasiz"] < t14["en_kotu"])
@@ -795,7 +798,7 @@ def devam(tmp):
 
     # CANCER_LIBRA: kota tabani ilan ortasinda -> DUR, geri alma yok, kota_durdu Drive'da; sonra geri_al
     lid = LID["CANCER_LIBRA"]; once = copy.deepcopy(api.L[lid])
-    api.kota_kes = api.yazim_say + 9
+    api.kota_kes = api.yazim_say + 16      # sirali plan: 13 sil, yukle, sil, yukle -> 16. yazimda kota tabani (2 yeni gorsel var)
     kod, S, _ = kos(api, kok, "yaz", *yaz_arg(kok, pd, "--sadece", lid))
     api.kota_kes = None
     dv = devam_drive(kok, lid)
@@ -803,6 +806,21 @@ def devam(tmp):
             and dv["durum"] == "BASLADI" and dv.get("kota_durdu") and len(dv["yuklenen"]) >= 1 and not dv.get("geri_alma"), str(S[lid]["neden"])[:200])
     kod, S, _ = kos(api, kok, "geri_al", *geri_arg(kok, pd, lid))
     kontrol("kota durmasi sonrasi geri_al: eski hal (bayt)", kod == 0 and eski_halde(api, lid, once), str(S[lid]["neden"])[:300])
+    # YARIM GALERI (sirali plan): kota yalniz silmeler yapilmisken (5 eski silindi, yukleme yok) -> DUR; geri_al eski hali yedekten kurar
+    kok3 = tmp / "yarim"; kok3.mkdir(); os.environ["SAHTE_DRIVE"] = str(kok3 / "drive")
+    api, pd, S, R = hazirla(kok3, LID["CANCER_LIBRA"]); kok = kok3
+    once = copy.deepcopy(api.L[lid]); n0 = len(once["images"])
+    api.kota_kes = api.yazim_say + 6
+    kod, S, _ = kos(api, kok, "yaz", *yaz_arg(kok, pd, "--sadece", lid))
+    api.kota_kes = None
+    kontrol("yarim galeri: silmeler ortasinda kota -> DUR, galeri 5 eksik, bag(lar) eksik olabilir, yukleme yok",
+            S[lid]["durum"] == "DUR" and len(api.L[lid]["images"]) == n0 - 5, f"{S[lid]['durum']} {len(api.L[lid]['images'])}")
+    kod, S, _ = kos(api, kok, "geri_al", *geri_arg(kok, pd, lid))
+    kontrol("yarim galeri sonrasi geri_al: eski galeri bayt bayt + Style baglari + video", kod == 0 and eski_halde(api, lid, once),
+            str(S[lid]["neden"])[:300])
+    kod, S, _ = kos(api, kok, "geri_al", *geri_arg(kok, pd, lid))
+    kontrol("geri_al ikinci kez (zaten eski halde): hata yok, galeri yine eski hal", eski_halde(api, lid, once),
+            f"{kod} {S.get(lid, {}).get('durum')} {str(S.get(lid, {}).get('neden'))[:300]}")
 
     # Drive'a DEVAM yazilamiyorsa ilan baslamaz
     kok2 = tmp / "devam2"; kok2.mkdir(); os.environ["SAHTE_DRIVE"] = str(kok2 / "drive")
