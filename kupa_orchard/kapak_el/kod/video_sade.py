@@ -2,13 +2,13 @@
 """SADE kupa ilan videosu, el sahnesi 4:3 (1440x1080, 30 fps, 6 sn, sessiz H.264). video_el43.py akisinin sade kupaya uyarlamasi:
 - Ilk ve son kare = onayli sade kapak dosyasi (birebir, 1440x1080'e kucultulmus).
 - 2. kareden toz baslar; ilk 0,3 sn icinde kapaktaki buyuk burc sembolu yumusakca kaybolur.
-- Sade kupada kucuk glif yok: toz isim satirindan (isim ve iki kucuk dal) buyuk semobole akar; sembol ilk varislarla olusur.
+- Sade kupada kucuk glif yok: toz isimden buyuk sembole akar; sembol ilk varislarla olusur (susleme dallari sabit kalir).
 - Toz miktari kupanin 3 kati (N 62400, Serdar 31 Eki), sigma 0.45; toz rengi sembol rengi + %22 altin (stile uyar).
 - Cikti once gecici dosyaya yazilir; hata olursa yarim video kalmaz, eski ciktilar basta silinir.
-Katmanlar: baski_sade3.py ciktisi (baski png) verilir. Sembol satiri ile isim satiri on yuzde dikey bosluga gore ayrilir;
-sembolsuz baski = sembol satiri beyaza boyanmis baski. Hepsi kapak_canva4.py ile ayni sahneye giydirilir.
+Katmanlar (v2, Serdar 31 Eki canli Orchard tasarimi): baski_kes_sade.py KATMAN=1 ciktilari verilir: <onek>_baski_11oz.png,
+<onek>_sembolsuz_11oz.png (ayni baski, sembol yok), <onek>_isim_11oz.png (yalniz isim). Hepsi kapak_canva4.py ile ayni sahneye giydirilir.
 Urun pikselleri (sembol) yapay zekadan gecmez; yalniz kopyalanir ve harmanlanir.
-Kullanim: python3 -I video_sade.py <baski_png> <kapak_jpg> <cikti_mp4> [bitis_sn]"""
+Kullanim: python3 -I video_sade.py <baski_onek> <kapak_jpg> <cikti_mp4> [bitis_sn]"""
 import os, shutil, subprocess, sys, time, pathlib, tempfile
 import numpy as np, cv2
 from PIL import Image
@@ -17,7 +17,11 @@ BURASI = pathlib.Path(__file__).resolve().parent
 IS = BURASI.parent
 if len(sys.argv) not in (4, 5):
     sys.exit(__doc__)
-BASKI, KAPAK, OUT = sys.argv[1:4]
+ONEK, KAPAK, OUT = sys.argv[1:4]
+BASKI, SEMBOLSUZ, ISIM = (f'{ONEK}_{k}_11oz.png' for k in ('baski', 'sembolsuz', 'isim'))
+for _f in (BASKI, SEMBOLSUZ, ISIM):
+    if not os.path.isfile(_f):
+        sys.exit(f'HATA: {_f} yok (baski_kes_sade.py KATMAN=1 ile uretilir)')
 BITIS = float(sys.argv[4]) if len(sys.argv) > 4 else 5.0
 if not 1.0 <= BITIS <= 6.0:
     sys.exit(f'HATA: bitis_sn 1 ile 6 arasinda olmali ({BITIS})')
@@ -52,32 +56,25 @@ try:
     FH_, FW_ = full.shape[:2]
     if (FW_, FH_) != (2700, 1050):
         sys.exit(f'HATA: baski 2700x1050 (11 oz) olmali, {FW_}x{FH_}')
-    murekkep = (255 - full).max(-1) > 20
-    on = murekkep[:, :FW_ // 2]
-    satir = np.where(on.any(1))[0]
-    if len(satir) == 0:
-        sys.exit('HATA: on yuzde baski yok')
-    bos = np.where(np.diff(satir) > 20)[0]
-    if len(bos) < 1:
-        sys.exit('HATA: on yuzde sembol ile isim satiri ayrilamadi')
-    # isim satiri en alttaki gruptur; sembol ici bosluklar (Libra, Aquarius) sembole dahil kalir
-    s0, s1 = satir[0], satir[bos[-1]]
-    i0, i1 = satir[bos[-1] + 1], satir[-1]
-    if not (i1 - i0) < (s1 - s0):
-        sys.exit(f'HATA: isim satiri sembolden yuksek gorunuyor (sembol {s1 - s0} px, isim {i1 - i0} px)')
-    orta = (s1 + i0) // 2
-    adim(f'sembol satiri y {s0}-{s1}, isim satiri y {i0}-{i1}, ayrim y {orta}')
-    nosym = full.copy()
-    nosym[:orta, :FW_ // 2] = 255
-    if (255 - nosym).max(-1)[:orta, :FW_ // 2].max() != 0:
-        sys.exit('HATA: sembol silinemedi')
+    nosym = np.asarray(Image.open(SEMBOLSUZ).convert('RGB')).astype(np.int16)
+    isim = np.asarray(Image.open(ISIM).convert('RGB')).astype(np.int16)
+    if nosym.shape != full.shape or isim.shape != full.shape:
+        sys.exit('HATA: katman boyutlari baskiyla ayni degil')
+    fark_sym = np.abs(full - nosym).max(-1)
+    if (fark_sym > 0).sum() < 2000 or fark_sym[:, FW_ // 2:].max() != 0:
+        sys.exit('HATA: sembol katmani hatali (on yuzde sembol farki yok ya da arka yuzde fark var)')
+    _ism = (255 - isim).max(-1) > 20
+    if _ism.sum() < 500 or _ism[:, FW_ // 2:].any():
+        sys.exit('HATA: isim katmani hatali')
+    if (np.abs(full - isim).max(-1)[_ism] > 2).mean() > 0.01:
+        sys.exit('HATA: isim katmani baskidaki isimle ayni degil')
+    adim(f'katmanlar: sembol {(fark_sym > 0).sum()} px, isim {_ism.sum()} px')
     Image.fromarray(full.astype(np.uint8)).save(TMP / 'full.png')
     Image.fromarray(nosym.astype(np.uint8)).save(TMP / 'nosym.png')
     Image.fromarray(np.full(full.shape, 255, np.uint8)).save(TMP / 'beyaz.png')
     fark = np.abs(full - nosym).max(-1).astype(float)
     Image.fromarray(np.stack([np.clip(255 - fark * 1.1, 0, 255).astype(np.uint8)] * 3, -1)).save(TMP / 'mask_sym.png')
-    kay = np.zeros(full.shape[:2], float)
-    kay[orta:, :FW_ // 2] = (255 - full[orta:, :FW_ // 2]).max(-1)
+    kay = (255 - isim).max(-1).astype(float)
     Image.fromarray(np.stack([np.clip(255 - kay * 1.1, 0, 255).astype(np.uint8)] * 3, -1)).save(TMP / 'mask_kay.png')
     SAHNE, GEO = IS / 'sahne/A3_uzun2.png', IS / 'sahne/geo_A3b.json'
     for ad in ('full', 'nosym', 'beyaz', 'mask_sym', 'mask_kay'):
@@ -115,7 +112,7 @@ try:
     dst = dst[np.argsort(dst[:, 0] + rng.random(N).astype(np.float32) * 40)]   # soldan saga eslesme, hafif karisik
     gec = rng.random(N).astype(np.float32) * 0.62
     yay = -(8 + 16 * rng.random(N).astype(np.float32)) * (H / 1080)
-    _ink = full[:orta, :FW_ // 2][(255 - full[:orta, :FW_ // 2]).max(-1) > 120]
+    _ink = full[fark_sym > 120]
     ANA = np.median(_ink, 0).astype(np.float32)                       # toz ana rengi = sembol rengi (stile uyar)
     ALTIN = np.array([196, 150, 64], np.float32)
     adim(f'toz rengi {ANA.astype(int).tolist()} + altin')

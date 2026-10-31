@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """SADE kupa baski dosyasi, CANLI Orchard tasarimi uzerine (Serdar 31 Eki 2026): on ve arka susleme (cicek/meyve dallari)
 canli cift kupayla AYNI (kes_suslme.py katmani). ON: cift sembolu yerine tek burc sembolu (ayni kutu), altinda tek isim
-(cift kupadaki isim satiri yerinde; sonsuz isareti, kucuk burc isaretleri ve burc adlari YOK). ARKA: yalniz mesaj
-(nazar ve imza YOK). baski_kes.py'den turetilmistir; olculer onayli gorselden (kes json, yerlesim).
+(cift kupadaki isim satiri yerinde; sonsuz isareti, kucuk burc isaretleri ve burc adlari YOK). ARKA: nazar boncugu
+ve mesaj (imza YOK; Serdar 31 Eki: nazar canli kupadaki yerinde). Sembol boyu 8 stilde AYNI (sabit K), dikey yeri 8 stilde
+AYNI (SEMBOL_Y); yatayda cercevenin (dallar) ortasinda, isim ayni eksende. baski_kes.py'den turetilmistir; olculer onayli gorselden (kes json, yerlesim).
+KATMAN=1 ortam degiskeni: video icin <cikti_onek>_sembolsuz_11oz.png ve <cikti_onek>_isim_11oz.png de yazilir.
 Kullanim: python3 -I baski_kes_sade.py <kes_onek> <glif_png> <isim> <mesaj> <renk r,g,b> <cikti_onek>
 Mesaj canli cift kupadaki mesaj tabaninda (yeri degismez).
 """
@@ -150,20 +152,19 @@ L = g['yerlesim']
 cx, _ = T('on', L['on_merkez_x'], 0)
 _c = np.where(MASK_ON.any(0))[0] - TW
 cx = (_c.min() + _c.max()) / 2                                  # Serdar 31 Eki: sembol ve isim cercevenin yatay ortasinda
-_, y_sem = T('on', 0, L['sembol_y'])
-# Serdar 31 Eki: sembol dikeyde tam ortada: susleme cercevesinin (dallar) ust ve alt kenarinin ortasi
 _, _t_isim0 = T('on', 0, L['isim_taban'])
 _satirlar = np.where(MASK_ON.any(1))[0]
-y_sem = ((_satirlar.min() - TH) + (_satirlar.max() - TH)) / 2
+y_sem = float(os.environ.get('SEMBOL_Y', 2))       # Serdar 31 Eki: 8 stilde ayni dikey yer (onayli Orange: cerceve ortasi = 2 px)
 ISIM_ARA = float(os.environ.get('ISIM_ARA', 4.0)) * MM          # sembol alti ile isim ustu arasi en az (mm)
-SEMBOL_K = float(os.environ.get('SEMBOL_K', 1.30))    # en buyuk sembol boyu: cift sembol kutusunun 1,30 kati (Serdar 31 Eki "daha buyuk")
+SEMBOL_K = float(os.environ.get('SEMBOL_K', 1.06))    # sabit sembol boyu (~25,3 mm): 12 burc x 8 stilin hepsinde dala en az 1,2 mm; Serdar 31 Eki "guzel": tum kupalarda ayni
 KALIN = float(os.environ.get('KALIN', 1.24))          # cizgi kalinligi: en kalin cizgi / sembol eni ~0,124 (Serdar 31 Eki referans gorsel)
-BOSLUK = float(os.environ.get('BOSLUK', 2.5)) * MM     # sembol ile susleme dali arasi en az (mm); sigmazsa sembol kuculur
+BOSLUK = float(os.environ.get('BOSLUK', 2.5)) * MM     # sembol ile susleme dali arasi hedef (mm); altinda UYARI, PAY altinda HATA
 UZAK = ndimage.distance_transform_edt(~MASK_ON)
 g0 = alfa(GLIF)
 
 
-def sembol_yap(k):
+def sembol_yap(k, x=None):
+    x = cx if x is None else x
     a = olcek(g0, kutu=(L['sembol_w'] * s * k, L['sembol_h'] * s * k))
     ciz = 2 * ndimage.distance_transform_edt(a > 0.5).max()
     r = max(0.0, (KALIN - 1) * ciz / 2)
@@ -174,25 +175,27 @@ def sembol_yap(k):
         ys, xs = np.where(a > 0.02)
         a = a[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
     m = np.zeros(MASK_ON.shape, bool)
-    x0, y0 = int(round(cx - a.shape[1] / 2 + TW)), int(round(y_sem - a.shape[0] / 2 + TH))
+    x0, y0 = int(round(x - a.shape[1] / 2 + TW)), int(round(y_sem - a.shape[0] / 2 + TH))
     m[y0:y0 + a.shape[0], x0:x0 + a.shape[1]] = a > 0.3
     return a, ciz, ciz + 2 * r, UZAK[m].min()
 
 
 k = SEMBOL_K
-while True:
-    ana, _cizgi, _cizgi2, _uzak = sembol_yap(k)
-    if _uzak >= BOSLUK or k <= 0.8:
-        break
-    k -= 0.02
+ana, _cizgi, _cizgi2, _uzak = sembol_yap(k)
 _alt = y_sem + ana.shape[0] / 2
 _isim_ust = _t_isim0 - L['isim_cap'] * s * float(os.environ.get('ISIM_BOY', 1.25))
 if _alt > _isim_ust - ISIM_ARA:                                  # isme cok yaklasirsa sembol yukari kayar
     y_sem -= _alt - (_isim_ust - ISIM_ARA)
-    ana, _cizgi, _cizgi2, _uzak = sembol_yap(k)
+
+
+ana, _cizgi, _cizgi2, _uzak = sembol_yap(k)
+if _uzak < BOSLUK:
+    adim(f'UYARI: sembol dala {_uzak / MM:.2f} mm (hedef {BOSLUK / MM:.1f} mm)')
 if _uzak < PAY:
     sys.exit(f'HATA: sembol susleme dalina {_uzak:.0f} px (en az {PAY})')
+_on_sembolsuz = on.copy()
 bas(on, ana, cx, y_sem)
+_on_sembollu = on.copy()
 _cols = np.where(MASK_ON.any(0))[0] - TW
 adim(f'merkez: sembol y {y_sem:.0f} / cerceve y {((_satirlar.min() + _satirlar.max()) / 2 - TH):.0f}; sembol x {cx:.0f} / cerceve x {((_cols.min() + _cols.max()) / 2):.0f} (on tuval px)')
 # isim satiri: tek isim, cift kupadaki isim satiri yerinde ve boyunda
@@ -203,31 +206,57 @@ ISIM_AR = float(os.environ.get('ISIM_ARALIK', 0.26))          # harf araligi, bu
 isim_cap, isim_tasti = satir(on, MASK_ON, ISIM.upper(), GAR, ISIM_CAP, ISIM_AG, cx, t_isim, aralik=ISIM_CAP * ISIM_AR,
                              min_cap=2.2 * MM, mesafe=ndimage.distance_transform_edt(~MASK_ON))
 burc_tasti = False
+# video katmanlari: sembol pikselleri ve isim pikselleri (ayni kosudan, birebir)
+_SEM = np.abs(_on_sembollu - _on_sembolsuz).max(-1) > 0
+_ISM = np.abs(on - _on_sembollu).max(-1) > 0
 adim(f'on: sembol {ana.shape[1] / MM:.1f}x{ana.shape[0] / MM:.1f} mm (K {k:.2f}, kalin {KALIN}, cizgi {_cizgi:.0f}->{_cizgi2:.0f} px, dala {_uzak:.0f} px), isim cap {isim_cap / MM:.2f} mm')
 
 # ---------------- ARKA ----------------
 arka = susleme_tuval('arka', f'{KES}_arka.png')
+# nazar boncugu: canli cift kupadaki yerinde ve boyunda (baski_kes.py ile ayni)
+nx, ny = T('arka', L['nazar_x'], L['nazar_y'])
+nz = np.asarray(Image.open(V_DIR + 'ORCHARD_nazar.png').convert('RGB')).astype(float)
+ys, xs = np.where(nz.min(-1) < 250)
+nz = nz[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+nzs = np.asarray(Image.fromarray(nz.astype(np.uint8)).resize((round(L['nazar_d'] * s),) * 2, Image.LANCZOS)).astype(float)
+h, w = nzs.shape[:2]
+x0, y0 = int(round(nx - w / 2 + TW)), int(round(ny - h / 2 + TH))
+arka[y0:y0 + h, x0:x0 + w] *= nzs / 255.0
 MASK_AR = arka.min(-1) < 245
 ax, _ = T('arka', L['arka_merkez_x'], 0)
 _, t_mes = T('arka', 0, L['mesaj_taban'])
 mes_cap, mes_tasti = satir(arka, MASK_AR, MESAJ, ITA, L['mesaj_cap'] * s, 600, ax, t_mes, min_cap=2.2 * MM,
                            maxw_sabit=860)
-adim(f'arka: mesaj cap {mes_cap / MM:.2f} mm (nazar ve imza yok)')
+adim(f'arka: mesaj cap {mes_cap / MM:.2f} mm, nazar {L["nazar_d"] * s / MM:.1f} mm (imza yok)')
 
 # ---------------- silindir -> baski ----------------
-baski = np.full((FH, FW, 3), 255.0)
-yy = np.arange(FH)
-for yuz, tv in (('on', on), ('arka', arka)):
-    u = np.arange(FW)
-    th = (u - FACE[yuz]) / RK
-    ok = np.abs(th) < math.asin(min(1.0, TW / RK))
-    xv = RK * np.sin(th[ok]) + TW
-    oy = (FH - 2 * TH) // 2
-    for c in range(3):
-        col = ndimage.map_coordinates(tv[..., c], [np.repeat(yy[:, None] - oy, ok.sum(), 1),
-                                                   np.repeat(xv[None, :], FH, 0)], order=1, mode='constant', cval=255)
-        baski[:, np.where(ok)[0], c] = np.minimum(baski[:, np.where(ok)[0], c], col)
+def silindir(on_tv, arka_tv):
+    baski = np.full((FH, FW, 3), 255.0)
+    yy = np.arange(FH)
+    for yuz, tv in (('on', on_tv), ('arka', arka_tv)):
+        u = np.arange(FW)
+        th = (u - FACE[yuz]) / RK
+        ok = np.abs(th) < math.asin(min(1.0, TW / RK))
+        xv = RK * np.sin(th[ok]) + TW
+        oy = (FH - 2 * TH) // 2
+        for c in range(3):
+            col = ndimage.map_coordinates(tv[..., c], [np.repeat(yy[:, None] - oy, ok.sum(), 1),
+                                                       np.repeat(xv[None, :], FH, 0)], order=1, mode='constant', cval=255)
+            baski[:, np.where(ok)[0], c] = np.minimum(baski[:, np.where(ok)[0], c], col)
+    return baski
+
+
+baski = silindir(on, arka)
 Image.fromarray(np.clip(baski, 0, 255).astype(np.uint8)).save(OUT + '_baski_11oz.png', dpi=(300, 300))
+if os.environ.get('KATMAN'):                                     # video icin: sembolsuz baski ve yalniz isim baskisi
+    _sz = on.copy()
+    _sz[_SEM] = _on_sembolsuz[_SEM]
+    _iz = np.full_like(on, 255.0)
+    _iz[_ISM] = on[_ISM]
+    _bos = np.full_like(arka, 255.0)
+    Image.fromarray(np.clip(silindir(_sz, arka), 0, 255).astype(np.uint8)).save(OUT + '_sembolsuz_11oz.png', dpi=(300, 300))
+    Image.fromarray(np.clip(silindir(_iz, _bos), 0, 255).astype(np.uint8)).save(OUT + '_isim_11oz.png', dpi=(300, 300))
+    adim('katmanlar: _sembolsuz_11oz.png, _isim_11oz.png')
 pv = np.full((2 * TH + 40, 4 * TW + 60, 3), 235.0)
 pv[20:20 + 2 * TH, 20:20 + 2 * TW] = on
 pv[20:20 + 2 * TH, 40 + 2 * TW:40 + 4 * TW] = arka
