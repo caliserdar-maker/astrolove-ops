@@ -9,7 +9,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: {description: "kupa | yd | ikisi", required: true, default: "ikisi", type: choice, options: [ikisi, kupa, yd]}
+      mod: {description: "kupa | yd | ikisi | kisisel (ayni burclu 12 kupa sorusu, 13 istek)", required: true, default: "ikisi", type: choice, options: [ikisi, kupa, yd, kisisel]}
       pilot: {description: "YD pilot listing_id", required: false, default: "4595350971"}
 jobs:
   oku:

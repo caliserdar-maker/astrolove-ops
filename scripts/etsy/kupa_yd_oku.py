@@ -2,6 +2,7 @@
 """SALT OKUMA (Etsy'ye yazma YOK; Serdar 31 Eki karar 3b + 5a). Iki kucuk okuma, kosu basina sabit istek:
   kupa : 78 kupa ilaninin canli EN aciklamasi + RU cevirisi (GET /listings/batch?includes=Translations, 100'luk parca: 1 istek).
          Kupa RU kurucusu (ru_kupa.py) girdisi. Cikti KUPA_CANLI.json (listing_id, cift, state, title, description, ru).
+  kisisel: ayni burclu 12 kupa ilaninin kisisellestirme sorusu + ilan talimati (Serdar 31 Eki 7a; 1 batch + 12 GET = 13 istek).
   yd   : 1st Anniversary boy (Size) ozelligi. Pilot ilan: GET /listings/{id} (taxonomy_id), /listings/{id}/inventory (canli
          varyasyon ozellikleri), /shops/{shop}/listings/{id}/properties (ilan nitelikleri), /seller-taxonomy/nodes/{tid}/properties
          (taksonomi ozellikleri) = 4 istek. Cikti YD_BOY.json: canli ozellikler, ilan nitelikleri, taksonomide supports_variations
@@ -47,6 +48,28 @@ def kupa(api, liste, out):
     return 0 if len(kayit) == len(cift) == 78 and not eksik else 1
 
 
+def kisisel(api, liste, out):
+    """Serdar 31 Eki karar 7a: ayni burclu 12 kupa ilaninin canli kisisellestirme sorusu (GET /listings/{id}/personalization, ilan
+    basina 1 istek) + ilan alanlari (personalization_instructions vb.; /listings/batch 1 istek). Cikti KUPA_KISISEL_AYNI12.json."""
+    rows = [r for r in csv.DictReader(open(liste, encoding="utf-8-sig")) if (r.get("listing_id") or "").strip()]
+    ayni = {r["listing_id"].strip(): r["cift"].strip() for r in rows if r["cift"].split("_")[0] == r["cift"].split("_")[-1]}
+    if len(ayni) != 12:
+        raise SystemExit(f"DUR: ayni burclu kupa {len(ayni)} (12 beklenir)")
+    api.kota_kapisi("kupa ayni12 batch")
+    L = {str(x.get("listing_id")): x for x in (api.get("/listings/batch", {"listing_ids": ",".join(ayni)}) or {}).get("results") or []}
+    kayit = []
+    for lid, c in sorted(ayni.items(), key=lambda x: x[1]):
+        api.kota_kapisi(f"kisisel {lid}")
+        q = (api.get(f"/listings/{lid}/personalization", ok404=True) or {}).get("personalization_questions") or []
+        x = L.get(lid) or {}
+        kayit.append(dict(listing_id=lid, cift=c, state=x.get("state"), is_personalizable=x.get("is_personalizable"),
+                          personalization_instructions=x.get("personalization_instructions"),
+                          personalization_char_count_max=x.get("personalization_char_count_max"), sorular=q))
+    (out / "KUPA_KISISEL_AYNI12.json").write_text(json.dumps(kayit, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"kisisel: 12 ilan, soru sayilari {[len(k['sorular']) for k in kayit]} | istek {api.calls} kota {api.remaining}")
+    return 0 if len(kayit) == 12 and all(k["state"] for k in kayit) else 1
+
+
 def yd(api, shop, pilot, out):
     api.kota_kapisi("yd pilot")
     L = api.get(f"/listings/{pilot}") or {}
@@ -82,7 +105,7 @@ def yd(api, shop, pilot, out):
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mod", choices=["kupa", "yd", "ikisi"], default="ikisi")
+    ap.add_argument("--mod", choices=["kupa", "yd", "ikisi", "kisisel"], default="ikisi")
     ap.add_argument("--kupa-liste", default="")
     ap.add_argument("--pilot", default="4595350971")
     ap.add_argument("--out", required=True)
@@ -98,6 +121,8 @@ def main(argv=None):
     rc, istek = 0, {}
     if a.mod in ("kupa", "ikisi"):
         rc |= kupa(api, a.kupa_liste, out); istek["kupa"] = api.calls
+    if a.mod == "kisisel":
+        rc |= kisisel(api, a.kupa_liste, out); istek["kisisel"] = api.calls
     if a.mod in ("yd", "ikisi"):
         c0 = api.calls
         rc |= yd(api, shop, a.pilot, out); istek["yd"] = api.calls - c0
