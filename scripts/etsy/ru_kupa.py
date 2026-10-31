@@ -6,7 +6,8 @@ karsiligi olmali; kalip disi paragraf ya da beklenmeyen deger = FAIL (eksik / fa
 Kaynak: kupa-orchard dali kupa_orchard/kod/ilan_metin.py (EN sablonu) + ilan_metin_ru.py (19 Eki RU sablonu); RU cumleler EN ile
 birebir ayni bilgiyi verecek sekilde duzeltildi (19 Eki RU'da EN'de olmayan "перед оформлением заказа" yok; EN'deki "A thoughtful
 choice..." cumlesinin karsiligi var).
-GALERI (Serdar 31 Eki 5a / 6a): kupa_en canli EN'deki foto numaralarini yeni galeri sirasina cevirir (stil 6-14, boy 4, kisisellestirme 3)
+GALERI (Serdar 31 Eki 5a / 6a, 2a): kupa_en canli EN'deki foto numaralarini GORSEL ADIYLA degistirir (stil / boyut / kisisellestirme
+fotografi; numara yok, Etsy videoyu 2. siraya koyuyor)
 ve kisisellestirme bolumune sade kupa Latin harf notunu ekler; ru_kupa_78 hedef_kapisi ile denetler.
 AYNI BURC (12 cift, Serdar 30 Eki): isim satirlari "First Name" / "Second Name". kupa_en() canli EN'deki "Left name" / "Right name"
 ya da "Name Under <Burc>" ciftini bu ada cevirir (hedef EN); farkli burcta EN degismez. EN degisikligi de Serdar onayina tabidir.
@@ -32,7 +33,20 @@ FOTO_MAX = 20   # Etsy galeri siniri
 GALERI_MAX = 14   # yeni kupa galerisi: 1 kapak + 5 kart + 8 stil (video ayri)
 
 
+FOTO_AD_RU = {"the style photos": "фото стилей", "the sizes photo": "фото с размерами",
+              "the personalization photo": "фото с персонализацией"}   # Serdar 31 Eki 2a: numara yok, gorsel adi
+
+
 def foto_ru(s):
+    """EN 'See <s>.' nesnesi -> RU 'Смотрите <donus>.' nesnesi. Gorsel adi (31 Eki 2a) ya da eski numara ('photo 4')."""
+    if s in FOTO_AD_RU:
+        return FOTO_AD_RU[s]
+    if not s.startswith("photo"):
+        raise ValueError(f"foto atfi kalip disi: {s!r}")
+    return "фото " + foto_no_ru(s.split(" ", 1)[1])
+
+
+def foto_no_ru(s):
     if not FOTO.fullmatch(s) or any(not 1 <= int(n) <= FOTO_MAX for n in re.findall(r"\d+", s)):
         raise ValueError(f"foto numarasi kalip / aralik disi: {s!r}")
     m = re.fullmatch(r"(\d+) to (\d+)", s)
@@ -80,12 +94,12 @@ def p_stil(m, ctx):
         raise ValueError("stil paragrafi burclari girisle ayni degil")
     return ("[ 8 СТИЛЕЙ: THE ORCHARD WE KEEP ]\nOrange Blossom, Purple Fig, Olive Breeze, Pomegranate Bloom, Almond Blossom, "
             "Lemon Grove, Blue Grape или Golden Loquat. Во всех стилях этой зодиакальной кружки для пары один и тот же символ знаков "
-            f"{ikili(a, b)} и турецкий глаз на обратной стороне. Смотрите фото {foto_ru(m.group(3))}.")
+            f"{ikili(a, b)} и турецкий глаз на обратной стороне. Смотрите {foto_ru(m.group(3))}.")
 
 
 def p_boy(m, ctx):
     return ("[ ДВА РАЗМЕРА ]\n- 11 oz (325 мл)\n- 15 oz (444 мл)\nОдинаковый дизайн в обоих размерах. "
-            f"Смотрите фото {foto_ru(m.group(1))}.")
+            f"Смотрите {foto_ru(m.group(1))}.")
 
 
 def isim_ru(s, ctx, sira):
@@ -110,8 +124,10 @@ LATIN_EN = "Please use Latin letters, numbers and simple punctuation, no emoji."
 LATIN_RU = "Пожалуйста, используйте латинские буквы, цифры и простые знаки препинания, без эмодзи."
 # Yeni galeri sirasi (Serdar 31 Eki karar 5a; kupa_kart78 / kupa_galeri78): 1 kapak, 2 K02 sembol, 3 K03 kisisellestirme, 4 K05 boyut,
 # 5 K07 surec, 6 K04 stil genel bakis, 7-14 stil gorselleri, video. Eski canli numaralar -> yeni.
-FOTO_YENI = {"stil": ("an evil eye on the back. See photo 4.", "an evil eye on the back. See photos 6 to 14."), "boy": ("Same design on both. See photo 5.", "Same design on both. See photo 4."),
-             "kisisel": ("Please check your spelling. See photos 3 and 6.", "Please check your spelling. See photo 3.")}
+# Serdar 31 Eki 2a: aciklamada foto NUMARASI yok (Etsy videoyu 2. siraya koyuyor, numara kayar); gorsel adiyla atif.
+FOTO_YENI = {"stil": ("an evil eye on the back. See photo 4.", "an evil eye on the back. See the style photos."),
+             "boy": ("Same design on both. See photo 5.", "Same design on both. See the sizes photo."),
+             "kisisel": ("Please check your spelling. See photos 3 and 6.", "Please check your spelling. See the personalization photo.")}
 
 
 def p_kisisel(m, ctx):
@@ -128,7 +144,7 @@ def p_kisisel(m, ctx):
             + (f"{LATIN_RU}\n" if latin else "") +
             "Если вы оставите надпись пустой, мы напечатаем:\n"
             f"{bos}\n"
-            f"Пожалуйста, проверьте написание. Смотрите фото {foto_ru(foto)}.")
+            f"Пожалуйста, проверьте написание. Смотрите {foto_ru(foto)}.")
 
 
 SABIT = {
@@ -163,12 +179,12 @@ KALIP = [
                 r"the two of you\.(?: A thoughtful choice when you are looking for (.+)\.)?"), p_giris),
     (re.compile(r"\[ 8 STYLES: THE ORCHARD WE KEEP \]\nOrange Blossom, Purple Fig, Olive Breeze, Pomegranate Bloom, Almond Blossom, "
                 r"Lemon Grove, Blue Grape or Golden Loquat\. Every style of this zodiac couple mug has the same " + B_RX + " and "
-                + B_RX + r" symbol and an evil eye on the back\. See photos? ([\d a-z]+)\."), p_stil),
-    (re.compile(r"\[ TWO SIZES \]\n- 11 oz \(325 ml\)\n- 15 oz \(444 ml\)\nSame design on both\. See photos? ([\d a-z]+)\."), p_boy),
+                + B_RX + r" symbol and an evil eye on the back\. See (photos? [\d a-z]+|the [a-z]+ photos?)\."), p_stil),
+    (re.compile(r"\[ TWO SIZES \]\n- 11 oz \(325 ml\)\n- 15 oz \(444 ml\)\nSame design on both\. See (photos? [\d a-z]+|the [a-z]+ photos?)\."), p_boy),
     (re.compile(r"\[ HOW TO PERSONALIZE \]\nWrite three lines in the personalization box:\n1\. " + ISIM_RX + r" \(up to (\d+) "
                 r"letters\)\n2\. " + ISIM_RX + r" \(up to (\d+) letters\)\n3\. Message \(one line, up to (\d+) characters including "
                 r"spaces and punctuation\)\n(" + re.escape(LATIN_EN) + r"\n)?Leave the message blank and we print:\n([^\n]+)\nPlease check your spelling\. See "
-                r"photos? ([\d a-z]+)\."), p_kisisel),
+                r"(photos? [\d a-z]+|the [a-z]+ photos?)\."), p_kisisel),
 ]
 
 
@@ -200,11 +216,11 @@ def hedef_kapisi(en):
     h += [f"foto {ad}: eski '{e}' kaldi" for ad, (e, y) in FOTO_YENI.items() if e in en]
     if en.count(LATIN_EN) != 1:
         h.append("Latin harf notu yok / birden cok")
-    ref = re.findall(r"See photos? ([\d a-z]+)\.", en)
+    ref = re.findall(r"See (photos? [\d a-z]+|the [a-z]+ photos?)\.", en)
     if len(ref) != 3:
-        h.append(f"'See photo' atfi {len(ref)} (3 beklenir)")
-    if any(int(n) > GALERI_MAX for r in ref for n in re.findall(r"\d+", r)):
-        h.append(f"foto numarasi galeri boyunu ({GALERI_MAX}) asiyor: {ref}")
+        h.append(f"'See ...' foto atfi {len(ref)} (3 beklenir)")
+    if any(re.search(r"\d", r) or r not in FOTO_AD_RU for r in ref):
+        h.append(f"foto numarasi / bilinmeyen atif kaldi (Serdar 31 Eki 2a: numara yok): {ref}")
     return h
 
 
