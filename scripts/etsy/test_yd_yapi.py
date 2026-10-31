@@ -210,7 +210,7 @@ def kuru_testleri(d):
       {v for (f, _), v in fy.items() if f == "Digital File"} == {3.90} and fy[("Print", K.K.ETIKET_5X7)] == 19.90
       and fy[("Print", "8×10″ (20×25cm)")] == 24.90 and fy[("Print", "24×36″ (61×91cm)")] == 64.90 and fy[("Print", "A2 (42×59.4cm)")] == 42.90)
     k("kuru: SKU poster kalibi, adet 999, readiness dijital / baski canlidan, on_property",
-      pr[0]["sku"] == "BY-CAN_LIB-STARLIT-5x7-DIGITAL" and pr[14]["sku"] == "BY-CAN_LIB-STARLIT-5x7"
+      pr[0]["sku"] == "BY-CAN_LIB-ST-5x7-DIGITAL" and pr[14]["sku"] == "BY-CAN_LIB-ST-5x7"
       and {o["quantity"] for p in pr for o in p["offerings"]} == {999}
       and {p["offerings"][0]["readiness_state_id"] for p in pr if K.deger(p, 514) == "Digital File"} == {1512772362964}
       and {p["offerings"][0]["readiness_state_id"] for p in pr if K.deger(p, 514) == "Print"} == {1517641240112}
@@ -437,15 +437,24 @@ def boy_516():
     sab, h = K.boy_ozellik(tax, K.BOY_PID)
     k("boy: varsayilan BOY_PID 516, menu adi Size (Custom Property degil), hata yok",
       K.BOY_PID == 516 and sab == {"property_id": 516, "property_name": "Size"} and not h, (sab, h))
+    pv = lambda ad3, ids=(513, 514, 516): {"products": [{"sku": "x", "property_values": [
+        {"property_id": i, "property_name": a} for i, a in zip(ids, ("Style", "Format", ad3))]}]}
+    k("boy_kabul: 513 + 514 + 516 Size -> PASS; ad 'Custom Property' -> FAIL; 516 yok -> FAIL (Serdar 31 Eki 4a pilot adimi)",
+      Y.boy_kabul(pv("Size"), 516) == [] and Y.boy_kabul(pv("Custom Property"), 516) and Y.boy_kabul(pv("Size", (513, 514, 515)), 516))
     k("boy: --boy-pid varsayilani 516, 0 = secilmedi", K.argumanlar(["--out", "x"]).boy_pid == 516
       and K.boy_ozellik(tax, 0)[0] is None)
 
 
 def sku_siniri(d):
-    """inceleme 31 Eki (BLOK): canli on ek (BY-CAN_LIB-FIRSTPAGE) + -11x14-DIGITAL 32'yi asar -> plan BLOK (Etsy 400)."""
+    """Serdar 31 Eki 1a: kisa stil kodu; 140 SKU <= 32 (kapi PASS). Kapi hala calisir: uzun SKU -> hata."""
     rc, out = kuru(Sahte(), d, damga="s32")
-    h = " ".join(json.loads((out / f"KURU_{A}.json").read_text())["hata"])
-    k("SKU > 32 -> plan BLOK, cikis 1 (SKU bicimi karari bekler)", rc == 1 and "32 karakteri asiyor" in h, h[:160])
+    ka = json.loads((out / f"KURU_{A}.json").read_text())
+    sk = [p["sku"] for p in ka["envanter_yuk"]["products"]]
+    k("SKU kisa kod: 140 SKU <= 32, en uzun 27, kapi hatasi yok", rc == 0 and len(sk) == 140 and max(map(len, sk)) == 27
+      and not any("karakteri asiyor" in h for h in ka["hata"]), (rc, max(map(len, sk)), ka["hata"][:2]))
+    k("SKU kodlari ST/TL/FP/LY/BO, eski uzun kod yok", {x.split("-")[2] for x in sk} == {"ST", "TL", "FP", "LY", "BO"})
+    uzun = copy.deepcopy(ka["envanter_yuk"]); uzun["products"][0]["sku"] = "BY-CAN_LIB-FIRSTPAGE-12x18-DIGITAL"
+    k("kapi: 34 karakterlik SKU -> hata", any("32 karakteri asiyor" in h for h in K.hedef_kapisi(uzun, BOY)))
 
 
 def main():
@@ -453,7 +462,6 @@ def main():
     try:
         boy_516()
         sku_siniri(d)
-        K.SKU_MAX = 99   # asagidaki testler SKU uzunlugundan bagimsiz yapiyi sinar (sinir testi yukarida)
         plan = kuru_testleri(d)
         yaz_testleri(d, plan)
         is_akisi()

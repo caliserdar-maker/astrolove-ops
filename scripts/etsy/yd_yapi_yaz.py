@@ -16,6 +16,8 @@ Modlar:
                    kurulur (tasiyici / mail_class / teslim gunleri / hedef aynen; yalniz ucret alanlari degisir). Yazim aninda profili
                    kullanan ilanlar yeniden taranir (5 durum); YD listesi (--liste) disinda kullanan varsa DUR. Hata -> SONUC.json HATA.
   profil-geri-al : ETSY'YE YAZAR (--onay SERDAR_YD_PROFIL_GERI_AL). Ucretler plandaki eski degerlere.
+PILOT ADIMI (Serdar 31 Eki karar 4a): ilk yazim tek pilot ilanla (--sadece); envanter PUT sonrasi geri okumada boy_kabul(): her urunde
+  tam 513 Style + 514 Format + boy (516, ad "Size") var mi. FAIL -> otomatik geri alma + kosu durur; --tum ancak pilot PASS sonrasi.
 Ilan secimi: plandaki ilanlar; --sadece (pilot) ve --haric (plan disi kimlik -> DUR). Secilen ilan plan durumu PLAN ya da ZATEN olmali.
 Plan butunlugu (Etsy isteginden ONCE): KURU_<lid>.json + PLAN.csv ayni; ham envanterden bu kodla (yd_yapi_kuru.envanter_plani)
   kurulan govde plandakiyle birebir.
@@ -229,6 +231,20 @@ def bag_kur(api, shop, lid, inv1, hedef_bag, R_):
         raise Fail("Style bagi kurulamadi (geri okuma)")
 
 
+def boy_kabul(inv, pid):
+    """Serdar 31 Eki karar 4a: ilk pilot ilanda 513 + 514 + boy (516) kabulu OKUMAYLA dogrulanir; FAIL ise kosu durur (otomatik geri
+    alma). Her urunde tam bu uc ozellik, adlari Style / Format / Size (ozel ozellik adi Etsy'de korunmali). -> hata[]."""
+    h, bek = [], {K.STIL_PID: "Style", K.FORMAT_PID: "Format", pid: "Size"}
+    for p in inv.get("products") or []:
+        v = {x.get("property_id"): x.get("property_name") for x in p.get("property_values") or []}
+        if set(v) != set(bek):
+            h.append(f"urun {p.get('sku')} ozellikler {sorted(v, key=str)} != {sorted(bek)}"); break
+        yanlis = {k: v[k] for k in bek if (k in K.OZEL_PID) and v[k] != bek[k]}
+        if yanlis:
+            h.append(f"urun {p.get('sku')} ozellik adlari {yanlis} (beklenen {bek})"); break
+    return h
+
+
 def envanter_yaz(api, lid, govde, kaynak, pid, R_, ad):
     """PUT (?max_variations_supported=3) + geri okuma (imza, adet, menu). -> canli envanter.
     Adim PUT'tan ONCE yazilan'a girer: Etsy PUT'u uygulayip 5xx / zaman asimi dondurse de otomatik geri alma kosar (inceleme 30 Eki 1)."""
@@ -241,6 +257,10 @@ def envanter_yaz(api, lid, govde, kaynak, pid, R_, ad):
         raise Fail(f"{ad} geri okuma plandan farkli (urun {len(inv1.get('products') or [])}, adet {sorted(adetler(inv1), key=str)})")
     if (pid and K.menu(inv1, pid) != K.menu(kaynak, pid)) or (not pid and menu_ham(inv1) != menu_ham(kaynak)):
         raise Fail(f"{ad} menu sirasi plandan farkli")
+    if pid:   # yalniz yeni yapi yaziminda (geri alma pid=None)
+        bh = boy_kabul(inv1, pid)
+        if bh:
+            raise Fail(f"BOY_KABUL FAIL ({ad}): Etsy 513 + 514 + {pid} yapisini kabul etmedi / degistirdi: {bh[0]}; kosu durur")
     return inv1
 
 

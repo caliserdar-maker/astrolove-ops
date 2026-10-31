@@ -35,6 +35,7 @@ import sys
 import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+sys.path.insert(1, str(pathlib.Path(__file__).resolve().parents[1] / "siparis_by"))   # by_sku (YD SKU cozucusu)
 from etsy_common import Etsy, TokenStore, mask  # noqa: E402
 
 ONAY, ONAY_GERI = "SERDAR_BURC_GIFT", "SERDAR_GERI_AL"
@@ -396,6 +397,21 @@ def bir_ilan(api, shop, lid, hedef, once, out, hazirlik_al, R, by_ids=()):
     R["sonuc"] = "PASS"
 
 
+def baski_mi(t, by_ids=()):
+    """Gonderilmemis BASKI satiri mi (yazim kapisi). Eski: SKU PRINT8X10 ya da YD ilaninda 'shipped print'. Serdar 31 Eki 1a/3a: yeni
+    YD SKU'su (kisa ya da uzun stil kodu, 14 boy) -DIGITAL degilse baski; YD ilaninda Format menusu 'Print' de baski."""
+    import by_sku
+    sku = (t.get("sku") or "").upper()
+    c = by_sku.coz(t.get("sku"))
+    if "PRINT8X10" in sku or (c and not c["dijital"]):
+        return True
+    if str(t.get("listing_id")) not in {str(i) for i in by_ids} or sku.endswith("-DIGITAL"):
+        return False
+    fmt = " ".join(str(v.get("formatted_value") or v.get("value") or "") for v in t.get("variations") or []
+                   if str(v.get("formatted_name") or v.get("property_name") or "").strip().lower() == "format").lower()
+    return "shipped print" in fmt or fmt.strip() == "print"
+
+
 def siparis_say(api, shop, by_ids, toplam=True):
     n_satir, n_makbuz, ofs = 0, 0, 0
     while True:
@@ -404,8 +420,7 @@ def siparis_say(api, shop, by_ids, toplam=True):
         for rc in r:
             k = 0
             for t in rc.get("transactions") or []:
-                var = " ".join(str(v.get("formatted_value") or v.get("value") or "") for v in t.get("variations") or [])
-                if "PRINT8X10" in (t.get("sku") or "").upper() or (str(t.get("listing_id")) in by_ids and "shipped print" in var.lower()):
+                if baski_mi(t, by_ids):
                     k += 1
             n_satir += k
             n_makbuz += 1 if k else 0

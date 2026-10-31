@@ -464,13 +464,18 @@ def kota_deneme(a, out):
         log(m)
 
 
+FORMAT_VARYASYON = ("format", "size")   # secilen format yalniz bu menulerde (yeni: Format; eski poster: Size "Digital File, ...")
+
+
 def dijital_mi(t):
-    """GOREV 0036: dijital kalem ASLA Prodigi'ye gitmez. SKU -DIGITAL ya da varyasyon degeri 'Digital'
-    (SKU yanlis/eksik olsa bile, fail-closed)."""
+    """GOREV 0036: dijital kalem ASLA Prodigi'ye gitmez. SKU -DIGITAL ya da FORMAT menusunun degeri 'Digital'
+    (SKU yanlis/eksik olsa bile, fail-closed). Serdar 31 Eki karar 3a: tur yalniz secilen formattan (SKU / Format, eski
+    posterde Size menusu) okunur; musteri mesaji / kisisellestirme (Personalization vb.) turu DEGISTIRMEZ."""
     if is_digital_sku(t.get("sku")):
         return True
     return any("digital" in str(v.get("formatted_value") or v.get("value") or "").lower()
-               for v in t.get("variations") or [])
+               for v in t.get("variations") or []
+               if str(v.get("formatted_name") or v.get("property_name") or "").strip().lower() in FORMAT_VARYASYON)
 
 
 def cerceve_haritasi(path=None):

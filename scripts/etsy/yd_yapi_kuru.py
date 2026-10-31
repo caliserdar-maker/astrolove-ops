@@ -15,8 +15,8 @@ Fiyat (hicbiri burada uydurulmadi; FIYAT_KAYNAK):
   14 boyun (5x7 dahil; 30 Eki yazimi sonrasi poster 5x7 canli) her biri hem Digital File hem Print olarak posterde bulunmali, tanimsiz
   boy etiketi / format olmamali; degilse KOSU BLOK (bos envanter ya da etiket degisikligi sessiz gecmez; inceleme 30 Eki madde 2).
 Diger urun alanlari: adet = ilandaki tek adet (999); readiness: Digital File = canli dijital urunlerin readiness'i, Print = canli
-  "Shipped print 8x10" urunlerinin readiness'i (her biri tek deger olmali); SKU <BY-AAA_BBB-STIL>-<boy> (Print) ve -<boy>-DIGITAL
-  (poster SKU kalibi, fiyat_kar.SKU_RX). price_on_property [514, boy], sku_on_property [513, 514, boy], readiness_on [514],
+  "Shipped print 8x10" urunlerinin readiness'i (her biri tek deger olmali); SKU BY-<AAA_BBB>-<ST|TL|FP|LY|BO>-<boy> (Print) ve
+  ...-<boy>-DIGITAL (Serdar 31 Eki 1a kisa stil kodu, en cok 27 karakter; scripts/siparis_by/by_sku.py, eski uzun kodu da cozer). price_on_property [514, boy], sku_on_property [513, 514, boy], readiness_on [514],
   quantity_on []. Envanter PUT ?max_variations_supported=3 ile (yazim betigi yd_yapi_yaz.py).
 Kapilar (ilan basina; biri tutmazsa BLOK, yazim yok):
   state active (CLAUDE.md 7 Eyl: updateListing taslagi yayina alir; bu is updateListing CAGIRMAZ, yine de taslak/pasif ilan ATLANIR);
@@ -45,6 +45,8 @@ sys.path.insert(0, str(KOK)); sys.path.insert(1, str(KOK.parent / "pod"))
 import etsy_common as E  # noqa: E402
 import pod_5x7_kuru as K  # noqa: E402
 import print_fiyat_v2 as PF  # noqa: E402
+sys.path.insert(0, str(KOK.parent / "siparis_by"))
+import by_sku as BS  # noqa: E402  YD SKU (kisa stil kodu ST/TL/FP/LY/BO + eski uzun kod cozumu)
 
 STIL_PID, FORMAT_PID = 513, 514
 # Size (Serdar 31 Eki karar 5a): taksonomi 121'de "Size" adli ozellik yok (21 ozellik; boy adayi 0). Varyasyon destekleyen 3. ozel
@@ -159,7 +161,7 @@ def envanter_plani(inv, boy_sab):
         for f in FORMATLAR:
             for etiket, kod in BOYLAR:
                 urun.append({
-                    "sku": f"{pre[s]}-{kod}" + ("-DIGITAL" if f == DIJITAL else ""),
+                    "sku": BS.sku(pre[s].split("-")[1], s, kod, f == DIJITAL),   # kisa stil kodu (Serdar 31 Eki 1a; <= 27 kr.)
                     "property_values": [{"property_id": STIL_PID, "property_name": "Style", "value_ids": [stil[s]], "values": [s]},
                                         {"property_id": FORMAT_PID, "property_name": "Format", "values": [f]},   # value_ids: Etsy
                                         {**boy_sab, "values": [etiket]}],
