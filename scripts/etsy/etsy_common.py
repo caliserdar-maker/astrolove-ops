@@ -253,7 +253,7 @@ def ru_yazim_kapisi(method, path, data=None, json_body=None):
 AI_BEYAN = {"en": "We use AI tools to help create the artwork",
             "ru": "При создании изображений мы используем инструменты искусственного интеллекта"}   # beyan_marka_yaz.RU_BEYAN ile ayni
 _BEYAN_ILAN = re.compile(r"/shops/[^/]+/listings(?:/0*(\d+))?$")                    # updateListing / createDraftListing (kanonik yol)
-_BEYAN_CEVIRI = re.compile(r"/listings/0*(\d+)/translations/([a-z]{2})(?:[-_][a-z]{2})?$")
+_BEYAN_CEVIRI = re.compile(r"/listings/0*(\d+)/translations/([a-z]{2,3})(?:[-_][a-z0-9]{2,4})?$")   # rus / zh-hant da yakalanir (tanimsiz dil FAIL)
 BEYAN_HATA = []          # [(ilan, dil, neden)] bu surecte beyan kapisina takilan yazimlar
 
 
@@ -271,6 +271,31 @@ def beyan_var(metin, dil):
     return bool(c) and _beyan_norm(c) in _beyan_norm(metin)
 
 
+def _beyan_aciklamalar(g):
+    """Govdedeki TUM description degerleri (inceleme 31 Eki madde 7: tekrarli anahtar, tuple listesi, JSON dizesi, None). None = okunamadi."""
+    if g is None:
+        return []
+    if isinstance(g, (bytes, str)):
+        t = g.decode("utf-8", "replace") if isinstance(g, bytes) else g
+        if t.lstrip().startswith("{"):
+            try:
+                return _beyan_aciklamalar(json.loads(t))
+            except ValueError:
+                return None
+        return list(urllib.parse.parse_qs(t, keep_blank_values=True).get("description") or [])
+    if isinstance(g, dict):
+        v = g.get("description")
+        if v is None:
+            return []                                    # yok ya da None (requests None alani gondermez)
+        return [str(x) for x in v] if isinstance(v, (list, tuple)) else [v]
+    if isinstance(g, (list, tuple)):
+        try:
+            return [v for k, v in g if k == "description" and v is not None]
+        except (TypeError, ValueError):
+            return None
+    return None                                          # generator / dosya nesnesi: okunamadi, guvenli taraf FAIL
+
+
 def ai_beyan_kapisi(method, path, data=None, json_body=None, params=None):
     """Aciklama yazimindan once (GET/HEAD/OPTIONS disi). description yoksa gecer; varsa son metinde dilin beyan cumlesi zorunlu."""
     if str(method or "").upper() in ("GET", "HEAD", "OPTIONS"):
@@ -281,15 +306,16 @@ def ai_beyan_kapisi(method, path, data=None, json_body=None, params=None):
         return
     ilan = str(int(m_c.group(1))) if m_c else (str(int(m_i.group(1))) if m_i.group(1) else "yeni ilan (createDraftListing)")
     dil = m_c.group(2) if m_c else "en"
-    govdeler = [_govde(data), _govde(json_body), _govde(params)]
+    sorgu = str(path or "").split("?", 1)[1].split("#")[0] if "?" in str(path or "") else ""   # yol sorgu dizesi de gonderilir
+    govdeler = [_beyan_aciklamalar(x) for x in (data, json_body, params, sorgu)]
     if any(g is None for g in govdeler):
         neden = "istek govdesi okunamadi"
     else:
-        aciklamalar = [g["description"] for g in govdeler if "description" in g]
+        aciklamalar = [x for g in govdeler for x in g]
         if not aciklamalar:
             return                                                       # kismi yazim: aciklama degismiyor
         if len({_beyan_norm(x) for x in aciklamalar}) > 1:
-            neden = "data / json / params aciklamalari celisiyor"
+            neden = "data / json / params / sorgu aciklamalari celisiyor (ya da description tekrarli)"
         elif dil not in AI_BEYAN:
             neden = f"'{dil}' dili icin beyan cumlesi tanimli degil"
         elif beyan_var(aciklamalar[0], dil):
@@ -308,6 +334,11 @@ def _beyan_cikis():
             pass
         print("::error::AI beyan kapisi: aciklamasi beyansiz oldugu icin YAZILMAYAN ilanlar: "
               + "; ".join(f"{i} {d.upper()} ({n})" for i, d, n in BEYAN_HATA), file=sys.stderr, flush=True)
+        try:
+            import logging
+            logging.shutdown()
+        except Exception:   # noqa: BLE001
+            pass
         os._exit(1)        # betik SystemExit'i yakalayip 0 ile bitse de kosu FAIL (token aninda yazilir, atexit kullanan baska kod yok)
 
 
@@ -443,6 +474,7 @@ class Etsy:
         """Multipart yukleme (gorsel/dosya). Ilk denemede 400 normal olabilir
         (B37); 3 deneme. tekrar=1 (eski78_gorsel_yukle, Serdar 24 Eki): hata yanitinda yeniden GONDERMEZ (cift yukleme
         riski); cagiran galeriyi okuyup karar verir. 401 token yenilemesi her durumda bir kez yapilir."""
+        ai_beyan_kapisi("POST", path, data)   # multipart createDraftListing da kapidan gecer (gorsel / video yolu eslesmez, gecer)
         self._istek_oncesi()
         attempt, yenilendi = 0, False
         while True:   # 401 (istek islenmedi) bir kez, hangi denemede gelirse gelsin: yenile + tekrar (deneme sayilmaz)

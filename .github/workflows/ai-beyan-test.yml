@@ -1,11 +1,11 @@
 name: ai-beyan-test
 # AI beyan kapisi kalici testi (Serdar 31 Eki, Gorev E): scripts/etsy/test_ai_beyan.py (kapi birimi, Etsy._call yolu, dogrudan requests
-# korumasi, aciklama yazan betik kapsami, eski kaynak metni FAIL). ETSY YOK, sir yok, ag yok.
+# korumasi (AST + mutasyon), kacis yollari, surec cikisi, eski kaynak metni FAIL). ETSY YOK, sir yok, ag yok. Canli yukleyiciler --canli.
 permissions:
   contents: read
 on:
   push:
-    paths: ["scripts/etsy/**", "scripts/pod/**", "scripts/kapak78/**", ".github/workflows/ai-beyan-test.yml"]
+    paths: ["scripts/**", ".github/workflows/**"]   # depo taramasi tum scripts/ + .sh + workflow curl satirlari
   workflow_dispatch: {}
 jobs:
   test:
@@ -14,6 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Kurulum
-        run: pip install -q requests==2.32.3
+        run: pip install -q requests==2.34.2
       - name: AI beyan kapisi testi
         run: python3 scripts/etsy/test_ai_beyan.py
