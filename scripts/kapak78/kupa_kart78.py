@@ -165,6 +165,8 @@ def uret(a):
     import wa_kupa_kart_ornek as W
     import kart_sablon as S
     import yd_kart_ornek as K
+    import cv2  # noqa: F401  (surec ici kapi OpenCV satirini da okusun)
+    simd_sabit.surec_ici("kupa_kart78")
     satir = {r["cift"]: r for r in csv.DictReader(open(a.ciftler_csv, encoding="utf-8-sig"))}
     ciftler = [x.strip() for x in Path(a.ciftler).read_text().split() if x.strip()]
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)

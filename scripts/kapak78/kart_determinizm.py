@@ -75,11 +75,14 @@ def kiyas(dosyalar):
     ilk = R[0]
     sonuc = {}
     for r in R[1:]:
-        farkli = [k for k in ilk["ara"] if ilk["ara"].get(k) != r["ara"].get(k)]
+        anah = sorted(set(ilk["ara"]) | set(r["ara"]))                       # iki yonlu (inceleme 31 Eki: yalniz ilk dosyanin anahtarlari)
+        farkli = [k for k in anah if ilk["ara"].get(k) != r["ara"].get(k)]
+        kanah = sorted(set(ilk["kart"]) | set(r["kart"]))
         sonuc[f"{ilk['etiket']}~{r['etiket']}"] = dict(cpu=[ilk["cpu"].get("model"), r["cpu"].get("model")],
-                                                       ara_farkli=farkli, kart_farkli=[k for k in ilk["kart"] if ilk["kart"][k] != r["kart"].get(k)])
-    print(json.dumps(sonuc, indent=1))
-    return 0
+                                                       ara_farkli=farkli, kart_farkli=[k for k in kanah if ilk["kart"].get(k) != r["kart"].get(k)])
+    ok = all(not v["ara_farkli"] and not v["kart_farkli"] for v in sonuc.values())
+    print(json.dumps(sonuc, indent=1)); print("KIYAS", "PASS" if ok else "FAIL")
+    return 0 if ok else 1
 
 
 def main(argv=None):
