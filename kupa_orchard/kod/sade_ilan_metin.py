@@ -19,6 +19,8 @@ ETIKET = ['zodiac mug', 'personalized mug', 'custom name mug', 'star sign mug', 
 TALIMAT = '1. Front: name or date, printed in capitals (max 12)\n2. Back: your message, printed as typed (required, max 30)'
 ACIKLAMA = """{B} gifts made personal: a mug with the {B} zodiac symbol and a name or date on the front, and your own message on the back.
 
+The zodiac symbol is an original AstroLoveArt design. We use AI tools to help create the artwork, and every design is reviewed and finished by us.
+
 [ A ZODIAC BIRTHDAY GIFT ]
 A birthday gift for the {B} in your life: a friend, a partner, a mom or a dad. Or a little treat for yourself in {B} season. A zodiac gift for every morning.
 
@@ -48,7 +50,6 @@ Please check your spelling. We send you a preview via Etsy Messages and print on
 - Dishwasher and microwave safe
 - Made to order, just for you
 - Zodiac symbol designed by AstroLoveArt
-- The fruit branch artwork was made with the help of AI tools and finished by AstroLoveArt
 
 [ RETURNS ]
 Every mug is personalized, so we can't accept returns or exchanges for a change of mind. If your mug arrives damaged, send us a photo within 7 days of delivery and we'll replace it at no cost.
@@ -78,6 +79,8 @@ for i, kod in enumerate(Z, 1):
         hatalar.append(f'{kod}: kisi adi var')
     if re.search(r'astrolove(?!art)', tum, re.I):
         hatalar.append(f'{kod}: marka AstroLoveArt degil')
+    if 'We use AI tools to help create the artwork' not in aciklama:     # Etsy AI beyani (magaza ortak cumlesi, 234 canli ilanla ayni)
+        hatalar.append(f'{kod}: AI beyani yok')
     if re.search(r'[{}]', tum):
         hatalar.append(f'{kod}: yer tutucu kalmis')
     satirlar.append({'kod': kod, 'baslik': baslik, 'baslik_kr': len(baslik), 'etiketler': ', '.join(etiket),
