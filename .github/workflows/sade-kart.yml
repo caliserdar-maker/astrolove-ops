@@ -10,8 +10,41 @@ on:
       burclar: {description: "virgullu BUYUK harf; bos = 12 burc", required: false, default: ""}
       on_yazi: {description: "on yazi (en fazla 12)", required: true, default: "EMILY"}
       mesaj: {description: "arka mesaj (en fazla 30)", required: true, default: "My favorite place is with you"}
+      kanit: {description: "bos = kart uretimi; dolu = yalniz K05 ONCE/SONRA kaniti: 'ETIKET|TEMP/eski.jpg|TEMP/yeni.jpg;...' (F-A, Serdar 31 Eki)", required: false, default: ""}
 jobs:
+  kanit:
+    if: inputs.kanit != ''
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: K05 ONCE / SONRA kaniti (Drive TEMP/K05_KENAR_KANIT)
+        env:
+          KN: ${{ inputs.kanit }}
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          [[ "$KN" =~ ^[A-Za-z0-9_\ ]+\|TEMP/[A-Za-z0-9_./-]+\|TEMP/[A-Za-z0-9_./-]+(\;[A-Za-z0-9_\ ]+\|TEMP/[A-Za-z0-9_./-]+\|TEMP/[A-Za-z0-9_./-]+)*$ ]] || { echo "::error::kanit girdisi"; exit 1; }
+          pip install -q pillow==11.0.0
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+          mkdir -p ~/.config/rclone _k; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
+          args=(); i=0
+          IFS=';' read -ra U <<< "$KN"
+          for u in "${U[@]}"; do
+            IFS='|' read -r et e y <<< "$u"; i=$((i+1))
+            rclone copyto "gdrive:ASTROLOVE/$e" "_k/e$i.jpg"; rclone copyto "gdrive:ASTROLOVE/$y" "_k/y$i.jpg"
+            echo "$et: $(sha256sum _k/e$i.jpg | cut -c1-16) -> $(sha256sum _k/y$i.jpg | cut -c1-16)"
+            args+=("$et (once $e | sonra $y)|_k/e$i.jpg|_k/y$i.jpg")
+          done
+          python3 scripts/kapak78/k05_kanit.py --cikti ONCE_SONRA_K05_KENAR.jpg "${args[@]}"
+          rclone copyto ONCE_SONRA_K05_KENAR.jpg "gdrive:ASTROLOVE/TEMP/K05_KENAR_KANIT/ONCE_SONRA_K05_KENAR_${{ github.run_id }}.jpg" --immutable -q
+          rm -rf ~/.config/rclone
+          echo "::notice title=K05 KANIT::TEMP/K05_KENAR_KANIT/ONCE_SONRA_K05_KENAR_${{ github.run_id }}.jpg"
   plan:
+    if: inputs.kanit == ''
     runs-on: ubuntu-24.04
     outputs:
       m: ${{ steps.m.outputs.m }}
@@ -99,6 +132,7 @@ jobs:
       - if: always()
         run: rm -rf _o _up ~/.config/rclone
   zemin_test:   # Serdar 31 Eki (K05 kenar kusuru): kupa_zemin govde korumasi kalici test; PASS degilse kart birlestirilmez
+    if: inputs.kanit == ''
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -115,7 +149,7 @@ jobs:
           python3 scripts/kapak78/test_kupa_zemin.py --ko _ko/kupa_orchard
   kontak:
     needs: [plan, kart, zemin_test]
-    if: always() && needs.zemin_test.result == 'success'
+    if: always() && inputs.kanit == '' && needs.zemin_test.result == 'success'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/download-artifact@v4
