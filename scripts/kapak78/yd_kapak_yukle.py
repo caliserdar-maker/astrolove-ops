@@ -46,6 +46,7 @@ import eski78_gorsel_yukle as Y  # noqa: E402
 import yd_liste_uret as LU  # noqa: E402  (eski kapak kurali, Serdar 30 Eki)
 import galeri_v10_yukle as V  # noqa: E402  (yalniz jdump / oku_json / sonuc_yaz; poster yukleyicisi degismez)
 from etsy_common import KOTA_SINIRI  # noqa: E402  (Serdar 15 ve 24 Eki: 10; degistirilmez)
+import kupa_galeri78 as KG  # noqa: E402  (geri alma motoru: galeri_kur / canli_oku / galeri_sorun ortak; inceleme 31 Eki madde 1)
 
 ONAY = Y.ONAY_YD
 ONAY_BAG = "YD_KAPAK_BAG"
@@ -203,7 +204,15 @@ def plan_girdisi(lid, man, c, adim, mx, liste_sha):
                 canli_baglar=sorted([x.get("value"), x.get("value_id"), x.get("image_id")] for x in c["baglar"]),
                 hedef=[[h["sira"], h["ad"], h["sha256"], h["alt"]] for h in sorted(man["hedef"], key=lambda h: h["sira"])],
                 adimlar=[list(a) for a in adim], en_fazla=mx,
-                en_az=KAPI_OKUMA + istek(adim, "en_az"), en_kotu=KAPI_OKUMA + istek(adim, "en_kotu"))
+                en_az=KAPI_OKUMA + istek(adim, "en_az"), en_kotu=KAPI_OKUMA + istek(adim, "en_kotu") + istek_geri_al())
+
+
+def istek_geri_al():
+    """YD geri alma EN KOTU (inceleme 31 Eki madde 1; kupa istek_tahmini geri_alma ile ayni kalemler, O = G.OKUMA_TEKRAR):
+    canli okuma (kupa_galeri78.canli_oku tekil) + N_ESKI yeniden yukleme x ((2 + 1) + (2 + O)) + N yeni gorsel silme x 4 + sira (O +
+    2 x (N_ESKI x 4 + O)) + bag (4 + O) + son okuma (galeri O + var_img O)."""
+    O = G.OKUMA_TEKRAR
+    return KG.KAPI_OKUMA + N_ESKI * ((2 + 1) + (2 + O)) + N * 4 + (O + 2 * (N_ESKI * 4 + O)) + (4 + O) + 2 * O
 
 
 def istek(adim, tur, basla=0, ilk=True):
@@ -238,6 +247,78 @@ def ilerleme_pass(ilerleme, lid, cift, a, son_ids):
                                                    son_ids=son_ids)
 
 
+def yedek_yol(a, lid, cift, x):
+    """Geri alma icin adim 5 yedeginden eski gorsel (r<rank>_<id>.jpg): yerelde yoksa Drive'dan (--yedek-uzak, rclone); JPEG imzasi +
+    yedek lsjson boyutu (--yedek-liste) kapisi (YD yedeginde sha256 yok)."""
+    rel = f"{lid}_{cift}/r{x['rank']}_{x['listing_image_id']}.jpg"
+    p = Path(a.yedek_dir) / rel
+    if not p.exists() and a.yedek_uzak:
+        import subprocess
+        p.parent.mkdir(parents=True, exist_ok=True)
+        subprocess.run([os.environ.get("RCLONE", "rclone"), "copyto", f"{a.yedek_uzak}/{rel}", str(p), "-q"], capture_output=True, timeout=300)
+    bek = (V.oku_json(a.yedek_liste, []) if a.yedek_liste else None)
+    boy = {x["Path"]: int(x.get("Size") or 0) for x in bek} if isinstance(bek, list) else {}
+    if not p.exists() or p.read_bytes()[:3] != b"\xff\xd8\xff" or (boy and boy.get(rel) != p.stat().st_size):
+        raise Y.Dur(f"geri alma: yedek dosyasi {rel} yok / JPEG degil / boyut yedek listesiyle ayni degil")
+    return p
+
+
+def geri_al(api, shop, lid, cift, man, a, out):
+    """YD GERI ALMA (inceleme 31 Eki madde 1, kritik: sirali planda eski 13 once silinir; hata aninda ilan tek gorselle kalabiliyordu).
+    Eski hal HAM'dan (sha256 = manifest ham_sha): 13 gorsel ayni sira + alt metin, Style baglari eski siralara. Yerinde kalan eski gorsel
+    korunur, silinmis olan adim 5 yedeginden yeniden yuklenir, yeni yuklenenler silinir (kupa_galeri78.galeri_kur, esnek; ayni motor).
+    Tekrar kosulabilir: onceki geri almada yeniden yuklenen eski gorsel (GERI_<ilan>.json geri_yuklenen) yerinde kalir.
+    -> sorun listesi (bos = geri alindi)"""
+    try:
+        hp = Path(a.ham_dir or "") / f"{lid}.json"
+        if not a.ham_dir or not hp.exists() or LU.sha(hp) != man.get("ham_sha"):
+            return [f"geri alma: HAM/{lid}.json yok ya da sha256 manifest ile ayni degil; elle bakilmali"]
+        h = json.loads(hp.read_text(encoding="utf-8"))
+        eski = sorted(h.get("images") or [], key=lambda x: x.get("rank") or 0)
+        if [x.get("listing_image_id") for x in eski] != man.get("yedek_galeri"):
+            return ["geri alma: HAM galerisi manifest yedek_galeri ile ayni degil; elle bakilmali"]
+        if hasattr(api, "kapat"):
+            api.kapat()                                   # tohumlu istemci: geri alma okumalari canli
+        K = KG.Kayit(Path(out) / "geri", lid, drive=a.devam_hedef_kok and f"{a.devam_hedef_kok}/GERI_{lid}.json" or "")
+        K.p.parent.mkdir(parents=True, exist_ok=True)
+        if K.p.exists():
+            K.d = json.loads(K.p.read_text(encoding="utf-8"))
+        else:
+            K.d = dict(cift=cift, yuklenen={}, silinen=[], geri_yuklenen={})
+        c = KG.canli_oku(api, shop, lid)
+        canli = {x.get("listing_image_id") for x in c["galeri"]}
+        eski_ids = {x["listing_image_id"] for x in eski}
+        geri_yk = set((K.d.get("geri_yuklenen") or {}).values())
+        hedef = {}
+        for x in eski:
+            s_, i_ = x["rank"], x["listing_image_id"]
+            hd = dict(alt=x.get("alt_text") or "", ad=f"YEDEK_r{s_}_{i_}.jpg")
+            if i_ in canli:
+                hd["id"] = i_
+            elif (K.d.get("geri_yuklenen") or {}).get(hd["ad"]) not in canli:
+                hd["yol"] = yedek_yol(a, lid, cift, x)
+            hedef[s_] = hd
+        sira = {x["listing_image_id"]: x["rank"] for x in eski}
+        vi = h.get("variation_images") or []
+        bag_sira = {b["value"]: sira[b["image_id"]] for b in vi if b.get("image_id") in sira}
+        stil_vid = {b["value"]: b["value_id"] for b in vi}
+        if len(bag_sira) != len(vi) or not set(bag_sira) <= set(c["stil"]):
+            return ["geri alma: HAM Style baglari canli envanterle eslenemedi; elle bakilmali"]
+        sil = sorted(canli - eski_ids - geri_yk)
+        son = KG.galeri_kur(api, shop, lid, c, hedef, sil, bag_sira, stil_vid, K, "geri_yuklenen", esnek=True)
+        bek = [son[k] for k in sorted(son)]
+        g = G.kararli(lambda: G.galeri(api, lid), lambda g: [x.get("listing_image_id") for x in g] == bek)
+        sorun = [f"geri alma galeri: {x}" for x in KG.galeri_sorun(g, son, {k: v["alt"] for k, v in hedef.items()})]
+        hb = {stil_vid[ad]: son[k] for ad, k in bag_sira.items()}
+        vm = G.kararli(lambda: G.var_img(api, shop, lid), lambda vm: {x.get("value_id"): x.get("image_id") for x in vm} == hb)
+        if {x.get("value_id"): x.get("image_id") for x in vm} != hb:
+            sorun.append("geri alma: Style baglari eski siralara donmedi")
+        K.d.update(durum="GERI_ALINDI" if not sorun else "BASARISIZ", son_sira=bek); K.yaz()
+        return sorun
+    except (Y.Dur, KG.Geri, SystemExit, Exception) as e:   # noqa: BLE001
+        return [f"geri alma hatasi: {str(getattr(e, 'code', None) or e)[:200]}"]
+
+
 def calistir(api, shop, a):
     hazir, out = Path(a.hazir), Path(a.out)
     ilan_out = out / "ilanlar"; ilan_out.mkdir(parents=True, exist_ok=True)
@@ -252,13 +333,23 @@ def calistir(api, shop, a):
     satir, girdiler, dur = [], {}, None
     # TOPLU kapi okumasi (Serdar 31 Eki 1a, madde 4): DEVAM disi ilanlar 100'luk parcada 2 istekte; ilan basina tohumlu istemci (ilan,
     # galeri, video, envanter toplu yanittan; variation-images ilk okumada), ilk yazimda kapanir. DEVAM ilanlari canli okunur.
+    # KURU: kosu basi toplu okuma. YAZIM: ilan basina yazmadan HEMEN once taze toplu okuma (inceleme 31 Eki madde 4: kosu basi anlik
+    # goruntu yazim kararinda kullanilmaz; kupa ile ayni). Kota once okunur (madde 11: ilk toplu GET kor gidiyordu). Toplu hata -> tekil.
     toplu_ids = [lid for lid, o in oz["ilanlar"].items() if not ((devam.get("ilanlar") or {}).get(lid) or {}).get("plan")]
     onb = {}
-    if toplu_ids and (api.remaining is None or int(api.remaining) - 2 * (-(-len(toplu_ids) // TO.TOPLU_N)) >= KOTA_SINIRI):
+    if oz["ilanlar"]:
+        KG.kota_oku(api, shop)
+    if toplu_ids and not yazim and int(api.remaining) - 2 * (-(-len(toplu_ids) // TO.TOPLU_N)) >= KOTA_SINIRI:
         c_t = api.calls
-        onb = TO.toplu(api, toplu_ids)
+        try:
+            onb = TO.toplu(api, toplu_ids)
+        except Exception as e:   # noqa: BLE001  (madde 12) kota DUR'u yukari, digeri tekil okumaya duser
+            if "kota" in str(getattr(e, "code", None) or e).lower():
+                raise
+            log(f"UYARI: toplu kapi okumasi hata ({str(e)[:120]}); tekil okuma"); onb = {}
         log(f"toplu kapi okumasi: {len(onb)}/{len(toplu_ids)} ilan, {api.calls - c_t} istek | kota {api.remaining}")
     api0 = api
+    esit_kalan = 2 if not yazim else 0      # madde 5: kuruda ilk 2 ilanda toplu == tekil olcumu
     for lid, o in oz["ilanlar"].items():
         api = TO.Tohumlu(api0, lid, onb.pop(lid, None))
         s = dict(ilan=lid, cift=o["cift"], durum="", neden=[], en_az=None, en_kotu=None, istek=None)
@@ -266,7 +357,8 @@ def calistir(api, shop, a):
         if dur:
             s.update(durum="KALAN", neden=[dur]); continue
         dv = (devam.get("ilanlar") or {}).get(lid)
-        bitmemis = bool(dv) and dv.get("son_ids") is not None and dv.get("adim", 0) < len(dv.get("plan") or [])
+        bitmemis = bool(dv) and dv.get("son_ids") is not None and dv.get("adim", 0) < len(dv.get("plan") or []) \
+            and dv.get("durum") != "GERI_ALINDI"                     # geri alinmis ilan surdurulmez (yeni kuru gerekir; canli != plan)
         s["yarim"] = bitmemis or (dv or {}).get("durum") in ("FAIL", "DUR")   # yarim / son okumasi tutmamis ilanin PASS disi
         # her sonucu cikis 1 (inceleme 27 Eki: BLOK ile yesil bitmesin)
         mp = hazir / lid / "manifest.json"
@@ -288,7 +380,7 @@ def calistir(api, shop, a):
             if bitmemis:                                                    # 1) DEVAM (liste kapisi BLOK'u uygulanmaz)
                 adim = [tuple(x) for x in dv["plan"]]
                 b = devam_basla(adim, dv.get("adim", 0))
-                s["en_kotu"] = istek(adim, "en_kotu", b, ilk=False)
+                s["en_kotu"] = istek(adim, "en_kotu", b, ilk=False) + istek_geri_al()
                 s["en_az"] = istek(adim, "en_az", b, ilk=False)
                 uretim = str(dv.get("uretim_kosu") or "")
                 if not re.fullmatch(r"\d+_[0-9a-f]{12}", uretim):
@@ -303,7 +395,18 @@ def calistir(api, shop, a):
                 if uretim != a.plan_damga:   # kayitli plan + LISTE sha256 + ids0 bir_ilan'da kilitli; yeni kuru damgasi yarim ilani durdurmaz
                     log(f"{lid} DEVAM: kayitli plan {uretim} ile surer (bu kosu {a.plan_damga})")
             else:
+                if yazim:      # yazmadan hemen once taze toplu okuma (2 istek); yanitta yoksa tekil
+                    api = TO.Tohumlu(api0, lid, TO.toplu(api0, [lid]).get(lid))
+                tohum = api.tohum
                 c = canli_durum(api, shop, lid)
+                if esit_kalan and tohum:      # madde 5: plan toplu yanittan; son okuma tekil -> gosterim farki her ilani FAIL ederdi
+                    esit_kalan -= 1
+                    ct = canli_durum(api0, shop, lid)
+                    fk = [k for k in ("state", "galeri", "baglar", "rv") if c[k] != ct[k]]
+                    s["toplu_tekil"] = "ESIT" if not fk else f"FARK {fk}"
+                    if fk:
+                        s.update(durum="BLOK", neden=[f"toplu okuma tekil okumayla ayni degil: {fk}; toplu yol kullanilmaz"], istek=api.calls - c0)
+                        continue
                 il = (ilerleme.get("ilanlar") or {}).get(lid)
                 z, zneden = zaten(c, man, kayit_kimlik(dv, il))           # 2) ZATEN (liste kapisindan ONCE)
                 if z:
@@ -348,8 +451,15 @@ def calistir(api, shop, a):
                     bitti = bool(d.get("plan")) and d.get("adim") == len(d["plan"])
                     devam.setdefault("ilanlar", {})[lid] = dict(d, cift=o["cift"], durum="DUR" if not bitti else "BITTI")
             s.update(durum=R["sonuc"], neden=R.get("sorun") or [], istek=api.calls - c0)
+            if R["sonuc"] != "PASS":            # GERI ALMA (inceleme 31 Eki madde 1): eski 13 + baglar yedekten
+                gs = geri_al(api, shop, lid, o["cift"], man, a, out)
+                s.update(durum="FAIL" if not gs else "DUR", neden=s["neden"] + (["GERI ALINDI (eski 13 gorsel + Style baglari)"] if not gs else gs),
+                         istek=api.calls - c0)
+                R = dict(R, sonuc=s["durum"])
+                if lid in (devam.get("ilanlar") or {}) and not gs:
+                    devam["ilanlar"][lid].update(durum="GERI_ALINDI", geri_alma="TAMAM")
             if lid in (devam.get("ilanlar") or {}):
-                devam["ilanlar"][lid]["durum"] = R["sonuc"]
+                devam["ilanlar"][lid]["durum"] = R["sonuc"] if devam["ilanlar"][lid].get("durum") != "GERI_ALINDI" else "GERI_ALINDI"
             if R["sonuc"] == "PASS":
                 ilerleme_pass(ilerleme, lid, o["cift"], a, R.get("son_ids"))
             else:
@@ -360,7 +470,13 @@ def calistir(api, shop, a):
                 dur = m; s.update(durum="KALAN", neden=[m], istek=api.calls - c0)
                 log(f"{lid} {o['cift']} KALAN | {m[:140]}"); continue
             s.update(durum="DUR", neden=[m], istek=api.calls - c0)
-            dur = f"ilan {lid} DUR; kosu durdu"
+            if basladi and yazim and not m.startswith("DUR: kota"):      # yazim sirasinda hata: geri alma (kota tabaninda yok: istek yok)
+                gs = geri_al(api, shop, lid, o["cift"], man, a, out)
+                s["neden"] += ["GERI ALINDI (eski 13 gorsel + Style baglari)"] if not gs else gs
+                if not gs:
+                    s["durum"] = "FAIL"
+                    devam.setdefault("ilanlar", {}).setdefault(lid, {}).update(durum="GERI_ALINDI", geri_alma="TAMAM", cift=o["cift"])
+            dur = f"ilan {lid} {s['durum']}; kosu durdu"
             if yazim:
                 eski = (ilerleme.get("ilanlar") or {}).get(lid) or {}
                 if eski.get("durum") != "PASS":
@@ -454,6 +570,10 @@ def arg(argv=None):
     ap.add_argument("--kosu", default=os.environ.get("GITHUB_RUN_ID", "0"))
     ap.add_argument("--azami-dk", type=float, default=0, help="yazim: bu sureden sonra yeni ilana baslanmaz (0 = sinirsiz)")
     ap.add_argument("--devam-hedef-kok", default="", help="her yazimdan once / sonra DEVAM_<ilan>.json kopyasi (rclone hedefi)")
+    ap.add_argument("--ham-dir", default="", help="geri alma: HAM/<ilan>.json klasoru (sha256 = manifest ham_sha)")
+    ap.add_argument("--yedek-dir", default="_yedek", help="geri alma: adim 5 yedegi yerel klasor (yoksa --yedek-uzak'tan iner)")
+    ap.add_argument("--yedek-uzak", default="", help="geri alma: TEMP/YD_KAPAK_V1_YEDEK/<damga> (rclone)")
+    ap.add_argument("--yedek-liste", default="", help="geri alma: yedek lsjson (boyut kapisi)")
     a = ap.parse_args(argv)
     if a.bag_onar:
         if a.kuru or a.confirm != ONAY_BAG or not re.fullmatch(r"\d+_[0-9a-f]{12}", a.plan_damga or ""):

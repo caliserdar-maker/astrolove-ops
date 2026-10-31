@@ -188,6 +188,7 @@ jobs:
           KU: ${{ inputs.kurtar }}
           AZ: ${{ inputs.azami_dk }}
           BO: ${{ inputs.bag_onar }}
+          YD: ${{ inputs.yedek_damga }}
         run: |
           set +e -o pipefail
           GEC=$(( ($(date +%s) - ${KILIT_T0:?}) / 60 )); AZE=$(( AZ - GEC ))   # kilitten bu yana gecen sure butceden duser
@@ -198,7 +199,8 @@ jobs:
           elif [ "$BO" = true ]; then args+=(--bag-onar --confirm YD_KAPAK_BAG --plan-damga "$PD")
           else
             args+=(--confirm YD_KAPAK --plan _work/PLAN_YD.json --plan-damga "$PD" --sonuc _work/SONUC.csv --azami-dk "$AZE"
-                   --devam-hedef-kok "$O/KOSU/${GITHUB_RUN_ID}/devam")
+                   --devam-hedef-kok "$O/KOSU/${GITHUB_RUN_ID}/devam"
+                   --ham-dir _in/HAM --yedek-uzak "$T/YD_KAPAK_V1_YEDEK/$YD" --yedek-liste _work/yedek_ls.json --yedek-dir _yedek)   # geri alma (inceleme 31 Eki madde 1)
             [ "$KU" = true ] && args+=(--kurtar)
           fi
           python3 scripts/kapak78/yd_kapak_yukle.py "${args[@]}" 2>&1 | tee _work/kosu.log

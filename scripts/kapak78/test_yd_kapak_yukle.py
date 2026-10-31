@@ -139,7 +139,9 @@ ESKI = [g["listing_image_id"] for g in HAM["images"]]
 BAGLI0 = {v["image_id"] for v in HAM["variation_images"]}
 # SIRALI plan (Serdar 31 Eki 1a) kod okumasi: kapi 4 + on okuma 7 (onbelleksiz) + 13 sil x 3 + 10 yukle x 13 + sira_bag (8 + 2 x (10 x 3 + 8) + 3 + 8)
 # + son (8 + 8 + 3); eski adim_plani 492 idi
-EN_KOTU = 4 + 7 + 13 * 3 + 10 * 13 + (8 + 2 * (10 * 3 + 8) + 3 + 8) + 8 + 8 + 3
+# kod okumasi (inceleme 31 Eki madde 3: sil / bag / sira POST'u 401 yenilemesiyle 4) + geri alma en kotu (madde 1)
+GERI_EN_KOTU = 7 + 13 * ((2 + 1) + (2 + 8)) + 10 * 4 + (8 + 2 * (13 * 4 + 8)) + (4 + 8) + 2 * 8
+EN_KOTU = 4 + 7 + 13 * 4 + 10 * 13 + (8 + 2 * (10 * 4 + 8) + 4 + 8) + 8 + 8 + 3 + GERI_EN_KOTU
 
 
 def kapak_tamam(api):
@@ -154,8 +156,8 @@ def normal_akis():
     rc, R, po = kuru(api, hz, "k1")
     s = R["ilanlar"][0]
     kontrol("kuru: PLAN, yazma yok, plan_damga", rc == 0 and s["durum"] == "PLAN" and not api.yaz and R["plan_damga"].startswith("111_"))
-    kontrol(f"kuru TOPLU kapi okumasi: 2 toplu istek, ilan basina {s['istek']} (variation-images 1; ilan / galeri / envanter toplu yanittan)",
-            api.n_toplu == 2 and s["istek"] == 1)
+    kontrol(f"kuru TOPLU kapi okumasi: 2 toplu istek, ilan basina {s['istek']} (variation-images 1 + toplu == tekil olcumu 4, inceleme 31 Eki madde 5)",
+            api.n_toplu == 2 and s["istek"] == 1 + K.KAPI_OKUMA and s.get("toplu_tekil") == "ESIT")
     plan = json.loads((po / "PLAN_YD.json").read_text())["girdiler"][LID]
     ad = [a[0] for a in plan["adimlar"]]
     bek = [["sil", c] for c in ESKI[:-1]] + [["yukle", "01_1.jpg"], ["sil", ESKI[-1]]] + [["yukle", f"{k:02d}_{k}.jpg"] for k in range(2, 11)] + [["sira_bag"]]
@@ -201,6 +203,47 @@ def normal_akis():
     D.azalmama({"ilanlar": {LID: dict(ilr, durum="DUR", set="-")}}, {"ilanlar": {LID: ilr}})
     kontrol("durum_dosyasi: set 10 / hedef 10 PASS geri donmez (esik kayittaki hedef)", geri)
     return hz
+
+
+def geri_alma(hz):
+    """inceleme 31 Eki madde 1 (kritik): sirali planda eski 13 once silinir; yukleme kalici hata verirse ilan eski 13 gorsel + eski alt
+    metin + Style baglari eski siralarla GERI ALINIR (adim 5 yedegi + HAM); ikinci kosu geri alinmis ilani surdurmez."""
+    import io as _io
+    yd = DEPO / "yedek_ga"; ls = []
+    g0 = sorted(HAM["images"], key=lambda x: x["rank"])
+    for x in g0:
+        rel = f"{LID}_{CIFT}/r{x['rank']}_{x['listing_image_id']}.jpg"
+        b = _io.BytesIO(); Image.new("RGB", (60, 40), (x["rank"] * 9, 30, 60)).save(b, "JPEG"); (yd / rel).parent.mkdir(parents=True, exist_ok=True)
+        (yd / rel).write_bytes(b.getvalue()); ls.append({"Path": rel, "Size": len(b.getvalue())})
+    (DEPO / "yl_ga.json").write_text(json.dumps(ls))
+    ek = ("--ham-dir", str(hz.parent / "HAM"), "--yedek-dir", str(yd), "--yedek-liste", str(DEPO / "yl_ga.json"))
+    api = SahteYD(); api.yukle_hata = {3: ("400", False, 0)}     # 3. yukleme kalici hata (bir_ilan 400 tekrar gondermez)
+    _, R, po = kuru(api, hz, "kga")
+    pd = R["plan_damga"]
+    dv, il = durum_dosyalari("dga")
+    rc, R = yaz(api, hz, po, "yga", pd, dv, il, *ek)
+    s = R["ilanlar"][0]
+    g = sorted(api.img, key=lambda x: (x["rank"], x["listing_image_id"]))
+    kontrol(f"geri alma: yukleme kalici hata -> FAIL + GERI ALINDI, cikis 1 ({s['durum']} {str(s['neden'])[-120:]})",
+            rc == 1 and s["durum"] == "FAIL" and any("GERI ALINDI" in n for n in s["neden"]))
+    kontrol("geri alma: 13 gorsel, rank 1..13, eski alt metinler eski sirada",
+            len(g) == 13 and [x["rank"] for x in g] == list(range(1, 14)) and [x["alt_text"] for x in g] == [x["alt_text"] for x in g0])
+    rk = {x["listing_image_id"]: x["rank"] for x in g}
+    eski_rk = {b["value"]: next(x["rank"] for x in g0 if x["listing_image_id"] == b["image_id"]) for b in HAM["variation_images"]}
+    kontrol(f"geri alma: 5 Style bagi eski siralarda {({k: rk.get(v) for k, v in api.bag.items()})}",
+            {k: rk.get(v) for k, v in api.bag.items()} == eski_rk)
+    d = json.loads(dv.read_text())["ilanlar"][LID]
+    kontrol(f"geri alma: DEVAM durum GERI_ALINDI ({d.get('durum')})", d.get("durum") == "GERI_ALINDI")
+    n0 = len(api.yaz)
+    rc2, R2 = yaz(api, hz, po, "yga2", pd, dv, il, *ek)
+    kontrol(f"geri alinmis ilan ikinci kosuda surdurulmez (canli != plan -> BLOK), yazim yok ({R2['ilanlar'][0]['durum']})",
+            R2["ilanlar"][0]["durum"] == "BLOK" and len(api.yaz) == n0)
+    api2 = SahteYD(); api2.yukle_hata = {3: ("400", False, 0)}
+    _, Rb, pob = kuru(api2, hz, "kga3")
+    dvb, ilb = durum_dosyalari("dga3")
+    rc3, R3 = yaz(api2, hz, pob, "yga3", Rb["plan_damga"], dvb, ilb)     # HAM / yedek verilmedi: geri alma yapamaz -> DUR (sessiz PASS yok)
+    kontrol(f"geri alma girdisi yok: DUR, neden 'HAM' ({R3['ilanlar'][0]['durum']})",
+            rc3 == 1 and R3["ilanlar"][0]["durum"] == "DUR" and any("HAM" in n for n in R3["ilanlar"][0]["neden"]))
 
 
 def yukleme_hatasi(hz):
@@ -261,7 +304,7 @@ def devam_zaten_blok(hz):
     kontrol(f"DEVAM kota tahmini son tamamlanan sil/yukle'den (devam_basla 1; en kotu {Rk['ilanlar'][0]['en_kotu']})",
             K.devam_basla([("yukle",), ("kapak",), ("bag",), ("sil", 1), ("sira",), ("bag",)], 3) == 1
             and Rk["ilanlar"][0]["en_kotu"] == K.istek(pl := [tuple(x) for x in json.loads(dv.read_text())["ilanlar"][LID]["plan"]], "en_kotu",
-                                                        K.devam_basla(pl, json.loads(dv.read_text())["ilanlar"][LID]["adim"]), ilk=False))
+                                                        K.devam_basla(pl, json.loads(dv.read_text())["ilanlar"][LID]["adim"]), ilk=False) + K.istek_geri_al())
     rc, R = yaz(api, hz, pk, "y4b", Rk["plan_damga"], dv, il)                # YENI kuru damgasiyla (inceleme 27 Eki bulgu 1)
     kontrol(f"yarim ilan, yeni kuru damgasi: kayitli planla DEVAM, PASS, ikinci yukleme yok (yukleme {api.n_yukle})",
             R["ilanlar"][0]["durum"] == "PASS" and api.n_yukle == 10 and Rk["plan_damga"] != damga)
@@ -389,6 +432,7 @@ def kota_ve_kilit(hz):
 def main():
     hz = normal_akis()
     yukleme_hatasi(hz)
+    geri_alma(hz)
     bag_bos(hz)
     devam_zaten_blok(hz)
     bloklar(hz)

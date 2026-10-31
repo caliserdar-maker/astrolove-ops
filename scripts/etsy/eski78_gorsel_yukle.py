@@ -162,12 +162,13 @@ def sirali_plan(cikar, yukle, hedef_n=HEDEF_N, koru=()):
 
 def istek_sirali_en_kotu(adimlar, basla=0, ilk=True, n=HEDEF_N):
     """SIRALI plan EN KOTU istek (kod yollarindan sayim, O = G.OKUMA_TEKRAR, SIRA_TEKRAR = sira POST tekrari):
-      sil = DELETE (5xx tekrari 3); yukle = 2 deneme x (POST + 401 yenilemesi) + hata sonrasi kararli galeri (O);
-      sira_bag = kararli galeri (O) + oturmazsa 2 gecis x (n POST x SIRA_TEKRAR + kararli galeri) + bag POST (3) + kararli var_img (O);
+      sil = DELETE (5xx tekrari 3 + 401 yenilemesi = 4); yukle = 2 deneme x (POST + 401 yenilemesi) + hata sonrasi kararli galeri (O);
+      sira_bag = kararli galeri (O) + oturmazsa 2 gecis x (n POST x (SIRA_TEKRAR + 401) + kararli galeri) + bag POST (4) + kararli var_img (O);
       on okuma ilk 7 (onbelleksiz: korunanlar 3, envanter, galeri, var_img x2; onbellekli istemci daha az okur, tahmin ust sinir),
       devam 5 + O; son = kararli galeri (sira POST'u olduysa) + kararli var_img + korunanlar 3."""
     O = G.OKUMA_TEKRAR
-    birim = {"sil": 3, "yukle": (2 + 1) + (2 + O), "sira_bag": O + 2 * (n * SIRA_TEKRAR + O) + (3 + O)}
+    # inceleme 31 Eki madde 3: etsy_common _call 3 gonderim + 401 yenilemesi = 4 (sil, bag); sira POST'u post_file tekrar + 401 (kupa ile ayni)
+    birim = {"sil": 4, "yukle": (2 + 1) + (2 + O), "sira_bag": O + 2 * (n * (SIRA_TEKRAR + 1) + O) + (4 + O)}
     return (7 if ilk else 5 + O) + sum(birim[a[0]] for a in adimlar[basla:]) + O + O + 3
 
 
