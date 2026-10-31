@@ -62,12 +62,12 @@ def kur(t, degis=(), istisna=True, gece=False):
     return t
 
 
-def topla(t, yeni=None):
+def topla(t, yeni=None, ref=None):
     if yeni is not None:
         (t / "yeni.txt").write_text("\n".join(yeni))
     rc = M.main(["topla", "--dir", str(t / "_d"), "--secim", str(t / "secim.txt"), "--out", str(t / "o"), "--ciftler-csv",
                  str(t / "ciftler.csv"), "--onceki", str(t / "once.csv"), "--onceki-ad", "GECE", "--yeni",
-                 str(t / ("yeni.txt" if yeni is not None else "secim.txt"))])
+                 str(t / ("yeni.txt" if yeni is not None else "secim.txt"))] + (["--ref", str(ref), "--ref-ad", "TEMP/KUPA_KART78/REF"] if ref else []))
     deg = list(csv.DictReader(open(t / "o" / "DEGISIM.csv")))
     return rc, deg, (t / "o" / "OZET.md").read_text(), list(csv.DictReader(open(t / "o" / "MANIFEST.csv")))
 
@@ -101,6 +101,21 @@ try:
     rc, deg, oz, _ = topla(kur(W0 / "c2", degis=izin - {("LEO_LEO", "K02")}), yeni=["CANCER_LIBRA", "GEMINI_SCORPIO"])
     k("T4b ayni burc cift bu kosuda yeniden uretilmediyse (tabandan) K02 ayni -> FAIL degil (31 Eki kosu 41220599136)",
       rc == 0 and "degismedi" not in oz.split("## Ayni burc")[0].replace("ortak kod degismedi", ""), (rc, [l for l in oz.splitlines() if "FAIL" in l][:3]))
+    # Serdar 31 Eki 2a: CANCER_LIBRA kiyas referansi F-A sonrasi uretim (KUPA_KART78/<damga>/CANCER_LIBRA_K0*.jpg), esik ayni
+    tr = kur(W0 / "r1", degis=izin); ref = W0 / "r1" / "ref"; ref.mkdir()
+    for kk, _, _ in M.KARTLAR:
+        shutil.copy(tr / "_d" / f"CANCER_LIBRA_{kk}.jpg", ref / f"CANCER_LIBRA_{kk}.jpg")
+    rc, deg, oz, _ = topla(tr, ref=ref)
+    k("T6 referans KUPA_KART78 adlandirmasi (CANCER_LIBRA_K0x.jpg), ayni dosya -> kiyas PASS, OZET referans adi", rc == 0
+      and "CANCER_LIBRA kiyasi (referans TEMP/KUPA_KART78/REF;" in oz and "| K03 | True |" in oz, rc)
+    tr2 = kur(W0 / "r2", degis=izin); ref2 = W0 / "r2" / "ref"; ref2.mkdir()
+    for j, (kk, _, _) in enumerate(M.KARTLAR):
+        jpg(ref2 / f"CANCER_LIBRA_{kk}.jpg", (250, 250, 250))
+    rc, deg, oz, _ = topla(tr2, ref=ref2)
+    k("T6b referanstan buyuk fark -> kiyas FAIL (esik ayni: ort <= 1,0, max <= 16)", rc == 1 and "| FAIL |" in oz.split("CANCER_LIBRA kiyasi")[1], rc)
+    y = (Path(__file__).resolve().parents[2] / ".github" / "workflows" / "kupa-kart78.yml").read_text()
+    k("T6c is akisi: kiyas_damga varsayilani 20261031_161948, kaynak TEMP/KUPA_KART78, CANCER_LIBRA_K0*.jpg", 'default: "20261031_161948"' in y
+      and 'TEMP/KUPA_KART78/$R" _ref --include "CANCER_LIBRA_K0*.jpg"' in y and "KART_SABLON_ORNEK" not in y)
 finally:
     shutil.rmtree(W0, ignore_errors=True)
 print(f"SONUC: {sum(sonuc)}/{len(sonuc)} PASS")

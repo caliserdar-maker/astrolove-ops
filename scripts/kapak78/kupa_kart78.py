@@ -16,7 +16,7 @@ fark 4/255) ise kapi gecer ve istisna SONUC / MANIFEST / OZET'e yazilir. Olcum f
 Her cift try/except: bir kart FAIL ise ciftin HICBIR karti yazilmaz; neden SONUC_<CIFT>.json'a yazilir.
 Kullanim:
   kupa_kart78.py uret --ciftler <dosya, satir basina CIFT> --ko <kupa_orchard> --sembol-kok <kupa_uretim/sembol> --v12 <python> --is <dir> --out <dir>
-  kupa_kart78.py topla --dir <SONUC + jpg> --ciftler-csv data/pod/yd78_ids.csv --secim <dosya> --out <dir> [--ref <28 Eki ornek dir>] [--kaynak T]
+  kupa_kart78.py topla --dir <SONUC + jpg> --ciftler-csv data/pod/yd78_ids.csv --secim <dosya> --out <dir> [--ref <referans dir: CANCER_LIBRA_K0*.jpg (Serdar 31 Eki 2a: F-A sonrasi KUPA_KART78/20261031_161948)> --ref-ad ad] [--kaynak T]
 Cikis: 0 = tum ciftler PASS (ve kiyas PASS), 1 = FAIL var."""
 import argparse
 import csv
@@ -311,7 +311,10 @@ def topla(a):
     kiy = {}
     if a.ref:
         for kk, _, _ in KARTLAR:
-            y, r = out / f"CANCER_LIBRA_{kk}.jpg", Path(a.ref) / f"KUPA_CANCER_LIBRA_{kk}_{REF_AD[kk]}.jpg"
+            y = out / f"CANCER_LIBRA_{kk}.jpg"
+            r = Path(a.ref) / f"CANCER_LIBRA_{kk}.jpg"   # Serdar 31 Eki 2a: referans F-A sonrasi KUPA_KART78 uretimi (ayni dosya adi)
+            if not r.is_file():
+                r = Path(a.ref) / f"KUPA_CANCER_LIBRA_{kk}_{REF_AD[kk]}.jpg"   # eski 28 Eki ornegi adlandirmasi
             kiy[kk] = kiyas(y, r) if y.is_file() and r.is_file() else dict(durum="FAIL", neden=f"dosya yok: yeni {y.is_file()} ref {r.is_file()}")
         (out / "KIYAS_CANCER_LIBRA.json").write_text(json.dumps(kiy, indent=1), encoding="utf-8")
     kiyas_ok = all(v["durum"] == "PASS" for v in kiy.values())
@@ -347,7 +350,7 @@ def topla(a):
                 fh.write(f"| {c} | {k2.get('metin', '-')} | {k2.get('genislik_px', '-')} / {k2.get('izin_px', '-')} |\n")
             fh.write("\n")
         if kiy:
-            fh.write(f"## CANCER_LIBRA kiyasi (28 Eki onayli ornek; esik ort <= {KIYAS_ORT}, max <= {KIYAS_MAX})\n\n"
+            fh.write(f"## CANCER_LIBRA kiyasi (referans {a.ref_ad or a.ref}; esik ort <= {KIYAS_ORT}, max <= {KIYAS_MAX})\n\n"
                      "| kart | sha esit | ort | max | durum |\n|---|---|---|---|---|\n")
             fh.writelines(f"| {k} | {v.get('sha_esit')} | {v.get('ort')} | {v.get('max')} | {v['durum']} |\n" for k, v in kiy.items())
             fh.write("\n")
@@ -373,6 +376,7 @@ def main(argv=None):
         t.add_argument(k, required=True)
     t.add_argument("--ciftler-csv", default="data/pod/yd78_ids.csv")
     t.add_argument("--ref", default="")
+    t.add_argument("--ref-ad", default="", help="OZET'te referansin adi (or. TEMP/KUPA_KART78/20261031_161948)")
     t.add_argument("--kaynak", default="")
     t.add_argument("--onceki", default="", help="gece MANIFEST.csv (sha kaniti)")
     t.add_argument("--onceki-ad", default="")
