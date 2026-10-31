@@ -12,7 +12,7 @@ on:
       boylar: {description: "virgullu boy", required: true, default: "12x18,A2"}
 jobs:
   uret:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     env:
       KOD_REF: e3d168cef6821d0bd6b6ae5b4dfba503025c5753   # by-siparis-ornek.yml ile ayni
@@ -27,6 +27,9 @@ jobs:
           set -euo pipefail
           git fetch -q --depth 1 origin "$KOD_REF"
           git worktree add -q _kod FETCH_HEAD
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Kurulum (by-siparis-ornek ile ayni surumler)
         run: |
           set -euo pipefail
@@ -48,8 +51,10 @@ jobs:
         run: |
           set -uo pipefail
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
-          python3 scripts/siparis_by/by_boy2.py --kod _kod --pair "$P" --stiller "$S" --boylar "$B" --scale 2 --out _o
+          mkdir -p _o
+          python3 scripts/siparis_by/by_boy2.py --kod _kod --pair "$P" --stiller "$S" --boylar "$B" --scale 2 --out _o > _o/LOG.txt 2>&1
           echo "KOD=$?" >> "$GITHUB_ENV"
+          tail -20 _o/LOG.txt
           cat _o/TABLO.csv >> "$GITHUB_STEP_SUMMARY" || true
       - name: Drive'a yaz
         if: always()
