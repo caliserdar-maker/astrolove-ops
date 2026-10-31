@@ -98,9 +98,24 @@ jobs:
         with: {name: "k-${{ matrix.burc }}", path: "_o/SADE_*_K0*.jpg", retention-days: 3}
       - if: always()
         run: rm -rf _o _up ~/.config/rclone
+  zemin_test:   # Serdar 31 Eki (K05 kenar kusuru): kupa_zemin govde korumasi kalici test; PASS degilse kart birlestirilmez
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {ref: 0196e37a0447d61eab42b84778a56d9261b0b201, path: _ko, sparse-checkout: kupa_orchard/varlik/gorunum}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: test_kupa_zemin (11 oz tek_on / tek_arka, 15 oz sahne15)
+        run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0 numpy==2.1.3 opencv-python-headless==4.10.0.84
+          python3 scripts/kapak78/test_kupa_zemin.py --ko _ko/kupa_orchard
   kontak:
-    needs: [plan, kart]
-    if: always()
+    needs: [plan, kart, zemin_test]
+    if: always() && needs.zemin_test.result == 'success'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/download-artifact@v4

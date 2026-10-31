@@ -6,6 +6,10 @@ kupa pikselleri aynen kalir; yalniz zemin (duvar + masa) duz kart rengine cekili
 - golge: zemin parlakligi / yerel zemin kestirimi (kupa bolgesi Telea ile doldurulmus sahnenin 101 px medyani; duvar-masa siniri
   korunur). Golge = 1 - oran (0..1), yalniz kupaya YAKIN_PX icinde, uzaklikla dogrusal sonumlenir; uzakta zemin tam #F5F0E7.
 - kenar: maske 1 px asindirilir ve 1,2 px yumusatilir (eski zemin rengi hale olarak kalmasin).
+- GOVDE KORUMASI (Serdar 31 Eki, K05 kenar kusuru): zemin-benzeri / sicak ton oyma YALNIZ kupa govdesi disinda yapilir. Govde = sahnenin
+  silindir geometrisi (temiz/kupa-orchard 0196e37a varlik/gorunum/geo_*.json: xl, xr, yt, yb, ust / alt elips yari eksenleri;
+  kapak_canva3 baskiyi ayni geometriyle giydirir) + GOVDE_PAY px. Eski kural parlak kenar yansimasini (R > B, dis zeminle bitisik)
+  masa golgesi sanip oyuyordu (m15 sag kenar, 31 Eki olcum). Masa golgesi ve kulp ici govde disinda: onlar eskisi gibi cikar.
 Olcum (olc): kirpim kenar seridinde (10 px) #F5F0E7'ye en buyuk RGB farki; kupadan > YAKIN_PX uzak zemin piksellerinde en buyuk fark;
 kupa kenarindan 2-6 px disaridaki halkada zeminden ACIK sapma (hale) en buyuk deger.
 Kullanim: kupa_zemin.py <gorunum klasoru (tek_on.jpg ..., stil_<st>.jpg)> <cikti>  -> z_<ad>.png, k_<ad>.npy, zemin_olcum.json
@@ -15,6 +19,29 @@ from PIL import Image
 
 ZEMIN = np.float32([245, 240, 231])
 YAKIN_PX = 220
+GOVDE_PAY = 2      # px: geometri ile gercek kenar arasi kenar yumusatma payi (tek_on xr 1544, GrabCut maskesi 1545)
+# temiz/kupa-orchard 0196e37a varlik/gorunum geo_*.json ("sol" / "sag" degeri; [xl, xr, yt, yb, et, eb], sahne pikseli). test_kupa_zemin.py
+# bu sabitleri o dosyalarla karsilastirir.
+GEO = {"tek_on": (504.0, 1544.0, 450.2, 1615.8, 35.5, 89.4), "tek_arka": (504.0, 1545.0, 452.2, 1621.4, 33.1, 87.5),
+       "m15": (522.4, 1600.5, 466.7, 1911.9, 36.8, 92.7)}
+ST8 = ("orange", "fig", "olive", "pomegranate", "almond", "lemon", "grape", "loquat")       # orchard_gorunum stil_<st> (kupa 04)
+# gorunum adi -> geometri (orchard_gorunum.py / sade_kart.py giydir cagrilariyla ayni)
+SAHNE_GEO = {"tek_on": "tek_on", "tek_arka": "tek_arka", "m15": "m15", "ML_on": "tek_on", "ML_arka": "tek_arka", "MJ_on": "tek_on",
+             "MJ_arka": "tek_arka", **{f"stil_{x}": "tek_on" for x in ST8}}
+
+
+def govde(shape, geo, pay=GOVDE_PAY):
+    """Silindir kupa govdesi maskesi (uint8): [xl, xr] x [yt, yb] dikdortgeni + ust (yt, et) ve alt (yb, eb) elipsler, pay px genisletilmis."""
+    xl, xr, yt, yb, et, eb = geo
+    h, w = shape[:2]
+    m = np.zeros((h, w), np.uint8)
+    cx, ax = (xl + xr) / 2, (xr - xl) / 2
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    ic = (xx >= xl) & (xx <= xr) & (yy >= yt) & (yy <= yb)
+    ic |= ((xx - cx) / ax) ** 2 + ((yy - yt) / max(et, 1e-6)) ** 2 <= 1
+    ic |= ((xx - cx) / ax) ** 2 + ((yy - yb) / max(eb, 1e-6)) ** 2 <= 1
+    m[ic] = 1
+    return cv2.dilate(m, np.ones((2 * pay + 1, 2 * pay + 1), np.uint8)) if pay > 0 else m
 
 
 def maske(a):
@@ -31,8 +58,8 @@ def maske(a):
     return cv2.morphologyEx(k, cv2.MORPH_CLOSE, np.ones((15, 15), np.uint8))
 
 
-def esitle(im):
-    """PIL RGB sahne -> (PIL RGB zemini esitlenmis sahne, kupa maskesi uint8)"""
+def esitle(im, geo):
+    """PIL RGB sahne + silindir geometrisi (GEO) -> (PIL RGB zemini esitlenmis sahne, kupa maskesi uint8)"""
     a = np.asarray(im.convert("RGB")).astype(np.float32)
     k = maske(a)
     lum = a @ np.float32([0.299, 0.587, 0.114])
@@ -50,7 +77,8 @@ def esitle(im):
     # yalniz dis zeminle bitisik zemin-benzeri bolgeler cikarilir (kupa ici beyaz alanlar oyulmasin)
     n2, lab2 = cv2.connectedComponents((zeminsi | (k == 0)).astype(np.uint8), connectivity=8)
     disa = np.unique(lab2[k == 0])
-    k = (k.astype(bool) & ~np.isin(lab2, disa[disa > 0])).astype(np.uint8)
+    gv = govde(a.shape, geo).astype(bool)                       # govde ASLA oyulmaz (Serdar 31 Eki)
+    k = (k.astype(bool) & ~(np.isin(lab2, disa[disa > 0]) & ~gv)).astype(np.uint8)
     n, lab, st, _ = cv2.connectedComponentsWithStats(k, 8)
     k = (lab == 1 + int(np.argmax(st[1:, 4]))).astype(np.uint8)
     k = cv2.morphologyEx(k, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
@@ -79,7 +107,9 @@ def olc(out, k):
 
 
 def _isle(g, o, ad):
-    z, k = esitle(Image.open(g / f"{ad}.jpg"))
+    if ad not in SAHNE_GEO:
+        raise SystemExit(f"DUR: kupa_zemin: {ad} sahnesinin govde geometrisi tanimsiz (SAHNE_GEO)")
+    z, k = esitle(Image.open(g / f"{ad}.jpg"), GEO[SAHNE_GEO[ad]])
     z.save(o / f"z_{ad}.png"); np.save(o / f"k_{ad}.npy", k)
     ys, xs = np.nonzero(k)
     return ad, dict(kutu=[int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())], **olc(z, k))
@@ -90,7 +120,6 @@ if __name__ == "__main__":
     from concurrent.futures import ProcessPoolExecutor
     from pathlib import Path
     g, o = Path(sys.argv[1]), Path(sys.argv[2]); o.mkdir(parents=True, exist_ok=True); R = {}
-    ST8 = ("orange", "fig", "olive", "pomegranate", "almond", "lemon", "grape", "loquat")       # orchard_gorunum stil_<st> (kupa 04)
     ADLAR = ("tek_on", "tek_arka", "m15", "ML_on", "ML_arka", "MJ_on", "MJ_arka") + tuple(f"stil_{s}" for s in ST8)
     # GrabCut sahne basina ~1-2 dk (2048 px): sahneler paralel (28 Eki yerel: 16 sahne 3 dk 19 sn, CPU toplami 11 dk 20 sn).
     # setRNGSeed(0) ile sonuc siradan bagimsiz; 27 Eki sirali ciktiya gore tek_on disindaki sahnelerde fark 6-15 (maske degisti)
