@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# OKU (AI beyan kapisi, Serdar 31 Eki 2026): bu betigin aciklama kaynagi (sablon / dosya / eski metin) AI beyan cumlesini icermeyebilir. etsy_common kapisi beyansiz aciklamayi YAZMAZ (ilan HATA, kosu FAIL). Kaynagi kullanmadan once beyan cumlesini ekleyin (EN: etsy_common.AI_BEYAN['en']; RU: beyan_marka_yaz.RU_BEYAN). Betik silinmedi; tablo docs/AI_BEYAN_YOLLARI.md.
 """BIZIM YILIMIZ: ayri kargo profili + SKU + aciklama (Serdar onayi 15 Eki 2026, A-D plani). ETSY'YE YAZAR (adim adim).
 --adim profil : YENI kargo profili "BY Print 8x10 Worldwide" (ayni adla varsa olusturmaz, eksik hedefleri ekler):
                 US 0 (3-8 gun), eu 0 (5-12), GB 0 (5-10), AU 5 (5-10), everywhere else 12 (7-21; 6 Eyl Mo kurali).

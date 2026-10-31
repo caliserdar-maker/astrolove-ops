@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# OKU (AI beyan kapisi, Serdar 31 Eki 2026): bu betigin aciklama kaynagi (sablon / dosya / eski metin) AI beyan cumlesini icermeyebilir. etsy_common kapisi beyansiz aciklamayi YAZMAZ (ilan HATA, kosu FAIL). Kaynagi kullanmadan once beyan cumlesini ekleyin (EN: etsy_common.AI_BEYAN['en']; RU: beyan_marka_yaz.RU_BEYAN). Betik silinmedi; tablo docs/AI_BEYAN_YOLLARI.md.
 """KUPA ORCHARD: 78 cift kupa ilani TASLAK (Serdar 19 Eki 2026). YAYIN YOK, Etsy Ads YOK.
 
 --mod oku  : SALT OKUMA (Etsy'ye yazma yok; SaltOkur her yazmayi durdurur). Kategori/nitelik, BY hazirlik ayari,
@@ -40,7 +41,7 @@ from pathlib import Path
 import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from etsy_common import API, Etsy, TokenStore, mask  # noqa: E402
+from etsy_common import API, Etsy, TokenStore, ai_beyan_kapisi, mask  # noqa: E402
 
 KOTA_MIN = 10
 OAS = "https://www.etsy.com/openapi/generated/oas/3.0.0.json"
@@ -382,6 +383,7 @@ class Kilitli(Etsy):
     def taslak_olustur(self, shop, body):
         """createDraftListing: TEK deneme (tekrar ikinci ilan acabilir). (status, json|None, metin)."""
         self._izin("POST", f"/shops/{shop}/listings")
+        ai_beyan_kapisi("POST", f"/shops/{shop}/listings", data=body)  # AI beyan kapisi (Gorev E): dogrudan requests _call'i atlar; kapi burada
         self.calls += 1
         r_ = requests.post(API + f"/shops/{shop}/listings", data=body, headers=self._headers(), timeout=120)
         self.remaining = r_.headers.get("x-remaining-today", self.remaining)

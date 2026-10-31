@@ -79,6 +79,8 @@ jobs:
           set -euo pipefail
           pip install -q requests==2.34.2
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: AI beyan kapisi testi (Gorev E; Etsy'den once)
+        run: python3 scripts/etsy/test_ai_beyan.py
       - name: rclone.conf
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
