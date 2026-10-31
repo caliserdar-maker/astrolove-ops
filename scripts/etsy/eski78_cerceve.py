@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# OKU (AI beyan kapisi, Serdar 31 Eki 2026): bu betigin aciklama kaynagi (sablon / dosya / eski metin) AI beyan cumlesini icermeyebilir. etsy_common kapisi beyansiz aciklamayi YAZMAZ (ilan HATA, kosu FAIL). Kaynagi kullanmadan once beyan cumlesini ekleyin (EN: etsy_common.AI_BEYAN['en']; RU: beyan_marka_yaz.RU_BEYAN). Betik silinmedi; tablo docs/AI_BEYAN_YOLLARI.md.
 """ESKI 78 POSTER: cerceve SATISINI kaldirma, metin + envanter (Serdar onayi 15 Eki, C plani). ETSY'YE YAZAR. Gorsellere dokunmaz.
 --ciftler "CANCER_LIBRA" | HEPSI  (data/pod/pod78_ids.csv)
 Ilan basina: envanter GET -> varyasyon gorsel baglari GET (once) -> envanter PUT: 4 cerceve degeri (Antique Gold/Black/White/

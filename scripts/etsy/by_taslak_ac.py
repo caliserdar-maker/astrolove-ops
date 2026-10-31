@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# OKU (AI beyan kapisi, Serdar 31 Eki 2026): bu betigin aciklama kaynagi (sablon / dosya / eski metin) AI beyan cumlesini icermeyebilir. etsy_common kapisi beyansiz aciklamayi YAZMAZ (ilan HATA, kosu FAIL). Kaynagi kullanmadan once beyan cumlesini ekleyin (EN: etsy_common.AI_BEYAN['en']; RU: beyan_marka_yaz.RU_BEYAN). Betik silinmedi; tablo docs/AI_BEYAN_YOLLARI.md.
 """BIZIM YILIMIZ: CANCER_LIBRA TEK TASLAK (14 Eki 2026, Takip gorevi). YAYIN YOK.
 
 MOD=ac (varsayilan): yeni taslak.
@@ -22,7 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import requests  # noqa: E402
-from etsy_common import API, Etsy, TokenStore, mask  # noqa: E402
+from etsy_common import API, Etsy, TokenStore, ai_beyan_kapisi, mask  # noqa: E402
 
 PAIR = "CANCER_LIBRA"
 REF = 4570143815
@@ -210,6 +211,7 @@ def main():
                     "materials": ",".join(MATERIALS), "should_auto_renew": "true", "is_personalizable": "true",
                     "production_partner_ids": ",".join(str(p) for p in partner0)}
             api._izin("POST", f"/shops/{shop}/listings")
+            ai_beyan_kapisi("POST", f"/shops/{shop}/listings", data=body)  # AI beyan kapisi (Gorev E): dogrudan requests _call'i atlar; kapi burada
             r_ = requests.post(API + f"/shops/{shop}/listings", data=body, headers=api._headers(), timeout=120)   # TEK deneme
             if r_.status_code not in (200, 201):
                 drafts = (api.get(f"/shops/{shop}/listings", params={"state": "draft", "limit": 100}) or {}).get("results") or []
