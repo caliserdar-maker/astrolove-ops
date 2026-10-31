@@ -5,11 +5,11 @@ renk, yerlesim, zemin, kopuk ton) wa_kupa_kart_ornek.kart_isle + kart_sablon AYN
 Degisen yalniz: K02 tek burc sembol karti (iki burc + baglac yerine tek buyuk sembol + burc adi), K03 / K07 metinleri (SADE12_METIN.csv
 CANCER aciklamasi ve kisisellestirme talimati ile ayni bilgi), sahneler sade baskiyla.
 Sahne (mod sahne, _v12 ortami = orchard_gorunum ile ayni surumler + simd_sabit kapisi, Serdar 31 Eki 8a):
-  baski  : kupa-orchard ceeb648 kod/baski_sade3.py (sade12.sh ile ayni arguman: glif, dal_sade/<stil>.jpg, on yazi, mesaj, stil rengi)
+  baski  : v2 (Serdar 31 Eki) kupa-orchard dc4a432 kod/baski_kes_sade.py (sade12.sh ile ayni arguman: kes/<STIL>R, glif, on yazi, mesaj, renk)
   gorunum: temiz/kupa-orchard 0196e37a kod/kapak_canva3.py, orchard_gorunum ile ayni sahneler / geo / ortam (GOLGE_US 0.4, PARLA 0.7):
            tek_on, tek_arka (Orange Blossom baskisi), m15 (sahne15, D_IN 3.35, ayni 11 oz baski; cift kartlarindaki gibi), stil_<st> (tek on)
   zemin  : kupa_zemin.py (kart ortami) -> z_<ad>.png
-Kullanim: sade_kart.py sahne --ko <0196e37a kupa_orchard> --kos <ceeb648 kupa_orchard> --glif <sol.png> --on EMILY --mesaj ... --out <dir>
+Kullanim: sade_kart.py sahne --ko <0196e37a kupa_orchard> --kos <dc4a432 kupa_orchard (v2)> --glif <sol.png> --on EMILY --mesaj ... --out <dir>
           sade_kart.py kart --burc Cancer --glif <sol.png> --gorunum <sahne/gorunum> --sahne <z_*.png dir> --out <dir>"""
 import argparse
 import hashlib
@@ -22,8 +22,13 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-# sade12.sh STIL tablosu (kupa-orchard ceeb648; Serdar 31 Eki 7b paleti): kisa ad -> baski rengi
-SADE_RENK = {"orange": "30,92,52", "fig": "82,28,74", "olive": "78,84,30", "pomegranate": "132,20,36", "almond": "150,78,96",
+# sade12.sh STIL tablosu (v1, GECERSIZ)
+# v2 (Serdar 31 Eki, kupa-orchard dc4a432 sade12.sh STIL tablosu): kisa ad -> (kes klasoru, baski rengi). v1 (baski_sade3) GECERSIZ.
+SADE_V2 = {"orange": ("ORANGER", "67,87,42"), "fig": ("FIGR", "126,43,113"), "olive": ("OLIVER", "78,84,30"),
+           "pomegranate": ("POMEGRANATER", "139,46,60"), "almond": ("ALMONDR", "112,58,72"), "lemon": ("LEMONR", "93,76,31"),
+           "grape": ("GRAPER", "72,59,172"), "loquat": ("LOQUATR", "105,69,35")}
+SADE_RENK = {k: v[1] for k, v in SADE_V2.items()}
+_V1_RENK = {"orange": "30,92,52", "fig": "82,28,74", "olive": "78,84,30", "pomegranate": "132,20,36", "almond": "150,78,96",
              "lemon": "150,112,10", "grape": "46,38,110", "loquat": "176,96,20"}
 K02_KUTU_H, K02_KUTU_ORAN = 514, 44.0 / 33.5        # K02 sembol kutusu (px yukseklik, en / boy = baski_sade3 SEM_GEN / SEM_YUK)
 SAHNE_AD = ("tek_on", "tek_arka", "m15") + tuple(f"stil_{s}" for s in SADE_RENK)
@@ -44,8 +49,8 @@ def sahne(a):
             print(r.stdout[-800:], r.stderr[-1500:])
             raise SystemExit("DUR: " + " ".join(str(x) for x in arg[:3]))
 
-    for st, rgb in SADE_RENK.items():
-        calis([py, "-I", str(kos / "kod" / "baski_sade3.py"), str(Path(a.glif).resolve()), str(kos / "varlik" / "dal_sade" / f"{st}.jpg"),
+    for st, (kes, rgb) in SADE_V2.items():          # v2: baski_kes_sade.py (canli Orchard dallari, tek sembol + isim; arka nazar + mesaj)
+        calis([py, "-I", str(kos / "kod" / "baski_kes_sade.py"), str(kos / "varlik" / "kes" / kes), str(Path(a.glif).resolve()),
                a.on, a.mesaj, rgb, str(out / "baski" / f"S_{st}")], dict(env), kos / "kod")
     bo = out / "baski" / "S_orange_baski_11oz.png"
 
@@ -61,8 +66,8 @@ def sahne(a):
     # 15 oz (inceleme 31 Eki): gercek BOY=15 baski (2700x1140, cizim dikeyde ortali) satir 45:1095 kesilir -> 2700x1050 (kapak_canva3
     # FH 1050 sabit), D_IN 3.35 ile giydirilir; 11 oz baskiyi 15 oz capina giydirmek on yuzu ~23 px kaydiriyordu.
     e15 = dict(env); e15["BOY"] = "15"
-    calis([py, "-I", str(kos / "kod" / "baski_sade3.py"), str(Path(a.glif).resolve()), str(kos / "varlik" / "dal_sade" / "orange.jpg"),
-           a.on, a.mesaj, SADE_RENK["orange"], str(out / "baski" / "S15_orange")], e15, kos / "kod")
+    calis([py, "-I", str(kos / "kod" / "baski_kes_sade.py"), str(kos / "varlik" / "kes" / SADE_V2["orange"][0]), str(Path(a.glif).resolve()),
+           a.on, a.mesaj, SADE_V2["orange"][1], str(out / "baski" / "S15_orange")], e15, kos / "kod")
     from PIL import Image
     b15 = Image.open(out / "baski" / "S15_orange_baski_15oz.png")
     if b15.size != (2700, 1140):
@@ -101,7 +106,7 @@ def kart(a):
         kay = S.Kayit(); im = K.tuval(); d = ImageDraw.Draw(im)
         kay.blok("baslik"); K.baslik(d, "Your Zodiac Sign")
         ay = K.BASLIK_Y + K.BASLIK["boy"] + 50
-        kay.blok("alt_baslik"); K.yaz(d, K.METIN, [f"The {b} symbol in an original AstroLoveArt design"], W / 2, ay, "center", W - 2 * K.KENAR)
+        kay.blok("alt_baslik"); K.yaz(d, K.METIN, [f"The {b} symbol, designed by AstroLoveArt"], W / 2, ay, "center", W - 2 * K.KENAR)
         ust = ay + K.METIN["boy"] + 160                                   # alt baslik ile sembol arasi (cift kartinda glif ust bosluguna yakin)
         et_y = K.NOT_Y - 160 - K.ETIKET["boy"]                            # burc adi alt nottan 160 px yukarida
         # 12 burcta AYNI kutu (inceleme 31 Eki): kupadaki gibi sembol SEM_YUK x SEM_GEN (33,5 x 44 mm, baski_sade3) oranli kutuya sigar.
@@ -131,8 +136,8 @@ def kart(a):
         (on, ko_), (ar, ka) = Wk.sahne(sd, "tek_on"), Wk.sahne(sd, "tek_arka")
         im, o, kut = S.yan_kart("Your Name, Your Message", [on, ar], [
             (None, ["Name or Date"], "Up to 12 characters, printed in capitals on the front"),
-            (None, ["Your Message"], "Up to 30 characters, required, printed on the back"),
-            (None, ["One Mug, Two Sides"], f"Front with the {b} symbol and your name or date, back with your message")],
+            (None, ["Your Message"], "Up to 30 characters, required, printed on the back as you type it"),
+            (None, ["One Mug, Two Sides"], f"Front with the {b} symbol and your name or date, back with an evil eye bead and your message")],
             "Please check your spelling before you order")
         return im, dict(o, kirpim=dict(tek_on=ko_, tek_arka=ka)), kut
 
@@ -143,17 +148,17 @@ def kart(a):
             ("02", ["Your Approval"], "We print your mug once you approve the preview"),
             ("03", ["Made to Order"], "Printed on both sides, glossy white ceramic, white inside"),
             ("04", ["Easy Care"], "Dishwasher safe and microwave safe")],
-            "Zodiac symbols designed by AstroLoveArt", surec=True)
+            "Zodiac symbol designed by AstroLoveArt", surec=True)
         return im, dict(o, kirpim=dict(tek_on=ko_)), kut
 
     bek = dict(Wk.beklenen(b, b))
-    bek["K02_SEMBOL"] = ["Your Zodiac Sign", f"The {b} symbol in an original AstroLoveArt design", b,
+    bek["K02_SEMBOL"] = ["Your Zodiac Sign", f"The {b} symbol, designed by AstroLoveArt", b,
                          "Personalized with a name or a date and your message"]
     bek["K03_KISISEL"] = ["Your Name, Your Message", "Name or Date", "Up to 12 characters, printed in capitals on the front",
-                          "Your Message", "Up to 30 characters, required, printed on the back",
-                          "One Mug, Two Sides", f"Front with the {b} symbol and your name or date, back with your message",
+                          "Your Message", "Up to 30 characters, required, printed on the back as you type it",
+                          "One Mug, Two Sides", f"Front with the {b} symbol and your name or date, back with an evil eye bead and your message",
                           "Please check your spelling before you order"]
-    bek["K07_SUREC"] = bek["K07_SUREC"][:-1] + ["Zodiac symbols designed by AstroLoveArt"]
+    bek["K07_SUREC"] = bek["K07_SUREC"][:-1] + ["Zodiac symbol designed by AstroLoveArt"]
     yok = lambda f: (lambda: (*f(), ()))
     c = b.upper()
     islem = [(f"SADE_{c}_K02_SEMBOL.jpg", "K02_SEMBOL", k02),

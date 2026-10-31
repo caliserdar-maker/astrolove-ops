@@ -1,7 +1,7 @@
 name: sade-kart
 # Sade kupa bilgi kartlari ORNEK (Serdar 31 Eki is 9): tek burc, 5 kart (galeri 2-6, cift kartlariyla ayni sira ve stil), 3000x2250.
-# scripts/kapak78/sade_kart.py: sahne (_v12 ortami: baski_sade3 kupa-orchard ceeb648 + kapak_canva3 temiz/kupa-orchard 0196e37a) -> kart
-# (kart ortami: kupa_zemin + wa_kupa_kart_ornek kapilari). SIMD sabit (Serdar 31 Eki 8a). ETSY YOK. Cikti Drive TEMP/SADE_KART/<damga>/.
+# scripts/kapak78/sade_kart.py: sahne (_v12 ortami: baski_kes_sade kupa-orchard dc4a432 (v2) + kapak_canva3 temiz/kupa-orchard 0196e37a) -> kart
+# (kart ortami: kupa_zemin + wa_kupa_kart_ornek kapilari). SIMD sabit (Serdar 31 Eki 8a). ETSY YOK. Cikti Drive TEMP/SADE_KART_V2/<damga>/.
 permissions:
   contents: read
 on:
@@ -45,7 +45,7 @@ jobs:
         env: {B: "${{ matrix.burc }}"}
         run: |
           set -euo pipefail
-          git fetch -q --depth 1 origin ceeb648ffd06d1850ed2c6acda7cde274eca5fd0 && git worktree add -q _kos FETCH_HEAD
+          git fetch -q --depth 1 origin dc4a4323c9218200447979a06ec7557e6f194e6d && git worktree add -q _kos FETCH_HEAD   # sade v2 (Serdar 31 Eki)
           git fetch -q --depth 1 origin 0196e37a0447d61eab42b84778a56d9261b0b201 && git worktree add -q _ko FETCH_HEAD
           git fetch -q --depth 1 origin ac9aa7185f9d7b07903f0cb99e7f366f425a631c
           git show "FETCH_HEAD:kupa_uretim/sembol/${B}_${B}/sol.png" > _glif.png
@@ -89,8 +89,8 @@ jobs:
           set -euo pipefail
           if ls _o/* >/dev/null 2>&1; then
             mkdir -p _up/$B && cp _o/* _up/$B/ && mv _up/$B/MAKINE.txt _up/$B/MAKINE_$B.txt && mv _up/$B/LOG.txt _up/$B/LOG_$B.txt
-            rclone copy _up "gdrive:ASTROLOVE/TEMP/SADE_KART/${DAMGA:?}" --immutable -q
-            echo "::notice title=SADE KART::TEMP/SADE_KART/${DAMGA}/"
+            rclone copy _up "gdrive:ASTROLOVE/TEMP/SADE_KART_V2/${DAMGA:?}" --immutable -q
+            echo "::notice title=SADE KART::TEMP/SADE_KART_V2/${DAMGA}/"
           fi
           [ "${KOD:-1}" = 0 ] || { echo "::error::sade_kart hata (LOG.txt)"; exit 1; }
       - uses: actions/upload-artifact@v4
@@ -137,6 +137,6 @@ jobs:
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
-          rclone copyto KONTAK_SADE_12.jpg "gdrive:ASTROLOVE/TEMP/SADE_KART/$DAMGA/KONTAK_SADE_12.jpg" --immutable -q
+          rclone copyto KONTAK_SADE_12.jpg "gdrive:ASTROLOVE/TEMP/SADE_KART_V2/$DAMGA/KONTAK_SADE_12.jpg" --immutable -q
           rm -rf ~/.config/rclone
-          echo "::notice title=SADE KART 12::TEMP/SADE_KART/$DAMGA/"
+          echo "::notice title=SADE KART 12::TEMP/SADE_KART_V2/$DAMGA/"
