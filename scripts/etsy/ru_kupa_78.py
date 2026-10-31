@@ -73,7 +73,7 @@ def main(argv=None):
                 hata.append(f"hedef EN kurulamadi: {e}")
             if b1 == b2 and "isim" not in deg and "First Name" not in en:
                 hata.append("ayni burc: isim satiri cevrilemedi (Left / Right ya da Name Under bulunmadi)")
-            hata += R.hedef_kapisi(en)   # Serdar 31 Eki 5a / 6a: yeni foto numaralari + Latin notu
+            hata += R.hedef_kapisi(en)   # Serdar 31 Eki 2a / 6a: gorsel adi atfi (numara yok) + Latin notu
             ru, kon = R.kur(en)
             if kon.get("burc") != [b1, b2]:
                 hata.append(f"EN burclari {kon.get('burc')} != cift {c}")
@@ -101,7 +101,7 @@ def main(argv=None):
         for s in satir:
             if s["durum"] != "PASS":
                 f.write(f"- FAIL {s['cift']}: {s['hata']}\n")
-        f.write("\nHedef EN: foto numaralari yeni galeri sirasina (stil 6-14, boy 4, kisisellestirme 3) + Latin harf notu (Serdar 31 Eki 5a / 6a); "
+        f.write("\nHedef EN: foto atiflari numarasiz, gorsel adiyla (See the style photos / See the sizes photo / See the personalization photo; Serdar 31 Eki 2a) + Latin harf notu (6a); "
                 "ayni burcta isim satirlari Left name / Right name -> First Name / Second Name (Serdar 30 Eki). "
                 "EN ve RU yazimi Serdar + Lena onayindan sonra, ayri onayla.\n")
     print(f"KUPA RU 78: PASS {n_pass}/{len(satir)}")

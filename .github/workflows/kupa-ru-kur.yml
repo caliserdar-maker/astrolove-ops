@@ -43,6 +43,7 @@ jobs:
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
           rclone copyto "gdrive:ASTROLOVE/TEMP/KUPA_YD_OKU/$O/KUPA_CANLI.json" _w/KUPA_CANLI.json || exit 1
           python3 scripts/etsy/test_ru_kupa.py > _o/TEST.txt; T=$?
+          python3 scripts/etsy/test_kupa_galeri78.py > _o/TEST_GALERI78.txt 2>&1 || T=1
           python3 scripts/etsy/ru_kupa_78.py --canli _w/KUPA_CANLI.json --ornek "$C" --out _o; K=$?
           echo "KOD=$(( T | K ))" >> "$GITHUB_ENV"
           tail -1 _o/TEST.txt; cat _o/OZET.md >> "$GITHUB_STEP_SUMMARY" || true

@@ -290,20 +290,25 @@ def soru_norm(q):
 
 
 def hedef_en(d0, a, b):
-    """Aciklama hedefi TEK KAYNAK ru_kupa (inceleme 31 Eki): canli kalip (See photo atiflari) varsa galeri_en (foto numaralari yeni
-    galeri sirasina + Latin harf notu, Serdar 31 Eki 5a / 6a); ayni burcta isim satirlari. -> (yeni, durum, hata[])."""
+    """Aciklama hedefi TEK KAYNAK ru_kupa (inceleme 31 Eki): metinde foto atfi (eski numarali ya da yeni gorsel adi) varsa galeri_en
+    (idempotan; gorsel adi, numara yok, Latin harf notu; Serdar 31 Eki 2a / 6a) + ru_kupa.hedef_kapisi; kapi hatasi = yazim yok.
+    Ayni burcta isim satirlari. Foto atfi hic olmayan metin (kupa kalibi disi) galeriye dokunulmadan isim adimina gecer.
+    -> (yeni, durum, hata[])."""
     import ru_kupa as RK
-    h, deg = [], []
-    if "See photo" in d0:
+    deg = []
+    if re.search(r"See (?:photos? |the [a-z]+ photos?)", d0):
         try:
             d0, deg = RK.galeri_en(d0)
         except ValueError as e:
             return d0, "TEK", [f"metin: galeri foto / Latin kalibi beklenen degil ({e}); yazim yok"]
+        h = [f"metin: hedef kapisi: {x}; yazim yok" for x in RK.hedef_kapisi(d0)]
+        if h:
+            return d0, "TEK", h
     if a.lower() == b.lower():
         d1, dd = isim_degistir(d0, a)
     else:
         d1, dd = d0, "YOK"
-    return d1, ("DEGISTI" if deg and dd != "TEK" else dd), h
+    return d1, ("DEGISTI" if deg and dd != "TEK" else dd), []
 
 
 def metin_plani(L, per, a, b):

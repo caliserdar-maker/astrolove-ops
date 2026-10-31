@@ -24,37 +24,21 @@ from ru_poster import BURC, DATIF  # noqa: E402  burc adlari ve datif tek kaynak
 
 B_RX = "(" + "|".join(BURC) + ")"
 KUYRUK = re.compile(r"(?:an? )?" + B_RX + r" gifts?(?: or (?:an? )?" + B_RX + r" gifts?)?")
-FOTO = re.compile(r"\d+(?: and \d+| to \d+)?")
 AYNI_EN = ("First Name", "Second Name")
 ISIM_RU = {"Left name": "Имя слева", "Right name": "Имя справа", "First Name": "Первое имя", "Second Name": "Второе имя"}
 
 
-FOTO_MAX = 20   # Etsy galeri siniri
-GALERI_MAX = 14   # yeni kupa galerisi: 1 kapak + 5 kart + 8 stil (video ayri)
-
-
 FOTO_AD_RU = {"the style photos": "фото стилей", "the sizes photo": "фото с размерами",
               "the personalization photo": "фото с персонализацией"}   # Serdar 31 Eki 2a: numara yok, gorsel adi
+FOTO_BOLUM = {"stil": "the style photos", "boy": "the sizes photo", "kisisel": "the personalization photo"}
 
 
-def foto_ru(s):
-    """EN 'See <s>.' nesnesi -> RU 'Смотрите <donus>.' nesnesi. Gorsel adi (31 Eki 2a) ya da eski numara ('photo 4')."""
-    if s in FOTO_AD_RU:
-        return FOTO_AD_RU[s]
-    if not s.startswith("photo"):
-        raise ValueError(f"foto atfi kalip disi: {s!r}")
-    return "фото " + foto_no_ru(s.split(" ", 1)[1])
-
-
-def foto_no_ru(s):
-    if not FOTO.fullmatch(s) or any(not 1 <= int(n) <= FOTO_MAX for n in re.findall(r"\d+", s)):
-        raise ValueError(f"foto numarasi kalip / aralik disi: {s!r}")
-    m = re.fullmatch(r"(\d+) to (\d+)", s)
-    if m:
-        if int(m.group(1)) >= int(m.group(2)):
-            raise ValueError(f"foto araligi ters: {s!r}")
-        return f"с {m.group(1)} по {m.group(2)}"
-    return s.replace(" and ", " и ")
+def foto_ru(s, bolum):
+    """EN 'See <s>.' nesnesi -> RU nesnesi. Yalniz o bolumun gorsel adi kabul edilir (Serdar 31 Eki 2a; inceleme 31 Eki: numarali atif ya da
+    baska bolumun adi FAIL, kur kurali kendisi uygular)."""
+    if s != FOTO_BOLUM[bolum]:
+        raise ValueError(f"foto atfi {bolum}: {s!r} (beklenen {FOTO_BOLUM[bolum]!r}; foto numarasi yok, Serdar 31 Eki 2a)")
+    return FOTO_AD_RU[s]
 
 
 def cogul(n, bir, iki, bes):
@@ -94,12 +78,12 @@ def p_stil(m, ctx):
         raise ValueError("stil paragrafi burclari girisle ayni degil")
     return ("[ 8 СТИЛЕЙ: THE ORCHARD WE KEEP ]\nOrange Blossom, Purple Fig, Olive Breeze, Pomegranate Bloom, Almond Blossom, "
             "Lemon Grove, Blue Grape или Golden Loquat. Во всех стилях этой зодиакальной кружки для пары один и тот же символ знаков "
-            f"{ikili(a, b)} и турецкий глаз на обратной стороне. Смотрите {foto_ru(m.group(3))}.")
+            f"{ikili(a, b)} и турецкий глаз на обратной стороне. Смотрите {foto_ru(m.group(3), 'stil')}.")
 
 
 def p_boy(m, ctx):
     return ("[ ДВА РАЗМЕРА ]\n- 11 oz (325 мл)\n- 15 oz (444 мл)\nОдинаковый дизайн в обоих размерах. "
-            f"Смотрите {foto_ru(m.group(1))}.")
+            f"Смотрите {foto_ru(m.group(1), 'boy')}.")
 
 
 def isim_ru(s, ctx, sira):
@@ -144,7 +128,7 @@ def p_kisisel(m, ctx):
             + (f"{LATIN_RU}\n" if latin else "") +
             "Если вы оставите надпись пустой, мы напечатаем:\n"
             f"{bos}\n"
-            f"Пожалуйста, проверьте написание. Смотрите {foto_ru(foto)}.")
+            f"Пожалуйста, проверьте написание. Смотрите {foto_ru(foto, 'kisisel')}.")
 
 
 SABIT = {
@@ -193,7 +177,7 @@ def norm(s):
 
 
 def galeri_en(d):
-    """Serdar 31 Eki 5a + 6a: foto numaralari yeni galeri sirasina, kisisellestirme bolumune Latin harf notu. Idempotan.
+    """Serdar 31 Eki 5a + 6a + 2a: foto atiflari gorsel adiyla (numara yok), kisisellestirme bolumune Latin harf notu. Idempotan.
     -> (en, degisen[]) ; eski / yeni kalip tam 1 kez bulunmazsa ValueError."""
     deg = []
     for ad, (eski, yeni) in FOTO_YENI.items():
@@ -211,7 +195,7 @@ def galeri_en(d):
 
 
 def hedef_kapisi(en):
-    """Hedef EN'de yeni foto numaralari + Latin notu var, eski numara yok (31 Eki 5a / 6a)."""
+    """Hedef EN'de 3 gorsel adi atfi (numara yok, Serdar 31 Eki 2a) + tek Latin notu var, eski numarali atif yok."""
     h = [f"foto {ad}: yeni '{y}' yok" for ad, (e, y) in FOTO_YENI.items() if en.count(y) != 1]
     h += [f"foto {ad}: eski '{e}' kaldi" for ad, (e, y) in FOTO_YENI.items() if e in en]
     if en.count(LATIN_EN) != 1:

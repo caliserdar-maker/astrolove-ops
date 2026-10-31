@@ -462,6 +462,12 @@ def birim():
     mp = K.metin_plani({"description": canli_f}, [], "Cancer", "Libra")
     kontrol("metin: farkli burc hedef = galeri_en (foto + Latin), talimat yok", mp["yaz"] and mp["desc_sonra"] == RK.galeri_en(RK.norm(canli_f))[0]
             and mp["pers_sonra"] is None, mp["hata"])
+    yeni_latinsiz = RK.galeri_en(RK.norm(canli_f))[0].replace(RK.LATIN_EN + "\n", "")
+    mp = K.metin_plani({"description": yeni_latinsiz}, [], "Cancer", "Libra")
+    kontrol("metin: yeni gorsel adli ama Latin notsuz metin -> galeri_en Latin ekler (inceleme 31 Eki: atlaniyordu)", mp["yaz"]
+            and RK.LATIN_EN in mp["desc_sonra"] and not RK.hedef_kapisi(mp["desc_sonra"]), mp["hata"])
+    mp = K.metin_plani({"description": RK.galeri_en(RK.norm(canli_f))[0].replace("See the sizes photo.", "See photo 9.")}, [], "Cancer", "Libra")
+    kontrol("metin: yeni metinde numarali atif -> hata, yazim yok", not mp["yaz"] and mp["hata"], mp["hata"])
     mp = K.metin_plani({"description": "Your names"}, [dict(instructions="Your names")], "Leo", "Leo")
     kontrol("metin: kalip yok -> hata (elle)", any("kalibi" in h for h in mp["hata"]))
     kontrol("metin: farkli burc yazim yok", K.metin_plani({"description": "Name Under Leo"}, [], "Aries", "Leo")["yaz"] is False)
