@@ -186,7 +186,7 @@ while True:
         break
     k -= 0.02
 _alt = y_sem + ana.shape[0] / 2
-_isim_ust = _t_isim0 - L['isim_cap'] * s
+_isim_ust = _t_isim0 - L['isim_cap'] * s * float(os.environ.get('ISIM_BOY', 1.25))
 if _alt > _isim_ust - ISIM_ARA:                                  # isme cok yaklasirsa sembol yukari kayar
     y_sem -= _alt - (_isim_ust - ISIM_ARA)
     ana, _cizgi, _cizgi2, _uzak = sembol_yap(k)
@@ -197,9 +197,9 @@ _cols = np.where(MASK_ON.any(0))[0] - TW
 adim(f'merkez: sembol y {y_sem:.0f} / cerceve y {((_satirlar.min() + _satirlar.max()) / 2 - TH):.0f}; sembol x {cx:.0f} / cerceve x {((_cols.min() + _cols.max()) / 2):.0f} (on tuval px)')
 # isim satiri: tek isim, cift kupadaki isim satiri yerinde ve boyunda
 _, t_isim = T('on', 0, L['isim_taban'])
-ISIM_CAP = L['isim_cap'] * s
-ISIM_AG = float(os.environ.get('ISIM_AGIRLIK', 450))          # Serdar 31 Eki: ince (referans gorsel), cift kupada 680
-ISIM_AR = float(os.environ.get('ISIM_ARALIK', 0.30))          # harf araligi, buyuk harf yuksekliginin orani (referans: acik)
+ISIM_CAP = L['isim_cap'] * s * float(os.environ.get('ISIM_BOY', 1.25))   # Serdar 31 Eki: isim daha belirgin
+ISIM_AG = float(os.environ.get('ISIM_AGIRLIK', 560))          # Serdar 31 Eki: referans gorsel gibi ince ama belirgin (cift kupada 680)
+ISIM_AR = float(os.environ.get('ISIM_ARALIK', 0.26))          # harf araligi, buyuk harf yuksekliginin orani (referans: acik)
 isim_cap, isim_tasti = satir(on, MASK_ON, ISIM.upper(), GAR, ISIM_CAP, ISIM_AG, cx, t_isim, aralik=ISIM_CAP * ISIM_AR,
                              min_cap=2.2 * MM, mesafe=ndimage.distance_transform_edt(~MASK_ON))
 burc_tasti = False
