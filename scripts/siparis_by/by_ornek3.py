@@ -26,9 +26,10 @@ import numpy as np
 from PIL import Image
 
 ESKI = "z/Baski_2400x3000_Buyutulmus/1_Starlit_8x10_300ppi.png"
-YAY = dict(cx=1187.0, cy=1251.0, r=936.0, bos=(60.0, 120.0))     # @2400x3000 (31 Eki olcum)
+YAY = dict(cx=1187.0, cy=1251.0, r=936.0)                         # @2400x3000 (31 Eki olcum); bos aci araligi eski zeminden olculur
 CERCEVE_PAY = 89                                                   # @2400 yan pay (31 Eki olcum: 89 / 90)
-YILDIZ = (1040, 180, 1340, 480)
+YILDIZ = (1040, 150, 1360, 500)                                    # @2400 tepe yildiz kirpim kutusu (x0, y0, x1, y1)
+YILDIZ_MERKEZ = (1197, 260)                                        # @2400 en parlak nokta (olcum 31 Eki)
 BY_SCALE = int(os.environ.get("BY_SCALE", "2"))                    # by_poster cizim olcegi (12x18 icin sonra esit olcekle 3600x4500)                                    # @2400 tepe yildiz kirpim kutusu (x0, y0, x1, y1)
 
 
@@ -83,6 +84,25 @@ def olc(eski):
     yar = [np.where(p - zz >= (p.max() - zz) / 2)[0] for p in pr]
     yay = dict(fwhm=float(np.median([y.max() - y.min() + 1 for y in yar])), tepe_renk=np.median(np.array(rk), 0).tolist(),
                tepe_fark=float(np.median(tepe)))
+    # yay bos aci araligi (inceleme 31 Eki: 60-120 yanlis): 5 derecelik dilimlerde yay kontrasti (r +- 8 en parlak - r +- 20..30 medyani)
+    kon = []
+    for ang in range(0, 360, 5):
+        t = np.radians(ang + 2.5)
+        v = [g[int(round(YAY["cy"] + (YAY["r"] + d) * np.sin(t))), int(round(YAY["cx"] + (YAY["r"] + d) * np.cos(t)))] for d in range(-30, 31)]
+        v = np.array(v); kon.append(float(v[22:39].max() - np.median(np.r_[v[:11], v[-11:]])))
+    var = np.array(kon) >= 30
+    en, bas, i = 0, 0, 0
+    while i < 72 * 2:                                   # dairesel en uzun bos dilim dizisi
+        if not var[i % 72]:
+            j = i
+            while j < i + 72 and not var[j % 72]:
+                j += 1
+            if j - i > en:
+                en, bas = j - i, i
+            i = j
+        i += 1
+    yay["bos"] = [(bas % 72) * 5.0, ((bas + en) % 72) * 5.0]
+    yay["kontrast_5derece"] = [round(x) for x in kon]
     return dict(cerceve=cer, yay=yay)
 
 
@@ -107,10 +127,10 @@ def yay(img, k, oy, o):
     yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
     d = np.hypot(xx - cx, yy - cy) - r
     ang = (np.degrees(np.arctan2(yy - cy, xx - cx)) + 360) % 360
-    b0, b1 = YAY["bos"]
+    b0, b1 = o["yay"]["bos"]
     # aciklik kenarinda 12 derecelik yumusak sonum (8x10'daki yay uclari gibi incelir)
     uz = np.minimum(np.abs(((ang - b0 + 180) % 360) - 180), np.abs(((ang - b1 + 180) % 360) - 180))
-    icerde = (ang > b0) & (ang < b1)
+    icerde = (ang > b0) & (ang < b1) if b0 < b1 else (ang > b0) | (ang < b1)
     sonum = np.where(icerde, 0.0, np.clip(uz / 12.0, 0, 1))
     cekirdek = np.exp(-0.5 * (d / sig) ** 2)
     hale = 0.18 * np.exp(-0.5 * (d / (sig * 6)) ** 2)                 # hafif isik halesi
@@ -118,21 +138,48 @@ def yay(img, k, oy, o):
     renk = np.array(o["yay"]["tepe_renk"], np.float32)
     out = img.astype(np.float32)
     out = out + m[..., None] * (renk[None, None] - out) * 0.92
-    return np.clip(out, 0, 255).astype(np.uint8), dict(merkez=[round(cx, 1), round(cy, 1)], r=round(r, 1), sigma=round(sig, 2))
+    return np.clip(out, 0, 255).astype(np.uint8), dict(merkez=[round(cx, 1), round(cy, 1)], r=round(r, 1), sigma=round(sig, 2),
+                                                       bos_aci=[b0, b1]), (cekirdek * sonum) > 0.1
+
+
+def yildiz_katmani(eski):
+    """8x10 zeminden YALNIZ tepe yildizi (inceleme 31 Eki: medyan cikarimi cekirdegi bosaltiyor, eski yay / noktalar kopyalaniyordu, kutu
+    kenari sert): yerel zemin = morfolojik acma (elips 45) + bulanik; isik = kirpim - zemin; eski yay bandi (isin disinda) sifirlanir;
+    yalniz yildiz merkezine bagli parca (esik 20) alinir, 5 px genisletilip 2,5 px yumusatilir (kenarda 0)."""
+    x0, y0, x1, y1 = YILDIZ
+    p = eski[y0:y1, x0:x1].astype(np.float32)
+    halka = np.r_[p[:6].reshape(-1, 3), p[-6:].reshape(-1, 3), p[:, :6].reshape(-1, 3), p[:, -6:].reshape(-1, 3)]
+    zem = np.median(halka, 0)[None, None]                              # duz koyu lacivert (cekirdegi bosaltmaz; inceleme 31 Eki)
+    isik = np.clip(p - zem, 0, 255)
+    L = isik.max(2)
+    cx, cy = YILDIZ_MERKEZ[0] - x0, YILDIZ_MERKEZ[1] - y0
+    # eski yay bandi: her sutunda eski y 335-395 (yatay isinin ~300 altinda) en parlak satir, isin disinda 2. derece uydurma
+    xs = np.arange(L.shape[1]); dis = np.abs(xs - cx) > 25
+    r0, r1 = 335 - y0, 395 - y0
+    ys = r0 + np.argmax(L[r0:r1], axis=0)
+    c = np.polyfit(xs[dis], ys[dis], 2); ya = np.polyval(c, xs)
+    yy = np.arange(L.shape[0])[:, None]
+    bant = (np.abs(yy - ya[None]) <= 8) & (np.abs(xs - cx) > 9)[None]
+    L2 = np.where(bant, 0, L)
+    n, lab = cv2.connectedComponents((L2 > 45).astype(np.uint8), 8)        # 45: toz / nokta disarida (olcum 31 Eki)
+    if lab[cy, cx] == 0:
+        raise SystemExit("DUR: yildiz merkezi esigin altinda")
+    m = (lab == lab[cy, cx]).astype(np.uint8)
+    m = cv2.GaussianBlur(cv2.dilate(m, np.ones((5, 5), np.uint8)).astype(np.float32), (0, 0), 2.5)
+    m[:4] = m[-4:] = 0; m[:, :4] = m[:, -4:] = 0
+    return isik * m[..., None], dict(zemin=[round(float(v), 1) for v in zem.ravel()], yay_bandi_polinom=[round(float(v), 6) for v in c], parca_px=int((lab == lab[cy, cx]).sum()))
 
 
 def yildiz(img, k, oy, eski):
     x0, y0, x1, y1 = YILDIZ
-    p = eski[y0:y1, x0:x1].astype(np.float32)
-    zem = cv2.medianBlur(eski[y0:y1, x0:x1], 31).astype(np.float32)    # yerel zemin (yildiz ince: medyan onu siler)
-    isik = np.clip(p - zem, 0, 255)
-    isik[isik.max(2) < 6] = 0                                           # doku gurultusu disarida
+    isik, bilgi = yildiz_katmani(eski)
     w, h = round((x1 - x0) * k), round((y1 - y0) * k)
-    isik = cv2.resize(isik, (w, h), interpolation=cv2.INTER_CUBIC if k > 1 else cv2.INTER_AREA)
+    if k != 1:
+        isik = cv2.resize(isik, (w, h), interpolation=cv2.INTER_CUBIC if k > 1 else cv2.INTER_AREA)
     X, Y = round(x0 * k), round(y0 * k + oy)
     out = img.astype(np.float32)
     out[Y:Y + h, X:X + w] = 255 - (255 - out[Y:Y + h, X:X + w]) * (255 - np.clip(isik, 0, 255)) / 255   # ekran karisimi
-    return np.clip(out, 0, 255).astype(np.uint8), dict(kutu=[X, Y, X + w, Y + h])
+    return np.clip(out, 0, 255).astype(np.uint8), dict(kutu=[X, Y, X + w, Y + h], **bilgi)
 
 
 # ---------------------------------------------------------------- by_poster ogeleri
@@ -196,22 +243,34 @@ def main(argv=None):
     else:
         z2, s = esrgan(kaynak, a.esrgan)
         z12 = cv2.resize(z2, (3600, 5400), interpolation=cv2.INTER_AREA)       # esit olcek (x ve y ayni oran)
-        # ESRGAN kapisi: (a) geri kucultulunce kaynaga sadik (ortalama mutlak fark), (b) karo sinirinda dikis yok (sinir satir / sutun
-        # gradyani komsu satirlarin medyanina gore)
+        # ESRGAN kapisi (inceleme 31 Eki: esik kaynaksizdi): (a) geri kucultmede kaynaga sadakat, BIKUBIK tabanla kiyas (ayni 2x buyut +
+        # geri kucult); p99.9 de yazilir. (b) karo dikisi: her karo sinir parcasinda (384 px) sinir gradyani / komsu satirlarin medyani.
+        # Esikler ONERI (onayli dosyadan olculmedi): ort fark <= 3 x bikubik taban, dikis orani <= 1.5.
         geri = cv2.resize(z2, (2400, 3600), interpolation=cv2.INTER_AREA).astype(np.float32)
-        ort = float(np.abs(geri - kaynak.astype(np.float32)).mean())
-        g = z2.astype(np.float32).mean(2)
-        dy = np.abs(np.diff(g, axis=0)).mean(1); dx = np.abs(np.diff(g, axis=1)).mean(0)
-        sin_y = [dy[y * s - 1] / max(np.median(dy[y * s - 6:y * s + 5]), 1e-3) for y in range(384, 3600, 384)]
-        sin_x = [dx[x * s - 1] / max(np.median(dx[x * s - 6:x * s + 5]), 1e-3) for x in range(384, 2400, 384)]
-        dikis = float(max(sin_y + sin_x))
-        rap["esrgan_kapi"] = dict(geri_ort_fark=round(ort, 3), karo_siniri_en_buyuk_oran=round(dikis, 3),
-                                  pass_=ort <= 3.0 and dikis <= 1.5)
+        kf = kaynak.astype(np.float32)
+        bik = cv2.resize(cv2.resize(kaynak, (4800, 7200), interpolation=cv2.INTER_CUBIC), (2400, 3600), interpolation=cv2.INTER_AREA)
+        fe, fb = np.abs(geri - kf).max(2), np.abs(bik.astype(np.float32) - kf).max(2)
+        g = z2.astype(np.float32).mean(2); oran = []
+        for y in range(384, 3600, 384):
+            for x in range(0, 2400, 384):
+                Y, X0, X1 = y * s, x * s, min(4800, (x + 384) * s)
+                d = np.abs(np.diff(g[Y - 6:Y + 6, X0:X1], axis=0)).mean(1)
+                oran.append(d[5] / max(float(np.median(np.r_[d[:4], d[7:]])), 1e-3))
+        for x in range(384, 2400, 384):
+            for y in range(0, 3600, 384):
+                X, Y0, Y1 = x * s, y * s, min(7200, (y + 384) * s)
+                d = np.abs(np.diff(g[Y0:Y1, X - 6:X + 6], axis=1)).mean(0)
+                oran.append(d[5] / max(float(np.median(np.r_[d[:4], d[7:]])), 1e-3))
+        rap["esrgan_kapi"] = dict(geri_ort_fark=round(float(fe.mean()), 3), geri_p999=round(float(np.percentile(fe, 99.9)), 2),
+                                  bikubik_ort_fark=round(float(fb.mean()), 3), bikubik_p999=round(float(np.percentile(fb, 99.9)), 2),
+                                  karo_dikis_en_buyuk=round(float(max(oran)), 3), karo_parca=len(oran),
+                                  esik="ONERI: ort <= 3 x bikubik, dikis <= 1.5 (onayli dosyadan olculmedi)")
+        rap["esrgan_kapi"]["pass_"] = bool(fe.mean() <= 3 * max(fb.mean(), 0.1) and max(oran) <= 1.5)
         if not rap["esrgan_kapi"]["pass_"]:
             raise SystemExit(f"DUR: ESRGAN kapisi {rap['esrgan_kapi']}")
     Image.fromarray(z12).save(out / "ZEMIN_12x18_esrgan.png")
     k, oy = 1.5, 450
-    z, rc = cerceve(z12, k, o); z, ry = yay(z, k, oy, o); z, rs = yildiz(z, k, oy, eski)
+    z, rc = cerceve(z12, k, o); z, ry, yay12 = yay(z, k, oy, o); z, rs = yildiz(z, k, oy, eski)
     bp = by_poster(a.kod, BY_SCALE, a.pair, a.n1, a.n2)
     blok = z[oy:oy + 4500]
     buyuk = cv2.resize(blok, (2400 * BY_SCALE, 3000 * BY_SCALE), interpolation=cv2.INTER_LANCZOS4)
@@ -222,15 +281,19 @@ def main(argv=None):
     son = z.copy()
     son[oy:oy + 4500] = np.clip(blok * (1 - mk) + ciz * mk, 0, 255).astype(np.uint8)
     Image.fromarray(son).save(out / "STARLIT_12x18.jpg", quality=95, subsampling=0, dpi=(300, 300))
-    rap["12x18"] = dict(boyut=[3600, 5400], esrgan_olcek=s, esit_olcek=k, dikey_ofset=oy, cerceve=rc, yay=ry, yildiz=rs,
+    ogem = np.zeros(son.shape[:2], bool); ogem[oy:oy + 4500] = cv2.dilate(fark.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
+    kes12 = int((ogem & yay12).sum())                                  # KAPI: yay hicbir ogeye (8 px pay) degmez
+    rap["12x18"] = dict(yay_oge_kesisim_px=kes12, boyut=[3600, 5400], esrgan_olcek=s, esit_olcek=k, dikey_ofset=oy, cerceve=rc, yay=ry, yildiz=rs,
                         oge_alani_px=int((fark > 0).sum()))
     # ---- 8x10 (ayni ayarlar, olcek 1)
     z8 = kaynak[300:3300].copy()
-    z8, rc8 = cerceve(z8, 1.0, o); z8, ry8 = yay(z8, 1.0, 0, o); z8, rs8 = yildiz(z8, 1.0, 0, eski)
+    z8, rc8 = cerceve(z8, 1.0, o); z8, ry8, yay8 = yay(z8, 1.0, 0, o); z8, rs8 = yildiz(z8, 1.0, 0, eski)
     bp1 = by_poster(a.kod, 1, a.pair, a.n1, a.n2)
     s8 = ogeler(bp1, z8)
     Image.fromarray(s8).save(out / "STARLIT_8x10.jpg", quality=95, subsampling=0, dpi=(300, 300))
-    rap["8x10"] = dict(boyut=[2400, 3000], kaynak_kirpim="satir 300:3300 (olcek yok)", cerceve=rc8, yay=ry8, yildiz=rs8)
+    oge8 = cv2.dilate((np.abs(s8.astype(np.int16) - z8.astype(np.int16)).max(2) > 2).astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
+    kes8 = int((oge8 & yay8).sum())
+    rap["8x10"] = dict(yay_oge_kesisim_px=kes8, boyut=[2400, 3000], kaynak_kirpim="satir 300:3300 (olcek yok)", cerceve=rc8, yay=ry8, yildiz=rs8)
     # ---- kontak (ayni yukseklik, yalniz kucultme)
     h = 1500
     a12 = Image.fromarray(son).resize((round(3600 * h / 5400), h), Image.LANCZOS)
@@ -239,8 +302,10 @@ def main(argv=None):
     kt.save(out / "KONTAK_ORNEK3.jpg", quality=88)
     kt.resize((kt.width * 450 // kt.height, 450), Image.LANCZOS).save(out / "ONIZLEME_KUCUK.jpg", quality=70)
     (out / "OLCUM.json").write_text(json.dumps(rap, indent=1), encoding="utf-8")
+    rap["sonuc"] = "PASS" if kes12 == 0 and kes8 == 0 else "FAIL (yay ogeye degiyor)"
+    (out / "OLCUM.json").write_text(json.dumps(rap, indent=1), encoding="utf-8")
     print(json.dumps(rap, indent=1))
-    return 0
+    return 0 if rap["sonuc"] == "PASS" else 1
 
 
 if __name__ == "__main__":
