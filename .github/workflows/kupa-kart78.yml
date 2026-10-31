@@ -132,13 +132,15 @@ jobs:
           else echo "$C" | tr ',' '\n' > _secim.txt; fi
           ONC=""
           if [ -n "$OD" ]; then   # gece kosusu: yeniden uretilmeyen ciftler (yeni uretilenin USTUNE yazilmaz)
+            echo "$C" | tr ',' '\n' > _istenen.txt   # inceleme 31 Eki: istenen her cift icin taze SONUC zorunlu (topla --yeni)
             mkdir -p _gece
             rclone copy "gdrive:ASTROLOVE/TEMP/KUPA_KART78/$OD" _gece --include "*_K0*.jpg" --include "SONUC_*.json" --include "MANIFEST.csv" \
               --exclude "KONTAK_*" --max-depth 1 --transfers 8 -q || { echo "::error::gece klasoru indirilemedi"; exit 1; }
+            for c in $(cat _istenen.txt); do [ -f "_d/SONUC_${c}.json" ] || { echo "::error::$c icin taze SONUC yok (is kosmadi / coktu); birlestirme yok"; exit 1; }; done
             for f in _gece/*_K0*.jpg _gece/SONUC_*.json; do b=$(basename "$f"); c=${b%%_K0*}; c=${c#SONUC_}; c=${c%.json}
               [ -f "_d/SONUC_${c}.json" ] || cp -n "$f" "_d/$b"; done
             echo "gece: $(ls _gece | wc -l) dosya; birlesik _d: $(ls _d/SONUC_*.json | wc -l) SONUC"
-            ONC="--onceki _gece/MANIFEST.csv --onceki-ad TEMP/KUPA_KART78/$OD"
+            ONC="--onceki _gece/MANIFEST.csv --onceki-ad TEMP/KUPA_KART78/$OD --yeni _istenen.txt"
           fi
           REF=""
           if [ -n "$R" ] && grep -qx CANCER_LIBRA _secim.txt; then
@@ -157,4 +159,4 @@ jobs:
           echo "Cikti: TEMP/KUPA_KART78/$D ($(find _o -type f | wc -l) dosya), RC $RC" | tee -a "$GITHUB_STEP_SUMMARY"
           [ "$RC" = 0 ] || { echo "::error::kupa kart 78 PASS degil"; exit 1; }
       - if: always()
-        run: rm -rf _d _o _ref _gece ~/.config/rclone
+        run: rm -rf _d _o _ref _gece _istenen.txt ~/.config/rclone

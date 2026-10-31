@@ -64,7 +64,7 @@ def kur(t, degis=(), istisna=True, gece=False):
 
 def topla(t):
     rc = M.main(["topla", "--dir", str(t / "_d"), "--secim", str(t / "secim.txt"), "--out", str(t / "o"), "--ciftler-csv",
-                 str(t / "ciftler.csv"), "--onceki", str(t / "once.csv"), "--onceki-ad", "GECE"])
+                 str(t / "ciftler.csv"), "--onceki", str(t / "once.csv"), "--onceki-ad", "GECE", "--yeni", str(t / "secim.txt")])
     deg = list(csv.DictReader(open(t / "o" / "DEGISIM.csv")))
     return rc, deg, (t / "o" / "OZET.md").read_text(), list(csv.DictReader(open(t / "o" / "MANIFEST.csv")))
 
@@ -89,6 +89,10 @@ try:
     ms = next(r for r in man if r["cift"] == "CANCER_LIBRA" and r["kart"] == "K03")
     k("T3b izinsiz fark + gece dosyasi -> GECE_DOSYASI, MANIFEST sha = gece, PASS", rc == 0 and ms["sha256"] == gs
       and hashlib.sha256((W0 / "b2" / "o" / "CANCER_LIBRA_K03.jpg").read_bytes()).hexdigest() == gs and "GECE_DOSYASI" in oz, (rc, ms))
+    so = next(x for x in json.loads((W0 / "b2" / "o" / "SONUC_CANCER_LIBRA.json").read_text())["kartlar"] if x["kart"] == "K03")
+    k("T3c SONUC sevk edilen gece dosyasinin sha'si + yeniden_sha256 + isaret (inceleme 31 Eki)", so["sha256"] == gs
+      and so.get("gece_dosyasi") is True and so.get("yeniden_sha256") not in (None, gs), so)
+    k("T3d OZET yeniden uretilen cift listesi", "Bu kosuda yeniden uretilen ciftler (3): CANCER_LIBRA, LEO_LEO, GEMINI_SCORPIO" in oz)
     rc, deg, oz, _ = topla(kur(W0 / "c", degis=izin - {("LEO_LEO", "K02")}))
     k("T4 ayni burc K02 degismedi -> FAIL", rc == 1 and "LEO_LEO K02 degismedi" in oz, rc)
 finally:

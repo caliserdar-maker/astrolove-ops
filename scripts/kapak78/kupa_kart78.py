@@ -245,6 +245,7 @@ def topla(a):
         # Izinsiz farkta yeni uretim KULLANILMAZ: gece dosyasi aynen alinir (fotografli kartlar kosucuya gore bit duzeyinde farkli
         # cikabiliyor, 31 Eki kosu 41179645300), fark olculur ve raporlanir. Gece dosyasi yoksa / sha tutmazsa FAIL.
         once = {(r["cift"], r["kart"]): r for r in csv.DictReader(open(a.onceki, encoding="utf-8"))}
+        gece_kart = {}
         gd = Path(a.onceki).parent
         for r in satirlar:
             o = once.get((r["cift"], r["kart"]))
@@ -260,10 +261,22 @@ def topla(a):
                     olc = kiyas(y, g) if y.is_file() else {}
                     subprocess.run(["cp", str(g), str(y)], check=True)
                     r["sha256"], r["neden"] = o["sha256"], (f"gece dosyasi (yeniden uretim farki ort {olc.get('ort')}, max {olc.get('max')})")
+                    gece_kart.setdefault(r["cift"], {})[r["kart"]] = (o["sha256"], olc)
             if izin and r["kart"] == "K02" and r["cift"] in ayni and ayni_sha:
                 deg_fail.append(f"{r['cift']} K02 degismedi")
             degisim.append(dict(cift=r["cift"], kart=r["kart"], once=(o or {}).get("sha256", ""), simdi=r["sha256"], tur=tur,
                                 yeniden_ort=olc.get("ort", ""), yeniden_max=olc.get("max", "")))
+        for c, kk in gece_kart.items():   # inceleme 31 Eki: SONUC sevk edilen (gece) dosyayla ayni sha'yi gostersin
+            f = out / f"SONUC_{c}.json"
+            if f.exists():
+                k = json.loads(f.read_text(encoding="utf-8"))
+                for x in k.get("kartlar") or []:
+                    if x["kart"] in kk:
+                        x["yeniden_sha256"], x["sha256"] = x["sha256"], kk[x["kart"]][0]
+                        x["gece_dosyasi"], x["yeniden_fark"] = True, kk[x["kart"]][1]
+                f.write_text(json.dumps(k, ensure_ascii=False, indent=1), encoding="utf-8")
+        yeni = [x.strip() for x in (Path(a.yeni).read_text().split() if a.yeni else []) if x.strip()]
+        deg_fail += [f"{c} istendi ama 78 listesinde yok" for c in yeni if c not in sira]
         with open(out / "DEGISIM.csv", "w", newline="", encoding="utf-8") as fh:
             w = csv.DictWriter(fh, fieldnames=["cift", "kart", "once", "simdi", "tur", "yeniden_ort", "yeniden_max"])
             w.writeheader(); w.writerows(degisim)
@@ -302,7 +315,8 @@ def topla(a):
             from collections import Counter
             say = Counter(d["tur"] for d in degisim)
             gm = [d for d in degisim if d["tur"] == "GECE_DOSYASI"]
-            fh.write(f"## Gece kosusuyla sha kiyasi ({a.onceki_ad or a.onceki})\n\nAYNI {say['AYNI']} | IZINLI_DEGISIM {say['IZINLI_DEGISIM']} | "
+            fh.write(f"## Gece kosusuyla sha kiyasi ({a.onceki_ad or a.onceki})\n\nBu kosuda yeniden uretilen ciftler ({len(yeni)}): "
+                     f"{', '.join(yeni) or 'belirtilmedi'}. Digerleri gece dosyasi.\n\nAYNI {say['AYNI']} | IZINLI_DEGISIM {say['IZINLI_DEGISIM']} | "
                      f"GECE_DOSYASI {say['GECE_DOSYASI']} | IZINSIZ_DEGISIM {say['IZINSIZ_DEGISIM']}\n\n"
                      f"Izinsiz fark cikan {len(gm)} kartta yeni uretim kullanilmadi, gece dosyasi aynen alindi (MANIFEST sha = gece). Yeniden uretim "
                      f"farki en buyuk: ort {max([float(d['yeniden_ort'] or 0) for d in gm] or [0])}, max {max([int(d['yeniden_max'] or 0) for d in gm] or [0])}.\n\n"
@@ -346,6 +360,7 @@ def main(argv=None):
     t.add_argument("--kaynak", default="")
     t.add_argument("--onceki", default="", help="gece MANIFEST.csv (sha kaniti)")
     t.add_argument("--onceki-ad", default="")
+    t.add_argument("--yeni", default="", help="bu kosuda yeniden uretilmesi istenen ciftler (dosya); her biri icin taze SONUC zorunlu")
     a = ap.parse_args(argv)
     return uret(a) if a.komut == "uret" else topla(a)
 
