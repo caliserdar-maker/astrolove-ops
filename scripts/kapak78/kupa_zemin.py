@@ -6,7 +6,7 @@ kupa pikselleri aynen kalir; yalniz zemin (duvar + masa) duz kart rengine cekili
 - golge: zemin parlakligi / yerel zemin kestirimi (kupa bolgesi Telea ile doldurulmus sahnenin 101 px medyani; duvar-masa siniri
   korunur). Golge = 1 - oran (0..1), yalniz kupaya YAKIN_PX icinde, uzaklikla dogrusal sonumlenir; uzakta zemin tam #F5F0E7.
 - kenar: maske 1 px asindirilir ve 1,2 px yumusatilir (eski zemin rengi hale olarak kalmasin).
-- GOVDE KORUMASI (Serdar 31 Eki, K05 kenar kusuru): zemin-benzeri / sicak ton oyma YALNIZ kupa govdesi disinda yapilir. Govde = sahnenin
+- GOVDE KORUMASI (Serdar 31 Eki, K05 kenar kusuru): oyma sonrasi GrabCut'in kupa saydigi govde pikselleri maskeye geri eklenir. Govde = sahnenin
   silindir geometrisi (temiz/kupa-orchard 0196e37a varlik/gorunum/geo_*.json: xl, xr, yt, yb, ust / alt elips yari eksenleri;
   kapak_canva3 baskiyi ayni geometriyle giydirir) + GOVDE_PAY px. Eski kural parlak kenar yansimasini (R > B, dis zeminle bitisik)
   masa golgesi sanip oyuyordu (m15 sag kenar, 31 Eki olcum). Masa golgesi ve kulp ici govde disinda: onlar eskisi gibi cikar.
@@ -62,6 +62,7 @@ def esitle(im, geo):
     """PIL RGB sahne + silindir geometrisi (GEO) -> (PIL RGB zemini esitlenmis sahne, kupa maskesi uint8)"""
     a = np.asarray(im.convert("RGB")).astype(np.float32)
     k = maske(a)
+    k_gc = k.copy()                                              # GrabCut kupa maskesi (govde korumasi icin)
     lum = a @ np.float32([0.299, 0.587, 0.114])
     dol = cv2.inpaint(a.astype(np.uint8), cv2.dilate(k, np.ones((25, 25), np.uint8)), 9, cv2.INPAINT_TELEA)
     trgb = cv2.medianBlur(dol, 101).astype(np.float32)
@@ -77,14 +78,19 @@ def esitle(im, geo):
     # yalniz dis zeminle bitisik zemin-benzeri bolgeler cikarilir (kupa ici beyaz alanlar oyulmasin)
     n2, lab2 = cv2.connectedComponents((zeminsi | (k == 0)).astype(np.uint8), connectivity=8)
     disa = np.unique(lab2[k == 0])
-    gv = govde(a.shape, geo).astype(bool)                       # govde ASLA oyulmaz (Serdar 31 Eki)
-    k = (k.astype(bool) & ~(np.isin(lab2, disa[disa > 0]) & ~gv)).astype(np.uint8)
+    k = (k.astype(bool) & ~np.isin(lab2, disa[disa > 0])).astype(np.uint8)
     n, lab, st, _ = cv2.connectedComponentsWithStats(k, 8)
     k = (lab == 1 + int(np.argmax(st[1:, 4]))).astype(np.uint8)
     k = cv2.morphologyEx(k, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
+    # GOVDE KORUMASI (Serdar 31 Eki): oyma eskisi gibi tam kosar (govde disi sonuc onayli ciktiyla ayni; kenar seridi oyulunca govdeden
+    # kopan masa parcasi en buyuk parca adiminda yine atilir), sonra GrabCut'in kupa saydigi GOVDE pikselleri geri eklenir: govde asla
+    # zemin sayilmaz. Golge mesafesi eski (govde eklenmemis) maskeden: govde disi golge deseni onayli ciktiyla ayni (yeni maskeyle 1-2 px
+    # kayan golge, kart olceginde kopuk ton kapisina takilan 1 px benekler veriyordu; sade CANCER K05 2 px, 31 Eki). (Oymayi govdede baslatmamak masa parcasini govdeye bagli birakiyordu: sade CANCER K05 kopuk ton 10 px, 31 Eki.)
+    k_eski = k                                                   # golge alani eski maskeden: govde disi golge onayli ciktiyla AYNI
+    k = (k.astype(bool) | (k_gc.astype(bool) & govde(a.shape, geo).astype(bool))).astype(np.uint8)
     tah = trgb @ np.float32([0.299, 0.587, 0.114])
     oran = np.clip(lum / np.maximum(tah, 1), 0, 1)
-    uz = cv2.distanceTransform((1 - k).astype(np.uint8), cv2.DIST_L2, 5)
+    uz = cv2.distanceTransform((1 - k_eski).astype(np.uint8), cv2.DIST_L2, 5)
     golge = (1 - oran) * np.clip(1 - uz / YAKIN_PX, 0, 1)
     golge = cv2.GaussianBlur(golge, (0, 0), 2.0)
     zem = ZEMIN[None, None, :] * (1 - golge[..., None])
