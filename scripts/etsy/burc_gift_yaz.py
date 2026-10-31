@@ -405,11 +405,12 @@ def baski_mi(t, by_ids=()):
     c = by_sku.coz(t.get("sku"))
     if "PRINT8X10" in sku or (c and not c["dijital"]):
         return True
-    if str(t.get("listing_id")) not in {str(i) for i in by_ids} or sku.endswith("-DIGITAL"):
-        return False
     fmt = " ".join(str(v.get("formatted_value") or v.get("value") or "") for v in t.get("variations") or []
                    if str(v.get("formatted_name") or v.get("property_name") or "").strip().lower() == "format").lower()
-    return "shipped print" in fmt or fmt.strip() == "print"
+    fmt_baski = "shipped print" in fmt or fmt.strip() == "print"
+    if c or str(t.get("listing_id")) in {str(i) for i in by_ids}:
+        return fmt_baski   # SKU -DIGITAL ama Format Print (celiski) -> baski say (yazim kapisi, fail-closed; inceleme 31 Eki)
+    return False
 
 
 def siparis_say(api, shop, by_ids, toplam=True):

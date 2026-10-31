@@ -437,7 +437,32 @@ def birim():
     mp = K.metin_plani({"description": "Name Under Leo, Name Under Leo"}, PER("Leo", "Leo") + [dict(question_id=78, question_text="Gift note",
                                                                                                      question_type="text_input")], "Leo", "Leo")
     kontrol("metin: birden fazla kisisellestirme sorusu -> BLOK", any("tek soru" in h for h in mp["hata"]), mp["hata"])
-    mp = K.metin_plani({"description": "Left name, Right name"}, [dict(instructions="Left name")], "Leo", "Leo")
+    canli = "1. Left name (max 10 letters)\n2. Right name (max 10 letters)\n3. Message (max 30 characters or blank)"   # 12 ilan canli (31 Eki)
+    y, d = K.isim_degistir(canli, "Leo")
+    kontrol("metin: canli Left name / Right name -> First Name / Second Name (Serdar 31 Eki 7a)", d == "DEGISTI" and y ==
+            "1. First Name (max 10 letters)\n2. Second Name (max 10 letters)\n3. Message (max 30 characters or blank)", y)
+    kontrol("metin: Left / Right sayisi tutmaz -> TEK", K.isim_degistir("Left name, Left name, Right name", "Leo")[1] == "TEK")
+    mp = K.metin_plani({"description": "1. Left name (up to 10 letters)\n2. Right name (up to 10 letters)"},
+                       [dict(question_id=5, question_text="Personalization", question_type="text_input", instructions=canli)], "Leo", "Leo")
+    kontrol("metin: canli Left / Right aciklama + talimat -> yaz, ikisi de First / Second", mp["yaz"] and not mp["hata"]
+            and "First Name" in mp["desc_sonra"] and "Left name" not in mp["desc_sonra"]
+            and mp["pers_sonra"][0]["instructions"].startswith("1. First Name (max 10 letters)"), mp["hata"])
+    mp = K.metin_plani({"description": "First Name, Second Name"},
+                       [dict(question_id=5, question_text="Personalization", question_type="text_input", instructions=canli)], "Leo", "Leo")
+    kontrol("metin: aciklama ZATEN ama talimat Left / Right -> talimat yine cevrilir (sessiz kalmaz)", mp["yaz"]
+            and mp["pers_sonra"][0]["instructions"].startswith("1. First Name"), mp)
+    import kupa_en_ornek as TR   # canli kalipta EN (eski foto numaralari)
+    canli_en = TR.en("Leo", "Leo", "Leo gifts")
+    mp = K.metin_plani({"description": canli_en}, [dict(question_id=5, question_text="Personalization", question_type="text_input",
+                                                         instructions=canli)], "Leo", "Leo")
+    import ru_kupa as RK
+    kontrol("metin: ayni burc hedef = ru_kupa.kupa_en (foto + Latin + isim; tek kaynak, inceleme 31 Eki)", mp["yaz"] and not mp["hata"]
+            and mp["desc_sonra"] == RK.kupa_en(canli_en, "Leo", "Leo")[0], mp["hata"])
+    canli_f = TR.en("Cancer", "Libra", "Cancer gifts or Libra gifts")
+    mp = K.metin_plani({"description": canli_f}, [], "Cancer", "Libra")
+    kontrol("metin: farkli burc hedef = galeri_en (foto + Latin), talimat yok", mp["yaz"] and mp["desc_sonra"] == RK.galeri_en(RK.norm(canli_f))[0]
+            and mp["pers_sonra"] is None, mp["hata"])
+    mp = K.metin_plani({"description": "Your names"}, [dict(instructions="Your names")], "Leo", "Leo")
     kontrol("metin: kalip yok -> hata (elle)", any("kalibi" in h for h in mp["hata"]))
     kontrol("metin: farkli burc yazim yok", K.metin_plani({"description": "Name Under Leo"}, [], "Aries", "Leo")["yaz"] is False)
     kontrol("alt metin: YASAK_EN / RU_YASAK kapisi", not K.alt_gecerli("mug printed by Printful") and not K.alt_gecerli("lasts 50 years")

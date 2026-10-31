@@ -22,7 +22,10 @@ def sku(cift_kod, stil, boy, dijital):
 
 
 def coz(s):
-    m = RX.match((s or "").strip())
+    """Buyuk / kucuk harf duyarsiz (inceleme 31 Eki: BY-CAN_LIB-ST-8X10 da cozulur)."""
+    t = (s or "").strip().upper()
+    t = re.sub(r"-(\d+)X(\d+)(?=-DIGITAL$|$)", r"-\1x\2", t)
+    m = RX.match(t)
     if not m or m.group(2) not in KOD_STIL:
         return None
     stil, kod, dig = KOD_STIL[m.group(2)], m.group(3), bool(m.group(4))

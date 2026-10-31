@@ -264,10 +264,17 @@ def hedef_kur(r, kaynak, alt):
 
 # ---------------------------------------------------------------- ayni burc metni
 def isim_degistir(metin, burc):
-    """ "Name Under <Burc>" ciftleri -> "First Name" / "Second Name" (sirayla). -> (yeni, durum DEGISTI | ZATEN | YOK | TEK)"""
+    """ "Name Under <Burc>" ciftleri ya da canli "Left name" / "Right name" (Serdar 31 Eki 7a; 12 ilanin canli talimati, kupa-yd-oku
+    41183072842) -> "First Name" / "Second Name" (sirayla). -> (yeni, durum DEGISTI | ZATEN | YOK | TEK)"""
     metin = metin or ""
     m = list(re.finditer(rf"\bName\s+Under\s+{re.escape(burc)}\b", metin, re.I))
     if not m:
+        sol = list(re.finditer(r"\bLeft name\b", metin, re.I)); sag = list(re.finditer(r"\bRight name\b", metin, re.I))
+        if sol or sag:
+            if len(sol) != len(sag) or any(x.start() > y.start() for x, y in zip(sol, sag)):
+                return metin, "TEK"
+            yeni = re.sub(r"\bRight name\b", "Second Name", re.sub(r"\bLeft name\b", "First Name", metin, flags=re.I), flags=re.I)
+            return yeni, "DEGISTI"
         return metin, ("ZATEN" if "First Name" in metin and "Second Name" in metin else "YOK")
     if len(m) % 2:
         return metin, "TEK"
@@ -282,12 +289,33 @@ def soru_norm(q):
     return {k: q.get(k) for k in SORU_ALAN if q.get(k) not in (None, [], "") or k in ("instructions", "required")}
 
 
+def hedef_en(d0, a, b):
+    """Aciklama hedefi TEK KAYNAK ru_kupa (inceleme 31 Eki): canli kalip (See photo atiflari) varsa galeri_en (foto numaralari yeni
+    galeri sirasina + Latin harf notu, Serdar 31 Eki 5a / 6a); ayni burcta isim satirlari. -> (yeni, durum, hata[])."""
+    import ru_kupa as RK
+    h, deg = [], []
+    if "See photo" in d0:
+        try:
+            d0, deg = RK.galeri_en(d0)
+        except ValueError as e:
+            return d0, "TEK", [f"metin: galeri foto / Latin kalibi beklenen degil ({e}); yazim yok"]
+    if a.lower() == b.lower():
+        d1, dd = isim_degistir(d0, a)
+    else:
+        d1, dd = d0, "YOK"
+    return d1, ("DEGISTI" if deg and dd != "TEK" else dd), h
+
+
 def metin_plani(L, per, a, b):
-    """-> dict(yaz, desc_once, desc_sonra, pers_once, pers_sonra, durum, hata). Yalniz ayni burc ciftinde yazim."""
-    if a.lower() != b.lower():
-        return dict(yaz=False, durum="FARKLI_BURC", hata=[])
+    """-> dict(yaz, desc_once, desc_sonra, pers_once, pers_sonra, durum, hata). Aciklama: hedef_en (78 ilan; foto + Latin + ayni burcta
+    isim). Kisisellestirme talimati yalniz ayni burcta (isim satirlari)."""
     d0 = html.unescape(L.get("description") or "")
-    d1, dd = isim_degistir(d0, a)
+    if a.lower() != b.lower():
+        d1, dd, h = hedef_en(d0, a, b)
+        h += [f"metin: yeni aciklamada yasak ifade / tire {yasak_bul(d1)[:5]}; yazim yok"] if dd == "DEGISTI" and yasak_bul(d1) else []
+        return dict(yaz=dd == "DEGISTI" and not h, durum="FARKLI_BURC" + ("+DEGISTI" if dd == "DEGISTI" else ""), hata=h,
+                    desc_once=d0, desc_sonra=d1 if dd == "DEGISTI" else None, pers_once=None, pers_sonra=None)
+    d1, dd, h0 = hedef_en(d0, a, b)
     q0 = [soru_norm(q) for q in per or []]
     q1, qd = copy.deepcopy(q0), []
     for q in q1:
@@ -295,12 +323,12 @@ def metin_plani(L, per, a, b):
             q[k], s = isim_degistir(q.get(k) or "", a) if q.get(k) is not None else (q.get(k), "YOK")
             qd.append(s)
     durum = [dd] + qd
-    hata = []
+    hata = list(h0)
     if "TEK" in durum:
-        hata.append("metin: 'Name Under' tek sayida (cift degil); yazim yok")
+        hata.append("metin: 'Name Under' tek sayida ya da Left / Right name cifti bozuk (cift degil); yazim yok")
     yaz = "DEGISTI" in durum
     if not yaz and "ZATEN" not in durum:
-        hata.append("metin: ayni burc ama 'Name Under' kalibi da 'First Name / Second Name' de yok; elle bakilmali")
+        hata.append("metin: ayni burc ama 'Name Under' / 'Left name - Right name' kalibi da 'First Name / Second Name' de yok; elle bakilmali")
     if not per:
         hata.append("metin: kisisellestirme sorusu okunamadi (0 soru)")
     if len(per or []) > 1:

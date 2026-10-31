@@ -5,6 +5,8 @@ name: yd-yapi-yaz
 # mod kontrol: SALT OKUMA (ilan basina 3 GET). yaz / geri-al / profil / profil-geri-al: ETSY'YE YAZAR, onay sozcugu zorunlu
 # (SERDAR_YD_YAPI_YAZ / SERDAR_YD_YAPI_GERI_AL / SERDAR_YD_PROFIL / SERDAR_YD_PROFIL_GERI_AL). sadece: pilot (yaz modunda bos ise tum=evet
 # zorunlu, inceleme 30 Eki madde 7); haric: plandan atlanir.
+# PILOT ADIMI (Serdar 31 Eki karar 4a): ilk yazim pilot ilanla (sadece=<pilot>); envanter PUT sonrasi okumayla 513 Style + 514 Format +
+# 516 Size kabulu dogrulanir (boy_kabul); FAIL -> otomatik geri alma + kosu durur. tum=evet kosusunda da pilot her zaman ilk ilandir.
 # Ilk FAIL (otomatik geri alma sonrasi) / KOTA / okuma hatasinda kosu durur. Cikti Drive TEMP/YD_YAPI/YAZ_<mod>_<run>_<deneme>/.
 permissions:
   actions: read

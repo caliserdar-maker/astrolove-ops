@@ -4,6 +4,7 @@ Girdi --canli: kupa-yd-oku KUPA_CANLI.json (Etsy salt okuma: listing_id, cift, s
 Cikti --out: KUPA_RU_78.csv (cift, listing_id, state, en_degisim, durum, hata, paragraf), KUPA_RU_78.json (en_canli, en_hedef,
 ru_yeni, ru_canli), ORNEK_YANYANA.html (--ornek ciftleri, paragraf paragraf EN | RU), OZET.md. Cikis 0 yalniz 78/78 PASS."""
 import argparse
+from collections import Counter
 import csv
 import html
 import json
@@ -22,14 +23,20 @@ def yanyana(kayitlar):
     for k in kayitlar:
         en = [p for p in k["en_hedef"].split("\n\n") if p.strip()]
         ru = [p for p in k["ru_yeni"].split("\n\n") if p.strip()]
+        ec = [p for p in k["en_canli"].split("\n\n") if p.strip()]
         h.append(f"<h2>{html.escape(k['cift'])} (ilan {html.escape(k['listing_id'])}; EN degisim: {k['en_degisim']}; "
                  f"kontrol {k['durum']})</h2>")
-        h.append("<table border='1' cellpadding='6' style='border-collapse:collapse;width:100%'><tr><th>#</th><th>EN</th><th>RU</th></tr>")
-        for i in range(max(len(en), len(ru))):
-            e = html.escape(en[i] if i < len(en) else "").replace("\n", "<br>")
+        h.append("<table border='1' cellpadding='6' style='border-collapse:collapse;width:100%'><tr><th>#</th><th>EN canli (bugun)</th>"
+                 "<th>EN hedef</th><th>RU hedef</th></tr>")
+        for i in range(max(len(en), len(ru), len(ec))):
+            c = ec[i] if i < len(ec) else ""
+            e = en[i] if i < len(en) else ""
             r = html.escape(ru[i] if i < len(ru) else "").replace("\n", "<br>")
-            h.append(f"<tr><td>{i + 1}</td><td style='width:48%;vertical-align:top'>{e}</td>"
-                     f"<td style='width:48%;vertical-align:top'>{r}</td></tr>")
+            renk = " background:#fff3c4;" if c != e else ""
+            h.append(f"<tr><td>{i + 1}{' DEGISTI' if c != e else ''}</td>"
+                     f"<td style='width:31%;vertical-align:top;color:#777'>{html.escape(c).replace(chr(10), '<br>')}</td>"
+                     f"<td style='width:31%;vertical-align:top;{renk}'>{html.escape(e).replace(chr(10), '<br>')}</td>"
+                     f"<td style='width:31%;vertical-align:top'>{r}</td></tr>")
         h.append("</table>")
     h.append("</body></html>")
     return "\n".join(h)
@@ -58,11 +65,13 @@ def main(argv=None):
             en, deg, ru, kon = R.norm(x.get("description")), "?", "", dict(pass_=False, hata=[], paragraf_en=0, paragraf_ru=0)
         else:
             try:
+                deg_g = R.galeri_en(R.norm(x.get("description")))[1]
                 en, deg = R.kupa_en(x.get("description"), b1, b2)
+                deg = "+".join(deg_g + (["isim"] if deg == "DEGISTI" else [])) or "AYNI"
             except ValueError as e:   # foto / Latin capasi bulunamadi: canli EN beklenen kalipta degil
                 en, deg = R.norm(x.get("description")), "?"
                 hata.append(f"hedef EN kurulamadi: {e}")
-            if b1 == b2 and deg == "YOK":
+            if b1 == b2 and "isim" not in deg and "First Name" not in en:
                 hata.append("ayni burc: isim satiri cevrilemedi (Left / Right ya da Name Under bulunmadi)")
             hata += R.hedef_kapisi(en)   # Serdar 31 Eki 5a / 6a: yeni foto numaralari + Latin notu
             ru, kon = R.kur(en)
@@ -86,12 +95,14 @@ def main(argv=None):
     with open(out / "OZET.md", "w", encoding="utf-8") as f:
         f.write(f"# Kupa RU aciklama 78 (Etsy'ye yazilmadi)\n\nkaynak: {a.canli} (kupa-yd-oku, Etsy salt okuma)\n"
                 f"ilan {len(satir)} | PASS {n_pass} | FAIL {len(satir) - n_pass} | ayni burc {len(ayni)} "
-                f"(EN isim satiri DEGISTI {sum(s['en_degisim'] == 'DEGISTI' for s in ayni)})\n"
+                f"(EN isim satiri degisen {sum('isim' in s['en_degisim'] for s in ayni)})\n"
+                f"EN degisim (canli -> hedef): {dict(Counter(s['en_degisim'] for s in satir))}\n"
                 f"RU canliyla ayni: {sum(t['ru_yeni'] == t['ru_canli'] for t in tam)} / {len(tam)}\n\n")
         for s in satir:
             if s["durum"] != "PASS":
                 f.write(f"- FAIL {s['cift']}: {s['hata']}\n")
-        f.write("\nAyni burcta hedef EN: isim satirlari Left name / Right name -> First Name / Second Name (Serdar 30 Eki). "
+        f.write("\nHedef EN: foto numaralari yeni galeri sirasina (stil 6-14, boy 4, kisisellestirme 3) + Latin harf notu (Serdar 31 Eki 5a / 6a); "
+                "ayni burcta isim satirlari Left name / Right name -> First Name / Second Name (Serdar 30 Eki). "
                 "EN ve RU yazimi Serdar + Lena onayindan sonra, ayri onayla.\n")
     print(f"KUPA RU 78: PASS {n_pass}/{len(satir)}")
     return 0 if n_pass == len(satir) == 78 else 1

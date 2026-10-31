@@ -464,7 +464,11 @@ def kota_deneme(a, out):
         log(m)
 
 
-FORMAT_VARYASYON = ("format", "size")   # secilen format yalniz bu menulerde (yeni: Format; eski poster: Size "Digital File, ...")
+# Secilen format menusu adinda bunlardan biri gecer (inceleme 31 Eki: menu adi satin alma anindaki adla gelir; repoda gorulen adlar
+# "Format", "Size" (eski poster "Digital File, ..."), "Digital File, Print or Framed?", "Format & Color"). Kisisellestirme (property 54,
+# "Personalization" ve soru adlari) bu adlari tasimaz; tasisa bile KISISEL disarida birakilir.
+FORMAT_VARYASYON = ("format", "size", "digital", "print", "type")
+KISISEL = ("personaliz", "message", "name", "note")
 
 
 def dijital_mi(t):
@@ -475,7 +479,14 @@ def dijital_mi(t):
         return True
     return any("digital" in str(v.get("formatted_value") or v.get("value") or "").lower()
                for v in t.get("variations") or []
-               if str(v.get("formatted_name") or v.get("property_name") or "").strip().lower() in FORMAT_VARYASYON)
+               if menu_format_mi(v))
+
+
+def menu_format_mi(v):
+    ad = str(v.get("formatted_name") or v.get("property_name") or "").strip().lower()
+    if v.get("property_id") == 54 or any(k in ad for k in KISISEL):
+        return False
+    return any(k in ad for k in FORMAT_VARYASYON)
 
 
 def cerceve_haritasi(path=None):

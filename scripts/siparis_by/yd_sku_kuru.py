@@ -100,6 +100,20 @@ def main(argv=None):
             grup[k][alan].add(str(r[alan]).split(" (")[0] if alan.startswith("router") else str(r[alan]))
     hata = [r for r in rows if r["cozucu"] != "TANIR" or not r["tur_dogru"] or not r["gift_dogru"] or r["kupa"] != "TANIMAZ"
             or (r["tur"] == "yeni (kisa kod)" and r["sku_32_asar"])]
+    # inceleme 31 Eki: eksik / yanlis SKU, eski menu adlari, buyuk harf SKU (beklenen: dijital mi, gift baski mi)
+    def ek(ad, sku, menu, deger, msj, dijital, baski):
+        t = dict(transaction_id=1, listing_id=4595350971, sku=sku, quantity=1, variations=[
+            dict(formatted_name=menu, formatted_value=deger), dict(property_id=54, formatted_name="Personalization", formatted_value=msj)])
+        d, b = R.dijital_mi(t), G.baski_mi(t, {"4595350971"})
+        return dict(senaryo=ad, sku=sku, menu=menu, deger=deger, dijital=d, baski=b, dogru=(d == dijital and b == baski))
+    ekler = [ek("SKU yok, Format Digital File, mesaj 'print'", "", "Format", "Digital File", "print it", True, False),
+             ek("SKU yok, Format Print, mesaj 'digital'", "", "Format", "Print", "digital love", False, True),
+             ek("SKU Print, Format Digital File (celiski)", "BY-CAN_LIB-FP-8x10", "Format", "Digital File", "x", True, True),
+             ek("SKU -DIGITAL, Format Print (celiski)", "BY-CAN_LIB-FP-8x10-DIGITAL", "Format", "Print", "x", True, True),
+             ek("eski menu adi 'Digital File, Print or Framed?'", "", "Digital File, Print or Framed?", "Digital File", "x", True, False),
+             ek("eski menu adi 'Format & Color'", "", "Format & Color", "Digital File, Deep Black", "x", True, False),
+             ek("buyuk harf SKU BY-CAN_LIB-ST-8X10", "BY-CAN_LIB-ST-8X10", "Format", "Print", "digital", False, True)]
+    hata += [e for e in ekler if not e["dogru"]]
     with open(out / "OZET.md", "w", encoding="utf-8") as f:
         f.write(f"# 1st Anniversary SKU kuru sinama (ag yok)\n\nSKU {len(rows)} (ornek ciftler {', '.join(c for c, _ in ORNEK)}; 5 stil). "
                 f"Makbuz bicimi gercek (formatted_name + Personalization); mesajli satir: Print'te 'digital', Digital'de 'print' gecen mesaj.\n\n"
@@ -108,6 +122,9 @@ def main(argv=None):
                 "|---|---|---|---|---|---|---|---|---|---|---|---|---|\n")
         for (tur, fmt, boy), v in sorted(grup.items()):
             f.write(f"| {tur} | {fmt} | {boy} | " + " | ".join("/".join(sorted(v[x])) for x in alanlar) + " |\n")
+        f.write("\n## Ek senaryolar (eksik / yanlis SKU, eski menu adi; celiskide dijital teslim edilir VE baski sayilir: fail-closed)\n\n"
+                "| senaryo | dijital_mi | gift baski | dogru |\n|---|---|---|---|\n"
+                + "".join(f"| {e['senaryo']} | {e['dijital']} | {e['baski']} | {e['dogru']} |\n" for e in ekler))
         f.write(f"\nYeni kisa kod SKU > 32: {sum(r['sku_32_asar'] for r in rows if r['tur'] == 'yeni (kisa kod)')} "
                 f"(en uzun {max(r['sku_uzunluk'] for r in rows if r['tur'] == 'yeni (kisa kod)')}). Uretim boyu (by_siparis.OLCU): "
                 f"{sorted(BS.OLCU)}.\nKAPI: {'PASS' if not hata else 'FAIL ' + str(len(hata))} (cozucu TANIR, tur ve gift mesajdan bagimsiz, "

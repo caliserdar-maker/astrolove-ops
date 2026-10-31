@@ -29,6 +29,7 @@ ISIM_RU = {"Left name": "Имя слева", "Right name": "Имя справа"
 
 
 FOTO_MAX = 20   # Etsy galeri siniri
+GALERI_MAX = 14   # yeni kupa galerisi: 1 kapak + 5 kart + 8 stil (video ayri)
 
 
 def foto_ru(s):
@@ -114,7 +115,7 @@ FOTO_YENI = {"stil": ("an evil eye on the back. See photo 4.", "an evil eye on t
 
 
 def p_kisisel(m, ctx):
-    i1, n1, i2, n2, msj, bos, latin, foto = m.groups()
+    i1, n1, i2, n2, msj, latin, bos, foto = m.groups()
     if n1 != n2:
         raise ValueError(f"isim sinirlari farkli {n1} / {n2}")
     if not re.fullmatch(r"[A-Za-z][A-Za-z ,.'!&]*", bos) or len(bos) > int(msj):
@@ -124,8 +125,9 @@ def p_kisisel(m, ctx):
             f"1. {isim_ru(i1, ctx, 1)} (до {n1} {cogul(n1, 'буквы', 'букв', 'букв')})\n"
             f"2. {isim_ru(i2, ctx, 2)} (до {n2} {cogul(n2, 'буквы', 'букв', 'букв')})\n"
             f"3. Надпись (одна строка, до {msj} {cogul(msj, 'символа', 'символов', 'символов')}, включая пробелы и знаки препинания)\n"
+            + (f"{LATIN_RU}\n" if latin else "") +
             "Если вы оставите надпись пустой, мы напечатаем:\n"
-            + (f"{bos}\n{LATIN_RU}\n" if latin else f"{bos}\n") +
+            f"{bos}\n"
             f"Пожалуйста, проверьте написание. Смотрите фото {foto_ru(foto)}.")
 
 
@@ -165,7 +167,7 @@ KALIP = [
     (re.compile(r"\[ TWO SIZES \]\n- 11 oz \(325 ml\)\n- 15 oz \(444 ml\)\nSame design on both\. See photos? ([\d a-z]+)\."), p_boy),
     (re.compile(r"\[ HOW TO PERSONALIZE \]\nWrite three lines in the personalization box:\n1\. " + ISIM_RX + r" \(up to (\d+) "
                 r"letters\)\n2\. " + ISIM_RX + r" \(up to (\d+) letters\)\n3\. Message \(one line, up to (\d+) characters including "
-                r"spaces and punctuation\)\nLeave the message blank and we print:\n([^\n]+)\n(" + re.escape(LATIN_EN) + r"\n)?Please check your spelling\. See "
+                r"spaces and punctuation\)\n(" + re.escape(LATIN_EN) + r"\n)?Leave the message blank and we print:\n([^\n]+)\nPlease check your spelling\. See "
                 r"photos? ([\d a-z]+)\."), p_kisisel),
 ]
 
@@ -184,11 +186,11 @@ def galeri_en(d):
         if d.count(eski) != 1:
             raise ValueError(f"foto {ad}: eski kalip {d.count(eski)} kez, yeni {d.count(yeni)} kez")
         d = d.replace(eski, yeni); deg.append(f"foto_{ad}")
-    capa = "\nPlease check your spelling. See photo 3."
-    if LATIN_EN not in d:
+    capa = " characters including spaces and punctuation)\nLeave the message blank and we print:"
+    if LATIN_EN not in d:   # inceleme 31 Eki: not mesaj satirindan hemen sonra (bos mesaj metniyle karismasin)
         if d.count(capa) != 1:
             raise ValueError("Latin notu capasi bulunamadi")
-        d = d.replace(capa, "\n" + LATIN_EN + capa); deg.append("latin")
+        d = d.replace(capa, capa.replace("\nLeave", "\n" + LATIN_EN + "\nLeave")); deg.append("latin")
     return d, deg
 
 
@@ -198,6 +200,11 @@ def hedef_kapisi(en):
     h += [f"foto {ad}: eski '{e}' kaldi" for ad, (e, y) in FOTO_YENI.items() if e in en]
     if en.count(LATIN_EN) != 1:
         h.append("Latin harf notu yok / birden cok")
+    ref = re.findall(r"See photos? ([\d a-z]+)\.", en)
+    if len(ref) != 3:
+        h.append(f"'See photo' atfi {len(ref)} (3 beklenir)")
+    if any(int(n) > GALERI_MAX for r in ref for n in re.findall(r"\d+", r)):
+        h.append(f"foto numarasi galeri boyunu ({GALERI_MAX}) asiyor: {ref}")
     return h
 
 

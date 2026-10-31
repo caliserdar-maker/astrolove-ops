@@ -135,6 +135,8 @@ def plan_yukle(d, sec, haric):
     secilen = [x for x in (sec or sorted(dosya)) if x not in haric]
     if not secilen:
         raise SystemExit("DUR: secilen ilan yok (hepsi haric)")
+    pilot = [x for x in secilen if json.loads(dosya[x].read_text(encoding="utf-8")).get("pilot")]
+    secilen = pilot + [x for x in secilen if x not in pilot]   # Serdar 31 Eki 4a: pilot her zaman ilk; ilk FAIL kosuyu durdurur
     plan = {}
     for lid in secilen:
         k = json.loads(dosya[lid].read_text(encoding="utf-8"))
@@ -253,14 +255,14 @@ def envanter_yaz(api, lid, govde, kaynak, pid, R_, ad):
     q = adetler(govde)
     inv1, ok = tekrar_oku(lambda: api.get(f"/listings/{lid}/inventory") or {},
                           lambda x: imza(x) == imza(kaynak) and adetler(x) == q)
+    if pid and inv1.get("products"):   # Serdar 31 Eki 4a: imza kapisindan ONCE, acik mesajla (yalniz yeni yapi yazimi)
+        bh = boy_kabul(inv1, pid)
+        if bh:
+            raise Fail(f"BOY_KABUL FAIL ({ad}): Etsy 513 + 514 + {pid} yapisini kabul etmedi / degistirdi: {bh[0]}; kosu durur")
     if not ok:
         raise Fail(f"{ad} geri okuma plandan farkli (urun {len(inv1.get('products') or [])}, adet {sorted(adetler(inv1), key=str)})")
     if (pid and K.menu(inv1, pid) != K.menu(kaynak, pid)) or (not pid and menu_ham(inv1) != menu_ham(kaynak)):
         raise Fail(f"{ad} menu sirasi plandan farkli")
-    if pid:   # yalniz yeni yapi yaziminda (geri alma pid=None)
-        bh = boy_kabul(inv1, pid)
-        if bh:
-            raise Fail(f"BOY_KABUL FAIL ({ad}): Etsy 513 + 514 + {pid} yapisini kabul etmedi / degistirdi: {bh[0]}; kosu durur")
     return inv1
 
 

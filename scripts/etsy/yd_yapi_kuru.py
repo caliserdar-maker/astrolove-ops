@@ -156,6 +156,9 @@ def envanter_plani(inv, boy_sab):
     if h or boy_sab is None:
         return None, h
     pid = boy_sab["property_id"]
+    ciftler = {v.split("-")[1] for v in pre.values()}
+    if len(ciftler) != 1:   # inceleme 31 Eki: ilan basina tek cift kodu
+        return None, [f"SKU cift kodu ilan icinde tek degil: {sorted(ciftler)}"]
     urun = []
     for s in STILLER:
         for f in FORMATLAR:

@@ -104,5 +104,16 @@ cp = json.loads((W / "d2" / "9203.json").read_text()) if (W / "d2" / "9203.json"
 k("D2 C paketi yalniz 8x10", [i["sku"] for i in cp.get("items", [])] == ["POD-CAN_LIB-DB-8x10"], cp.get("items"))
 k("D2 dijital SKU hicbir Prodigi govdesinde yok", not [c for c in cagri if "DIGITAL" in c[2] or "DIGITAL" in c[1]])
 k("D2 rapor: 3 dijital satiri", out2.count("DIJITAL - teslim paketi") == 3, out2.count("DIJITAL - teslim paketi"))
+# Serdar 31 Eki karar 3a + inceleme: tur yalniz secilen format menusunden; mesaj turu degistirmez; eski menu adlari kapsanir
+V = lambda ad, d: {"formatted_name": ad, "formatted_value": d}
+PERS = lambda d: {"property_id": 54, "formatted_name": "Personalization", "formatted_value": d}
+k("3a Print + mesajda 'digital' -> dijital degil", not R.dijital_mi(tx(9, "POD-CAN_LIB-8x10", [V("Format", "Print"), PERS("our digital love")])))
+k("3a Digital + mesajda 'print' -> dijital", R.dijital_mi(tx(9, "BY-CAN_LIB-FP-8x10-DIGITAL", [V("Format", "Digital File"), PERS("print it big")])))
+k("eski menu adi 'Digital File, Print or Framed?' + yanlis SKU -> dijital (fail-closed)",
+  R.dijital_mi(tx(9, "POD-CAN_LIB-8x10", [V("Digital File, Print or Framed?", "Digital File"), V("Primary color", "Deep Black")])))
+k("eski menu adi 'Format & Color' -> dijital", R.dijital_mi(tx(9, "", [V("Format & Color", "Digital File, Deep Black")])))
+k("eski poster Size 'Digital File, ...' -> dijital", R.dijital_mi(tx(9, "POD-CAN_LIB-MB-8x10", DV)))
+k("kisisellestirme sorusu adi (Name / Message) turu degistirmez", not R.dijital_mi(tx(9, "POD-CAN_LIB-8x10",
+  [V("Format", "Print"), V("Your message", "digital file please"), V("Left name", "Digital")])))
 print(f"SONUC: {sum(sonuc)}/{len(sonuc)} PASS")
 sys.exit(0 if all(sonuc) else 1)
