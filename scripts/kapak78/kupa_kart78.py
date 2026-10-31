@@ -239,6 +239,34 @@ def topla(a):
                          for kk, g, _ in KARTLAR]
         if f.exists():
             subprocess.run(["cp", str(f), str(out / f.name)], check=True)
+    ayni = [c for c in sira if ayni_burc(*ab[c])]
+    degisim, deg_fail = [], []
+    if a.onceki:   # gece MANIFEST'iyle sha kaniti (Serdar 31 Eki 1a/2b): yalniz izinli degisim (ayni burc K02 + gece FAIL olan cift).
+        # Izinsiz farkta yeni uretim KULLANILMAZ: gece dosyasi aynen alinir (fotografli kartlar kosucuya gore bit duzeyinde farkli
+        # cikabiliyor, 31 Eki kosu 41179645300), fark olculur ve raporlanir. Gece dosyasi yoksa / sha tutmazsa FAIL.
+        once = {(r["cift"], r["kart"]): r for r in csv.DictReader(open(a.onceki, encoding="utf-8"))}
+        gd = Path(a.onceki).parent
+        for r in satirlar:
+            o = once.get((r["cift"], r["kart"]))
+            ayni_sha = bool(o) and o["durum"] == "PASS" and o["sha256"] == r["sha256"]
+            izin = (r["kart"] == "K02" and r["cift"] in ayni) or (o is not None and o["durum"] != "PASS")
+            tur, olc = ("AYNI" if ayni_sha else "IZINLI_DEGISIM" if izin else "GECE_DOSYASI"), {}
+            if tur == "GECE_DOSYASI":
+                g = gd / (o or {}).get("dosya", "-")
+                if not g.is_file() or hashlib.sha256(g.read_bytes()).hexdigest() != (o or {}).get("sha256"):
+                    tur = "IZINSIZ_DEGISIM"; deg_fail.append(f"{r['cift']} {r['kart']} gece dosyasi yok / sha farkli")
+                else:
+                    y = out / r["dosya"]
+                    olc = kiyas(y, g) if y.is_file() else {}
+                    subprocess.run(["cp", str(g), str(y)], check=True)
+                    r["sha256"], r["neden"] = o["sha256"], (f"gece dosyasi (yeniden uretim farki ort {olc.get('ort')}, max {olc.get('max')})")
+            if izin and r["kart"] == "K02" and r["cift"] in ayni and ayni_sha:
+                deg_fail.append(f"{r['cift']} K02 degismedi")
+            degisim.append(dict(cift=r["cift"], kart=r["kart"], once=(o or {}).get("sha256", ""), simdi=r["sha256"], tur=tur,
+                                yeniden_ort=olc.get("ort", ""), yeniden_max=olc.get("max", "")))
+        with open(out / "DEGISIM.csv", "w", newline="", encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fieldnames=["cift", "kart", "once", "simdi", "tur", "yeniden_ort", "yeniden_max"])
+            w.writeheader(); w.writerows(degisim)
     with open(out / "MANIFEST.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=MANIFEST_ALAN); w.writeheader(); w.writerows(satirlar)
     kontak = []
@@ -247,24 +275,10 @@ def topla(a):
         kontak.append(dict(kart=kk, galeri_no=g, **yd_kontak.pafta(og, out / f"KONTAK_{kk}.jpg", 320, 10,
                                                                      f"KUPA {kk} galeri {g} | {len(sira)} cift | {a.kaynak}")))
         print(f"KONTAK_{kk}: hucre {kontak[-1]['hucre']} eksik {len(kontak[-1]['eksik'])}", flush=True)
-    ayni = [c for c in sira if ayni_burc(*ab[c])]
     og = [(c, out / f"{c}_K02.jpg" if (out / f"{c}_K02.jpg").is_file() else None) for c in ayni]
     if og:   # Serdar 31 Eki karar 2b: ayni burc K02 (12 kart) ayri KONTAK
         k = yd_kontak.pafta(og, out / "KONTAK_K02_AYNI_BURC.jpg", 320, 6, f"KUPA K02 ayni burc {len(og)} cift | {a.kaynak}")
         kontak.append(dict(kart="K02 ayni burc", galeri_no=2, **k))
-    degisim, deg_fail = [], []
-    if a.onceki:   # gece MANIFEST'iyle sha kaniti: yalniz izinli degisiklik (ayni burc K02 + gece FAIL olan cift)
-        once = {(r["cift"], r["kart"]): r for r in csv.DictReader(open(a.onceki, encoding="utf-8"))}
-        for r in satirlar:
-            o = once.get((r["cift"], r["kart"]))
-            ayni_sha = bool(o) and o["durum"] == "PASS" and o["sha256"] == r["sha256"]
-            izin = (r["kart"] == "K02" and r["cift"] in ayni) or (o is not None and o["durum"] != "PASS")
-            tur = "AYNI" if ayni_sha else ("IZINLI_DEGISIM" if izin else "IZINSIZ_DEGISIM")
-            degisim.append(dict(cift=r["cift"], kart=r["kart"], once=(o or {}).get("sha256", ""), simdi=r["sha256"], tur=tur))
-            if tur == "IZINSIZ_DEGISIM" or (izin and r["kart"] == "K02" and r["cift"] in ayni and ayni_sha):
-                deg_fail.append(f"{r['cift']} {r['kart']} {tur if tur != 'AYNI' else 'K02 degismedi'}")
-        with open(out / "DEGISIM.csv", "w", newline="", encoding="utf-8") as fh:
-            w = csv.DictWriter(fh, fieldnames=["cift", "kart", "once", "simdi", "tur"]); w.writeheader(); w.writerows(degisim)
     kiy = {}
     if a.ref:
         for kk, _, _ in KARTLAR:
@@ -287,9 +301,14 @@ def topla(a):
         if a.onceki:
             from collections import Counter
             say = Counter(d["tur"] for d in degisim)
+            gm = [d for d in degisim if d["tur"] == "GECE_DOSYASI"]
             fh.write(f"## Gece kosusuyla sha kiyasi ({a.onceki_ad or a.onceki})\n\nAYNI {say['AYNI']} | IZINLI_DEGISIM {say['IZINLI_DEGISIM']} | "
-                     f"IZINSIZ_DEGISIM {say['IZINSIZ_DEGISIM']}\n\n" + "".join(f"- {d['cift']} {d['kart']}: {d['tur']}\n" for d in degisim
-                                                                          if d["tur"] != "AYNI") + ("".join(f"- FAIL: {x}\n" for x in deg_fail)) + "\n")
+                     f"GECE_DOSYASI {say['GECE_DOSYASI']} | IZINSIZ_DEGISIM {say['IZINSIZ_DEGISIM']}\n\n"
+                     f"Izinsiz fark cikan {len(gm)} kartta yeni uretim kullanilmadi, gece dosyasi aynen alindi (MANIFEST sha = gece). Yeniden uretim "
+                     f"farki en buyuk: ort {max([float(d['yeniden_ort'] or 0) for d in gm] or [0])}, max {max([int(d['yeniden_max'] or 0) for d in gm] or [0])}.\n\n"
+                     + "".join(f"- {d['cift']} {d['kart']}: {d['tur']}" + (f" (yeniden uretim farki ort {d['yeniden_ort']}, max {d['yeniden_max']})"
+                                                                          if d["tur"] == "GECE_DOSYASI" else "") + "\n"
+                               for d in degisim if d["tur"] != "AYNI") + ("".join(f"- FAIL: {x}\n" for x in deg_fail)) + "\n")
         if ayni:
             fh.write("## Ayni burc K02 alt basligi (galeri alt metni sira 2)\n\n| cift | metin | genislik / izin px |\n|---|---|---|\n")
             for c in ayni:

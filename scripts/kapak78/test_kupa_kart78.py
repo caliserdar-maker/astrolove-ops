@@ -2,7 +2,7 @@
 """kupa_kart78 topla sentetik testi (Etsy yok, cizim yok): Serdar 31 Eki 1a/2b.
 T1 ayni burc K02 metni = galeri alt metni sira 2 (tek kaynak)
 T2 gece MANIFEST'iyle sha kaniti: ayni burc K02 degisir, digerleri ayni -> PASS; DEGISIM.csv, KONTAK_K02_AYNI_BURC
-T3 ayni burc disi bir kart degisirse -> IZINSIZ_DEGISIM, FAIL
+T3 ayni burc disi bir kart degisirse: gece dosyasi yoksa IZINSIZ_DEGISIM FAIL; varsa GECE_DOSYASI (MANIFEST sha = gece) PASS
 T4 ayni burc K02 degismediyse -> FAIL
 T5 istisna MANIFEST ve OZET'te gorunur; gece FAIL cift (GEMINI_SCORPIO) izinli
 Calistir: python3 scripts/kapak78/test_kupa_kart78.py"""
@@ -34,7 +34,7 @@ def jpg(p, renk):
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
-def kur(t, degis=(), istisna=True):
+def kur(t, degis=(), istisna=True, gece=False):
     """t/_d: yeni kosu SONUC + jpg; t/once.csv: gece MANIFEST (GEMINI_SCORPIO FAIL)."""
     d = t / "_d"; d.mkdir(parents=True)
     with open(t / "ciftler.csv", "w", newline="") as f:
@@ -49,7 +49,7 @@ def kur(t, degis=(), istisna=True):
             s = jpg(d / f"{c}_{kk}.jpg", renk)
             ist = ("kopuk_ton 3 px max 4/255 (Serdar 31 Eki karar 1a)" if (c, kk) == ("GEMINI_SCORPIO", "K05") and istisna else "")
             kartlar.append(dict(kart=kk, galeri_no=g, dosya=f"{c}_{kk}.jpg", sha256=s, istisna=ist))
-            tmp = t / "tmp.jpg"
+            tmp = t / (f"{c}_{kk}.jpg" if gece else "tmp.jpg")       # gece=True: gece dosyasi once.csv klasorunde
             so = jpg(tmp, renk_once)
             once.append(dict(cift=c, kart=kk, galeri_no=g, dosya=f"{c}_{kk}.jpg", sha256=so if c != "GEMINI_SCORPIO" else "",
                              durum="PASS" if c != "GEMINI_SCORPIO" else "FAIL", neden=""))
@@ -83,9 +83,14 @@ try:
     k("T5 istisna MANIFEST + OZET", any(r["cift"] == "GEMINI_SCORPIO" and r["kart"] == "K05" and "3 px" in r["istisna"] for r in man)
       and "GEMINI_SCORPIO K05: kopuk_ton 3 px" in oz)
     rc, deg, oz, _ = topla(kur(W0 / "b", degis=izin | {("CANCER_LIBRA", "K03")}))
-    k("T3 izinsiz degisim (CANCER_LIBRA K03) -> FAIL", rc == 1 and "IZINSIZ_DEGISIM" in oz, rc)
+    k("T3 izinsiz degisim, gece dosyasi yok -> FAIL", rc == 1 and "gece dosyasi yok" in oz, rc)
+    rc, deg, oz, man = topla(kur(W0 / "b2", degis=izin | {("CANCER_LIBRA", "K03")}, gece=True))
+    gs = next(x for x in csv.DictReader(open(W0 / "b2" / "once.csv")) if x["cift"] == "CANCER_LIBRA" and x["kart"] == "K03")["sha256"]
+    ms = next(r for r in man if r["cift"] == "CANCER_LIBRA" and r["kart"] == "K03")
+    k("T3b izinsiz fark + gece dosyasi -> GECE_DOSYASI, MANIFEST sha = gece, PASS", rc == 0 and ms["sha256"] == gs
+      and hashlib.sha256((W0 / "b2" / "o" / "CANCER_LIBRA_K03.jpg").read_bytes()).hexdigest() == gs and "GECE_DOSYASI" in oz, (rc, ms))
     rc, deg, oz, _ = topla(kur(W0 / "c", degis=izin - {("LEO_LEO", "K02")}))
-    k("T4 ayni burc K02 degismedi -> FAIL", rc == 1 and "LEO_LEO K02 K02 degismedi" in oz, rc)
+    k("T4 ayni burc K02 degismedi -> FAIL", rc == 1 and "LEO_LEO K02 degismedi" in oz, rc)
 finally:
     shutil.rmtree(W0, ignore_errors=True)
 print(f"SONUC: {sum(sonuc)}/{len(sonuc)} PASS")
