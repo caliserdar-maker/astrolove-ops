@@ -853,6 +853,44 @@ def devam(tmp):
     kontrol("DEVAM Drive'a yazilamiyor: DUR, Etsy yazimi yok", S[LID["CANCER_LIBRA"]]["durum"] == "DUR" and not api.yazimlar)
 
 
+def taze_ve_esit(tmp):
+    """inceleme 31 Eki madde 4 + 5: (a) koşu sirasinda ikinci ilanin envanteri degisir (satis) -> o ilan yazilmadan BLOK;
+    (b) kuru: toplu yanit tekil okumadan farkli -> BLOK, plan girdisi yok."""
+    kok = tmp / "taze"; kok.mkdir(); os.environ["SAHTE_DRIVE"] = str(kok / "drive")
+    a_id, b_id = LID["ARIES_LEO"], LID["CANCER_LIBRA"]
+    api, pd, S, R = hazirla(kok, f"{a_id},{b_id}")
+    once_b = copy.deepcopy(api.L[b_id]); oldu = []
+
+    def satis(lid_, path):   # A'nin ilk silmesinde B'de satis: offerings adedi azalir
+        if lid_ == a_id and not oldu:
+            pr = api.L[b_id]["inv"]["products"][0]; of = pr["offerings"][0]
+            of["quantity"] = int(of.get("quantity") or 999) - 1; oldu.append(1)
+    api.silme_oncesi = satis
+    kod, S, _ = kos(api, kok, "yaz", *yaz_arg(kok, pd, "--sadece", f"{a_id},{b_id}"))
+    api.silme_oncesi = None
+    kontrol("taze okuma (madde 4): A PASS; koşu sirasinda envanteri degisen B yazilmadan BLOK (canli != plan), B'ye tek yazim yok",
+            oldu and S[a_id]["durum"] == "PASS" and S[b_id]["durum"] == "BLOK" and "canli != plan" in " ".join(S[b_id]["neden"])
+            and not any(y[1] == b_id for y in api.yazimlar) and api.L[b_id]["images"] == once_b["images"],
+            f"{S[a_id]['durum']} {S[b_id]['durum']} {str(S[b_id]['neden'])[:160]}")
+    gercek = K.TO.toplu
+
+    def bozuk(api_, ids):   # toplu yanit gosterimi tekil okumadan farkli (or. aciklama kacisi)
+        o = gercek(api_, ids)
+        for v in o.values():
+            v["L"]["description"] = (v["L"].get("description") or "") + " "
+        return o
+    K.TO.toplu = bozuk
+    try:
+        api.salt = True
+        kod, S, R = kos(api, kok, "kuru", "--sadece", b_id, ad="kuru_esit")
+        api.salt = False
+    finally:
+        K.TO.toplu = gercek
+    kontrol("toplu != tekil (madde 5): kuru BLOK, neden 'toplu okuma tekil okumayla ayni degil', plan girdisi yok",
+            S[b_id]["durum"] == "BLOK" and "toplu okuma tekil" in " ".join(S[b_id]["neden"]) and "FARK" in S[b_id].get("toplu_tekil", "")
+            and b_id not in (json.loads((kok / "kuru_esit" / K.PLAN_AD).read_text()).get("girdiler") or {}), f"{S[b_id]}"[:300])
+
+
 def is_akislari():
     """madde 4 + 2: hazir ayri, kilitsiz, Etsy token yok; yukleyici kilitte, yalniz parti dosyalari, geri_al, DEVAM_<ilan> Drive'a"""
     W = KOK / ".github" / "workflows"
@@ -883,6 +921,7 @@ def main():
         metin_acik(tmp)
         geri(tmp)
         devam(tmp)
+        taze_ve_esit(tmp)
         is_akislari()
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
