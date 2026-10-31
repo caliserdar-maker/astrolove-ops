@@ -76,7 +76,7 @@ BURCLAR = ["ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCOR
 CIFTLER = sorted("_".join(sorted(p)) for p in itertools.combinations_with_replacement(BURCLAR, 2))
 ALT_CSV = KOK / "data" / "pod" / "kupa_galeri78_alt.csv"
 YASAK_LISTE = (YASAK_EN, RU_YASAK, re.compile(r"AstroLove(?!Art)"))   # tire, Hahnemuhle, Printful, OBA, cotton, museum, omur yili
-KAPI_OKUMA = 6                      # ilan, galeri, video, Style baglari, envanter, kisisellestirme
+KAPI_OKUMA = 7                      # ilan, galeri, video, Style baglari, envanter, kisisellestirme, RU ceviri (Serdar 31 Eki 1a)
 VIDEO_DENEME, VIDEO_BEKLE = 12, 10  # video_yukle_78 v7 (yeni video active olana dek ~2 dk)
 VIDEO_MB = 100
 CDN = ("https://i.etsystatic.com/", "https://v.etsystatic.com/")
@@ -115,7 +115,7 @@ def istek_tahmini(n_yukle=N, n_sil=N, metin=False, n_rank=N):
       sira       : en az 1 (galeri, oturdu) | en kotu O + 2 x (n_rank x 4 + O)   (sira gecisi bagi ayrica yazmaz; bag sonda)
       video      : en az 5 (video okuma, POST, active okuma, DELETE, son video okuma) | en kotu 1 + (2 + O) + VIDEO_DENEME + 4 + O
       metin      : en az 4 (ilan GET, kisisellestirme GET, PATCH, POST) | en kotu 2 + 4 + 4
-      son okuma  : en az 6 (galeri, bag, video, ilan, envanter, kisisellestirme) | en kotu 3 x O + 3
+      son okuma  : en az 7 (galeri, bag, video, ilan, envanter, kisisellestirme, RU ceviri) | en kotu 3 x O + 4
       geri alma  : kapi 6 + n_sil yeniden yukleme (ilanin GERCEK eski gorsel sayisi; en kotu hepsi silinmis) + n_yukle sil + bag +
                    sira (n_sil gorsel) + video + metin + son okuma (en kotu; FAIL yolunda bir kez)
     n_sil = plandaki eski gorsel sayisi (14 sabiti DEGIL; inceleme 30 Eki madde 5). -> dict(en_az, en_kotu_geri_almasiz, geri_alma, en_kotu)"""
@@ -125,7 +125,7 @@ def istek_tahmini(n_yukle=N, n_sil=N, metin=False, n_rank=N):
     sira_az, sira_k = 1, O + 2 * (n_rank * 4 + O)
     vid_az, vid_k = 5, 1 + (2 + O) + VIDEO_DENEME + 4 + O
     met_az, met_k = (4, 10) if metin else (0, 0)
-    son_az, son_k = 6, 3 * O + 3
+    son_az, son_k = 7, 3 * O + 4
     az = KAPI_OKUMA + n_yukle * yk_az + n_sil * 1 + bag_az + sira_az + vid_az + met_az + son_az
     kotu = KAPI_OKUMA + n_yukle * yk_k + n_sil * 4 + bag_k + sira_k + vid_k + met_k + son_k
     geri_sira_k = O + 2 * (n_sil * 4 + O)
@@ -354,7 +354,7 @@ def canli_oku(api, shop, lid, onb=None):
     """onb: toplu_oku.toplu sonucu (kapi okumasi); yoksa / ilan yoksa tekil okuma (6 GET). Style baglari her zaman tekil (toplu uc yok)."""
     t = (onb or {}).pop(str(lid), None)
     if t:
-        L, g, v, inv, per = t["L"], t["galeri"], t["video"], t["inv"], t["per"]
+        L, g, v, inv, per, ru = t["L"], t["galeri"], t["video"], t["inv"], t["per"], t.get("ru") or {}
         vi = G.var_img(api, shop, lid)
     else:
         L = api.get(f"/listings/{lid}") or {}
@@ -363,6 +363,7 @@ def canli_oku(api, shop, lid, onb=None):
         vi = G.var_img(api, shop, lid)
         inv = api.get(f"/listings/{lid}/inventory") or {}
         per = (api.get(f"/listings/{lid}/personalization", ok404=True) or {}).get("personalization_questions") or []
+        ru = ru_oku(api, shop, lid)
     stil, urun = {}, []
     for pr in inv.get("products") or []:
         if pr.get("is_deleted"):
@@ -372,7 +373,18 @@ def canli_oku(api, shop, lid, onb=None):
             if pv.get("property_id") == P_STYLE:
                 for vid, val in zip(pv.get("value_ids") or [], pv.get("values") or []):
                     stil.setdefault(val, vid)
-    return dict(L=L, galeri=g, video=v, bag=vi, stil=stil, urun_n=len(urun), inv_sha=sha_metin(jdump(sorted(urun))), per=per)
+    return dict(L=L, galeri=g, video=v, bag=vi, stil=stil, urun_n=len(urun), inv_sha=sha_metin(jdump(sorted(urun))), per=per,
+                ru_sha=ru_sha(ru))
+
+
+def ru_oku(api, shop, lid):
+    return api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
+
+
+def ru_sha(ru):
+    """RU ceviri ozeti: aciklama yoksa "" (tekil GET ceviri yokken bos kayit donebilir, beyan_marka_yaz.ru_gercek notu)"""
+    d = html.unescape((ru or {}).get("description") or "")
+    return sha_metin(d) if d.strip() else ""
 
 
 TOPLU_ILAN = 2   # ilan basina taze toplu okuma: /listings/batch + /listings/batch/inventory
@@ -398,7 +410,7 @@ def canli_ozet(c):
                 video=[[str(x.get("video_id")), x.get("video_url") or x.get("url") or ""] for x in c["video"]],
                 bag=sorted([int(x.get("property_id") or 0), int(x.get("value_id") or 0), int(x.get("image_id") or 0)] for x in c["bag"]),
                 stil=sorted([k, v] for k, v in c["stil"].items()), urun_n=c["urun_n"], inv_sha=c["inv_sha"],
-                per_sha=sha_metin(jdump([soru_norm(q) for q in c["per"]])))
+                per_sha=sha_metin(jdump([soru_norm(q) for q in c["per"]])), ru_sha=c.get("ru_sha", ""))
 
 
 def kapilar(c, lid):
@@ -903,6 +915,10 @@ def son_kontrol(api, shop, lid, son, alt, bag_sira, stil_vid, video, gd_canli, d
         s.append("korunan aciklama degisti")
     if pers is not None and c["per"] != [soru_norm(q) for q in pers]:
         s.append("kisisellestirme hedef metin degil")
+    if pers is None and sha_metin(jdump(c["per"])) != gd_canli["per_sha"]:   # Serdar 31 Eki 1a: sorular plandakiyle ayni
+        s.append("korunan kisisellestirme sorulari degisti")
+    if ru_sha(ru_oku(api, shop, lid)) != gd_canli.get("ru_sha", ""):   # RU bu kosuda yazilmaz: varligi ve metni plandakiyle ayni olmali
+        s.append("RU ceviri silindi / degisti (bu kosuda RU yazilmaz)")
     return s
 
 

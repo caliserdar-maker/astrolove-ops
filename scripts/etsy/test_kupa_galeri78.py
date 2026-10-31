@@ -519,8 +519,8 @@ def ana(tmp):
     kontrol("kuru: 3 ilan PLAN, yazim yok", all(S[LID[c]]["durum"] == "PLAN" for c in TEST) and not api.yazimlar)
     _ist = sorted(S[LID[c]]["istek"] for c in TEST)
     kontrol("kuru (TOPLU kapi okumasi, Serdar 31 Eki 1a): ilan basina 1 istek (Style baglari); ilan / galeri / video / envanter / "
-            "kisisellestirme / RU koşu basi 2 toplu istekte; ilk 2 ilanda toplu == tekil olcumu (+6 tekil, inceleme 31 Eki madde 5)",
-            _ist == [1, 7, 7] and sorted(S[LID[c]].get("toplu_tekil", "-") for c in TEST) == ["-", "ESIT", "ESIT"],
+            "kisisellestirme / RU koşu basi 2 toplu istekte; ilk 2 ilanda toplu == tekil olcumu (+7 tekil, inceleme 31 Eki madde 5)",
+            _ist == [1, 1 + K.KAPI_OKUMA, 1 + K.KAPI_OKUMA] and sorted(S[LID[c]].get("toplu_tekil", "-") for c in TEST) == ["-", "ESIT", "ESIT"],
             f"{[(S[LID[c]]['istek'], S[LID[c]].get('toplu_tekil')) for c in TEST]}")
     kontrol("kuru: metin varsayilan KAPALI (ayni burc durum KAPALI:DEGISTI, RU_ACIK raporda)",
             S[LID["LEO_LEO"]]["ru"].startswith("RU_ACIK") and S[LID["LEO_LEO"]]["metin"].startswith("KAPALI:")
@@ -570,8 +570,8 @@ def ana(tmp):
     c0 = api.calls; api.salt = True
     kod, Sh, _ = kos(api, kok, "kuru", "--sadece", hepsi, "--haric", LID["LEO_LEO"], ad="kuru_haric")
     api.salt = False
-    kontrol(f"haric: ilan raporda yok, okunmadi (istek {api.calls - c0} = toplu 2 + 2 ilan x (1 + 6 toplu == tekil olcumu))",
-            LID["LEO_LEO"] not in Sh and len(Sh) == 2 and api.calls - c0 == 16)
+    kontrol(f"haric: ilan raporda yok, okunmadi (istek {api.calls - c0} = toplu 2 + 2 ilan x (1 + 7 toplu == tekil olcumu))",
+            LID["LEO_LEO"] not in Sh and len(Sh) == 2 and api.calls - c0 == 2 + 2 * (1 + K.KAPI_OKUMA))
     api.salt = True; _, _, R2 = kos(api, kok, "kuru", "--sadece", hepsi, ad="kuru_tekrar"); api.salt = False
     kontrol("kuru tekrar: ayni canli durum -> ayni plan_damga", R2["plan_damga"] == pd)
 
@@ -891,6 +891,34 @@ def taze_ve_esit(tmp):
             and b_id not in (json.loads((kok / "kuru_esit" / K.PLAN_AD).read_text()).get("girdiler") or {}), f"{S[b_id]}"[:300])
 
 
+def son_kontrol_ru_per(tmp):
+    """Serdar 31 Eki 1a: son kontrol RU cevirinin varligini / ayniligini ve kisisellestirme sorularini okur. Yazim sirasinda RU silinir
+    ya da soru degisirse ilan FAIL (geri alindi); RU bu kosuda yazilmaz."""
+    for ad, boz, bek, cift in (("ru", lambda x: x.update(ru=None), "RU ceviri", "LEO_LEO"),     # sahtede RU yalniz ayni burcta
+                               ("per", lambda x: x["per"][0].update(question_text=x["per"][0]["question_text"] + " X"), "kisisellestirme sorulari",
+                                "ARIES_LEO")):
+        kok = tmp / f"sk_{ad}"; kok.mkdir(); os.environ["SAHTE_DRIVE"] = str(kok / "drive")
+        lid = LID[cift]
+        api, pd, S, R = hazirla(kok, lid)
+        ru0 = copy.deepcopy(api.L[lid]["ru"]); oldu = []
+
+        def h(lid_, path):
+            if lid_ == lid and not oldu:
+                boz(api.L[lid]); oldu.append(1)
+        api.silme_oncesi = h
+        kod, S, _ = kos(api, kok, "yaz", *yaz_arg(kok, pd, "--sadece", lid))
+        api.silme_oncesi = None
+        kontrol(f"son kontrol {ad}: yazim sirasinda {bek} bozulur -> FAIL (geri alindi), neden '{bek}'",
+                oldu and (ru0 or ad != "ru") and S[lid]["durum"] == "FAIL" and bek in " ".join(S[lid]["neden"]) and kod == 1, f"{S[lid]['durum']} {str(S[lid]['neden'])[:200]}")
+    kok = tmp / "sk_ok"; kok.mkdir(); os.environ["SAHTE_DRIVE"] = str(kok / "drive")
+    lid = LID["LEO_LEO"]
+    api, pd, S, R = hazirla(kok, lid)
+    ru0 = copy.deepcopy(api.L[lid]["ru"])
+    kod, S, _ = kos(api, kok, "yaz", *yaz_arg(kok, pd, "--sadece", lid))
+    kontrol("son kontrol: RU dokunulmadan PASS, RU aynen yerinde, translations PUT yok", S[lid]["durum"] == "PASS" and api.L[lid]["ru"] == ru0
+            and ru0 and not any("translations" in str(y[2]) for y in api.yazimlar), str(S[lid]["neden"])[:200])
+
+
 def is_akislari():
     """madde 4 + 2: hazir ayri, kilitsiz, Etsy token yok; yukleyici kilitte, yalniz parti dosyalari, geri_al, DEVAM_<ilan> Drive'a"""
     W = KOK / ".github" / "workflows"
@@ -922,6 +950,7 @@ def main():
         geri(tmp)
         devam(tmp)
         taze_ve_esit(tmp)
+        son_kontrol_ru_per(tmp)
         is_akislari()
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
