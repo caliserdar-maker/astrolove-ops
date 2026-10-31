@@ -25,6 +25,7 @@ sys.path.insert(0, str(HERE))
 # sade12.sh STIL tablosu (kupa-orchard ceeb648; Serdar 31 Eki 7b paleti): kisa ad -> baski rengi
 SADE_RENK = {"orange": "30,92,52", "fig": "82,28,74", "olive": "78,84,30", "pomegranate": "132,20,36", "almond": "150,78,96",
              "lemon": "150,112,10", "grape": "46,38,110", "loquat": "176,96,20"}
+K02_KUTU_H, K02_KUTU_ORAN = 514, 44.0 / 33.5        # K02 sembol kutusu (px yukseklik, en / boy = baski_sade3 SEM_GEN / SEM_YUK)
 SAHNE_AD = ("tek_on", "tek_arka", "m15") + tuple(f"stil_{s}" for s in SADE_RENK)
 
 
@@ -57,7 +58,17 @@ def sahne(a):
     G = out / "gorunum"
     for y in ("tek_on", "tek_arka"):
         giydir(V / f"ORCHARD_OrangeBlossom_sahne_{y}.png", bo, V / f"geo_{y}.json", G / f"{y}.jpg")
-    giydir(V / "sahne15.png", bo, V / "geo15.json", G / "m15.jpg", d_in="3.35")
+    # 15 oz (inceleme 31 Eki): gercek BOY=15 baski (2700x1140, cizim dikeyde ortali) satir 45:1095 kesilir -> 2700x1050 (kapak_canva3
+    # FH 1050 sabit), D_IN 3.35 ile giydirilir; 11 oz baskiyi 15 oz capina giydirmek on yuzu ~23 px kaydiriyordu.
+    e15 = dict(env); e15["BOY"] = "15"
+    calis([py, "-I", str(kos / "kod" / "baski_sade3.py"), str(Path(a.glif).resolve()), str(kos / "varlik" / "dal_sade" / "orange.jpg"),
+           a.on, a.mesaj, SADE_RENK["orange"], str(out / "baski" / "S15_orange")], e15, kos / "kod")
+    from PIL import Image
+    b15 = Image.open(out / "baski" / "S15_orange_baski_15oz.png")
+    if b15.size != (2700, 1140):
+        raise SystemExit(f"DUR: 15 oz baski boyutu {b15.size}")
+    b15.crop((0, 45, 2700, 1095)).save(out / "baski" / "S15_orange_kesim_1050.png")
+    giydir(V / "sahne15.png", out / "baski" / "S15_orange_kesim_1050.png", V / "geo15.json", G / "m15.jpg", d_in="3.35")
     for st in SADE_RENK:
         giydir(V / "ORCHARD_OrangeBlossom_sahne_tek_on.png", out / "baski" / f"S_{st}_baski_11oz.png", V / "geo_tek_on.json", G / f"stil_{st}.jpg")
     print("sahne tamam", sorted(p.name for p in G.iterdir()), flush=True)
@@ -93,19 +104,19 @@ def kart(a):
         kay.blok("alt_baslik"); K.yaz(d, K.METIN, [f"The {b} symbol in an original AstroLoveArt design"], W / 2, ay, "center", W - 2 * K.KENAR)
         ust = ay + K.METIN["boy"] + 160                                   # alt baslik ile sembol arasi (cift kartinda glif ust bosluguna yakin)
         et_y = K.NOT_Y - 160 - K.ETIKET["boy"]                            # burc adi alt nottan 160 px yukarida
-        gh = round(et_y - 60 - ust)
-        g = S.maske(glif, gh)
-        # renk kapisi (3): 61x61 dolu murekkep blogu yok. Buyuk tek sembolun cizgisi bu kalinligi asabilir; sembol, en kalin cizgi
-        # (alfa > 0.6 iceriginin en buyuk ic kare kenari) <= 56 px olacak kadar KUCULTULUR (orantili; kapi esigi degismez).
+        # 12 burcta AYNI kutu (inceleme 31 Eki): kupadaki gibi sembol SEM_YUK x SEM_GEN (33,5 x 44 mm, baski_sade3) oranli kutuya sigar.
+        # Kutu yuksekligi K02_KUTU_H: 12 glifin hepsinde en kalin cizgi <= 56 px (renk kapisi 3: 61x61 dolu blok yok) olacak en buyuk
+        # deger (olcum 31 Eki: siniri CANCER veriyor, 514 px; onayli CANCER kartindaki 515 px ile ayni). Asilirsa DUR (sessiz kucultme yok).
         import cv2
         import numpy as np
-        for _ in range(4):
-            c = (np.asarray(g.getchannel("A")) > 153).astype(np.uint8)
-            kal = float(cv2.distanceTransform(c, cv2.DIST_C, 3).max()) * 2 - 1
-            if kal <= 56:
-                break
-            gh = int(gh * 56 / kal); g = S.maske(glif, gh)
-        ust = ust + (round(et_y - 60 - ust) - gh) / 2                      # kuculduyse sembol alanda dikeyde ortali
+        a_ = Image.open(glif).convert("RGBA").getchannel("A"); a_ = a_.crop(a_.getbbox())
+        gh = round(min(K02_KUTU_H, K02_KUTU_H * K02_KUTU_ORAN * a_.height / a_.width))
+        g = S.maske(glif, gh)
+        c = (np.asarray(g.getchannel("A")) > 153).astype(np.uint8)
+        kal = float(cv2.distanceTransform(c, cv2.DIST_C, 3).max()) * 2 - 1
+        if kal > 56:
+            raise SystemExit(f"DUR: K02 {b} sembol cizgisi {kal} px > 56 (renk kapisi 61x61); K02_KUTU_H yeniden olculmeli")
+        ust = ust + (round(et_y - 60 - ust) - gh) / 2                      # sembol alanda dikeyde ortali
         x = round(W / 2 - g.width / 2); im.paste(g, (x, round(ust)), g)
         kay.ekle("sembol", [x, round(ust), x + g.width, round(ust) + g.height])
         d = ImageDraw.Draw(im)
