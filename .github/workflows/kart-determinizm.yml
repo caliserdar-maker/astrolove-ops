@@ -1,6 +1,6 @@
 name: kart-determinizm
 # Kupa kart yeniden uretimi neden ayni cikmiyor (Serdar 31 Eki karar 8a). ETSY YOK. Ayni cift, ayni kod, ayni girdi: matris 2 is (ayri
-# kosucular) kupa_kart78 uret --sahne-tut; her ara dosyanin (gorunum, baski, zemin z_ / k_, kart) sha256'si + kosucu CPU bilgisi + gece
+# kosucular; ubuntu-24.04 ve ubuntu-latest imaji) kupa_kart78 uret --sahne-tut; her ara dosyanin (gorunum, baski, zemin z_ / k_, kart) sha256'si + kosucu CPU bilgisi + gece
 # dosyasiyla piksel farki (yer: satir / sutun kutusu) Drive TEMP/KART_DETERMINIZM/<damga>/ (SHA_<is>.json, OZET.json). Kart Drive'a yazilmaz.
 permissions:
   contents: read
@@ -12,11 +12,14 @@ on:
       env_ek: {description: "uretime eklenecek ortam (orn. OPENCV_CPU_DISABLE=AVX512_SKX); bos = yok", required: false, default: ""}
 jobs:
   uret:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
-      matrix: {is: [a, b]}
+      matrix:
+        include:
+          - {is: u2404, os: ubuntu-24.04}
+          - {is: latest, os: ubuntu-latest}
     steps:
       - name: Girdi kapisi
         env: {C: "${{ inputs.cift }}", G: "${{ inputs.gece }}", E: "${{ inputs.env_ek }}"}

@@ -27,6 +27,11 @@ def cpu():
     except OSError:
         pass
     d["python"] = platform.python_version()
+    d["libc"] = "-".join(platform.libc_ver())
+    try:
+        d["os"] = next(x.split("=", 1)[1].strip('"') for x in Path("/etc/os-release").read_text().splitlines() if x.startswith("PRETTY_NAME="))
+    except (OSError, StopIteration):
+        pass
     return d
 
 
