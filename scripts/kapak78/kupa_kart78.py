@@ -259,6 +259,7 @@ def topla(a):
         # Izinsiz farkta yeni uretim KULLANILMAZ: gece dosyasi aynen alinir (fotografli kartlar kosucuya gore bit duzeyinde farkli
         # cikabiliyor, 31 Eki kosu 41179645300), fark olculur ve raporlanir. Gece dosyasi yoksa / sha tutmazsa FAIL.
         once = {(r["cift"], r["kart"]): r for r in csv.DictReader(open(a.onceki, encoding="utf-8"))}
+        yeni = [x.strip() for x in (Path(a.yeni).read_text().split() if a.yeni else []) if x.strip()]
         gece_kart = {}
         gd = Path(a.onceki).parent
         for r in satirlar:
@@ -276,7 +277,9 @@ def topla(a):
                     subprocess.run(["cp", str(g), str(y)], check=True)
                     r["sha256"], r["neden"] = o["sha256"], (f"gece dosyasi (yeniden uretim farki ort {olc.get('ort')}, max {olc.get('max')})")
                     gece_kart.setdefault(r["cift"], {})[r["kart"]] = (o["sha256"], olc)
-            if izin and r["kart"] == "K02" and r["cift"] in ayni and ayni_sha:
+            # K02 degisimi yalniz BU kosuda yeniden uretilen ciftte beklenir (--yeni verilmediyse tum ciftler); tabandan alinan cift
+            # tabanin K02'sini tasir (31 Eki kosu 41220599136: taban 20261031_161948 zaten yeni K02 ile, 12 yanlis "degismedi")
+            if izin and r["kart"] == "K02" and r["cift"] in ayni and ayni_sha and (not yeni or r["cift"] in yeni):
                 deg_fail.append(f"{r['cift']} K02 degismedi")
             degisim.append(dict(cift=r["cift"], kart=r["kart"], once=(o or {}).get("sha256", ""), simdi=r["sha256"], tur=tur,
                                 yeniden_ort=olc.get("ort", ""), yeniden_max=olc.get("max", "")))
@@ -289,7 +292,6 @@ def topla(a):
                         x["yeniden_sha256"], x["sha256"] = x["sha256"], kk[x["kart"]][0]
                         x["gece_dosyasi"], x["yeniden_fark"] = True, kk[x["kart"]][1]
                 f.write_text(json.dumps(k, ensure_ascii=False, indent=1), encoding="utf-8")
-        yeni = [x.strip() for x in (Path(a.yeni).read_text().split() if a.yeni else []) if x.strip()]
         deg_fail += [f"{c} istendi ama 78 listesinde yok" for c in yeni if c not in sira]
         with open(out / "DEGISIM.csv", "w", newline="", encoding="utf-8") as fh:
             w = csv.DictWriter(fh, fieldnames=["cift", "kart", "once", "simdi", "tur", "yeniden_ort", "yeniden_max"])

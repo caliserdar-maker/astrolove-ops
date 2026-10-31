@@ -62,9 +62,12 @@ def kur(t, degis=(), istisna=True, gece=False):
     return t
 
 
-def topla(t):
+def topla(t, yeni=None):
+    if yeni is not None:
+        (t / "yeni.txt").write_text("\n".join(yeni))
     rc = M.main(["topla", "--dir", str(t / "_d"), "--secim", str(t / "secim.txt"), "--out", str(t / "o"), "--ciftler-csv",
-                 str(t / "ciftler.csv"), "--onceki", str(t / "once.csv"), "--onceki-ad", "GECE", "--yeni", str(t / "secim.txt")])
+                 str(t / "ciftler.csv"), "--onceki", str(t / "once.csv"), "--onceki-ad", "GECE", "--yeni",
+                 str(t / ("yeni.txt" if yeni is not None else "secim.txt"))])
     deg = list(csv.DictReader(open(t / "o" / "DEGISIM.csv")))
     return rc, deg, (t / "o" / "OZET.md").read_text(), list(csv.DictReader(open(t / "o" / "MANIFEST.csv")))
 
@@ -95,6 +98,9 @@ try:
     k("T3d OZET yeniden uretilen cift listesi", "Bu kosuda yeniden uretilen ciftler (3): CANCER_LIBRA, LEO_LEO, GEMINI_SCORPIO" in oz)
     rc, deg, oz, _ = topla(kur(W0 / "c", degis=izin - {("LEO_LEO", "K02")}))
     k("T4 ayni burc K02 degismedi -> FAIL", rc == 1 and "LEO_LEO K02 degismedi" in oz, rc)
+    rc, deg, oz, _ = topla(kur(W0 / "c2", degis=izin - {("LEO_LEO", "K02")}), yeni=["CANCER_LIBRA", "GEMINI_SCORPIO"])
+    k("T4b ayni burc cift bu kosuda yeniden uretilmediyse (tabandan) K02 ayni -> FAIL degil (31 Eki kosu 41220599136)",
+      rc == 0 and "degismedi" not in oz.split("## Ayni burc")[0].replace("ortak kod degismedi", ""), (rc, [l for l in oz.splitlines() if "FAIL" in l][:3]))
 finally:
     shutil.rmtree(W0, ignore_errors=True)
 print(f"SONUC: {sum(sonuc)}/{len(sonuc)} PASS")
