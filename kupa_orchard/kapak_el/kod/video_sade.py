@@ -3,7 +3,7 @@
 - Ilk ve son kare = onayli sade kapak dosyasi (birebir, 1440x1080'e kucultulmus).
 - 2. kareden toz baslar; ilk 0,3 sn icinde kapaktaki buyuk burc sembolu yumusakca kaybolur.
 - Sade kupada kucuk glif yok: toz isim satirindan (isim ve iki kucuk dal) buyuk semobole akar; sembol ilk varislarla olusur.
-- Toz miktari ve sigma video_el43 ile ayni (N 20800, sigma 0.45); toz rengi sembol rengi + %22 altin (stile uyar).
+- Toz miktari kupanin 3 kati (N 62400, Serdar 31 Eki), sigma 0.45; toz rengi sembol rengi + %22 altin (stile uyar).
 - Cikti once gecici dosyaya yazilir; hata olursa yarim video kalmaz, eski ciktilar basta silinir.
 Katmanlar: baski_sade3.py ciktisi (baski png) verilir. Sembol satiri ile isim satiri on yuzde dikey bosluga gore ayrilir;
 sembolsuz baski = sembol satiri beyaza boyanmis baski. Hepsi kapak_canva4.py ile ayni sahneye giydirilir.
@@ -26,7 +26,7 @@ if not OUT.endswith('.mp4'):
 for _e in ('.mp4', '_0.0.jpg', '_0.15.jpg', '_1.4.jpg', '_2.8.jpg', '_son.jpg'):   # eski cikti yeni sanilmasin
     pathlib.Path(OUT[:-4] + _e).unlink(missing_ok=True)
 W, H, FPS, SURE, SILME = 1440, 1080, 30, 6.0, 0.3
-N, SIGMA = 20800, 0.45
+N, SIGMA = 62400, 0.45                # toz: kupa 20800 x 3 (Serdar 31 Eki, sade kupa)
 rng = np.random.default_rng(11)
 t0 = time.time()
 TEMIZ = ('D_IN', 'SABIT_YUKSEKLIK', 'SEMBOL_YOK', 'GLIF_YOK', 'MESAJ_YOK', 'IMZA_YOK', 'BURC_YOK', 'BURC_DY', 'BURC_MIN', 'UST_YUM')
