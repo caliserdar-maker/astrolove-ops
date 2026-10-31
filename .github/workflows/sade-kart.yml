@@ -1,0 +1,74 @@
+name: sade-kart
+# Sade kupa bilgi kartlari ORNEK (Serdar 31 Eki is 9): tek burc, 5 kart (galeri 2-6, cift kartlariyla ayni sira ve stil), 3000x2250.
+# scripts/kapak78/sade_kart.py: sahne (_v12 ortami: baski_sade3 kupa-orchard ceeb648 + kapak_canva3 temiz/kupa-orchard 0196e37a) -> kart
+# (kart ortami: kupa_zemin + wa_kupa_kart_ornek kapilari). SIMD sabit (Serdar 31 Eki 8a). ETSY YOK. Cikti Drive TEMP/SADE_KART/<damga>/.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      burc: {description: "BUYUK harf (ornek CANCER)", required: true, default: "CANCER"}
+      on_yazi: {description: "on yazi (en fazla 12)", required: true, default: "EMILY"}
+      mesaj: {description: "arka mesaj (en fazla 30)", required: true, default: "My favorite place is with you"}
+jobs:
+  kart:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Girdi kapisi
+        env: {B: "${{ inputs.burc }}", O: "${{ inputs.on_yazi }}", M: "${{ inputs.mesaj }}"}
+        run: '[[ "$B" =~ ^(ARIES|TAURUS|GEMINI|CANCER|LEO|VIRGO|LIBRA|SCORPIO|SAGITTARIUS|CAPRICORN|AQUARIUS|PISCES)$ && ${#O} -le 12 && ${#M} -le 30 ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1 }
+      - name: Kaynaklar (SHA ile)
+        env: {B: "${{ inputs.burc }}"}
+        run: |
+          set -euo pipefail
+          git fetch -q --depth 1 origin ceeb648ffd06d1850ed2c6acda7cde274eca5fd0 && git worktree add -q _kos FETCH_HEAD
+          git fetch -q --depth 1 origin 0196e37a0447d61eab42b84778a56d9261b0b201 && git worktree add -q _ko FETCH_HEAD
+          git fetch -q --depth 1 origin ac9aa7185f9d7b07903f0cb99e7f366f425a631c
+          git show "FETCH_HEAD:kupa_uretim/sembol/${B}_${B}/sol.png" > _glif.png
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kurulum (kupa-kart78 ile ayni surumler)
+        run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0 numpy==2.1.3 opencv-python-headless==4.10.0.84
+          python3 -m venv _v12 && _v12/bin/pip install -q numpy==2.5.3 pillow==12.3.0 scipy==1.18.1 opencv-python-headless==5.0.0.93 fonttools==4.60.1
+          python3 -c "from PIL import features; import sys; sys.exit(0 if features.check('raqm') else 1)"
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Sahne + kart
+        env: {B: "${{ inputs.burc }}", O: "${{ inputs.on_yazi }}", M: "${{ inputs.mesaj }}"}
+        run: |
+          set -uo pipefail
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+          mkdir -p _o
+          BB=$(python3 -c "import sys; print(sys.argv[1].capitalize())" "$B")
+          { grep -m1 "model name" /proc/cpuinfo; grep -m1 -o avx512f /proc/cpuinfo || echo "avx512 yok"; } > _o/MAKINE.txt
+          ( _v12/bin/python3 -I scripts/kapak78/sade_kart.py sahne --ko _ko/kupa_orchard --kos _kos/kupa_orchard --glif _glif.png \
+              --on "$O" --mesaj "$M" --out _s \
+            && python3 -I scripts/kapak78/sade_kart.py kart --burc "$BB" --glif _glif.png --gorunum _s/gorunum --sahne _z --out _o ) > _o/LOG.txt 2>&1
+          echo "KOD=$?" >> "$GITHUB_ENV"
+          tail -5 _o/LOG.txt
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          if ls _o/* >/dev/null 2>&1; then
+            rclone copy _o "gdrive:ASTROLOVE/TEMP/SADE_KART/${DAMGA:?}" --immutable -q
+            echo "::notice title=SADE KART::TEMP/SADE_KART/${DAMGA}/"
+          fi
+          [ "${KOD:-1}" = 0 ] || { echo "::error::sade_kart hata (LOG.txt)"; exit 1; }
+      - if: always()
+        run: rm -rf _o ~/.config/rclone
