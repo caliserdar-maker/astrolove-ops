@@ -84,7 +84,8 @@ k("giris paragrafi yoksa isim satiri FAIL", not kon["pass_"])
 # Serdar 31 Eki 5a / 6a: yeni galeri foto numaralari + Latin harf notu
 e0 = en_eski("Cancer", "Libra", "Cancer gifts or Libra gifts")
 e1, deg = R.galeri_en(e0)
-k("galeri_en: foto numarasi yok, gorsel adi (Serdar 31 Eki 2a) + Latin notu", deg == ["foto_stil", "foto_boy", "foto_kisisel", "latin"]
+k("galeri_en: foto numarasi yok, gorsel adi (Serdar 31 Eki 2a) + Latin notu", deg == ["foto_stil", "foto_boy", "foto_kisisel", "kapak", "latin"]
+  and "The cover shows" not in e1 and "One mug, printed on both sides.\nFront:" in e1
   and "back. See the style photos." in e1 and "both. See the sizes photo." in e1 and "spelling. See the names and message photo." in e1
   and not __import__("re").search(r"See photos? \d", e1)
   and "punctuation)\n" + R.LATIN_EN + "\nLeave the message blank" in e1 and not R.hedef_kapisi(e1) and R.hedef_kapisi(e0), deg)
@@ -93,6 +94,8 @@ ru, kon = R.kur(e1)
 k("RU: фото стилей / с размерами / с именами и надписью, Latin RU satiri, PASS", kon["pass_"] and "Смотрите фото стилей." in ru
   and "Смотрите фото с размерами." in ru and "Смотрите фото с именами и надписью." in ru and "знаки препинания)\n" + R.LATIN_RU + "\nЕсли вы оставите" in ru, kon["hata"])
 k("RU tire / yasak yok", not any(c in ru for c in "—–") and not R.E.RU_YASAK.search(ru))
+k("RU kapak cumlesi yok (Serdar 31 Eki 2)", "главном фото" not in ru and "Одна кружка с печатью с двух сторон.\nЛицевая" in ru)
+k("hedef kapisi: kapak cumlesi kalirsa FAIL", R.hedef_kapisi(e1.replace("printed on both sides.", "printed on both sides. The cover shows its front and back.")))
 e2, d2 = R.kupa_en(en_eski("Leo", "Leo", "Leo gifts"), "Leo", "Leo")
 k("ayni burc: kupa_en hem isim hem galeri", d2 == "DEGISTI" and not R.hedef_kapisi(e2) and R.kur(e2)[1]["pass_"])
 try:

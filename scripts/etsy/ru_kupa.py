@@ -143,7 +143,14 @@ SABIT = {
         "[ ЧТО ВЫ ПОЛУЧИТЕ ]\nОдна кружка с печатью с двух сторон. На главном фото показаны её лицевая и обратная стороны.\n"
         "Лицевая сторона: объединённый символ, два небольших знака зодиака, ваши имена заглавными буквами, соединённые знаком ∞, "
         "и названия ваших знаков зодиака.\nОбратная сторона: ваша надпись курсивом, ваши имена и небольшой назар (турецкий глаз).",
-    "[ DETAILS ]\n- Glossy white ceramic, white inside\n- Dishwasher and microwave safe\n- Made to order, just for you\n- Original "
+        # Serdar 31 Eki 2: yeni kapak yalniz on yuz -> "The cover shows its front and back." hedef EN'den CIKAR (RU karsiligi da)
+    "[ WHAT YOU GET ]\nOne mug, printed on both sides.\nFront: the fusion symbol, two small zodiac "
+    "signs, your names in capitals joined by ∞, and your zodiac sign names.\nBack: your message in italics, your names and a small "
+    "nazar (evil eye).":
+        "[ ЧТО ВЫ ПОЛУЧИТЕ ]\nОдна кружка с печатью с двух сторон.\n"
+        "Лицевая сторона: объединённый символ, два небольших знака зодиака, ваши имена заглавными буквами, соединённые знаком ∞, "
+        "и названия ваших знаков зодиака.\nОбратная сторона: ваша надпись курсивом, ваши имена и небольшой назар (турецкий глаз).",
+"[ DETAILS ]\n- Glossy white ceramic, white inside\n- Dishwasher and microwave safe\n- Made to order, just for you\n- Original "
     "zodiac fusion symbols designed by AstroLoveArt":
         "[ ХАРАКТЕРИСТИКИ ]\n- Глянцевая белая керамика, белая внутри\n- Можно мыть в посудомоечной машине и использовать в "
         "микроволновой печи\n- Изготавливаем на заказ, специально для вас\n- Оригинальные объединённые символы зодиака, созданные "
@@ -176,6 +183,9 @@ def norm(s):
     return html.unescape(s or "").replace("\r\n", "\n").strip()
 
 
+KAPAK_EN = " The cover shows its front and back."         # Serdar 31 Eki 2: hedef EN'de YOK (yeni kapak yalniz on yuz)
+
+
 def galeri_en(d):
     """Serdar 31 Eki 5a + 6a + 2a: foto atiflari gorsel adiyla (numara yok), kisisellestirme bolumune Latin harf notu. Idempotan.
     -> (en, degisen[]) ; eski / yeni kalip tam 1 kez bulunmazsa ValueError."""
@@ -186,6 +196,10 @@ def galeri_en(d):
         if d.count(eski) != 1:
             raise ValueError(f"foto {ad}: eski kalip {d.count(eski)} kez, yeni {d.count(yeni)} kez")
         d = d.replace(eski, yeni); deg.append(f"foto_{ad}")
+    if d.count(KAPAK_EN) > 1:
+        raise ValueError("kapak cumlesi birden cok")
+    if KAPAK_EN in d:                                       # Serdar 31 Eki 2: yeni kapak yalniz on yuz
+        d = d.replace(KAPAK_EN, ""); deg.append("kapak")
     capa = " characters including spaces and punctuation)\nLeave the message blank and we print:"
     if LATIN_EN not in d:   # inceleme 31 Eki: not mesaj satirindan hemen sonra (bos mesaj metniyle karismasin)
         if d.count(capa) != 1:
@@ -200,6 +214,8 @@ def hedef_kapisi(en):
     h += [f"foto {ad}: eski '{e}' kaldi" for ad, (e, y) in FOTO_YENI.items() if e in en]
     if en.count(LATIN_EN) != 1:
         h.append("Latin harf notu yok / birden cok")
+    if KAPAK_EN.strip() in en:
+        h.append("kapak cumlesi kaldi (Serdar 31 Eki 2: yeni kapak yalniz on yuz)")
     ref = re.findall(r"See (photos? [\d a-z]+|the [a-z]+(?: [a-z]+)* photos?)\.", en)
     if len(ref) != 3:
         h.append(f"'See ...' foto atfi {len(ref)} (3 beklenir)")
