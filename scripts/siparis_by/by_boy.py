@@ -46,6 +46,13 @@ YAMA = [
     (r"return im if SCALE == 1 else im\.resize\(\(W, H\), Image\.LANCZOS\)", "return im if im.size == (W, H) else im.resize((W, H), Image.LANCZOS)", 1),
     (r'im\.save\(f"\{OUT\}/\{n\}_8x10\.jpg"', 'im.save(f"{OUT}/{n}_AILE.png"', 1),
     (r", quality=97, subsampling=0, dpi=\(300, 300\)\)", ")", 1),
+    # ALTIN (Serdar 31 Eki, Gorev C): by_poster gold_layer doku ortalamasi float32 'a.reshape(-1, 3).mean(0)' SCALE 2'de koyu / gri
+    # (olcum 1_Starlit_Altin_1024: SCALE 1 4:5 R 231,6 = onayli 8x10; SCALE 2 4:5 149,1, 2:3 124,3, 3:4 139,8). Ortalama onayli 8x10
+    # (SCALE 1, 2400x3000 doseme, float32) degeriyle sabitlenir; by_ornek3.gold_layer ile ayni kural. SCALE 1 4:5'te cikti birebir ayni.
+    (r"    mean = a\.reshape\(-1, 3\)\.mean\(0\)\n",
+     "    _t1 = np.array(Image.open(tex).convert(\"RGB\"))\n"
+     "    _d1 = np.concatenate([np.concatenate([_t1, _t1[:, ::-1]], 1), np.concatenate([_t1[::-1], _t1[::-1, ::-1]], 1)], 0)\n"
+     "    mean = np.tile(_d1, (3000 // _d1.shape[0] + 1, 2400 // _d1.shape[1] + 1, 1))[:3000, :2400].astype(np.float32).reshape(-1, 3).mean(0)\n", 1),
 ]
 
 

@@ -60,6 +60,8 @@ jobs:
           python3 -c "from PIL import features; import sys; sys.exit(0 if features.check('raqm') else 1)"
           curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
           unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: Altin yamasi testi (Serdar 31 Eki, Gorev C; SCALE 2 altin = onayli 8x10)
+        run: python3 scripts/siparis_by/test_by_boy_altin.py
       - name: rclone.conf
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
