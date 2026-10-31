@@ -41,6 +41,7 @@ from PIL import Image
 KOK = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KOK / "etsy")); sys.path.insert(0, str(KOK / "kapak78"))
 import cl_galeri_degistir as G  # noqa: E402
+import toplu_oku as TO  # noqa: E402  (Serdar 31 Eki 1a: toplu kapi okumasi)
 import eski78_gorsel_yukle as Y  # noqa: E402
 import yd_liste_uret as LU  # noqa: E402  (eski kapak kurali, Serdar 30 Eki)
 import galeri_v10_yukle as V  # noqa: E402  (yalniz jdump / oku_json / sonuc_yaz; poster yukleyicisi degismez)
@@ -249,7 +250,17 @@ def calistir(api, shop, a):
     eski_tablo = LU.eski_kapak_oku()       # Serdar 30 Eki: ESKI kapak listesi (kosu basina bir kez)
     t0 = time.time()
     satir, girdiler, dur = [], {}, None
+    # TOPLU kapi okumasi (Serdar 31 Eki 1a, madde 4): DEVAM disi ilanlar 100'luk parcada 2 istekte; ilan basina tohumlu istemci (ilan,
+    # galeri, video, envanter toplu yanittan; variation-images ilk okumada), ilk yazimda kapanir. DEVAM ilanlari canli okunur.
+    toplu_ids = [lid for lid, o in oz["ilanlar"].items() if not ((devam.get("ilanlar") or {}).get(lid) or {}).get("plan")]
+    onb = {}
+    if toplu_ids and (api.remaining is None or int(api.remaining) - 2 * (-(-len(toplu_ids) // TO.TOPLU_N)) >= KOTA_SINIRI):
+        c_t = api.calls
+        onb = TO.toplu(api, toplu_ids)
+        log(f"toplu kapi okumasi: {len(onb)}/{len(toplu_ids)} ilan, {api.calls - c_t} istek | kota {api.remaining}")
+    api0 = api
     for lid, o in oz["ilanlar"].items():
+        api = TO.Tohumlu(api0, lid, onb.pop(lid, None))
         s = dict(ilan=lid, cift=o["cift"], durum="", neden=[], en_az=None, en_kotu=None, istek=None)
         satir.append(s)
         if dur:

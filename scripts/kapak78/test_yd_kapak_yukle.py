@@ -52,8 +52,20 @@ class SahteYD(T.Sahte):
             x["alt_text"] = h["alt_text"]
         self.bag = {v["value"]: v["image_id"] for v in ham["variation_images"]}
         self.alt_yok = 0      # sira / kapak POST'larindan alt_text alani olmayanlar
+        self.n_toplu = 0      # toplu kapi okumasi istegi (Serdar 31 Eki 1a)
 
     def get(self, path, params=None, ok404=False):
+        if path == "/listings/batch":           # getListingsByListingIds (31 Eki yoklamasinda olculen sekil)
+            self._k(); self.n_get += 1; self.n_toplu += 1
+            ids = str((params or {}).get("listing_ids") or "").split(",")
+            g = sorted(self.img, key=lambda x: (x["rank"], x["listing_image_id"]))
+            return {"count": 1, "results": [dict(listing_id=int(LID), state=self.state, title="T", tags=["a"], description="D", inventory=None,
+                                                 images=copy.deepcopy(g), videos=[], personalization=None, translations={"ru": None})]
+                    if LID in ids else []}
+        if path == "/listings/batch/inventory":
+            self._k(); self.n_get += 1; self.n_toplu += 1
+            ids = str((params or {}).get("listing_ids") or "").split(",")
+            return {"count": 1, "results": [dict(listing_id=int(LID), images=None, inventory=copy.deepcopy(HAM["inventory"]))] if LID in ids else []}
         if path.endswith("/variation-images"):
             self._k(); self.n_get += 1
             return {"results": [dict(property_id=513, value_id=STIL_VID[k], value=k, image_id=v) for k, v in self.bag.items()]}
@@ -125,9 +137,9 @@ def durum_dosyalari(ad):
 
 ESKI = [g["listing_image_id"] for g in HAM["images"]]
 BAGLI0 = {v["image_id"] for v in HAM["variation_images"]}
-# SIRALI plan (Serdar 31 Eki 1a) kod okumasi: kapi 4 + on okuma 1 + 13 sil x 3 + 10 yukle x 13 + sira_bag (8 + 2 x (10 x 3 + 8) + 3 + 8)
+# SIRALI plan (Serdar 31 Eki 1a) kod okumasi: kapi 4 + on okuma 7 (onbelleksiz) + 13 sil x 3 + 10 yukle x 13 + sira_bag (8 + 2 x (10 x 3 + 8) + 3 + 8)
 # + son (8 + 8 + 3); eski adim_plani 492 idi
-EN_KOTU = 4 + 1 + 13 * 3 + 10 * 13 + (8 + 2 * (10 * 3 + 8) + 3 + 8) + 8 + 8 + 3
+EN_KOTU = 4 + 7 + 13 * 3 + 10 * 13 + (8 + 2 * (10 * 3 + 8) + 3 + 8) + 8 + 8 + 3
 
 
 def kapak_tamam(api):
@@ -142,6 +154,8 @@ def normal_akis():
     rc, R, po = kuru(api, hz, "k1")
     s = R["ilanlar"][0]
     kontrol("kuru: PLAN, yazma yok, plan_damga", rc == 0 and s["durum"] == "PLAN" and not api.yaz and R["plan_damga"].startswith("111_"))
+    kontrol(f"kuru TOPLU kapi okumasi: 2 toplu istek, ilan basina {s['istek']} (variation-images 1; ilan / galeri / envanter toplu yanittan)",
+            api.n_toplu == 2 and s["istek"] == 1)
     plan = json.loads((po / "PLAN_YD.json").read_text())["girdiler"][LID]
     ad = [a[0] for a in plan["adimlar"]]
     bek = [["sil", c] for c in ESKI[:-1]] + [["yukle", "01_1.jpg"], ["sil", ESKI[-1]]] + [["yukle", f"{k:02d}_{k}.jpg"] for k in range(2, 11)] + [["sira_bag"]]

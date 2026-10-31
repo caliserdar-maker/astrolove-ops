@@ -54,6 +54,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import cl_galeri_degistir as G  # noqa: E402
 import eski78_gorsel_yukle as Y  # noqa: E402
+import toplu_oku as TO  # noqa: E402  (Serdar 31 Eki 1a: toplu kapi okumasi, ortak)
 from etsy_common import KOTA_SINIRI, RU_YASAK  # noqa: E402  (Serdar 15 ve 24 Eki: 10; degistirilmez)
 from pod_5x7_kuru import YASAK_EN  # noqa: E402  (urun metni yasaklari; metin_kurali.py main'de yok)
 
@@ -349,38 +350,8 @@ def metin_plani(L, per, a, b):
 
 
 # ---------------------------------------------------------------- canli okuma ve kapilar
-TOPLU_N = 100                       # getListingsByListingIds / batch inventory en fazla 100 ilan (Etsy dokumani, Merkez 31 Eki)
-TOPLU_INCLUDES = "Images,Videos,Personalization,Translations"
-
-
-def toplu_oku(api, lids):
-    """YAZIM ONCESI / KURU kapi okumasi TOPLU (Serdar 31 Eki 1a, istek azaltma madde 3-4): 100'luk parcada 2 istek
-    (GET /listings/batch?includes=Images,Videos,Personalization,Translations + GET /listings/batch/inventory). Yanit sekli 31 Eki
-    yoklamasiyla olculdu (TEMP/TOPLU_OKU_YOKLA; 4598525642 + 4595350971): results[] ilan; images / videos listesi, personalization.
-    personalization_questions (question_id), translations[dil] (yoksa None); batch/inventory results[].inventory.products. Style
-    variation-images toplu degil: ilan basina 1 GET (canli_oku). -> {ilan: dict(L, galeri, video, inv, per, ru)}; yanitta olmayan
-    ilan sozlukte yoktur (canli_oku tekil okumaya duser)."""
-    out = {}
-    lids = [str(x) for x in dict.fromkeys(lids)]
-    for i in range(0, len(lids), TOPLU_N):
-        p = lids[i:i + TOPLU_N]
-        L = {str(x.get("listing_id")): x for x in (api.get("/listings/batch", params={"listing_ids": ",".join(p), "includes": TOPLU_INCLUDES})
-                                                   or {}).get("results") or []}
-        V = {str(x.get("listing_id")): x.get("inventory") for x in (api.get("/listings/batch/inventory", params={"listing_ids": ",".join(p)})
-                                                                     or {}).get("results") or []}
-        for lid in p:
-            if lid not in L or not isinstance(V.get(lid), dict) or L[lid].get("images") is None or L[lid].get("videos") is None:
-                continue
-            x = L[lid]
-            ru = (x.get("translations") or {}).get("ru") or {}
-            out[lid] = dict(L={k: x.get(k) for k in ("state", "shop_section_id", "title", "tags", "description")},
-                            galeri=sorted(x.get("images") or [], key=lambda g: g.get("rank") or 0), video=list(x.get("videos") or []),
-                            inv=V[lid], per=list((x.get("personalization") or {}).get("personalization_questions") or []), ru=ru)
-    return out
-
-
 def canli_oku(api, shop, lid, onb=None):
-    """onb: toplu_oku sonucu (kapi okumasi); yoksa / ilan yoksa tekil okuma (6 GET). Style baglari her zaman tekil (toplu uc yok)."""
+    """onb: toplu_oku.toplu sonucu (kapi okumasi); yoksa / ilan yoksa tekil okuma (6 GET). Style baglari her zaman tekil (toplu uc yok)."""
     t = (onb or {}).pop(str(lid), None)
     if t:
         L, g, v, inv, per = t["L"], t["galeri"], t["video"], t["inv"], t["per"]
@@ -1147,9 +1118,9 @@ def calistir(api, shop, a):
         kota_oku(api, shop)
         oku_ids = [r["listing_id"] for r in R if not yazim or (plan.get("girdiler") or {}).get(r["listing_id"])
                    or (dvs.get(r["listing_id"]) or {}).get("durum") not in ("PASS", "GERI_ALINDI", None)]
-        if oku_ids and int(api.remaining) - 2 * (-(-len(oku_ids) // TOPLU_N)) >= KOTA_SINIRI:
+        if oku_ids and int(api.remaining) - 2 * (-(-len(oku_ids) // TO.TOPLU_N)) >= KOTA_SINIRI:
             c_t = api.calls
-            onb = toplu_oku(api, oku_ids)
+            onb = TO.toplu(api, oku_ids)
             ru_onb = {k: v.get("ru") or {} for k, v in onb.items()}
             log(f"toplu kapi okumasi: {len(onb)}/{len(oku_ids)} ilan, {api.calls - c_t} istek | kota {api.remaining}")
     for n, r in enumerate(R, 1):

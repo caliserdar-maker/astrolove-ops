@@ -164,16 +164,17 @@ def istek_sirali_en_kotu(adimlar, basla=0, ilk=True, n=HEDEF_N):
     """SIRALI plan EN KOTU istek (kod yollarindan sayim, O = G.OKUMA_TEKRAR, SIRA_TEKRAR = sira POST tekrari):
       sil = DELETE (5xx tekrari 3); yukle = 2 deneme x (POST + 401 yenilemesi) + hata sonrasi kararli galeri (O);
       sira_bag = kararli galeri (O) + oturmazsa 2 gecis x (n POST x SIRA_TEKRAR + kararli galeri) + bag POST (3) + kararli var_img (O);
-      on okuma ilk 1 (yalin ile ayni onbellek), devam 5 + O; son = kararli galeri (sira POST'u olduysa) + kararli var_img + korunanlar 3."""
+      on okuma ilk 7 (onbelleksiz: korunanlar 3, envanter, galeri, var_img x2; onbellekli istemci daha az okur, tahmin ust sinir),
+      devam 5 + O; son = kararli galeri (sira POST'u olduysa) + kararli var_img + korunanlar 3."""
     O = G.OKUMA_TEKRAR
     birim = {"sil": 3, "yukle": (2 + 1) + (2 + O), "sira_bag": O + 2 * (n * SIRA_TEKRAR + O) + (3 + O)}
-    return (1 if ilk else 5 + O) + sum(birim[a[0]] for a in adimlar[basla:]) + O + O + 3
+    return (7 if ilk else 5 + O) + sum(birim[a[0]] for a in adimlar[basla:]) + O + O + 3
 
 
 def istek_sirali_en_az(adimlar, basla=0, ilk=True, n=HEDEF_N):
     """SIRALI plan EN AZ: her yazim 1 istek; sira_bag = 1 galeri okumasi (oturdu) + bag POST + 1 var_img; son = var_img 1 +
-    korunanlar 3 (galeri sira_bag okumasindan); on okuma ilk 1 (devam 6)."""
-    return (1 if ilk else 6) + sum(3 if a[0] == "sira_bag" else 1 for a in adimlar[basla:]) + 4
+    korunanlar 3 (galeri sira_bag okumasindan); on okuma ilk 7 onbelleksiz (devam 6)."""
+    return (7 if ilk else 6) + sum(3 if a[0] == "sira_bag" else 1 for a in adimlar[basla:]) + 4
 
 def sha256(yol):
     import hashlib
