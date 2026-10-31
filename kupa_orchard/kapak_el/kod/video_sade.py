@@ -120,6 +120,7 @@ try:
     par = (0.55 + 0.45 * rng.random(N)).astype(np.float32)
 
     nT, nB, nS = int(round(SURE * FPS)), int(round(BITIS * FPS)), int(round(SILME * FPS))
+    nK = int(round(0.3 * FPS))
     GEC = str(TMP / 'video.mp4')
     p = subprocess.Popen(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}',
                           '-r', str(FPS), '-i', '-', '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '17',
@@ -154,6 +155,9 @@ try:
             rk = kat / np.maximum(al[..., None], 1e-4)
             a3 = np.clip(al, 0, 0.9)[..., None]
             f = f * (1 - a3) + rk * a3
+        if 0 < i < nB and i > nB - 1 - nK:    # inceleme 31 Eki: son 0,3 sn kapaga yumusak gecis (sembol kenari ve toz sicramasin)
+            e = ease((i - (nB - 1 - nK)) / (nK + 1))
+            f = f * (1 - e) + KAP * e
         p.stdin.write(np.clip(f, 0, 255).astype(np.uint8).tobytes())
         if i in anlar:
             Image.fromarray(np.clip(f, 0, 255).astype(np.uint8)).save(TMP / f'kare_{anlar[i]}.jpg', quality=90)

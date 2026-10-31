@@ -141,6 +141,8 @@ def satir(tv, mask, m, font, cap0, ag, cx, taban, aralik=0.0, min_cap=None, maxw
             cap -= 0.25
         else:
             break
+    if not sigar:                         # inceleme 31 Eki: tasan ya da susleme ustune binen yazi baskiya girmez
+        sys.exit(f'HATA: {m!r} sigmiyor (en kucuk puntoda bile dala ya da kenara tasiyor); daha kisa metin gerekli')
     koy(tv, a, base, cx - a.shape[1] / 2, taban)
     return cap, not sigar
 
@@ -158,7 +160,7 @@ y_sem = float(os.environ.get('SEMBOL_Y', 2))       # Serdar 31 Eki: 8 stilde ayn
 ISIM_ARA = float(os.environ.get('ISIM_ARA', 4.0)) * MM          # sembol alti ile isim ustu arasi en az (mm)
 SEMBOL_K = float(os.environ.get('SEMBOL_K', 1.06))    # sabit sembol boyu (~25,3 mm): 12 burc x 8 stilin hepsinde dala en az 1,2 mm; Serdar 31 Eki "guzel": tum kupalarda ayni
 KALIN = float(os.environ.get('KALIN', 1.24))          # cizgi kalinligi: en kalin cizgi / sembol eni ~0,124 (Serdar 31 Eki referans gorsel)
-BOSLUK = float(os.environ.get('BOSLUK', 2.5)) * MM     # sembol ile susleme dali arasi hedef (mm); altinda UYARI, PAY altinda HATA
+BOSLUK = float(os.environ.get('BOSLUK', 1.2)) * MM     # sembol ile susleme dali arasi en az (mm, karar 31 Eki); altinda UYARI, PAY altinda HATA
 UZAK = ndimage.distance_transform_edt(~MASK_ON)
 g0 = alfa(GLIF)
 
@@ -226,7 +228,7 @@ MASK_AR = arka.min(-1) < 245
 ax, _ = T('arka', L['arka_merkez_x'], 0)
 _, t_mes = T('arka', 0, L['mesaj_taban'])
 mes_cap, mes_tasti = satir(arka, MASK_AR, MESAJ, ITA, L['mesaj_cap'] * s, 600, ax, t_mes, min_cap=2.2 * MM,
-                           maxw_sabit=860)
+                           maxw_sabit=860, mesafe=ndimage.distance_transform_edt(~MASK_AR))
 adim(f'arka: mesaj cap {mes_cap / MM:.2f} mm, nazar {L["nazar_d"] * s / MM:.1f} mm (imza yok)')
 
 # ---------------- silindir -> baski ----------------
