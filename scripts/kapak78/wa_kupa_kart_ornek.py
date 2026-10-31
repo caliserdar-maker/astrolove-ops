@@ -38,7 +38,7 @@ import yd_kart_ornek as K  # noqa: E402
 import kart_sablon as S  # noqa: E402
 
 W, H = K.W, K.H
-YASAK = re.compile(r"(?<!\d)\.|\.(?!\d)|[+=‐-―−]")     # ondalik nokta (9.6) serbest
+YASAK = re.compile(r"(?<!\d)\.|\.(?!\d)|[+=‐-―−]")     # ondalik nokta (9.6) serbest; Serdar 31 Eki onayi: YALNIZ olcu sayilarinda ondalik nokta serbest (K05)
 BIRIM = {"oz", "in", "cm", "ml"}
 ST8 = (("orange", "Orange Blossom"), ("fig", "Purple Fig"), ("olive", "Olive Breeze"), ("pomegranate", "Pomegranate Bloom"),
        ("almond", "Almond Blossom"), ("lemon", "Lemon Grove"), ("grape", "Blue Grape"), ("loquat", "Golden Loquat"))   # cift.py ST8 sirasi
