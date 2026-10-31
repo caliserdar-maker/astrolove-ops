@@ -250,24 +250,27 @@ def main(argv=None):
         kf = kaynak.astype(np.float32)
         bik = cv2.resize(cv2.resize(kaynak, (4800, 7200), interpolation=cv2.INTER_CUBIC), (2400, 3600), interpolation=cv2.INTER_AREA)
         fe, fb = np.abs(geri - kf).max(2), np.abs(bik.astype(np.float32) - kf).max(2)
-        g = z2.astype(np.float32).mean(2); oran = []
+        g = z2.astype(np.float32).mean(2); oran = []; yer = []
         for y in range(384, 3600, 384):
             for x in range(0, 2400, 384):
                 Y, X0, X1 = y * s, x * s, min(4800, (x + 384) * s)
                 d = np.abs(np.diff(g[Y - 6:Y + 6, X0:X1], axis=0)).mean(1)
-                oran.append(d[5] / max(float(np.median(np.r_[d[:4], d[7:]])), 1e-3))
+                oran.append(d[5] / max(float(np.median(np.r_[d[:4], d[7:]])), 1e-3)); yer.append((Y, (X0 + X1) // 2))
         for x in range(384, 2400, 384):
             for y in range(0, 3600, 384):
                 X, Y0, Y1 = x * s, y * s, min(7200, (y + 384) * s)
                 d = np.abs(np.diff(g[Y0:Y1, X - 6:X + 6], axis=1)).mean(0)
-                oran.append(d[5] / max(float(np.median(np.r_[d[:4], d[7:]])), 1e-3))
+                oran.append(d[5] / max(float(np.median(np.r_[d[:4], d[7:]])), 1e-3)); yer.append(((Y0 + Y1) // 2, X))
+        en = int(np.argmax(oran)); cy_, cx_ = yer[en]               # en kotu dikis parcasinin yakin plani (gercek piksel, 800x800)
+        Image.fromarray(z2[max(0, cy_ - 400):cy_ + 400, max(0, cx_ - 400):cx_ + 400]).save(out / "ESRGAN_EN_KOTU_DIKIS_800.jpg", quality=92)
         rap["esrgan_kapi"] = dict(geri_ort_fark=round(float(fe.mean()), 3), geri_p999=round(float(np.percentile(fe, 99.9)), 2),
                                   bikubik_ort_fark=round(float(fb.mean()), 3), bikubik_p999=round(float(np.percentile(fb, 99.9)), 2),
                                   karo_dikis_en_buyuk=round(float(max(oran)), 3), karo_parca=len(oran),
-                                  esik="ONERI: ort <= 3 x bikubik, dikis <= 1.5 (onayli dosyadan olculmedi)")
-        rap["esrgan_kapi"]["pass_"] = bool(fe.mean() <= 3 * max(fb.mean(), 0.1) and max(oran) <= 1.5)
-        if not rap["esrgan_kapi"]["pass_"]:
-            raise SystemExit(f"DUR: ESRGAN kapisi {rap['esrgan_kapi']}")
+                                  en_kotu_dikis_yeri_4800x7200=[int(cx_), int(cy_)],
+                                  not_="BILGI (engellemez): esik onayli dosyadan olculmedi; bikubik gidis-donus neredeyse ozdes oldugu "
+                                       "icin taban degil. Karar: gorsel (ESRGAN_EN_KOTU_DIKIS_800.jpg) + Serdar onayi")
+        rap["esrgan_kapi"]["pass_"] = None
+        print("ESRGAN olcum", rap["esrgan_kapi"], flush=True)
     Image.fromarray(z12).save(out / "ZEMIN_12x18_esrgan.png")
     k, oy = 1.5, 450
     z, rc = cerceve(z12, k, o); z, ry, yay12 = yay(z, k, oy, o); z, rs = yildiz(z, k, oy, eski)
