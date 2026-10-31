@@ -51,7 +51,8 @@ STIL_PID, FORMAT_PID = 513, 514
 # ozellik 516 (name Custom3, display "Custom Property", olceksiz, sabit deger yok). Kaynak: kupa-yd-oku kosu 41180774733 YD_BOY.json
 # (pilot 4595350971, salt okuma 4 istek). Etsy'nin 513 + 514 + 516 ucluzunu kabul ettigi YAZIMLA dogrulanmadi (ilk pilot yazimda olculur).
 BOY_PID = 516
-OZEL_PID = (513, 514, 515, 516)   # Etsy ozel (Custom) ozellikleri: menu adi property_name ile verilir
+OZEL_PID = (513, 514, 516)   # taksonomi 121 ozel (Custom1-3) ozellikleri (YD_BOY.json; 515 yok): menu adi property_name ile verilir
+SKU_MAX = 32   # Etsy SKU siniri (pod_sku.MAX_LEN; 34 karakter -> 400, kupa_taslak.py)
 STILLER = ("Starlit", "Timeless", "First Page", "Layers", "Botanical")          # canli sira (yd_kapak_yukle.STILLER)
 ESKI_FORMAT = {"Digital card 5x7": "dijital", "Digital file 8x10": "dijital", "Shipped print 8x10": "baski"}   # by_baski_ekle
 ESKI_SKU_EK = {"Digital card 5x7": "CARD5X7", "Digital file 8x10": "FILE8X10", "Shipped print 8x10": "PRINT8X10"}
@@ -173,6 +174,9 @@ def hedef_kapisi(yuk, pid):
     """Hedef govde kendi icinde tutarli mi (plan ve yazim sonrasi geri okuma ayni kurali kullanir)."""
     h, pr = [], yuk.get("products") or []
     kombi = [(deger(p, STIL_PID), deger(p, FORMAT_PID), deger(p, pid)) for p in pr]
+    uzun = sorted({p.get("sku") or "" for p in pr if len(p.get("sku") or "") > SKU_MAX}, key=len)
+    if uzun:   # inceleme 31 Eki: yeni SKU kalibi (on ek + boy + -DIGITAL) 32'yi asabiliyor; SKU bicimi karari Serdar / Merkez
+        h.append(f"SKU {len(uzun)} urunde {SKU_MAX} karakteri asiyor (en uzun {len(uzun[-1])}: {uzun[-1]})")
     if len(pr) != 140 or len(set(kombi)) != 140:
         h.append(f"urun {len(pr)} / tekil {len(set(kombi))} (5 x 2 x 14 = 140)")
     if kombi != [(s, f, e) for s in STILLER for f in FORMATLAR for e, _ in BOYLAR]:

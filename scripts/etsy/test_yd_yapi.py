@@ -441,10 +441,19 @@ def boy_516():
       and K.boy_ozellik(tax, 0)[0] is None)
 
 
+def sku_siniri(d):
+    """inceleme 31 Eki (BLOK): canli on ek (BY-CAN_LIB-FIRSTPAGE) + -11x14-DIGITAL 32'yi asar -> plan BLOK (Etsy 400)."""
+    rc, out = kuru(Sahte(), d, damga="s32")
+    h = " ".join(json.loads((out / f"KURU_{A}.json").read_text())["hata"])
+    k("SKU > 32 -> plan BLOK, cikis 1 (SKU bicimi karari bekler)", rc == 1 and "32 karakteri asiyor" in h, h[:160])
+
+
 def main():
     d = Path(tempfile.mkdtemp(prefix="ydyapi_"))
     try:
         boy_516()
+        sku_siniri(d)
+        K.SKU_MAX = 99   # asagidaki testler SKU uzunlugundan bagimsiz yapiyi sinar (sinir testi yukarida)
         plan = kuru_testleri(d)
         yaz_testleri(d, plan)
         is_akisi()

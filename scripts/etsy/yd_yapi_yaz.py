@@ -74,8 +74,9 @@ def urun_imza(p, sabit_id):
     """ADET HARIC (satis adedi dusurur); value_ids yalniz sabit_id ozelliklerinde sayilir (varsayilan hicbiri: Format / Size kimliklerini
     Etsy uretir, Style kimligi korunmasa da bag ADA gore denetlenir ve onarilir)."""
     props = tuple(sorted((v.get("property_id"),
-                          # ad yalniz ozel ozelliklerde (513 / 514; bizim verdigimiz ad); taksonomi ozelliginin adini Etsy kendisi dondurur
-                          v.get("property_name") if v.get("property_id") in (K.STIL_PID, K.FORMAT_PID) else None,
+                          # ad yalniz ozel ozelliklerde (513 / 514 / 516; bizim verdigimiz ad, boy 516 "Size" dahil, inceleme 31 Eki);
+                          # taksonomi ozelliginin adini Etsy kendisi dondurur
+                          v.get("property_name") if v.get("property_id") in K.OZEL_PID else None,
                           tuple(v.get("values") or []),
                           tuple(v.get("value_ids") or []) if v.get("property_id") in sabit_id else ())
                          for v in p.get("property_values") or []))
