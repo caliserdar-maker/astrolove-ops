@@ -149,6 +149,11 @@ MASK_ON = on.min(-1) < 245
 L = g['yerlesim']
 cx, _ = T('on', L['on_merkez_x'], 0)
 _, y_sem = T('on', 0, L['sembol_y'])
+# Serdar 31 Eki: sembol dikeyde tam ortada: susleme cercevesinin (dallar) ust ve alt kenarinin ortasi
+_, _t_isim0 = T('on', 0, L['isim_taban'])
+_satirlar = np.where(MASK_ON.any(1))[0]
+y_sem = ((_satirlar.min() - TH) + (_satirlar.max() - TH)) / 2
+ISIM_ARA = float(os.environ.get('ISIM_ARA', 4.0)) * MM          # sembol alti ile isim ustu arasi en az (mm)
 SEMBOL_K = float(os.environ.get('SEMBOL_K', 1.30))    # en buyuk sembol boyu: cift sembol kutusunun 1,30 kati (Serdar 31 Eki "daha buyuk")
 KALIN = float(os.environ.get('KALIN', 1.45))          # cizgi kalinligi carpani (Serdar 31 Eki "daha kalin")
 BOSLUK = float(os.environ.get('BOSLUK', 2.5)) * MM     # sembol ile susleme dali arasi en az (mm); sigmazsa sembol kuculur
@@ -178,6 +183,11 @@ while True:
     if _uzak >= BOSLUK or k <= 0.8:
         break
     k -= 0.02
+_alt = y_sem + ana.shape[0] / 2
+_isim_ust = _t_isim0 - L['isim_cap'] * s
+if _alt > _isim_ust - ISIM_ARA:                                  # isme cok yaklasirsa sembol yukari kayar
+    y_sem -= _alt - (_isim_ust - ISIM_ARA)
+    ana, _cizgi, _cizgi2, _uzak = sembol_yap(k)
 if _uzak < PAY:
     sys.exit(f'HATA: sembol susleme dalina {_uzak:.0f} px (en az {PAY})')
 bas(on, ana, cx, y_sem)
