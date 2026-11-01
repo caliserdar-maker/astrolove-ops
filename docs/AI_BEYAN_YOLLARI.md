@@ -1,5 +1,14 @@
 # AI beyan kapisi: aciklama yazan yollar (Gorev E, Serdar 31 Eki 2026)
 
+> DAL ai-beyan-main NOTU (1 Kas, bagimsiz inceleme sonrasi): bu dal ai-beyan-v2'nin YALNIZ beyan kismidir (Serdar 1 Kas). Asagidaki
+> metinde gecen su parcalar bu dalda YOK (ai-beyan-v2'de kaldi): `scripts/kapak78/yd_kapak_yukle.py` tg_metin / tg_geri PATCH ve YD tek
+> gecis (A11 testi bu dalda ATLANDI), `kupa_galeri78.beyan_hata` ve kupa geri alma izni (karar 2 kupa / karar 5), kupa-galeri78-yukle ve
+> yd-kapak-yukle is akislarindaki `--canli` kapi adimi. Bilinen risk (merge oncesi karar): main'deki `kupa_galeri78.py` geri alma yolu
+> (metin_kur(desc_once), satir 955-957) geri_alma_izni cagirmiyor; eski aciklama beyansizsa kapi bu yazimi durdurur (galeri / video geri
+> alinmis, aciklama geri alinmamis kalir). Ileri yolda galeri metinden once yazilir (913 / 916). Yan etkiler: yayin_beyan_kontrol her
+> aciklamasiz updateListing'de +1 GET; RU_BEYANSIZ satirlari cikista rclone varsa Drive'a yazilir (RU_BEYANSIZ_DRIVE=0 kapatir).
+> Diffte kupa betigi olarak yalniz `scripts/etsy/kupa_taslak.py` (+3/-1: ai_beyan_kapisi cagrisi) var.
+
 Kural: Etsy "Sellers must disclose within their listing description if an item is created with the use of AI." Kapi tek yerde:
 `etsy_common.Etsy._call` -> `ai_beyan_kapisi` (EN: `AI_BEYAN['en']`, RU: `beyan_marka_yaz.RU_BEYAN`). Beyansiz aciklama gonderilmez,
 ilan `BEYAN_HATA`'ya girer, surec cikisinda kosu FAIL. Dogrudan `requests` kullanan 3 createDraftListing yolu kapiyi ayrica cagirir.
