@@ -85,9 +85,44 @@ def tablo_yap(P, n=1440, yumusak=1.0):
     return tab
 
 
-def bos_aci(P):
-    ang = np.sort(P[:, 0]); b = np.diff(np.r_[ang, ang[0] + 360]); i = int(np.argmax(b))
-    return [round(float(ang[i]) % 360, 2), round(float(ang[i] + b[i]) % 360, 2)]
+def bos_aci(P, kume=1.5, en_az=0.75):
+    """alt aciklik (yayin iki ucu): sirt acilari kumelenir (ara <= kume derece), kisa kumeler (< en_az derece; aciklikta tek zemin yildizi
+    / toz) atilir; kalan kumeler arasindaki en buyuk dairesel bosluk."""
+    ang = np.sort(P[:, 0] % 360)
+    if len(ang) == 0:
+        return [0.0, 0.0]
+    ara = np.diff(np.r_[ang, ang[0] + 360]); kop = np.where(ara > kume)[0]
+    if len(kop) == 0:
+        return [0.0, 0.0]
+    bas = np.r_[kop[-1] + 1, kop[:-1] + 1] % len(ang); son = kop            # kume i: ang[bas[i]] .. ang[son[i]]
+    tut = [(ang[b_], ang[e_]) for b_, e_ in zip(bas, son) if (ang[e_] - ang[b_]) % 360 >= en_az]
+    if not tut:
+        tut = [(ang[b_], ang[e_]) for b_, e_ in zip(bas, son)]
+    tut.sort()
+    bosl = [((tut[(i + 1) % len(tut)][0] - tut[i][1]) % 360, tut[i][1], tut[(i + 1) % len(tut)][0]) for i in range(len(tut))]
+    g, a0, a1 = max(bosl)
+    return [round(float(a0) % 360, 2), round(float(a1) % 360, 2)]
+
+
+def uclar(P, bos_ref, ic=10.0, adim=2.5):
+    """yayin iki ucu, YURUYEREK: referans uclarin (bos_ref) ic derece icinden baslayip sirt noktalari arasinda en cok 'adim' derecelik (eski yayin seyrek sonuk kuyrugu 33 derecede ~2 derece bosluklu)
+    bosluklarla aciklik yonune ilerlenir; ulasilan son aci uctur (aciklikta yalitik zemin yildizi / toz sayilmaz). -> [sag_uc, sol_uc]"""
+    ang = np.sort(P[:, 0] % 360)
+    b0, b1 = bos_ref
+
+    def yuru(bas, yon):
+        a = bas
+        while True:
+            fark = ((ang - a) * yon) % 360                               # yon yonunde ileri farklar
+            ileri = fark[(fark > 0) & (fark <= adim)]
+            if not len(ileri):
+                return round(float(a) % 360, 2)
+            a = (a + yon * ileri.max()) % 360
+            if ((a - bas) * yon) % 360 > 60:
+                return round(float(a) % 360, 2)
+    s0 = ang[np.argmin(np.abs(((ang - (b0 - ic)) + 180) % 360 - 180))]
+    s1 = ang[np.argmin(np.abs(((ang - (b1 + ic)) + 180) % 360 - 180))]
+    return [yuru(s0, +1), yuru(s1, -1)]
 
 
 def daire_otur(xy):
@@ -198,5 +233,32 @@ def eski_yol(eski, seed):
         tab = tablo_yap(P, 1440, yumusak=0.5)
     sek = isilti_sektorleri(g, cx, cy, tab)
     Pt = P[~sektorde(P[:, 0], sek)]
-    tab = tablo_yap(Pt, 1440, yumusak=YUMUSAK)              # isilti sektorlerinde komsu acilardan ara deger
-    return dict(cx=cx, cy=cy, r=tab, bos=bos_aci(P), P=P, P_kapi=Pt, isilti=sek)
+    tab = tablo_yap(Pt, 1440, yumusak=YUMUSAK)
+    bos = bos_aci(P)
+    return dict(cx=cx, cy=cy, r=tab, bos=bos, P=P, P_kapi=Pt, isilti=sek, sonum=uc_sonumu(Pt, bos))
+
+
+UC_BOLGE = 25.0   # derece: uc sonumu eski yayin olculen kontrastindan (Serdar 1 Kas madde 3: sol uc ~1 derece erken bitiyordu)
+
+
+def uc_sonumu(Pt, bos, n=1440, plato=None):
+    """yay parlaklik carpani tablosu (0..1): aciklikta 0; uclara UC_BOLGE derece icinde eski sirt kontrasti / plato (yay ortasi medyani),
+    1 derece Gauss yumusatma; geri kalan 1. Eski yay acikliga kadar sonuk kuyrukla gelip orada biter (olcum: sag 20-41 derece plato %15-35,
+    sol 139-145 derece %20-45); 31 Eki dogrusal 12 derece sonum kuyrugu ~1,7 derece erken gorunmez yapiyordu."""
+    a = np.arange(n) * 360.0 / n
+    ang, k = Pt[:, 0], Pt[:, 4]
+    b0, b1 = bos
+    ic = ((a - b0) % 360) < ((b1 - b0) % 360)                      # aciklik (b0 -> b1, artan aci)
+    uz = np.minimum((b0 - a) % 360, (a - b1) % 360)                # en yakin uca aci uzakligi (aciklik disinda)
+    orta = ((ang - b1) % 360 > UC_BOLGE) & ((b0 - ang) % 360 > UC_BOLGE)
+    if plato is None:   # eski yayin kendi platosu; by_ornek3 YENI yayin olculen platosunu verir (mutlak kontrast eslesir, uc ayni yerde)
+        plato = float(np.median(k[orta])) if orta.any() else float(np.median(k))
+    o = np.argsort(ang)
+    kk = np.interp(a, np.r_[ang[o] - 360, ang[o], ang[o] + 360], np.r_[k[o], k[o], k[o]])
+    w = 4; ker = cv2.getGaussianKernel(8 * w + 1, w).ravel()       # 1 derece (4 ornek)
+    kk = np.convolve(np.r_[kk[-4 * w:], kk, kk[:4 * w]], ker, "same")[4 * w:-4 * w]
+    oran = np.clip(kk / plato, 0, 1)
+    gecis = np.clip((UC_BOLGE - uz) / 3.0, 0, 1)                    # uc bolgesi sinirinda 3 derecede yumusak gecis
+    t = np.where(ic, 0.0, gecis * oran + (1 - gecis) * 1.0)
+    return t
+

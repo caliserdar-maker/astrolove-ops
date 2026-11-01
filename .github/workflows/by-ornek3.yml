@@ -61,8 +61,12 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/YD_ZEMIN_YENI/1_Starlit_2x3_kaynak.png" _zemin.png
           echo "$ZEMIN_SHA  _zemin.png" | sha256sum -c - > _o/ZEMIN_SHA.txt 2>&1 || { cat _o/ZEMIN_SHA.txt; echo "KOD=1" >> "$GITHUB_ENV"; exit 0; }
           { grep -m1 "model name" /proc/cpuinfo; nproc; python3 -c "import torch; print('torch', torch.__version__)"; } > _o/MAKINE.txt
+          ONCE=()   # Denetim 20261101B: onceki cikti (kosu 41238698983, f6078af3) ayni yontemle olculur (once / sonra)
+          if rclone copyto "gdrive:ASTROLOVE/TEMP/YD_BOY_ORNEK3/20261031_202531/STARLIT_8x10.jpg" _once8.jpg -q \
+             && rclone copyto "gdrive:ASTROLOVE/TEMP/YD_BOY_ORNEK3/20261031_202531/STARLIT_12x18.jpg" _once12.jpg -q; then
+            ONCE=(--once-8x10 _once8.jpg --once-12x18 _once12.jpg); fi
           BY_SCALE=2 python3 scripts/siparis_by/by_ornek3.py --kod _kod --zemin _zemin.png --esrgan _x2plus.pth --out _o \
-            --pair "$P" --n1 "$A" --n2 "$B" > _o/LOG.txt 2>&1
+            --pair "$P" --n1 "$A" --n2 "$B" "${ONCE[@]}" > _o/LOG.txt 2>&1
           echo "KOD=$?" >> "$GITHUB_ENV"
           tail -25 _o/LOG.txt
       - name: Drive'a yaz
@@ -75,4 +79,4 @@ jobs:
           fi
           [ "${KOD:-1}" = 0 ] || { echo "::error::by_ornek3 hata (LOG.txt)"; exit 1; }
       - if: always()
-        run: rm -rf _o _zemin.png ~/.config/rclone
+        run: rm -rf _o _zemin.png _once8.jpg _once12.jpg ~/.config/rclone
