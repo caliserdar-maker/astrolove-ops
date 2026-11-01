@@ -490,20 +490,30 @@ def kose_tasma(img, xs, ys, olcek=1.0):
     (xl, xr), (yu, ya) = xs, ys
     H, W = L.shape
     r, ds = {}, {}
-    for ad, (cx, cy, sx, sy) in (("sol_ust", (xl, yu, -1, -1)), ("sag_ust", (xr, yu, 1, -1)), ("sol_alt", (xl, ya, -1, 1)),
-                                 ("sag_alt", (xr, ya, 1, 1))):
+    KO = {"sol_ust": (xl, yu, -1, -1, "sol", "ust"), "sag_ust": (xr, yu, 1, -1, "sag", "ust"), "sol_alt": (xl, ya, -1, 1, "sol", "alt"),
+          "sag_alt": (xr, ya, 1, 1, "sag", "alt")}
+    kagk, parca = {}, {}
+    for ad, (cx, cy, sx, sy, cd, cyy) in KO.items():
+        x0, x1 = max(0, int(round(cx - pen))), min(W, int(round(cx + pen)) + 1)
+        y0, y1 = max(0, int(round(cy - pen))), min(H, int(round(cy + pen)) + 1)
+        yy, xx = np.mgrid[y0:y1, x0:x1].astype(np.float64)
+        ic = ((xx - cx) * -sx > 2 * KOSE_CEKIRDEK * olcek) & ((yy - cy) * -sy > 2 * KOSE_CEKIRDEK * olcek)
+        kagk[ad] = kag = float(np.median(L[y0:y1, x0:x1][ic]))
+        # bitisik parcalar: dikey cizgi koseden iceri (y yonu -sy) pen..3pen; yatay cizgi (x yonu -sx) pen..3pen
+        by = sorted((cy - sy * pen, cy - sy * 3 * pen)); bx = sorted((cx - sx * pen, cx - sx * 3 * pen))
+        parca.setdefault(cd, []).append(cizgi_dis_sinir(L, True, cx, kag, sx, by))
+        parca.setdefault(cyy, []).append(cizgi_dis_sinir(L, False, cy, kag, sy, bx))
+    # cizginin dis siniri = iki ucundaki kose parcalarinin buyugu (ayni cizgi tek profille cizilir; F 4. kosu: sol alt parcada doku
+    # nedeniyle 6,46 px, ayni alt cizgi sag altta 7,46 px; cizginin kendi pikseli 1 px tasma sayiliyordu)
+    dsin = {k: max(v) for k, v in parca.items()}
+    for ad, (cx, cy, sx, sy, cd, cyy) in KO.items():
         x0, x1 = max(0, int(round(cx - pen))), min(W, int(round(cx + pen)) + 1)
         y0, y1 = max(0, int(round(cy - pen))), min(H, int(round(cy + pen)) + 1)
         yy, xx = np.mgrid[y0:y1, x0:x1].astype(np.float64)   # float64: sinir ustundeki piksel (ofset = dis sinir) float32'de "oteye" dusuyordu
-        ic = ((xx - cx) * -sx > 2 * KOSE_CEKIRDEK * olcek) & ((yy - cy) * -sy > 2 * KOSE_CEKIRDEK * olcek)
         P = L[y0:y1, x0:x1]
-        kag = float(np.median(P[ic]))
-        # bitisik parcalar: dikey cizgi koseden iceri (y yonu -sy) pen..3pen; yatay cizgi (x yonu -sx) pen..3pen
-        by = sorted((cy - sy * pen, cy - sy * 3 * pen)); bx = sorted((cx - sx * pen, cx - sx * 3 * pen))
-        dx = cizgi_dis_sinir(L, True, cx, kag, sx, by)
-        dy = cizgi_dis_sinir(L, False, cy, kag, sy, bx)
+        dx, dy = dsin[cd], dsin[cyy]
         dis = ((xx - cx) * sx > dx + 1e-6) | ((yy - cy) * sy > dy + 1e-6)
-        r[ad] = int(((P < kag - KOSE_KOYU) & dis).sum())
+        r[ad] = int(((P < kagk[ad] - KOSE_KOYU) & dis).sum())
         ds[ad] = [round(dx, 2), round(dy, 2)]
     r["toplam"] = sum(r[a] for a in ("sol_ust", "sag_ust", "sol_alt", "sag_alt"))
     r["dis_sinir_px"] = ds
