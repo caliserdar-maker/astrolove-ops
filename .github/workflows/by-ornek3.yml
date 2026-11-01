@@ -52,8 +52,8 @@ jobs:
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - name: Yay kapisi testi (sahte zemin; kapi dar tumsek / eksik yay / kisa ucu yakaliyor mu)
-        run: python3 scripts/siparis_by/test_yay_kapisi.py
+      - name: Yay kapisi testi (Denetim 20261101C; kayma / olcek / yay izi olcumleri hatayi yakaliyor mu)
+        run: python3 scripts/siparis_by/test_yay_orijinal.py _kod/z/Baski_2400x3000_Buyutulmus/1_Starlit_8x10_300ppi.png
       - name: Ornek 3
         env: {P: "${{ inputs.pair }}", A: "${{ inputs.n1 }}", B: "${{ inputs.n2 }}"}
         run: |
@@ -63,13 +63,8 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/YD_ZEMIN_YENI/1_Starlit_2x3_kaynak.png" _zemin.png
           echo "$ZEMIN_SHA  _zemin.png" | sha256sum -c - > _o/ZEMIN_SHA.txt 2>&1 || { cat _o/ZEMIN_SHA.txt; echo "KOD=1" >> "$GITHUB_ENV"; exit 0; }
           { grep -m1 "model name" /proc/cpuinfo; nproc; python3 -c "import torch; print('torch', torch.__version__)"; } > _o/MAKINE.txt
-          ONCE=()   # Denetim 20261101B: onceki cikti (kosu 41238698983, f6078af3) ayni yontemle olculur (once / sonra)
-          if rclone copyto "gdrive:ASTROLOVE/TEMP/YD_BOY_ORNEK3/20261031_202531/STARLIT_8x10.jpg" _once8.jpg -q \
-             && rclone copyto "gdrive:ASTROLOVE/TEMP/YD_BOY_ORNEK3/20261031_202531/STARLIT_12x18.jpg" _once12.jpg -q; then
-            ONCE=(--once-8x10 _once8.jpg --once-12x18 _once12.jpg)
-          else echo "::warning::onceki cikti (20261031_202531) indirilemedi; OLCUM.json yay_kapi.once hata alani yazilir"; fi
           BY_SCALE=2 python3 scripts/siparis_by/by_ornek3.py --kod _kod --zemin _zemin.png --esrgan _x2plus.pth --out _o \
-            --pair "$P" --n1 "$A" --n2 "$B" "${ONCE[@]}" > _o/LOG.txt 2>&1
+            --pair "$P" --n1 "$A" --n2 "$B" > _o/LOG.txt 2>&1
           echo "KOD=$?" >> "$GITHUB_ENV"
           tail -25 _o/LOG.txt
       - name: Drive'a yaz
@@ -82,4 +77,4 @@ jobs:
           fi
           [ "${KOD:-1}" = 0 ] || { echo "::error::by_ornek3 hata (LOG.txt)"; exit 1; }
       - if: always()
-        run: rm -rf _o _zemin.png _once8.jpg _once12.jpg ~/.config/rclone
+        run: rm -rf _o _zemin.png ~/.config/rclone
