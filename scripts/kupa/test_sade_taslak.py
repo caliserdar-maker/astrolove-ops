@@ -43,7 +43,7 @@ class Sim:
             self.secs.append(dict(shop_section_id=777, title=st.BOLUM_AD))
         self.L, self.inv, self.ims, self.vids, self.vis, self.per, self.props = None, None, [], [], [], [], {}
         self.aktif_adim, self.olustur_kod, self.drafts = aktif_adim, olustur_kod, []
-        self.patchler, self.alt_bozuk = [], False
+        self.patchler, self.alt_bozuk, self.dil_farkli, self.yayin_gorsel_sil = [], False, False, False
 
     def say(self):
         self.n += 1; self.kota -= 1
@@ -74,7 +74,11 @@ class Sim:
             if path == f"/shops/{s}/sections":
                 return dict(results=self.secs)
             if path == f"/shops/{s}/listings":
-                return dict(results=self.drafts)
+                st_ = (params or {}).get("state")
+                r = [x for x in self.drafts if x.get("state", "draft") == st_]
+                if self.L and self.L.get("state") == st_:
+                    r.append(dict(listing_id=self.L["listing_id"], title=self.L["title"], state=st_))
+                return dict(results=r)
             if path == f"/listings/{lid}":
                 return copy.deepcopy(self.L)
             if path == f"/listings/{lid}/inventory":
@@ -92,7 +96,10 @@ class Sim:
             raise AssertionError(f"sim GET {path}")
         if method == "PATCH" and path == f"/shops/{s}/listings/{lid}":
             self.patchler.append(data)
-            self.L["state"] = data["state"]; return copy.deepcopy(self.L)
+            self.L["state"] = data["state"]
+            if self.yayin_gorsel_sil:
+                self.ims = self.ims[:-1]
+            return copy.deepcopy(self.L)
         if path == f"/shops/{s}/sections":
             self.secs.append(dict(shop_section_id=888, title=data["title"]))
             return self.secs[-1]
@@ -148,6 +155,8 @@ class Sim:
                       production_partners=[dict(production_partner_id=int(body["production_partner_ids"]))],
                       is_supply=False, should_auto_renew=True, is_taxable=True, is_customizable=True, language="en-US",
                       processing_min=4, processing_max=7, item_weight=None, styles=[])
+        if self.dil_farkli:
+            self.L["language"] = "de"
         self.body = body
         return 201, dict(listing_id=4700000001), ""
 
@@ -314,6 +323,53 @@ try:
     a15.patch(f"/shops/{SHOP}/listings/4700000001", {"state": "active", "title": "x"}); ok("T15 baska alanli PATCH engellendi", False)
 except SystemExit as e:
     ok("T15 baska alanli PATCH engellendi", "YASAK" in str(e), str(e))
+
+# T16 yayindan sonra DURUM kaybolursa: ikinci kosu yeni ilan ACMAZ, ikinci PATCH yok (inceleme madde 1)
+with tempfile.TemporaryDirectory() as td:
+    out = ortam(td); sim = Sim()
+    rc, a, e = kos(sim, out, yayinla=True)
+    ok("T16a ilk kosu yayin", rc == 0 and sim.L["state"] == "active")
+    (out / "DURUM.json").unlink()
+    n_create = len([y for y in sim.yazma if y[1] == "create"])
+    rc2, a2, e2 = kos(sim, out, yayinla=True)
+    ok("T16b DURUM yok: yeni create yok, ikinci PATCH yok, DUR", len([y for y in sim.yazma if y[1] == "create"]) == n_create
+       and sim.patchler == [{"state": "active"}] and e2 is not None, f"{e2} {sim.patchler}")
+
+# T17 sablonla farkli alan (elle) varsa yayin yok (inceleme madde 2)
+with tempfile.TemporaryDirectory() as td:
+    out = ortam(td); sim = Sim(); sim.dil_farkli = True
+    rc, a, e = kos(sim, out, yayinla=True)
+    ok("T17 elle alan -> PATCH yok, draft", e is not None and "elle" in str(e) and sim.patchler == [] and sim.L["state"] == "draft", str(e))
+
+# T18 yayin sonrasi FAIL: tamam'a girmez, DURUM'da FAIL; ikinci kosu DUR (inceleme madde 3)
+with tempfile.TemporaryDirectory() as td:
+    out = ortam(td); sim = Sim(); sim.yayin_gorsel_sil = True
+    rc, a, e = kos(sim, out, yayinla=True)
+    D = json.load(open(out / "DURUM.json"))
+    ok("T18a yayin sonrasi FAIL kaydi", e is not None and "ARIES" not in D["tamam"] and str(D["yayin"]["ARIES"]).startswith("FAIL"), f"{e} {D}")
+    rc2, a2, e2 = kos(sim, out, yayinla=True)
+    ok("T18b ikinci kosu DUR, yeni yazim yok", e2 is not None and "FAIL" in str(e2) and len(sim.patchler) == 1, str(e2))
+
+# T19 yarim kalan ilan (envanter sonrasi kesinti) sonraki kosuda ayni ilanla surer, ikinci create yok
+with tempfile.TemporaryDirectory() as td:
+    out = ortam(td); sim = Sim(aktif_adim="yok")
+    a19 = api_kur(sim)
+    gercek = st.Kilitli.post_file if hasattr(st.Kilitli, "post_file") else None
+    sayac = {"n": 0}
+    eski_pf = st.Etsy.post_file
+    def kesik(self, p, files, data=None, tekrar=3):
+        sayac["n"] += 1
+        if sayac["n"] == 5:
+            raise SystemExit("HATA: POST(file) -> 500 (sahte kesinti)")
+        return sim.post_file(self, p, files, data, tekrar)
+    st.Etsy.post_file = kesik
+    try:
+        st.kos(a19, SHOP, out, ["ARIES"], yayinla=True); ok("T19a kesinti", False)
+    except SystemExit as e:
+        ok("T19a kesinti DUR", "sahte kesinti" in str(e), str(e))
+    rc2, a2, e2 = kos(sim, out, yayinla=True)
+    ok("T19b devam: tek create, 14 gorsel, yayin", rc2 == 0 and len([y for y in sim.yazma if y[1] == "create"]) == 1
+       and len(sim.ims) == 14 and sim.patchler == [{"state": "active"}], f"{e2} create {len([y for y in sim.yazma if y[1] == 'create'])} ims {len(sim.ims)}")
 
 # T8 beyansiz aciklama -> metin kapisi DUR (gercek CSV degistirilmeden)
 r = st.metin("ARIES"); r2 = dict(r)

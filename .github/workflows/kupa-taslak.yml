@@ -2,7 +2,8 @@ name: kupa-taslak
 # DAL gorev-g (Serdar 1 Kas, Gorev 20261101G): bu dosya YALNIZ bu dalda SADE KUPA tek burc YENI TASLAK akisidir; main'deki
 # kupa-taslak.yml (cift kupa) DEGISMEZ, bu dal main'e alinmaz. Dosya adi yalniz workflow_dispatch icin (main'de ayni adli dosya var).
 # Girdi adlari main surumuyle ayni: mod=yaz, ciftler=burc listesi (ARIES / TUMU), hedef=SADE_TASLAK (onay), metin_ref=kupa-orchard commit.
-# Kod: scripts/kupa/sade_taslak.py (createDraftListing; PATCH / DELETE YOK; sablon 4607523667 yalniz okunur; state draft degilse DUR).
+# Kod: scripts/kupa/sade_taslak.py (createDraftListing; mod=yayin'da yalniz 15/15 PASS taslaga PATCH {state: active}; DELETE yok;
+#      ayar kaynagi ARIES 4607613712 yalniz okunur; 4607523667'ye istek yok; state draft degilse DUR).
 # Medya: sade_taslak.MEDYA_KLASOR / KART_KLASOR (Merkez 1 Kas tablosu); kilitten ONCE iner; 15/15 yoksa o burc atlanir; sha MANIFEST kapisi.
 # Rapor: Drive TEMP/SADE_TASLAK_G/<damga>/ ; kalici DURUM.json (burc -> listing_id): TEMP/SADE_TASLAK_G/DURUM.json
 permissions:
@@ -76,6 +77,15 @@ jobs:
           done
           TAM=$(echo $TAM); [ -n "$TAM" ] || { echo "::error::hicbir burcta 15/15 medya yok"; exit 1; }
           echo "BURC_LISTE=$TAM" >> "$GITHUB_ENV"; echo "kosulacak: $TAM"
+      - name: Medya on kontrolu (Etsy YOK, kilitten ONCE; sha + kare ozeti onbellegi)
+        env:
+          SEO_CSV: _m/SADE12_SEO_ONERI.csv
+          METIN_CSV: _m/SADE12_METIN.csv
+          MANIFEST: _m/SADE12_MANIFEST.tsv
+          KARE_JSON: _m/SADE12_KARE.json
+          KARE_ONBELLEK: _m/KARE_ONBELLEK.json
+          IMG_ROOT: _img
+        run: python3 scripts/kupa/sade_taslak.py --on-kontrol "$BURC_LISTE"
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
           GH_TOKEN: ${{ github.token }}
@@ -85,7 +95,11 @@ jobs:
           set -euo pipefail
           umask 077
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _w/ETSY_TOKEN.json
-          if rclone copyto "$T/DURUM.json" _o/DURUM.json -q 2>/dev/null; then cat _o/DURUM.json; else echo "onceki DURUM yok"; fi
+          # inceleme 1 Kas madde 1: DURUM varsa okunmali; okunamazsa DUR (sessizce "yok" sayilmaz)
+          if rclone lsf "$T" --files-only --include "/DURUM.json" | grep -qx DURUM.json; then
+            rclone copyto "$T/DURUM.json" _o/DURUM.json || { echo "::error::DURUM.json var ama okunamadi; Etsy'ye yazma yok"; exit 1; }
+            cat _o/DURUM.json
+          else echo "onceki DURUM yok"; fi
       - name: YAZ (Etsy, yeni taslak)
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
@@ -96,6 +110,7 @@ jobs:
           METIN_CSV: _m/SADE12_METIN.csv
           MANIFEST: _m/SADE12_MANIFEST.tsv
           KARE_JSON: _m/SADE12_KARE.json
+          KARE_ONBELLEK: _m/KARE_ONBELLEK.json
           IMG_ROOT: _img
           OUT: _o
         run: |
@@ -110,7 +125,9 @@ jobs:
           if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:' _o/ 2>/dev/null; then
             echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; rm -rf _w ~/.config/rclone; exit 1; fi
           [ -d _o ] && ls _o/* >/dev/null 2>&1 && rclone copy _o "$T/${DAMGA}" --immutable -q && echo "::notice::TEMP/SADE_TASLAK_G/${DAMGA}/" || true
-          [ "$ONAY" != OKU ] && [ -f _o/DURUM.json ] && rclone copyto _o/DURUM.json "$T/DURUM.json" -q || true
+          if [ "$ONAY" != OKU ] && [ -f _o/DURUM.json ]; then
+            rclone copyto _o/DURUM.json "$T/DURUM.json" -q || { echo "::error::DURUM.json Drive'a yazilamadi (sonraki kosu ikinci ilan acmasin diye DUR)"; TOKEN_RC=1; }
+          fi
           rm -rf _w ~/.config/rclone
           [ "$TOKEN_RC" = 0 ] || { echo "::error::token geri yazilamadi"; exit 1; }
       - name: Sonuc

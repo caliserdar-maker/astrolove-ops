@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""SADE KUPA (tek burc) Etsy YENI TASLAK (Gorev 20261101G, Serdar 1 Kas 2026). YAYIN YOK.
+"""SADE KUPA (tek burc) Etsy YENI ILAN (Gorev 20261101G, Serdar 1 Kas 2026).
 
 Kurallar (Serdar 1 Kas):
-- Ayarlar YALNIZ sablon taslak 4607523667'den OKUNUR; sablona yazma / silme YOK.
-- Yeni ilan createDraftListing ile acilir. updateListing / PATCH HIC YOK (yeni taslakta da); PATCH ile yazilabilen alanlar
-  rapora "Serdar elle girecek" + deger olarak yazilir. DELETE yok.
+- Ayarlar YALNIZ onayli ARIES ilani 4607613712'den OKUNUR (Serdar yayina aldi); ona yazim YOK. Eski kopya 4607523667: hic istek yok.
+- Yeni ilan createDraftListing ile acilir; updateListing / PATCH YALNIZ mod yayin'da, tum kontrolleri (15) PASS ve "Serdar elle
+  girecek" listesi BOS olan taslakta, tek govde {"state": "active"}. Baska PATCH ve DELETE yok.
 - Her adimdan sonra state okunur; draft degilse DUR (duzeltme denemesi yok) ve rapor.
 - Kota: kosu basinda okunur; ilan basina pay kapisi: kalan < PAY + KOTA_SINIRI ise o ilan baslamaz (rc 4). KOTA_SINIRI 10.
-- Ikinci kosu ikinci ilan acmaz: DURUM.json (burc -> listing_id) + ayni baslikli taslak aramasi.
+- Ikinci ilan acilmaz: DURUM.json (burc -> listing_id) + magazadaki draft / active / inactive / expired ilanlarda ayni baslik aramasi
+  (bagimsiz inceleme 1 Kas madde 1: yayina alinmis ilan taslak aramasinda gorunmez).
+- mod yayin'da burc "tamam" ancak yayin sonrasi geri okuma PASS olunca yazilir; yarim kalan ilan sonraki kosuda ayni listing_id ile
+  surer (var olan adimlar atlanir, sonra yayin).
 
 Metin: SEO_CSV (kupa_orchard/ilan/SADE12_SEO_ONERI.csv: kod, baslik, etiketler, aciklama, alt) +
        METIN_CSV (kupa_orchard/ilan/SADE12_METIN.csv: kod, kisisellestirme_talimati).
@@ -207,7 +210,14 @@ def medya(b):
             bilgi[p.name] = dict(sha=s_[:16], manifest="ESIT" if man[anahtar] == s_ else "FARKLI")
             if man[anahtar] != s_:
                 if p.suffix == ".mp4":                  # Merkez 1 Kas 16:05: bayt farkinda kare ozeti kapisi
-                    ok_, neden = kare_kapisi(p, anahtar)
+                    ob_f = os.environ.get("KARE_ONBELLEK")
+                    ob = json.load(open(ob_f)) if ob_f and Path(ob_f).is_file() else {}
+                    if s_ in ob:                        # kilitten ONCE ayni dosya (sha) icin hesaplandi (inceleme madde 9)
+                        ok_, neden = ob[s_]
+                    else:
+                        ok_, neden = kare_kapisi(p, anahtar)
+                        if ob_f:
+                            ob[s_] = [ok_, neden]; json.dump(ob, open(ob_f, "w"))
                     bilgi[p.name].update(manifest="BAYT FARKI, kare ozeti " + ("PASS" if ok_ else "FAIL"), kare=neden)
                     if not ok_:
                         hata.append(f"video bayt farki ve kare ozeti FAIL {p.name}: {neden}")
@@ -341,14 +351,25 @@ def bolum_bul(api, shop, olustur):
     return v[0]["shop_section_id"], "OLUSTURULDU"
 
 
+BASLIK_STATE = ("draft", "active", "inactive", "expired")
+
+
 def taslaklar(api, shop):
-    out, off = [], 0
-    while off < 1000:
-        r = (api.get(f"/shops/{shop}/listings", params={"state": "draft", "limit": 100, "offset": off}) or {}).get("results") or []
-        out += r
-        if len(r) < 100:
-            break
-        off += 100
+    """Magazadaki draft / active / inactive / expired ilanlar (baslik aramasi icin). Kosu basina BIR kez okunur (onbellek);
+    bu kosuda acilan ilan onbellege eklenir."""
+    ob = getattr(api, "_ilan_onbellek", None)
+    if ob is not None:
+        return ob
+    out = []
+    for st_ in BASLIK_STATE:
+        off = 0
+        while off < 5000:
+            r = (api.get(f"/shops/{shop}/listings", params={"state": st_, "limit": 100, "offset": off}) or {}).get("results") or []
+            out += [dict(listing_id=x.get("listing_id"), title=x.get("title"), state=x.get("state") or st_) for x in r]
+            if len(r) < 100:
+                break
+            off += 100
+    api._ilan_onbellek = out
     return out
 
 
@@ -424,6 +445,8 @@ def yaz(api, shop, out, b, SB, bolum_id, D, yayinla=False):
             raise SystemExit(f"DUR: createDraftListing {kod}: {mt} | ayni baslikli taslak: {ayni}")
         lid = js.get("listing_id")
         R["olusturma"] = "yeni taslak (createDraftListing, tek POST)"
+        if getattr(api, "_ilan_onbellek", None) is not None:
+            api._ilan_onbellek.append(dict(listing_id=lid, title=M["title"], state="draft"))
     api.lid = lid
     D["burclar"][b] = lid; kaydet()
     print(f"::warning::{b} listing_id {lid}")
@@ -572,9 +595,11 @@ def yaz(api, shop, out, b, SB, bolum_id, D, yayinla=False):
           f"elle {sorted(elle)} | kota {R['kota_bas']} -> {R['kota_son']}")
     if kotu:
         raise SystemExit(f"FAIL kontrol {b}: {kotu} (yayinlanmadi, draft kaldi)")
-    if b not in D.setdefault("tamam", []):
+    if not yayinla and b not in D.setdefault("tamam", []):
         D["tamam"].append(b); kaydet()
     if yayinla:
+        if elle:                                   # inceleme madde 2: elle girilecek alan varsa otomatik yayin yok
+            raise SystemExit(f"FAIL {b}: sablonla farkli alan {sorted(elle)} (Serdar elle girecek); yayinlanmadi, draft kaldi")
         # Serdar 1 Kas: tum kontroller PASS -> ayni kosuda yayin; sonra geri okuma (state, fiyat, gorsel, video)
         api.yayin_izni = lid
         try:
@@ -587,15 +612,21 @@ def yaz(api, shop, out, b, SB, bolum_id, D, yayinla=False):
         ims2 = (api.get(f"/listings/{lid}/images") or {}).get("results") or []
         vids2 = (api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or []
         fiyat2 = sorted({(pv, para((p.get("offerings") or [{}])[0].get("price"))) for p in inv2.get("products") or []
-                         for pv in [next((v.get("values") or [None])[0] for v in p.get("property_values") or [] if v.get("property_id") == P_SIZE)]})
+                         for pv in [next(((v.get("values") or [None])[0] for v in p.get("property_values") or []
+                                          if v.get("property_id") == P_SIZE), None)]}, key=str)
         Y = {"state active": L2.get("state") == "active",
              "fiyat 11 oz 12.90 / 15 oz 16.90 (16 urun)": fiyat2 == sorted(BOYLAR) and len(inv2.get("products") or []) == N_URUN,
              f"gorsel {N_GORSEL}": len(ims2) == N_GORSEL, "video 1": len(vids2) == 1,
-             "baslik / aciklama degismedi": L2.get("title") == M["title"] and beyan_var(L2.get("description"), "en")}
+             "baslik / aciklama CSV ile ayni (AI beyanli)": L2.get("title") == M["title"]
+             and html.unescape(L2.get("description") or "").strip() == M["desc"].strip() and beyan_var(L2.get("description"), "en")}
         R["yayin"] = dict(kontrol=Y, state=L2.get("state"), url=L2.get("url"), fiyat=fiyat2, gorsel=len(ims2), video=len(vids2),
                           kota=api.remaining)
-        D.setdefault("yayin", {})[b] = L2.get("state"); kaydet()
         kotu2 = [k_ for k_, v_ in Y.items() if not v_]
+        # inceleme madde 3: yayin sonrasi FAIL "active" diye kaydedilmez; burc tamam'a yalniz PASS'te girer
+        D.setdefault("yayin", {})[b] = "active" if not kotu2 else f"FAIL {L2.get('state')} {kotu2}"
+        if not kotu2 and b not in D.setdefault("tamam", []):
+            D["tamam"].append(b)
+        kaydet()
         print(f"::warning::{b} YAYIN {lid} state={L2.get('state')} | {len(Y) - len(kotu2)}/{len(Y)} PASS | FAIL {kotu2} | kota {api.remaining}")
         if kotu2:
             raise SystemExit(f"FAIL yayin sonrasi {b}: {kotu2}")
@@ -634,8 +665,10 @@ def kos(api, shop, out, burclar, salt_oku=False, yayinla=False):
         api.lid = None
         if b in D["tamam"] and (not yayinla or (D.get("yayin") or {}).get(b) == "active"):
             ozet["burclar"][b] = f"ATLANDI: tamam ({D['burclar'].get(b)})"; continue
-        if b in D["tamam"] and yayinla:
-            ozet["burclar"][b] = f"DUR: taslak tamam ama yayinlanmamis ({D['burclar'].get(b)}); elle bakilmali"
+        if b in D["tamam"] and yayinla:            # eski kipte (yaz) tamamlanmis taslak: yayin yolundan gecer (adimlar atlanir)
+            D["tamam"].remove(b)
+        if str((D.get("yayin") or {}).get(b, "")).startswith("FAIL"):
+            ozet["burclar"][b] = f"DUR: onceki kosuda yayin sonrasi FAIL ({D['yayin'][b]}); elle bakilmali"
             json.dump(ozet, open(out / "OZET.json", "w"), indent=1, ensure_ascii=False, default=str)
             raise SystemExit(ozet["burclar"][b])
         if api.remaining is not None and int(api.remaining) < PAY + KOTA_SINIRI:
@@ -675,7 +708,16 @@ def main():
     ap.add_argument("--confirm", default="")
     ap.add_argument("--liste", help="indirme listesi yaz (Etsy yok): <dizin>/a.txt (kapak, 8 stil, video) + k.txt (5 kart)")
     ap.add_argument("--liste-dizin", default="_w")
+    ap.add_argument("--on-kontrol", help="Etsy YOK: burclarin medya kapisi (sha + kare ozeti) kilitten once; KARE_ONBELLEK'e yazar")
     a = ap.parse_args()
+    if a.on_kontrol:
+        hata = {}
+        for b in burc_listesi(a.on_kontrol):
+            _, _, mh, _ = medya(b)
+            if mh:
+                hata[b] = mh
+        print(f"on kontrol: {len(burc_listesi(a.on_kontrol))} burc, hata {hata}")
+        sys.exit(1 if hata else 0)
     if a.liste:
         b = burc_listesi(a.liste)[0]
         g, v = dosyalar(b)
