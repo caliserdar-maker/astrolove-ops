@@ -1011,7 +1011,7 @@ def geri_al(api, shop, lid, yd, yedek_dir, K, uzak=""):
         return [f"geri alma hatasi: {str(getattr(e, 'code', None) or e)[:200]}"]
 
 
-def yaz_ilan(api, shop, lid, gd, c, dosya_dir, yd, yedek_dir, K, out, uzak=""):
+def yaz_ilan(api, shop, lid, gd, c, dosya_dir, yd, yedek_dir, K, out, uzak="", geri_payi="evet"):
     """-> dict(sonuc PASS | FAIL (geri alindi) | DUR, sorun, son_ids, video)"""
     (Path(out) / f"YEDEK_CANLI_{lid}.json").write_text(json.dumps(canli_ozet(c), indent=1, ensure_ascii=False), encoding="utf-8")
     try:
@@ -1029,6 +1029,12 @@ def yaz_ilan(api, shop, lid, gd, c, dosya_dir, yd, yedek_dir, K, out, uzak=""):
         if not int(K.d.get("yazim") or 0):
             K.yaz(); return dict(sonuc="DUR", sorun=[m + " (yazim gonderilmedi, ilan degismedi)"])
         K.d["hata"] = m; K.yaz()
+        ert = geri_ertele(api, yd, geri_payi)
+        if ert:
+            K.d.update(geri_alma="ERTELENDI", geri_ertelendi=ert); K.yaz()
+            log(f"    {lid} HATA: {m[:160]} -> {ert}")
+            return dict(sonuc="DUR", sorun=[m, ert, f"kota gelince mod=geri_al sadece={lid} (ayni plan_damga)"]
+                        + ([] if K.drive_ok else ["UYARI: DEVAM Drive'a yazilamadi"]))
         log(f"    {lid} HATA: {m[:160]} -> geri alma (yedekten)")
         gs = geri_al(api, shop, lid, yd, yedek_dir, K, uzak)
         if gs:
@@ -1075,6 +1081,28 @@ def kota_oku(api, shop):
 def ilan_tahmini(gd):
     """Ilan basi en kotu istek, GUNCEL kodla ve plandaki GERCEK eski gorsel sayisiyla (planin eski en_kotu degeri degil)."""
     return istek_tahmini(n_sil=len(gd["canli"]["galeri"]), metin=bool(gd["metin"].get("yaz")))
+
+
+def kota_esigi(gd, geri_payi="evet"):
+    """Yazimda ilan basi kota kapisi (kalan - esik >= KOTA_SINIRI). evet (varsayilan): en kotu = geri almasiz + geri alma.
+    hayir (Serdar 1 Kas, secenek b): yalniz geri almasiz en kotu. Ilan FAIL olur ve geri almanin en kotusune kota yetmezse geri alma
+    HIC BASLAMAZ (geri_ertele; yarim geri alma galeriyi daha kotu birakirdi, inceleme 1 Kas madde 1): DEVAM_<ilan>.json hata +
+    geri_alma=ERTELENDI; kota gelince mod=geri_al sadece=<ilan>. Her ikisinde + TOPLU_ILAN."""
+    if geri_payi not in ("evet", "hayir"):
+        raise SystemExit(f"DUR: --geri-payi evet / hayir olmali ({geri_payi!r})")
+    t = ilan_tahmini(gd)
+    return (t["en_kotu"] if geri_payi == "evet" else t["en_kotu_geri_almasiz"]) + TOPLU_ILAN
+
+
+def geri_ertele(api, yd, geri_payi="evet"):
+    """yaz icindeki geri alma oncesi (yalniz geri_payi=hayir): kalan - geri alma en kotu < KOTA_SINIRI ise neden metni, yoksa None.
+    evet'te ilan basi kapi geri alma payini zaten ayirdi -> None (davranis aynen)."""
+    if geri_payi != "hayir":
+        return None
+    t = istek_tahmini(n_sil=len(yd.get("galeri") or []), metin=bool((yd.get("metin") or {}).get("yaz")))["geri_alma"]
+    if api.remaining is None or int(api.remaining) - t < KOTA_SINIRI:
+        return f"geri alma ertelendi: kalan {api.remaining} - geri alma en kotu {t} < {KOTA_SINIRI} (geri_payi=hayir)"
+    return None
 
 
 def devam_birlestir(a, devam):
@@ -1182,9 +1210,10 @@ def calistir(api, shop, a):
                 if pg is None:
                     s.update(durum="BLOK", neden=["DEVAM kaydi var ama plan girdisi yok"]); continue
                 # koddaki en kotu: taze toplu okuma 2 istek + (toplu yanitta ilan yoksa) tekil kapi okumasi 6 -> en kotu +2
-                t = ilan_tahmini(pg)["en_kotu"] + TOPLU_ILAN
+                t = kota_esigi(pg, getattr(a, "geri_payi", "evet"))
                 if int(api.remaining) - t < KOTA_SINIRI:
-                    dur = f"kota: kalan {api.remaining} - en kotu {t} < {KOTA_SINIRI}; ilan baslamadi"
+                    ek = "" if getattr(a, "geri_payi", "evet") == "evet" else " (geri alma payi yok)"
+                    dur = f"kota: kalan {api.remaining} - en kotu{ek} {t} < {KOTA_SINIRI}; ilan baslamadi"
                     s.update(durum="KALAN", neden=[dur]); continue
             elif int(api.remaining) - KAPI_OKUMA - 1 - (KAPI_OKUMA if esit_kalan else 0) < KOTA_SINIRI:
                 dur = f"kota: kalan {api.remaining} - {KAPI_OKUMA + 1} okuma < {KOTA_SINIRI}; ilan baslamadi"
@@ -1251,7 +1280,7 @@ def calistir(api, shop, a):
                 s.update(durum="DUR", neden=["DEVAM_<ilan>.json Drive'a yazilamadi; yazim yok"]); dur = f"ilan {lid} DUR; kosu durdu"; continue
             baslayan += 1
             s.update(en_az=gd["en_az"], en_kotu=ilan_tahmini(gd)["en_kotu"])
-            Rz = yaz_ilan(api, shop, lid, gd, c, a.dosya_dir, yd, a.yedek_dir, K, ilan_out, a.yedek_uzak)
+            Rz = yaz_ilan(api, shop, lid, gd, c, a.dosya_dir, yd, a.yedek_dir, K, ilan_out, a.yedek_uzak, getattr(a, "geri_payi", "evet"))
             # DEVAM: set 0 (durum_dosyasi json-ilanlar: PASS + set >= hedef geri donmez kurali DEVAM'a uygulanmaz; geri alma kaydi yazilabilir)
             devam.setdefault("ilanlar", {})[lid] = dict(K.d, cift=cift, set=0, hedef=N, durum=K.d.get("durum") or Rz["sonuc"])
             s.update(durum=Rz["sonuc"], neden=Rz["sorun"])
@@ -1312,7 +1341,7 @@ def rapor(satir, girdiler, a, api, out):
         say[s["durum"]] = say.get(s["durum"], 0) + 1
     t0, t1 = istek_tahmini(metin=False), istek_tahmini(metin=True)
     plan_s = [s for s in satir if s["durum"] == "PLAN"]
-    R = dict(mod=a.mod, kosu=a.kosu, sayilar=say, istek_tahmini=dict(farkli_burc=t0, ayni_burc=t1),
+    R = dict(mod=a.mod, kosu=a.kosu, geri_payi=getattr(a, "geri_payi", "evet"), sayilar=say, istek_tahmini=dict(farkli_burc=t0, ayni_burc=t1),
              plan_en_az=sum(s["en_az"] or 0 for s in plan_s), plan_en_kotu_geri_almasiz=sum(
                  (t1 if s["metin"] and s["metin"] != "FARKLI_BURC" else t0)["en_kotu_geri_almasiz"] for s in plan_s),
              istek=api.calls, kalan_kota=api.remaining, ilanlar=satir)
@@ -1323,7 +1352,8 @@ def rapor(satir, girdiler, a, api, out):
                                    encoding="utf-8")
     (out / "RAPOR.json").write_text(json.dumps(R, indent=1, ensure_ascii=False), encoding="utf-8")
     with open(out / "RAPOR.md", "w", encoding="utf-8") as f:
-        f.write(f"# Kupa galeri 78 {a.mod} ({a.kosu})\n\n" + " | ".join(f"{k} {v}" for k, v in sorted(say.items()))
+        f.write(f"# Kupa galeri 78 {a.mod} ({a.kosu})\n\n" + ("geri_payi hayir (Serdar 1 Kas b)\n\n" if getattr(a, "geri_payi", "evet") == "hayir" else "")
+                + " | ".join(f"{k} {v}" for k, v in sorted(say.items()))
                 + f"\n\nIstek (kod okumasi, istek_tahmini): ilan basina en az {t0['en_az']} (ayni burc {t1['en_az']}), en kotu geri almasiz "
                   f"{t0['en_kotu_geri_almasiz']} (ayni burc {t1['en_kotu_geri_almasiz']}), geri alma +{t1['geri_alma']}; PLAN {len(plan_s)} ilan "
                   f"toplam en az {R['plan_en_az']} / en kotu {R['plan_en_kotu_geri_almasiz']} | bu kosu istek {api.calls}, kalan kota {api.remaining}\n"
@@ -1359,6 +1389,8 @@ def arg(argv=None):
     ap.add_argument("--metin-yaz", action="store_true", help="aciklama + kisisellestirme yazimi (VARSAYILAN KAPALI: RU = EN kurali)")
     ap.add_argument("--kurtar", action="store_true", help="hata kaydi olan DEVAM'i surdur")
     ap.add_argument("--azami-ilan", type=int, default=15, help="yaz / parti: kosu basina en fazla ilan (0 = sinirsiz)")
+    ap.add_argument("--geri-payi", choices=("evet", "hayir"), default="evet",
+                    help="yaz: ilan basi kota kapisinda geri alma payi (hayir = yalniz geri almasiz en kotu; Serdar 1 Kas b)")
     ap.add_argument("--toplu-esit-n", type=int, default=2, help="kuru: ilk N ilanda toplu okuma tekil okumayla karsilastirilir (fark -> BLOK)")
     ap.add_argument("--kosu", default=os.environ.get("GITHUB_RUN_ID", "0"))
     a = ap.parse_args(argv)

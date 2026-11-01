@@ -611,6 +611,34 @@ def ana(tmp):
     kontrol("kota None ile baslangic: ucuz GET, kalan - en kotu < 10 -> KALAN, ilan tekil okunmadi, yazim yok",
             S[lid]["durum"] == "KALAN" and S[lid]["istek"] == 0 and not api.yazimlar
             and api.remaining == t1 + 9, f"{S[lid]} kalan {api.remaining}")
+    # geri_payi (Serdar 1 Kas b): hayir = yalniz geri almasiz en kotu + TOPLU; varsayilan evet aynen; gecersiz deger DUR
+    th = K.istek_tahmini(n_sil=16)["en_kotu_geri_almasiz"] + K.TOPLU_ILAN
+    try:
+        K.kota_esigi(gd, "belki"); gecersiz = False
+    except SystemExit:
+        gecersiz = True
+    kontrol("geri_payi: evet = en kotu + 2, hayir = geri almasiz en kotu + 2 (< evet), gecersiz deger DUR",
+            K.kota_esigi(gd) == t1 and K.kota_esigi(gd, "evet") == t1 and K.kota_esigi(gd, "hayir") == th and th < t1 and gecersiz,
+            f"evet {K.kota_esigi(gd)} hayir {K.kota_esigi(gd, 'hayir')} t1 {t1}")
+    cagri = []; asil = K.kota_esigi
+    K.kota_esigi = lambda g, gp="evet": (cagri.append(gp), asil(g, gp))[1]    # bayrak kapiya ulasiyor mu (inceleme 1 Kas madde 2)
+    api.remaining = None; api.gercek = th + 10         # ucuz GET sonrasi th + 9: hayir'da da sinirin 1 altinda
+    kod, S, _ = kos(api, kok, "yaz", *yaz_arg(kok, pd, "--sadece", lid, "--geri-payi", "hayir"), ad="out_kota_gp")
+    K.kota_esigi = asil
+    kontrol("geri_payi hayir: kapi kota_esigi(..., 'hayir') ile cagrildi", cagri == ["hayir"], str(cagri))
+    # yaz icindeki geri alma: hayir'da geri alma en kotusune kota yetmezse geri alma baslamaz (yarim geri alma yok); evet aynen
+    class _A:
+        remaining = None
+    yd = {"galeri": [1] * 14, "metin": {"yaz": True}}
+    tg = K.istek_tahmini(n_sil=14, metin=True)["geri_alma"]
+    a1 = _A(); a1.remaining = tg + 9
+    a2 = _A(); a2.remaining = tg + 10
+    kontrol("geri_ertele: hayir + kalan geri alma + 9 -> ertele; + 10 -> None; evet her zaman None; kalan bilinmiyorsa ertele",
+            K.geri_ertele(a1, yd, "hayir") and K.geri_ertele(a2, yd, "hayir") is None and K.geri_ertele(a1, yd) is None
+            and K.geri_ertele(a1, yd, "evet") is None and K.geri_ertele(_A(), yd, "hayir"), f"tg {tg}")
+    kontrol("geri_payi hayir: kalan - geri almasiz en kotu < 10 -> KALAN (neden 'geri alma payi yok'), yazim yok",
+            S[lid]["durum"] == "KALAN" and S[lid]["istek"] == 0 and not api.yazimlar
+            and "geri alma payi yok" in str(S[lid]["neden"]), f"{S[lid]} kalan {api.remaining}")
 
     # pilot (kota None, sinirda baslar): yedek silmeden ONCE ve Drive'da BAYT olarak
     once = {c: copy.deepcopy(api.L[LID[c]]) for c in TEST}
