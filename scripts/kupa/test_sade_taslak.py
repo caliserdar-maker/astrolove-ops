@@ -259,6 +259,15 @@ with tempfile.TemporaryDirectory() as td:
     ok("T9 OKU: bolum YOK, P_STYLE 513, readiness", O["bolum"][1] == "YOK" and O["P_STYLE"] == 513 and O["readiness"] == 1517641240112)
     print(f"     T9 istek {sim.n}")
 
+# T10 video bayt farki + KARE_JSON yok -> DUR, create yok
+with tempfile.TemporaryDirectory() as td:
+    out = ortam(td); sim = Sim()
+    v = Path(td) / "img" / "ARIES" / "SADE_VIDEO_ARIES.mp4"; v.write_bytes(b"yeniden kodlanmis")
+    os.environ.pop("KARE_JSON", None)
+    rc, a, e = kos(sim, out)
+    ok("T10 video bayt farki, kare ozeti yok -> DUR", e is not None and "kare ozeti FAIL" in str(e)
+       and not [y for y in sim.yazma if y[1] == "create"], str(e))
+
 # T8 beyansiz aciklama -> metin kapisi DUR (gercek CSV degistirilmeden)
 r = st.metin("ARIES"); r2 = dict(r)
 ok("T8 ARIES metin hatasiz", r["hata"] == [], r["hata"])

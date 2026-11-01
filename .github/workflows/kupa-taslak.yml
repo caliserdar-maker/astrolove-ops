@@ -41,7 +41,8 @@ jobs:
       - name: Kurulum
         run: |
           set -euo pipefail
-          pip install -q requests==2.34.2 pillow==12.3.0
+          pip install -q requests==2.34.2 pillow==12.3.0 numpy==2.5.3
+          sudo apt-get update -qq >/dev/null && sudo apt-get install -y -qq ffmpeg >/dev/null
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
       - name: rclone.conf
         env:
@@ -58,6 +59,7 @@ jobs:
         env: { B: "${{ inputs.ciftler }}", MR: "${{ inputs.metin_ref }}" }
         run: |
           set -euo pipefail
+          git -C orchard show "e235d342:kupa_orchard/ilan/SADE12_KARE.json" > _m/SADE12_KARE.json   # Merkez 1 Kas: bayt farkli video icin kare ozeti
           for f in SADE12_SEO_ONERI.csv SADE12_METIN.csv SADE12_MANIFEST.tsv; do git -C orchard show "$MR:kupa_orchard/ilan/$f" > "_m/$f"; done
           L=$(python3 -c 'import sys; sys.path.insert(0,"scripts/kupa"); import sade_taslak as s; print(" ".join(s.burc_listesi(sys.argv[1])))' "$B")
           echo "BURC_LISTE=$L" >> "$GITHUB_ENV"; echo "burc: $L"
@@ -87,6 +89,7 @@ jobs:
           SEO_CSV: _m/SADE12_SEO_ONERI.csv
           METIN_CSV: _m/SADE12_METIN.csv
           MANIFEST: _m/SADE12_MANIFEST.tsv
+          KARE_JSON: _m/SADE12_KARE.json
           IMG_ROOT: _img
           OUT: _o
         run: |

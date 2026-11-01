@@ -72,6 +72,46 @@ def dosyalar(b):
             f"SADE_VIDEO_{b}.mp4")
 
 
+KARE_TOL = 2   # kare ozeti (4x3 blok ortalamasi, 0-255) en buyuk fark; yerel olcum 1 Kas: Drive ARIES videosu 1 (yeniden kodlama), +1 cozucu payi
+
+
+def kare_ozeti(p):
+    """SADE12_KARE.json tanimi (1 Kas olcumu ile dogrulandi): her kare 1440x1080 -> 4 sutun x 3 satir blok RGB ortalamasi, yuvarlanmis.
+    -> (kare, fps, [w, h], [[36 deger] ...]). Bellek: kare kare okunur."""
+    import subprocess
+    import numpy as np
+    pr = json.loads(subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height,r_frame_rate",
+                                    "-of", "json", str(p)], capture_output=True, text=True, check=True).stdout)["streams"][0]
+    w, h = int(pr["width"]), int(pr["height"])
+    a_, b_ = pr["r_frame_rate"].split("/")
+    fps = round(float(a_) / float(b_), 3)
+    pc = subprocess.Popen(["ffmpeg", "-v", "error", "-i", str(p), "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], stdout=subprocess.PIPE)
+    oz, n = [], w * h * 3
+    while True:
+        buf = pc.stdout.read(n)
+        if len(buf) < n:
+            break
+        f = np.frombuffer(buf, np.uint8).reshape(3, h // 3, 4, w // 4, 3)
+        oz.append(np.rint(f.mean(axis=(1, 3))).astype(int).reshape(36).tolist())
+    pc.wait()
+    return len(oz), fps, [w, h], oz
+
+
+def kare_kapisi(p, anahtar):
+    """Bayt farki olan video: SADE12_KARE.json ile kare sayisi, fps, boyut esit ve her degerde fark <= KARE_TOL ise PASS."""
+    yol = os.environ.get("KARE_JSON")
+    if not yol or not Path(yol).is_file():
+        return False, "KARE_JSON yok"
+    K = json.load(open(yol)).get(anahtar)
+    if not K:
+        return False, f"KARE_JSON'da {anahtar} yok"
+    n, fps, boy, oz = kare_ozeti(p)
+    if (n, fps, boy) != (K["kare"], float(K["fps"]), list(K["boyut"])):
+        return False, f"kare/fps/boyut {(n, fps, boy)} != {(K['kare'], K['fps'], K['boyut'])}"
+    d = max(abs(x - y) for a, b in zip(oz, K["ozet_4x3"]) for x, y in zip(a, b))
+    return d <= KARE_TOL, f"kare {n}, fps {fps}, {boy[0]}x{boy[1]}, en buyuk fark {d} (esik {KARE_TOL})"
+
+
 def sha(p):
     h = hashlib.sha256()
     with open(p, "rb") as fh:
@@ -148,7 +188,13 @@ def medya(b):
         if anahtar in man:
             bilgi[p.name] = dict(sha=s_[:16], manifest="ESIT" if man[anahtar] == s_ else "FARKLI")
             if man[anahtar] != s_:
-                hata.append(f"sha manifestle farkli {p.name}")
+                if p.suffix == ".mp4":                  # Merkez 1 Kas 16:05: bayt farkinda kare ozeti kapisi
+                    ok_, neden = kare_kapisi(p, anahtar)
+                    bilgi[p.name].update(manifest="BAYT FARKI, kare ozeti " + ("PASS" if ok_ else "FAIL"), kare=neden)
+                    if not ok_:
+                        hata.append(f"video bayt farki ve kare ozeti FAIL {p.name}: {neden}")
+                else:
+                    hata.append(f"sha manifestle farkli {p.name}")
         else:
             d = dict(sha=s_[:16], manifest="YOK", bayt=p.stat().st_size)
             try:
