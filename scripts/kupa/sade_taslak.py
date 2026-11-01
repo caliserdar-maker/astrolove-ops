@@ -213,10 +213,13 @@ class Kilitli(Etsy):
 def sablon_oku(api, shop, out):
     """Sablon 4607523667: YALNIZ GET. Yedek OUT/SABLON_<id>.json (Drive TEMP altina kopyalanir)."""
     S = SABLON
-    L = api.get(f"/listings/{S}", params={"includes": "Images,Videos,Inventory"}) or {}
-    inv = L.get("inventory") or api.get(f"/listings/{S}/inventory") or {}
+    L = api.get(f"/listings/{S}", params={"includes": "Images,Videos"}) or {}   # 1 Kas: includes=Inventory gecersiz (400)
+    inv = api.get(f"/listings/{S}/inventory") or {}
     props = (api.get(f"/shops/{shop}/listings/{S}/properties") or {}).get("results") or []
-    per = (api.get(f"/listings/{S}/personalization", ok404=True) or {})
+    try:
+        per = (api.get(f"/listings/{S}/personalization", ok404=True) or {})
+    except SystemExit as e:                     # okunamazsa yalniz rapora; yazilan talimat CSV'den
+        per = {"okunamadi": str(e)[:300]}
     Y = dict(okuma_zamani=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), listing=L, inventory=inv, properties=props,
              personalization=per)
     json.dump(Y, open(out / f"SABLON_{S}.json", "w"), indent=1, ensure_ascii=False, default=str)
@@ -402,7 +405,8 @@ def yaz(api, shop, out, b, SB, bolum_id, D):
     api.post_json(f"/shops/{shop}/listings/{lid}/personalization", {"personalization_questions": Q})
     state_oku("6 kisisellestirme")
 
-    # 7) nitelikler: sablondaki her nitelik aynen
+    # 7) nitelikler: sablondaki her nitelik aynen (yazilamayan nitelik rapora; kontrol FAIL gosterir, digerleri surer)
+    R["nitelik_hata"] = []
     for p_ in SB["props"]:
         ids = [str(i) for i in p_.get("value_ids") or []]
         vals = p_.get("values") or []
@@ -413,7 +417,12 @@ def yaz(api, shop, out, b, SB, bolum_id, D):
             d["value_ids"] = ",".join(ids)
         if p_.get("scale_id"):
             d["scale_id"] = str(p_["scale_id"])
-        api.put(f"/shops/{shop}/listings/{lid}/properties/{p_['property_id']}", d)
+        try:
+            api.put(f"/shops/{shop}/listings/{lid}/properties/{p_['property_id']}", d)
+        except SystemExit as e:
+            if "kota" in str(e) or "YASAK" in str(e) or "beyan" in str(e).lower():
+                raise
+            R["nitelik_hata"].append((p_.get("property_name"), d, str(e)[:300]))
     state_oku("7 nitelikler")
 
     # 8) geri okuma
@@ -490,7 +499,7 @@ def yaz(api, shop, out, b, SB, bolum_id, D):
     return R
 
 
-def kos(api, shop, out, burclar):
+def kos(api, shop, out, burclar, salt_oku=False):
     durum_f = out / "DURUM.json"
     D = json.load(open(durum_f)) if durum_f.exists() else {}
     D.setdefault("burclar", {}); D.setdefault("tamam", [])
@@ -498,10 +507,23 @@ def kos(api, shop, out, burclar):
     print(f"kota basta {api.remaining} | pay ilan basina {PAY} + taban {KOTA_SINIRI}")
     SB = sablon_oku(api, shop, out)
     print(f"sablon {SABLON}: {json.dumps(SB['ozet'], ensure_ascii=False, default=str)[:1500]}")
-    if SB["hata"]:
+    if SB["hata"] and not salt_oku:
         raise SystemExit(f"DUR: sablon {SB['hata']}")
-    bolum_id, bolum_durum = bolum_bul(api, shop, olustur=True)
+    bolum_id, bolum_durum = bolum_bul(api, shop, olustur=not salt_oku)
     print(f"bolum {BOLUM_AD}: {bolum_id} ({bolum_durum})")
+    if salt_oku:                                   # Etsy'ye yazma yok: sablon + bolum + metin/medya kapilari + ayni baslikli taslak
+        O = dict(sablon=SB["ozet"], sablon_hata=SB["hata"], P_STYLE=SB["P_STYLE"], P_SIZE=SB["P_SIZE"], readiness=SB["readiness"],
+                 sablon_stil=SB["stil_degerleri"], sablon_boy=SB["boy_degerleri"], ai_anahtar=SB["ai_anahtar"],
+                 kopya={k: SB["L"].get(k) for k in KOPYA}, bolum=(bolum_id, bolum_durum), burclar={})
+        dr = taslaklar(api, shop)
+        for b in burclar:
+            M = metin(b); _, _, mh, bilgi = medya(b)
+            O["burclar"][b] = dict(metin_hata=M["hata"], medya_hata=mh, medya=bilgi, durum=D["burclar"].get(b),
+                                   ayni_baslikli=[x["listing_id"] for x in dr if x.get("title") == M["title"]])
+        O["kota_son"], O["istek"] = api.remaining, api.calls
+        json.dump(O, open(out / "OKU.json", "w"), indent=1, ensure_ascii=False, default=str)
+        print(json.dumps(O, ensure_ascii=False, default=str)[:3000])
+        return 0 if not SB["hata"] and all(not v["metin_hata"] and not v["medya_hata"] for v in O["burclar"].values()) else 1
     t0 = time.time()
     ozet = dict(sablon=SB["ozet"], bolum=(bolum_id, bolum_durum), sablon_stil=SB["stil_degerleri"], sablon_boy=SB["boy_degerleri"],
                 burclar={})
@@ -553,7 +575,7 @@ def main():
         Path(a.liste_dizin, "a.txt").write_text("".join(x + "\n" for x in g if x not in kart) + v + "\n")
         Path(a.liste_dizin, "k.txt").write_text("".join(x + "\n" for x in kart))
         return
-    if a.confirm != "SADE_TASLAK":
+    if a.confirm not in ("SADE_TASLAK", "OKU"):
         raise SystemExit("DUR: --confirm SADE_TASLAK yok (Etsy'ye yazar)")
     out = Path(os.environ.get("OUT", "_out")); out.mkdir(parents=True, exist_ok=True)
     bl = burc_listesi(a.burclar)
@@ -562,7 +584,10 @@ def main():
     store = TokenStore(os.environ["TOKEN_FILE"], k, s)
     if store.needs_refresh():
         store.refresh()
-    sys.exit(kos(Kilitli(store), os.environ["ETSY_SHOP_ID"], out, bl))
+    api = Kilitli(store)
+    if a.confirm == "OKU":
+        api._izin = lambda m, p, d=None: (_ for _ in ()).throw(SystemExit(f"YASAK (salt okuma): {m} {p}"))
+    sys.exit(kos(api, os.environ["ETSY_SHOP_ID"], out, bl, salt_oku=a.confirm == "OKU"))
 
 
 if __name__ == "__main__":

@@ -59,7 +59,13 @@ class Sim:
             if path == f"/shops/{s}":
                 return {}
             if path == f"/listings/{st.SABLON}":
-                return copy.deepcopy(dict(SABLON_L, inventory=SABLON_INV))
+                inc = (params or {}).get("includes", "")
+                if any(x.strip().lower() not in ("images", "shop", "user", "translations", "videos", "personalization", "buyerprice")
+                       for x in inc.split(",") if x.strip()):   # gercek Etsy 1 Kas: 400 Invalid value (inventory)
+                    raise SystemExit(f"HATA: GET {path} -> 400: includes {inc}")
+                return copy.deepcopy(SABLON_L)
+            if path == f"/listings/{st.SABLON}/inventory":
+                return copy.deepcopy(SABLON_INV)
             if path == f"/shops/{s}/listings/{st.SABLON}/properties":
                 return dict(results=copy.deepcopy(SABLON_PROPS))
             if path == f"/listings/{st.SABLON}/personalization":
@@ -241,6 +247,17 @@ with tempfile.TemporaryDirectory() as td:
     rc, a, e = kos(sim, out)
     ok("T7 bolum varken POST sections yok", ("POST", f"/shops/{SHOP}/sections") not in sim.yazma)
     ok("T7 create 400 -> DUR, tek create", e is not None and len([y for y in sim.yazma if y[1] == "create"]) == 1, str(e))
+
+# T9 salt okuma: hic yazma yok, bolum olusturulmaz, OKU.json
+with tempfile.TemporaryDirectory() as td:
+    out = ortam(td); sim = Sim()
+    a9 = api_kur(sim)
+    a9._izin = lambda m, p, d=None: (_ for _ in ()).throw(SystemExit(f"YASAK (salt okuma): {m} {p}"))
+    rc9 = st.kos(a9, SHOP, out, ["ARIES"], salt_oku=True)
+    O = json.load(open(out / "OKU.json"))
+    ok("T9 salt okuma rc 0, yazma 0", rc9 == 0 and sim.yazma == [], f"rc {rc9} yazma {sim.yazma}")
+    ok("T9 OKU: bolum YOK, P_STYLE 513, readiness", O["bolum"][1] == "YOK" and O["P_STYLE"] == 513 and O["readiness"] == 1517641240112)
+    print(f"     T9 istek {sim.n}")
 
 # T8 beyansiz aciklama -> metin kapisi DUR (gercek CSV degistirilmeden)
 r = st.metin("ARIES"); r2 = dict(r)
