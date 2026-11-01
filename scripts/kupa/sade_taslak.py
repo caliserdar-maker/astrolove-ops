@@ -68,6 +68,16 @@ FARK_DISI = {"listing_id", "user_id", "shop_id", "title", "description", "tags",
              "translations", "views_count", "image_ids", "user", "shop", "shipping_profile", "shipping_upgrades"}
 
 
+# Drive kaynak klasorleri (31 Eki v2 uretimi; kapak + 8 stil + video burc klasorunde, sha MANIFEST ile dogrulanir)
+MEDYA_KLASOR = {"ARIES": "1wL7pOapo4w40HEeTfPKjjIgoThmN02-y", "TAURUS": "1daCFNqfTQb7IHWokh0CMcWX22rAng7Hl",
+                "GEMINI": "1ctxkx7QQBUURvP6A7MQLuWsaS6ZVsYP_", "CANCER": "1L0sjyEyisBTy2rgkKuXHdYaDA9fOICHc",
+                "LEO": "1TzGSmAQyB3-7gfTNBs-pOIxuKcDSAiB8", "VIRGO": "1cZaiK-lmFMYlbWuBj94-ihdP2OeqKwBP",
+                "LIBRA": "1cRi2zpDh-QyLisKHIgdFzJp0YLXkhLwD", "SCORPIO": "1v5hWmX8kxZyjnVSXLgAqLM3t-0-xh0FZ",
+                "SAGITTARIUS": "14PfKyttkykXDv4mbGM3nFZA6C5kqrpFC", "CAPRICORN": "1CVX0WIigQr4dFXkDwCS0SKNCmnP56hI7",
+                "AQUARIUS": "1u5vA-BZJJSU7ZeAAms3a71bLxVnu6dYO", "PISCES": "18Kyo05maeAbtA0eSzFfdPk6uB634fmCg"}
+KART_KOK = "1l1zKanXQAQs3o9JdCDMYD5acteVnPA5V"   # 31 Eki 20:1x sade kart kosusu: <KART_KOK>/<BURC>/SADE_<BURC>_K0x_*.jpg (ARIES = 13xiqqp3...)
+
+
 def dosyalar(b):
     return ([f"SADE_KAPAK_{b}.jpg", f"SADE_{b}_K02_SEMBOL.jpg", f"SADE_{b}_K03_KISISEL.jpg", f"SADE_{b}_K05_BOYUT.jpg",
              f"SADE_{b}_K07_SUREC.jpg", f"SADE_{b}_K04_STIL.jpg"] + [f"SADE_STIL_{b}_{ek}.jpg" for _, ek, _ in STILLER],
@@ -666,6 +676,7 @@ def main():
         kart = [x for x in g if "_K0" in x]
         Path(a.liste_dizin, "a.txt").write_text("".join(x + "\n" for x in g if x not in kart) + v + "\n")
         Path(a.liste_dizin, "k.txt").write_text("".join(x + "\n" for x in kart))
+        Path(a.liste_dizin, "klasor.txt").write_text(f"{MEDYA_KLASOR[b]} {KART_KOK} {b}\n")
         return
     if a.confirm not in ("SADE_TASLAK", "SADE_YAYIN", "OKU"):
         raise SystemExit("DUR: --confirm SADE_TASLAK yok (Etsy'ye yazar)")
