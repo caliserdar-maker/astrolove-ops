@@ -14,6 +14,7 @@ on:
       pair: {description: "cift", required: true, default: "CANCER_LIBRA"}
       n1: {description: "isim 1", required: true, default: "EMMA"}
       n2: {description: "isim 2", required: true, default: "JAMES"}
+      stiller: {description: "F 4. kosu (Serdar 1 Kas): FirstPage,Layers,Botanical (Layers = B)", required: true, default: "FirstPage,Layers,Botanical"}
 jobs:
   ornek:
     runs-on: ubuntu-24.04
@@ -23,6 +24,7 @@ jobs:
       SHA_T: 2af9fb94c19fc30d23e697f721d07e7b9674e46ee4da36ef18aa993c79de3759   # 2_Timeless_2x3_kaynak.png (.sha256.txt, kosu 41298943459)
       SHA_F: 93e5d7f6d622cfb01e8afe2481cef8443bb7ef9605101ad2e4a912ae60b749c2   # 3_FirstPage_2x3_kaynak.png
       SHA_B: 7a68c2b76d481a4c715b2aa8599651f375b14b84678345ca82c05ecaafdf96b0   # 5_Botanical_2x3_kaynak.png
+      SHA_L: 73a43564bb1506c089f0c371ed08af7941d108e51acd4441cc45f171d28f81f8   # 4_Layers_2x3_kaynak.png (Serdar 1 Kas karar b; kosu 41303795895)
       ESRGAN_SHA: 49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb
     steps:
       - name: Girdi kapisi
@@ -58,12 +60,13 @@ jobs:
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
       - name: Stil4 ornek
-        env: {P: "${{ inputs.pair }}", A: "${{ inputs.n1 }}", B: "${{ inputs.n2 }}"}
+        env: {P: "${{ inputs.pair }}", A: "${{ inputs.n1 }}", B: "${{ inputs.n2 }}", ST: "${{ inputs.stiller }}"}
         run: |
           set -uo pipefail
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
           mkdir -p _o _doku
-          for f in "2_Timeless:$SHA_T" "3_FirstPage:$SHA_F" "5_Botanical:$SHA_B"; do
+          [[ "$ST" =~ ^(Timeless|FirstPage|Layers|Botanical)(,(Timeless|FirstPage|Layers|Botanical))*$ ]] || { echo "::error::stiller"; echo "KOD=1" >> "$GITHUB_ENV"; exit 0; }
+          for f in "2_Timeless:$SHA_T" "3_FirstPage:$SHA_F" "4_Layers:$SHA_L" "5_Botanical:$SHA_B"; do
             n="${f%%:*}_2x3_kaynak.png"
             rclone copyto "gdrive:ASTROLOVE/TEMP/YD_ZEMIN_YENI/$n" "_doku/$n" -q || { echo "::error::$n indirilemedi"; echo "KOD=1" >> "$GITHUB_ENV"; exit 0; }
             echo "${f#*:}  _doku/$n" | sha256sum -c - >> _o/ZEMIN_SHA.txt 2>&1 || { cat _o/ZEMIN_SHA.txt; echo "KOD=1" >> "$GITHUB_ENV"; exit 0; }
@@ -71,7 +74,7 @@ jobs:
           { grep -m1 "model name" /proc/cpuinfo; nproc; python3 -c "import torch; print('torch', torch.__version__)"; } > _o/MAKINE.txt
           # inceleme 1 Kas: varsayilan bash -e, betik 1 (kapi FAIL) dondurunce KOD yazilmadan adim dusuyordu ("by_stil4 hata" yaniltici)
           RC=0; BY_SCALE=2 python3 scripts/siparis_by/by_stil4.py --kod _kod --doku-dizin _doku --esrgan _x2plus.pth --out _o \
-            --pair "$P" --n1 "$A" --n2 "$B" > _o/LOG.txt 2>&1 || RC=$?
+            --pair "$P" --n1 "$A" --n2 "$B" --stiller "$ST" > _o/LOG.txt 2>&1 || RC=$?
           echo "KOD=$RC" >> "$GITHUB_ENV"
           tail -25 _o/LOG.txt
       - name: Drive'a yaz
