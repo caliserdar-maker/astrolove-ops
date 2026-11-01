@@ -97,7 +97,8 @@ def botanical_parcalar(e):
     d = zemin_lum(e) - lum(e)
     sat = e.max(2).astype(np.float32) - e.min(2)
     s0 = float(np.median(sat[km]))
-    ic = cv2.dilate(km.astype(np.uint8), np.ones((21, 21), np.uint8)) > 0
+    # yerel deneme 1 Kas: kagidin tirtikli kenari / adacayi zemin maskeye karisiyordu (sol alt kutu x 19..2357) -> yalniz kagit ici
+    ic = cv2.erode(km.astype(np.uint8), np.ones((31, 31), np.uint8)) > 0
     m = histerezis(((d > 25) | (sat - s0 > 25)) & ic, ((d > 10) | (sat - s0 > 12)) & ic, 3000)
     n, lab, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
     p = {}
@@ -109,6 +110,24 @@ def botanical_parcalar(e):
         ad = "cicek_sag_ust" if (cx > 1200 and cy < 1500) else "cicek_sol_alt" if (cx < 1200 and cy > 1500) else None
         if ad:
             p.setdefault(ad, np.zeros_like(m)); p[ad] |= lab == i
+    # dala ait kucuk ayrik yapraklar (yerel bakis 1 Kas: sag ustte 1, sol altta 2 yaprak disarida kaliyordu): ana dal kutusuna 450 px
+    # yakin, alani >= 600 px parcalar (kagit lifleri / tohum kirintilari < 600 px)
+    aday = ((d > 18) | (sat - s0 > 20)) & ic & ~m
+    n2, lab2, st2, _ = cv2.connectedComponentsWithStats(aday.astype(np.uint8), 8)
+    for ad in list(p):
+        x0, y0, x1, y1 = kutu(p[ad], 0)
+        for i in range(1, n2):
+            x, y, w, h, a_ = (int(v) for v in st2[i])
+            if a_ >= 600 and x > x0 - 450 and x + w < x1 + 450 and y > y0 - 450 and y + h < y1 + 450:
+                c = e[lab2 == i].astype(np.float32).mean(0)
+                if c[1] - c[0] > -18:     # yesil yaprak (G - R -9..-14); kahverengi kagit kirintisi -21..-31 (olcum 1 Kas) alinmaz
+                    p[ad] |= lab2 == i
+    # yaprak ici delikleri doldur (yerel bakis 1 Kas: maske deliginde yeni kagit gorunuyor, yaprakta beyaz leke)
+    for ad in p:
+        x0, y0, x1, y1 = kutu(p[ad], 2)
+        k = p[ad][y0:y1, x0:x1].astype(np.uint8)
+        f = k.copy(); cv2.floodFill(f, np.zeros((k.shape[0] + 2, k.shape[1] + 2), np.uint8), (0, 0), 1)
+        p[ad][y0:y1, x0:x1] |= f == 0
     return p, km, kk
 
 
@@ -124,8 +143,13 @@ def oran(e, maske, haric_ek=None):
 
 
 def kutu(m, pay=24):
+    """goruntu sinirina KIRPILMIS kutu (yerel deneme 1 Kas: sinir disina tasan kutu kesik diziyi tek yonde esnetiyordu; SIFT sy 1,559)"""
     ys, xs = np.where(m)
-    return [max(0, int(xs.min()) - pay), max(0, int(ys.min()) - pay), int(xs.max()) + pay + 1, int(ys.max()) + pay + 1]
+    H, W = m.shape
+    x0, y0 = max(0, int(xs.min()) - pay), max(0, int(ys.min()) - pay)
+    x1, y1 = min(W, int(xs.max()) + pay + 1), min(H, int(ys.max()) + pay + 1)
+    # cift koordinat: x 1,5 tam sayi olur (yerel deneme: (3000 - 2351) x 1,5 = 973,5 yuvarlamasi 0,5 px kayma veriyordu)
+    return [x0 - x0 % 2, y0 - y0 % 2, min(W, x1 + x1 % 2), min(H, y1 + y1 % 2)]
 
 
 def carp(dst, R, kt, X, Y):
