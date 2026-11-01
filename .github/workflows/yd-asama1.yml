@@ -19,6 +19,7 @@ on:
       plan_damga: {description: "uygula: PLAN_DAMGA.txt", required: false, default: ""}
       confirm: {description: "uygula: YD_ASAMA1", required: false, default: ""}
       sadece: {description: "uygula: virgullu listing_id (pilot); bos = plandaki tum PLAN satirlari", required: false, default: ""}
+      onceki: {description: "uygula: kaldigi yerden; onceki uygula kosusunun TEMP/YD_ASAMA1/<damga> (SONUC.json; PASS ilanlar atlanir)", required: false, default: ""}
 env:
   T: "gdrive:ASTROLOVE/TEMP"
 jobs:
@@ -58,10 +59,12 @@ jobs:
           mkdir -p _o _w
       - name: Plan ve medya indir (uygula; kilitten ONCE)
         if: ${{ inputs.mod == 'uygula' }}
-        env: {PK: "${{ inputs.plan_klasor }}", KD: "${{ inputs.kapak_damga }}", YD: "${{ inputs.yeni3_damga }}"}
+        env: {PK: "${{ inputs.plan_klasor }}", KD: "${{ inputs.kapak_damga }}", YD: "${{ inputs.yeni3_damga }}", ONC: "${{ inputs.onceki }}"}
         run: |
           set -euo pipefail
           rclone copy "$T/YD_ASAMA1/$PK" _p --include "/PLAN.json" -q
+          if [ -n "$ONC" ]; then [[ "$ONC" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::onceki"; exit 1; }
+            rclone copyto "$T/YD_ASAMA1/$ONC/SONUC.json" _o/SONUC.json && echo "onceki SONUC: $(python3 -c "import json;S=json.load(open('_o/SONUC.json'));print(sum(v.get('durum')=='PASS' for v in S.values()),'PASS /',len(S))")"; fi
           # PLAN.json yerel yollari plan kosusunun duzeni (_w/y01, _w/y01b, _w/v/<damga>/...); sha256'lar uygula'da plana karsi dogrulanir
           python3 - <<'EOF2'
           import json
@@ -117,4 +120,4 @@ jobs:
         run: |
           [ -f _w/ETSY_TOKEN.json.updated ] && rclone copyto _w/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" || true
           rm -rf _w _p ~/.config/rclone
-          [ "${RC:-x}" = 0 ] || { echo "::error::sonuc kodu ${RC:-yok}"; exit 1; }
+          case "${RC:-x}" in 0) ;; 4) echo "::warning::KOTA: kalan ilanlar baslamadi; kota acilinca onceki=${DAMGA} ile surdur" ;; *) echo "::error::sonuc kodu ${RC:-yok}"; exit 1 ;; esac

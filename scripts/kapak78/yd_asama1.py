@@ -34,6 +34,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 KAPAK_AYNI_ESIK = 3.0     # TAHMIN (olcumle dogrulanacak): 256 px gri ortalama mutlak fark (0-255); Etsy yeniden kodlamasi < 3 beklenir
 ONAY = "YD_ASAMA1"
 VIDEO_DENEME, VIDEO_BEKLE = 12, 10       # yeni video active olana dek ~2 dk (video_yukle_78 v7 ile ayni)
+ILAN_UST = 25            # ilan basina en cok istek (kapak 5 + bag 2 + video 1 + active okuma 12 + silme 1-2 + son 1; video_yukle_78 ILAN_CAGRI_UST
+#                          ile ayni yaklasim): ilan basinda kalan < KOTA_SINIRI + ILAN_UST ise o ilana BASLANMAZ (yarim ilan birakilmaz), DUR
 GORSEL_DENEME, GORSEL_BEKLE = 4, 8
 
 
@@ -221,6 +223,10 @@ def uygula(a, api, shop):
         if S.get(lid, {}).get("durum") == "PASS":
             continue
         api.kota_kapisi(f"ilan {lid}")
+        from etsy_common import KOTA_SINIRI
+        if api.remaining is not None and int(api.remaining) < KOTA_SINIRI + ILAN_UST:
+            print(f"::warning::KOTA: kalan {api.remaining} < {KOTA_SINIRI} + {ILAN_UST}; {c} ve sonrasi baslamadi (kota acilinca onceki={out.name} ile surdur)")
+            return 4
         R = S[lid] = dict(cift=c, adim=[], durum="BASLADI", istek_bas=api.calls)
 
         def kaydet():
