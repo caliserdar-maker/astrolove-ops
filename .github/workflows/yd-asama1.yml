@@ -1,0 +1,120 @@
+name: yd-asama1
+# YD (1st Anniversary) 1. ASAMA (Serdar 1 Kas): 78 ilanda yalniz KAPAK (rank 1 = Y01) + VIDEO. Galeri / SKU / boyut / aciklama YOK.
+# Kod: scripts/kapak78/yd_asama1.py (updateListing YOK; silme yalniz eski video). Uc ayri kosu:
+#   mod=oku    : Etsy SALT OKUMA (kilit) -> TEMP/YD_ASAMA1/<damga>/HAM_ASAMA1.json (78 ilan toplu okuma, ~1 istek). Etsy disi is yok.
+#   PLAN       : AYRI is akisi yd-asama1-plan.yml (ETSY YOK, KILITSIZ, kilit kumesine girmez): HAM (ham_damga) + CDN'den canli rank 1 ve video YEDEGI (TEMP/YD_ASAMA1_YEDEK/<ham_damga>/) + Y01
+#                (TEMP/YD_KAPAK_V1/<kapak_damga> ve <yeni3_damga>) + esleme videolari (TEMP/YD_VIDEO_ESLEME/<esleme_damga>/VIDEO_ESLEME.csv)
+#                -> TEMP/YD_ASAMA1/<damga>/PLAN.json + PLAN.md + PLAN_DAMGA.txt
+#   mod=uygula : ETSY'YE YAZAR (kilit): confirm=YD_ASAMA1 + plan_klasor + plan_damga; sadece = pilot ilan(lar). Girdiler kilitten ONCE iner.
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      mod: {description: "oku | uygula (plan ayri is akisi yd-asama1-plan: kilit kumesine girmez)", required: true, default: "oku"}
+      kapak_damga: {description: "plan: ana Y01 seti TEMP/YD_KAPAK_V1/<damga>", required: false, default: "20261027_141146"}
+      yeni3_damga: {description: "plan: 3 yeni Y01 TEMP/YD_KAPAK_V1/<damga>", required: false, default: "20261101_092221"}
+      plan_klasor: {description: "uygula: TEMP/YD_ASAMA1/<damga> (plan kosusu)", required: false, default: ""}
+      plan_damga: {description: "uygula: PLAN_DAMGA.txt", required: false, default: ""}
+      confirm: {description: "uygula: YD_ASAMA1", required: false, default: ""}
+      sadece: {description: "uygula: virgullu listing_id (pilot); bos = plandaki tum PLAN satirlari", required: false, default: ""}
+env:
+  T: "gdrive:ASTROLOVE/TEMP"
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - name: Girdi kapisi
+        env: {M: "${{ inputs.mod }}", PK: "${{ inputs.plan_klasor }}", PD: "${{ inputs.plan_damga }}",
+              ON: "${{ inputs.confirm }}", SA: "${{ inputs.sadece }}", KD: "${{ inputs.kapak_damga }}", YD: "${{ inputs.yeni3_damga }}"}
+        run: |
+          set -euo pipefail
+          D='^[0-9]{8}_[0-9]{6}$'
+          case "$M" in
+            oku) ;;
+            uygula) [[ "$PK" =~ $D && "$PD" =~ ^[0-9a-f]{16}$ && "$ON" = YD_ASAMA1 ]] || { echo "::error::uygula: plan_klasor / plan_damga / confirm"; exit 1; }
+                    [ -z "$SA" ] || [[ "$SA" =~ ^[0-9]{6,12}(,[0-9]{6,12})*$ ]] || { echo "::error::sadece"; exit 1; } ;;
+            *) echo "::error::mod oku|uygula"; exit 1 ;;
+          esac
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==12.3.0 numpy==2.5.3
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"; echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          mkdir -p _o _w
+      - name: Plan ve medya indir (uygula; kilitten ONCE)
+        if: ${{ inputs.mod == 'uygula' }}
+        env: {PK: "${{ inputs.plan_klasor }}", KD: "${{ inputs.kapak_damga }}", YD: "${{ inputs.yeni3_damga }}"}
+        run: |
+          set -euo pipefail
+          rclone copy "$T/YD_ASAMA1/$PK" _p --include "/PLAN.json" -q
+          # PLAN.json yerel yollari plan kosusunun duzeni (_w/y01, _w/y01b, _w/v/<damga>/...); sha256'lar uygula'da plana karsi dogrulanir
+          python3 - <<'EOF2'
+          import json
+          P = [x for x in json.load(open("_p/PLAN.json"))["ilanlar"] if x["durum"] == "PLAN"]
+          for ad, on in (("y.txt", "_w/y01/"), ("yb.txt", "_w/y01b/"), ("v.txt", "_w/v/")):
+              k = "video" if ad == "v.txt" else "kapak"
+              open("_w/" + ad, "w").write("".join(x[k]["dosya"][len(on):] + "\n" for x in P if x[k]["dosya"].startswith(on)))
+          EOF2
+          [ -s _w/y.txt ] && rclone copy "$T/YD_KAPAK_V1/$KD" _w/y01 --files-from _w/y.txt -q || true
+          [ -s _w/yb.txt ] && rclone copy "$T/YD_KAPAK_V1/$YD" _w/y01b --files-from _w/yb.txt -q || true
+          rclone copy "$T/YD_VIDEO_ORNEK43" _w/v --files-from _w/v.txt --transfers 8 -q
+          echo "indirilen: kapak $(ls _w/y01 _w/y01b 2>/dev/null | wc -l), video $(find _w/v -name '*.mp4' | wc -l)"
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        if: ${{ inputs.mod == 'oku' || inputs.mod == 'uygula' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - name: Etsy token
+        if: ${{ inputs.mod == 'oku' || inputs.mod == 'uygula' }}
+        run: |
+          set -euo pipefail
+          umask 077
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _w/ETSY_TOKEN.json
+      - name: OKU (Etsy salt okuma)
+        if: ${{ inputs.mod == 'oku' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _w/ETSY_TOKEN.json
+        run: |
+          set +e
+          python3 scripts/kapak78/yd_asama1.py oku --out _o; echo "RC=$?" >> "$GITHUB_ENV"
+      - name: UYGULA (Etsy'ye yazar)
+        if: ${{ inputs.mod == 'uygula' }}
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _w/ETSY_TOKEN.json
+          PD: ${{ inputs.plan_damga }}
+          SA: ${{ inputs.sadece }}
+        run: |
+          set +e
+          python3 scripts/kapak78/yd_asama1.py uygula --plan _p/PLAN.json --plan-damga "$PD" --confirm YD_ASAMA1 --sadece "$SA" --out _o
+          echo "RC=$?" >> "$GITHUB_ENV"
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          [ -d _o ] && ls _o/* >/dev/null 2>&1 && rclone copy _o "$T/YD_ASAMA1/${DAMGA}" --immutable -q && echo "::notice::TEMP/YD_ASAMA1/${DAMGA}/" || true
+      - name: Token geri yaz
+        if: always()
+        run: |
+          [ -f _w/ETSY_TOKEN.json.updated ] && rclone copyto _w/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" || true
+          rm -rf _w _p ~/.config/rclone
+          [ "${RC:-x}" = 0 ] || { echo "::error::sonuc kodu ${RC:-yok}"; exit 1; }
