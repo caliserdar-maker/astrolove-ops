@@ -4,7 +4,8 @@ name: by-ornek3
 # YALNIZ zemin) -> esit olcek 3600x5400 + kodla cerceve / yay + 8x10'dan tepe yildizi + by_poster ogeleri (esit olcek, dikeyde ortali);
 # yaninda ayni ayarlarla 8x10. Cikti Drive TEMP/YD_BOY_ORNEK3/<damga>/.
 # DAL yd-stil4 (Denetim 20261101F): bu dalda is akisi kalan 4 stilin 12x18 ORNEGINI uretir (scripts/siparis_by/by_stil4.py):
-# Timeless / FirstPage / Botanical yeni Canva 2:3 dokular (TEMP/YD_ZEMIN_YENI, sha256 kapisi) + Layers A/B. Cikti TEMP/YD_STIL4_ORNEK/<damga>/.
+# Timeless / FirstPage / Botanical yeni Canva 2:3 dokular (TEMP/YD_ZEMIN_YENI, sha256 kapisi) + Layers A (B Serdar 1 Kas karariyla birakildi).
+# Cikti TEMP/YD_STIL4_ORNEK/<damga>/.
 permissions:
   contents: read
 on:
@@ -22,7 +23,6 @@ jobs:
       SHA_T: 2af9fb94c19fc30d23e697f721d07e7b9674e46ee4da36ef18aa993c79de3759   # 2_Timeless_2x3_kaynak.png (.sha256.txt, kosu 41298943459)
       SHA_F: 93e5d7f6d622cfb01e8afe2481cef8443bb7ef9605101ad2e4a912ae60b749c2   # 3_FirstPage_2x3_kaynak.png
       SHA_B: 7a68c2b76d481a4c715b2aa8599651f375b14b84678345ca82c05ecaafdf96b0   # 5_Botanical_2x3_kaynak.png
-      SHA_L: 73a43564bb1506c089f0c371ed08af7941d108e51acd4441cc45f171d28f81f8   # 4_Layers_2x3_kaynak.png (Serdar 1 Kas karar b; kosu 41303795895)
       ESRGAN_SHA: 49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb
     steps:
       - name: Girdi kapisi
@@ -63,15 +63,16 @@ jobs:
           set -uo pipefail
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
           mkdir -p _o _doku
-          for f in "2_Timeless:$SHA_T" "3_FirstPage:$SHA_F" "4_Layers:$SHA_L" "5_Botanical:$SHA_B"; do
+          for f in "2_Timeless:$SHA_T" "3_FirstPage:$SHA_F" "5_Botanical:$SHA_B"; do
             n="${f%%:*}_2x3_kaynak.png"
             rclone copyto "gdrive:ASTROLOVE/TEMP/YD_ZEMIN_YENI/$n" "_doku/$n" -q || { echo "::error::$n indirilemedi"; echo "KOD=1" >> "$GITHUB_ENV"; exit 0; }
             echo "${f#*:}  _doku/$n" | sha256sum -c - >> _o/ZEMIN_SHA.txt 2>&1 || { cat _o/ZEMIN_SHA.txt; echo "KOD=1" >> "$GITHUB_ENV"; exit 0; }
           done
           { grep -m1 "model name" /proc/cpuinfo; nproc; python3 -c "import torch; print('torch', torch.__version__)"; } > _o/MAKINE.txt
-          BY_SCALE=2 python3 scripts/siparis_by/by_stil4.py --kod _kod --doku-dizin _doku --esrgan _x2plus.pth --out _o \
-            --pair "$P" --n1 "$A" --n2 "$B" > _o/LOG.txt 2>&1
-          echo "KOD=$?" >> "$GITHUB_ENV"
+          # inceleme 1 Kas: varsayilan bash -e, betik 1 (kapi FAIL) dondurunce KOD yazilmadan adim dusuyordu ("by_stil4 hata" yaniltici)
+          RC=0; BY_SCALE=2 python3 scripts/siparis_by/by_stil4.py --kod _kod --doku-dizin _doku --esrgan _x2plus.pth --out _o \
+            --pair "$P" --n1 "$A" --n2 "$B" > _o/LOG.txt 2>&1 || RC=$?
+          echo "KOD=$RC" >> "$GITHUB_ENV"
           tail -25 _o/LOG.txt
       - name: Drive'a yaz
         if: always()
@@ -81,6 +82,6 @@ jobs:
             rclone copy _o "gdrive:ASTROLOVE/TEMP/YD_STIL4_ORNEK/${DAMGA:?}" --immutable -q
             echo "::notice title=YD STIL4::TEMP/YD_STIL4_ORNEK/${DAMGA}/"
           fi
-          [ "${KOD:-1}" = 0 ] || { echo "::error::by_stil4 hata (LOG.txt)"; exit 1; }
+          case "${KOD:-x}" in 0) ;; 3) echo "::error::kapi FAIL (OLCUM.json)"; exit 1;; *) echo "::error::by_stil4 hata kod ${KOD:-yok} (LOG.txt)"; exit 1;; esac
       - if: always()
         run: rm -rf _o _doku ~/.config/rclone

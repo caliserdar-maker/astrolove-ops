@@ -1,5 +1,5 @@
 """F raporu: Timeless kayma olcumu oz-testi. by_stil4.faz (numpy) ve cv2.phaseCorrelate; ozdes girdi ve bilinen yapay kaymalar
-(Fourier tam alt piksel kaydirma + bilinear warpAffine). Girdi: yerel 12x18 Timeless ciktisi (vekil doku kosusu), 1/1,5 kucultulmus koyuluk."""
+(Fourier tam alt piksel kaydirma + bilinear warpAffine). Girdi: kosu 41305506283 Timeless_12x18.jpg, 1/1,5 kucultulmus koyuluk (medianBlur 101; kapinin koyuluk() islevi DEGIL). cv2 cagrisi pencere(Hann)siz; F 3. kosuda kapi icinde ayni kirpim + koyuluk ile faz_oztest() var."""
 import sys, json
 import numpy as np, cv2
 from PIL import Image

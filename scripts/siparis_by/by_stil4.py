@@ -13,10 +13,9 @@ Stiller:
             (kenara uzaklik eski x 1,5).
   FirstPage: yeni krem doku + bordo cerceve KODLA (8x10'dan olculen renk orani / FWHM), dort kenar payi esit = 8x10 yan payi x 1,5.
   Layers A KIRP: 8x10 zemin x1,8 (Lanczos; ogeler BY_SCALE'de) -> 4320x5400, iki yandan esit 360 px kirpilir.
-  Layers B USTE SABIT (Serdar 1 Kas karar b): zemin = yeni duz seftali doku (4_Layers_2x3_kaynak.png, ESRGAN, esit olcek); kemer
-            katmanlari eski 8x10 pikseli x1,5 uste sabit (yumusak maske); yazilar ayni donusumle; dikis (renk basamagi, gradyan) kapida.
+  (Layers B Serdar 1 Kas F 3. kosu karariyla birakildi.)
   Botanical: yeni tirtikli kagit + adacayi doku (ESRGAN) + 2 cicek dali kagit koselerine sabit (kagit kenarina uzaklik eski x 1,5).
-Kullanim: by_stil4.py --kod <KOD_REF> --doku-dizin <dir: 2_Timeless/3_FirstPage/4_Layers/5_Botanical _2x3_kaynak.png> --esrgan <pth> --out <dir>
+Kullanim: by_stil4.py --kod <KOD_REF> --doku-dizin <dir: 2_Timeless/3_FirstPage/5_Botanical _2x3_kaynak.png> --esrgan <pth> --out <dir>
           [--hizli]  (yalniz yerel deneme: ESRGAN yerine Lanczos; uretimde kullanilmaz)"""
 import argparse
 import json
@@ -35,13 +34,13 @@ import yay_orijinal as YR  # noqa: E402  (yerel_zemin)
 Z = "z/Baski_2400x3000_Buyutulmus"
 K, OY = 1.5, 450
 DUZ_Y = 2100
-KEMER_ESIK, KEMER_YUMUSAK = 12, 3.0   # Layers B kemer maskesi: duz seftaliden > 12 sapma (golgeler dahil), 9 px genisletme, sigma 3 kenar
-DIKIS_DE, DIKIS_GRAD = 3.0, 1.5       # ONERI (Serdar onayi yok): dikis renk basamagi dE76 <= 3; kenar gradyani p99 <= 1,5 x yeni doku p99           # Layers: eski 8x10'da kemer katmanlari satir 2050'de biter (olcum 1 Kas: satir 2050+ duz renkten > 25 sapan piksel 0)
 KORELASYON, KAZANC, KAYMA, AFIN = 0.98, (0.95, 1.05), 0.5, 0.01
 YAKIN = {"Timeless": [(0, 4800), (3000, 4800), (1500, 500)], "FirstPage": [(0, 0), (3000, 4800)], "Botanical": [(2900, 100), (100, 4600)]}
 KIRP_ORAN = 0.01       # ONERI (Serdar onayi yok): susleme piksellerinin en cok %1'i 255'te kirpilabilir
 PROFIL_FARK = 0.05     # ONERI: cerceve en koyu oran farki (kanal) <= 0,05 ve FWHM farki <= 1 px @8x10 (yerel vekil olcum 0,019)
+PROFIL_ORNEK = 0.08    # ONERI (G1, d2a38e47; tahmin): cerceve profili ofset basina oran farki (kanal) <= 0,08
 DIS_ORAN = 0.02        # ONERI: maske disinda kalan susleme koyuluk kutlesi maske icinin en cok %2'si
+KAGIT_KENAR = 31       # Botanical maske disi halka: kagit maskesi 31 px asindirilir (yirtik kenar bandi; olcum asagida, F 3. kosu)
 
 
 def lum(a):
@@ -74,7 +73,9 @@ def timeless_parcalar(e):
         if a < 3000:
             continue
         cx, cy = x + w / 2, y + h / 2
-        ad = ("yay" if w > 1200 else "dal_sol_ust" if cx < 1200 and cy < 1500 else "dal_sol_alt" if cx < 1200 else "dal_sag_alt")
+        # inceleme 1 Kas bulgu 12: son secenek sessizce dal_sag_alt'a katiyordu; atanamayan buyuk parca "diger" olur ve kapi FAIL verir
+        ad = ("yay" if w > 1200 else "dal_sol_ust" if cx < 1200 and cy < 1500 else "dal_sol_alt" if cx < 1200 and cy >= 1500
+              else "dal_sag_alt" if cx >= 1200 and cy >= 1500 else "diger")
         p.setdefault(ad, np.zeros_like(m))
         p[ad] |= lab == i
     return p
@@ -188,21 +189,46 @@ def koyuluk(a, haric):
     return np.clip(1 - lum(a) / np.maximum(lum(z.clip(0, 255)), 1.0), 0, 1)
 
 
-def faz(a, b):
-    """numpy faz korelasyonu (Hann pencere, 3 nokta parabol alt piksel). inceleme 1 Kas E1: cv2.phaseCorrelate bazi kirpim boylarinda
-    OZDES goruntude 0,50 px veriyordu (Timeless yay 1968x1842, dal_sol_alt 702x650); bu surum ozdes ve ideal x1,5 girdide 0,000."""
+def faz(a, b, up=50):
+    """numpy faz korelasyonu (Hann pencere). Denetim 1 Kas (F 3. kosu): 3 nokta parabol alt piksel kestirimi S bicimli yanliydi
+    (oz-test: 0,25 -> 0,08-0,14; 0,55 -> 0,62-0,74; inceleme bulgu 9). Simdi tam sayi tepe etrafinda +-0,75 px bolge, 1/up px adimla
+    ters DFT dogrudan hesaplanir (Guizar-Sicairos 2008 yontemi). cv2.phaseCorrelate kullanilmaz: OpenCV 5.0.0.93'te kirpim boyunun
+    getOptimalDFTSize karsiligi tek sayi olan eksende ozdes girdide 0,50 px veriyor (650 -> 675, 1842 -> 1875)."""
     a = a.astype(np.float64); b = b.astype(np.float64); h, w = a.shape
     hn = np.outer(np.hanning(h), np.hanning(w))
     A = np.fft.fft2((a - a.mean()) * hn); B = np.fft.fft2((b - b.mean()) * hn)
     R = np.conj(A) * B; R /= np.maximum(np.abs(R), 1e-12)
     r = np.real(np.fft.ifft2(R))
     iy, ix = np.unravel_index(int(np.argmax(r)), r.shape)
-    def para(m, c, p):
-        d = m - 2 * c + p
-        return 0.0 if d == 0 else 0.5 * (m - p) / d
-    py = iy + para(r[(iy - 1) % h, ix], r[iy, ix], r[(iy + 1) % h, ix]); px = ix + para(r[iy, (ix - 1) % w], r[iy, ix], r[iy, (ix + 1) % w])
+    n = int(1.5 * up) + 1
+    ys = iy + (np.arange(n) - n // 2) / up; xs = ix + (np.arange(n) - n // 2) / up
+    Ey = np.exp(2j * np.pi * np.outer(ys, np.fft.fftfreq(h))); Ex = np.exp(2j * np.pi * np.outer(np.fft.fftfreq(w), xs))
+    c = np.real(Ey @ R @ Ex)
+    jy, jx = np.unravel_index(int(np.argmax(c)), c.shape)
+    py, px = ys[jy], xs[jx]
     py = py - h if py > h / 2 else py; px = px - w if px > w / 2 else px
-    return float(px), float(py), float(r[iy, ix])
+    return float(px), float(py), float(c[jy, jx] / (h * w))
+
+
+def fourier_kaydir(a, dx, dy):
+    h, w = a.shape
+    return np.real(np.fft.ifft2(np.fft.fft2(a) * np.exp(-2j * np.pi * (np.fft.fftfreq(w)[None, :] * dx + np.fft.fftfreq(h)[:, None] * dy))))
+
+
+FAZ_TEST = (0.0, 0.25, 0.45, 0.5, 0.55, 1.0, 2.0)
+FAZ_TEST_HATA = 0.05   # oz-test gecerlilik siniri (tahmin): bilinen kaymada en buyuk mutlak hata
+
+
+def faz_oztest(De):
+    """kapinin AYNI kirpimi ve AYNI koyuluk haritasi uzerinde bilinen kaymalar (x ve y); en buyuk hata"""
+    hata = 0.0; satir = []
+    for k in FAZ_TEST:
+        for yon in ("x", "y"):
+            dx, dy = (k, 0.0) if yon == "x" else (0.0, k)
+            mx, my, _ = faz(De, fourier_kaydir(De, dx, dy))
+            e_ = max(abs(mx - dx), abs(my - dy)); hata = max(hata, e_)
+            satir.append([yon, k, round(mx, 3), round(my, 3)])
+    return dict(en_buyuk_hata=round(hata, 4), esik=FAZ_TEST_HATA, pass_=bool(hata <= FAZ_TEST_HATA), olcumler=satir)
 
 
 def sift_afin(a, b):
@@ -225,8 +251,10 @@ def sift_afin(a, b):
                 pass_=bool(abs(sx / sy - 1) <= AFIN))
 
 
-def susleme_kapi(e, out, maske_e, kt, X, Y, haric_out):
-    """bagimsiz: eski ve cikti koyulugu (1 - lum / yerel zemin) ayni yontemle; cikti kirpimi 1/1,5 INTER_AREA; maske >= 0,5 pikseller."""
+def susleme_kapi(e, out, maske_e, kt, X, Y, haric_out, kagit_ic=None):
+    """bagimsiz: eski ve cikti koyulugu (1 - lum / yerel zemin) ayni yontemle; cikti kirpimi 1/1,5 INTER_AREA; maske >= 0,5 pikseller.
+    kagit_ic (Botanical): maske disi halka yalniz kagit icinde olculur (F 3. kosu: halka kutlesinin cogu kagidin yirtik kenari / adacayi
+    zemin; kagit disi px 2770 / 5137 ve 4728 / 5972, olcum 1 Kas)."""
     x0, y0, x1, y1 = kt
     w, h = x1 - x0, y1 - y0
     He, We = e.shape[:2]
@@ -245,6 +273,7 @@ def susleme_kapi(e, out, maske_e, kt, X, Y, haric_out):
     m = maske_e[y0:y1, x0:x1] & (De > 0.02)
     xe, xo = De[m], Do[m]
     dx, dy, r = faz(De, Do)
+    fz = faz_oztest(De)
     sift = sift_afin(lum(e[y0:y1, x0:x1]), lum(out[Y:Y + round(h * K), X:X + round(w * K)]))
     # E2: mutlak renk (Lab dE76) susleme cekirdeginde (koyuluk > 0,10) ve 255 kirpilan susleme pikseli; E4: maske DISINDA kalan susleme
     # (eski koyuluk > 0,08, maskeye 30 px yakin) koyuluk kutlesi / maske ici kutle
@@ -255,19 +284,33 @@ def susleme_kapi(e, out, maske_e, kt, X, Y, haric_out):
     mt = cv2.resize(maske_e[y0:y1, x0:x1].astype(np.uint8), (round(w * K), round(h * K)), interpolation=cv2.INTER_NEAREST) > 0
     eski_b = cv2.resize(e[y0:y1, x0:x1], (round(w * K), round(h * K)), interpolation=cv2.INTER_LANCZOS4)
     # yalniz YENI kirpma: eskide 255'e yakin olmayan (< 250) ama ciktida >= 254 (eskide de doygun altin parlakligi sayilmaz)
-    kirp = int(((out[Y:Y + round(h * K), X:X + round(w * K)] >= 254).any(2) & ~(eski_b >= 250).any(2) & mt).sum())
+    o_t = out[Y:Y + round(h * K), X:X + round(w * K)]
+    kirp = int(((o_t >= 254).any(2) & ~(eski_b >= 250).any(2) & mt).sum())
+    # F 3. kosu (Serdar 1 Kas, "Timeless 255 kirpma"): ESKI tanim (ciktida >= 254 olan tum maske pikseli) eskinin KENDI doygun altin
+    # parlakligini da sayiyordu (eski 8x10 susleme maskesinde >= 254 orani %0,5-2,7, olcum 1 Kas). Kapi: (a) yeni doyan px orani
+    # <= KIRP_ORAN ve (b) cikti doygun orani - eski doygun orani (ayni maske, eski x1,5 Lanczos) <= KIRP_ORAN. ESKI tanim bilgi olarak yazilir.
+    doy_o = float((o_t >= 254).any(2)[mt].mean()) if mt.any() else 0.0
+    doy_e = float((eski_b >= 254).any(2)[mt].mean()) if mt.any() else 0.0
     me = maske_e[y0:y1, x0:x1]
     yak = (cv2.dilate(me.astype(np.uint8), np.ones((61, 61), np.uint8)) > 0) & ~(cv2.dilate(me.astype(np.uint8), np.ones((7, 7), np.uint8)) > 0)
+    dis_eski_tanim = float(De[yak & (De > 0.08)].sum() / max(De[me].sum(), 1e-6))     # G1 tanimi (bilgi): taban yok, kagit disi dahil
+    ki = kagit_ic[y0:y1, x0:x1] if kagit_ic is not None else np.ones_like(me)
+    yak &= ki
     # taban: ayni yogunluk olcusu maskeden 120-180 px uzak (yalniz kagit lifi / kirinti); asim = yakin - taban (alan oranli)
-    uzak = (cv2.dilate(me.astype(np.uint8), np.ones((361, 361), np.uint8)) > 0) & ~(cv2.dilate(me.astype(np.uint8), np.ones((241, 241), np.uint8)) > 0)
+    uzak = (cv2.dilate(me.astype(np.uint8), np.ones((361, 361), np.uint8)) > 0) & ~(cv2.dilate(me.astype(np.uint8), np.ones((241, 241), np.uint8)) > 0) & ki
     yog = lambda b: float(De[b & (De > 0.08)].sum() / max(b.sum(), 1))  # noqa: E731
     dis = max(0.0, (yog(yak) - (yog(uzak) if uzak.any() else 0.0))) * float(yak.sum()) / max(float(De[me].sum()), 1e-6)
     d = dict(korelasyon=round(float(np.corrcoef(xe, xo)[0, 1]), 4), kazanc=round(float((xe * xo).sum() / max((xe * xe).sum(), 1e-9)), 4),
              ort_mutlak_fark=round(float(np.abs(xo - xe).mean()), 4), px=int(m.sum()), kayma=[round(dx, 3), round(dy, 3)], faz_tepe=round(r, 3),
+             faz_oztest=fz,
              sift=sift, dE76_cekirdek=dict(medyan=round(float(np.median(dE)), 2), p95=round(float(np.percentile(dE, 95)), 2)),
-             kirpilan_255_px=kirp, kirpilan_255_oran=round(kirp / max(int(mt.sum()), 1), 5), maske_disi_susleme_kutle_orani=round(dis, 4))
+             kirpilan_255_px=kirp, kirpilan_255_oran=round(kirp / max(int(mt.sum()), 1), 5),
+             doygun_oran_cikti=round(doy_o, 5), doygun_oran_eski=round(doy_e, 5), doygun_fazla=round(doy_o - doy_e, 5),
+             kirp_eski_tanim_bilgi=round(doy_o, 5),
+             maske_disi_susleme_kutle_orani=round(dis, 4), maske_disi_eski_tanim_bilgi=round(dis_eski_tanim, 4))
     d["pass_"] = bool(d["korelasyon"] >= KORELASYON and KAZANC[0] <= d["kazanc"] <= KAZANC[1] and max(abs(dx), abs(dy)) < KAYMA
-                      and sift.get("pass_", False) and d["kirpilan_255_oran"] <= KIRP_ORAN and dis <= DIS_ORAN)
+                      and sift.get("pass_", False) and d["kirpilan_255_oran"] <= KIRP_ORAN and d["doygun_fazla"] <= KIRP_ORAN and dis <= DIS_ORAN
+                      and fz["pass_"])
     return d
 
 
@@ -305,6 +348,8 @@ def timeless(e, zem, bp, S):
         tum |= v
     out = zem.astype(np.float32); yer = {}
     for ad, m in p.items():
+        if ad == "diger":
+            continue
         R, _ = oran(e, m, haric_ek=tum & ~m)
         kt = kutu(m)
         x0, y0, x1, y1 = kt
@@ -361,31 +406,57 @@ def cerceve_olc(e):
         r[yan] = dict(merkez=round(c, 2), kenar_uzaklik=round(float(uzak), 2), ofs=ofs[m].round(3).tolist(), oran=oran_[m].round(4).tolist(),
                       en_koyu_oran=oran_[m].min(0).round(4).tolist(), kagit=kag.round(1).tolist())
     r["yan_pay"] = round((r["sol"]["kenar_uzaklik"] + r["sag"]["kenar_uzaklik"]) / 2, 2)
+    r["kose_tasma_8x10"] = kose_tasma(e, r["yan_pay"], 1.0)      # Serdar 1 Kas: 12x18 kose = 0 ve eski 8x10 ile ayni (8x10 = 0 olmali)
     return r
 
 
 def cerceve_ciz(img, olc):
-    """inceleme 1 Kas E6: Gauss yerine her kenarin OLCULEN 8x10 oran profili (ofset x 1,5, dogrusal ara deger), kose DIK (cizgiler
-    birbirinin dis kenarina kadar uzanir, kesiside kanal basina en koyu oran). Dort kenar payi esit = 8x10 yan payi x 1,5."""
+    """Her kenarin OLCULEN 8x10 oran profili (ofset x 1,5, dogrusal ara deger; acik kabartma omuzlari > 1 DAHIL). F 3. kosu (Serdar 1 Kas):
+    2. kosuda (a) cizgiler koseden profil penceresi kadar (~21 px) uzayip "+" yapiyordu, (b) np.minimum oran > 1 omuzlari atiyordu
+    (ornek basina profil farki 0,08-0,12, omuz ofsetlerinde). Simdi her piksel icin dikdortgene isaretli L-sonsuz uzaklik
+    s = max(m - x, x - xs, m - y, y - ya) (icerde < 0, disarida > 0; disarida kose KARE) ve s'yi veren kenarin profili uygulanir:
+    cizgi hicbir yerde dik cizginin disina tasmaz. Dort kenar payi esit = 8x10 yan payi x 1,5."""
     H, W = img.shape[:2]
     m = olc["yan_pay"] * K
-    yari = PROFIL_T * K
+    xs_, ya_ = W - 1 - m, H - 1 - m
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    d = np.stack([m - xx, xx - xs_, m - yy, yy - ya_])            # sol, sag, ust, alt
+    k = np.argmax(d, 0); s_ = np.take_along_axis(d, k[None], 0)[0]
     R = np.ones((H, W, 3), np.float32)
-    for yan in ("sol", "sag", "ust", "alt"):
+    yari = PROFIL_T * K
+    bolge = np.abs(s_) <= yari
+    for i, yan in enumerate(("sol", "sag", "ust", "alt")):
         ofs = np.array(olc[yan]["ofs"]) * K; orn = np.array(olc[yan]["oran"])
-        if yan in ("sol", "sag"):
-            c = m if yan == "sol" else W - 1 - m
-            xs = np.arange(int(np.floor(c - yari)), int(np.ceil(c + yari)) + 1)
-            prof = np.stack([np.interp(xs - c, ofs, orn[:, k], left=1, right=1) for k in range(3)], 1).astype(np.float32)
-            y0, y1 = int(np.floor(m - yari)), int(np.ceil(H - 1 - m + yari)) + 1
-            R[y0:y1, xs] = np.minimum(R[y0:y1, xs], prof[None])
-        else:
-            c = m if yan == "ust" else H - 1 - m
-            ys = np.arange(int(np.floor(c - yari)), int(np.ceil(c + yari)) + 1)
-            prof = np.stack([np.interp(ys - c, ofs, orn[:, k], left=1, right=1) for k in range(3)], 1).astype(np.float32)
-            x0, x1 = int(np.floor(m - yari)), int(np.ceil(W - 1 - m + yari)) + 1
-            R[ys, x0:x1] = np.minimum(R[ys, x0:x1], prof[:, None])
-    return np.clip(img.astype(np.float32) * R, 0, 255).astype(np.uint8), dict(pay_px=round(m, 2), profil="olculen 8x10 (kenar basina)")
+        sec = bolge & (k == i)
+        o = (-s_[sec]) if yan in ("sol", "ust") else s_[sec]           # yan_profil ofseti: koordinat artan yonde (sol / ust icin iceri)
+        for c in range(3):
+            R[..., c][sec] = np.interp(o, ofs, orn[:, c], left=1, right=1)
+    return np.clip(img.astype(np.float32) * R, 0, 255).astype(np.uint8), dict(pay_px=round(m, 2), profil="olculen 8x10 (kenar basina, omuz dahil)",
+                                                                                kose="L-sonsuz (kare), tasma yok")
+
+
+KOSE_PEN, KOSE_CEKIRDEK, KOSE_KOYU = 40, 7, 25   # 8x10 px: kose penceresi, cizgi koyu cekirdegi yari genisligi (profil: oran ofset +-5,4'te
+#                                                  ~1'e doner, olcum 1 Kas), kagittan koyu esigi (lum). 12x18'de x1,5.
+
+
+def kose_tasma(img, m, olcek=1.0):
+    """dort kosede, cizgi koyu cekirdeginin DISINDA (kenar ve kose yonunde) kagittan KOSE_KOYU kadar koyu piksel sayisi. Serdar 1 Kas:
+    kapi = 0 ve eski 8x10 ile ayni."""
+    H, W = img.shape[:2]
+    L = lum(img)
+    pen, ck = KOSE_PEN * olcek, KOSE_CEKIRDEK * olcek
+    r = {}
+    for ad, (cx, cy, sx, sy) in (("sol_ust", (m, m, -1, -1)), ("sag_ust", (W - 1 - m, m, 1, -1)), ("sol_alt", (m, H - 1 - m, -1, 1)),
+                                 ("sag_alt", (W - 1 - m, H - 1 - m, 1, 1))):
+        x0, x1 = int(round(cx - pen)), int(round(cx + pen)) + 1; y0, y1 = int(round(cy - pen)), int(round(cy + pen)) + 1
+        yy, xx = np.mgrid[y0:y1, x0:x1].astype(np.float32)
+        dis = ((xx - cx) * sx > ck) | ((yy - cy) * sy > ck)              # dik cizgilerden en az birinin disinda
+        ic = ((xx - cx) * -sx > 2 * ck) & ((yy - cy) * -sy > 2 * ck)     # kagit referansi: cerceve ici kose bolgesi
+        P = L[y0:y1, x0:x1]
+        kag = float(np.median(P[ic]))
+        r[ad] = int(((P < kag - KOSE_KOYU) & dis).sum())
+    r["toplam"] = sum(r.values())
+    return r
 
 
 def cerceve_kapi(img, olc=None, ara=60):
@@ -407,9 +478,16 @@ def cerceve_kapi(img, olc=None, ara=60):
                              en_koyu_12x18=r12.min(0).round(3).tolist(), en_koyu_fark=round(float(np.abs(r12.min(0) - r8.min(0)).max()), 4),
                              fwhm_8x10=round(fwhm(o8, r8), 2), fwhm_12x18_olcekli=round(fwhm(ofs / K, oran_), 2))
     r["fark_max"] = round(max(r[k] for k in ("sol", "sag", "ust", "alt")) - min(r[k] for k in ("sol", "sag", "ust", "alt")), 3)
+    r["beklenen_fark_max"] = round(max(abs(r[k] - m) for k in ("sol", "sag", "ust", "alt")), 3) if olc else None   # inceleme bulgu: her kenar
     r["profil"] = prof
-    r["pass_"] = bool(r["fark_max"] <= 1.0 and (not prof or all(v["en_koyu_fark"] <= PROFIL_FARK and abs(v["fwhm_12x18_olcekli"] - v["fwhm_8x10"]) <= 1.0
-                                                               for v in prof.values())))
+    r["kose_tasma_px"] = kose_tasma(img, m, K)
+    if olc:
+        r["kose_tasma_8x10_px"] = olc.get("kose_tasma_8x10")
+    # F 3. kosu: G1 ornek basina profil farki <= PROFIL_ORNEK (onceki adiyla oran_fark_max) yeniden kapida; en koyu + FWHM de kalir
+    r["pass_"] = bool(r["fark_max"] <= 1.0 and (r["beklenen_fark_max"] is None or r["beklenen_fark_max"] <= 1.0)
+                      and r["kose_tasma_px"]["toplam"] == 0
+                      and (not prof or all(v["oran_fark_max_bilgi"] <= PROFIL_ORNEK and v["en_koyu_fark"] <= PROFIL_FARK
+                                           and abs(v["fwhm_12x18_olcekli"] - v["fwhm_8x10"]) <= 1.0 for v in prof.values())))
     return r
 
 
@@ -463,8 +541,9 @@ def main(argv=None):
         har_o = (cv2.dilate(tum_yeni.astype(np.uint8), np.ones((21, 21), np.uint8)) > 0) | har
         kap = {ad: susleme_kapi(e, son, p[ad], y["kutu_eski"], y["X"], y["Y"], har_o) for ad, y in yer.items()}
         kes = int((cv2.dilate(tum_yeni.astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool) & har).sum())
-        rap["Timeless"] = dict(zemin=yon, yerlesim=yer, kapi=kap, susleme_oge_kesisim_px=kes,
-                               pass_=bool(all(v["pass_"] for v in kap.values()) and kes == 0 and set(yer) == {"yay", "dal_sol_ust", "dal_sol_alt", "dal_sag_alt"}))
+        rap["Timeless"] = dict(zemin=yon, yerlesim=yer, kapi=kap, susleme_oge_kesisim_px=kes, atanamayan_parca_px=int(p["diger"].sum()) if "diger" in p else 0,
+                               pass_=bool(all(v["pass_"] for v in kap.values()) and kes == 0 and "diger" not in p
+                                          and set(yer) == {"yay", "dal_sol_ust", "dal_sol_alt", "dal_sag_alt"}))
         kayit("Timeless", son, e, "timeless")
 
     if "FirstPage" in stiller:
@@ -478,7 +557,8 @@ def main(argv=None):
         rap["FirstPage"] = dict(zemin=yon, cerceve_8x10={k: (v if k == "yan_pay" else {x: v[x] for x in v if x not in ("ofs", "oran")})
                                                         for k, v in o.items()}, cerceve=rc, cerceve_kapi_12x18=kc,
                                 doku_onceden_cizgi_kontrast_sol=on_k,
-                                beklenen_pay=round(o["yan_pay"] * K, 2), pass_=kc["pass_"] and abs(kc["sol"] - o["yan_pay"] * K) <= 1.0)
+                                beklenen_pay=round(o["yan_pay"] * K, 2),
+                                pass_=bool(kc["pass_"] and o["kose_tasma_8x10"]["toplam"] == 0))
         kayit("FirstPage", son, e, "first_page")
 
     if "Layers" in stiller:
@@ -502,53 +582,10 @@ def main(argv=None):
                                kemer_kesilen_eski_8x10_px_yan=200, sift=sift_afin(lum(e), lum(A)))
         rap["Layers_A"]["pass_"] = bool(rap["Layers_A"]["kirpilan_bantta_oge_px"] == 0 and rap["Layers_A"]["sift"].get("pass_", False))
         Image.fromarray(A).save(out / "Layers_A_12x18.jpg", quality=95, subsampling=0, dpi=(300, 300))
-        # ---- B USTE SABIT (Serdar 1 Kas karar b): zemin = YENI duz seftali doku (TEMP/YD_ZEMIN_YENI/4_Layers_2x3_kaynak.png, ESRGAN, esit
-        # olcek); kemer katmanlari ESKI 8x10 pikseli x1,5 uste sabit (oy = 0); yazilar ayni donusumle (kemerle iliski korunur)
-        zemB, yonB = doku(Path(a.doku_dizin, "4_Layers_2x3_kaynak.png"), a.esrgan, a.hizli)
-        ust = cv2.resize(e, (3600, 4500), interpolation=cv2.INTER_LANCZOS4).astype(np.float32)
-        km_ince = kemer_maske(e, duz, KEMER_ESIK)                            # golgeler dahil (esik 12)
-        km15 = cv2.resize(km_ince.astype(np.uint8), (3600, 4500), interpolation=cv2.INTER_NEAREST)
-        km15 = cv2.dilate(km15, np.ones((9, 9), np.uint8))
-        wk = cv2.GaussianBlur(km15.astype(np.float32), (0, 0), KEMER_YUMUSAK)[..., None]
-        Bz = zemB.astype(np.float32)
-        Bz[:4500] = ust * wk + Bz[:4500] * (1 - wk)
-        Bz = np.clip(Bz, 0, 255).astype(np.uint8)
-        b, fB = ogeli_blok(bp, "layers", Bz[:4500], S)
-        B = Bz.copy(); B[:4500] = b
-        fBt = np.zeros((5400, 3600), bool); fBt[:4500] = fB
-        # dikis: kemer maskesinin yumusak kenari (0,05 < w < 0,95) boyunca; (1) renk basamagi = eski duz seftali (kenarin hemen disi,
-        # eski) ile yeni doku (ayni halka) Lab dE76 ortalamasi; (2) kenar gradyani / yeni doku gradyani p99 orani
-        w2 = wk[..., 0]
-        halka = (w2 > 0.02) & (w2 < 0.3) & ~cv2.dilate(fB.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
-        lab = lambda x: cv2.cvtColor(np.clip(x, 0, 255).astype(np.uint8), cv2.COLOR_RGB2LAB).astype(np.float32) * [100 / 255, 1, 1] - [0, 128, 128]  # noqa: E731
-        dE = np.linalg.norm(lab(ust) - lab(zemB[:4500].astype(np.float32)), axis=2)[halka]
-        gB = cv2.Sobel(lum(B[:4500]), cv2.CV_32F, 1, 0) ** 2 + cv2.Sobel(lum(B[:4500]), cv2.CV_32F, 0, 1) ** 2
-        gZ = cv2.Sobel(lum(zemB), cv2.CV_32F, 1, 0) ** 2 + cv2.Sobel(lum(zemB), cv2.CV_32F, 0, 1) ** 2
-        kenar = (w2 > 0.3) & (w2 < 0.7) & ~cv2.dilate(fB.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
-        g_or = float(np.sqrt(np.percentile(gB[kenar], 99)) / max(np.sqrt(np.percentile(gZ, 99)), 1e-6)) if kenar.any() else None
-        tasarim = np.where(fBt)
-        zr = np.median(zemB.reshape(-1, 3), 0)
-        rap["Layers_B"] = dict(ust_olcek=1.5, zemin=yonB, yeni_doku_medyan_rgb=zr.round(1).tolist(), eski_duz_rgb=np.asarray(duz).round(1).tolist(),
-                               kemer_esik=KEMER_ESIK, kemer_yumusak_sigma=KEMER_YUMUSAK,
-                               dikis=dict(renk_basamagi_dE76_ort=round(float(dE.mean()), 2) if dE.size else None,
-                                          renk_basamagi_dE76_p95=round(float(np.percentile(dE, 95)), 2) if dE.size else None, halka_px=int(halka.sum()),
-                                          kenar_gradyan_orani_p99=round(g_or, 3) if g_or else None, esik_dE=DIKIS_DE, esik_gradyan=DIKIS_GRAD),
-                               eklenen_bant=[4500, 5400], eklenen_bantta_oge_px=int(fBt[4500:].sum()),
-                               tasarim_kutu=[int(tasarim[1].min()), int(tasarim[0].min()), int(tasarim[1].max()), int(tasarim[0].max())],
-                               tasarim_alt_bosluk_px=int(5400 - 1 - tasarim[0].max()),
-                               sift_ust=sift_afin(lum(e[:DUZ_Y]), lum(B[:round(DUZ_Y * K)])))
-        d_ = rap["Layers_B"]["dikis"]
-        rap["Layers_B"]["pass_"] = bool(rap["Layers_B"]["eklenen_bantta_oge_px"] == 0 and rap["Layers_B"]["sift_ust"].get("pass_", False)
-                                        and d_["renk_basamagi_dE76_ort"] is not None and d_["renk_basamagi_dE76_ort"] <= DIKIS_DE
-                                        and d_["kenar_gradyan_orani_p99"] is not None and d_["kenar_gradyan_orani_p99"] <= DIKIS_GRAD)
-        Image.fromarray(B).save(out / "Layers_B_12x18.jpg", quality=95, subsampling=0, dpi=(300, 300))
-        ys_, xs_ = np.where((w2 > 0.3) & (w2 < 0.7))
-        if ys_.size:
-            j = int(np.argmax(ys_)); cy_, cx_ = int(ys_[j]), int(xs_[j])   # kemerin en alt ucu: dikis yakin plani
-            yakin.append(("Layers_B dikis", B[max(0, cy_ - 300):cy_ + 300, max(0, cx_ - 300):cx_ + 300]))
+        # Layers B (yeni duz doku + kemer uste sabit): Serdar 1 Kas F 3. kosu karari ile BIRAKILDI; yalniz A uretilir.
         yakin.append(("Layers_A sol kirpim", A[1500:2100, 0:600]))
         s8 = ogeler(bp1, e, "layers")
-        kontak.append(("Layers_A", s8, A)); kontak.append(("Layers_B", s8, B))
+        kontak.append(("Layers_A", s8, A))
         print(f"Layers tamam ({time.time() - t0:.0f}s)", flush=True)
 
     if "Botanical" in stiller:
@@ -580,7 +617,8 @@ def main(argv=None):
             a0, b0 = max(0, -X0), max(0, -Y0); a1, b1 = min(X1 - X0, 3600 - X0), min(Y1 - Y0, 5400 - Y0)
             tum_yeni[Y0 + b0:Y0 + b1, X0 + a0:X0 + a1] |= mm[b0:b1, a0:a1]
         har_o = (cv2.dilate(tum_yeni.astype(np.uint8), np.ones((21, 21), np.uint8)) > 0) | har | ~km_n
-        kap = {ad: susleme_kapi(e, son, p[ad], y["kutu_eski"], y["X"], y["Y"], har_o) for ad, y in yer.items()}
+        ki_e = cv2.erode(km_e.astype(np.uint8), np.ones((KAGIT_KENAR, KAGIT_KENAR), np.uint8)) > 0
+        kap = {ad: susleme_kapi(e, son, p[ad], y["kutu_eski"], y["X"], y["Y"], har_o, ki_e) for ad, y in yer.items()}
         kes = int((cv2.dilate(tum_yeni.astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool) & har).sum())
         rap["Botanical"] = dict(zemin=yon, yerlesim=yer, kapi=kap, susleme_oge_kesisim_px=kes,
                                 pass_=bool(all(v["pass_"] for v in kap.values()) and kes == 0 and set(yer) == {"cicek_sag_ust", "cicek_sol_alt"}))
@@ -611,7 +649,7 @@ def main(argv=None):
     rap["sonuc"] = "PASS" if all(v.get("pass_") for k, v in rap.items() if isinstance(v, dict) and "pass_" in v) else "FAIL"
     (out / "OLCUM.json").write_text(json.dumps(rap, indent=1, default=lambda x: x.tolist() if hasattr(x, "tolist") else str(x)), encoding="utf-8")
     print(json.dumps({k: (v.get("pass_") if isinstance(v, dict) else v) for k, v in rap.items()}, default=str))
-    return 0 if rap["sonuc"] == "PASS" else 1
+    return 0 if rap["sonuc"] == "PASS" else 3   # 3 = kapi FAIL (1 = Python hatasi / SystemExit ile karismasin)
 
 
 if __name__ == "__main__":
