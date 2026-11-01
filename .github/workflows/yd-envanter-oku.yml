@@ -1,6 +1,7 @@
 name: yd-envanter-oku
 # SALT OKUMA (Etsy'ye yazma YOK; Merkez 26 Eki YD): YD ilanlari gorsel / stil / foto bagi / video / kisisellestirme envanteri.
-# Ilan listesi Drive TEMP/BY78_TASLAK_20261014/BY78_TASLAKLAR.csv (by78-denetim ile ayni). Cikti: Drive TEMP/YD_ENVANTER_20261026/.
+# Ilan listesi Drive TEMP/BY78_TASLAK_20261014/BY78_TASLAKLAR.csv (by78-denetim ile ayni). Cikti: Drive TEMP/<cikti>/ (YD2 gece 1 Kas:
+# varsayilan YD_ENVANTER_<UTC damga>, YENI klasor, --immutable; klasor varsa DUR. Eski YD_ENVANTER_20261026 = 1. asama ONCESI yedek, yazilmaz).
 permissions:
   actions: read
   contents: read
@@ -9,14 +10,18 @@ on:
     inputs:
       pilot: {description: "pilot listing_id", required: false, default: "4595350971"}
       yalniz_pilot: {description: "1 = yalniz pilot oku; FARKLI Drive'daki YD_OZET.csv'den yeniden", required: false, default: "0"}
+      cikti: {description: "TEMP altinda YENI klasor adi (bos = YD_ENVANTER_<UTC damga>); var olan klasore yazilmaz", required: false, default: ""}
 jobs:
   oku:
     runs-on: ubuntu-latest
     timeout-minutes: 150
     steps:
       - name: Girdi kapisi
-        env: {PILOT: "${{ inputs.pilot }}", YALNIZ: "${{ inputs.yalniz_pilot }}"}
-        run: '[[ "$PILOT" =~ ^[0-9]+$ && "$YALNIZ" =~ ^[01]$ ]] || { echo "::error::girdi"; exit 1; }'
+        env: {PILOT: "${{ inputs.pilot }}", YALNIZ: "${{ inputs.yalniz_pilot }}", CK: "${{ inputs.cikti }}"}
+        run: |
+          [[ "$PILOT" =~ ^[0-9]+$ && "$YALNIZ" =~ ^[01]$ && "$CK" =~ ^([A-Za-z0-9_]+)?$ ]] || { echo "::error::girdi"; exit 1; }
+          [ "$CK" != YD_ENVANTER_20261026 ] || { echo "::error::YD_ENVANTER_20261026 (1. asama oncesi yedek) yazilmaz"; exit 1; }
+          echo "CIKTI=${CK:-YD_ENVANTER_$(date -u +%Y%m%d_%H%M%S)}" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
@@ -46,6 +51,7 @@ jobs:
           umask 077; mkdir -p _work _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           rclone copyto "gdrive:ASTROLOVE/TEMP/BY78_TASLAK_20261014/BY78_TASLAKLAR.csv" _work/LISTE.csv
+          if rclone lsf "gdrive:ASTROLOVE/TEMP/$CIKTI" --max-depth 1 2>/dev/null | grep -q .; then echo "::error::TEMP/$CIKTI dolu; yeni klasor adi ver"; exit 1; fi
           if [ "$YALNIZ" = "1" ]; then rclone copyto "gdrive:ASTROLOVE/TEMP/YD_ENVANTER_20261026/YD_OZET.csv" _work/OZET.csv; fi
       - name: Oku
         env:
@@ -67,7 +73,7 @@ jobs:
           TOKEN_RC=0; OUT_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
           if ls _out/* >/dev/null 2>&1; then
             python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
-            rclone copy _out "gdrive:ASTROLOVE/TEMP/YD_ENVANTER_20261026" -q && echo "Cikti: YD_ENVANTER_20261026 (kosu ${GITHUB_RUN_ID})" || OUT_RC=1
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/${CIKTI:?}" --immutable -q && echo "Cikti: $CIKTI (kosu ${GITHUB_RUN_ID})" | tee -a "$GITHUB_STEP_SUMMARY" || OUT_RC=1
           fi
           [ "$TOKEN_RC" = 0 ] && [ "$OUT_RC" = 0 ] || exit 1
       - if: always()
