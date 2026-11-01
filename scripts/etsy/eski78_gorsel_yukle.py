@@ -100,7 +100,7 @@ def istek_yalin_en_az(adimlar, basla=0, ilk=True, n=HEDEF_N):
     return (1 if ilk else 6) + sum(2 if a[0] in ("bag", "bag_deneme") else 1 for a in adimlar[basla:]) + 4
 
 
-def yalin_plan(cikar, yukle, hedef_n=HEDEF_N, koru=(), eksik_bag=False):
+def yalin_plan(cikar, yukle, hedef_n=HEDEF_N, koru=(), eksik_bag=False, bagli=None):
     """YALIN adim plani (Merkez 29 Eki karar 3: yalniz degisen gorsel, alt metin ve sira yukleme isteginde, okuma tekrari yok):
       1. hedef gorseller hedef sirasinda yuklenir (rank = hedef sira, alt metin ayni istekte): kapak ilk yuklemeyle 1. sirada,
          yeni gorseller 1..n'de, eskiler arkada (gorsel sayisi en fazla canli + n, IMG_LIMIT altinda olmali).
@@ -119,11 +119,19 @@ def yalin_plan(cikar, yukle, hedef_n=HEDEF_N, koru=(), eksik_bag=False):
     sira = sorted([int(r["hedef_sira"]) for r in yk] + [int(r["hedef_sira"]) for r in koru])
     if sira != list(range(1, hedef_n + 1)):
         raise Dur(f"yalin plan: yukleme + yerinde kalan hedef siralari 1..{hedef_n} degil ({sira})")
+    # YD 2. asama (1 Kas gece): canli 13 + 9 yukleme = 22 > IMG_LIMIT (20). bagli verilirse (canli Style / renk bagli kimlikler) asan
+    # kadar BAGSIZ CIKAR gorsel yuklemeden ONCE silinir (kapak / DOKUNMA / KORU satirlari cikar'da yok; bagli gorsel bag dogrulanmadan
+    # silinmez). Toplam IMG_LIMIT altindaysa (poster v11 / v11b) plan aynen.
+    toplam = len(cikar) + len(koru) + len(yk)
+    on = []
+    if bagli is not None and toplam > G.IMG_LIMIT:
+        on = [c for c in cikar if c not in set(bagli)][:toplam - G.IMG_LIMIT]
     adim = [("bag_deneme",)] if eksik_bag else []
+    adim += [("sil", c) for c in on]
     adim += [("yukle", r["hedef_gorsel"]) for r in yk]
     adim += [("dokunma_kontrol",)] if any(r["islem"] == "DOKUNMA" for r in koru) else []
-    adim += [("bag",)] + [("sil", c) for c in cikar] + [("sira_kontrol",)]
-    return adim, len(cikar) + len(koru) + len(yk)
+    adim += [("bag",)] + [("sil", c) for c in cikar if c not in on] + [("sira_kontrol",)]
+    return adim, toplam - len(on)
 
 
 def sha256(yol):
@@ -559,7 +567,8 @@ def bir_ilan(api, shop, lid, liste, hedef_dir, manifest, out, kuru=False, kota_i
         bagli0 = {v.get("image_id") for v in G.var_img(api, shop, lid)}
         kapak = next((r for r in yukle if int(r["hedef_sira"]) == 1), None)
         if yalin:
-            adimlar, enfazla = yalin_plan(cikar, yukle, hedef_n, koru=[r for r in hedef if r["islem"] != "DEGISTIR"], eksik_bag=len(hbag) < 5)
+            adimlar, enfazla = yalin_plan(cikar, yukle, hedef_n, koru=[r for r in hedef if r["islem"] != "DEGISTIR"], eksik_bag=len(hbag) < 5,
+                                          bagli=bagli0)
         else:
             adimlar, enfazla = adim_plani(len(g0), cikar, bagli0, yukle, set(hbag.values()), kapak_degisir=kapak, hedef_n=hedef_n)
         K.d["plan"] = [list(x) for x in adimlar]; K.d["en_fazla"] = enfazla; K.d["adim"] = 0

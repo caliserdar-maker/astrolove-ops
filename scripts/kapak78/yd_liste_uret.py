@@ -310,16 +310,141 @@ def ilan_hazirla(r, d):
                 esleme=esl)
 
 
+YD2_KAPAK = (3000, 2250)   # 1. asama (Serdar 1 Kas) sonrasi canli rank 1 kapak (Y01, 3000x2250); 2. asamada DOKUNULMAZ
+
+
+def ham_kapisi_yd2(h, a_, b_):
+    """YD 2. asama (Merkez / Serdar 1 Kas): 1. asama SONRASI canli durum. -> (gorseller, baglar, neden).
+    rank 1 = 1. asamanin yeni kapagi (3000x2250, alt metin = alt_metin(A, B)) DOKUNULMAZ; 13 gorsel; 5 Style bagi (property 513, 5 ad,
+    5 farkli gorsel, galeride, kapak bagsiz); envanter Style value_id'leri bag value_id'leriyle ayni."""
+    neden = []
+    L = h.get("listing") or {}
+    if L.get("state") != "active":
+        neden.append(f"HAM state {L.get('state')} (active degil)")
+    g = sorted(h.get("images") or [], key=lambda x: x.get("rank") or 0)
+    ids = [x.get("listing_image_id") for x in g]
+    if len(g) != N_ESKI or len(set(ids)) != N_ESKI:
+        neden.append(f"HAM galeri {len(g)} gorsel / {len(set(ids))} tekil ({N_ESKI} beklenir)")
+    if [x.get("rank") for x in g] != list(range(1, len(g) + 1)):
+        neden.append(f"HAM rank 1..{len(g)} tekil/artan degil")
+    if g and (g[0].get("full_width"), g[0].get("full_height")) != YD2_KAPAK:
+        neden.append(f"HAM rank 1 {g[0].get('full_width')}x{g[0].get('full_height')} (1. asama kapagi 3000x2250 beklenir)")
+    if g and Y.alt_norm(g[0].get("alt_text")) != Y.alt_norm(alt_metin(a_, b_)):
+        neden.append("HAM rank 1 alt metni 1. asama kapak metni degil (rank 1 1. asama kapagi olmali)")
+    bag = {}
+    for x in h.get("variation_images") or []:
+        if x.get("property_id") != STIL_PID or x.get("value") not in STILLER or x.get("value") in bag:
+            neden.append(f"HAM bag gecersiz ({x.get('property_id')}, {x.get('value')})"); continue
+        bag[x["value"]] = x
+    if sorted(bag) != sorted(STILLER):
+        neden.append(f"HAM'da {len(bag)} Style bagi (5 beklenir)")
+    bimg = [x.get("image_id") for x in bag.values()]
+    if len(set(bimg)) != len(bimg):
+        neden.append("HAM'da bir gorsel birden fazla stile bagli")
+    if any(i not in ids for i in bimg):
+        neden.append("HAM'da bagli gorsel galeride yok")
+    if g and g[0].get("listing_image_id") in bimg:
+        neden.append("HAM kapak (rank 1) bagli (bagsiz beklenir)")
+    sv = stil_degerleri(h.get("inventory"))
+    for ad, x in bag.items():
+        if sv.get(ad) != x.get("value_id"):
+            neden.append(f"envanter Style degeri ({ad}) bag value_id ile ayni degil")
+    return g, bag, neden
+
+
+def set_oku(p):
+    """yd_set_kontrol.py SET_KONTROL.csv (dosya, ..., sha256, durum) -> qc_oku ile ayni bicim (QC_RAPOR yerine; Serdar 30 Eki karar 3:
+    SABLON / ESIK kurulmaz, set kontrolu + kontak). -> ({dosya: satir}, {"esik": "SET_KONTROL"})"""
+    rows = {r["dosya"]: r for r in csv.DictReader(open(p, encoding="utf-8"))}
+    return rows, {"esik": "SET_KONTROL"}
+
+
+def ilan_hazirla_yd2(r, d):
+    """YD 2. asama galeri listesi: sira 1 DOKUNMA (canli 1. asama kapagi), 2-10 DEGISTIR (Y02-Y10), kalan 12 canli gorsel CIKAR."""
+    lid, cift = r["listing_id"], r["cift"]
+    neden = []
+    hp = Path(d["ham"]) / f"{lid}.json"
+    if not hp.exists():
+        return dict(ilan=lid, cift=cift, durum="BLOK", neden=[f"HAM/{lid}.json yok"])
+    h = json.loads(hp.read_text(encoding="utf-8"))
+    if str((h.get("listing") or {}).get("listing_id")) != lid:
+        neden.append("HAM listing_id dosya adiyla ayni degil")
+    g, bag, n_ = ham_kapisi_yd2(h, r["a"], r["b"]); neden += n_
+    neden += yedek_kapisi(lid, cift, g, d["yedek_ozet"], d["yedek_liste"])
+    od = Path(d["out"]) / lid; hd = od / "hedef"
+    if od.exists():
+        shutil.rmtree(od)
+    hd.mkdir(parents=True)
+    dokun = g[0] if g else {}
+    hedef = [dict(sira=1, ad=hedef_ad(1), kaynak="canli", sha256="", tasima_sha256="", alt=dokun.get("alt_text") or "",
+                  islem="DOKUNMA", listing_image_id=dokun.get("listing_image_id"))]
+    esl, shas, qc = [], {}, {}
+    for k in range(2, N_HEDEF + 1):
+        ka = kaynak_ad(cift, k); kp = Path(d["kapak"]) / ka
+        e = jpeg_kontrol(kp, KART_BOYUT[k])
+        if e:
+            neden.append(f"{ka}: {e}")
+        s_ = sha(kp) if kp.exists() else ""
+        m = d["tasima"].get(ka) or {}
+        t_sha = m.get("sha256", "")
+        if not m or not (m.get("durum") or "").startswith(("YENI", "ATLA", "MEVCUT")):
+            neden.append(f"tasima MANIFEST'te {ka} gecerli satir yok ({(m.get('durum') or 'yok')[:40]})")
+        elif s_ and t_sha != s_:
+            neden.append(f"{ka} sha256 tasima MANIFEST ile ayni degil")
+        q = d["qc"].get(ka)
+        if not q or q.get("durum") != "PASS":
+            neden.append(f"{d['qc_ad']} {ka}: {(q or {}).get('durum', 'yok')} (PASS degil; yukleme yok)")
+        elif not s_ or q.get("sha256") != s_:
+            neden.append(f"{d['qc_ad']} {ka} PASS baska dosyaya ait (sha256 farkli)")
+        qc[ka] = q or {}
+        alt = d["alt"].get((cift, k)) or (d["alt"].get(("ORTAK", k)) if k in ORTAK else None) or ""
+        if not alt or len(alt) > 250 or Y.YASAK_ALT.search(alt) or RU_YASAK.search(alt) or HTML_KAR.search(alt):
+            neden.append(f"sira {k} alt metni gecersiz (bos / >250 / yasak ifade / tire / & ' \" < >)")
+        if kp.exists():
+            shutil.copyfile(kp, hd / hedef_ad(k))
+        shas[k] = s_
+        hedef.append(dict(sira=k, ad=hedef_ad(k), kaynak=ka, sha256=s_, tasima_sha256=t_sha, alt=alt))
+        esl.append(dict(listing_id=lid, cift=cift, sira=k, kaynak=ka, hedef_gorsel=hedef_ad(k), sha256=s_, tasima_sha256=t_sha,
+                        durum="PASS" if s_ and s_ == t_sha else "FAIL"))
+    if all(shas.values()) and len(set(shas.values())) != N_HEDEF - 1:
+        neden.append("9 hedef dosyadan en az ikisi ayni (sha256)")
+    rows = [dict(hedef_sira=1, hedef_gorsel=hedef_ad(1), hedef_alt=hedef[0]["alt"], islem="DOKUNMA", simdi_sira=dokun.get("rank", ""),
+                 simdi_id=dokun.get("listing_image_id", ""))]
+    rows += [dict(hedef_sira=x["sira"], hedef_gorsel=x["ad"], hedef_alt=x["alt"], islem="DEGISTIR", simdi_sira="", simdi_id="")
+             for x in hedef[1:]]
+    rows += [dict(hedef_sira="", hedef_gorsel="", hedef_alt="", islem="CIKAR", simdi_sira=x.get("rank"), simdi_id=x.get("listing_image_id"))
+             for x in g[1:]]
+    with open(od / f"LISTE_{lid}.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=LISTE_ALAN); w.writeheader(); w.writerows(rows)
+    yb = {ad: dict(property_id=x.get("property_id"), value_id=x.get("value_id"), image_id=x.get("image_id")) for ad, x in sorted(bag.items())}
+    man = dict(listing_id=lid, cift=cift, a=r["a"], b=r["b"], profil="yd2", renk_bag_sayisi=len(STIL_SIRA), dosyasiz=False,
+               variation_images=[dict(value=ad, image_id=STIL_SIRA[ad], property_id=x["property_id"], value_id=x["value_id"])
+                                 for ad, x in yb.items() if ad in STIL_SIRA],
+               yedek_ids=sorted(x.get("listing_image_id") for x in g), yedek_galeri=[x.get("listing_image_id") for x in g],
+               yedek_baglar=yb, dokunma_id=dokun.get("listing_image_id"), hedef=hedef, qc=qc, ham_sha=sha(hp))
+    (od / "manifest.json").write_text(json.dumps(man, indent=1, ensure_ascii=False), encoding="utf-8")
+    return dict(ilan=lid, cift=cift, durum="BLOK" if neden else "HAZIR", neden=neden, liste_sha=Y.sha256(od / f"LISTE_{lid}.csv"),
+                esleme=esl)
+
+
 def liste(a):
     try:
         ilanlar = [r for r in csv.DictReader(open(a.ciftler, encoding="utf-8-sig")) if r.get("listing_id")]
         kaynak = {r["listing_id"]: r["kaynak_image_id"] for r in csv.DictReader(open(a.kaynak, encoding="utf-8-sig")) if r.get("tur") == "yd"}
-        qc, qj = qc_oku(a.qc)
+        if a.qc:
+            qc, qj = qc_oku(a.qc); qc_ad, qc_kaynak = "QC_RAPOR", a.qc
+        elif getattr(a, "profil", "v1") == "yd2" and a.set_kontrol:
+            qc, qj = set_oku(a.set_kontrol); qc_ad, qc_kaynak = "SET_KONTROL", a.set_kontrol
+        else:
+            raise SystemExit("--qc gerekli (yd2: --qc ya da --set-kontrol)")
         tasima = {r["ad"]: r for r in csv.DictReader(open(Path(a.kapak_dir) / "MANIFEST.csv", encoding="utf-8"))}
         alt = alt_oku(a.alt)
         yozet = ozet_oku(a.yedek_ozet)
         yliste = {x["Path"]: int(x.get("Size") or 0) for x in json.loads(Path(a.yedek_liste).read_text(encoding="utf-8"))}
         eski = eski_kapak_oku(a.eski_kapak)
+        ab = {r["listing_id"]: r for r in ilanlar}
+        if any(not (ab[x].get("a") and ab[x].get("b")) for x in ab):
+            raise SystemExit("ciftler: a / b sutunu bos satir var")
     except (SystemExit, OSError, ValueError, KeyError) as e:
         print(f"::error::{e}"); return 2
     s = {x.strip() for x in a.sadece.split(",") if x.strip()}
@@ -330,14 +455,15 @@ def liste(a):
         print("::error::kapsamda ilan yok"); return 2
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     d = dict(ham=a.ham_dir, kapak=a.kapak_dir, out=str(out), kaynak=kaynak, qc=qc, tasima=tasima, yedek_ozet=yozet, yedek_liste=yliste, alt=alt,
-             eski_kapak=eski)
+             eski_kapak=eski, qc_ad=qc_ad)
+    hazirla = ilan_hazirla_yd2 if a.profil == "yd2" else ilan_hazirla
     sonuc = []
     for n, r in enumerate(ilanlar, 1):
-        x = ilan_hazirla(r, d); sonuc.append(x)
+        x = hazirla(r, d); sonuc.append(x)
         print(f"[{n}/{len(ilanlar)}] {x['ilan']} {x['cift']} {x['durum']}" + (f": {x['neden'][0][:120]}" if x["neden"] else ""), flush=True)
     with open(out / "ESLEME.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=ESLEME_ALAN); w.writeheader(); w.writerows(e for x in sonuc for e in x.get("esleme") or [])
-    oz = dict(urun="yd", n_hedef=N_HEDEF, alt_sablon=ALT_SABLON, qc_sha=Y.sha256(a.qc), qc_esik=qj.get("esik"),
+    oz = dict(urun="yd", profil=a.profil, n_hedef=N_HEDEF, alt_sablon=ALT_SABLON, qc_ad=qc_ad, qc_sha=Y.sha256(qc_kaynak), qc_esik=qj.get("esik"),
               tasima_sha=Y.sha256(Path(a.kapak_dir) / "MANIFEST.csv"), alt_sha=Y.sha256(a.alt), stil_sira=STIL_SIRA, yazim=True,
               eski_kapak_sha=Y.sha256(a.eski_kapak), eski_kapak=eski,
               ilanlar={x["ilan"]: {k: v for k, v in x.items() if k != "esleme"} for x in sonuc})
@@ -358,8 +484,12 @@ def main(argv=None):
     k.add_argument("--ozet", required=True, help="YD_OZET.csv (TEMP/YD_ENVANTER_20261026)")
     k.add_argument("--out", required=True, help="data/pod/yd78_ids.csv")
     li = sub.add_parser("liste")
-    for x in ("--ciftler", "--kaynak", "--ham-dir", "--kapak-dir", "--qc", "--alt", "--yedek-ozet", "--yedek-liste", "--out"):
+    for x in ("--ciftler", "--kaynak", "--ham-dir", "--kapak-dir", "--alt", "--yedek-ozet", "--yedek-liste", "--out"):
         li.add_argument(x, required=True)
+    li.add_argument("--qc", default="", help="QC_RAPOR.json (v1 zorunlu)")
+    li.add_argument("--set-kontrol", default="", help="yd2: QC_RAPOR yerine SET_KONTROL.csv (Serdar 30 Eki karar 3)")
+    li.add_argument("--profil", choices=["v1", "yd2"], default="v1",
+                    help="yd2: 2. asama (1 Kas): sira 1 canli kapak DOKUNMA, 2-10 Y02-Y10, kalan 12 CIKAR")
     li.add_argument("--sadece", default="")
     li.add_argument("--eski-kapak", default=str(ESKI_KAPAK), help="eski kapak listesi (Serdar 30 Eki)")
     a = ap.parse_args(argv)

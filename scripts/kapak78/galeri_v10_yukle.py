@@ -57,17 +57,42 @@ V11 = dict(ONAY="GALERI_V11", ONAY_BAG="GALERI_V11_BAG", N=10, CANLI_N=9, PLAN_A
 # WP 10; Champagne Ivory bagsiz. Canli gorsel sayisi ilana gore: CANLI_N None = manifest yedek_ids (liste kosusundaki canli okuma).
 V11B = dict(V11, ONAY="GALERI_V11B", ONAY_BAG="GALERI_V11B_BAG", CANLI_N=None, PLAN_AD="PLAN_V11B.json", PROFIL="v11b",
             RENK_SIRA={"Midnight Blue": 7, "Deep Black": 8, "Pure White": 9, "Warm Parchment": 10})
+# yd2 (YD 1st Anniversary 2. asama; Merkez / Serdar 1 Kas gece hazirligi, KOSTURMA AYRI ONAYLA): sira 1 = 1. asamanin canli kapagi
+# DOKUNMA (silinmez, yeniden yuklenmez, alt metni / sirasi yazilmaz), 2-10 Y02-Y10 (yd_liste_uret --profil yd2), kalan 12 canli gorsel
+# CIKAR. Baglar Style (513): Starlit 6, Timeless 7, First Page 8, Layers 9, Botanical 10 (Serdar 27 Eki). Boy ozelligi 516 (Size).
+YD2 = dict(V11, ONAY="YD_GALERI_V2", ONAY_BAG="YD_GALERI_V2_BAG", CANLI_N=None, PLAN_AD="PLAN_YD2.json", PROFIL="yd2",
+           RENK_SIRA={"Starlit": 6, "Timeless": 7, "First Page": 8, "Layers": 9, "Botanical": 10},
+           RENKLER=("Starlit", "Timeless", "First Page", "Layers", "Botanical"), RENK_PID=513, BOY_PID=516, DEGERLER="stil")
+
+
+RENK_PID, BOY_PID = 200, 513
+DEGERLER = None    # bir_ilan / bag_kur bag degerleri: None = renk (G.renk_degerleri); yd2 = Style 513 (stil_degerleri)
+
+
+def stil_degerleri(api, lid):
+    """yd2: envanterden Style (513) -> {ad: (513, value_id)} (yd_kapak_yukle.stil_degerleri ile ayni; Format 514 / Size 516 disarida)."""
+    inv = api.get(f"/listings/{lid}/inventory") or {}
+    out = {}
+    for pr in inv.get("products") or []:
+        for pv in pr.get("property_values") or []:
+            if pv.get("property_id") != RENK_PID:
+                continue
+            for vid, val in zip(pv.get("value_ids") or [], pv.get("values") or []):
+                if val in RENKLER:
+                    out.setdefault(val, (RENK_PID, vid))
+    return out
 
 
 def profil_kur(ad, ek_kapi=None):
-    """v11 / v11b: modul sabitleri (galeri_v11_yukle.py). v10 testleri / is akisi bu cagriyi yapmaz."""
-    global ONAY, ONAY_BAG, N, CANLI_N, PLAN_AD, PROFIL, RENK_SIRA, EK_KAPI, YALIN
-    P = {"v11": V11, "v11b": V11B}.get(ad)
+    """v11 / v11b / yd2: modul sabitleri (galeri_v11_yukle.py, yd2_galeri_yukle.py). v10 testleri / is akisi bu cagriyi yapmaz."""
+    global ONAY, ONAY_BAG, N, CANLI_N, PLAN_AD, PROFIL, RENK_SIRA, EK_KAPI, YALIN, RENKLER, RENK_PID, BOY_PID, DEGERLER
+    P = {"v11": V11, "v11b": V11B, "yd2": YD2}.get(ad)
     if P is None:
         raise SystemExit(f"bilinmeyen profil {ad}")
     ONAY, ONAY_BAG, N, CANLI_N, YALIN = P["ONAY"], P["ONAY_BAG"], P["N"], P["CANLI_N"], P["YALIN"]
     PLAN_AD, PROFIL, RENK_SIRA, EK_KAPI = P["PLAN_AD"], P["PROFIL"], dict(P["RENK_SIRA"]), ek_kapi
-RENK_PID, BOY_PID = 200, 513
+    RENKLER = tuple(P.get("RENKLER", RENKLER)); RENK_PID = P.get("RENK_PID", RENK_PID); BOY_PID = P.get("BOY_PID", BOY_PID)
+    DEGERLER = stil_degerleri if P.get("DEGERLER") == "stil" else None
 KAPI_OKUMA = 4     # ilan, galeri, variation-images, envanter
 BES_X7 = re.compile(r"^\s*5\s*[x×]\s*7(\D|$)")
 
@@ -163,12 +188,12 @@ def kapilar(c, man, bes_x7):
     if len(g) != cn:
         neden.append(f"canli galeri {len(g)} gorsel ({cn} beklenir)")
     b = c["baglar"]; adlar = [x.get("value") for x in b]
-    if len(b) != 5 or sorted(map(str, adlar)) != sorted(RENKLER):
-        neden.append(f"canli renk bagi {len(b)} kayit / adlar {sorted(set(map(str, adlar)))} (5 renk beklenir)")
+    if len(b) != len(RENKLER) or sorted(map(str, adlar)) != sorted(RENKLER):
+        neden.append(f"canli renk bagi {len(b)} kayit / adlar {sorted(set(map(str, adlar)))} ({len(RENKLER)} deger beklenir)")
     if len(set(adlar)) != len(adlar):
         neden.append("bir renk birden fazla gorselde (variation-images tekrar)")
     if any(x.get("property_id") != RENK_PID for x in b):
-        neden.append("renk bagi property 200 degil")
+        neden.append(f"renk bagi property {RENK_PID} degil")
     if any(x.get("image_id") not in ids for x in b):
         neden.append("bagli gorsel canli galeride yok")
     if sorted(ids) != sorted(man["yedek_ids"]):
@@ -226,7 +251,7 @@ def plan_kur(hazir, lid, man, dosyasiz=False):
     bagli0 = {v["image_id"] for v in man["yedek_baglar"].values()}
     kapak = next((r for r in yukle if int(r["hedef_sira"]) == 1), None)
     if YALIN:
-        adim, mx = Y.yalin_plan(cikar, yukle, N, koru=koru, eksik_bag=int(man.get("renk_bag_sayisi") or 5) < 5)
+        adim, mx = Y.yalin_plan(cikar, yukle, N, koru=koru, eksik_bag=int(man.get("renk_bag_sayisi") or 5) < 5, bagli=bagli0)
     else:
         adim, mx = Y.adim_plani(CANLI_N, cikar, bagli0, yukle, set(RENK_SIRA.values()), kapak_degisir=kapak, hedef_n=N)
     return adim, mx, Y.sha256(liste)
@@ -382,7 +407,7 @@ def calistir(api, shop, a):
                 try:
                     R = Y.bir_ilan(api_i, shop, lid, hazir / lid / f"LISTE_{lid}.csv", hazir / lid / "hedef", hazir / lid / "manifest.json",
                                    ilan_out, kuru=False, kurtar=a.kurtar and bitmemis and bool(dv.get("hata")), uretim_kosu=a.plan_damga,
-                                   hedef_n=N, cdn=False, ara_tekrar=True, yalin=YALIN, devam_hedef=hedef_kok)
+                                   hedef_n=N, cdn=False, ara_tekrar=True, yalin=YALIN, devam_hedef=hedef_kok, degerler=DEGERLER)
                 finally:
                     if dvp.exists():
                         d = json.loads(dvp.read_text(encoding="utf-8"))
@@ -466,7 +491,8 @@ def bag_onar(api, shop, a):
         c0 = api.calls
         try:
             api.kota_kapisi(f"ilan {lid}")
-            R = Y.bag_kur(api, shop, lid, hazir / lid / f"LISTE_{lid}.csv", hazir / lid / "manifest.json", dvp, out, yaz=True, hedef_n=N)
+            R = Y.bag_kur(api, shop, lid, hazir / lid / f"LISTE_{lid}.csv", hazir / lid / "manifest.json", dvp, out, yaz=True, hedef_n=N,
+                          degerler=DEGERLER)
         except (Y.Dur, SystemExit, Exception) as e:   # noqa: BLE001
             R = dict(sonuc="DUR", sorun=[str(getattr(e, "code", None) or e)[:300]])
         s.update(durum=R["sonuc"], neden=R.get("sorun") or [], istek=api.calls - c0)
