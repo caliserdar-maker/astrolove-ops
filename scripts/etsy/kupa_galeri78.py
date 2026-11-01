@@ -1087,17 +1087,19 @@ def kota_esigi(gd, geri_payi="evet"):
     """Yazimda ilan basi kota kapisi (kalan - esik >= KOTA_SINIRI). evet (varsayilan): en kotu = geri almasiz + geri alma.
     hayir (Serdar 1 Kas, secenek b): yalniz geri almasiz en kotu. Ilan FAIL olur ve geri almanin en kotusune kota yetmezse geri alma
     HIC BASLAMAZ (geri_ertele; yarim geri alma galeriyi daha kotu birakirdi, inceleme 1 Kas madde 1): DEVAM_<ilan>.json hata +
-    geri_alma=ERTELENDI; kota gelince mod=geri_al sadece=<ilan>. Her ikisinde + TOPLU_ILAN."""
-    if geri_payi not in ("evet", "hayir"):
-        raise SystemExit(f"DUR: --geri-payi evet / hayir olmali ({geri_payi!r})")
+    geri_alma=ERTELENDI; kota gelince mod=geri_al sadece=<ilan>. Her ucunde + TOPLU_ILAN.
+    en_az (Serdar 1 Kas "8 tane daha yukle derhal"): yalniz ilan basi EN AZ istek; kota ilan ortasinda biterse etsy_common
+    tabaninda DUR (kota_durdu, DEVAM_<ilan>.json), geri alma geri_ertele ile ertelenir."""
+    if geri_payi not in ("evet", "hayir", "en_az"):
+        raise SystemExit(f"DUR: --geri-payi evet / hayir / en_az olmali ({geri_payi!r})")
     t = ilan_tahmini(gd)
-    return (t["en_kotu"] if geri_payi == "evet" else t["en_kotu_geri_almasiz"]) + TOPLU_ILAN
+    return {"evet": t["en_kotu"], "hayir": t["en_kotu_geri_almasiz"], "en_az": t["en_az"]}[geri_payi] + TOPLU_ILAN
 
 
 def geri_ertele(api, yd, geri_payi="evet"):
     """yaz icindeki geri alma oncesi (yalniz geri_payi=hayir): kalan - geri alma en kotu < KOTA_SINIRI ise neden metni, yoksa None.
     evet'te ilan basi kapi geri alma payini zaten ayirdi -> None (davranis aynen)."""
-    if geri_payi != "hayir":
+    if geri_payi not in ("hayir", "en_az"):
         return None
     t = istek_tahmini(n_sil=len(yd.get("galeri") or []), metin=bool((yd.get("metin") or {}).get("yaz")))["geri_alma"]
     if api.remaining is None or int(api.remaining) - t < KOTA_SINIRI:
@@ -1212,7 +1214,7 @@ def calistir(api, shop, a):
                 # koddaki en kotu: taze toplu okuma 2 istek + (toplu yanitta ilan yoksa) tekil kapi okumasi 6 -> en kotu +2
                 t = kota_esigi(pg, getattr(a, "geri_payi", "evet"))
                 if int(api.remaining) - t < KOTA_SINIRI:
-                    ek = "" if getattr(a, "geri_payi", "evet") == "evet" else " (geri alma payi yok)"
+                    ek = {"evet": "", "hayir": " (geri alma payi yok)", "en_az": " (yalniz en az)"}[getattr(a, "geri_payi", "evet")]
                     dur = f"kota: kalan {api.remaining} - en kotu{ek} {t} < {KOTA_SINIRI}; ilan baslamadi"
                     s.update(durum="KALAN", neden=[dur]); continue
             elif int(api.remaining) - KAPI_OKUMA - 1 - (KAPI_OKUMA if esit_kalan else 0) < KOTA_SINIRI:
@@ -1352,7 +1354,7 @@ def rapor(satir, girdiler, a, api, out):
                                    encoding="utf-8")
     (out / "RAPOR.json").write_text(json.dumps(R, indent=1, ensure_ascii=False), encoding="utf-8")
     with open(out / "RAPOR.md", "w", encoding="utf-8") as f:
-        f.write(f"# Kupa galeri 78 {a.mod} ({a.kosu})\n\n" + ("geri_payi hayir (Serdar 1 Kas b)\n\n" if getattr(a, "geri_payi", "evet") == "hayir" else "")
+        f.write(f"# Kupa galeri 78 {a.mod} ({a.kosu})\n\n" + ({"hayir": "geri_payi hayir (Serdar 1 Kas b)\n\n", "en_az": "geri_payi en_az (Serdar 1 Kas: 8 ilan derhal)\n\n"}.get(getattr(a, "geri_payi", "evet"), ""))
                 + " | ".join(f"{k} {v}" for k, v in sorted(say.items()))
                 + f"\n\nIstek (kod okumasi, istek_tahmini): ilan basina en az {t0['en_az']} (ayni burc {t1['en_az']}), en kotu geri almasiz "
                   f"{t0['en_kotu_geri_almasiz']} (ayni burc {t1['en_kotu_geri_almasiz']}), geri alma +{t1['geri_alma']}; PLAN {len(plan_s)} ilan "
@@ -1389,7 +1391,7 @@ def arg(argv=None):
     ap.add_argument("--metin-yaz", action="store_true", help="aciklama + kisisellestirme yazimi (VARSAYILAN KAPALI: RU = EN kurali)")
     ap.add_argument("--kurtar", action="store_true", help="hata kaydi olan DEVAM'i surdur")
     ap.add_argument("--azami-ilan", type=int, default=15, help="yaz / parti: kosu basina en fazla ilan (0 = sinirsiz)")
-    ap.add_argument("--geri-payi", choices=("evet", "hayir"), default="evet",
+    ap.add_argument("--geri-payi", choices=("evet", "hayir", "en_az"), default="evet",
                     help="yaz: ilan basi kota kapisinda geri alma payi (hayir = yalniz geri almasiz en kotu; Serdar 1 Kas b)")
     ap.add_argument("--toplu-esit-n", type=int, default=2, help="kuru: ilk N ilanda toplu okuma tekil okumayla karsilastirilir (fark -> BLOK)")
     ap.add_argument("--kosu", default=os.environ.get("GITHUB_RUN_ID", "0"))

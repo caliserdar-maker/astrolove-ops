@@ -32,7 +32,7 @@ on:
       sadece: {description: "yalniz bu ilanlar (virgullu listing_id); bos = 78; geri_al icin zorunlu", required: false, default: ""}
       haric: {description: "bu ilanlar haric (virgullu listing_id)", required: false, default: ""}
       azami_ilan: {description: "yaz: kosu basina en fazla ilan", required: false, default: "15"}
-      geri_payi: {description: "yaz: ilan basi kota kapisinda geri alma payi (evet = en kotu + geri alma; hayir = yalniz geri almasiz en kotu, Serdar 1 Kas b)", required: false, default: "evet"}
+      geri_payi: {description: "yaz: ilan basi kota kapisinda geri alma payi (evet = en kotu + geri alma; hayir = yalniz geri almasiz en kotu, Serdar 1 Kas b; en_az = yalniz en az istek, Serdar 1 Kas)", required: false, default: "evet"}
       kurtar: {description: "true = hata kaydi olan DEVAM ilanini surdur", required: false, default: "false"}
       metin_yaz: {description: "true = EN aciklama galeriyle birlikte (Serdar 31 Eki onayi; RU yazilmaz). kuru ve yaz AYNI deger (plana bagli)", required: false, default: "false"}
 
@@ -61,8 +61,8 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$MY" =~ ^(true|false)$ ]] || { echo "::error::girdi (metin_yaz)"; exit 1; }
-          [[ "$GP" =~ ^(evet|hayir)$ ]] || { echo "::error::girdi (geri_payi evet / hayir)"; exit 1; }
-          if [ "$GP" = hayir ] && [ "$MOD" != yaz ]; then echo "::error::geri_payi=hayir yalniz mod=yaz"; exit 1; fi
+          [[ "$GP" =~ ^(evet|hayir|en_az)$ ]] || { echo "::error::girdi (geri_payi evet / hayir / en_az)"; exit 1; }
+          if [ "$GP" != evet ] && [ "$MOD" != yaz ]; then echo "::error::geri_payi=$GP yalniz mod=yaz"; exit 1; fi
           [[ "$MOD" =~ ^(kuru|yaz|geri_al)$ && "$KT" =~ ^(true|false)$ && "$AI" =~ ^[0-9]{1,2}$ ]] || { echo "::error::girdi (mod / kurtar / azami_ilan)"; exit 1; }
           [[ "$SA" =~ ^([0-9]+(,[0-9]+)*)?$ && "$HA" =~ ^([0-9]+(,[0-9]+)*)?$ ]] || { echo "::error::girdi (sadece / haric)"; exit 1; }
           if [ "$MOD" != geri_al ]; then [[ "$HK" =~ ^[0-9]+$ ]] || { echo "::error::kuru / yaz icin hazir_kosu (run_id)"; exit 1; }; fi
@@ -208,7 +208,7 @@ jobs:
             [ "$KT" = true ] && args+=(--kurtar)
             [ "$MY" = true ] && args+=(--metin-yaz)
             args+=(--geri-payi "${GP:-evet}")
-            [ "${GP:-evet}" = hayir ] && echo "::warning title=KUPA GALERI78::geri_payi=hayir: kota kapisi geri alma payi olmadan (Serdar 1 Kas b)"
+            [ "${GP:-evet}" != evet ] && echo "::warning title=KUPA GALERI78::geri_payi=${GP}: kota kapisi geri alma payi olmadan (Serdar 1 Kas)"
             python3 scripts/etsy/kupa_galeri78.py yaz "${args[@]}" 2>&1 | tee _work/kosu.log
             echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
           else
