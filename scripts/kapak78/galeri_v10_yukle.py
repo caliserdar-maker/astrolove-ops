@@ -189,7 +189,7 @@ def kapilar(c, man, bes_x7):
         neden.append(f"canli galeri {len(g)} gorsel ({cn} beklenir)")
     b = c["baglar"]; adlar = [x.get("value") for x in b]
     if len(b) != len(RENKLER) or sorted(map(str, adlar)) != sorted(RENKLER):
-        neden.append(f"canli renk bagi {len(b)} kayit / adlar {sorted(set(map(str, adlar)))} ({len(RENKLER)} deger beklenir)")
+        neden.append(f"canli renk bagi {len(b)} kayit / adlar {sorted(set(map(str, adlar)))} ({len(RENKLER)} {'deger' if DEGERLER else 'renk'} beklenir)")
     if len(set(adlar)) != len(adlar):
         neden.append("bir renk birden fazla gorselde (variation-images tekrar)")
     if any(x.get("property_id") != RENK_PID for x in b):
@@ -251,7 +251,8 @@ def plan_kur(hazir, lid, man, dosyasiz=False):
     bagli0 = {v["image_id"] for v in man["yedek_baglar"].values()}
     kapak = next((r for r in yukle if int(r["hedef_sira"]) == 1), None)
     if YALIN:
-        adim, mx = Y.yalin_plan(cikar, yukle, N, koru=koru, eksik_bag=int(man.get("renk_bag_sayisi") or 5) < 5, bagli=bagli0)
+        adim, mx = Y.yalin_plan(cikar, yukle, N, koru=koru, eksik_bag=int(man.get("renk_bag_sayisi") or 5) < 5,
+                                 bagli=bagli0 if PROFIL == "yd2" else None)   # on silme yalniz yd2 (inceleme O4: v11b davranisi aynen)
     else:
         adim, mx = Y.adim_plani(CANLI_N, cikar, bagli0, yukle, set(RENK_SIRA.values()), kapak_degisir=kapak, hedef_n=N)
     return adim, mx, Y.sha256(liste)
