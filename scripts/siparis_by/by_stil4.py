@@ -13,10 +13,10 @@ Stiller:
             (kenara uzaklik eski x 1,5).
   FirstPage: yeni krem doku + bordo cerceve KODLA (8x10'dan olculen renk orani / FWHM), dort kenar payi esit = 8x10 yan payi x 1,5.
   Layers A KIRP: 8x10 zemin x1,8 (Lanczos; ogeler BY_SCALE'de) -> 4320x5400, iki yandan esit 360 px kirpilir.
-  Layers B USTE SABIT: 8x10 zemin x1,5 uste (0..4500, ogeler ayni donusumle); duz seftali bolgesi (eski satir >= DUZ_Y, kemer yok)
-            ESRGAN x2 ile buyutulup TEK parca esit olcekle (x2,5) satir 1,5*DUZ_Y..5400'u kaplar (ortadan kirpilir; kopya / ayna yok).
+  Layers B USTE SABIT (Serdar 1 Kas karar b): zemin = yeni duz seftali doku (4_Layers_2x3_kaynak.png, ESRGAN, esit olcek); kemer
+            katmanlari eski 8x10 pikseli x1,5 uste sabit (yumusak maske); yazilar ayni donusumle; dikis (renk basamagi, gradyan) kapida.
   Botanical: yeni tirtikli kagit + adacayi doku (ESRGAN) + 2 cicek dali kagit koselerine sabit (kagit kenarina uzaklik eski x 1,5).
-Kullanim: by_stil4.py --kod <KOD_REF> --doku-dizin <dir: 2_Timeless/3_FirstPage/5_Botanical _2x3_kaynak.png> --esrgan <pth> --out <dir>
+Kullanim: by_stil4.py --kod <KOD_REF> --doku-dizin <dir: 2_Timeless/3_FirstPage/4_Layers/5_Botanical _2x3_kaynak.png> --esrgan <pth> --out <dir>
           [--hizli]  (yalniz yerel deneme: ESRGAN yerine Lanczos; uretimde kullanilmaz)"""
 import argparse
 import json
@@ -34,7 +34,9 @@ import yay_orijinal as YR  # noqa: E402  (yerel_zemin)
 
 Z = "z/Baski_2400x3000_Buyutulmus"
 K, OY = 1.5, 450
-DUZ_Y = 2100           # Layers: eski 8x10'da kemer katmanlari satir 2050'de biter (olcum 1 Kas: satir 2050+ duz renkten > 25 sapan piksel 0)
+DUZ_Y = 2100
+KEMER_ESIK, KEMER_YUMUSAK = 12, 3.0   # Layers B kemer maskesi: duz seftaliden > 12 sapma (golgeler dahil), 9 px genisletme, sigma 3 kenar
+DIKIS_DE, DIKIS_GRAD = 3.0, 1.5       # ONERI (Serdar onayi yok): dikis renk basamagi dE76 <= 3; kenar gradyani p99 <= 1,5 x yeni doku p99           # Layers: eski 8x10'da kemer katmanlari satir 2050'de biter (olcum 1 Kas: satir 2050+ duz renkten > 25 sapan piksel 0)
 KORELASYON, KAZANC, KAYMA, AFIN = 0.98, (0.95, 1.05), 0.5, 0.01
 YAKIN = {"Timeless": [(0, 4800), (3000, 4800), (1500, 500)], "FirstPage": [(0, 0), (3000, 4800)], "Botanical": [(2900, 100), (100, 4600)]}
 KIRP_ORAN = 0.01       # ONERI (Serdar onayi yok): susleme piksellerinin en cok %1'i 255'te kirpilabilir
@@ -401,8 +403,8 @@ def cerceve_kapi(img, olc=None, ara=60):
     return r
 
 
-def kemer_maske(a, duz):
-    return np.abs(a.astype(np.float32) - np.float32(duz)).max(2) > 25
+def kemer_maske(a, duz, esik=25):
+    return np.abs(a.astype(np.float32) - np.float32(duz)).max(2) > esik
 
 
 # ------------------------------------------------------------------ main
@@ -490,43 +492,51 @@ def main(argv=None):
                                kemer_kesilen_eski_8x10_px_yan=200, sift=sift_afin(lum(e), lum(A)))
         rap["Layers_A"]["pass_"] = bool(rap["Layers_A"]["kirpilan_bantta_oge_px"] == 0 and rap["Layers_A"]["sift"].get("pass_", False))
         Image.fromarray(A).save(out / "Layers_A_12x18.jpg", quality=95, subsampling=0, dpi=(300, 300))
-        # ---- B USTE SABIT (x1,5 uste; duz bolge tek parca x2,5)
+        # ---- B USTE SABIT (Serdar 1 Kas karar b): zemin = YENI duz seftali doku (TEMP/YD_ZEMIN_YENI/4_Layers_2x3_kaynak.png, ESRGAN, esit
+        # olcek); kemer katmanlari ESKI 8x10 pikseli x1,5 uste sabit (oy = 0); yazilar ayni donusumle (kemerle iliski korunur)
+        zemB, yonB = doku(Path(a.doku_dizin, "4_Layers_2x3_kaynak.png"), a.esrgan, a.hizli)
         ust = cv2.resize(e, (3600, 4500), interpolation=cv2.INTER_LANCZOS4).astype(np.float32)
-        duz_par = e[DUZ_Y:3000]
-        if a.hizli:
-            d2 = cv2.resize(duz_par, (4800, 1800), interpolation=cv2.INTER_LANCZOS4); dy = "lanczos (YEREL)"
-        else:
-            d2, s_ = B3.esrgan(duz_par, a.esrgan); dy = f"Real-ESRGAN x{s_}"
-        s2 = (5400 - DUZ_Y * K) / (3000 - DUZ_Y)                          # duz bolge esit olcegi (2,5)
-        dw = round(2400 * s2)
-        alt = cv2.resize(d2, (dw, round((3000 - DUZ_Y) * s2)), interpolation=cv2.INTER_AREA)
-        x0 = (dw - 3600) // 2
-        alt = alt[:, x0:x0 + 3600].astype(np.float32)
-        Bz = np.zeros((5400, 3600, 3), np.float32); Bz[:4500] = ust
-        y_s = round(DUZ_Y * K)
-        rampa = 120
-        w = np.clip((np.arange(5400) - y_s) / rampa, 0, 1)[:, None, None]
-        tam_alt = np.zeros_like(Bz); tam_alt[y_s:y_s + alt.shape[0]] = alt[:5400 - y_s]
-        Bz = Bz * (1 - w) + tam_alt * w
-        Bz[:y_s] = ust[:y_s]
+        km_ince = kemer_maske(e, duz, KEMER_ESIK)                            # golgeler dahil (esik 12)
+        km15 = cv2.resize(km_ince.astype(np.uint8), (3600, 4500), interpolation=cv2.INTER_NEAREST)
+        km15 = cv2.dilate(km15, np.ones((9, 9), np.uint8))
+        wk = cv2.GaussianBlur(km15.astype(np.float32), (0, 0), KEMER_YUMUSAK)[..., None]
+        Bz = zemB.astype(np.float32)
+        Bz[:4500] = ust * wk + Bz[:4500] * (1 - wk)
         Bz = np.clip(Bz, 0, 255).astype(np.uint8)
         b, fB = ogeli_blok(bp, "layers", Bz[:4500], S)
         B = Bz.copy(); B[:4500] = b
         fBt = np.zeros((5400, 3600), bool); fBt[:4500] = fB
-        kmB = np.zeros((5400, 3600), bool); kmB[:4500] = cv2.resize(km.astype(np.uint8), (3600, 4500), interpolation=cv2.INTER_NEAREST) > 0
+        # dikis: kemer maskesinin yumusak kenari (0,05 < w < 0,95) boyunca; (1) renk basamagi = eski duz seftali (kenarin hemen disi,
+        # eski) ile yeni doku (ayni halka) Lab dE76 ortalamasi; (2) kenar gradyani / yeni doku gradyani p99 orani
+        w2 = wk[..., 0]
+        halka = (w2 > 0.02) & (w2 < 0.3) & ~cv2.dilate(fB.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
+        lab = lambda x: cv2.cvtColor(np.clip(x, 0, 255).astype(np.uint8), cv2.COLOR_RGB2LAB).astype(np.float32) * [100 / 255, 1, 1] - [0, 128, 128]  # noqa: E731
+        dE = np.linalg.norm(lab(ust) - lab(zemB[:4500].astype(np.float32)), axis=2)[halka]
+        gB = cv2.Sobel(lum(B[:4500]), cv2.CV_32F, 1, 0) ** 2 + cv2.Sobel(lum(B[:4500]), cv2.CV_32F, 0, 1) ** 2
+        gZ = cv2.Sobel(lum(zemB), cv2.CV_32F, 1, 0) ** 2 + cv2.Sobel(lum(zemB), cv2.CV_32F, 0, 1) ** 2
+        kenar = (w2 > 0.3) & (w2 < 0.7) & ~cv2.dilate(fB.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
+        g_or = float(np.sqrt(np.percentile(gB[kenar], 99)) / max(np.sqrt(np.percentile(gZ, 99)), 1e-6)) if kenar.any() else None
         tasarim = np.where(fBt)
-        rap["Layers_B"] = dict(ust_olcek=1.5, duz_y_eski=DUZ_Y, duz_olcek=round(s2, 4), duz_doku=dy, gecis_satir=[y_s, y_s + rampa],
-                               eklenen_bantta_oge_px=int(fBt[y_s:].sum()), eklenen_bantta_kemer_px=int(kmB[y_s:].sum()),
+        zr = np.median(zemB.reshape(-1, 3), 0)
+        rap["Layers_B"] = dict(ust_olcek=1.5, zemin=yonB, yeni_doku_medyan_rgb=zr.round(1).tolist(), eski_duz_rgb=np.asarray(duz).round(1).tolist(),
+                               kemer_esik=KEMER_ESIK, kemer_yumusak_sigma=KEMER_YUMUSAK,
+                               dikis=dict(renk_basamagi_dE76_ort=round(float(dE.mean()), 2) if dE.size else None,
+                                          renk_basamagi_dE76_p95=round(float(np.percentile(dE, 95)), 2) if dE.size else None, halka_px=int(halka.sum()),
+                                          kenar_gradyan_orani_p99=round(g_or, 3) if g_or else None, esik_dE=DIKIS_DE, esik_gradyan=DIKIS_GRAD),
+                               eklenen_bant=[4500, 5400], eklenen_bantta_oge_px=int(fBt[4500:].sum()),
                                tasarim_kutu=[int(tasarim[1].min()), int(tasarim[0].min()), int(tasarim[1].max()), int(tasarim[0].max())],
-                               tasarim_alt_bosluk_px=int(5400 - 1 - tasarim[0].max()), kemer_ic_tepe_y=None,
-                               sift_ust=sift_afin(lum(e[:DUZ_Y]), lum(B[:y_s])))
-        # inceleme 1 Kas E7: baslik / isimler / tarih (eski y 2049-2799, Olculer.json) DUZ_Y = 2100 altinda -> eklenen (x2,5) bantta oge
-        # var; "eklenen bantta oge yok" kurali bu yerlesimde saglanamaz -> FAIL (Serdar karari: yeni Layers duz dokusu / A / kabul)
-        rap["Layers_B"]["kural_catismasi"] = "yazilar eklenen x2,5 doku bandinda; kopyasiz doldurma icin yeni duz doku gerekir"
-        rap["Layers_B"]["pass_"] = bool(rap["Layers_B"]["eklenen_bantta_kemer_px"] == 0 and rap["Layers_B"]["eklenen_bantta_oge_px"] == 0
-                                        and rap["Layers_B"]["sift_ust"].get("pass_", False))
+                               tasarim_alt_bosluk_px=int(5400 - 1 - tasarim[0].max()),
+                               sift_ust=sift_afin(lum(e[:DUZ_Y]), lum(B[:round(DUZ_Y * K)])))
+        d_ = rap["Layers_B"]["dikis"]
+        rap["Layers_B"]["pass_"] = bool(rap["Layers_B"]["eklenen_bantta_oge_px"] == 0 and rap["Layers_B"]["sift_ust"].get("pass_", False)
+                                        and d_["renk_basamagi_dE76_ort"] is not None and d_["renk_basamagi_dE76_ort"] <= DIKIS_DE
+                                        and d_["kenar_gradyan_orani_p99"] is not None and d_["kenar_gradyan_orani_p99"] <= DIKIS_GRAD)
         Image.fromarray(B).save(out / "Layers_B_12x18.jpg", quality=95, subsampling=0, dpi=(300, 300))
-        yakin.append(("Layers_B gecis", B[y_s - 300:y_s + 300, 1500:2100])); yakin.append(("Layers_A sol kirpim", A[1500:2100, 0:600]))
+        ys_, xs_ = np.where((w2 > 0.3) & (w2 < 0.7))
+        if ys_.size:
+            j = int(np.argmax(ys_)); cy_, cx_ = int(ys_[j]), int(xs_[j])   # kemerin en alt ucu: dikis yakin plani
+            yakin.append(("Layers_B dikis", B[max(0, cy_ - 300):cy_ + 300, max(0, cx_ - 300):cx_ + 300]))
+        yakin.append(("Layers_A sol kirpim", A[1500:2100, 0:600]))
         s8 = ogeler(bp1, e, "layers")
         kontak.append(("Layers_A", s8, A)); kontak.append(("Layers_B", s8, B))
         print(f"Layers tamam ({time.time() - t0:.0f}s)", flush=True)

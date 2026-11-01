@@ -22,6 +22,7 @@ jobs:
       SHA_T: 2af9fb94c19fc30d23e697f721d07e7b9674e46ee4da36ef18aa993c79de3759   # 2_Timeless_2x3_kaynak.png (.sha256.txt, kosu 41298943459)
       SHA_F: 93e5d7f6d622cfb01e8afe2481cef8443bb7ef9605101ad2e4a912ae60b749c2   # 3_FirstPage_2x3_kaynak.png
       SHA_B: 7a68c2b76d481a4c715b2aa8599651f375b14b84678345ca82c05ecaafdf96b0   # 5_Botanical_2x3_kaynak.png
+      SHA_L: 73a43564bb1506c089f0c371ed08af7941d108e51acd4441cc45f171d28f81f8   # 4_Layers_2x3_kaynak.png (Serdar 1 Kas karar b; kosu 41303795895)
       ESRGAN_SHA: 49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb
     steps:
       - name: Girdi kapisi
@@ -62,7 +63,7 @@ jobs:
           set -uo pipefail
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
           mkdir -p _o _doku
-          for f in "2_Timeless:$SHA_T" "3_FirstPage:$SHA_F" "5_Botanical:$SHA_B"; do
+          for f in "2_Timeless:$SHA_T" "3_FirstPage:$SHA_F" "4_Layers:$SHA_L" "5_Botanical:$SHA_B"; do
             n="${f%%:*}_2x3_kaynak.png"
             rclone copyto "gdrive:ASTROLOVE/TEMP/YD_ZEMIN_YENI/$n" "_doku/$n" -q || { echo "::error::$n indirilemedi"; echo "KOD=1" >> "$GITHUB_ENV"; exit 0; }
             echo "${f#*:}  _doku/$n" | sha256sum -c - >> _o/ZEMIN_SHA.txt 2>&1 || { cat _o/ZEMIN_SHA.txt; echo "KOD=1" >> "$GITHUB_ENV"; exit 0; }
