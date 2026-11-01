@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           umask 077; mkdir -p _w _o
-          pip install -q pillow==11.0.0
+          pip install -q --only-binary=:all: pillow
           rclone backend copyid gdrive: "$TSV_ID" _w/girdi.tsv -q
           N=0
           while IFS=$'\t' read -r AD URL; do
