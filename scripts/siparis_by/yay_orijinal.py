@@ -24,9 +24,10 @@ BANT_TAM = 16.0        # px: maske tam (cekirdek +-5, koyu halka +-8, noktali ha
 BANT_SON = 22.0        # px: maske 0
 UC_PAY = 1.5           # derece: yay uclarindan acikliga dogru maske payi (uc kesilmesin)
 PARCA_ESIK = 45.0      # tepe yildizi yontemindeki esik (isik L2 > 45)
-PARCA_YARICAP = 160.0  # px: yaya bagli parca aramasinin bant genisligi (isilti isinlari / tepe yildizi)
+PARCA_YARICAP = 190.0  # px: yaya bagli parca aramasinin bant genisligi (inceleme 1 Kas: 160 tepe yildizi ust isinini 12 px kesiyordu)
 HALE_D = 120.0         # px: yay ustu isilti sektorlerinde (yay_olcum.isilti_sektorleri, +-HALE_PAY derece) altin hale bolgesi
 HALE_PAY = 2.0
+HALE_ESIK = 6.0       # isik > 6 gri: hale aday pikseli (bagli bilesen aramasi icin)
 SICAK = (8.0, 16.0)    # altin secimi: w = clip((dR - dB - 8) / 16, 0, 1) (olcum 1 Kas: zemin dokusu dR-dB p99 9,6-14,5; tepe hale p90 16,3,
                        # 330 derece hale p90 109)
 
@@ -90,12 +91,20 @@ def katman(eski, yol):
     sek = YO.sektorde(ang.ravel(), pad).reshape(H, W) & (np.abs(d) <= HALE_D)
     sek = cv2.GaussianBlur(sek.astype(np.float32), (0, 0), 8.0)
     sicak = np.clip((isik[..., 0] - isik[..., 2] - SICAK[0]) / SICAK[1], 0, 1)
-    m = np.maximum(np.maximum(bant, pm), sek * sicak)
+    # inceleme 1 Kas (E3): hale yalniz isiltiya BAGLI altin bilesenlerden; kopuk noktalar (eski zemin yildizlari / doku) alinmaz
+    aday = ((sek > 0.05) & (sicak > 0) & (isik.max(2) > HALE_ESIK)).astype(np.uint8)
+    n2, lab2 = cv2.connectedComponents(aday, 8)
+    tohum = cv2.dilate(parca.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
+    ids2 = np.unique(lab2[tohum & (lab2 > 0)])
+    bagli = cv2.GaussianBlur((np.isin(lab2, ids2) & (lab2 > 0)).astype(np.float32), (0, 0), 1.5)
+    hale = sek * sicak * np.clip(bagli * 2, 0, 1)
+    m = np.maximum(np.maximum(bant, pm), hale)
     m[:4] = m[-4:] = 0; m[:, :4] = m[:, -4:] = 0
     # aciklik ici kalan bantsiz parca var mi (uc payi disinda yaya bagli olmayan) -> bilgi
     bilgi = dict(parca_sayisi=int(len(ids)), parca_px=int(parca.sum()), maske_px=int((m > 0.01).sum()),
                  zemin_sigma=ZEMIN_SIGMA, bant=[BANT_TAM, BANT_SON], uc_pay_derece=UC_PAY, parca_esik=PARCA_ESIK,
-                 hale=dict(d=HALE_D, pay=HALE_PAY, sicak=list(SICAK), sektor=[list(map(float, x)) for x in yol["isilti"]]))
+                 hale=dict(d=HALE_D, pay=HALE_PAY, sicak=list(SICAK), esik=HALE_ESIK, bagli_bilesen=int(len(ids2)),
+                           kopuk_bilesen=int(n2 - 1 - len(ids2)), sektor=[list(map(float, x)) for x in yol["isilti"]]))
     return isik * m[..., None], m, bilgi
 
 
@@ -111,32 +120,67 @@ def ekle(img, isik, k=1.0, oy=0):
     return np.clip(np.round(out), 0, 255).astype(np.uint8), dict(olcek=k, dikey_ofset=oy, kirpilan_255_px=kirp)
 
 
-def yay_izi(zem8, yol):
-    """yeni zeminde (8x10 kirpim) eski yol uzerinde yay var mi: aci basina [g(|d|<=2) ort - g(30<=|d|<=40) ort], aciklik / isilti disi medyan."""
-    H, W = zem8.shape[:2]
-    ang, d = geometri(H, W, yol)
+def yay_izi(zem8, yol, d_ara=250, pencere=10.0):
+    """yeni zeminde (8x10 olcekli) YAY var mi (inceleme 1 Kas E4: yalniz eski yolun +-2 px'i kayik / olcekli / kismi yayi kaciriyordu).
+    Kutupsal ornekleme: 0,5 derece x 1 px, d = -d_ara..d_ara (eski yola gore); d boyunca 41 px kutu ortalamasi cikarilir (yavas zemin);
+    aci boyunca `pencere` derece ortalama (yay tutarli d'de birikir, yildizlar sonumlenir); aciklik ve isilti sektorleri disarida.
+    guc = en buyuk pencere ortalamasi (gri); yeri (aci, d) yazilir."""
     g = zem8.astype(np.float32).mean(2)
-    ok = ~aciklikta(ang, yol["bos"]) & ~YO.sektorde(ang.ravel(), yol["isilti"]).reshape(H, W)
-    a = np.floor(ang * 2).astype(int)                 # 0,5 derece kutular
-    ic = ok & (np.abs(d) <= 2); dis = ok & (np.abs(d) >= 30) & (np.abs(d) <= 40)
-    si = np.bincount(a[ic], g[ic], 720); ni = np.bincount(a[ic], None, 720)
-    sd = np.bincount(a[dis], g[dis], 720); nd = np.bincount(a[dis], None, 720)
-    v = (ni > 0) & (nd > 0)
-    k = si[v] / ni[v] - sd[v] / nd[v]
-    return dict(medyan=round(float(np.median(k)), 2), p90=round(float(np.percentile(k, 90)), 2), kutu=int(v.sum()))
+    th = (np.arange(720) + 0.5) * 0.5
+    dd = np.arange(-d_ara, d_ara + 1, dtype=np.float32)
+    r = YO.tablo_r(np.asarray(yol["r"]), th)[:, None] + dd[None]
+    t = np.radians(th)[:, None]
+    mx = (yol["cx"] + r * np.cos(t)).astype(np.float32); my = (yol["cy"] + r * np.sin(t)).astype(np.float32)
+    H, W = g.shape
+    ic = (mx >= 0) & (mx <= W - 1) & (my >= 0) & (my <= H - 1)
+    P = cv2.remap(g, mx, my, cv2.INTER_LINEAR)
+    P = P - cv2.blur(P, (41, 1), borderType=cv2.BORDER_REFLECT)
+    ok = (~aciklikta(th, yol["bos"]) & ~YO.sektorde(th, yol["isilti"]))[:, None] & ic
+    w = ok.astype(np.float32)
+    n = int(round(pencere / 0.5))
+    def dairesel(A):
+        A2 = np.concatenate([A[-n:], A, A[:n]], 0)
+        return cv2.blur(A2, (1, n), borderType=cv2.BORDER_CONSTANT)[n:-n]
+    sw = dairesel(w); sp = dairesel(P * w)
+    M = np.where(sw > 0.6, sp / np.maximum(sw, 1e-6), -1e9)
+    i, j = np.unravel_index(int(np.argmax(M)), M.shape)
+    gecerli = M > -1e8
+    return dict(guc=round(float(M[i, j]), 2), aci=round(float(th[i]), 1), d=int(dd[j]),
+                p99=round(float(np.percentile(M[gecerli], 99)), 2), pencere_derece=pencere, d_aralik=[-d_ara, d_ara])
 
 
-def kayma(a, b, m, pencere=256):
-    """yay boyunca pencerelerde alt-piksel faz korelasyonu (a'ya gore b kaymasi), px. m: bant maskesi (bool)."""
-    ys, xs = np.where(m)
+def kayma(a, b, m, yol, pencere=256, n=24, olcek=1.0):
+    """yay boyunca ACIYA GORE ESIT n pencerede (aciklik disi, uclardan 3 derece iceride) alt-piksel faz korelasyonu (a'ya gore b), px.
+    m: yalniz kayit icin (bos pencere atlanir)."""
     H, W = a.shape[:2]
+    b0, b1 = yol["bos"]
+    acilar = (b1 + 3 + np.arange(n) * (((b0 - b1) % 360) - 6) / (n - 1)) % 360
     hn = np.outer(np.hanning(pencere), np.hanning(pencere)).astype(np.float32)
     sonuc = []
-    for t in np.linspace(0, len(ys) - 1, 24).astype(int):
-        y0 = int(np.clip(ys[t] - pencere // 2, 0, H - pencere)); x0 = int(np.clip(xs[t] - pencere // 2, 0, W - pencere))
+    for th in acilar:
+        r = float(YO.tablo_r(np.asarray(yol["r"]), th))
+        cx, cy = yol["cx"] + r * np.cos(np.radians(th)), yol["cy"] + r * np.sin(np.radians(th))
+        y0 = int(np.clip(round(cy) - pencere // 2, 0, H - pencere)); x0 = int(np.clip(round(cx) - pencere // 2, 0, W - pencere))
+        if not m[y0:y0 + pencere, x0:x0 + pencere].any():
+            continue
         pa = a[y0:y0 + pencere, x0:x0 + pencere].astype(np.float32); pb = b[y0:y0 + pencere, x0:x0 + pencere].astype(np.float32)
         if pa.std() < 1 or pb.std() < 1:
             continue
-        (dx, dy), r = cv2.phaseCorrelate(pa, pb, hn)
-        sonuc.append((x0 + pencere // 2, y0 + pencere // 2, float(dx), float(dy), float(r)))
+        (dx, dy), rr = cv2.phaseCorrelate(pa, pb, hn)
+        sonuc.append((round(float(th), 1), float(dx), float(dy), float(rr)))
     return sonuc
+
+
+def bagimsiz(eski, cikti, maske, oge=None):
+    """BAGIMSIZ kapi (inceleme 1 Kas E1): eski 8x10 ve cikti (2400x3000) AYNI yerel zemin cikarimiyla olculur (katman kullanilmaz).
+    Guclu yay pikselleri S = eski isik >= 20 ve maske >= 0,5 (oge disi): kazanc (orijinden egim, cikti / eski), korelasyon,
+    ortalama mutlak fark (yeni zemin dokusu gurultusu dahil). Yari parlak / bulanik / kayik katman kazanc ve korelasyonda FAIL verir."""
+    har = maske > 0.01
+    Le = np.clip(eski.astype(np.float32) - yerel_zemin(eski, har | parlak(eski)), 0, None).max(2)
+    Lo = np.clip(cikti.astype(np.float32) - yerel_zemin(cikti, har | parlak(cikti)), 0, None).max(2)
+    S = (Le >= 20) & (maske >= 0.5)
+    if oge is not None:
+        S &= ~oge
+    x, y = Le[S], Lo[S]
+    return dict(kazanc=round(float((x * y).sum() / max((x * x).sum(), 1e-6)), 4), korelasyon=round(float(np.corrcoef(x, y)[0, 1]), 4),
+                ort_mutlak_fark=round(float(np.abs(y - x).mean()), 3), px=int(S.sum())), Le, Lo
