@@ -1,0 +1,54 @@
+{
+ "Timeless": {
+  "dal_sol_ust": {
+   "kirp_oran_ESKI_jpeg": 0.02942,
+   "kirp_oran_YENI_jpeg": 0.00181,
+   "kirp_oran_YENI_olcum_json": 0.00153,
+   "dis_ESKI": 0.0064,
+   "dis_YENI": 0.0,
+   "dis_YENI_olcum_json": 0.0
+  },
+  "yay": {
+   "kirp_oran_ESKI_jpeg": 0.01338,
+   "kirp_oran_YENI_jpeg": 0.00266,
+   "kirp_oran_YENI_olcum_json": 0.00233,
+   "dis_ESKI": 0.006,
+   "dis_YENI": 0.0,
+   "dis_YENI_olcum_json": 0.0
+  },
+  "dal_sag_alt": {
+   "kirp_oran_ESKI_jpeg": 0.02747,
+   "kirp_oran_YENI_jpeg": 0.00113,
+   "kirp_oran_YENI_olcum_json": 0.00079,
+   "dis_ESKI": 0.002,
+   "dis_YENI": 0.0,
+   "dis_YENI_olcum_json": 0.0
+  },
+  "dal_sol_alt": {
+   "kirp_oran_ESKI_jpeg": 0.03382,
+   "kirp_oran_YENI_jpeg": 0.00169,
+   "kirp_oran_YENI_olcum_json": 0.00135,
+   "dis_ESKI": 0.0,
+   "dis_YENI": 0.0,
+   "dis_YENI_olcum_json": 0.0
+  }
+ },
+ "Botanical": {
+  "cicek_sag_ust": {
+   "kirp_oran_ESKI_jpeg": 0.00066,
+   "kirp_oran_YENI_jpeg": 0.00023,
+   "kirp_oran_YENI_olcum_json": 0.00033,
+   "dis_ESKI": 0.0227,
+   "dis_YENI": 0.0023,
+   "dis_YENI_olcum_json": 0.0023
+  },
+  "cicek_sol_alt": {
+   "kirp_oran_ESKI_jpeg": 0.00049,
+   "kirp_oran_YENI_jpeg": 3e-05,
+   "kirp_oran_YENI_olcum_json": 3e-05,
+   "dis_ESKI": 0.0235,
+   "dis_YENI": 0.018,
+   "dis_YENI_olcum_json": 0.018
+  }
+ }
+}
