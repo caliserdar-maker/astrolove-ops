@@ -18,6 +18,7 @@ from PIL import Image
 
 KAPAK, OUT = sys.argv[1:3]
 RENK_MOD = 'murekkep'
+SEMBOL_EK = 0.25  # sembol alt parca bandi: sembol yuksekliginin en cok bu orani kadar asagida (Denetim 20261101D)
 ISIM_ALT = 0.4   # isim satiri koruma payi (alt uzantilar: J, y kuyruklari), isim yuksekligi orani
 BITIS = 5.0
 VW, VH = 1440, 1080
@@ -80,6 +81,18 @@ class PosterYD:
         sym = list(bands[i]['cs'])
         sx0 = min(c[1] for c in sym); sy0 = min(c[2] for c in sym)
         sx1 = max(c[1] + c[3] for c in sym); sy1 = max(c[2] + c[4] for c in sym)
+        # Denetim 20261101D: ortak sembolun AYRIK alt parcasi (LIBRA_LIBRA: iki halkanin altindaki yatay cubuk) kendi bandini olusturup
+        # "kucuk burclar" sanilmasin: sembolun hemen altindaki (bosluk <= SEMBOL_EK x sembol yuksekligi) ve tamamen sembolun yatay
+        # araliginda kalan bant sembole katilir. Kucuk burc satiri sembolden daha uzakta (LIBRA_LIBRA kapaginda ~280 px, cubuk ~70 px; Canva
+        # kucuk resmi olcumu, kosuda kiyasla dogrulanir).
+        self.sembol_ek_bant = 0
+        while i + 1 < len(bands):
+            nb = bands[i + 1]; u = self._union(nb['cs'])
+            if u[2] - sy1 <= SEMBOL_EK * (sy1 - sy0) and u[1] >= sx0 and u[1] + u[3] <= sx1:
+                bands[i]['cs'] = bands[i]['cs'] + nb['cs']; bands[i]['y1'] = max(bands[i]['y1'], nb['y1']); del bands[i + 1]
+                sym = list(bands[i]['cs']); sy1 = max(c[2] + c[4] for c in sym); self.sembol_ek_bant += 1
+            else:
+                break
         ids = {c[0] for c in sym}
         sym += [c for c in comps if c[0] not in ids and c[5] <= 300 and sx0 < c[1] + c[3] / 2 < sx1 and sy0 < c[2] + c[4] / 2 < sy1]
         self.merged_parts = sym
@@ -129,6 +142,11 @@ class PosterYD:
 
 s_ = 2000 / cw
 P = PosterYD(cv2.resize(kap_src[y0:y1, x0:x1], (2000, round(ch * s_)), interpolation=cv2.INTER_CUBIC).astype(np.float32))
+if os.environ.get('YD_AYRISTIR_JSON'):   # Denetim 20261101D: yalniz ayristirma kutulari (kiyas icin), video yok
+    import json
+    json.dump(dict(sign_a=P.sign_a[1:5], sign_b=P.sign_b[1:5], names_row=P.names_row[1:5], msg_row=P.msg_row[1:5], merged=P.merged[1:5],
+                   sembol_ek_bant=P.sembol_ek_bant), open(os.environ['YD_AYRISTIR_JSON'], 'w'))
+    sys.exit(0)
 
 
 # ---------- V7B MOTORU (poster_video_v7.py 'def vid' satirindan sona kadar birebir; yalniz sonsuz = [])
