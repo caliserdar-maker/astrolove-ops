@@ -18,7 +18,7 @@ from PIL import Image
 
 KAPAK, OUT = sys.argv[1:3]
 RENK_MOD = 'murekkep'
-SEMBOL_EK = 0.25  # sembol alt parca bandi: sembol yuksekliginin en cok bu orani kadar asagida (Denetim 20261101D)
+SEMBOL_EK = 0.5   # sembol alt parca bandi: sembol yuksekliginin en cok bu orani kadar asagida (Denetim 20261101D; ust sinir)
 ISIM_ALT = 0.4   # isim satiri koruma payi (alt uzantilar: J, y kuyruklari), isim yuksekligi orani
 BITIS = 5.0
 VW, VH = 1440, 1080
@@ -81,18 +81,22 @@ class PosterYD:
         sym = list(bands[i]['cs'])
         sx0 = min(c[1] for c in sym); sy0 = min(c[2] for c in sym)
         sx1 = max(c[1] + c[3] for c in sym); sy1 = max(c[2] + c[4] for c in sym)
-        # Denetim 20261101D: ortak sembolun AYRIK alt parcasi (LIBRA_LIBRA: iki halkanin altindaki yatay cubuk) kendi bandini olusturup
-        # "kucuk burclar" sanilmasin: sembolun hemen altindaki (bosluk <= SEMBOL_EK x sembol yuksekligi) ve tamamen sembolun yatay
-        # araliginda kalan bant sembole katilir. Kucuk burc satiri sembolden daha uzakta (LIBRA_LIBRA kapaginda ~280 px, cubuk ~70 px; Canva
-        # kucuk resmi olcumu, kosuda kiyasla dogrulanir).
+        # Denetim 20261101D: ortak sembolun AYRIK alt parcasi (LIBRA_LIBRA / LIBRA_TAURUS / ARIES_LIBRA: halkalarin altindaki yatay cubuk)
+        # kendi bandini olusturup "kucuk burclar" sanilmasin. Sembolun hemen altindaki bant, DIKEY MERKEZ CIZGISINI (Wp / 2) kesen bir
+        # parca iceriyorsa (ve bosluk <= SEMBOL_EK x sembol yuksekligi) sembole katilir. Kucuk burclar merkezi kesmez: 75 calisan kapakta
+        # sol burcun sag kenari / sag burcun sol kenari merkezden en az 237 / 248 px uzakta (kosu 41294935578 KIYAS olcumu); cubuk sembolden
+        # genis olabildigi icin (LIBRA) yatay aralik kosulu YOK (deneme 1'in hatasi).
         self.sembol_ek_bant = 0
         while i + 1 < len(bands):
             nb = bands[i + 1]; u = self._union(nb['cs'])
-            if u[2] - sy1 <= SEMBOL_EK * (sy1 - sy0) and u[1] >= sx0 and u[1] + u[3] <= sx1:
+            if u[2] - sy1 <= SEMBOL_EK * (sy1 - sy0) and any(c[1] < Wp / 2 < c[1] + c[3] for c in nb['cs']):
                 bands[i]['cs'] = bands[i]['cs'] + nb['cs']; bands[i]['y1'] = max(bands[i]['y1'], nb['y1']); del bands[i + 1]
-                sym = list(bands[i]['cs']); sy1 = max(c[2] + c[4] for c in sym); self.sembol_ek_bant += 1
+                sym = list(bands[i]['cs']); self.sembol_ek_bant += 1
+                sx0 = min(c[1] for c in sym); sx1 = max(c[1] + c[3] for c in sym); sy1 = max(c[2] + c[4] for c in sym)
             else:
                 break
+        if os.environ.get('YD_BANT_DOKUM'):
+            print('YD bantlar:', [(k, len(bb['cs']), self._union(bb['cs'])[1:5]) for k, bb in enumerate(bands)], 'sembol', i, flush=True)
         ids = {c[0] for c in sym}
         sym += [c for c in comps if c[0] not in ids and c[5] <= 300 and sx0 < c[1] + c[3] / 2 < sx1 and sy0 < c[2] + c[4] / 2 < sy1]
         self.merged_parts = sym
