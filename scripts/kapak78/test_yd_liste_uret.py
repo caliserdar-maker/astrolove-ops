@@ -153,11 +153,13 @@ class ListeTest(unittest.TestCase):
         self.assertEqual(kos(self.t)[0], 2)                                           # tirnaksiz virgul: girdi hatasi
 
     def test_05_eski_kapak(self):
-        """Serdar 30 Eki: ARIES_LEO, CAPRICORN_SAGITTARIUS, SAGITTARIUS_SAGITTARIUS kapaklari eski; listede kalir, yukleyici reddeder."""
+        """Serdar 30 Eki: 3 kapak eskiydi; Serdar 1 Kas: yeni Y01 (TEMP/YD_KAPAK_V1/20261101_092221) ile YENILENDI, sha256 kayitli.
+        Eski kapak tablosu yine okunur; ESKI satiri BLOK, yanlis sha'li YENILENDI satiri BLOK (asagidaki gecici dosyalar)."""
         tab = L.eski_kapak_oku()
         ids = {r["cift"] for r in csv.DictReader(open(KOK / "data/pod/yd78_ids.csv"))}
         self.assertEqual({c: v["durum"] for c, v in tab.items()},
-                         {"ARIES_LEO": "ESKI", "CAPRICORN_SAGITTARIUS": "ESKI", "SAGITTARIUS_SAGITTARIUS": "ESKI"})
+                         {"ARIES_LEO": "YENILENDI", "CAPRICORN_SAGITTARIUS": "YENILENDI", "SAGITTARIUS_SAGITTARIUS": "YENILENDI"})
+        self.assertEqual(tab["ARIES_LEO"]["yeni_sha256"], "4fcd825d42634373e9d79f6efb49a6dd93cda5c331670b2eaf21827ac29526cd")
         self.assertTrue(set(tab) <= ids)
         ek = self.t / "eski.csv"
         ek.write_text("cift,durum,yeni_sha256,not\nCANCER_LIBRA,ESKI,,x\n")
@@ -180,7 +182,8 @@ class ListeTest(unittest.TestCase):
         n = YK.dosya_kapisi(hz, LID, man, eski={"CANCER_LIBRA": dict(durum="ESKI", yeni_sha256="")})
         self.assertTrue(any("kapak Y01 ESKI" in x for x in n), n)
         man["cift"] = "ARIES_LEO"
-        self.assertTrue(any("kapak Y01 ESKI (ARIES_LEO" in x for x in YK.dosya_kapisi(hz, LID, man)))   # depodaki liste
+        # depodaki liste (Serdar 1 Kas: ARIES_LEO YENILENDI): baska sha'li Y01 yine reddedilir
+        self.assertTrue(any("yenilenmis kapak kaydiyla ayni degil (ARIES_LEO" in x for x in YK.dosya_kapisi(hz, LID, man)))
 
 
 if __name__ == "__main__":
