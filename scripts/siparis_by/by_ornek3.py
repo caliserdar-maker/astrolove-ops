@@ -25,11 +25,16 @@ import cv2
 import numpy as np
 from PIL import Image
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import yay_olcum as YO  # noqa: E402  (Denetim 20261101B: yay sirti olcumu / kapi)
+
 ESKI = "z/Baski_2400x3000_Buyutulmus/1_Starlit_8x10_300ppi.png"
 YAY = dict(cx=1187.0, cy=1251.0, r=936.0)                         # @2400x3000 (31 Eki olcum); bos aci araligi eski zeminden olculur
 CERCEVE_PAY = 89                                                   # @2400 yan pay (31 Eki olcum: 89 / 90)
 YILDIZ = (1040, 150, 1360, 500)                                    # @2400 tepe yildiz kirpim kutusu (x0, y0, x1, y1)
 YILDIZ_MERKEZ = (1197, 260)                                        # @2400 en parlak nokta (olcum 31 Eki)
+YOL_SEED = (1186.1, 1278.7, 925.0)                                 # @2400 eski yay sirti en iyi daire (f6078af3 olcumu); yalniz baslangic
+KAPI_8x10 = dict(en_buyuk=1.0, medyan=0.5)                          # Merkez / Serdar 1 Kas: 8x10 cikti px; 12x18 = x 1,5
 BY_SCALE = int(os.environ.get("BY_SCALE", "2"))                    # by_poster cizim olcegi (12x18 icin sonra esit olcekle 3600x4500)                                    # @2400 tepe yildiz kirpim kutusu (x0, y0, x1, y1)
 
 
@@ -173,9 +178,8 @@ def yay(img, k, oy, o, yol=None):
     else:             # eski 8x10'daki gercek yol, esit olcek
         cx, cy = yol["cx"] * k, yol["cy"] * k + oy
         ang = (np.degrees(np.arctan2(yy - cy, xx - cx)) + 360) % 360
-        rt = np.r_[yol["r"], yol["r"][:1]] * k
-        d = np.hypot(xx - cx, yy - cy) - np.interp(ang, np.arange(721) / 2, rt)
-        r = float(np.median(rt))
+        d = np.hypot(xx - cx, yy - cy) - YO.tablo_r(np.asarray(yol["r"]) * k, ang)   # 0,25 derece tablo (yay_olcum.eski_yol)
+        r = float(np.median(yol["r"]) * k)
         b0, b1 = yol["bos"]
     # aciklik kenarinda 12 derecelik yumusak sonum (8x10'daki yay uclari gibi incelir)
     uz = np.minimum(np.abs(((ang - b0 + 180) % 360) - 180), np.abs(((ang - b1 + 180) % 360) - 180))
@@ -189,6 +193,65 @@ def yay(img, k, oy, o, yol=None):
     out = out + m[..., None] * (renk[None, None] - out) * 0.92
     return np.clip(out, 0, 255).astype(np.uint8), dict(merkez=[round(cx, 1), round(cy, 1)], r=round(r, 1), sigma=round(sig, 2),
                                                        bos_aci=[b0, b1], yol="eski_gercek" if yol is not None else "daire"), (cekirdek * sonum) > 0.1
+
+
+def yay_kapisi(s8, son, yol, once8="", once12=""):
+    """YAY KAPISI (Denetim 20261101B): cikti yayi eski 8x10 yayindan ayni acida radyal; 8x10 en buyuk <= 1, medyan <= 0,5 px; 12x18 x 1,5.
+    once8 / once12: onceki ORNEK3 ciktilari (f6078af3) ayni yontemle, genis bant (40 px @2400; o yol 16 px sapiyordu). -> (kapi, cizgiler)"""
+    kapi, cizgi = {}, {}
+    for ad, (img, k_, oy_) in {"8x10": (s8, 1.0, 0), "12x18": (son, 1.5, 450)}.items():
+        if img is None:
+            continue
+        Pn = YO.sirt(YO.gri(img), yol["cx"] * k_, yol["cy"] * k_ + oy_, np.asarray(yol["r"]) * k_, k=k_, bant=14.0, esik=25.0, tur=1)
+        oz, fark = YO.kiyas(yol["P_kapi"], Pn, yol["cx"], yol["cy"], k_, oy_)
+        px = {x: round(oz[x] * k_, 3) for x in ("medyan", "p95", "en_buyuk")}
+        esik = {x: v * k_ for x, v in KAPI_8x10.items()}
+        kapi[ad] = dict(cikti_px=px, at2400=oz, esik_px=esik, ortak_aci=oz["n"],
+                        en_kotu_acilar=[[round(a_, 2), round(f_ * k_, 2)] for a_, f_ in fark[np.argsort(-np.abs(fark[:, 1]))[:5]]],
+                        pass_=bool(px["en_buyuk"] <= esik["en_buyuk"] and px["medyan"] <= esik["medyan"] and oz["n"] >= 0.9 * len(yol["P_kapi"])))
+        cizgi[ad] = Pn
+    if once8 and once12:
+        kapi["once"] = {}
+        for ad, (yolp, k_, oy_) in {"8x10": (once8, 1.0, 0), "12x18": (once12, 1.5, 450)}.items():
+            im = np.asarray(Image.open(yolp).convert("RGB"))
+            Pn = YO.sirt(YO.gri(im), yol["cx"] * k_, yol["cy"] * k_ + oy_, np.asarray(yol["r"]) * k_, k=k_, bant=40.0, esik=25.0, tur=2)
+            oz, fark = YO.kiyas(yol["P_kapi"], Pn, yol["cx"], yol["cy"], k_, oy_)
+            kapi["once"][ad] = dict(cikti_px={x: round(oz[x] * k_, 3) for x in ("medyan", "p95", "en_buyuk")}, ortak_aci=oz["n"],
+                                    en_kotu_acilar=[[round(a_, 2), round(f_ * k_, 2)] for a_, f_ in fark[np.argsort(-np.abs(fark[:, 1]))[:5]]])
+            cizgi["once_" + ad] = Pn
+    return kapi, cizgi
+
+
+def bindirme(img, P_eski, P_yeni, yol_):
+    """BINDIRME_8x10: eski yay sirti KIRMIZI, yeni (cikti) sirti YESIL, 8x10 uzerinde (koyulastirilmis); ust: tum goruntu (cizgi 5 px, ayni
+    yerde ust uste -> SARI); alt: 4 yakin plan x6 (sirt noktalari 1 px): sag uc ~40, sag yan ~15, sol uc ~140, sol yan ~200 derece."""
+    H, W = img.shape[:2]
+    base = (img.astype(np.float32) * 0.45).astype(np.uint8)
+
+    def maske(P, kal):
+        m = np.zeros((H, W), np.uint8)
+        o = np.argsort(P[:, 0]); Q = P[o]
+        kop = np.where(np.diff(Q[:, 0]) > 1.0)[0] + 1                   # buyuk aci boslugunda cizgi kopar (aciklik, isilti)
+        for parca in np.split(Q, kop):
+            if len(parca) > 1:
+                cv2.polylines(m, [np.round(parca[:, 1:3] * 4).astype(np.int32)], False, 255, kal, cv2.LINE_AA, shift=2)
+        return m > 0
+
+    def boya(b, me, my):
+        c = b.copy(); c[me, 0] = 255; c[my, 1] = 255
+        c[me & ~my, 1:] //= 3; c[my & ~me, 0] //= 3; c[my & ~me, 2] //= 3
+        return c
+    ust = boya(base, maske(P_eski, 5), maske(P_yeni, 5))
+    ince = boya(base, maske(P_eski, 1), maske(P_yeni, 1))
+    yak = []
+    for th in (40.0, 15.0, 140.0, 200.0):
+        i = int(np.argmin(np.abs(((P_eski[:, 0] - th + 180) % 360) - 180)))
+        x, y = int(P_eski[i, 1]), int(P_eski[i, 2])
+        k = ince[max(0, y - 40):y + 40, max(0, x - 40):x + 40]
+        yak.append(cv2.resize(k, (480, 480), interpolation=cv2.INTER_NEAREST))
+    alt = np.concatenate(yak, 1)
+    ust = cv2.resize(ust, (alt.shape[1], round(alt.shape[1] * H / W)), interpolation=cv2.INTER_AREA)
+    Image.fromarray(np.concatenate([ust, alt], 0)).save(yol_, quality=92)
 
 
 def yildiz_katmani(eski):
@@ -278,6 +341,8 @@ def main(argv=None):
     ap.add_argument("--out", required=True); ap.add_argument("--pair", default="CANCER_LIBRA")
     ap.add_argument("--n1", default="EMMA"); ap.add_argument("--n2", default="JAMES")
     ap.add_argument("--esrgan-hazir", default="", help="onceden buyutulmus 3600x5400 zemin (yerel deneme)")
+    ap.add_argument("--once-8x10", default="", help="ONCE olcumu: onceki STARLIT_8x10.jpg (koşu 41238698983)")
+    ap.add_argument("--once-12x18", default="", help="ONCE olcumu: onceki STARLIT_12x18.jpg")
     a = ap.parse_args(argv)
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     kaynak = np.asarray(Image.open(a.zemin).convert("RGB"))
@@ -285,10 +350,17 @@ def main(argv=None):
         raise SystemExit(f"DUR: zemin kaynagi {kaynak.shape[1]}x{kaynak.shape[0]} (2400x3600 beklenir)")
     eski = np.asarray(Image.open(Path(a.kod, ESKI)).convert("RGB"))
     o = olc(eski)
-    yol = yay_yolu(eski)
+    # Denetim 20261101B (Serdar 1 Kas "elips hatali"): yol eski 8x10 sirtindan 0,25 derecede (yay_olcum.eski_yol). f6078af3 yay_yolu sonuk
+    # sag ucu (0-40 derece, kontrast < 80) kaciriyor, aciklik boyunca dogrusal ara degerle 10-16 px iceri ciziyordu; uclarin ice kivrimi
+    # (40-45 / 130-145 derece, daireden 13-22 px) da kayboluyordu. Daire / elips ikisi de eski yola oturmuyor (rap["eski_yay_oturtma"]).
+    yol = YO.eski_yol(eski, YOL_SEED)
+    dfit, dd = YO.daire_otur(yol["P_kapi"][:, 1:3]); efit, de = YO.elips_otur(yol["P_kapi"][:, 1:3])
     rap = dict(olcum_8x10=o, kaynak=dict(boyut=[2400, 3600]),
-               yay_yolu=dict(merkez=[round(yol["cx"], 1), round(yol["cy"], 1)], en_iyi_daire_r=round(yol["en_iyi_daire_r"], 1),
-                             bos=yol["bos"], artik=yol["artik"]))
+               yay_yolu=dict(yontem="eski 8x10 sirti, 0,25 derece tablo (yay_olcum)", merkez=[round(yol["cx"], 2), round(yol["cy"], 2)],
+                             bos=yol["bos"], isilti_sektor=yol["isilti"], sirt_nokta=int(len(yol["P"])), kapi_nokta=int(len(yol["P_kapi"]))),
+               eski_yay_oturtma=dict(daire={k_: round(v, 2) for k_, v in dfit.items()}, daire_sapma=YO.ozet(dd),
+                                     elips={k_: round(v, 3) for k_, v in efit.items()}, elips_a_b=round(efit["a"] / efit["b"], 5),
+                                     elips_sapma=YO.ozet(de), not_="px @2400; yay ustu isilti sektorleri haric sirt noktalari"))
     # ---- 12x18
     if a.esrgan_hazir:
         z12 = np.asarray(Image.open(a.esrgan_hazir).convert("RGB")); s = 2
@@ -349,15 +421,25 @@ def main(argv=None):
     oge8 = cv2.dilate((np.abs(s8.astype(np.int16) - z8.astype(np.int16)).max(2) > 2).astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
     kes8 = int((oge8 & yay8).sum())
     rap["8x10"] = dict(yay_oge_kesisim_px=kes8, boyut=[2400, 3000], kaynak_kirpim="satir 300:3300 (olcek yok)", cerceve=rc8, yay=ry8, yildiz=rs8)
+    kapi, cizgi = yay_kapisi(s8, son, yol, a.once_8x10, a.once_12x18)
+    rap["yay_kapi"] = kapi
+    bindirme(s8, yol["P_kapi"], cizgi["8x10"], out / "BINDIRME_8x10.jpg")
+    h = 1500
+    ey = Image.new("RGB", (2 * round(2400 * h / 3000) + 60, h + 40), (230, 230, 230))
+    ey.paste(Image.fromarray(eski).resize((round(2400 * h / 3000), h), Image.LANCZOS), (20, 20))
+    ey.paste(Image.fromarray(s8).resize((round(2400 * h / 3000), h), Image.LANCZOS), (round(2400 * h / 3000) + 40, 20))
+    ey.save(out / "ESKI_YENI_8x10.jpg", quality=90)
     # ---- kontak (ayni yukseklik, yalniz kucultme)
     h = 1500
     a12 = Image.fromarray(son).resize((round(3600 * h / 5400), h), Image.LANCZOS)
     a8 = Image.fromarray(s8).resize((round(2400 * h / 3000), h), Image.LANCZOS)
     kt = Image.new("RGB", (a12.width + a8.width + 60, h + 40), (230, 230, 230)); kt.paste(a12, (20, 20)); kt.paste(a8, (a12.width + 40, 20))
-    kt.save(out / "KONTAK_ORNEK3.jpg", quality=88)
+    kt.save(out / "KONTAK_ORNEK3_v2.jpg", quality=88)
+    Image.fromarray(son).save(out / "ORNEK3_12x18_v2.jpg", quality=95, subsampling=0, dpi=(300, 300))
     kt.resize((kt.width * 450 // kt.height, 450), Image.LANCZOS).save(out / "ONIZLEME_KUCUK.jpg", quality=70)
     (out / "OLCUM.json").write_text(json.dumps(rap, indent=1), encoding="utf-8")
-    rap["sonuc"] = "PASS" if kes12 == 0 and kes8 == 0 else "FAIL (yay ogeye degiyor)"
+    yk = kapi["8x10"]["pass_"] and kapi["12x18"]["pass_"]
+    rap["sonuc"] = "PASS" if kes12 == 0 and kes8 == 0 and yk else ("FAIL (yay eski yoldan sapiyor)" if not yk else "FAIL (yay ogeye degiyor)")
     (out / "OLCUM.json").write_text(json.dumps(rap, indent=1), encoding="utf-8")
     print(json.dumps(rap, indent=1))
     return 0 if rap["sonuc"] == "PASS" else 1
