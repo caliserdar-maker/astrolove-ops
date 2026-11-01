@@ -40,7 +40,7 @@ DIKIS_DE, DIKIS_GRAD = 3.0, 1.5       # ONERI (Serdar onayi yok): dikis renk bas
 KORELASYON, KAZANC, KAYMA, AFIN = 0.98, (0.95, 1.05), 0.5, 0.01
 YAKIN = {"Timeless": [(0, 4800), (3000, 4800), (1500, 500)], "FirstPage": [(0, 0), (3000, 4800)], "Botanical": [(2900, 100), (100, 4600)]}
 KIRP_ORAN = 0.01       # ONERI (Serdar onayi yok): susleme piksellerinin en cok %1'i 255'te kirpilabilir
-PROFIL_FARK = 0.08     # ONERI: cerceve profili 8x10 ile oran farki (kanal, ofset basina) en cok 0,08
+PROFIL_FARK = 0.05     # ONERI: cerceve en koyu oran farki (kanal) <= 0,05 ve FWHM farki <= 1 px @8x10 (yerel vekil olcum 0,019)
 DIS_ORAN = 0.02        # ONERI: maske disinda kalan susleme koyuluk kutlesi maske icinin en cok %2'si
 
 
@@ -253,10 +253,15 @@ def susleme_kapi(e, out, maske_e, kt, X, Y, haric_out):
     cek = maske_e[y0:y1, x0:x1] & (De > 0.10)
     dE = np.linalg.norm(lab(e[y0:y1, x0:x1]) - lab(o_k), axis=2)[cek] if cek.any() else np.zeros(1)
     mt = cv2.resize(maske_e[y0:y1, x0:x1].astype(np.uint8), (round(w * K), round(h * K)), interpolation=cv2.INTER_NEAREST) > 0
-    kirp = int(((out[Y:Y + round(h * K), X:X + round(w * K)] >= 254).any(2) & mt).sum())
+    eski_b = cv2.resize(e[y0:y1, x0:x1], (round(w * K), round(h * K)), interpolation=cv2.INTER_LANCZOS4)
+    # yalniz YENI kirpma: eskide 255'e yakin olmayan (< 250) ama ciktida >= 254 (eskide de doygun altin parlakligi sayilmaz)
+    kirp = int(((out[Y:Y + round(h * K), X:X + round(w * K)] >= 254).any(2) & ~(eski_b >= 250).any(2) & mt).sum())
     me = maske_e[y0:y1, x0:x1]
     yak = (cv2.dilate(me.astype(np.uint8), np.ones((61, 61), np.uint8)) > 0) & ~(cv2.dilate(me.astype(np.uint8), np.ones((7, 7), np.uint8)) > 0)
-    dis = float(De[yak & (De > 0.08)].sum() / max(De[me].sum(), 1e-6))
+    # taban: ayni yogunluk olcusu maskeden 120-180 px uzak (yalniz kagit lifi / kirinti); asim = yakin - taban (alan oranli)
+    uzak = (cv2.dilate(me.astype(np.uint8), np.ones((361, 361), np.uint8)) > 0) & ~(cv2.dilate(me.astype(np.uint8), np.ones((241, 241), np.uint8)) > 0)
+    yog = lambda b: float(De[b & (De > 0.08)].sum() / max(b.sum(), 1))  # noqa: E731
+    dis = max(0.0, (yog(yak) - (yog(uzak) if uzak.any() else 0.0))) * float(yak.sum()) / max(float(De[me].sum()), 1e-6)
     d = dict(korelasyon=round(float(np.corrcoef(xe, xo)[0, 1]), 4), kazanc=round(float((xe * xo).sum() / max((xe * xe).sum(), 1e-9)), 4),
              ort_mutlak_fark=round(float(np.abs(xo - xe).mean()), 4), px=int(m.sum()), kayma=[round(dx, 3), round(dy, 3)], faz_tepe=round(r, 3),
              sift=sift, dE76_cekirdek=dict(medyan=round(float(np.median(dE)), 2), p95=round(float(np.percentile(dE, 95)), 2)),
@@ -395,11 +400,16 @@ def cerceve_kapi(img, olc=None, ara=60):
         if olc:
             o8 = np.array(olc[yan]["ofs"]); r8 = np.array(olc[yan]["oran"])
             r12 = np.stack([np.interp(o8 * K, ofs, oran_[:, k]) for k in range(3)], 1)
-            prof[yan] = dict(oran_fark_max=round(float(np.abs(r12 - r8).max()), 4), en_koyu_8x10=r8.min(0).round(3).tolist(),
-                             en_koyu_12x18=r12.min(0).round(3).tolist())
+            ince = np.arange(o8.min(), o8.max(), 0.05)
+            def fwhm(o, r):
+                k = 1 - np.interp(ince, o, r @ np.float32([0.299, 0.587, 0.114])); return float((k >= k.max() / 2).sum() * 0.05)
+            prof[yan] = dict(oran_fark_max_bilgi=round(float(np.abs(r12 - r8).max()), 4), en_koyu_8x10=r8.min(0).round(3).tolist(),
+                             en_koyu_12x18=r12.min(0).round(3).tolist(), en_koyu_fark=round(float(np.abs(r12.min(0) - r8.min(0)).max()), 4),
+                             fwhm_8x10=round(fwhm(o8, r8), 2), fwhm_12x18_olcekli=round(fwhm(ofs / K, oran_), 2))
     r["fark_max"] = round(max(r[k] for k in ("sol", "sag", "ust", "alt")) - min(r[k] for k in ("sol", "sag", "ust", "alt")), 3)
     r["profil"] = prof
-    r["pass_"] = bool(r["fark_max"] <= 1.0 and (not prof or max(v["oran_fark_max"] for v in prof.values()) <= PROFIL_FARK))
+    r["pass_"] = bool(r["fark_max"] <= 1.0 and (not prof or all(v["en_koyu_fark"] <= PROFIL_FARK and abs(v["fwhm_12x18_olcekli"] - v["fwhm_8x10"]) <= 1.0
+                                                               for v in prof.values())))
     return r
 
 
