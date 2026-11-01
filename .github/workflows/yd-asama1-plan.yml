@@ -27,10 +27,16 @@ jobs:
           [[ "$HD" =~ $D && "$KD" =~ $D && "$YD" =~ $D && "$ED" =~ $D ]] || { echo "::error::damgalar"; exit 1; }
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
+      - name: "Dal ve betik kapisi (Serdar 1 Kas, yalniz --ref yd-asama1; arac main'de YOK)"
+        run: |
+          set -euo pipefail
+          [ "${{ github.ref_name }}" = yd-asama1 ] || { echo "::error::Bu is akisi yalniz dal yd-asama1 uzerinden kosar (ref ${{ github.ref_name }}); Etsy'ye yazma yok"; exit 1; }
+          [ -f scripts/kapak78/yd_asama1.py ] || { echo "::error::scripts/kapak78/yd_asama1.py yok (main'den tetiklendi?); Etsy'ye yazma yok"; exit 1; }
       - name: Kurulum
         run: |
           set -euo pipefail
           pip install -q requests==2.34.2 pillow==12.3.0 numpy==2.5.3
+          sudo apt-get install -y -qq ffmpeg >/dev/null
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
       - name: rclone.conf
         env:
@@ -61,8 +67,8 @@ jobs:
           print("yedek dosya", n)
           EOF
           rclone copy _w/yedek "$Y" --immutable -q
-          rclone copy "$T/YD_KAPAK_V1/$KD" _w/y01 --include "*_Y01.jpg" -q
-          rclone copy "$T/YD_KAPAK_V1/$YD" _w/y01b --include "*_Y01.jpg" -q
+          rclone copy "$T/YD_KAPAK_V1/$KD" _w/y01 --include "/*_Y01.jpg" --include "/MANIFEST.csv" -q
+          rclone copy "$T/YD_KAPAK_V1/$YD" _w/y01b --include "/*_Y01.jpg" --include "/MANIFEST.csv" -q
           rclone copyto "$T/YD_VIDEO_ESLEME/$ED/VIDEO_ESLEME.csv" _w/VIDEO_ESLEME.csv
           python3 -c "import csv; print(''.join(r['dosya'] + '\n' for r in csv.DictReader(open('_w/VIDEO_ESLEME.csv'))), end='')" > _w/vlist.txt
           rclone copy "$T/YD_VIDEO_ORNEK43" _w/v --files-from _w/vlist.txt --transfers 8 -q

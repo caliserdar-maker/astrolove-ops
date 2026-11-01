@@ -19,6 +19,7 @@ on:
       plan_damga: {description: "uygula: PLAN_DAMGA.txt", required: false, default: ""}
       confirm: {description: "uygula: YD_ASAMA1", required: false, default: ""}
       sadece: {description: "uygula: virgullu listing_id (pilot); bos = plandaki tum PLAN satirlari", required: false, default: ""}
+      azami_dk: {description: "uygula: kilitten bu sure sonra yeni ilana baslanmaz (dk, 1-75)", required: false, default: "75"}
       onceki: {description: "uygula: kaldigi yerden; onceki uygula kosusunun TEMP/YD_ASAMA1/<damga> (SONUC.json; PASS ilanlar atlanir)", required: false, default: ""}
 env:
   T: "gdrive:ASTROLOVE/TEMP"
@@ -41,6 +42,11 @@ jobs:
           esac
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
+      - name: "Dal ve betik kapisi (Serdar 1 Kas, yalniz --ref yd-asama1; arac main'de YOK)"
+        run: |
+          set -euo pipefail
+          [ "${{ github.ref_name }}" = yd-asama1 ] || { echo "::error::Bu is akisi yalniz dal yd-asama1 uzerinden kosar (ref ${{ github.ref_name }}); Etsy'ye yazma yok"; exit 1; }
+          [ -f scripts/kapak78/yd_asama1.py ] || { echo "::error::scripts/kapak78/yd_asama1.py yok (main'den tetiklendi?); Etsy'ye yazma yok"; exit 1; }
       - name: Kurulum
         run: |
           set -euo pipefail
@@ -81,7 +87,9 @@ jobs:
         if: ${{ inputs.mod == 'oku' || inputs.mod == 'uygula' }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/etsy/kilit_bekle.py
+        run: |
+          python3 scripts/etsy/kilit_bekle.py
+          echo "KILIT_T0=$(date +%s)" >> "$GITHUB_ENV"   # sure butcesi kilit alindigi andan (yd-kapak-yukle ile ayni)
       - name: Etsy token
         if: ${{ inputs.mod == 'oku' || inputs.mod == 'uygula' }}
         run: |
@@ -107,17 +115,26 @@ jobs:
           TOKEN_FILE: _w/ETSY_TOKEN.json
           PD: ${{ inputs.plan_damga }}
           SA: ${{ inputs.sadece }}
+          AZ: ${{ inputs.azami_dk }}
         run: |
           set +e
-          python3 scripts/kapak78/yd_asama1.py uygula --plan _p/PLAN.json --plan-damga "$PD" --confirm YD_ASAMA1 --sadece "$SA" --out _o
+          [[ "$AZ" =~ ^[0-9]{1,2}$ ]] && [ "$AZ" -ge 1 ] && [ "$AZ" -le 75 ] || { echo "::error::azami_dk 1-75"; echo "RC=2" >> "$GITHUB_ENV"; exit 0; }
+          python3 scripts/kapak78/yd_asama1.py uygula --plan _p/PLAN.json --plan-damga "$PD" --confirm YD_ASAMA1 --sadece "$SA" --out _o \
+            --bitis $(( ${KILIT_T0:?} + AZ * 60 ))
           echo "RC=$?" >> "$GITHUB_ENV"
-      - name: Drive'a yaz
+      - name: Token + cikti Drive'a
         if: always()
         run: |
+          set -uo pipefail
+          TOKEN_RC=0
+          if [ -f _w/ETSY_TOKEN.json ]; then bash scripts/etsy/token_geri_yaz.sh _w/ETSY_TOKEN.json "$T/ETSY_TOKEN.json" || TOKEN_RC=1; fi
+          if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:' _o/ 2>/dev/null; then
+            echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; rm -rf _w _p ~/.config/rclone; exit 1; fi
           [ -d _o ] && ls _o/* >/dev/null 2>&1 && rclone copy _o "$T/YD_ASAMA1/${DAMGA}" --immutable -q && echo "::notice::TEMP/YD_ASAMA1/${DAMGA}/" || true
-      - name: Token geri yaz
+          rm -rf _w _p ~/.config/rclone
+          [ "$TOKEN_RC" = 0 ] || { echo "::error::token geri yazilamadi"; exit 1; }
+      - name: Sonuc
         if: always()
         run: |
-          [ -f _w/ETSY_TOKEN.json.updated ] && rclone copyto _w/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" || true
-          rm -rf _w _p ~/.config/rclone
-          case "${RC:-x}" in 0) ;; 4) echo "::warning::KOTA: kalan ilanlar baslamadi; kota acilinca onceki=${DAMGA} ile surdur" ;; *) echo "::error::sonuc kodu ${RC:-yok}"; exit 1 ;; esac
+          case "${RC:-x}" in 0) ;; 4) echo "::warning::KOTA: kalan ilanlar baslamadi; kota acilinca onceki=${DAMGA} ile surdur" ;;
+            5) echo "::warning::SURE: kilit butcesi doldu; onceki=${DAMGA} ile surdur" ;; *) echo "::error::sonuc kodu ${RC:-yok}"; exit 1 ;; esac
