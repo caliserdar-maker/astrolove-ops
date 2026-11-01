@@ -303,11 +303,10 @@ def _beyan_aciklamalar(g, alan="description"):
 #    aciklamasi beyansizsa da gecer; ilan RU_BEYANSIZ listesine girer (listing_id, burc cifti, tarih; cikista Drive
 #    TEMP/RU_BEYANSIZ/). Aciklamaya dokunan RU yaziminda kural aynen.
 # 1  YAYINA ALMA: Etsy.yayin_beyan_kontrol (Etsy._call icinde): aciklamasiz updateListing (state=active / taslak guncelleme) once
-#    canli ilani okur (bu kosuda ONBELLEK_SN icinde okunmussa yeniden okumaz; yoksa +1 GET), ilan active degilse canli aciklamada beyan zorunlu.
+#    canli ilani HER SEFER taze okur (+1 GET); canli TASLAK ya da active olmayan ilana state=active ise canli aciklamada beyan zorunlu.
 GERI_IZIN = {}           # (ilan, dil) -> {sha}: geri_alma_izni ile kaydedilen, yedekteki metnin sha'si
 GERI_ISTISNA = []        # [(ilan, dil, sha12)] bu surecte geri alma istisnasiyla gecen yazimlar
 RU_BEYANSIZ = []         # [dict(listing_id, cift, tarih, neden)]
-ONBELLEK_SN = 900
 
 
 def geri_alma_izni(ilan, metin, yedek_sha, dil="en"):
@@ -318,6 +317,18 @@ def geri_alma_izni(ilan, metin, yedek_sha, dil="en"):
                          f"(sha {s_[:12]} != {str(yedek_sha or '-')[:12]}); yazim yok")
     GERI_IZIN.setdefault((ilan, dil), set()).add(s_)
     return s_
+
+
+def beyan_on_kontrol(en_yeni=None, ru_yeni=None, ru_canli=None):
+    """Karar 3 (Serdar 1 Kas): EN + RU yazan ilanda yazimdan ONCE iki yeni metin birlikte denetlenir. None = o dil yazilmayacak.
+    RU: beyanli olmali ya da canli RU aciklamasiyla ayni (karar 4: aciklamaya dokunulmuyor). Donus: neden listesi (bos = yazilabilir).
+    Bos degilse cagiran HICBIR metni yazmaz; ilan ATLANDI + neden (FAIL degil)."""
+    neden = []
+    if en_yeni is not None and not beyan_var(en_yeni, "en"):
+        neden.append(f"EN yeni aciklamada AI beyani yok (\"{AI_BEYAN['en']}\")")
+    if ru_yeni is not None and not beyan_var(ru_yeni, "ru") and not (ru_canli is not None and _beyan_norm(ru_canli) == _beyan_norm(ru_yeni)):
+        neden.append(f"RU yeni aciklamada AI beyani yok (\"{AI_BEYAN['ru']}\")")
+    return neden
 
 
 _BURC = ("Aquarius", "Aries", "Cancer", "Capricorn", "Gemini", "Leo", "Libra", "Pisces", "Sagittarius", "Scorpio", "Taurus", "Virgo")
@@ -339,11 +350,14 @@ def cift_bul(ilan, baslik=None):
                 pass
     if str(ilan) in _CIFT_TABLO:
         return _CIFT_TABLO[str(ilan)]
-    bul = [b for b in _BURC if re.search(rf"\b{b}\b", str(baslik or ""), re.I)]
-    if bul:
-        b = sorted(bul)
-        return "_".join(x.upper() for x in (b * 2 if len(b) == 1 else b[:2]))
-    return "?"
+    t = str(baslik or "")
+    bul = {b: len(re.findall(rf"\b{b}\b", t, re.I)) for b in _BURC}
+    bul = {b: n for b, n in bul.items() if n}
+    if len(bul) == 2:
+        return "_".join(x.upper() for x in sorted(bul))
+    if len(bul) == 1 and max(bul.values()) >= 2:          # "Leo and Leo"
+        b = next(iter(bul)).upper(); return f"{b}_{b}"
+    return "?"                                            # tek gecen / 3+ burc: uydurulmaz (inceleme madde 12)
 
 
 def ai_beyan_kapisi(method, path, data=None, json_body=None, params=None, canli_ceviri=None, baslik=None):  # noqa: C901
@@ -380,8 +394,8 @@ def ai_beyan_kapisi(method, path, data=None, json_body=None, params=None, canli_
             if m_c and canli_ceviri is not None:                                        # karar 4: aciklamaya dokunmayan ceviri yazimi
                 canli = canli_ceviri()
                 if canli is not None and _beyan_norm(canli) == _beyan_norm(a0):
-                    RU_BEYANSIZ.append(dict(listing_id=ilan, dil=dil, cift=cift_bul(ilan, baslik), tarih=time.strftime("%Y-%m-%d", time.gmtime()),
-                                            neden="eski ceviri aciklamasi beyansiz; aciklama degismedi (yalniz baslik / etiket)"))
+                    _ru_beyansiz_ekle(dict(listing_id=ilan, dil=dil, cift=cift_bul(ilan, baslik), tarih=time.strftime("%Y-%m-%d", time.gmtime()),
+                                           neden="eski ceviri aciklamasi beyansiz; aciklama degismedi (yalniz baslik / etiket)"))
                     log(f"AI beyan kapisi: ilan {ilan} {dil.upper()} aciklama degismiyor, eski metin beyansiz -> yazim izinli, RU_BEYANSIZ listesine eklendi")
                     return
             neden = f"aciklamada AI beyani yok ({dil.upper()}: \"{AI_BEYAN[dil]}\")"
@@ -389,27 +403,41 @@ def ai_beyan_kapisi(method, path, data=None, json_body=None, params=None, canli_
     raise BeyanYok(f"HATA: AI beyan kapisi: ilan {ilan} {dil.upper()} {neden}; yazim yok")
 
 
-def _ru_beyansiz_yaz():
-    """RU_BEYANSIZ satirlari: yerel CSV (RU_BEYANSIZ_CSV, varsayilan RU_BEYANSIZ.csv) + Drive TEMP/RU_BEYANSIZ/<kosu>_<pid>.csv (rclone varsa;
-    RU_BEYANSIZ_DRIVE=0 kapatir). Sir yok: yalniz ilan no, cift, tarih."""
-    if not RU_BEYANSIZ:
+_RU_YAZILAN = set()
+
+
+def _ru_beyansiz_yol():
+    return Path(os.environ.get("RU_BEYANSIZ_CSV") or "RU_BEYANSIZ.csv")
+
+
+def _ru_beyansiz_ekle(x):
+    """Satir ANINDA yerel CSV'ye eklenir (inceleme madde 12: timeout / kill'de kaybolmasin); Drive'a cikista. Ilan / dil basina tek satir."""
+    RU_BEYANSIZ.append(x)
+    if (x["listing_id"], x["dil"]) in _RU_YAZILAN:
         return
+    _RU_YAZILAN.add((x["listing_id"], x["dil"]))
     import csv
-    import shutil
-    import subprocess
-    yol = Path(os.environ.get("RU_BEYANSIZ_CSV") or "RU_BEYANSIZ.csv")
     try:
-        yeni = not yol.exists()
+        yol = _ru_beyansiz_yol(); yeni = not yol.exists()
         with open(yol, "a", newline="", encoding="utf-8") as fh:
             w = csv.DictWriter(fh, fieldnames=["listing_id", "cift", "dil", "tarih", "kosu", "neden"])
             if yeni:
                 w.writeheader()
-            gorulen = set()
-            for x in RU_BEYANSIZ:                          # ilan / dil basina tek satir
-                if (x["listing_id"], x["dil"]) in gorulen:
-                    continue
-                gorulen.add((x["listing_id"], x["dil"]))
-                w.writerow(dict(x, kosu=os.environ.get("GITHUB_RUN_ID", "yerel")))
+            w.writerow(dict(x, kosu=os.environ.get("GITHUB_RUN_ID", "yerel")))
+            fh.flush()
+    except OSError as e:
+        print(f"::warning::RU_BEYANSIZ yerel CSV yazilamadi ({type(e).__name__})", file=sys.stderr, flush=True)
+
+
+def _ru_beyansiz_yaz():
+    """Cikista: RU_BEYANSIZ yerel CSV'si (RU_BEYANSIZ_CSV, varsayilan RU_BEYANSIZ.csv) Drive TEMP/RU_BEYANSIZ/RU_BEYANSIZ_<kosu>_<pid>.csv'ye
+    (rclone varsa; RU_BEYANSIZ_DRIVE=0 kapatir). Sir yok: yalniz ilan no, cift, tarih."""
+    if not RU_BEYANSIZ:
+        return
+    import shutil
+    import subprocess
+    yol = _ru_beyansiz_yol()
+    try:
         print(f"::warning::RU_BEYANSIZ: {len({x['listing_id'] for x in RU_BEYANSIZ})} ilan (eski RU aciklamasi beyansiz, aciklamaya dokunulmadi): "
               + ", ".join(sorted({f"{x['listing_id']} {x['cift']}" for x in RU_BEYANSIZ})[:20]), file=sys.stderr, flush=True)
         if os.environ.get("RU_BEYANSIZ_DRIVE", "1") != "0" and shutil.which("rclone"):
@@ -497,13 +525,10 @@ class Etsy:
             pass
 
     def canli_ilan(self, ilan):
-        """(state, description, title): bu kosuda ONBELLEK_SN icinde okunduysa bellekten, yoksa 1 GET (yayin_okuma += 1)."""
+        """(state, description, title): HER cagrida 1 taze GET (karar 1 "canli aciklamayi 1 kez oku"; inceleme 1 Kas madde 6: bellek
+        dogrudan requests / panel degisikliginde bayatlar). yayin_okuma += 1."""
         ilan = str(int(ilan))
         self._bel_hazir()
-        with self._bel_kilit:
-            b = self._ilan_bel.get(ilan)
-        if b and time.monotonic() - b[0] <= ONBELLEK_SN:
-            return b[1:]
         with self._kilit:
             self.yayin_okuma += 1
         self._call("GET", f"/listings/{ilan}")
@@ -520,16 +545,11 @@ class Etsy:
         return b[3] if b else None
 
     def _canli_ceviri(self, path):
-        """Karar 4: ceviri yolunun canli aciklamasi; bu kosuda okunduysa bellekten, yoksa ayni yola 1 GET (ceviri yoksa None)."""
+        """Karar 4: ceviri yolunun canli aciklamasi; ayni yola 1 taze GET (ceviri yoksa None)."""
         m = _BEYAN_CEVIRI.search(_kanonik_yol(path))
         if not m:
             return None
-        anahtar = (str(int(m.group(1))), m.group(2))
-        self._bel_hazir()
-        with self._bel_kilit:
-            b = self._ceviri_bel.get(anahtar)
-        if b and time.monotonic() - b[0] <= ONBELLEK_SN:
-            return b[1]
+        self._bel_hazir()                                  # taze okuma (bellek kullanilmaz; inceleme 1 Kas madde 6)
         with self._kilit:
             self.yayin_okuma += 1
         j = self._call("GET", str(path).split("?", 1)[0], ok404=True)
@@ -553,7 +573,10 @@ class Etsy:
             return                                        # acikca inactive / draft: yayina almaz
         ilan = str(int(m.group(1)))
         state, desc, _ = self.canli_ilan(ilan)
-        if state == "active" or beyan_var(desc, "en") or ozet(desc) in GERI_IZIN.get((ilan, "en"), ()):
+        # yayina alan yazim: canli TASLAK (updateListing taslagi yayina alir, CLAUDE.md 7 Eyl) ya da active olmayan ilana state=active.
+        # inactive / sold_out / expired ilanda state'siz kismi yazim yayina almaz -> denetlenmez (karar yalniz taslak; inceleme madde 6).
+        # Geri alma izni (karar 2) burada GECERSIZ: geri donus yazimina izin verir, yayina almaya degil (inceleme madde 5).
+        if state == "active" or not (state == "draft" or "active" in st) or beyan_var(desc, "en"):
             return
         neden = f"yayina alma / taslak guncelleme: canli ilan {state}, canli aciklamada AI beyani yok (EN: \"{AI_BEYAN['en']}\")"
         BEYAN_HATA.append((ilan, "en", neden))

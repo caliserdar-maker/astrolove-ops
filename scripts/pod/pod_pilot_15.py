@@ -32,6 +32,7 @@ KOK = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(KOK))
 sys.path.insert(0, str(KOK.parent / "etsy"))
 from etsy_common import Etsy, TokenStore  # noqa: E402
+import etsy_common as EC  # noqa: E402
 from pod_sku import SKU_RE  # noqa: E402
 
 DRV = "gdrive:ASTROLOVE/TEMP/POD_5X7"
@@ -439,6 +440,11 @@ def main():
     ru_eski = sn["ru"].get("description") or ""
     ru_yeni, ru_dgs = aciklama_15(ru_eski, "ru") if ru_eski else (ru_eski, ["(RU yok)"])
     en_diff, ru_diff = diff_ozet(L.get("description") or "", en_yeni), diff_ozet(ru_eski, ru_yeni)
+    if "3" in adimlar:   # karar 3 (Serdar 1 Kas): EN ve RU, HICBIR adim yazilmadan once birlikte; biri beyansizsa ilan ATLANDI
+        on_neden = EC.beyan_on_kontrol(en_yeni, ru_yeni if ru_eski else None, ru_eski)
+        if on_neden:
+            log("ATLANDI (beyan on kontrolu, hicbir sey yazilmadi): " + "; ".join(on_neden))
+            return 0
     log("aciklama EN degisiklikleri: " + " ; ".join(en_dgs))
     for s in en_diff:
         log(f"  EN {s}")

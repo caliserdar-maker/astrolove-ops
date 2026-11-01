@@ -34,6 +34,7 @@ KOK = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(KOK))
 sys.path.insert(0, str(KOK.parent / "etsy"))
 from etsy_common import Etsy, TokenStore  # noqa: E402
+import etsy_common as EC  # noqa: E402
 from pod_sku import SKU_RE  # noqa: E402
 import pod_pilot_15 as P  # noqa: E402
 
@@ -257,6 +258,10 @@ def isle(api, shop, lid, cift, isd, yaz, kota_alt):
     except SystemExit as e:
         return "ATLANDI", f"RU aciklama: {str(e)[:120]}", ayrinti
     ayrinti["aciklama"] = {"en": en_dgs, "ru": ru_dgs}
+    on_neden = EC.beyan_on_kontrol(en_yeni if en_yeni != (L.get("description") or "") else None,
+                                   ru_yeni if ru_eski and ru_yeni != ru_eski else None, ru_eski)
+    if on_neden:   # karar 3 (Serdar 1 Kas): EN ve RU yazimdan ONCE birlikte; biri beyansizsa ilanda hicbir sey yazilmaz
+        return "ATLANDI", "beyan on kontrolu: " + "; ".join(on_neden), ayrinti
     fiyatli = [s for s in (L.get("description") or "").split("\n") if FIYAT_DESE.search(s)]
     if fiyatli:
         ayrinti["aciklamada_fiyat"] = fiyatli[:3]      # raporlanir, DEGISTIRILMEZ

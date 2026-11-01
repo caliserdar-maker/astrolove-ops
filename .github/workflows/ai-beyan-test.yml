@@ -17,3 +17,24 @@ jobs:
         run: pip install -q requests==2.34.2
       - name: AI beyan kapisi testi
         run: python3 scripts/etsy/test_ai_beyan.py
+  v2-test:
+    # AI beyan v2 + kota olcum kilidi (Denetim 20261101A, Serdar 1 Kas): sahte Etsy testleri. ETSY YOK, sir yok. YD yukleyici
+    # degisiklikleri bu dala ALINMADI (Serdar 1 Kas: yalniz AI beyan v2 main'e); YD testleri yd-kapak dalinda.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Kurulum (yd-kapak-yukle ile ayni surumler)
+        run: pip install -q requests==2.34.2 numpy==2.1.3 pillow==11.0.0 pyyaml==6.0.2
+      - name: Kapi + yazicilar (karar 1-5)
+        run: |
+          set -euo pipefail
+          for t in scripts/etsy/test_ru_kapisi.py scripts/etsy/test_beyan_marka_yaz.py scripts/etsy/test_by78_yayinla.py \
+                   scripts/etsy/test_pod_5x7_yaz.py scripts/etsy/test_kota_esik.py scripts/etsy/test_kupa_galeri78.py; do
+            echo "== $t"; python3 "$t" > _t.log 2>&1 || { tail -40 _t.log; exit 1; }; tail -1 _t.log
+          done
+      - name: etsy-kota olcum kilidi (madde 7) + workflow denetimi
+        run: |
+          set -euo pipefail
+          python3 scripts/etsy/test_etsy_kota_kilit.py
+          python3 scripts/ops/test_workflows.py

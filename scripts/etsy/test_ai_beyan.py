@@ -3,7 +3,7 @@
 Etsy kurali: "Sellers must disclose within their listing description if an item is created with the use of AI." Kapi tek yerde:
 etsy_common.Etsy._call -> ai_beyan_kapisi (aciklama yazan her istek). Bu test:
   A  kapi birimi: EN updateListing (PATCH / PUT), createDraftListing (POST data / json), ceviri PUT (RU), kismi yazim (aciklamasiz) gecer,
-     celisen govde / tanimsiz dil / beyansiz metin FAIL; YD yolu yalniz EN yazar (RU kapisi YD'de yok; yd_kapak_yukle tek gecis PATCH'i).
+     celisen govde / tanimsiz dil / beyansiz metin FAIL; YD tek gecis EN PATCH + RU PUT (6c, 1 Kas).
   B  _call gercek yol: Etsy._call beyansiz aciklamada istek GONDERMEZ (requests cagrilmaz), beyanliysa gonderir; BEYAN_HATA dolar.
   C  dogrudan requests korumasi (statik): scripts/ altinda Etsy'ye dogrudan requests.post/put/patch yapan ve govdesinde description olan
      her cagrinin 8 satir oncesinde ai_beyan_kapisi( olmali (createDraftListing: by78_taslak, by_taslak_ac, kupa_taslak). Yeni bir
@@ -71,10 +71,19 @@ def birim():
       and not gecer("PATCH", "/shops/1/listings/4595350971", data={"title": "T", "description": d0}))
     yd = (KOK / "scripts/kapak78/yd_kapak_yukle.py").read_text(encoding="utf-8")
     agac = ast.parse(yd)
-    cagri = [n for n in ast.walk(agac) if isinstance(n, ast.Call) and isinstance(n.func, (ast.Attribute, ast.Name))
-             and getattr(n.func, "attr", getattr(n.func, "id", "")) == "ru_yazim_kapisi"]
-    dize = [n for n in ast.walk(agac) if isinstance(n, ast.Constant) and isinstance(n.value, str) and "/translations" in n.value]
-    k("A11 YD yolunda RU ceviri yazimi yok (kodda /translations dizesi ve ru_yazim_kapisi cagrisi yok; yorumlar sayilmaz)", not cagri and not dize)
+    # 6c (Serdar 1 Kas): YD tek geciste RU da yazilir; YALNIZ api.put ile (Etsy._call: ru_yazim_kapisi + ai_beyan_kapisi), dogrudan HTTP yok;
+    # kuruda tg_metin_kapisi EN + RU beyanini birlikte (beyan_on_kontrol) ve RU_YASAK'i denetler
+    ru_yaz = [n for n in ast.walk(agac) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+              and any(isinstance(x, ast.JoinedStr) and "/translations/ru" in ast.unparse(x) for x in n.args[:1])
+              and n.func.attr not in ("get",)]
+    fn = {n.name: ast.unparse(n) for n in ast.walk(agac) if isinstance(n, ast.FunctionDef)}
+    kap_src = fn.get("tg_metin_kapisi", "") + fn.get("tg_ru_kapisi", "")   # yasak ifade kuruda; beyan canli RU ile planda (karar 3 + 4)
+    if "tg_ru_kapisi" not in fn:   # Serdar 1 Kas: main'e yalniz AI beyan v2; YD tek gecis RU yolu yd-kapak dalinda (A11 orada kosar)
+        print("ATLANDI A11 YD RU yazimi: yd_kapak_yukle tek gecis RU yolu bu dalda yok (YD degisiklikleri main'e alinmadi)")
+        return
+    k(f"A11 YD RU yazimi yalniz api.put ({[n.func.attr for n in ru_yaz]}), dogrudan requests yok; kuru kapisi beyan_on_kontrol + RU_YASAK",
+      ru_yaz and all(n.func.attr == "put" and ast.unparse(n.func.value) == "api" for n in ru_yaz) and "requests" not in yd
+      and "beyan_on_kontrol" in fn.get("tg_ru_kapisi", "") and "RU_YASAK" in fn.get("tg_metin_kapisi", "") and "RU metni yok" in kap_src)
 
 
 def call_yolu():
@@ -360,6 +369,9 @@ def yayin_ve_geri():
     import requests
     sv = SahteSunucu(); gercek = requests.request
     requests.request = sv
+    t = Path(tempfile.mkdtemp(prefix="aib_ru_")) / "RU_BEYANSIZ.csv"
+    eski_env = {x: os.environ.get(x) for x in ("RU_BEYANSIZ_CSV", "RU_BEYANSIZ_DRIVE")}
+    os.environ.update(RU_BEYANSIZ_CSV=str(t), RU_BEYANSIZ_DRIVE="0")   # satir aninda yazilir (inceleme madde 12)
     d1 = "Text.\n\n" + BEYAN
     try:
         def dene(fn):
@@ -391,8 +403,8 @@ def yayin_ve_geri():
         k("G3 active ilan, beyansiz, yalniz etiket -> yazildi (yayina alma yok)", g == "gecti" and len(yaz_sayi("103")) == 1, g)
         api = canli_api(sv); sv.istek.clear()
         g = dene(lambda: (api.get("/listings/104"), api.patch("/shops/1/listings/104", {"title": "x"})))
-        k("G4 bu kosuda okunmus taslak: ek GET yok (yayin_okuma 0), beyansiz -> kapi (updateListing taslagi yayina alirdi)",
-          g == "kapi" and api.yayin_okuma == 0 and [x[0] for x in sv.istek] == ["GET"], f"{g} {sv.istek}")
+        k("G4 bu kosuda okunmus taslak da TAZE okunur (inceleme madde 6: bellek bayatlar), beyansiz -> kapi, PATCH yok",
+          g == "kapi" and api.yayin_okuma == 1 and [x[0] for x in sv.istek] == ["GET", "GET"], f"{g} {sv.istek}")
         api = canli_api(sv); sv.istek.clear()
         g = dene(lambda: api.patch("/shops/1/listings/104", {"state": "inactive"}))
         k("G5 acikca state=inactive (yayina almaz) -> okuma yok, yazildi", g == "gecti" and api.yayin_okuma == 0, g)
@@ -412,10 +424,17 @@ def yayin_ve_geri():
           f"baska metin kapi ({g3}); baska ilan kapi ({g4})",
           g0 == "kapi" and "geri alma izni" in g1 and g2 == "gecti" and g3 == "kapi" and g4 == "kapi"
           and E.GERI_ISTISNA and E.GERI_ISTISNA[-1][0] == "103")
-        api = canli_api(sv)
-        E.geri_alma_izni(105, eski, E.ozet(eski))
-        g = dene(lambda: api.patch("/shops/1/listings/105", {"title": "geri"}))
-        k("G8 karar 1+2: canli metni yedek sha'li (geri alinan) inactive ilanda kismi geri yazim gecer", g == "gecti", g)
+        api = canli_api(sv); sv.istek.clear()
+        g = dene(lambda: api.patch("/shops/1/listings/105", {"tags": "a"}))
+        k("G8 karar 1 kapsam: inactive ilanda state'siz kismi yazim yayina almaz -> 1 durum okumasi, beyansiz da gecer (yalniz taslak / state=active)",
+          g == "gecti" and api.yayin_okuma == 1 and [x[0] for x in sv.istek] == ["GET", "PATCH"], f"{g} {sv.istek}")
+        g = dene(lambda: api.patch("/shops/1/listings/105", {"state": "active"}))
+        k("G8b inactive ilana state=active (yayina alma) beyansiz -> kapi", g == "kapi" and sv.L["105"]["state"] == "inactive", g)
+        sv.L["106"] = dict(listing_id=106, state="draft", description=eski, title="t")
+        E.geri_alma_izni(106, eski, E.ozet(eski))
+        g = dene(lambda: api.patch("/shops/1/listings/106", {"state": "active"}))
+        k("G8c karar 2 izni yayina almayi ACMAZ (inceleme madde 5): izinli beyansiz taslak + state=active -> kapi",
+          g == "kapi" and sv.L["106"]["state"] == "draft", g)
         # karar 4 (yd78 ilani: poster listesinde degil, cift tablodan)
         lid = "4595373190"
         sv.L[lid] = dict(listing_id=int(lid), state="active", description=d1, title="t")
@@ -428,19 +447,19 @@ def yayin_ve_geri():
           and E.RU_BEYANSIZ[-1]["listing_id"] == lid and E.RU_BEYANSIZ[-1]["cift"] == "AQUARIUS_AQUARIUS", f"{g} {E.RU_BEYANSIZ[-1:]}")
         n0 = api.yayin_okuma
         g = dene(lambda: api.put(f"/shops/1/listings/{lid}/translations/ru", {"title": "Новое 2", "description": "Старый текст без пометки.", "tags": "a"}))
-        k("G10 ayni kosuda ikinci yazim: canli RU bellekten (ek GET yok)", g == "gecti" and api.yayin_okuma == n0, f"{g} {api.yayin_okuma - n0}")
+        k("G10 ayni kosuda ikinci yazim: canli RU yine taze okunur (+1 GET)", g == "gecti" and api.yayin_okuma == n0 + 1, f"{g} {api.yayin_okuma - n0}")
         g = dene(lambda: api.put(f"/shops/1/listings/{lid}/translations/ru", {"title": "x", "description": "Новый текст без пометки.", "tags": "a"}))
         k("G11 aciklamaya DOKUNAN beyansiz RU yazimi -> kapi (kural aynen)", g == "kapi" and sv.T[(lid, "ru")]["description"] == "Старый текст без пометки.", g)
         lid2 = "4595350971"
         sv.L[lid2] = dict(listing_id=int(lid2), state="active", description=d1, title="t")
         g = dene(lambda: api.put(f"/shops/1/listings/{lid2}/translations/ru", {"title": "x", "description": "Старый текст.", "tags": "a"}))
         k("G12 canli RU ceviri yok (404) -> kapi", g == "kapi", g)
-        t = Path(tempfile.mkdtemp(prefix="aib_ru_")) / "RU_BEYANSIZ.csv"
-        os.environ.update(RU_BEYANSIZ_CSV=str(t), RU_BEYANSIZ_DRIVE="0")
-        E._ru_beyansiz_yaz()
-        satir = t.read_text().splitlines()
-        k(f"G13 RU_BEYANSIZ CSV: listing_id, cift, tarih ({len(satir) - 1} satir)", satir[0].startswith("listing_id,cift,dil,tarih")
-          and lid in satir[1] and "AQUARIUS_AQUARIUS" in satir[1], satir[:2])
+        satir = t.read_text().splitlines()       # _ru_beyansiz_yaz cagrilmadan: olay aninda yazilmis olmali
+        k(f"G13 RU_BEYANSIZ CSV olay aninda (cikis beklenmeden): listing_id, cift, tarih; ilan basina tek satir ({len(satir) - 1})", satir[0].startswith("listing_id,cift,dil,tarih")
+          and len(satir) == 2 and lid in satir[1] and "AQUARIUS_AQUARIUS" in satir[1], satir[:2])
+        k("G15 cift_bul: tablodan; baslikta iki burc -> alfabetik; tek gecen / 3 burc -> ? (uydurulmaz)",
+          E.cift_bul("4595373190") == "AQUARIUS_AQUARIUS" and E.cift_bul("1", "Libra and Cancer mug") == "CANCER_LIBRA"
+          and E.cift_bul("1", "Leo and Leo mug") == "LEO_LEO" and E.cift_bul("1", "Leo mug") == "?" and E.cift_bul("1", "Leo Aries Virgo") == "?")
         kod = ("import sys, os; sys.path.insert(0, %r); import etsy_common as E\n"
                "E.RU_BEYANSIZ.append(dict(listing_id='1', dil='ru', cift='?', tarih='2026-11-01', neden='x'))\n") % str(HERE)
         pr = subprocess.run([sys.executable, "-c", kod], capture_output=True, text=True, timeout=60,
@@ -450,6 +469,38 @@ def yayin_ve_geri():
     finally:
         requests.request = gercek
         E.BEYAN_HATA.clear(); E.RU_BEYANSIZ.clear(); E.GERI_IZIN.clear(); E.GERI_ISTISNA.clear()
+        for x, v in eski_env.items():
+            os.environ.pop(x, None) if v is None else os.environ.update({x: v})
+
+
+ON_KONTROL = {"scripts/etsy/pod_inventory_update.py", "scripts/pod/pod_boy_15.py", "scripts/pod/pod_pilot_15.py", "scripts/etsy/beyan_marka_yaz.py"}
+YAZ_ATTR = {"patch", "put", "put_json", "post", "post_json", "post_file", "delete", "_yaz_dogrula"}
+
+
+def on_kontrol():
+    """Karar 3: birim + EN ve RU yazan 4 betikte, kontrolu iceren fonksiyonda kontrolden ONCE hicbir yazim cagrisi yok (AST)."""
+    d1, r1 = "x\n\n" + BEYAN, "Текст.\n\n" + RU_BEYAN
+    k("H1 beyan_on_kontrol: iki metin beyanli -> bos; RU beyansiz -> neden; EN beyansiz -> neden; RU yazilmiyorsa (None) yalniz EN",
+      E.beyan_on_kontrol(d1, r1) == [] and len(E.beyan_on_kontrol(d1, "Текст.")) == 1 and len(E.beyan_on_kontrol("x", r1)) == 1
+      and E.beyan_on_kontrol(d1, None) == [] and len(E.beyan_on_kontrol("x", "y")) == 2)
+    k("H2 karar 4 ile uyum: RU aciklamasi canli ile ayni (dokunulmuyor) ve beyansiz -> engel degil",
+      E.beyan_on_kontrol(d1, "Старый текст.", "Старый  текст.") == [] and len(E.beyan_on_kontrol(d1, "Новый.", "Старый.")) == 1)
+    sorun = []
+    for rel in sorted(ON_KONTROL):
+        t = (KOK / rel).read_text(encoding="utf-8"); agac = ast.parse(t)
+        fonks = [n for n in ast.walk(agac) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+        cagri = [n for n in ast.walk(agac) if isinstance(n, ast.Call) and getattr(n.func, "attr", getattr(n.func, "id", "")) == "beyan_on_kontrol"]
+        if not cagri:
+            sorun.append(f"{rel}: beyan_on_kontrol yok"); continue
+        for c in cagri:
+            fn = min([f for f in fonks if f.lineno <= c.lineno <= (f.end_lineno or f.lineno)], key=lambda f: (f.end_lineno or 0) - f.lineno)
+            once = [n.lineno for n in ast.walk(fn) if isinstance(n, ast.Call) and n.lineno < c.lineno
+                    and getattr(n.func, "attr", getattr(n.func, "id", "")) in YAZ_ATTR]
+            sonra = [n.lineno for n in ast.walk(fn) if isinstance(n, ast.Call) and n.lineno > c.lineno
+                     and getattr(n.func, "attr", getattr(n.func, "id", "")) in YAZ_ATTR]
+            if once or not sonra:
+                sorun.append(f"{rel}:{c.lineno} once {once[:3]} sonra {len(sonra)}")
+    k(f"H3 EN + RU yazan {len(ON_KONTROL)} betikte on kontrol, ayni fonksiyonda tum yazimlardan ONCE", not sorun, str(sorun))
 
 
 def main():
@@ -459,6 +510,8 @@ def main():
     kacis()
     cikis()
     yayin_ve_geri()
+    if not canli:
+        on_kontrol()
     eski_kaynak()
     if not canli:                      # depo taramasi yalniz CI'da (inceleme madde 6: ilgisiz betik canli yazimi / geri almayi durdurmasin)
         yazanlar = statik()
