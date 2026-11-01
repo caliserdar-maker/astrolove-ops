@@ -43,6 +43,7 @@ class Sim:
             self.secs.append(dict(shop_section_id=777, title=st.BOLUM_AD))
         self.L, self.inv, self.ims, self.vids, self.vis, self.per, self.props = None, None, [], [], [], [], {}
         self.aktif_adim, self.olustur_kod, self.drafts = aktif_adim, olustur_kod, []
+        self.patchler, self.alt_bozuk = [], False
 
     def say(self):
         self.n += 1; self.kota -= 1
@@ -89,6 +90,9 @@ class Sim:
             if path == f"/shops/{s}/listings/{lid}/variation-images":
                 return dict(results=self.vis)
             raise AssertionError(f"sim GET {path}")
+        if method == "PATCH" and path == f"/shops/{s}/listings/{lid}":
+            self.patchler.append(data)
+            self.L["state"] = data["state"]; return copy.deepcopy(self.L)
         if path == f"/shops/{s}/sections":
             self.secs.append(dict(shop_section_id=888, title=data["title"]))
             return self.secs[-1]
@@ -110,7 +114,7 @@ class Sim:
             self.per = json_body["personalization_questions"]; return json_body
         if "/properties/" in path:
             pid = int(path.rsplit("/", 1)[1])
-            self.props[pid] = dict(property_id=pid, property_name="x", value_ids=[int(x) for x in data["value_ids"].split(",")],
+            self.props[pid] = dict(property_id=pid, property_name={46803063641: "Occasion"}.get(pid, "x"), value_ids=[int(x) for x in data["value_ids"].split(",")],
                                    values=data["values"].split(","))
             return self.props[pid]
         raise AssertionError(f"sim {method} {path}")
@@ -125,7 +129,7 @@ class Sim:
         api.calls += 1; api.remaining = self.say(); self.yazma.append(("POST", path))
         if path.endswith("/images"):
             rk = int(data["rank"])
-            self.ims.append(dict(rank=rk, listing_image_id=800000 + rk, full_width=2000, full_height=2000, alt_text=data["alt_text"]))
+            self.ims.append(dict(rank=rk, listing_image_id=800000 + rk, full_width=2000, full_height=2000, alt_text=data["alt_text"] + (" x" if self.alt_bozuk and rk == 3 else "")))
             return self.ims[-1]
         self.vids.append(dict(video_id=900001, video_state="active"))
         return self.vids[-1]
@@ -180,10 +184,10 @@ def ortam(td, bozuk=False):
     return out
 
 
-def kos(sim, out, burclar=("ARIES",)):
+def kos(sim, out, burclar=("ARIES",), yayinla=False):
     a = api_kur(sim)
     try:
-        return st.kos(a, SHOP, out, list(burclar)), a, None
+        return st.kos(a, SHOP, out, list(burclar), yayinla=yayinla), a, None
     except SystemExit as e:
         return None, a, e
 
@@ -267,6 +271,49 @@ with tempfile.TemporaryDirectory() as td:
     rc, a, e = kos(sim, out)
     ok("T10 video bayt farki, kare ozeti yok -> DUR", e is not None and "kare ozeti FAIL" in str(e)
        and not [y for y in sim.yazma if y[1] == "create"], str(e))
+
+# T11 sablon Occasion Wedding -> DUR, create yok
+with tempfile.TemporaryDirectory() as td:
+    out = ortam(td); sim = Sim()
+    eski = copy.deepcopy(SABLON_PROPS); SABLON_PROPS[1]["values"] = ["Wedding"]
+    rc, a, e = kos(sim, out)
+    SABLON_PROPS[:] = eski
+    ok("T11 Occasion Wedding -> DUR", e is not None and "Occasion" in str(e) and not [y for y in sim.yazma if y[1] == "create"], str(e))
+
+# T12 eski kopya 4607523667: GET dahil engel
+a12 = api_kur(Sim())
+try:
+    st.Kilitli._call(a12, "GET", f"/listings/{st.ESKI_KOPYA}"); ok("T12 eski kopya GET engellendi", False)
+except SystemExit as e:
+    ok("T12 eski kopya GET engellendi", "YASAK" in str(e), str(e))
+
+# T13 yayin: 14/14 PASS -> tek PATCH {"state": "active"}, yayin sonrasi geri okuma PASS
+with tempfile.TemporaryDirectory() as td:
+    out = ortam(td); sim = Sim()
+    rc, a, e = kos(sim, out, yayinla=True)
+    R = json.load(open(out / "SADE_TASLAK_ARIES.json"))
+    ok("T13 yayin rc 0, tek PATCH state=active", rc == 0 and sim.patchler == [{"state": "active"}], f"{e} {sim.patchler}")
+    ok("T13 yayin sonrasi kontrol PASS", all(R["yayin"]["kontrol"].values()), R.get("yayin"))
+    ok("T13 PATCH izni kapandi", a.yayin_izni is None)
+    print(f"     T13 istek {sim.n}")
+
+# T14 kontrol FAIL (alt metin) -> PATCH yok, draft kalir
+with tempfile.TemporaryDirectory() as td:
+    out = ortam(td); sim = Sim(); sim.alt_bozuk = True
+    rc, a, e = kos(sim, out, yayinla=True)
+    ok("T14 kontrol FAIL -> PATCH yok, draft", e is not None and sim.patchler == [] and sim.L["state"] == "draft", f"{e} {sim.patchler}")
+
+# T15 yayin izni yokken PATCH engelli (izinli govde olsa bile)
+a15 = api_kur(Sim()); a15.lid = 4700000001
+try:
+    a15.patch(f"/shops/{SHOP}/listings/4700000001", {"state": "active"}); ok("T15 izinsiz PATCH engellendi", False)
+except SystemExit as e:
+    ok("T15 izinsiz PATCH engellendi", "YASAK" in str(e), str(e))
+a15.yayin_izni = 4700000001
+try:
+    a15.patch(f"/shops/{SHOP}/listings/4700000001", {"state": "active", "title": "x"}); ok("T15 baska alanli PATCH engellendi", False)
+except SystemExit as e:
+    ok("T15 baska alanli PATCH engellendi", "YASAK" in str(e), str(e))
 
 # T8 beyansiz aciklama -> metin kapisi DUR (gercek CSV degistirilmeden)
 r = st.metin("ARIES"); r2 = dict(r)

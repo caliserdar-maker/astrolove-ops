@@ -32,8 +32,10 @@ import requests
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "etsy"))
 from etsy_common import API, KOTA_SINIRI, Etsy, TokenStore, ai_beyan_kapisi, beyan_var, mask  # noqa: E402
 
-SABLON = 4607523667                 # Serdar'in kopyaladigi taslak: YALNIZ OKUNUR
-YAZMA_YASAK = {SABLON, 4597843405, 4598525642}
+SABLON = 4607613712                 # Serdar 1 Kas: ONAYLI ARIES (Serdar yayina aldi, active) = kalan 11 burcun ayar kaynagi, YALNIZ OKUNUR
+ESKI_KOPYA = 4607523667             # Serdar'in eski kopyasi: DOKUNMA (Serdar 1 Kas madde 5): okuma dahil hic istek yok
+YAZMA_YASAK = {SABLON, ESKI_KOPYA, 4597843405, 4598525642}
+OCCASION = "Birthday"               # Serdar 1 Kas madde 1: sablonun Occasion degeri Birthday olmali (ARIES'te elle yapildi)
 BOLUM_AD = "Zodiac Sign Mugs"
 BURCLAR = ["ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS", "CAPRICORN",
            "AQUARIUS", "PISCES"]
@@ -211,8 +213,12 @@ class Kilitli(Etsy):
     """Izinli yazmalar: createDraftListing, (yoksa) createShopSection BOLUM_AD, ve YALNIZ yeni taslagin alt uclari.
     PATCH ve DELETE hic yok. Sablon / yasak ilanlara yazma yok. Her istekten once kota sert tabani (etsy_common)."""
     lid = None
+    yayin_izni = None                   # yalniz tum kontrolleri gecen taslak: PATCH {"state": "active"} (Serdar 1 Kas)
 
     def _izin(self, method, path, data=None):
+        if (method == "PATCH" and self.yayin_izni and self.yayin_izni == self.lid
+                and re.match(rf"^/shops/\d+/listings/{self.lid}$", path) and data == {"state": "active"}):
+            return
         if method in ("PATCH", "DELETE"):
             raise SystemExit(f"YASAK: {method} {path} (Gorev G: PATCH / DELETE yok)")
         if any(re.search(rf"/listings/{e}(/|$)", path) for e in YAZMA_YASAK):
@@ -231,6 +237,8 @@ class Kilitli(Etsy):
             raise SystemExit(f"YASAK yazma: {method} {path}")
 
     def _call(self, method, path, params=None, data=None, ok404=False, json_body=None):
+        if re.search(rf"/listings/{ESKI_KOPYA}(/|$)", path):
+            raise SystemExit(f"YASAK: {ESKI_KOPYA} (Serdar: dokunma) {method} {path}")
         if method != "GET":
             self._izin(method, path, data)
         return super()._call(method, path, params=params, data=data, ok404=ok404, json_body=json_body)
@@ -239,8 +247,9 @@ class Kilitli(Etsy):
         self._izin("POST", path)
         return super().post_file(path, files, data, tekrar=1)   # tekrar yok: cift yukleme riski; cagiran galeriyi okur
 
-    def patch(self, *a, **k):
-        raise SystemExit("YASAK: PATCH (Gorev G)")
+    def patch(self, path, data):
+        self._izin("PATCH", path, data)           # yalniz yayin izni olan taslak + {"state": "active"}
+        return super().patch(path, data)
 
     def delete(self, *a, **k):
         raise SystemExit("YASAK: DELETE (Gorev G)")
@@ -282,6 +291,11 @@ def sablon_oku(api, shop, out):
         hata.append(f"sablon envanterinde Style/Size ozelligi {list(ps)}")
     if len(rs) != 1:
         hata.append(f"sablon readiness_state_id {rs} (tek olmali)")
+    occ = [p for p in props if (p.get("property_name") or "").strip().lower() == "occasion"]
+    if len(occ) != 1 or (occ[0].get("values") or []) != [OCCASION]:
+        hata.append(f"sablon Occasion {[(p.get('values')) for p in occ]} != ['{OCCASION}']")
+    if L.get("state") not in ("draft", "active"):
+        hata.append(f"sablon state {L.get('state')} (draft/active olmali)")
     if L.get("taxonomy_id") is None or L.get("shipping_profile_id") is None:
         hata.append("sablonda taxonomy / kargo profili yok")
     ai_anahtar = {k: v for k, v in L.items() if re.search(r"(^|_)ai(_|$)|ai_generated|how_it|made_by|creation_method", k, re.I)}
@@ -322,7 +336,7 @@ def taslaklar(api, shop):
     return out
 
 
-def yaz(api, shop, out, b, SB, bolum_id, D):
+def yaz(api, shop, out, b, SB, bolum_id, D, yayinla=False):
     R = {"burc": b, "adimlar": [], "olusturma": None}
     rapor_f = out / f"SADE_TASLAK_{b}.json"
     durum_f = out / "DURUM.json"
@@ -517,6 +531,8 @@ def yaz(api, shop, out, b, SB, bolum_id, D):
         "who_made / when_made / kategori / malzeme sablonla ayni": (L.get("who_made"), L.get("when_made"), L.get("taxonomy_id"),
                                                                      sorted(L.get("materials") or []))
         == (L0.get("who_made"), L0.get("when_made"), L0.get("taxonomy_id"), sorted(L0.get("materials") or [])),
+        f"Occasion = {OCCASION}": [p_.get("values") for p_ in props if (p_.get("property_name") or "").strip().lower() == "occasion"]
+        == [[OCCASION]],
         "nitelikler sablonla ayni": sorted((p_.get("property_id"), tuple(p_.get("value_ids") or []), tuple(p_.get("values") or []))
                                           for p_ in props)
         == sorted((p_.get("property_id"), tuple(p_.get("value_ids") or []), tuple(p_.get("values") or []))
@@ -539,13 +555,38 @@ def yaz(api, shop, out, b, SB, bolum_id, D):
     print(f"::warning::{b} TASLAK {lid} state={L.get('state')} | kontrol {len(K) - len(kotu)}/{len(K)} PASS | FAIL {kotu} | "
           f"elle {sorted(elle)} | kota {R['kota_bas']} -> {R['kota_son']}")
     if kotu:
-        raise SystemExit(f"FAIL kontrol {b}: {kotu}")
+        raise SystemExit(f"FAIL kontrol {b}: {kotu} (yayinlanmadi, draft kaldi)")
     if b not in D.setdefault("tamam", []):
         D["tamam"].append(b); kaydet()
+    if yayinla:
+        # Serdar 1 Kas: tum kontroller PASS -> ayni kosuda yayin; sonra geri okuma (state, fiyat, gorsel, video)
+        api.yayin_izni = lid
+        try:
+            api.patch(f"/shops/{shop}/listings/{lid}", {"state": "active"})
+        finally:
+            api.yayin_izni = None
+        time.sleep(3)
+        L2 = api.get(f"/listings/{lid}") or {}
+        inv2 = api.get(f"/listings/{lid}/inventory") or {}
+        ims2 = (api.get(f"/listings/{lid}/images") or {}).get("results") or []
+        vids2 = (api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or []
+        fiyat2 = sorted({(pv, para((p.get("offerings") or [{}])[0].get("price"))) for p in inv2.get("products") or []
+                         for pv in [next((v.get("values") or [None])[0] for v in p.get("property_values") or [] if v.get("property_id") == P_SIZE)]})
+        Y = {"state active": L2.get("state") == "active",
+             "fiyat 11 oz 12.90 / 15 oz 16.90 (16 urun)": fiyat2 == sorted(BOYLAR) and len(inv2.get("products") or []) == N_URUN,
+             f"gorsel {N_GORSEL}": len(ims2) == N_GORSEL, "video 1": len(vids2) == 1,
+             "baslik / aciklama degismedi": L2.get("title") == M["title"] and beyan_var(L2.get("description"), "en")}
+        R["yayin"] = dict(kontrol=Y, state=L2.get("state"), url=L2.get("url"), fiyat=fiyat2, gorsel=len(ims2), video=len(vids2),
+                          kota=api.remaining)
+        D.setdefault("yayin", {})[b] = L2.get("state"); kaydet()
+        kotu2 = [k_ for k_, v_ in Y.items() if not v_]
+        print(f"::warning::{b} YAYIN {lid} state={L2.get('state')} | {len(Y) - len(kotu2)}/{len(Y)} PASS | FAIL {kotu2} | kota {api.remaining}")
+        if kotu2:
+            raise SystemExit(f"FAIL yayin sonrasi {b}: {kotu2}")
     return R
 
 
-def kos(api, shop, out, burclar, salt_oku=False):
+def kos(api, shop, out, burclar, salt_oku=False, yayinla=False):
     durum_f = out / "DURUM.json"
     D = json.load(open(durum_f)) if durum_f.exists() else {}
     D.setdefault("burclar", {}); D.setdefault("tamam", [])
@@ -575,17 +616,22 @@ def kos(api, shop, out, burclar, salt_oku=False):
                 burclar={})
     for i, b in enumerate(burclar, 1):
         api.lid = None
-        if b in D["tamam"]:
+        if b in D["tamam"] and (not yayinla or (D.get("yayin") or {}).get(b) == "active"):
             ozet["burclar"][b] = f"ATLANDI: tamam ({D['burclar'].get(b)})"; continue
+        if b in D["tamam"] and yayinla:
+            ozet["burclar"][b] = f"DUR: taslak tamam ama yayinlanmamis ({D['burclar'].get(b)}); elle bakilmali"
+            json.dump(ozet, open(out / "OZET.json", "w"), indent=1, ensure_ascii=False, default=str)
+            raise SystemExit(ozet["burclar"][b])
         if api.remaining is not None and int(api.remaining) < PAY + KOTA_SINIRI:
             ozet["burclar"][b] = f"BASLAMADI: kota {api.remaining} < pay {PAY} + {KOTA_SINIRI}"
             json.dump(ozet, open(out / "OZET.json", "w"), indent=1, ensure_ascii=False, default=str)
             print(f"::warning::KOTA: {b} ve sonrasi baslamadi (kalan {api.remaining})")
             return 4
         try:
-            R = yaz(api, shop, out, b, SB, bolum_id, D)
+            R = yaz(api, shop, out, b, SB, bolum_id, D, yayinla=yayinla)
             ozet["burclar"][b] = dict(listing_id=R["son"]["listing_id"], kontrol=f"{sum(R['kontrol'].values())}/{len(R['kontrol'])}",
-                                      elle=sorted(R["serdar_elle_girecek"]))
+                                      elle=sorted(R["serdar_elle_girecek"]),
+                                      yayin=(R.get("yayin") or {}).get("state"), url=(R.get("yayin") or {}).get("url"))
         except BaseException as e:  # noqa: BLE001
             ozet["burclar"][b] = f"HATA {type(e).__name__}: {e}"[:800]
             json.dump(ozet, open(out / "OZET.json", "w"), indent=1, ensure_ascii=False, default=str)
@@ -621,7 +667,7 @@ def main():
         Path(a.liste_dizin, "a.txt").write_text("".join(x + "\n" for x in g if x not in kart) + v + "\n")
         Path(a.liste_dizin, "k.txt").write_text("".join(x + "\n" for x in kart))
         return
-    if a.confirm not in ("SADE_TASLAK", "OKU"):
+    if a.confirm not in ("SADE_TASLAK", "SADE_YAYIN", "OKU"):
         raise SystemExit("DUR: --confirm SADE_TASLAK yok (Etsy'ye yazar)")
     out = Path(os.environ.get("OUT", "_out")); out.mkdir(parents=True, exist_ok=True)
     bl = burc_listesi(a.burclar)
@@ -633,7 +679,9 @@ def main():
     api = Kilitli(store)
     if a.confirm == "OKU":
         api._izin = lambda m, p, d=None: (_ for _ in ()).throw(SystemExit(f"YASAK (salt okuma): {m} {p}"))
-    sys.exit(kos(api, os.environ["ETSY_SHOP_ID"], out, bl, salt_oku=a.confirm == "OKU"))
+    if "ARIES" in bl:
+        raise SystemExit("DUR: ARIES 4607613712 yayinda (Serdar); yazim yok")
+    sys.exit(kos(api, os.environ["ETSY_SHOP_ID"], out, bl, salt_oku=a.confirm == "OKU", yayinla=a.confirm == "SADE_YAYIN"))
 
 
 if __name__ == "__main__":

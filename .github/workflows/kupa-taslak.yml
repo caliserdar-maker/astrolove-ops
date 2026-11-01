@@ -11,7 +11,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: { description: "oku (Etsy salt okuma) | yaz", required: true, default: "kuru" }
+      mod: { description: "oku (Etsy salt okuma) | yaz (taslak) | yayin (taslak + 14/14 PASS ise state=active, Serdar 1 Kas)", required: true, default: "kuru" }
       ciftler: { description: "burc listesi: ARIES ya da TUMU ya da virgullu", required: true, default: "CANCER_LIBRA" }
       hedef: { description: "onay: SADE_TASLAK", required: true, default: "ORCHARD78_20261019" }
       metin_ref: { description: "kupa-orchard commit: kupa_orchard/ilan/SADE12_*.csv", required: true, default: "0278b13" }
@@ -28,9 +28,9 @@ jobs:
         run: |
           set -euo pipefail
           [ "${{ github.ref_name }}" = gorev-g ] || { echo "::error::yalniz dal gorev-g (ref ${{ github.ref_name }}); Etsy'ye yazma yok"; exit 1; }
-          { [ "$M" = yaz ] || [ "$M" = oku ]; } && [ "$H" = SADE_TASLAK ] && [[ "$MR" =~ ^[0-9a-f]{7,40}$ ]] && [[ "$B" =~ ^[A-Za-z,\ ]+$ ]] || { echo "::error::girdi: mod=yaz hedef=SADE_TASLAK metin_ref ciftler"; exit 1; }
+          { [ "$M" = yaz ] || [ "$M" = oku ] || [ "$M" = yayin ]; } && [ "$H" = SADE_TASLAK ] && [[ "$MR" =~ ^[0-9a-f]{7,40}$ ]] && [[ "$B" =~ ^[A-Za-z,\ ]+$ ]] || { echo "::error::girdi: mod=yaz hedef=SADE_TASLAK metin_ref ciftler"; exit 1; }
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
-          [ "$M" = oku ] && echo "ONAY=OKU" >> "$GITHUB_ENV" || echo "ONAY=SADE_TASLAK" >> "$GITHUB_ENV"
+          case "$M" in oku) echo "ONAY=OKU" ;; yayin) echo "ONAY=SADE_YAYIN" ;; *) echo "ONAY=SADE_TASLAK" ;; esac >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - name: "Betik kapisi"
         run: '[ -f scripts/kupa/sade_taslak.py ] || { echo "::error::sade_taslak.py yok"; exit 1; }'
@@ -104,7 +104,7 @@ jobs:
           if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:' _o/ 2>/dev/null; then
             echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; rm -rf _w ~/.config/rclone; exit 1; fi
           [ -d _o ] && ls _o/* >/dev/null 2>&1 && rclone copy _o "$T/${DAMGA}" --immutable -q && echo "::notice::TEMP/SADE_TASLAK_G/${DAMGA}/" || true
-          [ "$ONAY" = SADE_TASLAK ] && [ -f _o/DURUM.json ] && rclone copyto _o/DURUM.json "$T/DURUM.json" -q || true
+          [ "$ONAY" != OKU ] && [ -f _o/DURUM.json ] && rclone copyto _o/DURUM.json "$T/DURUM.json" -q || true
           rm -rf _w ~/.config/rclone
           [ "$TOKEN_RC" = 0 ] || { echo "::error::token geri yazilamadi"; exit 1; }
       - name: Sonuc
