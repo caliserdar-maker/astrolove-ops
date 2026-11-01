@@ -44,7 +44,9 @@ KOSE_YUZDE = 99        # F 4. kosu: cizgi dis koyu siniri = cizgi boyunca koyulu
 #                        ulastigi nokta; p99,9 kagit lekeleriyle sisiyordu: eski 8x10 ust 13,89 px, p99 9,89; olcum 1 Kas)
 DUZ_Y = 2100           # Layers: eski 8x10'da kemer katmanlari satir 2050'de biter (olcum 1 Kas: satir 2050+ duz renkten > 25 sapan piksel 0)
 KEMER_ESIK = 12        # Layers B kemer maskesi: duz seftaliden > 12 sapma (golgeler dahil), 9 px genisletme
-KEMER_RAMPA = 60       # Layers B (F 4. kosu): kemer disinda eski duz seftaliden yeni dokuya gecis rampasi (12x18 px; 2. kosu sigma 3 dikisi
+KEMER_RAMPA = 120      # F5 it. 2 (kosu 41339810943: yerel dikis max 2,332 > 2,3 oneri; ESRGAN dokusunda rampa uclari arasi dE ort 3,12):
+#                        gecis 60 -> 120 px; ayni renk farki iki kat mesafeye yayilir (kapi degismedi). Onceki not: Layers B (F 4. kosu):
+#                        kemer disinda eski duz seftaliden yeni dokuya gecis rampasi (12x18 px; 2. kosu sigma 3 dikisi
 #                        gradyan orani 1,615 > 1,5 veriyordu); kemer cekirdegi (w = 1) eski piksel x1,5 AYNEN (Serdar 1 Kas: kemer orijinal)
 KEMER_PAY = 9          # F5: geometrik kemer maskesi disa 9 px (12x18) genisletilir: kenar gecisi eski 8x10'da 3-6 px (olcum 1 Kas,
 #                        ic kemer sol kenar y 1300: -115 -> -4,6 lum 3 px'te; on duzlem x 150: 6 px), x1,5
