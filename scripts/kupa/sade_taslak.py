@@ -75,7 +75,13 @@ MEDYA_KLASOR = {"ARIES": "1wL7pOapo4w40HEeTfPKjjIgoThmN02-y", "TAURUS": "1daCFNq
                 "LIBRA": "1cRi2zpDh-QyLisKHIgdFzJp0YLXkhLwD", "SCORPIO": "1v5hWmX8kxZyjnVSXLgAqLM3t-0-xh0FZ",
                 "SAGITTARIUS": "14PfKyttkykXDv4mbGM3nFZA6C5kqrpFC", "CAPRICORN": "1CVX0WIigQr4dFXkDwCS0SKNCmnP56hI7",
                 "AQUARIUS": "1u5vA-BZJJSU7ZeAAms3a71bLxVnu6dYO", "PISCES": "18Kyo05maeAbtA0eSzFfdPk6uB634fmCg"}
-KART_KOK = "1l1zKanXQAQs3o9JdCDMYD5acteVnPA5V"   # 31 Eki 20:1x sade kart kosusu: <KART_KOK>/<BURC>/SADE_<BURC>_K0x_*.jpg (ARIES = 13xiqqp3...)
+# Kart klasorleri (Merkez 1 Kas tablosu; 31 Eki 20:13-20:15 kart kosusu)
+KART_KLASOR = {"ARIES": "13xiqqp3RFx3Fiy_DUiAN5Nmp--58kT95", "TAURUS": "1NgK9l_W3Esd03yOLXVBgOFG7viWnIMAd",
+               "GEMINI": "1Z5sCYtFzaQ6zQCDmx_JPhGA_DiBx4xDP", "CANCER": "14mlBOhrG1KSsGQP3uOoqJ67SZ__wIYYs",
+               "LEO": "1VvmQ0rPbP4ud4FzXydFOnTxcW2cadx0M", "VIRGO": "18MCAcmbxidTTJ4S-j3EtpTHVxniPpAxi",
+               "LIBRA": "18HCaYkLf8H0N0EAzCNCyggd-5cDhDPie", "SCORPIO": "1W63-PqxLy9Qsvvt-EqHlvZ0IlPz3PVS2",
+               "SAGITTARIUS": "1IEoqINfWX_Bq5xZfxbr7SL_rEgJvXYAf", "CAPRICORN": "14NLF7atEjcjG4bNqesnGMiOdS8jSWLEy",
+               "AQUARIUS": "10snRH3F3plo_cMBVgYBGVf1BuJRMhrAQ", "PISCES": "1aRymrQ2r21CDdj3CyX9HzoxZOobM_3NX"}
 
 
 def dosyalar(b):
@@ -676,7 +682,7 @@ def main():
         kart = [x for x in g if "_K0" in x]
         Path(a.liste_dizin, "a.txt").write_text("".join(x + "\n" for x in g if x not in kart) + v + "\n")
         Path(a.liste_dizin, "k.txt").write_text("".join(x + "\n" for x in kart))
-        Path(a.liste_dizin, "klasor.txt").write_text(f"{MEDYA_KLASOR[b]} {KART_KOK} {b}\n")
+        Path(a.liste_dizin, "klasor.txt").write_text(f"{MEDYA_KLASOR[b]} {KART_KLASOR[b]}\n")
         return
     if a.confirm not in ("SADE_TASLAK", "SADE_YAYIN", "OKU"):
         raise SystemExit("DUR: --confirm SADE_TASLAK yok (Etsy'ye yazar)")

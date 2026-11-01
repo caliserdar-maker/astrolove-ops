@@ -3,7 +3,7 @@ name: kupa-taslak
 # kupa-taslak.yml (cift kupa) DEGISMEZ, bu dal main'e alinmaz. Dosya adi yalniz workflow_dispatch icin (main'de ayni adli dosya var).
 # Girdi adlari main surumuyle ayni: mod=yaz, ciftler=burc listesi (ARIES / TUMU), hedef=SADE_TASLAK (onay), metin_ref=kupa-orchard commit.
 # Kod: scripts/kupa/sade_taslak.py (createDraftListing; PATCH / DELETE YOK; sablon 4607523667 yalniz okunur; state draft degilse DUR).
-# Medya: sade_taslak.MEDYA_KLASOR[burc] (kapak, 8 stil, video) + KART_KOK/<BURC> (5 kart); kilitten ONCE iner; sha MANIFEST kapisi.
+# Medya: sade_taslak.MEDYA_KLASOR / KART_KLASOR (Merkez 1 Kas tablosu); kilitten ONCE iner; 15/15 yoksa o burc atlanir; sha MANIFEST kapisi.
 # Rapor: Drive TEMP/SADE_TASLAK_G/<damga>/ ; kalici DURUM.json (burc -> listing_id): TEMP/SADE_TASLAK_G/DURUM.json
 permissions:
   actions: read
@@ -63,14 +63,19 @@ jobs:
           for f in SADE12_SEO_ONERI.csv SADE12_METIN.csv SADE12_MANIFEST.tsv; do git -C orchard show "$MR:kupa_orchard/ilan/$f" > "_m/$f"; done
           L=$(python3 -c 'import sys; sys.path.insert(0,"scripts/kupa"); import sade_taslak as s; print(" ".join(s.burc_listesi(sys.argv[1])))' "$B")
           echo "BURC_LISTE=$L" >> "$GITHUB_ENV"; echo "burc: $L"
+          TAM=""; : > _o/ATLA.txt
           for b in $L; do
             python3 scripts/kupa/sade_taslak.py --liste "$b" --liste-dizin _w
             mkdir -p "_img/$b"
-            read MK KK KB < _w/klasor.txt
-            rclone copy "gdrive,root_folder_id=$MK:" "_img/$b" --files-from _w/a.txt --max-depth 1 -q
-            rclone copy "gdrive,root_folder_id=$KK:$KB" "_img/$b" --files-from _w/k.txt --max-depth 1 -q
-            n=$(ls "_img/$b" | wc -l); echo "$b: $n dosya"; [ "$n" = 15 ] || { echo "::error::$b medya $n/15"; ls -la "_img/$b"; exit 1; }
+            read MK KK < _w/klasor.txt
+            rclone copy "gdrive,root_folder_id=$MK:" "_img/$b" --files-from _w/a.txt --max-depth 1 -q || true
+            rclone copy "gdrive,root_folder_id=$KK:" "_img/$b" --files-from _w/k.txt --max-depth 1 -q || true
+            n=$(ls "_img/$b" | wc -l); echo "$b: $n dosya"
+            # Merkez 1 Kas: 15/15 yoksa O BURC atlanir (raporlanir), digerleri surer
+            if [ "$n" = 15 ]; then TAM="$TAM $b"; else echo "::warning::$b ATLANDI: medya $n/15"; echo "$b|medya $n/15" >> _o/ATLA.txt; rm -rf "_img/$b"; fi
           done
+          TAM=$(echo $TAM); [ -n "$TAM" ] || { echo "::error::hicbir burcta 15/15 medya yok"; exit 1; }
+          echo "BURC_LISTE=$TAM" >> "$GITHUB_ENV"; echo "kosulacak: $TAM"
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
           GH_TOKEN: ${{ github.token }}
