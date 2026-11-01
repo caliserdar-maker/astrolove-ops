@@ -51,7 +51,9 @@ KEMER_PAY = 9          # F5: geometrik kemer maskesi disa 9 px (12x18) genisleti
 CIZGI_PEN = 240        # F5 yatay cizgi dedektoru pencere genisligi (12x18 px). Olcum 1 Kas (4. kosu ciktisi): 240 px'te satir 4500 kesimi 2,98,
 #                        temiz yeni doku 0,53; tam satir (3600) ortalamasi ayni kesimi 0,61 ile KACIRIYOR (daha siki tanim secildi)
 CIZGI_ESIK = 1.0       # ONERI (gorev metni F5): yatay cizgi <= 1,0 lum
-DIKIS_YEREL_ESIK = 99.0   # GECICI (yerel olcum)
+DIKIS_YEREL_ESIK = 2.3   # ONERI (Serdar onayi yok): yerel dikis karo dE76 EN BUYUK <= 2,3 (CIE76 fark edilebilirlik esigi; 3. taraf:
+#                          Mahy vd. 1994 / Sharma 2003). Yerel olcum 1 Kas (hizli doku): cikti p95 1,38 max 1,95; yeni doku tabani p95 0,93,
+#                          eski doku tabani p95 0,75 (taban esik olarak kullanilmadi: iki farkli kagidin gecisi tabandan buyuk olmak zorunda)
 DIKIS_DE, DIKIS_GRAD = 3.0, 1.5   # ONERI (Serdar onayi yok): dikis renk basamagi dE76 <= 3; kenar gradyani p99 <= 1,5 x yeni doku p99
 
 
@@ -988,7 +990,7 @@ def main(argv=None):
         L_ = rap["Layers_B"]
         L_["pass_"] = bool(kes == 0 and eski_yok == 0 and float(cek_fark.max()) <= 1.0 and L_["eklenen_bantta_oge_px"] == 0
                            and L_["sift_ust"].get("pass_", False) and c_max <= CIZGI_ESIK
-                           and dk["p95"] is not None and dk["p95"] <= DIKIS_YEREL_ESIK
+                           and dk["max"] is not None and dk["max"] <= DIKIS_YEREL_ESIK
                            and g_or is not None and g_or <= DIKIS_GRAD)
         Image.fromarray(B).save(out / "Layers_B_12x18.jpg", quality=95, subsampling=0, dpi=(300, 300))
         # yakin planlar: eski 4500 bolgesi x2 (satir 4200-4800, sol 600 px) ve kemer alt ucu rampa x2

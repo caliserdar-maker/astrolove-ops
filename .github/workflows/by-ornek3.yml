@@ -14,7 +14,7 @@ on:
       pair: {description: "cift", required: true, default: "CANCER_LIBRA"}
       n1: {description: "isim 1", required: true, default: "EMMA"}
       n2: {description: "isim 2", required: true, default: "JAMES"}
-      stiller: {description: "F 4. kosu (Serdar 1 Kas): FirstPage,Layers,Botanical (Layers = B)", required: true, default: "FirstPage,Layers,Botanical"}
+      stiller: {description: "F5 (Serdar 1 Kas karar b): FirstPage,Layers (Layers = B); Timeless / Botanical dokunulmaz", required: true, default: "FirstPage,Layers"}
 jobs:
   ornek:
     runs-on: ubuntu-24.04
