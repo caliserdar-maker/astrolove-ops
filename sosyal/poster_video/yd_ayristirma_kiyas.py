@@ -68,7 +68,10 @@ def main():
         s = Path(yeni).read_text(encoding="utf-8")
         k = "self.sign_a, self.sign_b = self._union(left), self._union(right)"
         assert s.count(k) == 1, "ters kontrol: hedef satir yok"
-        Path(yeni_t).write_text(s.replace(k, "self.sign_a, self.sign_b = self._union(right), self._union(left)"), encoding="utf-8")
+        s = s.replace(k, "self.sign_a, self.sign_b = self._union(right), self._union(left)")
+        assert s.count("KUTU_PAY = 15") == 1, "ters kontrol: KUTU_PAY satiri yok"
+        s = s.replace("KUTU_PAY = 15", "KUTU_PAY = 10 ** 6")   # aralik kapisi kapali: farki kiyasin kendisi yakalamali (kosu 41298831323 dersi)
+        Path(yeni_t).write_text(s, encoding="utf-8")
         yeni = yeni_t
     kapaklar = sorted(Path(dizin).glob("*_Y01.jpg"))
     satir, fark, hata = [], [], []

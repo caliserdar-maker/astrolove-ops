@@ -19,9 +19,9 @@ from PIL import Image
 KAPAK, OUT = sys.argv[1:3]
 RENK_MOD = 'murekkep'
 # Denetim 20261101E: 2000 px poster olceginde kutu araliklari (x, y, w, h), olcum: kosu 41295497893 KIYAS (TEMP/YD_KAPAK_V1/20261027_141146,
-# 78 kapak) + KIYAS_20261101_092221 (3 yeni Y01). KUTU_PAY onerimdir (Serdar onayi yok): poster genisliginin %0,75'i.
+# 78 kapak) + kosu 41298831323 KIYAS_20261101_092221 (3 yeni Y01: isim / mesaj kutusu farkli yerlesim). KUTU_PAY onerimdir (Serdar onayi yok): poster genisliginin %0,75'i.
 KUTU_ARALIK = {'sign_a': ((525, 600), (1595, 1652), (113, 238), (117, 206)), 'sign_b': ((1248, 1324), (1602, 1652), (119, 237), (117, 200)),
-               'names_row': ((455, 457), (1867, 1868), (1126, 1128), (107, 108)), 'msg_row': ((691, 692), (2090, 2092), (629, 630), (309, 310))}
+               'names_row': ((455, 483), (1854, 1868), (1107, 1128), (107, 111)), 'msg_row': ((691, 709), (2075, 2092), (629, 680), (309, 336))}
 KUTU_PAY = 15
 SEMBOL_EK = 0.5   # sembol alt parca bandi: sembol yuksekliginin en cok bu orani kadar asagida (Denetim 20261101D; ust sinir)
 ISIM_ALT = 0.4   # isim satiri koruma payi (alt uzantilar: J, y kuyruklari), isim yuksekligi orani
