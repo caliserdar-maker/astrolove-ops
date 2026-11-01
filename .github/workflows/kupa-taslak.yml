@@ -12,7 +12,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: { description: "oku (Etsy salt okuma) | yaz (taslak) | yayin (taslak + 14/14 PASS ise state=active, Serdar 1 Kas)", required: true, default: "kuru" }
+      mod: { description: "oku (Etsy salt okuma) | yaz (taslak) | yayin (taslak + 14/14 PASS ise state=active, Serdar 1 Kas) | denetim (G-OKU: 12 ilan salt okuma, sade_oku.py)", required: true, default: "kuru" }
       ciftler: { description: "burc listesi: ARIES ya da TUMU ya da virgullu", required: true, default: "CANCER_LIBRA" }
       hedef: { description: "onay: SADE_TASLAK", required: true, default: "ORCHARD78_20261019" }
       metin_ref: { description: "kupa-orchard commit: kupa_orchard/ilan/SADE12_*.csv", required: true, default: "0278b13" }
@@ -29,9 +29,10 @@ jobs:
         run: |
           set -euo pipefail
           [ "${{ github.ref_name }}" = gorev-g ] || { echo "::error::yalniz dal gorev-g (ref ${{ github.ref_name }}); Etsy'ye yazma yok"; exit 1; }
-          { [ "$M" = yaz ] || [ "$M" = oku ] || [ "$M" = yayin ]; } && [ "$H" = SADE_TASLAK ] && [[ "$MR" =~ ^[0-9a-f]{7,40}$ ]] && [[ "$B" =~ ^[A-Za-z,\ ]+$ ]] || { echo "::error::girdi: mod=yaz hedef=SADE_TASLAK metin_ref ciftler"; exit 1; }
+          { [ "$M" = yaz ] || [ "$M" = oku ] || [ "$M" = yayin ] || [ "$M" = denetim ]; } && [ "$H" = SADE_TASLAK ] && [[ "$MR" =~ ^[0-9a-f]{7,40}$ ]] && [[ "$B" =~ ^[A-Za-z,\ ]+$ ]] || { echo "::error::girdi: mod=yaz hedef=SADE_TASLAK metin_ref ciftler"; exit 1; }
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
-          case "$M" in oku) echo "ONAY=OKU" ;; yayin) echo "ONAY=SADE_YAYIN" ;; *) echo "ONAY=SADE_TASLAK" ;; esac >> "$GITHUB_ENV"
+          case "$M" in oku) echo "ONAY=OKU" ;; yayin) echo "ONAY=SADE_YAYIN" ;; denetim) echo "ONAY=DENETIM" ;; *) echo "ONAY=SADE_TASLAK" ;; esac >> "$GITHUB_ENV"
+          [ "$M" = denetim ] && echo "T=gdrive:ASTROLOVE/TEMP/SADE12_OKU" >> "$GITHUB_ENV" || true
       - uses: actions/checkout@v4
       - name: "Betik kapisi"
         run: '[ -f scripts/kupa/sade_taslak.py ] || { echo "::error::sade_taslak.py yok"; exit 1; }'
@@ -115,7 +116,8 @@ jobs:
           OUT: _o
         run: |
           set +e
-          python3 scripts/kupa/sade_taslak.py --burclar "$BURC_LISTE" --confirm "$ONAY"; echo "RC=$?" >> "$GITHUB_ENV"
+          if [ "$ONAY" = DENETIM ]; then python3 scripts/kupa/sade_oku.py --burclar "$(echo $BURC_LISTE | tr ' ' ',')" --confirm OKU12
+          else python3 scripts/kupa/sade_taslak.py --burclar "$BURC_LISTE" --confirm "$ONAY"; fi; echo "RC=$?" >> "$GITHUB_ENV"
       - name: Token + cikti Drive'a
         if: always()
         run: |
@@ -124,8 +126,9 @@ jobs:
           if [ -f _w/ETSY_TOKEN.json ]; then bash scripts/etsy/token_geri_yaz.sh _w/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" || TOKEN_RC=1; fi
           if grep -rqE '"(access_token|refresh_token)"[[:space:]]*:[[:space:]]*"[A-Za-z0-9._-]{20,}"|x-api-key[[:space:]]*:' _o/ 2>/dev/null; then
             echo "::error::Ciktida sir bulundu; Drive'a yazilmadi"; rm -rf _w ~/.config/rclone; exit 1; fi
-          [ -d _o ] && ls _o/* >/dev/null 2>&1 && rclone copy _o "$T/${DAMGA}" --immutable -q && echo "::notice::TEMP/SADE_TASLAK_G/${DAMGA}/" || true
-          if [ "$ONAY" != OKU ] && [ -f _o/DURUM.json ]; then
+          [ -d _o ] && ls _o/* >/dev/null 2>&1 && rclone copy _o "$T/${DAMGA}" --immutable -q && echo "::notice::$T/${DAMGA}/" || true
+          [ "$ONAY" = DENETIM ] && rm -f _o/DURUM.json                  # G-OKU: kalici DURUM'a dokunulmaz, kopyalanmaz
+          if [ "$ONAY" != OKU ] && [ "$ONAY" != DENETIM ] && [ -f _o/DURUM.json ]; then
             rclone copyto _o/DURUM.json "$T/DURUM.json" -q || { echo "::error::DURUM.json Drive'a yazilamadi (sonraki kosu ikinci ilan acmasin diye DUR)"; TOKEN_RC=1; }
           fi
           rm -rf _w ~/.config/rclone
@@ -133,5 +136,5 @@ jobs:
       - name: Sonuc
         if: always()
         run: |
-          case "${RC:-x}" in 0) ;; 4) echo "::warning::KOTA: kalan burclar baslamadi; kota acilinca ayni girdiyle yeniden (DURUM.json kaldigi yerden)" ;;
+          case "${RC:-x}" in 0) ;; 5) echo "::warning::kalan kota < 300: G-OKU baslamadi" ;; 4) echo "::warning::KOTA: kalan burclar baslamadi; kota acilinca ayni girdiyle yeniden (DURUM.json kaldigi yerden)" ;;
             *) echo "::error::sonuc kodu ${RC:-yok}"; exit 1 ;; esac
