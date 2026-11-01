@@ -199,6 +199,7 @@ def main():
             raise SystemExit(f"YASAK: {lid} hedef listede degil")
         if state not in ("active", "inactive"):
             raise SystemExit(f"YASAK: state {state!r}")
+        api.yayin_beyan_kontrol("PATCH", f"/shops/{shop}/listings/{lid}", data={"state": state})   # karar 1: dogrudan requests _call'i atlar
         r = requests.patch(f"{API}/shops/{shop}/listings/{lid}", data={"state": state}, headers=api._headers(), timeout=60)
         api.calls += 1
         if r.headers.get("x-remaining-today") is not None:

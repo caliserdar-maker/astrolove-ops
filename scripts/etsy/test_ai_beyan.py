@@ -137,6 +137,14 @@ def _kaynak(n, t):
         return ""
 
 
+def _literal_anahtarlar(c):
+    out = set()
+    for kw in c.keywords:
+        if kw.arg in ("data", "json") and isinstance(kw.value, ast.Dict):
+            out |= {k_.value for k_ in kw.value.keys if isinstance(k_, ast.Constant)}
+    return out
+
+
 def _aciklamasiz_literal(c):
     """Govde anahtarlari (data / json / files / params) hepsi literal dict ve description / ** yok mu (or. state PATCH)."""
     gv = [kw for kw in c.keywords if kw.arg in ("data", "json", "files", "params")]
@@ -184,10 +192,14 @@ def statik():
             if c.func.attr == "request" and not c.args and not c.keywords:
                 continue
             # yalniz GET (requests.get) bu kumede yok; requests.request(method, ...) yontemi bilinmedigi icin muaf DEGIL
-            if _aciklamasiz_literal(c) and c.func.attr != "request":
-                continue
             ic = [fn for fn in fonks if fn.lineno <= c.lineno <= (fn.end_lineno or fn.lineno)]
             kapsam = min(ic, key=lambda fn: (fn.end_lineno or 0) - fn.lineno) if ic else agac
+            if _aciklamasiz_literal(c) and c.func.attr != "request":
+                # karar 1 (1 Kas): state yazan dogrudan istek (yayina alma) ayni fonksiyonda once yayin_beyan_kontrol cagirmali
+                if "state" in _literal_anahtarlar(c) and not [n for n in ast.walk(kapsam) if isinstance(n, ast.Call) and n.lineno <= c.lineno
+                                                           and getattr(n.func, "attr", getattr(n.func, "id", "")) == "yayin_beyan_kontrol"]:
+                    ihlal.append(f"{rel}:{c.lineno} (state yazimi, yayin_beyan_kontrol yok)")
+                continue
             kapi = [n for n in ast.walk(kapsam) if isinstance(n, ast.Call) and n.lineno < c.lineno
                     and getattr(n.func, "attr", getattr(n.func, "id", "")) == "ai_beyan_kapisi"]
             if not kapi:
@@ -223,10 +235,12 @@ def mutasyon():
         "ortam_url": 'import os, requests\nAPI=os.environ["ETSY_API"]\ndef f(d):\n    requests.put(API + "/listings/2", json={"description": d})\n',
         "urllib": 'import urllib.request\nAPI="https://openapi.etsy.com/v3"\ndef f(b):\n    urllib.request.urlopen(urllib.request.Request(API + "/x", data=b, method="PATCH"))\nK = "description"\n',
         "request_method": 'import requests\nAPI="https://openapi.etsy.com/v3"\ndef f(m, g):\n    requests.request(m, API + "/shops/1/listings/2", data=g)\nK = "description"\n',
+        "state_kontrolsuz": 'import requests\nAPI="https://openapi.etsy.com/v3"\ndef f():\n    requests.patch(API + "/shops/1/listings/2", data={"state": "active"})\nK = "description"\n',
         "baska_fonk_kapi": 'import requests\nfrom etsy_common import ai_beyan_kapisi\nAPI="https://openapi.etsy.com/v3"\ndef g(d):\n    ai_beyan_kapisi("PATCH", "/shops/1/listings/2", data={"description": d})\ndef f(d):\n    requests.patch(API + "/shops/1/listings/2", data={"description": d})\n',
     }
     muaf = {
-        "state_literal": 'import requests\nAPI="https://openapi.etsy.com/v3"\ndef f():\n    requests.patch(API + "/shops/1/listings/2", data={"state": "active"})\nK = "description"\n',
+        "state_literal": 'import requests\nAPI="https://openapi.etsy.com/v3"\ndef f(api):\n    api.yayin_beyan_kontrol("PATCH", "/shops/1/listings/2", data={"state": "active"})\n    requests.patch(API + "/shops/1/listings/2", data={"state": "active"})\nK = "description"\n',
+        "baslik_literal": 'import requests\nAPI="https://openapi.etsy.com/v3"\ndef f():\n    requests.patch(API + "/shops/1/listings/2", data={"title": "t"})\nK = "description"\n',
         "kapili": 'import requests\nfrom etsy_common import ai_beyan_kapisi\nAPI="https://openapi.etsy.com/v3"\ndef f(d):\n    ai_beyan_kapisi("POST", "/shops/1/listings", data=d)\n    requests.post(\n        API + "/shops/1/listings", data=d)\nK = "description"\n',
     }
     yakalanan, kacan = [], []
@@ -296,12 +310,155 @@ def eski_kaynak():
     k("E4 RU eski metin (beyansiz) kapida FAIL", not gecer("PUT", "/shops/1/listings/1/translations/ru", data={"description": "Старый текст без пометки."}))
 
 
+class SahteSunucu:
+    """requests.request / requests.patch seviyesinde sahte Etsy (gercek Etsy._call yolu calisir). Taslak PATCH'te active olur (7 Eyl)."""
+    def __init__(self):
+        self.L, self.T, self.istek = {}, {}, []
+
+    def __call__(self, method, url, params=None, data=None, json=None, headers=None, timeout=None):
+        import urllib.parse as up
+        yol = up.urlparse(url).path.split("/v3/application", 1)[-1]
+        self.istek.append((method, yol, dict(data or {}) if isinstance(data, dict) else data))
+        m = re.fullmatch(r"(?:/shops/\d+)?/listings/(\d+)", yol); mt = re.fullmatch(r"/shops/\d+/listings/(\d+)/translations/(\w+)", yol)
+
+        class R:
+            headers = {"x-remaining-today": "5000"}
+            text = ""
+
+            def __init__(s, kod, j):
+                s.status_code, s._j = kod, j
+
+            def json(s):
+                return s._j
+        if mt:
+            k_ = (mt.group(1), mt.group(2))
+            if method == "GET":
+                return R(200, dict(self.T[k_], listing_id=int(k_[0]))) if k_ in self.T else R(404, {})
+            self.T[k_] = dict(data); return R(200, dict(data, listing_id=int(k_[0])))
+        if m and m.group(1) in self.L:
+            L = self.L[m.group(1)]
+            if method == "GET":
+                return R(200, dict(L))
+            L.update(data or {})
+            if L["state"] == "draft":
+                L["state"] = "active"
+            return R(200, dict(L))
+        return R(404, {})
+
+
+def canli_api(sunucu):
+    import requests
+    api = E.Etsy(type("S", (), {"access_token": "x", "api_key_header": "k"})())
+    api.pace = 0
+    return api
+
+
+def yayin_ve_geri():
+    """Karar 1 / 2 / 4: gercek Etsy._call + sahte sunucu (requests.request yamali). Etsy YOK."""
+    import os
+    import tempfile
+    import requests
+    sv = SahteSunucu(); gercek = requests.request
+    requests.request = sv
+    d1 = "Text.\n\n" + BEYAN
+    try:
+        def dene(fn):
+            try:
+                fn(); return "gecti"
+            except E.BeyanYok:
+                return "kapi"
+            except SystemExit as e:
+                return "DUR:" + str(e)[:60]
+            finally:
+                E.BEYAN_HATA.clear()
+
+        def yaz_sayi(lid):
+            return [x for x in sv.istek if x[0] in ("PATCH", "PUT") and x[1].endswith(lid)]
+        sv.L.update({"101": dict(listing_id=101, state="draft", description="Old text without disclosure.", title="Aries and Leo mug"),
+                     "102": dict(listing_id=102, state="draft", description=d1, title="t"),
+                     "103": dict(listing_id=103, state="active", description="Old text without disclosure.", title="t"),
+                     "104": dict(listing_id=104, state="draft", description="Old text without disclosure.", title="t"),
+                     "105": dict(listing_id=105, state="inactive", description="Old text without disclosure.", title="t")})
+        api = canli_api(sv)
+        g = dene(lambda: api.patch("/shops/1/listings/101", {"state": "active"}))
+        k("G1 karar 1: beyansiz TASLAK state=active -> kapi, PATCH gonderilmedi, 1 canli GET",
+          g == "kapi" and not yaz_sayi("101") and api.yayin_okuma == 1 and sv.L["101"]["state"] == "draft", f"{g} okuma {api.yayin_okuma}")
+        api = canli_api(sv)
+        g = dene(lambda: api.patch("/shops/1/listings/102", {"state": "active"}))
+        k("G2 beyanli taslak state=active -> yazildi (1 GET + 1 PATCH)", g == "gecti" and len(yaz_sayi("102")) == 1 and api.yayin_okuma == 1, g)
+        api = canli_api(sv)
+        g = dene(lambda: api.patch("/shops/1/listings/103", {"tags": "a,b"}))
+        k("G3 active ilan, beyansiz, yalniz etiket -> yazildi (yayina alma yok)", g == "gecti" and len(yaz_sayi("103")) == 1, g)
+        api = canli_api(sv); sv.istek.clear()
+        g = dene(lambda: (api.get("/listings/104"), api.patch("/shops/1/listings/104", {"title": "x"})))
+        k("G4 bu kosuda okunmus taslak: ek GET yok (yayin_okuma 0), beyansiz -> kapi (updateListing taslagi yayina alirdi)",
+          g == "kapi" and api.yayin_okuma == 0 and [x[0] for x in sv.istek] == ["GET"], f"{g} {sv.istek}")
+        api = canli_api(sv); sv.istek.clear()
+        g = dene(lambda: api.patch("/shops/1/listings/104", {"state": "inactive"}))
+        k("G5 acikca state=inactive (yayina almaz) -> okuma yok, yazildi", g == "gecti" and api.yayin_okuma == 0, g)
+        sv.L["104"]["state"] = "draft"
+        api = canli_api(sv); sv.istek.clear()
+        g = dene(lambda: api.patch("/shops/1/listings/104", {"description": d1}))
+        k("G6 aciklamali yazim (beyanli) -> yayin okumasi yok, ana kapi gecer", g == "gecti" and api.yayin_okuma == 0, g)
+        # karar 2
+        eski = "Old text without disclosure."
+        api = canli_api(sv); sv.istek.clear()
+        g0 = dene(lambda: api.patch("/shops/1/listings/103", {"description": eski}))
+        g1 = dene(lambda: E.geri_alma_izni(103, eski, E.ozet("baska metin")))
+        g2 = dene(lambda: (E.geri_alma_izni(103, eski, E.ozet(eski)), api.patch("/shops/1/listings/103", {"description": eski})))
+        g3 = dene(lambda: api.patch("/shops/1/listings/103", {"description": eski + " degisik"}))
+        g4 = dene(lambda: api.patch("/shops/1/listings/999103", {"description": eski}))
+        k(f"G7 karar 2: beyansiz eski metne donus izinsiz kapi ({g0}); yanlis sha DUR ({g1[:30]}); yedek sha ile birebir gecti ({g2}); "
+          f"baska metin kapi ({g3}); baska ilan kapi ({g4})",
+          g0 == "kapi" and "geri alma izni" in g1 and g2 == "gecti" and g3 == "kapi" and g4 == "kapi"
+          and E.GERI_ISTISNA and E.GERI_ISTISNA[-1][0] == "103")
+        api = canli_api(sv)
+        E.geri_alma_izni(105, eski, E.ozet(eski))
+        g = dene(lambda: api.patch("/shops/1/listings/105", {"title": "geri"}))
+        k("G8 karar 1+2: canli metni yedek sha'li (geri alinan) inactive ilanda kismi geri yazim gecer", g == "gecti", g)
+        # karar 4 (yd78 ilani: poster listesinde degil, cift tablodan)
+        lid = "4595373190"
+        sv.L[lid] = dict(listing_id=int(lid), state="active", description=d1, title="t")
+        sv.T[(lid, "ru")] = dict(title="Старое", description="Старый текст без пометки.", tags="a")
+        E.RU_BEYANSIZ.clear()
+        api = canli_api(sv); sv.istek.clear()
+        g = dene(lambda: api.put(f"/shops/1/listings/{lid}/translations/ru", {"title": "Новое", "description": "Старый текст без пометки.", "tags": "a"}))
+        k("G9 karar 4: RU aciklamasi degismeyen yazim (yalniz baslik), eski RU beyansiz -> yazildi, 1 GET, RU_BEYANSIZ satiri (cift tablodan)",
+          g == "gecti" and sv.T[(lid, "ru")]["title"] == "Новое" and api.yayin_okuma == 1 and E.RU_BEYANSIZ
+          and E.RU_BEYANSIZ[-1]["listing_id"] == lid and E.RU_BEYANSIZ[-1]["cift"] == "AQUARIUS_AQUARIUS", f"{g} {E.RU_BEYANSIZ[-1:]}")
+        n0 = api.yayin_okuma
+        g = dene(lambda: api.put(f"/shops/1/listings/{lid}/translations/ru", {"title": "Новое 2", "description": "Старый текст без пометки.", "tags": "a"}))
+        k("G10 ayni kosuda ikinci yazim: canli RU bellekten (ek GET yok)", g == "gecti" and api.yayin_okuma == n0, f"{g} {api.yayin_okuma - n0}")
+        g = dene(lambda: api.put(f"/shops/1/listings/{lid}/translations/ru", {"title": "x", "description": "Новый текст без пометки.", "tags": "a"}))
+        k("G11 aciklamaya DOKUNAN beyansiz RU yazimi -> kapi (kural aynen)", g == "kapi" and sv.T[(lid, "ru")]["description"] == "Старый текст без пометки.", g)
+        lid2 = "4595350971"
+        sv.L[lid2] = dict(listing_id=int(lid2), state="active", description=d1, title="t")
+        g = dene(lambda: api.put(f"/shops/1/listings/{lid2}/translations/ru", {"title": "x", "description": "Старый текст.", "tags": "a"}))
+        k("G12 canli RU ceviri yok (404) -> kapi", g == "kapi", g)
+        t = Path(tempfile.mkdtemp(prefix="aib_ru_")) / "RU_BEYANSIZ.csv"
+        os.environ.update(RU_BEYANSIZ_CSV=str(t), RU_BEYANSIZ_DRIVE="0")
+        E._ru_beyansiz_yaz()
+        satir = t.read_text().splitlines()
+        k(f"G13 RU_BEYANSIZ CSV: listing_id, cift, tarih ({len(satir) - 1} satir)", satir[0].startswith("listing_id,cift,dil,tarih")
+          and lid in satir[1] and "AQUARIUS_AQUARIUS" in satir[1], satir[:2])
+        kod = ("import sys, os; sys.path.insert(0, %r); import etsy_common as E\n"
+               "E.RU_BEYANSIZ.append(dict(listing_id='1', dil='ru', cift='?', tarih='2026-11-01', neden='x'))\n") % str(HERE)
+        pr = subprocess.run([sys.executable, "-c", kod], capture_output=True, text=True, timeout=60,
+                            env=dict(os.environ, RU_BEYANSIZ_CSV=str(t.parent / "b.csv"), RU_BEYANSIZ_DRIVE="0"))
+        k("G14 yalniz RU_BEYANSIZ (beyan hatasi yok) -> surec cikisi 0 (FAIL degil), uyari satiri", pr.returncode == 0 and "RU_BEYANSIZ" in pr.stderr,
+          f"rc {pr.returncode}")
+    finally:
+        requests.request = gercek
+        E.BEYAN_HATA.clear(); E.RU_BEYANSIZ.clear(); E.GERI_IZIN.clear(); E.GERI_ISTISNA.clear()
+
+
 def main():
     canli = "--canli" in sys.argv
     birim()
     call_yolu()
     kacis()
     cikis()
+    yayin_ve_geri()
     eski_kaynak()
     if not canli:                      # depo taramasi yalniz CI'da (inceleme madde 6: ilgisiz betik canli yazimi / geri almayi durdurmasin)
         yazanlar = statik()
