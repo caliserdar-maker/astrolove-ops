@@ -23,6 +23,12 @@ RENK_MOD = 'murekkep'
 KUTU_ARALIK = {'sign_a': ((525, 600), (1595, 1652), (113, 238), (117, 206)), 'sign_b': ((1248, 1324), (1602, 1652), (119, 237), (117, 200)),
                'names_row': ((455, 483), (1854, 1868), (1107, 1128), (107, 111)), 'msg_row': ((691, 709), (2075, 2092), (629, 680), (309, 336))}
 KUTU_PAY = 15
+# inceleme 1 Kas (E bulgu 1): isim / mesaj kutusu iki olculen yerlesimden BIRINE +-YERLESIM_PAY (ayni yerlesimde <= 2 px degisir);
+# burc kutusu merkezi x olculen araliga +-KUTU_PAY (sign_a 629..672, sign_b 1356..1384; 78 + 3 kapak, yeni Y01 668-672)
+YERLESIM = {'names_row': ((455, 1868, 1128, 107), (457, 1867, 1126, 108), (483, 1854, 1107, 111)),
+            'msg_row': ((691, 2092, 630, 309), (692, 2090, 629, 310), (709, 2075, 680, 336))}
+YERLESIM_PAY = 5
+MERKEZ_X = {'sign_a': (629, 672), 'sign_b': (1356, 1384)}
 SEMBOL_EK = 0.5   # sembol alt parca bandi: sembol yuksekliginin en cok bu orani kadar asagida (Denetim 20261101D; ust sinir)
 ISIM_ALT = 0.4   # isim satiri koruma payi (alt uzantilar: J, y kuyruklari), isim yuksekligi orani
 BITIS = 5.0
@@ -132,6 +138,12 @@ class PosterYD:
             for j, (lo, hi) in enumerate(KUTU_ARALIK[ad]):
                 if not (lo - KUTU_PAY <= kt[1 + j] <= hi + KUTU_PAY):
                     raise RuntimeError(f'YD kapi: {ad} kutusu {kt[1:5]} olculen araligin disinda ({ad}[{j}] {lo}..{hi} +-{KUTU_PAY})')
+        for ad, kt in (('sign_a', self.sign_a), ('sign_b', self.sign_b)):
+            mx = kt[1] + kt[3] / 2
+            if not (MERKEZ_X[ad][0] - KUTU_PAY <= mx <= MERKEZ_X[ad][1] + KUTU_PAY):
+                raise RuntimeError(f'YD kapi: {ad} merkez x {mx:.0f} olculen araligin disinda ({MERKEZ_X[ad]} +-{KUTU_PAY})')
+        if not any(max(abs(a - b) for a, b in zip(self.names_row[1:5], y)) <= YERLESIM_PAY for y in YERLESIM['names_row']):
+            raise RuntimeError(f'YD kapi: names_row {self.names_row[1:5]} olculen yerlesimlerin hicbirine +-{YERLESIM_PAY} uymuyor')
         # mesaj = isim satirinin altindaki tum yazi (tarih + YEAR ONE; v7'de isimlerin altindaki tum bantlar). Inceleme 27 Eki: ince
         # ve acik harfler alfa > 0,4 parcalarina yalniz %28 giriyordu (tarih yarim, YEAR ONE hic silinmiyordu). Mesaj pikselleri bolgeden:
         # kagit -> murekkep dogrusu uzerinde (artik < 22; yaprak / altin tohum disarida) ve oran > 0,15.
@@ -162,6 +174,8 @@ class PosterYD:
         for j, (lo, hi) in enumerate(KUTU_ARALIK['msg_row']):
             if not (lo - KUTU_PAY <= self.msg_row[1 + j] <= hi + KUTU_PAY):
                 raise RuntimeError(f'YD kapi: msg_row kutusu {self.msg_row[1:5]} olculen araligin disinda (msg_row[{j}] {lo}..{hi} +-{KUTU_PAY})')
+        if not any(max(abs(a - b) for a, b in zip(self.msg_row[1:5], y)) <= YERLESIM_PAY for y in YERLESIM['msg_row']):
+            raise RuntimeError(f'YD kapi: msg_row {self.msg_row[1:5]} olculen yerlesimlerin hicbirine +-{YERLESIM_PAY} uymuyor')
         yazi = (t > 0.25) & (art < 22) & bol                   # olcum: mesaj yazisinin maskeye giren orani
         self.mesaj_kapsam = float((np.isin(self.lab, [c[0] for c in mes]) & yazi).sum() / max(1, yazi.sum()))
         print(f'YD mesaj: {len(eski)} eski + {len(yeni)} yeni parca, kutu {self.msg_row[1:5]}, kapsam {self.mesaj_kapsam:.3f}', flush=True)

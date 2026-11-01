@@ -22,9 +22,12 @@ def piksel(kare, maske):
     ys, xs = np.where(a)
     ic = cv2.distanceTransform(maske.astype(np.uint8), cv2.DIST_L2, 3)        # maske kenarina uzaklik (iceride)
     n, _ = cv2.connectedComponents(a.astype(np.uint8), 8)
-    return dict(n=int(a.sum()), bilesen=int(n - 1), kenar_uzaklik_max=round(float(ic[a].max()), 1) if a.any() else None,
+    my = np.where(maske.any(1))[0]
+    return dict(n=int(a.sum()), bilesen=int(n - 1), maske_y=[int(my.min()), int(my.max())] if my.size else None,
+                artik_y=[int(ys.min()), int(ys.max())] if ys.size else None,
+                artik_maske_alt_kenara_uzaklik_px=[int(my.max() - ys.max()), int(my.max() - ys.min())] if ys.size and my.size else None, kenar_uzaklik_max=round(float(ic[a].max()), 1) if a.any() else None,
                 kenar_uzaklik_medyan=round(float(np.median(ic[a])), 1) if a.any() else None,
-                ornek_xy=[[int(x), int(y), round(float(ex[y, x]), 1)] for x, y in list(zip(xs, ys))[:40]])
+                ornek_xy=[[int(x), int(y), round(float(ex[y, x]), 1)] for x, y in sorted(zip(xs, ys), key=lambda t: -t[1])[:40]])
 
 
 def main():

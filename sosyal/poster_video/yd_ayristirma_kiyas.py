@@ -43,10 +43,13 @@ def kos(py, kapak, js):
     return json.load(open(js)), None
 
 
-def referans(satir):
-    """AYNI ciftlerden burca gore medyan kutular."""
+def referans(satir, yerlesim=None):
+    """AYNI ciftlerden burca gore medyan kutular. yerlesim verilirse yalniz ayni alt yerlesimdeki (names_row kutusu ayni) ciftler
+    (inceleme E bulgu 3: 78 kapakta iki alt yerlesim var, medyan karisiyordu); o yerlesimde hic AYNI cift yoksa tumu."""
     import numpy as np
     ayni = [d for d in satir if d["durum"] == "AYNI"]
+    if yerlesim is not None and any(list(d["yeni"]["names_row"]) == list(yerlesim) for d in ayni):
+        ayni = [d for d in ayni if list(d["yeni"]["names_row"]) == list(yerlesim)]
     ra, rb = {}, {}
     for d in ayni:
         a, b = d["cift"].split("_")
@@ -58,9 +61,14 @@ def referans(satir):
 
 def main():
     arg = sys.argv[1:]
-    ters = "--ters" in arg
+    if "--oztest" in arg:
+        return oztest()
+    ters = "--ters" in arg or "--ters-kapi" in arg
+    ters_kapi = "--ters-kapi" in arg          # aralik kapisi ACIK: yer degisimi "YD kapi" hatasi olarak yakalanmali
     beklenen = int(arg[arg.index("--beklenen") + 1]) if "--beklenen" in arg else None
-    eski, yeni, dizin, cik = [x for x in arg if not x.startswith("--") and not (beklenen is not None and x == str(beklenen))][:4]
+    liste = Path(arg[arg.index("--beklenen-liste") + 1]).read_text().split() if "--beklenen-liste" in arg else None
+    deger = {str(beklenen)} | ({arg[arg.index("--beklenen-liste") + 1]} if liste is not None else set())
+    eski, yeni, dizin, cik = [x for x in arg if not x.startswith("--") and x not in deger][:4]
     eski_k = str(Path(cik).with_name("_yd_video_eski_kiyas.py"))
     hazirla_eski(eski, eski_k)
     if ters:   # bilinen fark: yeni surumun kopyasinda sign_a / sign_b yer degistirir
@@ -69,8 +77,9 @@ def main():
         k = "self.sign_a, self.sign_b = self._union(left), self._union(right)"
         assert s.count(k) == 1, "ters kontrol: hedef satir yok"
         s = s.replace(k, "self.sign_a, self.sign_b = self._union(right), self._union(left)")
-        assert s.count("KUTU_PAY = 15") == 1, "ters kontrol: KUTU_PAY satiri yok"
-        s = s.replace("KUTU_PAY = 15", "KUTU_PAY = 10 ** 6")   # aralik kapisi kapali: farki kiyasin kendisi yakalamali (kosu 41298831323 dersi)
+        if not ters_kapi:
+            assert s.count("KUTU_PAY = 15") == 1 and s.count("YERLESIM_PAY = 5") == 1, "ters kontrol: kapi satirlari yok"
+            s = s.replace("KUTU_PAY = 15", "KUTU_PAY = 10 ** 6").replace("YERLESIM_PAY = 5", "YERLESIM_PAY = 10 ** 6")  # kapi kapali: farki kiyas yakalamali
         Path(yeni_t).write_text(s, encoding="utf-8")
         yeni = yeni_t
     kapaklar = sorted(Path(dizin).glob("*_Y01.jpg"))
@@ -92,20 +101,25 @@ def main():
                 fark.append(c)
         satir.append(d)
         print(f"[{n}/{len(kapaklar)}] {c}: {d['durum']}" + (f" {d.get('fark')}" if d.get("fark") else ""), flush=True)
-    sayi_tamam = beklenen is None or len(kapaklar) == beklenen
+    sayi_tamam = (beklenen is None or len(kapaklar) == beklenen) and (liste is None or sorted(liste) == sorted(d["cift"] for d in satir))
     if ters:
-        bulunamayan = [d["cift"] for d in satir if d["durum"] != "FARK" and d["cift"].split("_")[0] != d["cift"].split("_")[1]]
-        ozet = dict(mod="ters", toplam=len(satir), fark_bulunan=len(fark), fark_bulunamayan=bulunamayan, sayi_tamam=sayi_tamam)
+        if ters_kapi:
+            bulunamayan = [d["cift"] for d in satir if not (d["durum"] == "YENI_HATA" and "YD kapi" in " ".join(d["yeni_hata"] or []))]
+        else:
+            bulunamayan = [d["cift"] for d in satir if d["durum"] != "FARK" and d["cift"].split("_")[0] != d["cift"].split("_")[1]]
+        ozet = dict(mod="ters_kapi" if ters_kapi else "ters", toplam=len(satir), fark_bulunan=len(fark), fark_bulunamayan=bulunamayan, sayi_tamam=sayi_tamam)
         json.dump(dict(ozet=ozet, ciftler=satir), open(cik, "w"), indent=1)
         print("OZET", json.dumps(ozet))
-        return 0 if (not bulunamayan and fark and sayi_tamam) else 1
-    ra, rb, ortak = referans(satir)
+        return 0 if (not bulunamayan and (fark or ters_kapi) and sayi_tamam) else 1
     sapma, ref_fail = {}, []
     for d in satir:
         if not d["yeni"]:
             continue
+        ra, rb, ortak = referans(satir, d["yeni"]["names_row"])
+        ga, gb, _ = referans(satir)              # alt yerlesimde ayni burc yoksa tum yerlesimler (kaynak d["referans_kaynak"])
         a, b = d["cift"].split("_")
-        ref = dict(sign_a=ra.get(a), sign_b=rb.get(b), **ortak)
+        ref = dict(sign_a=ra.get(a) or ga.get(a), sign_b=rb.get(b) or gb.get(b), **ortak)
+        d["referans_kaynak"] = dict(sign_a="alt_yerlesim" if ra.get(a) else "tum", sign_b="alt_yerlesim" if rb.get(b) else "tum")
         m = {k: (max(abs(x - y) for x, y in zip(d["yeni"][k], ref[k])) if ref.get(k) else None) for k in ANAHTAR}
         d["referans"] = ref; d["referans_fark"] = m
         sapma[d["cift"]] = max(v for v in m.values() if v is not None)
@@ -119,6 +133,24 @@ def main():
     json.dump(dict(ozet=ozet, ciftler=satir), open(cik, "w"), indent=1)
     print("OZET", json.dumps(ozet))
     return 1 if fark or hata or ref_fail or not sayi_tamam else 0
+
+
+def oztest():
+    """referans kapisinin sentetik oz testi (inceleme E bulgu 2c): AYNI ciftler + bir ONCE_HATA cifti; kutu 7 px kayinca
+    referans_fail, 3 px kayinca gecer olmali."""
+    ref = dict(sign_a=[546, 1616, 191, 188], sign_b=[1281, 1615, 187, 189], names_row=[457, 1867, 1126, 108], msg_row=[692, 2090, 629, 310])
+    def satirlar(kay):
+        S = [dict(cift=f"LIBRA_{b}", durum="AYNI", yeni=dict(ref)) for b in ("PISCES", "VIRGO")]
+        S += [dict(cift=f"{a}_LIBRA", durum="AYNI", yeni=dict(ref)) for a in ("AQUARIUS", "CANCER")]
+        y = {k: list(v) for k, v in ref.items()}; y["sign_a"][0] += kay
+        return S + [dict(cift="LIBRA_LIBRA", durum="ONCE_HATA_SIMDI_TAMAM", yeni=y)]
+    sonuc = {}
+    for kay in (3, 7):
+        S = satirlar(kay); ra, rb, ortak = referans(S, S[-1]["yeni"]["names_row"])
+        m = max(max(abs(x - z) for x, z in zip(S[-1]["yeni"][k], dict(sign_a=ra["LIBRA"], sign_b=rb["LIBRA"], **ortak)[k])) for k in ANAHTAR)
+        sonuc[kay] = m > REF_PAY
+    print("OZTEST", json.dumps({"3px_fail": sonuc[3], "7px_fail": sonuc[7]}))
+    return 0 if (not sonuc[3] and sonuc[7]) else 1
 
 
 if __name__ == "__main__":
