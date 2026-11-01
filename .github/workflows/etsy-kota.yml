@@ -3,7 +3,7 @@ name: etsy-kota
 # Etsy kota olcumu (salt okuma; OAuth/token kullanmaz, bu yuzden Etsy kilidine girmez). Saatlik:
 # /openapi-ping basliklari (x-limit-per-day, x-remaining-today, ...) Drive TEMP/ETSY_KOTA.csv'ye eklenir.
 # Amac: gunluk sifirlama mi kayan 24 saat mi (28 Eyl gozlemi: 13:54 293 -> 14:02 527) + isleri kotaya gore zamanlamak.
-# OLCUM KILIDI (Serdar 1 Kas madde 7): Etsy kilit kumesinde (kilit_bekle kullanan workflow'lar) in_progress kosu varken olcum
+# OLCUM KILIDI (Serdar 1 Kas madde 7): Etsy kilit kumesinde (kilit_bekle kullanan + Etsy anahtari / tokeni kullanan workflow'lar) in_progress kosu varken olcum
 # yapilmaz (31 Eki: yazimla cakisan olcum kota dususu 725/583, kosunun saydigi 723/581). Olcumden once ve sonra kontrol; biri
 # doluysa ATLA, CSV'ye satir yazilmaz. GitHub API okunamazsa da ATLA (yanlis satir yerine eksik satir). Bu is akisi kilit kumesine
 # GIRMEZ (yazicilari bekletmez): kilit modulu yalniz ice aktarilir.
@@ -51,7 +51,12 @@ jobs:
           import os, sys
           sys.path.insert(0, "scripts/etsy")
           import kilit_bekle as K
+          import glob, re
           kume = K.kilit_kumesi(".", "etsy")
+          # kilit kullanmayan ama Etsy anahtari / tokeni kullanan is akislari da (inceleme 1 Kas madde 7: saglik-raporu 05:17 cakismasi)
+          kume |= {".github/workflows/" + f.rsplit("/", 1)[-1] for f in glob.glob(".github/workflows/*.y*ml")
+                   if re.search(r"secrets\.ETSY_(API_KEY|SHARED_SECRET)|ETSY_TOKEN\.json", open(f, encoding="utf-8", errors="replace").read())}
+          kume.discard(".github/workflows/etsy-kota.yml")
           benim = int(os.environ["GITHUB_RUN_ID"])
           try:
               kosular = K.api_kosular()
@@ -84,7 +89,12 @@ jobs:
           import os, sys
           sys.path.insert(0, "scripts/etsy")
           import kilit_bekle as K
+          import glob, re
           kume = K.kilit_kumesi(".", "etsy")
+          # kilit kullanmayan ama Etsy anahtari / tokeni kullanan is akislari da (inceleme 1 Kas madde 7: saglik-raporu 05:17 cakismasi)
+          kume |= {".github/workflows/" + f.rsplit("/", 1)[-1] for f in glob.glob(".github/workflows/*.y*ml")
+                   if re.search(r"secrets\.ETSY_(API_KEY|SHARED_SECRET)|ETSY_TOKEN\.json", open(f, encoding="utf-8", errors="replace").read())}
+          kume.discard(".github/workflows/etsy-kota.yml")
           benim = int(os.environ["GITHUB_RUN_ID"])
           try:
               kosular = K.api_kosular()
