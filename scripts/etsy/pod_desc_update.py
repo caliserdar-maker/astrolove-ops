@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# OKU (AI beyan kapisi, Serdar 31 Eki 2026): bu betigin aciklama kaynagi (sablon / dosya / eski metin) AI beyan cumlesini icermeyebilir. etsy_common kapisi beyansiz aciklamayi YAZMAZ (ilan HATA, kosu FAIL). Kaynagi kullanmadan once beyan cumlesini ekleyin (EN: etsy_common.AI_BEYAN['en']; RU: beyan_marka_yaz.RU_BEYAN). Betik silinmedi; tablo docs/AI_BEYAN_YOLLARI.md.
 """
 Mevcut POD ilanlarinin aciklamasini sablona esitler (Mo 6 Eyl 2026: "THE ARTWORK" altina cercevesiz satiri).
 

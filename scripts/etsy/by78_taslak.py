@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# OKU (AI beyan kapisi, Serdar 31 Eki 2026): bu betigin aciklama kaynagi (sablon / dosya / eski metin) AI beyan cumlesini icermeyebilir. etsy_common kapisi beyansiz aciklamayi YAZMAZ (ilan HATA, kosu FAIL). Kaynagi kullanmadan once beyan cumlesini ekleyin (EN: etsy_common.AI_BEYAN['en']; RU: beyan_marka_yaz.RU_BEYAN). Betik silinmedi; tablo docs/AI_BEYAN_YOLLARI.md.
 """BIZIM YILIMIZ 78 TASLAK (14 Eki 2026, Takip gorevi, Serdar onayi). YAYIN YOK, PATCH YOK (yalniz acil state=inactive).
 
 Akis:
@@ -27,7 +28,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import requests  # noqa: E402
-from etsy_common import API, Etsy, TokenStore, mask  # noqa: E402
+from etsy_common import API, Etsy, TokenStore, ai_beyan_kapisi, mask  # noqa: E402
 
 REF = 4570143815
 SECTION_ID = 60895624
@@ -244,6 +245,7 @@ def main():
                         "shipping_profile_id": SHIP, "return_policy_id": RET, "readiness_state_id": rs[0],
                         "shop_section_id": SECTION_ID, "tags": ",".join(tags), "materials": ",".join(MATERIALS),
                         "should_auto_renew": "true", "is_personalizable": "true", "production_partner_ids": str(PARTNER)}
+                ai_beyan_kapisi("POST", f"/shops/{shop}/listings", data=body)  # AI beyan kapisi (Gorev E): dogrudan requests _call'i atlar; kapi burada
                 rq = requests.post(API + f"/shops/{shop}/listings", data=body, headers=api._headers(), timeout=120)   # TEK deneme
                 api.calls += 1
                 if rq.headers.get("x-remaining-today") is not None:

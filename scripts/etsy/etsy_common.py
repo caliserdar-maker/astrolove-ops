@@ -12,12 +12,15 @@ Ortak Etsy v3 istemcisi (token deposu + GET/PATCH sarmali).
 Hicbir sir loga yazilmaz; okunan her token degeri ::add-mask:: ile
 maskelenir.
 """
+import atexit
 import hashlib
+import html
 import posixpath
 import urllib.parse
 import json
 import os
 import re
+import sys
 import threading
 import time
 from datetime import datetime, timezone
@@ -240,6 +243,231 @@ def ru_yazim_kapisi(method, path, data=None, json_body=None):
         raise SystemExit(f"DUR: RU yazim kapisi: poster ilan {lid} RU aciklamasi ru_poster sablon kurucusundan gelmiyor; yazim yok")
 
 
+
+# AI BEYAN KAPISI (Merkez 31 Eki, Serdar "ok"): Etsy kurali "Sellers must disclose within their listing description if an item is created
+# with the use of AI." Aciklama (description) yazan HER istek (updateListing PATCH/PUT, createDraftListing POST, ceviri PUT/POST) gondermeden
+# once SON metinde beyan cumlesi aranir; tum betikler Etsy._call'dan gectigi icin kapi tek yerde (kopya kod yok). description anahtari
+# olmayan kismi yazim (yalniz baslik / etiket / fiyat) aciklamayi degistirmez, kapiya takilmaz. Beyan yoksa: o ilan YAZILMAZ (istek
+# gonderilmez, BeyanYok = SystemExit, mesajda ilan id), ilan BEYAN_HATA listesine girer ve surec cikisinda kosu FAIL olur (betik
+# SystemExit'i ilan bazinda yakalayip devam etse bile; cikis kodu 1, "::error::" satirinda ilan id'leri).
+AI_BEYAN = {"en": "We use AI tools to help create the artwork",
+            "ru": "При создании изображений мы используем инструменты искусственного интеллекта"}   # beyan_marka_yaz.RU_BEYAN ile ayni
+_BEYAN_ILAN = re.compile(r"/shops/[^/]+/listings(?:/0*(\d+))?$")                    # updateListing / createDraftListing (kanonik yol)
+_BEYAN_CEVIRI = re.compile(r"/listings/0*(\d+)/translations/([a-z]{2,3})(?:[-_][a-z0-9]{2,4})?$")   # rus / zh-hant da yakalanir (tanimsiz dil FAIL)
+BEYAN_HATA = []          # [(ilan, dil, neden)] bu surecte beyan kapisina takilan yazimlar
+
+
+class BeyanYok(SystemExit):
+    pass
+
+
+def _beyan_norm(t):
+    return re.sub(r"\s+", " ", html.unescape(str(t or ""))).strip()
+
+
+def beyan_var(metin, dil):
+    """Son aciklama metninde o dilin beyan cumlesi var mi (bosluk / satir sonu ve HTML varligi normalize)."""
+    c = AI_BEYAN.get(dil)
+    return bool(c) and _beyan_norm(c) in _beyan_norm(metin)
+
+
+def _beyan_aciklamalar(g, alan="description"):
+    """Govdedeki TUM description degerleri (inceleme 31 Eki madde 7: tekrarli anahtar, tuple listesi, JSON dizesi, None). None = okunamadi."""
+    if g is None:
+        return []
+    if isinstance(g, (bytes, str)):
+        t = g.decode("utf-8", "replace") if isinstance(g, bytes) else g
+        if t.lstrip().startswith("{"):
+            try:
+                return _beyan_aciklamalar(json.loads(t), alan)
+            except ValueError:
+                return None
+        return list(urllib.parse.parse_qs(t, keep_blank_values=True).get(alan) or [])
+    if isinstance(g, dict):
+        v = g.get(alan)
+        if v is None:
+            return []                                    # yok ya da None (requests None alani gondermez)
+        return [str(x) for x in v] if isinstance(v, (list, tuple)) else [v]
+    if isinstance(g, (list, tuple)):
+        try:
+            return [v for k, v in g if k == alan and v is not None]
+        except (TypeError, ValueError):
+            return None
+    return None                                          # generator / dosya nesnesi: okunamadi, guvenli taraf FAIL
+
+
+# KARARLAR (Serdar 1 Kas, Denetim 20261101A):
+# 2  GERI ALMA: beyansiz eski metne donus yalniz yedekteki metne BIREBIR (sha) donuste; cagiran geri_alma_izni(ilan, metin, yedek_sha)
+#    ile izin kaydeder (sha uyusmazsa DUR). Baska metin yine durur.
+# 4  RU: aciklamaya DOKUNMAYAN ceviri yazimi (gonderilen RU aciklama = canli RU aciklama; yalniz baslik / etiket degisir) eski RU
+#    aciklamasi beyansizsa da gecer; ilan RU_BEYANSIZ listesine girer (listing_id, burc cifti, tarih; cikista Drive
+#    TEMP/RU_BEYANSIZ/). Aciklamaya dokunan RU yaziminda kural aynen.
+# 1  YAYINA ALMA: Etsy.yayin_beyan_kontrol (Etsy._call icinde): aciklamasiz updateListing (state=active / taslak guncelleme) once
+#    canli ilani HER SEFER taze okur (+1 GET); canli TASLAK ya da active olmayan ilana state=active ise canli aciklamada beyan zorunlu.
+GERI_IZIN = {}           # (ilan, dil) -> {sha}: geri_alma_izni ile kaydedilen, yedekteki metnin sha'si
+GERI_ISTISNA = []        # [(ilan, dil, sha12)] bu surecte geri alma istisnasiyla gecen yazimlar
+RU_BEYANSIZ = []         # [dict(listing_id, cift, tarih, neden)]
+
+
+def geri_alma_izni(ilan, metin, yedek_sha, dil="en"):
+    """Geri almada eski metne donus izni: metin, yedek alinirken kaydedilen sha ile birebir ayni olmali; degilse DUR (yazim yok)."""
+    ilan = str(int(ilan)); s_ = ozet(metin)
+    if not yedek_sha or s_ != str(yedek_sha):
+        raise SystemExit(f"DUR: geri alma izni: ilan {ilan} {dil.upper()} metni yedekteki ile birebir degil "
+                         f"(sha {s_[:12]} != {str(yedek_sha or '-')[:12]}); yazim yok")
+    GERI_IZIN.setdefault((ilan, dil), set()).add(s_)
+    return s_
+
+
+def beyan_on_kontrol(en_yeni=None, ru_yeni=None, ru_canli=None):
+    """Karar 3 (Serdar 1 Kas): EN + RU yazan ilanda yazimdan ONCE iki yeni metin birlikte denetlenir. None = o dil yazilmayacak.
+    RU: beyanli olmali ya da canli RU aciklamasiyla ayni (karar 4: aciklamaya dokunulmuyor). Donus: neden listesi (bos = yazilabilir).
+    Bos degilse cagiran HICBIR metni yazmaz; ilan ATLANDI + neden (FAIL degil)."""
+    neden = []
+    if en_yeni is not None and not beyan_var(en_yeni, "en"):
+        neden.append(f"EN yeni aciklamada AI beyani yok (\"{AI_BEYAN['en']}\")")
+    if ru_yeni is not None and not beyan_var(ru_yeni, "ru") and not (ru_canli is not None and _beyan_norm(ru_canli) == _beyan_norm(ru_yeni)):
+        neden.append(f"RU yeni aciklamada AI beyani yok (\"{AI_BEYAN['ru']}\")")
+    return neden
+
+
+_BURC = ("Aquarius", "Aries", "Cancer", "Capricorn", "Gemini", "Leo", "Libra", "Pisces", "Sagittarius", "Scorpio", "Taurus", "Virgo")
+_CIFT_TABLO = None
+
+
+def cift_bul(ilan, baslik=None):
+    """Burc cifti: data/pod pod78_ids / yd78_ids; yoksa baslikta gecen burclar (alfabetik, CLAUDE.md cift anahtari); yoksa '?'."""
+    global _CIFT_TABLO
+    if _CIFT_TABLO is None:
+        _CIFT_TABLO = {}
+        for ad in ("pod78_ids.csv", "yd78_ids.csv"):
+            try:
+                for x in (POSTER_IDS_YOL.parent / ad).read_text(encoding="utf-8").splitlines()[1:]:
+                    c = x.split(",")
+                    if len(c) > 1 and c[0].strip():
+                        _CIFT_TABLO[str(int(c[0]))] = c[1].strip()
+            except (OSError, ValueError):
+                pass
+    if str(ilan) in _CIFT_TABLO:
+        return _CIFT_TABLO[str(ilan)]
+    t = str(baslik or "")
+    bul = {b: len(re.findall(rf"\b{b}\b", t, re.I)) for b in _BURC}
+    bul = {b: n for b, n in bul.items() if n}
+    if len(bul) == 2:
+        return "_".join(x.upper() for x in sorted(bul))
+    if len(bul) == 1 and max(bul.values()) >= 2:          # "Leo and Leo"
+        b = next(iter(bul)).upper(); return f"{b}_{b}"
+    return "?"                                            # tek gecen / 3+ burc: uydurulmaz (inceleme madde 12)
+
+
+def ai_beyan_kapisi(method, path, data=None, json_body=None, params=None, canli_ceviri=None, baslik=None):  # noqa: C901
+    """Aciklama yazimindan once (GET/HEAD/OPTIONS disi). description yoksa gecer; varsa son metinde dilin beyan cumlesi zorunlu.
+    canli_ceviri: (yalniz Etsy._call) ceviri yolunda canli aciklamayi donduren cagri (karar 4); baslik: RU_BEYANSIZ cifti icin."""
+    if str(method or "").upper() in ("GET", "HEAD", "OPTIONS"):
+        return
+    yol = _kanonik_yol(path)
+    m_c, m_i = _BEYAN_CEVIRI.search(yol), _BEYAN_ILAN.search(yol)
+    if not (m_c or m_i):
+        return
+    ilan = str(int(m_c.group(1))) if m_c else (str(int(m_i.group(1))) if m_i.group(1) else "yeni ilan (createDraftListing)")
+    dil = m_c.group(2) if m_c else "en"
+    sorgu = str(path or "").split("?", 1)[1].split("#")[0] if "?" in str(path or "") else ""   # yol sorgu dizesi de gonderilir
+    govdeler = [_beyan_aciklamalar(x) for x in (data, json_body, params, sorgu)]
+    if any(g is None for g in govdeler):
+        neden = "istek govdesi okunamadi"
+    else:
+        aciklamalar = [x for g in govdeler for x in g]
+        if not aciklamalar:
+            return                                                       # kismi yazim: aciklama degismiyor
+        if len({_beyan_norm(x) for x in aciklamalar}) > 1:
+            neden = "data / json / params / sorgu aciklamalari celisiyor (ya da description tekrarli)"
+        elif dil not in AI_BEYAN:
+            neden = f"'{dil}' dili icin beyan cumlesi tanimli degil"
+        elif beyan_var(aciklamalar[0], dil):
+            return
+        else:
+            a0 = aciklamalar[0]
+            if all(x == a0 for x in aciklamalar) and ozet(a0) in GERI_IZIN.get((ilan, dil), ()):
+                GERI_ISTISNA.append((ilan, dil, ozet(a0)[:12]))                       # karar 2: yedekteki metne birebir donus
+                log(f"AI beyan kapisi: ilan {ilan} {dil.upper()} geri alma istisnasi (yedek sha {ozet(a0)[:12]}, beyansiz eski metin)")
+                return
+            if m_c and canli_ceviri is not None:                                        # karar 4: aciklamaya dokunmayan ceviri yazimi
+                canli = canli_ceviri()
+                if canli is not None and _beyan_norm(canli) == _beyan_norm(a0):
+                    _ru_beyansiz_ekle(dict(listing_id=ilan, dil=dil, cift=cift_bul(ilan, baslik), tarih=time.strftime("%Y-%m-%d", time.gmtime()),
+                                           neden="eski ceviri aciklamasi beyansiz; aciklama degismedi (yalniz baslik / etiket)"))
+                    log(f"AI beyan kapisi: ilan {ilan} {dil.upper()} aciklama degismiyor, eski metin beyansiz -> yazim izinli, RU_BEYANSIZ listesine eklendi")
+                    return
+            neden = f"aciklamada AI beyani yok ({dil.upper()}: \"{AI_BEYAN[dil]}\")"
+    BEYAN_HATA.append((ilan, dil, neden))
+    raise BeyanYok(f"HATA: AI beyan kapisi: ilan {ilan} {dil.upper()} {neden}; yazim yok")
+
+
+_RU_YAZILAN = set()
+
+
+def _ru_beyansiz_yol():
+    return Path(os.environ.get("RU_BEYANSIZ_CSV") or "RU_BEYANSIZ.csv")
+
+
+def _ru_beyansiz_ekle(x):
+    """Satir ANINDA yerel CSV'ye eklenir (inceleme madde 12: timeout / kill'de kaybolmasin); Drive'a cikista. Ilan / dil basina tek satir."""
+    RU_BEYANSIZ.append(x)
+    if (x["listing_id"], x["dil"]) in _RU_YAZILAN:
+        return
+    _RU_YAZILAN.add((x["listing_id"], x["dil"]))
+    import csv
+    try:
+        yol = _ru_beyansiz_yol(); yeni = not yol.exists()
+        with open(yol, "a", newline="", encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fieldnames=["listing_id", "cift", "dil", "tarih", "kosu", "neden"])
+            if yeni:
+                w.writeheader()
+            w.writerow(dict(x, kosu=os.environ.get("GITHUB_RUN_ID", "yerel")))
+            fh.flush()
+    except OSError as e:
+        print(f"::warning::RU_BEYANSIZ yerel CSV yazilamadi ({type(e).__name__})", file=sys.stderr, flush=True)
+
+
+def _ru_beyansiz_yaz():
+    """Cikista: RU_BEYANSIZ yerel CSV'si (RU_BEYANSIZ_CSV, varsayilan RU_BEYANSIZ.csv) Drive TEMP/RU_BEYANSIZ/RU_BEYANSIZ_<kosu>_<pid>.csv'ye
+    (rclone varsa; RU_BEYANSIZ_DRIVE=0 kapatir). Sir yok: yalniz ilan no, cift, tarih."""
+    if not RU_BEYANSIZ:
+        return
+    import shutil
+    import subprocess
+    yol = _ru_beyansiz_yol()
+    try:
+        print(f"::warning::RU_BEYANSIZ: {len({x['listing_id'] for x in RU_BEYANSIZ})} ilan (eski RU aciklamasi beyansiz, aciklamaya dokunulmadi): "
+              + ", ".join(sorted({f"{x['listing_id']} {x['cift']}" for x in RU_BEYANSIZ})[:20]), file=sys.stderr, flush=True)
+        if os.environ.get("RU_BEYANSIZ_DRIVE", "1") != "0" and shutil.which("rclone"):
+            hedef = f"gdrive:ASTROLOVE/TEMP/RU_BEYANSIZ/RU_BEYANSIZ_{os.environ.get('GITHUB_RUN_ID', 'yerel')}_{os.getpid()}.csv"
+            p_ = subprocess.run(["rclone", "copyto", str(yol), hedef, "-q"], capture_output=True, text=True, timeout=120)
+            if p_.returncode:
+                print("::warning::RU_BEYANSIZ Drive'a yazilamadi (yerel CSV ve bu log satiri kaynak)", file=sys.stderr, flush=True)
+    except Exception as e:   # noqa: BLE001
+        print(f"::warning::RU_BEYANSIZ yazilamadi ({type(e).__name__})", file=sys.stderr, flush=True)
+
+
+def _beyan_cikis():
+    if BEYAN_HATA:
+        try:
+            sys.stdout.flush()
+        except Exception:   # noqa: BLE001
+            pass
+        print("::error::AI beyan kapisi: aciklamasi beyansiz oldugu icin YAZILMAYAN ilanlar: "
+              + "; ".join(f"{i} {d.upper()} ({n})" for i, d, n in BEYAN_HATA), file=sys.stderr, flush=True)
+        try:
+            import logging
+            logging.shutdown()
+        except Exception:   # noqa: BLE001
+            pass
+        os._exit(1)        # betik SystemExit'i yakalayip 0 ile bitse de kosu FAIL (token aninda yazilir, atexit kullanan baska kod yok)
+
+
+atexit.register(_beyan_cikis)
+atexit.register(_ru_beyansiz_yaz)     # LIFO: _beyan_cikis'in os._exit'inden ONCE calisir
+
 # ------------------------------------------------------------------ api
 class Etsy:
     """Is parcacigi guvenli (Serdar 29 Eki hiz: galeri yukleyici --isci N ayni istemciyi paylasir): tempo TUM iscilere ortak tek
@@ -263,6 +491,96 @@ class Etsy:
             log(f"KOTA SINIRI {self.sert_taban} (kosu/ilan baslangici ve her istek; Serdar 15 ve 24 Eki)")
         self.pace = 0.25  # sn; 5 QPS sinirinin altinda kalir
         self.verbose_quota = False  # True: her istekten sonra x-remaining-today loglanir (C gorevi, 5 Eyl 2026)
+        self._ilan_bel = {}          # ilan -> (t, state, description, title): bu kosunun okudugu / yazdigi ilanlar (karar 1)
+        self._ceviri_bel = {}        # (ilan, dil) -> (t, description)
+        self._bel_kilit = threading.Lock()
+        self.yayin_okuma = 0         # karar 1 icin yapilan ek GET sayisi
+
+    def _bel_hazir(self):
+        """__new__ ile kurulan (testler) nesnede de bellek alanlari olsun."""
+        if "_bel_kilit" not in self.__dict__:
+            self.__dict__.update(_ilan_bel={}, _ceviri_bel={}, _bel_kilit=threading.Lock(), yayin_okuma=0)
+        if "_kilit" not in self.__dict__:
+            self._kilit = threading.Lock()
+
+    def _belle(self, method, path, j):
+        """Basarili GET / PATCH / PUT yanitindaki ilan ve ceviri alanlarini bellege yazar (karar 1 / 4 icin; hata sessiz)."""
+        try:
+            self._bel_hazir()
+            if str(method).upper() not in ("GET", "PATCH", "PUT") or not isinstance(j, dict):
+                return
+            yol, t = _kanonik_yol(path), time.monotonic()
+            m = _BEYAN_CEVIRI.search(yol)
+            if m:
+                if "description" in j:
+                    with self._bel_kilit:
+                        self._ceviri_bel[(str(int(m.group(1))), m.group(2))] = (t, j.get("description"))
+                return
+            satirlar = j["results"] if isinstance(j.get("results"), list) else [j]
+            with self._bel_kilit:
+                for L in satirlar:
+                    if isinstance(L, dict) and L.get("listing_id") and "state" in L and "description" in L:
+                        self._ilan_bel[str(int(L["listing_id"]))] = (t, L.get("state"), L.get("description"), L.get("title"))
+        except Exception:   # noqa: BLE001
+            pass
+
+    def canli_ilan(self, ilan):
+        """(state, description, title): HER cagrida 1 taze GET (karar 1 "canli aciklamayi 1 kez oku"; inceleme 1 Kas madde 6: bellek
+        dogrudan requests / panel degisikliginde bayatlar). yayin_okuma += 1."""
+        ilan = str(int(ilan))
+        self._bel_hazir()
+        with self._kilit:
+            self.yayin_okuma += 1
+        self._call("GET", f"/listings/{ilan}")
+        with self._bel_kilit:
+            b = self._ilan_bel.get(ilan)
+        if not b:
+            raise SystemExit(f"DUR: yayin beyan kontrolu: ilan {ilan} canli okunamadi (state / description yok); yazim yok")
+        return b[1:]
+
+    def _baslik(self, path):
+        m = _BEYAN_CEVIRI.search(_kanonik_yol(path))
+        self._bel_hazir()
+        b = self._ilan_bel.get(str(int(m.group(1)))) if m else None
+        return b[3] if b else None
+
+    def _canli_ceviri(self, path):
+        """Karar 4: ceviri yolunun canli aciklamasi; ayni yola 1 taze GET (ceviri yoksa None)."""
+        m = _BEYAN_CEVIRI.search(_kanonik_yol(path))
+        if not m:
+            return None
+        self._bel_hazir()                                  # taze okuma (bellek kullanilmaz; inceleme 1 Kas madde 6)
+        with self._kilit:
+            self.yayin_okuma += 1
+        j = self._call("GET", str(path).split("?", 1)[0], ok404=True)
+        return (j or {}).get("description") if isinstance(j, dict) else None
+
+    def yayin_beyan_kontrol(self, method, path, data=None, json_body=None, params=None):
+        """Karar 1: aciklama gondermeyen updateListing (PATCH / PUT /shops/x/listings/<id>) taslagi yayina alabilir (CLAUDE.md 7 Eyl)
+        ya da state=active ile yayina alir: canli ilan active degilse canli aciklamada EN beyan zorunlu. Aciklamali yazimi
+        ai_beyan_kapisi denetler."""
+        if str(method or "").upper() not in ("PATCH", "PUT"):
+            return
+        m = _BEYAN_ILAN.search(_kanonik_yol(path))
+        if not (m and m.group(1)):
+            return
+        sorgu = str(path or "").split("?", 1)[1].split("#")[0] if "?" in str(path or "") else ""
+        g = [_beyan_aciklamalar(x) for x in (data, json_body, params, sorgu)]
+        if any(x is None for x in g) or any(g):
+            return
+        st = [str(x).lower() for x in sum((_beyan_aciklamalar(x, "state") or [] for x in (data, json_body, params, sorgu)), [])]
+        if st and all(x != "active" for x in st):
+            return                                        # acikca inactive / draft: yayina almaz
+        ilan = str(int(m.group(1)))
+        state, desc, _ = self.canli_ilan(ilan)
+        # yayina alan yazim: canli TASLAK (updateListing taslagi yayina alir, CLAUDE.md 7 Eyl) ya da active olmayan ilana state=active.
+        # inactive / sold_out / expired ilanda state'siz kismi yazim yayina almaz -> denetlenmez (karar yalniz taslak; inceleme madde 6).
+        # Geri alma izni (karar 2) burada GECERSIZ: geri donus yazimina izin verir, yayina almaya degil (inceleme madde 5).
+        if state == "active" or not (state == "draft" or "active" in st) or beyan_var(desc, "en"):
+            return
+        neden = f"yayina alma / taslak guncelleme: canli ilan {state}, canli aciklamada AI beyani yok (EN: \"{AI_BEYAN['en']}\")"
+        BEYAN_HATA.append((ilan, "en", neden))
+        raise BeyanYok(f"HATA: AI beyan kapisi: ilan {ilan} EN {neden}; yazim yok")
 
     def kota_kapisi(self, ne="is"):
         """Ise / ilana baslamadan cagrilir: kalan < esik ise SystemExit (kosu kirmizi, GitHub e-postasi). Esik pasifse etkisiz."""
@@ -370,6 +688,7 @@ class Etsy:
         """Multipart yukleme (gorsel/dosya). Ilk denemede 400 normal olabilir
         (B37); 3 deneme. tekrar=1 (eski78_gorsel_yukle, Serdar 24 Eki): hata yanitinda yeniden GONDERMEZ (cift yukleme
         riski); cagiran galeriyi okuyup karar verir. 401 token yenilemesi her durumda bir kez yapilir."""
+        ai_beyan_kapisi("POST", path, data)   # multipart createDraftListing da kapidan gecer (gorsel / video yolu eslesmez, gecer)
         self._istek_oncesi()
         attempt, yenilendi = 0, False
         while True:   # 401 (istek islenmedi) bir kez, hangi denemede gelirse gelsin: yenile + tekrar (deneme sayilmaz)
@@ -399,6 +718,8 @@ class Etsy:
 
     def _call(self, method, path, params=None, data=None, ok404=False, json_body=None):
         ru_yazim_kapisi(method, path, data, json_body)
+        ai_beyan_kapisi(method, path, data, json_body, params, canli_ceviri=lambda: self._canli_ceviri(path), baslik=self._baslik(path))
+        self.yayin_beyan_kontrol(method, path, data, json_body, params)
         self._istek_oncesi()
         attempt, yenilendi = 0, False
         while True:   # en fazla 3 gonderim (5xx / kisa 429); 401 (istek islenmedi) bir kez, hangi denemede gelirse gelsin, sayilmaz
@@ -439,5 +760,7 @@ class Etsy:
                 return {}
             if r.status_code not in (200, 201):          # 201: createShopShippingProfileDestination gibi olusturma uclari (6 Eyl)
                 raise SystemExit(f"HATA: {method} {path} -> {r.status_code}: {r.text[:300]}")
-            return r.json()
+            j = r.json()
+            self._belle(method, path, j)
+            return j
 

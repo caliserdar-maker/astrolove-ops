@@ -22,6 +22,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import Etsy, TokenStore, log, mask  # noqa: E402
+import etsy_common as E  # noqa: E402
 from pod_listing_create import ED_NAME, SIZE_LABEL, SIZES, build_listing, build_ru, load_ru_template, spellcheck_ru  # noqa: E402
 from pod_listing_update import load_template  # noqa: E402
 from wp_listing_update import norm, tags_of  # noqa: E402
@@ -228,6 +229,8 @@ def main():
             status = "FAIL " + "; ".join(fails)
         elif quota_before is not None and rem < a.quota_min:
             status = f"KOTA({rem}<{a.quota_min}) yazma yok"
+        elif on_neden := E.beyan_on_kontrol(None if en_same else new_desc, None if ru_same else new_ru, (tru or {}).get("description")):
+            status = "ATLANDI (beyan on kontrolu, hicbir sey yazilmadi): " + "; ".join(on_neden)   # karar 3 (Serdar 1 Kas)
         else:
             res = []
             # IS 1

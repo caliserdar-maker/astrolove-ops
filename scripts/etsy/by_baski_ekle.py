@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# OKU (AI beyan kapisi, Serdar 31 Eki 2026): bu betigin aciklama kaynagi (sablon / dosya / eski metin) AI beyan cumlesini icermeyebilir. etsy_common kapisi beyansiz aciklamayi YAZMAZ (ilan HATA, kosu FAIL). Kaynagi kullanmadan once beyan cumlesini ekleyin (EN: etsy_common.AI_BEYAN['en']; RU: beyan_marka_yaz.RU_BEYAN). Betik silinmedi; tablo docs/AI_BEYAN_YOLLARI.md.
 """BIZIM YILIMIZ (yil donumu, bolum 60895624): "Shipped print 8x10" ($29) secenegini ve baski ayarlarini KURAR (v2).
 
 Serdar onayi 24 Eki 2026 (Genel Merkez): tedarikci Printful ana + Shortrun ABD yedek; baski geri gelir.
