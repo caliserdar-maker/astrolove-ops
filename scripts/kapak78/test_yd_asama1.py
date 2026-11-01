@@ -48,11 +48,13 @@ class Sahte:
         pass
 
     def _g(self, lid):
-        return [dict(listing_image_id=int(g), rank=i + 1, url_fullxfull="u", alt_text="alt", full_width=w, full_height=h)
-                for i, (g, w, h) in enumerate(self.L[lid]["g"])]
+        return [dict(listing_image_id=int(g), rank=i + 1, url_fullxfull="u", alt_text=self.L[lid].get("alt", "alt") if i == 0 else "alt",
+                      full_width=w, full_height=h) for i, (g, w, h) in enumerate(self.L[lid]["g"])]
 
     def get(self, path, params=None, ok404=False):
         self.calls += 1
+        if path == "/shops/1":
+            return {}
         if path == "/listings/batch":
             return dict(results=[dict(listing_id=int(l), state=self.L[l]["state"], images=self._g(l),
                                       videos=[dict(video_id=int(v), video_state=s, video_url="v" if s == "active" else None)
@@ -135,6 +137,7 @@ class T(unittest.TestCase):
         self.eski.write_text("cift,durum,yeni_sha256,not\nARIES_LEO,YENILENDI," + A.sha(self.t / "y01b/ARIES_LEO_Y01.jpg") + ",x\n")
         self.canli = {l: dict(state="active", g=galeri(f"9{l[-1]}{l[0]}"), v=[(f"7{l}", "active")], bag=[]) for l, _ in cif}
         self.canli["11"]["g"] = galeri("901"); self.canli["12"]["g"] = galeri("902")
+        self.canli["11"]["alt"] = "Aquarius and Aquarius 1st anniversary zodiac print, paper anniversary gift"
         self.canli["22"]["bag"] = [dict(property_id=513, value_id=5, image_id=922), dict(property_id=513, value_id=6, image_id=803)]
         self.canli["44"]["state"] = "draft"
         A.oku(Sahte(self.canli), A.ids_oku(self.ids), self.t)
@@ -160,6 +163,13 @@ class T(unittest.TestCase):
         self.assertEqual(P["22"]["kapak"]["alt"], "Aries and Leo 1st anniversary zodiac print, paper anniversary gift")
         self.assertEqual(P["44"]["durum"], "BLOK"); n44 = " ".join(P["44"]["neden"])
         self.assertIn("state draft", n44); self.assertIn("ses", n44.lower())
+
+    def test_ayni_alt_kosulu(self):
+        self.canli["11"]["alt"] = "eski alt"                           # elle yuklenmis kapak, alt metin sablon degil -> DEGISTIR
+        A.oku(Sahte(self.canli), A.ids_oku(self.ids), self.t)
+        _, P, _ = self.plan()
+        self.assertEqual(P["11"]["kapak"]["islem"], "DEGISTIR")
+        self.assertEqual(P["11"]["kapak"]["eski_alt"], "eski alt")
 
     def test_plan_kapilar(self):
         self.canli["33"]["g"] = galeri("933", 14)
@@ -229,7 +239,14 @@ class T(unittest.TestCase):
 
     def test_kota_ve_sure(self):
         _, P, d = self.plan()
-        api = Sahte(self.canli); api.remaining = "40"
+        api = Sahte(self.canli); api.remaining = "100"
+        self.assertEqual(self.ugy(api, d, sadece="33"), 4)
+        self.assertFalse(api.yaz)
+        api = Sahte(self.canli); api.remaining = None                # inceleme tur 2: ilk yanittan once None
+        g0 = api.get
+        def get(path, params=None, ok404=False):
+            r = g0(path, params, ok404); api.remaining = "20"; return r
+        api.get = get
         self.assertEqual(self.ugy(api, d, sadece="33"), 4)
         self.assertFalse(api.yaz)
         self.assertEqual(self.ugy(Sahte(self.canli), d, sadece="33", bitis=1.0), 5)

@@ -45,8 +45,9 @@ KAPAK_AYNI_BLOK = 6.0      # TAHMIN: 8x8 blok ortalama mutlak farkin en buyugu (
 #                            beklenir, %1'lik gorunur degisim blokta >> 6 (inceleme sentetik olcumu: rozet %1,2 -> p99 178). Plan dagilimi raporlar.
 GALERI_N = 13              # YD canli galeri (YD_OZET 13); farkliysa BLOK (elle degisimde eski kapak galeride kalmis olabilir)
 Y01_BOYUT = (3000, 2250)
-ILAN_UST = 35              # ilan basina en kotu istek: canli 1 + bag 2 + kapak 1 + gorsel okuma 4 + eski gorsel sil 1 + okuma 4 + video 1 +
-#                            active okuma 12 + silme 2 + son okuma 4 + 3 pay (video_yukle_78 ILAN_CAGRI_UST yaklasimi; yeni kota esigi DEGIL)
+ILAN_UST = 105             # ilan basina en kotu istek 35 (canli 1 + bag 2 + kapak 1 + gorsel okuma 4 + eski gorsel sil 1 + okuma 4 + video 1 +
+#                            active okuma 12 + silme 2 + son okuma 4 + 3) x 3 (etsy_common._call 5xx / 429 tekrari; video_yukle_78
+#                            ILAN_CAGRI_UST_V7 ile ayni yaklasim; yeni kota esigi DEGIL, taban KOTA_SINIRI 10 aynen)
 VIDEO_DENEME, VIDEO_BEKLE = 12, 10
 GORSEL_DENEME, GORSEL_BEKLE = 4, 8
 
@@ -171,7 +172,8 @@ def plan(a):
                     bm, ort = blok_fark(yed, y01)
                 except Exception as e:  # noqa: BLE001 bozuk indirme
                     bm, ort = None, None; P["neden"].append(f"rank 1 yedegi acilamadi: {e}")
-                ayni = P["manuel"] and bm is not None and bm <= KAPAK_AYNI_BLOK
+                # inceleme tur 2: AYNI yalniz alt metin de ALT_SABLON ise (elle yuklemede alt bos / eski olabilir; degilse ayni Y01 dogru alt ile)
+                ayni = P["manuel"] and bm is not None and bm <= KAPAK_AYNI_BLOK and (r1.get("alt") or "") == P["kapak"]["alt"]
                 P["kapak"].update(eski_id=r1["id"], eski_alt=r1.get("alt") or "", blok_fark=None if bm is None else round(bm, 3),
                                   ort_fark=None if ort is None else round(ort, 3), islem="AYNI" if ayni else "DEGISTIR",
                                   gorsel_sira=[x["id"] for x in g])
@@ -189,20 +191,21 @@ def plan(a):
     (out / "PLAN_DAMGA.txt").write_text(damga + "\n")
     with open(out / "PLAN.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
-        w.writerow(["listing_id", "cift", "durum", "manuel", "kapak", "blok_fark", "ort_fark", "video", "eski_video", "neden"])
+        w.writerow(["listing_id", "cift", "durum", "manuel", "kapak", "blok_fark", "ort_fark", "eski_alt", "yeni_alt", "video", "eski_video", "neden"])
         for P in satir:
             k, v = P.get("kapak") or {}, P.get("video") or {}
             w.writerow([P["listing_id"], P["cift"], P["durum"], P["manuel"], k.get("islem", ""), k.get("blok_fark", ""), k.get("ort_fark", ""),
-                        v.get("islem", ""), " ".join(v.get("eski") or []), "; ".join(P["neden"])])
+                        k.get("eski_alt", ""), k.get("alt", ""), v.get("islem", ""), " ".join(v.get("eski") or []), "; ".join(P["neden"])])
     say = {}
     for P in satir:
         k_ = P["durum"] if P["durum"] == "BLOK" else f"{(P.get('kapak') or {}).get('islem')}+{(P.get('video') or {}).get('islem')}"
         say[k_] = say.get(k_, 0) + 1
-    mf = [(P["cift"], (P.get("kapak") or {}).get("blok_fark")) for P in satir if P["manuel"]]
+    mf = [(P["cift"], (P.get("kapak") or {}).get("blok_fark"), (P.get("kapak") or {}).get("eski_alt")) for P in satir if P["manuel"]]
     df = sorted((P["kapak"]["blok_fark"], P["cift"]) for P in satir if not P["manuel"] and (P.get("kapak") or {}).get("blok_fark") is not None)
     md = [f"# YD 1. asama PLAN (damga {damga})", "", f"Durum: {say}",
           f"Istek: en kotu {sum(ILAN_UST for P in satir if P['durum'] == 'PLAN')} (ILAN_UST {ILAN_UST} x PLAN); tipik ~10-14/ilan (tahmin)",
-          f"Kapak AYNI blok esigi {KAPAK_AYNI_BLOK} (TAHMIN), yalniz elle degisen 5 ilanda. Elle degisen 5 (cift, blok fark): {mf}",
+          f"Kapak AYNI: blok esigi {KAPAK_AYNI_BLOK} (TAHMIN) VE canli alt metin = ALT_SABLON, yalniz elle degisen 5 ilanda. "
+          f"Elle degisen 5 (cift, blok fark, canli alt): {mf}",
           f"Digerlerinde en kucuk 5 blok fark: {df[:5]} (eski kapak ile Y01; AYNI esiginden buyuk olmali)", "",
           "| ilan | cift | durum | manuel | kapak (blok / ort) | video | neden |", "|---|---|---|---|---|---|---|"]
     md += [f"| {P['listing_id']} | {P['cift']} | {P['durum']} | {'evet' if P['manuel'] else ''} | {(P.get('kapak') or {}).get('islem', '')} "
@@ -372,6 +375,14 @@ def uygula(a, api, shop):
     def kaydet():
         with open(out / "SONUC.json", "w") as fh:
             json.dump(S, fh, indent=1, ensure_ascii=False)
+    def pay_yok():
+        return api.remaining is not None and int(api.remaining) < KOTA_SINIRI + ILAN_UST
+    try:
+        api.get(f"/shops/{shop}")              # inceleme tur 2: kalan kota ilk ilandan ONCE okunur (remaining None iken pay kapisi bos gecerdi)
+    except SystemExit as e:
+        if "kota" in str(e.code):
+            print(f"::warning::KOTA: {e.code}"); return 4
+        raise
     t0 = time.time()
     for i, P in enumerate(sec, 1):
         lid, c, k = P["listing_id"], P["cift"], P["kapak"]
@@ -380,12 +391,18 @@ def uygula(a, api, shop):
         if a.bitis and time.time() > a.bitis:
             print(f"::warning::SURE: kilit butcesi doldu; {c} ve sonrasi baslamadi (onceki kosu ile surdur)")
             return 5
-        api.kota_kapisi(f"ilan {lid}")
-        if api.remaining is not None and int(api.remaining) < KOTA_SINIRI + ILAN_UST:
+        try:
+            api.kota_kapisi(f"ilan {lid}")
+        except SystemExit as e:
+            print(f"::warning::KOTA: {e.code}"); return 4
+        if api.remaining is None or pay_yok():
             print(f"::warning::KOTA: kalan {api.remaining} < {KOTA_SINIRI} + {ILAN_UST}; {c} ve sonrasi baslamadi (kota acilinca surdur)")
             return 4
         R = S[lid] = dict(cift=c, adim=[], durum="BASLADI", istek_bas=api.calls)
         st, gids, vids = canli(api, lid)
+        if pay_yok():                          # canli okumadan sonra, ilk yazmadan once tekrar
+            S.pop(lid, None); kaydet()
+            print(f"::warning::KOTA: kalan {api.remaining}; {c} yazilmadan birakildi"); return 4
         if st != "active" or gids != k["gorsel_sira"] or sorted(vids) != sorted(P["video"]["eski"]):
             R.update(durum="ATLA", neden=f"canli plandan farkli (state {st}, gorsel {len(gids)}, video {vids})"); kaydet()
             print(f"::error::{c} ATLA: canli plandan farkli; DUR (once ilani incele)")
