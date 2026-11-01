@@ -16,9 +16,13 @@ Durum: gece sonu (06:00 UTC kota olcumu bolum 4'te). Her rakamin kaynagi parante
   | Layers B kemer kesim (px) | 0 | 0 | 0 |
   | Layers B yerel dikis dE76 max | <= 2,3 (oneri) | 2,332 FAIL | 1,39 |
   | Layers B kenar gradyan p99 | <= 1,5 | 1,028 | 1,054 |
-  | Layers B eklenen bantta oge (px) | 0 | - | 0 |
+  | Layers B eklenen bantta oge (px) | 0 | 0 | 0 |
 
-  Tek degisiklik: Layers B gecis rampasi 60 -> 120 px (commit 5fc66633). Bilgi (kapi degil): rampa bolgesi 0-20 px ile 60-80 px karolari arasi dE76 max 3,185 (OLCUM rampa_uclari_0_20_vs_60_80_bilgi).
+  Tek degisiklik: Layers B gecis rampasi 60 -> 120 px (commit 5fc66633; esikler ayni, inceleme dogruladi).
+  DIKKAT (inceleme O5): yerel dikis olcumu rampa ortasinda +-20 px bakar; rampa genisleyince bantlar arasi agirlik farki 0,463 -> 0,246
+  (hesap), yani PASS'in buyuk kismi olcum geometrisinden. Eski / yeni doku arasindaki toplam renk farki DEGISMEDI (dE76 ort ~3,1-3,7,
+  max ~4,6-5; it.1 OLCUM rampa_uclari ort 3,118 max 4,643). Gecis daha yumusak ama renk farki ayni: gorsel onay sart.
+  Ayrica yerel hizli kosu CI'yi ~%20 eksik tahmin etti (it.1 1,95 / 2,332; it.2 1,112 / 1,39). Bilgi (kapi degil): rampa bolgesi 0-20 px ile 60-80 px karolari arasi dE76 max 3,185 (OLCUM rampa_uclari_0_20_vs_60_80_bilgi).
 - Paket: Drive ASTROLOVE/TEMP/YD_STIL4_ORNEK/20261101_193620 (klasor 1po8Sj6Ynwa_OPSOZLZrm0RUN_EujawI5):
   KONTAK_STIL4.jpg (her stil eski 8x10 | yeni 12x18) 1FZua7HAHhZQcRnaoCpTCZup_BlyQeDAf; FP_KOSE_YAKIN.jpg (eski 8x10 / yeni 8x10 / yeni 12x18,
   4 kose, 2x) 1LdP_dqAre25_KBPXcD0i1IdMrhCBRNIr; LB_4500_YAKIN_x2.jpg 1UiX4CDrM8yWSyl8exXTkruq4IneCK1ga; CIZGI_KESIT_Layers_B.png
@@ -34,11 +38,13 @@ Durum: gece sonu (06:00 UTC kota olcumu bolum 4'te). Her rakamin kaynagi parante
   - C) Galeri girdileri (Ek B): Y01 yeri, 3 cift Y06-Y10 olcumu, stil esleme tablosu.
   - D) Kuru kosu 41342310370 78/78 PLAN (bolum 4).
   - E) 2. asama galeri kodu, dal yd-asama2 85a04f79 (KOSTURMA YOK): yd2 profili (rank 1 DOKUNMA, Y02-Y10, 12 eski CIKAR, Style 513 baglari,
-    Size 516 = 14 boy kapisi, ara galeri <= 20). Sahte Etsy testi 14/14 PASS; regresyon v11 32/32, v11b 15/15, v11 paralel 19/19,
-    v10_wf 7/7, eski78 55/55, pilot 37/37, yd_kapak 42/42, yd_liste rc 0; galeri_v10 55/58 (ayni FAIL main fff34005'te de var, bu
-    degisiklikten degil).
+    Size 516 = 14 boy kapisi, ara galeri <= 20) + inceleme duzeltmesi 116c8f2f. Sahte Etsy testi 14/14 PASS; regresyon v11 32/32,
+    v11b 15/15, v11 paralel 19/19, v10_wf 7/7, eski78 55/55, pilot 37/37, yd_kapak 42/42, yd_liste rc 0, galeri_v10 57/58 (tek FAIL
+    main fff34005'te de ayni). Ilk surumde galeri_v10 55/58 idi (BLOK metni degismisti) ve on silme v11b'ye de siziyordu (inceleme
+    K1, O4); ikisi 116c8f2f'te duzeltildi. yd2 icin is akisi YOK (kod dalda; workflow_dispatch yalniz main).
   - yd-envanter-oku.yml: cikti klasoru girdisi + --immutable (main fff34005); 1. asama sonrasi envanter TEMP/YD_ENVANTER_20261101_ASAMA1_SONRASI.
-  - G-OKU (sade kupa 12 ilan, salt okuma): kosu 41342604196, 529 PASS / 0 FAIL / 24 BILGI, 62 istek, kota 2165 -> 2104 (kosu ciktisi);
+  - G-OKU (sade kupa 12 ilan, salt okuma; is akisi kupa-taslak mod denetim, dal gorev-g): kosu 41342604196, 529 PASS / 0 FAIL /
+    24 BILGI, istek sayaci 62, kota 2165 -> 2104 (fark 61; ikisi de kosu ciktisi);
     Drive TEMP/SADE12_OKU/20261101_193646/OKU.csv (1LoiCONwAvvtfbgvVvo4XT9KYI3b4xMru).
 - Atlanan / basarisiz:
   - CDN yedek (yd-kapak-yedek 41343915309) FAIL, "Girdi kapisi" adimi: kapi ad kurali YD_ENVANTER_<8 rakam>(_<6 rakam>), benim verdigim ad
@@ -54,15 +60,29 @@ Durum: gece sonu (06:00 UTC kota olcumu bolum 4'te). Her rakamin kaynagi parante
   4. Baslik / aciklama: canli CANCER_LIBRA metninden yeni yapiya uyarlandi (D1-D6 yok).
   5. CDN yedegi zorlanmadi (yukarida).
 
+## 2b. Riskler (inceleme 1 Kas gecesi; kod okumasi + sahte test)
+- Kapak itilmesi (O1): kod rank 1'e hic yazmaz (6 senaryoda dogrulandi), ama Etsy yuklemeyi rank 1'e koyarsa kapak itilir ve bu ancak
+  9 yuklemeden sonra (dokunma_kontrol) gorulur; kod duzeltemez, geri donus elle. Pilot (1 ilan) bunu olcer; ilk yuklemeden sonra tek galeri
+  okumasi (+1 istek) eklenebilir (yapilmadi).
+- Galeri geri alma (O2): on silme yuklemeden ONCE 2 bagsiz eski gorseli kalici siler; yd2 icin otomatik galeri geri alma yok (yedekten
+  elle yeniden yukleme). Liste kosusu yedeksiz HAZIR olmaz.
+- Bag (O3): variation-images yazimi tutmazsa ilan Style bagsiz kalir (eski bagli gorseller silinmez); otomatik geri bag yok.
+- Metin yazimi (updateListing) bir TASLAGI yayina alir: yazimdan once state okunmali; yd2 metin yazicisi YOK.
+- Metin AU 7-22 diyor, canli profil AU 5-10: profil (madde 5) metinden ONCE.
+- QC: 4 ciftte Y01 ile Y10 olcumleri birebir ayni (ncc, kutu); Y10 dosyasi Y01 ile ayni poster mi, sha256 ile bakilmali (dogrulanamadi).
+- Devam kosusunda (yarim ilan) Size 14 ve rank 1 ek kapilari yeniden denetlenmez; --bag-onar ek kapisiz (dusuk risk).
+
 ## 3. Serdar karar listesi (en fazla 6)
 1. Stil + varyasyon: 5 stil (Starlit, Timeless, First Page, Layers, Botanical) x Format x 14 boy = 140 urun. Layers icin uretimde Layers B mi?
    Risk: 3. ozel varyasyon (516) Etsy'de kabul edilmeyebilir (3. taraf ozet); pilotta boy_kabul olcer, FAIL -> otomatik geri alma.
 2. Fiyat tablosu (Ek A; wall art 4570143815 ile birebir): onay.
 3. SKU semasi BY-<S1>_<S2>-<ST|TL|FP|LY|BO>-<BOY>[-DIGITAL] (10920 tekil): onay.
-4. Baslik / aciklama: docs/yd2/CANCER_LIBRA_METIN_TASLAK.txt (metin_kurali PASS): onay ya da D1-D6 belgesinin yeri.
+4. Baslik / aciklama: docs/yd2/CANCER_LIBRA_METIN_TASLAK.txt (metin_kurali GENEL PASS; elle tarama: kagit yasaklari, tire yok; NOT:
+   metin_kurali 23 Eki kagit kuralini kapsamiyor): onay ya da D1-D6 belgesinin yeri. "300 dpi JPG" ve hasar degisimi cumleleri canli
+   metinden, inceleme dogrulayamadi.
 5. Kargo: profil 318080539024'te AU 5-10 -> 7-22 (Etsy yazimi; profili yalniz 78 YD ilani kullaniyor). Profil adi "8x10" degissin mi?
-6. Pilot baslatma (CANCER_LIBRA 4595350971): once CDN yedegi (kapi duzeltmesi) + ALT.csv kimligi + yd2 liste kosusu; sonra envanter ->
-   galeri. Ayrica: SAGITTARIUS_SAGITTARIUS Y03 gorsel kontrolu (NCC 0,9082) ve "Serdar onayli 60 kart seti" kaynagi (dogrulanmadi).
+6. Pilot baslatma (CANCER_LIBRA 4595350971) on kosullari: CDN yedegi (kapi tek satir), ALT.csv kimligi, yd2 liste kosusu, yd2 is akisi
+   main'e (kilit: kilit_bekle.py; 6b istisnasi yeni is akisina gecmez), galeri geri alma yontemi (elle) kabulu; sonra envanter -> galeri. Ayrica: SAGITTARIUS_SAGITTARIUS Y03 gorsel kontrolu (NCC 0,9082) ve "Serdar onayli 60 kart seti" kaynagi (dogrulanmadi).
 
 ## 4. Kuru kosu
 - Kosu 41342310370 (yd-yapi-kuru, main b6216a4e, poster_ref 4570143815; salt okuma): 78/78 PLAN, BLOK 0, hata 0 (PLAN.csv).
@@ -72,11 +92,13 @@ Durum: gece sonu (06:00 UTC kota olcumu bolum 4'te). Her rakamin kaynagi parante
   - bugunku YD yolu (adim_plani, ara galeri okumali): ilan basina en az 75, en kotu 478 -> 78 ilan en az 5850, en kotu 37284.
     En iyi durumda bile gunluk kota (5000, son 24 saat) ASILIR.
   - yalin plan (galeri v11, Merkez 29 Eki karar 3): en az 29, en kotu 279 -> 78 ilan en az 2262, en kotu 21762.
-  - yd2 profili yazildi (yd-asama2 85a04f79): sahte Etsy testinde ilan basina 34 istek (en kotu 291) -> 78 ilan 2652 (en kotu 22698)
-    (olcum, sahte API sayaci; gercek Etsy yanitlariyla farkli olabilir).
-- Toplam (en iyi durum, tahmin): envanter 546 + galeri (yd2) 2652 = 3198 istek -> tek gunde sigar. En kotu durum sigmaz; ilan basina
-  kota kapisi (kalan - en kotu < 10 ise ilan baslamaz) kosuyu kendisi durdurur, ertesi gun kaldigi yerden.
-- Parca plani (oneri): P0 pilot CANCER_LIBRA 4595350971 (envanter -> boy_kabul -> galeri); P1-P3 26'sar ilan (envanter once, galeri
+  - yd2 profili (yd-asama2 116c8f2f): ilan basina 34 istek (olcum, sahte API sayaci, EN IYI durum; Etsy yukleme sirasini yok sayarsa
+    47) ve en kotu 291 (kod tahmini) -> 78 ilan 2652 / 3666 / 22698.
+- Toplam yazim (en iyi durum, tahmin): envanter 546 + galeri (yd2) 2652 = 3198 istek. Oncesinde okumalar: CDN yedegi icin envanter (yeniden
+  okunursa ~390), yd2 liste, galeri kuru 312 (4 x 78), yapi kuru 248 (son kosu). Kota KAYAN 24 saat: 1 Kas aksami okumalar (19:36'da kalan
+  2104) 2 Kas aksamina kadar sayilir. "Tek gunde sigar" DENMEZ; plan sabah olculen kalan kota uzerinden kurulur. Ilan basina kota kapisi
+  (kalan - en kotu < 10 ise ilan baslamaz) kosuyu durdurur, sonra kaldigi yerden.
+- Parca plani (oneri): P0 pilot CANCER_LIBRA 4595350971 (envanter -> boy_kabul -> galeri); P1 26, P2 26, P3 25 ilan (envanter once, galeri
   sonra; 30 Eki karari: galeri yeni yapidan once yuklenmez). Her parca once kuru / kontrol (salt okuma).
 
 ## Ek A: ilan yapisi onerisi (B)
