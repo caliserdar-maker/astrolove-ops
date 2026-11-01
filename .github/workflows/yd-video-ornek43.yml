@@ -15,17 +15,22 @@ on:
       ciftler: {description: "bosluklu CIFT listesi (yd78_ids.csv)", required: true, default: "CANCER_LIBRA LEO_LEO SAGITTARIUS_SAGITTARIUS"}
       kiyas: {description: "1 = once 78 kapakta ayristirma kiyasi (main surumu / bu dal; Denetim 20261101D)", required: false, default: "0"}
       kiyas_ek_damga: {description: "kiyasa eklenecek ikinci kapak seti (yeni Y01'ler)", required: false, default: "20261101_092221"}
+      onceki_damga: {description: "bos degilse uretilen her mp4 TEMP/YD_VIDEO_ORNEK43/<damga>/ icindeki ayni adli mp4 ile kiyaslanir", required: false, default: ""}
 jobs:
   video:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
       - name: Girdi kapisi
-        env: {KD: "${{ inputs.kapak_damga }}", CS: "${{ inputs.ciftler }}"}
+        env: {KD: "${{ inputs.kapak_damga }}", CS: "${{ inputs.ciftler }}", OD: "${{ inputs.onceki_damga }}"}
         run: |
           set -euo pipefail
           [[ "$KD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::kapak_damga"; exit 1; }
+          [ -z "$OD" ] || [[ "$OD" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::onceki_damga"; exit 1; }
           for C in $CS; do [[ "$C" =~ ^[A-Z]+_[A-Z]+$ ]] || { echo "::error::cift $C"; exit 1; }; done
+          # Denetim 20261101E madde 4: cift basina ~79 sn (kosu 41295497893 Drive dosya zamanlari); 90 dk sinirinda 40 cift ust siniri
+          N=$(echo $CS | wc -w); [ "$N" -le 40 ] || { echo "::error::$N cift > 40 (90 dk siniri; partiyi bol)"; exit 1; }
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"   # ilk adimda: sonraki adim duserse de Drive'a yazilir
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -57,31 +62,40 @@ jobs:
         if: ${{ inputs.kiyas == '1' }}
         env: {KD: "${{ inputs.kapak_damga }}", KD2: "${{ inputs.kiyas_ek_damga }}"}
         run: |
-          set -euo pipefail
-          [[ "$KD2" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::kiyas_ek_damga"; exit 1; }
-          mkdir -p _k1 _k2 _o/KIYAS
-          git fetch -q --depth 1 origin main && git show FETCH_HEAD:sosyal/poster_video/yd_video.py > _w_eski_yd_video.py
-          rclone copy "gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1/$KD" _k1 --include "*_Y01.jpg" -q --transfers 8
-          rclone copy "gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1/$KD2" _k2 --include "*_Y01.jpg" -q --transfers 8
+          # Denetim 20261101E madde 4: bu adim hicbir hatada dusmez (kanit Drive'a yazilsin); sonuc KIYAS ile Drive adiminda FAIL olur
+          set -uo pipefail
+          K=0; mkdir -p _k1 _k2 _kt _o/KIYAS
+          [[ "$KD2" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::kiyas_ek_damga"; K=1; }
+          { git fetch -q --depth 1 origin main && git show FETCH_HEAD:sosyal/poster_video/yd_video.py > _w_eski_yd_video.py; } || { echo "::error::main yd_video alinamadi"; K=1; }
+          rclone copy "gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1/$KD" _k1 --include "*_Y01.jpg" -q --transfers 8 || K=1
+          rclone copy "gdrive:ASTROLOVE/TEMP/YD_KAPAK_V1/$KD2" _k2 --include "*_Y01.jpg" -q --transfers 8 || K=1
           echo "kapak: $(ls _k1 | wc -l) ($KD), $(ls _k2 | wc -l) ($KD2)" | tee -a "$GITHUB_STEP_SUMMARY"
-          K=0
-          python3 sosyal/poster_video/yd_ayristirma_kiyas.py _w_eski_yd_video.py sosyal/poster_video/yd_video.py _k1 "_o/KIYAS/KIYAS_$KD.json" \
-            > "_o/KIYAS/KIYAS_$KD.log" 2>&1 || K=1
-          python3 sosyal/poster_video/yd_ayristirma_kiyas.py _w_eski_yd_video.py sosyal/poster_video/yd_video.py _k2 "_o/KIYAS/KIYAS_$KD2.json" \
-            > "_o/KIYAS/KIYAS_$KD2.log" 2>&1 || K=1
-          grep -h OZET _o/KIYAS/*.log | tee -a "$GITHUB_STEP_SUMMARY"
+          B1=$(( $(wc -l < data/pod/yd78_ids.csv) - 1 )); B2=$(grep -c ',ESKI,' data/pod/yd_kapak_eski.csv || true)
+          if [ -f _w_eski_yd_video.py ]; then
+            python3 sosyal/poster_video/yd_ayristirma_kiyas.py _w_eski_yd_video.py sosyal/poster_video/yd_video.py _k1 "_o/KIYAS/KIYAS_$KD.json" \
+              --beklenen "$B1" > "_o/KIYAS/KIYAS_$KD.log" 2>&1 || K=1
+            python3 sosyal/poster_video/yd_ayristirma_kiyas.py _w_eski_yd_video.py sosyal/poster_video/yd_video.py _k2 "_o/KIYAS/KIYAS_$KD2.json" \
+              --beklenen "$B2" > "_o/KIYAS/KIYAS_$KD2.log" 2>&1 || K=1
+            # ters kontrol (madde 5): bilinen fark (sign_a / sign_b yer degistirir) 3 kapakta FARK olarak yakalanmali
+            for T in AQUARIUS_ARIES CANCER_LEO GEMINI_VIRGO; do cp "_k1/${T}_Y01.jpg" _kt/ 2>/dev/null || K=1; done
+            python3 sosyal/poster_video/yd_ayristirma_kiyas.py _w_eski_yd_video.py sosyal/poster_video/yd_video.py _kt "_o/KIYAS/KIYAS_TERS.json" \
+              --beklenen 3 --ters > "_o/KIYAS/KIYAS_TERS.log" 2>&1 || K=1
+          fi
+          grep -h OZET _o/KIYAS/*.log | cut -c1-600 | tee -a "$GITHUB_STEP_SUMMARY" || true
           echo "KIYAS=$K" >> "$GITHUB_ENV"
-          rm -rf _k1 _k2 _w_eski_yd_video.py
+          rm -rf _k1 _k2 _kt _w_eski_yd_video.py
+          exit 0
       - name: Uretim + kareler (+ bilgi QC)
-        env: {KD: "${{ inputs.kapak_damga }}", CS: "${{ inputs.ciftler }}"}
+        env: {KD: "${{ inputs.kapak_damga }}", CS: "${{ inputs.ciftler }}", OD: "${{ inputs.onceki_damga }}"}
         run: |
           set -euo pipefail
-          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
           mkdir -p _w _o/LOG
           ORT="V7_DOLGU=nk V6_C=sosyal/poster_video/v6_c_egri.json V6_N=58000 V6_BOLGE_REF=44274 V6_N_REF=58000"
           N=$(echo $CS | wc -w); I=0; T0=$(date +%s); HATA=0
           for C in $CS; do
             I=$((I + 1))
+            if [ $(( $(date +%s) - T0 )) -gt 4500 ]; then   # madde 4: 75 dk sonra yeni cift baslamaz; kalanlar KALAN listesine
+              echo "::error::zaman siniri: $C ve sonrasi uretilmedi"; echo "$C" >> _o/LOG/KALAN.txt; HATA=1; continue; fi
             grep -qE "(^|,)$C(,|$)" data/pod/yd78_ids.csv || { echo "::error::$C yd78_ids.csv'de yok"; HATA=1; continue; }
             if grep -qE "^$C,ESKI," data/pod/yd_kapak_eski.csv; then   # inceleme 30 Eki: eski Y01 kapakla video uretilmez
               echo "::error::$C kapagi ESKI (data/pod/yd_kapak_eski.csv); yeni Y01 gelmeden video yok"; HATA=1; continue; fi
@@ -109,12 +123,23 @@ jobs:
             set +e; python3 -I sosyal/poster_video/v7_qc.py "$V" "_w/${C}_Y01.jpg" "_o/LOG/${C}_uretim.log" "_w/qc_$C" > "_o/LOG/${C}_qc.txt" 2>&1; set -e
             [ -f "_w/qc_$C/QC.json" ] && cp "_w/qc_$C/QC.json" "_o/LOG/${C}_QC.json"
             [ -f "$V.ic.json" ] && cp "$V.ic.json" "_o/LOG/${C}_ic.json"
+            set +e   # madde 3: silme_artik tozlu / tozsuz olcumu (BILGI, kural degismez)
+            python3 -I sosyal/poster_video/yd_silme_artik_olc.py "$V" "_o/LOG/${C}_silme_olcum.json" 2>&1 | tail -2
+            if [ -n "$OD" ]; then   # onceki uretimle kiyas (ayni dosya mi; degilse farkli kare sayisi)
+              if rclone copyto "gdrive:ASTROLOVE/TEMP/YD_VIDEO_ORNEK43/$OD/${C}_yd_video_43.mp4" "_w/${C}_onceki.mp4" -q; then
+                ffmpeg -v error -i "_w/${C}_onceki.mp4" -f framemd5 - | grep -v '^#' | awk -F, '{print $NF}' > "_w/${C}_a.md5"
+                ffmpeg -v error -i "$V" -f framemd5 - | grep -v '^#' | awk -F, '{print $NF}' > "_w/${C}_b.md5"
+                FK=$(paste -d' ' "_w/${C}_a.md5" "_w/${C}_b.md5" | awk '$1 != $2' | wc -l)
+                echo "$C onceki ($OD) kiyas: dosya_md5_ayni=$( [ "$(md5sum < "_w/${C}_onceki.mp4")" = "$(md5sum < "$V")" ] && echo 1 || echo 0 ) farkli_kare=$FK / $(wc -l < "_w/${C}_b.md5")" | tee -a "_o/LOG/ONCEKI_KIYAS.txt"
+              else echo "$C onceki ($OD) yok" | tee -a "_o/LOG/ONCEKI_KIYAS.txt"; fi
+            fi
+            set -e
             G=$(( $(date +%s) - T0 )); echo "[$I/$N %$((100 * I / N))] $C (gecen ${G}s, kalan ~$(( G * (N - I) / I ))s)"
           done
           NM=$(ls _o/*_yd_video_43.mp4 2>/dev/null | wc -l); NJ=$(ls _o/*_kare_*.jpg 2>/dev/null | wc -l)
           echo "mp4 $NM / $N, kare jpg $NJ / $((5 * N))" | tee -a "$GITHUB_STEP_SUMMARY"
           for f in _o/LOG/*_QC.json; do
-            [ -f "$f" ] && python3 -c "import json, sys; q = json.load(open(sys.argv[1])); f = [k for k, v in q['kontrol'].items() if not v['gecti']]; print(sys.argv[1].split('/')[-1], 'bilgi QC:', 'FAIL (' + ', '.join(f) + ')' if f else 'PASS')" "$f" | tee -a "$GITHUB_STEP_SUMMARY"
+            [ -f "$f" ] && { python3 -c "import json, sys; q = json.load(open(sys.argv[1])); f = [k for k, v in q['kontrol'].items() if not v['gecti']]; print(sys.argv[1].split('/')[-1], 'bilgi QC:', 'FAIL (' + ', '.join(f) + ')' if f else 'PASS')" "$f" | tee -a "$GITHUB_STEP_SUMMARY" || echo "$f okunamadi"; }
           done
           [ "$NM" = "$N" ] && [ "$NJ" = "$((5 * N))" ] || HATA=1
           echo "HATA=$HATA" >> "$GITHUB_ENV"
@@ -123,6 +148,7 @@ jobs:
         run: |
           set -euo pipefail
           [ -n "${DAMGA:-}" ] || exit 1
+          mkdir -p _o; [ -n "$(ls -A _o)" ] || echo "bos" > _o/BOS.txt
           rclone copy _o "gdrive:ASTROLOVE/TEMP/YD_VIDEO_ORNEK43/$DAMGA" --immutable -q
           echo "Cikti: TEMP/YD_VIDEO_ORNEK43/$DAMGA" | tee -a "$GITHUB_STEP_SUMMARY"
           [ "${HATA:-1}" = 0 ] || { echo "::error::eksik / hatali cikti"; exit 1; }

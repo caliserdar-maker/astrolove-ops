@@ -18,6 +18,11 @@ from PIL import Image
 
 KAPAK, OUT = sys.argv[1:3]
 RENK_MOD = 'murekkep'
+# Denetim 20261101E: 2000 px poster olceginde kutu araliklari (x, y, w, h), olcum: kosu 41295497893 KIYAS (TEMP/YD_KAPAK_V1/20261027_141146,
+# 78 kapak) + KIYAS_20261101_092221 (3 yeni Y01). KUTU_PAY onerimdir (Serdar onayi yok): poster genisliginin %0,75'i.
+KUTU_ARALIK = {'sign_a': ((525, 600), (1595, 1652), (113, 238), (117, 206)), 'sign_b': ((1248, 1324), (1602, 1652), (119, 237), (117, 200)),
+               'names_row': ((455, 457), (1867, 1868), (1126, 1128), (107, 108)), 'msg_row': ((691, 692), (2090, 2092), (629, 630), (309, 310))}
+KUTU_PAY = 15
 SEMBOL_EK = 0.5   # sembol alt parca bandi: sembol yuksekliginin en cok bu orani kadar asagida (Denetim 20261101D; ust sinir)
 ISIM_ALT = 0.4   # isim satiri koruma payi (alt uzantilar: J, y kuyruklari), isim yuksekligi orani
 BITIS = 5.0
@@ -86,13 +91,22 @@ class PosterYD:
         # parca iceriyorsa (ve bosluk <= SEMBOL_EK x sembol yuksekligi) sembole katilir. Kucuk burclar merkezi kesmez: 75 calisan kapakta
         # sol burcun sag kenari / sag burcun sol kenari merkezden en az 237 / 248 px uzakta (kosu 41294935578 KIYAS olcumu); cubuk sembolden
         # genis olabildigi icin (LIBRA) yatay aralik kosulu YOK (deneme 1'in hatasi).
-        self.sembol_ek_bant = 0
+        self.sembol_ek_bant = 0; self.sembol_ek_bosluk = []
         while i + 1 < len(bands):
-            nb = bands[i + 1]; u = self._union(nb['cs'])
-            if u[2] - sy1 <= SEMBOL_EK * (sy1 - sy0) and any(c[1] < Wp / 2 < c[1] + c[3] for c in nb['cs']):
-                bands[i]['cs'] = bands[i]['cs'] + nb['cs']; bands[i]['y1'] = max(bands[i]['y1'], nb['y1']); del bands[i + 1]
-                sym = list(bands[i]['cs']); self.sembol_ek_bant += 1
+            nb = bands[i + 1]
+            kat = [c for c in nb['cs'] if c[1] < Wp / 2 < c[1] + c[3]]          # Denetim 20261101E madde 1: YALNIZ merkezi kesen parcalar
+            bosluk = min(c[2] for c in kat) - sy1 if kat else None
+            if kat and bosluk <= SEMBOL_EK * (sy1 - sy0):
+                bands[i]['cs'] = bands[i]['cs'] + kat
+                kal = [c for c in nb['cs'] if c not in kat]
+                if kal:
+                    nb['cs'] = kal; nb['y1'] = max(c[2] + c[4] for c in kal)
+                else:
+                    del bands[i + 1]
+                sym = list(bands[i]['cs']); self.sembol_ek_bant += 1; self.sembol_ek_bosluk.append(round(bosluk / (sy1 - sy0), 3))
                 sx0 = min(c[1] for c in sym); sx1 = max(c[1] + c[3] for c in sym); sy1 = max(c[2] + c[4] for c in sym)
+                if kal:
+                    break
             else:
                 break
         if os.environ.get('YD_BANT_DOKUM'):
@@ -110,6 +124,14 @@ class PosterYD:
             raise RuntimeError('YD: sol veya sag kucuk burc bulunamadi')
         self.sign_a, self.sign_b = self._union(left), self._union(right)
         self.names_row = self._union(alt[1]['cs'])
+        # Denetim 20261101E madde 1: ayristirma kapisi. Kucuk burc satiri merkezi kesmez; kutular 78 + 3 kapakta olculen araliklarin
+        # (KUTU_ARALIK) disina cikarsa sessiz yanlis ayristirma yerine hata.
+        if any(c[1] < Wp / 2 < c[1] + c[3] for c in alt[0]['cs']):
+            raise RuntimeError('YD kapi: kucuk burc satirinda merkezi kesen parca var (sembol parcasi / sus?)')
+        for ad, kt in (('sign_a', self.sign_a), ('sign_b', self.sign_b), ('names_row', self.names_row)):
+            for j, (lo, hi) in enumerate(KUTU_ARALIK[ad]):
+                if not (lo - KUTU_PAY <= kt[1 + j] <= hi + KUTU_PAY):
+                    raise RuntimeError(f'YD kapi: {ad} kutusu {kt[1:5]} olculen araligin disinda ({ad}[{j}] {lo}..{hi} +-{KUTU_PAY})')
         # mesaj = isim satirinin altindaki tum yazi (tarih + YEAR ONE; v7'de isimlerin altindaki tum bantlar). Inceleme 27 Eki: ince
         # ve acik harfler alfa > 0,4 parcalarina yalniz %28 giriyordu (tarih yarim, YEAR ONE hic silinmiyordu). Mesaj pikselleri bolgeden:
         # kagit -> murekkep dogrusu uzerinde (artik < 22; yaprak / altin tohum disarida) ve oran > 0,15.
@@ -137,6 +159,9 @@ class PosterYD:
         self.comps += yeni
         mes = eski + yeni
         self.msg_row = self._union(mes)
+        for j, (lo, hi) in enumerate(KUTU_ARALIK['msg_row']):
+            if not (lo - KUTU_PAY <= self.msg_row[1 + j] <= hi + KUTU_PAY):
+                raise RuntimeError(f'YD kapi: msg_row kutusu {self.msg_row[1:5]} olculen araligin disinda (msg_row[{j}] {lo}..{hi} +-{KUTU_PAY})')
         yazi = (t > 0.25) & (art < 22) & bol                   # olcum: mesaj yazisinin maskeye giren orani
         self.mesaj_kapsam = float((np.isin(self.lab, [c[0] for c in mes]) & yazi).sum() / max(1, yazi.sum()))
         print(f'YD mesaj: {len(eski)} eski + {len(yeni)} yeni parca, kutu {self.msg_row[1:5]}, kapsam {self.mesaj_kapsam:.3f}', flush=True)
@@ -149,7 +174,7 @@ P = PosterYD(cv2.resize(kap_src[y0:y1, x0:x1], (2000, round(ch * s_)), interpola
 if os.environ.get('YD_AYRISTIR_JSON'):   # Denetim 20261101D: yalniz ayristirma kutulari (kiyas icin), video yok
     import json
     json.dump(dict(sign_a=P.sign_a[1:5], sign_b=P.sign_b[1:5], names_row=P.names_row[1:5], msg_row=P.msg_row[1:5], merged=P.merged[1:5],
-                   sembol_ek_bant=P.sembol_ek_bant), open(os.environ['YD_AYRISTIR_JSON'], 'w'))
+                   sembol_ek_bant=P.sembol_ek_bant, sembol_ek_bosluk=P.sembol_ek_bosluk), open(os.environ['YD_AYRISTIR_JSON'], 'w'))
     sys.exit(0)
 
 
