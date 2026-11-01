@@ -490,8 +490,8 @@ def main():
     m.ru_plan = lambda desc, aile: ("Новый текст без пометки.", 0, "test: beyansiz RU")
     try:
         api = Sahte(ilanlar={"1": (KUPA, 8, "Старый текст.")}); ok3, R3 = kos(api)
-        s.append(("karar 3: RU yeni metin beyansiz -> EN de yazilmaz, ATLA + neden (FAIL degil)",
-                  api.yaz == [] and ok3 is True and R3["sonuc"] == "ATLA" and "beyan on kontrolu" in R3.get("neden", "")
+        s.append(("karar 3: RU yeni metin beyansiz -> EN de yazilmaz, ATLANDI + neden (FAIL degil; 'beyan zaten var' ATLA'dan ayri)",
+                  api.yaz == [] and ok3 is True and R3["sonuc"] == "ATLANDI" and "beyan on kontrolu" in R3.get("neden", "")
                   and "RU yeni" in R3["neden"]))
     finally:
         m.ru_plan = eski_ru_plan

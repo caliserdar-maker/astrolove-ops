@@ -990,18 +990,22 @@ def geri_al(api, shop, lid, yd, yedek_dir, K, uzak=""):
         bag_sira = {b["stil"]: sira_eski[b["image_id"]] for b in yd.get("baglar") or [] if b.get("image_id") in sira_eski}
         if len(bag_sira) != len(yd.get("baglar") or []) or not set(bag_sira) <= set(c["stil"]):
             return ["geri alma: yedek Style baglari canli envanterle eslenemedi; elle bakilmali"]
+        m = yd.get("metin") or {}
+        desc = m.get("desc_once") if m.get("yaz") else None
+        pers = m.get("pers_once") if m.get("yaz") else None
+        if desc is not None and not EC.beyan_var(desc, "en"):
+            # karar 2 (Serdar 1 Kas): beyansiz eski metne donus yalniz plandaki (plan_damga sha kilitli, Drive --immutable) yedek sha ile birebir;
+            # sha yoksa / uymazsa DUR. HICBIR geri alma yaziminden ONCE (inceleme 1 Kas madde 3: galeri + video geri, metin yeni kalmasin)
+            try:
+                EC.geri_alma_izni(lid, desc, m.get("desc_once_sha"))
+            except SystemExit as e:
+                return [f"geri alma yapilmadi (galeri / video / metin dokunulmadi): {e}"]
         geri_yk = set((K.d.get("geri_yuklenen") or {}).values())
         sil = sorted(canli - eski_ids - geri_yk)   # onceki geri almada yeniden yuklenen eski gorsel yerinde kalir (inceleme 31 Eki madde 2)
         son = galeri_kur(api, shop, lid, c, hedef, sil, bag_sira, c["stil"], K, "geri_yuklenen", esnek=True)
         ev = [x["video_id"] for x in yd.get("video") or []]
         vyol = yedek_dosya(yedek_dir, alt_d, yd["video"][0], uzak) if ev and ev[0] not in [str(x.get("video_id")) for x in c["video"]] else None
         vid = video_kur(api, shop, lid, vyol, ev, K, "video_geri")
-        m = yd.get("metin") or {}
-        desc = m.get("desc_once") if m.get("yaz") else None
-        pers = m.get("pers_once") if m.get("yaz") else None
-        if desc is not None and not EC.beyan_var(desc, "en"):
-            # karar 2 (Serdar 1 Kas): beyansiz eski metne donus yalniz plandaki yedek sha ile birebir; sha yoksa / uymazsa DUR
-            EC.geri_alma_izni(lid, desc, m.get("desc_once_sha"))
         metin_kur(api, shop, lid, desc, pers, K)
         s = []
         bek = [son[k] for k in sorted(son)]

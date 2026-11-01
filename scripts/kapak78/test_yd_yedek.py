@@ -103,6 +103,7 @@ class YedekTest(unittest.TestCase):
         self.assertIn("ilan PASS 1/1", oz)
         v = list(csv.DictReader(open(self.out / "VIDEO_OZET.csv")))
         self.assertEqual(v[0]["durum"], "FAIL"); self.assertIn("ftyp", v[0]["not"])
+        self.assertFalse((self.out / "4595350971_CANCER_LIBRA" / "v_847831962.mp4").exists())   # gecersiz dosya silindi
 
     def test_02_boyut_ve_ham_eksik_fail(self):
         rc, log, oz = self.kos([self.ilan("4595350971", "CANCER_LIBRA", bozuk_rank=5), "4595373190,AQUARIUS_AQUARIUS,A,B\n"])

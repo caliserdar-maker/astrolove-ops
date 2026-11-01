@@ -36,7 +36,8 @@ jobs:
         run: |
           set -euo pipefail
           for t in scripts/kapak78/test_yd_kapak_yukle.py scripts/kapak78/test_yd_kapak_wf.py scripts/kapak78/test_yd_liste_uret.py \
-                   scripts/kapak78/test_yd_yedek.py scripts/etsy/test_yd_yapi.py scripts/etsy/test_eski78_gorsel_yukle.py; do
+                   scripts/kapak78/test_yd_yedek.py scripts/etsy/test_yd_yapi.py scripts/etsy/test_eski78_gorsel_yukle.py \
+                   scripts/kapak78/test_yd_geri_drive.py; do
             echo "== $t"; python3 "$t" > _t.log 2>&1 || { tail -40 _t.log; exit 1; }; tail -1 _t.log
           done
       - name: etsy-kota olcum kilidi (madde 7) + workflow denetimi

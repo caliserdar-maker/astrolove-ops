@@ -143,6 +143,7 @@ jobs:
           rclone copyto "$Y/OZET.md" _work/YEDEK_OZET.md
           rclone lsjson -R "$Y" --files-only --include "*.jpg" --include "*.mp4" > _work/yedek_ls.json   # 6d: eski video yedegi (v_<id>.mp4)
           rclone copyto "$Y/KAYNAK_YAMA.csv" _work/KAYNAK_YAMA.csv -q 2>/dev/null || true   # 6a: geri alinan ilanin yeni Botanical kimligi
+          rclone copyto "$Y/VIDEO_OZET.csv" _work/VIDEO_OZET.csv -q 2>/dev/null || true     # 6d: video yedegi PASS satirlari (yd_yedek)
           if [ -n "$TG" ]; then   # tek gecis girdileri (F-B madde 2): yapi plani, metin json, video klasoru (kilit altinda, 15 dk butcesi)
             IFS=';' read -r TGY TGM TGV <<< "$TG"; mkdir -p _in/tg
             [ -n "$TGY" ] || { echo "::error::tek_gecis: YAPI parcasi zorunlu (yd_yapi_kuru klasoru)"; exit 1; }
@@ -215,6 +216,7 @@ jobs:
           echo "kilit suresi: $GEC dk gecti, kalan butce $AZE dk (azami_dk $AZ)"
           [ "$AZE" -ge 1 ] || { echo "::error::zaman butcesi kilit altinda doldu ($GEC dk >= $AZ); ilan baslamadi"; echo "KOD=1" >> "$GITHUB_ENV"; exit 1; }
           args=(--hazir _hazir --out _out --devam _work/DEVAM.json --ilerleme _work/ILERLEME.json)
+          args+=(--video-ozet _work/VIDEO_OZET.csv)
           if [ "$KURU" = true ]; then args+=(--kuru --ham-dir _in/HAM --yedek-liste _work/yedek_ls.json)   # 6d: video yedegi kuruda da
           elif [ "$BO" = true ]; then args+=(--bag-onar --confirm YD_KAPAK_BAG --plan-damga "$PD")
           else
@@ -273,18 +275,24 @@ jobs:
             b=$(basename "$f"); i=${b%.json}
             python3 -c "import json,sys;d=json.load(open('$G/'+sys.argv[1]+'.json'));sys.exit(0 if d.get('durum')=='HAZIR' else 1)" "$i" \
               || { echo "::warning::$i geri hazirlik BLOK; HAM / yedek Drive'a yazilmadi (OZET: KOSU/${GITHUB_RUN_ID}/GERI_HAZIRLIK/$i.json)"; continue; }
-            rclone copyto "$T/$EN/HAM/$b" "$T/$EN/HAM_ONCEKI/${i}_${GITHUB_RUN_ID}.json" -q    # eski HAM saklanir (uzerine yazilmaz)
+            rclone copyto "$T/$EN/HAM/$b" "$T/$EN/HAM_ONCEKI/${i}_${GITHUB_RUN_ID}.json" --ignore-existing -q   # ilk HAM saklanir; yeniden denemede ezilmez
             rclone copyto "$f" "$T/$EN/HAM/$b" -q
             echo "::notice title=YD GERI::$i yeni HAM (eskisi HAM_ONCEKI/${i}_${GITHUB_RUN_ID}.json)"
           done
           [ -d "$G/YEDEK" ] && rclone copy "$G/YEDEK" "$Y" --ignore-existing -q    # yeni kimlik adlari eklenir; mevcut dosyaya dokunulmaz
           if [ -f "$G/KAYNAK_YAMA.csv" ]; then
             python3 - <<'PY'
-          import csv, os
+          import csv, json, os
           y = {}
           for p in ("_work/KAYNAK_YAMA.csv", "_out/GERI_HAZIRLIK/KAYNAK_YAMA.csv"):
-              if os.path.exists(p):
-                  y.update({r["listing_id"]: r["kaynak_image_id"] for r in csv.DictReader(open(p)) if r.get("kaynak_image_id")})
+              if not os.path.exists(p):
+                  continue
+              for r in csv.DictReader(open(p)):
+                  oz = f"_out/GERI_HAZIRLIK/{r['listing_id']}.json"
+                  if p.startswith("_out") and not (os.path.exists(oz) and json.load(open(oz)).get("durum") == "HAZIR"):
+                      continue          # BLOK ilanda HAM eski kalir: Botanical yamasi da yazilmaz (inceleme madde 11)
+                  if r.get("kaynak_image_id"):
+                      y[r["listing_id"]] = r["kaynak_image_id"]
           with open("_work/KAYNAK_YAMA_YENI.csv", "w", newline="") as f:
               w = csv.writer(f); w.writerow(["listing_id", "kaynak_image_id"]); w.writerows(sorted(y.items()))
           print(f"KAYNAK_YAMA: {len(y)} ilan")

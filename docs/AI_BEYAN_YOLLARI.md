@@ -60,21 +60,28 @@ YD yolu (`scripts/kapak78/yd_kapak_yukle.py` tek gecis) yalniz EN baslik + acikl
 - Canli yukleyicilerde yalniz kapi davranisi testi (`--canli`): ilgisiz bir betik degisikligi canli yazimi / geri almayi durdurmaz.
 
 ## Kararlar (Serdar 1 Kas, Denetim 20261101A) - uygulandi (dal ai-beyan-v2; kupa 78/78 sonrasi birlestirilir)
-1. Yayina alma: `Etsy.yayin_beyan_kontrol` (`_call` icinde): aciklamasiz updateListing (state=active / taslak guncelleme) once canli ilani
-   okur (bu kosuda 15 dk icinde okunmussa bellekten; yoksa +1 GET, `yayin_okuma` sayaci); ilan active degilse canli aciklamada EN beyan
-   zorunlu. Acikca state=inactive / draft yazimi muaf. Dogrudan requests yolu (by78_yayinla) ayrica cagirir; statik test C state yazan
-   dogrudan istekte `yayin_beyan_kontrol` arar. Sayilan yukleyiciler (kupa, YD, eski78) aciklamasiz updateListing yapmaz: en kotu ek 0.
-2. Geri alma: `geri_alma_izni(ilan, metin, yedek_sha, dil)` yalniz yedek alinirken kaydedilen sha ile birebir ayni metne donuse izin verir
-   (sha yok / farkli -> DUR). Kullanan: yd tg_geri (EN + RU), kupa_galeri78 geri alma (`desc_once_sha` plan alani; eski planlarda yok ->
-   beyansiz eski metne donus DUR), burc_gift_yaz geri al (yedek dosyasindaki metin; `aciklama_sha` varsa o).
-3. RU sirasi: `beyan_on_kontrol(en_yeni, ru_yeni, ru_canli)` yazimdan ONCE; biri beyansizsa hicbiri yazilmaz, ilan ATLANDI / ATLA + neden:
-   pod_inventory_update, pod_boy_15, pod_pilot_15, beyan_marka_yaz (AST testi H3: kontrol ayni fonksiyonda tum yazimlardan once),
-   yd tek gecis (kuruda tg_metin_kapisi -> BLOK).
-4. RU yanlis FAIL: ceviri yaziminda gonderilen RU aciklama canli RU aciklamayla ayniysa (yalniz baslik / etiket) ve beyansizsa yazim izinli;
-   ilan RU_BEYANSIZ listesine (listing_id, burc cifti, dil, tarih, kosu): yerel RU_BEYANSIZ.csv + Drive TEMP/RU_BEYANSIZ/RU_BEYANSIZ_<kosu>_<pid>.csv
-   (rclone varsa). Aciklamaya dokunan RU yaziminda kural aynen.
-5. Kupa kuru plani: `kupa_galeri78.beyan_hata` metin planinda; yeni aciklama beyansizsa plan hatasi (BLOK), yazim yok.
+1. Yayina alma: `Etsy.yayin_beyan_kontrol` (`_call` icinde): aciklamasiz updateListing PATCH / PUT once canli ilani HER SEFER taze okur
+   (+1 GET, `yayin_okuma`); canli TASLAK ya da active olmayan ilana state=active ise canli aciklamada EN beyan zorunlu. Acikca
+   state=inactive / draft muaf (okuma yok). inactive / sold_out / expired ilanda state'siz kismi yazim denetlenmez (yayina almaz).
+   Geri alma izni (karar 2) yayina almayi ACMAZ. Dogrudan requests yolu (by78_yayinla) ayrica cagirir; statik test C state yazan
+   dogrudan istekte `yayin_beyan_kontrol` arar. Sayilan yukleyiciler (kupa, YD, eski78) aciklamasiz updateListing yapmaz (en kotu ek 0;
+   kod taramasi 1 Kas); diger betiklerde istek tahmini yok, her kismi updateListing +1 GET.
+2. Geri alma: `geri_alma_izni(ilan, metin, yedek_sha, dil)` yalniz yedekteki sha ile birebir ayni metne donus (sha yok / farkli -> DUR).
+   Sha kaynagi: YD EN = adim 5 HAM aciklamasi (yazim aninin okumasi degil); YD RU = yazim oncesi kayit (HAM'da RU yok, test_veri
+   translations None; bagimsiz RU yedegi YOK, sinir); kupa = kuru plandaki desc_once (plan_damga sha kilitli, Drive --immutable; ayni plan
+   kaydi); burc_gift_yaz = yedek_al aninda yazilan `aciklama_sha` (sha'siz eski yedek -> DUR). Kupa izni HICBIR geri alma yaziminden once.
+3. RU sirasi: `beyan_on_kontrol(en_yeni, ru_yeni, ru_canli)` yazimdan ONCE; biri beyansizsa hicbiri yazilmaz: pod_inventory_update /
+   pod_boy_15 / pod_pilot_15 ATLANDI, beyan_marka_yaz ATLANDI (TOPLU_OZET.atlandi; "beyan zaten var" ATLA'dan ayri), YD tek gecis BLOK.
+4. RU yanlis FAIL: gonderilen RU aciklama canli RU ile ayniysa (taze GET) ve beyansizsa yazim izinli; RU_BEYANSIZ satiri ANINDA yerel CSV'ye
+   (RU_BEYANSIZ_CSV), cikista Drive TEMP/RU_BEYANSIZ/RU_BEYANSIZ_<kosu>_<pid>.csv (rclone varsa; hata ::warning). Burc cifti: pod78 / yd78
+   tablosu, yoksa baslikta iki burc; tek gecen / 3+ burc -> "?". YD kuruda da canli RU ile uygulanir.
+5. Kupa kuru plani: `kupa_galeri78.beyan_hata`; yeni aciklama beyansizsa plan hatasi (BLOK).
+6a-d ve 7: YD geri hazirlik (yeni HAM / yedek / KAYNAK_YAMA / LISTE; Drive adimi yalniz HAZIR ilanda, HAM_ONCEKI ezilmez), kota DUR ->
+   GERI_BEKLIYOR (siranin basi; kapsam disi ise kosu baslamaz; once tg_geri sonra geri_al), RU tek geciste ZORUNLU (canli RU yoksa BLOK),
+   video yedegi (yd_yedek v_<id>.mp4 + VIDEO_OZET PASS; gecersiz dosya silinir), etsy-kota kumesi = kilit kumesi + Etsy anahtarli is akislari.
 
 ## Hala acik (bilgi)
 - Sorgu dizesi / multipart disi kacis yollari (Etsy'nin PATCH'te sorgu parametresini okuyup okumadigi) dogrulanmadi.
 - RU geri almasinda eski RU metni RU_YASAK ifadesi iceriyorsa ru_yazim_kapisi geri almayi durdurur (elle; sorun raporda).
+- YD RU icin bagimsiz yedek yok (madde 2 sinir). Mevcut YD adim 5 yedeginde video yok: tek gecis videolu kosudan once yd-kapak-yedek
+  yeniden kosulmali (yeni damga), aksi halde kuru BLOK.

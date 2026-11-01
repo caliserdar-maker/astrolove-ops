@@ -427,7 +427,7 @@ def yaz(api, shop, lid, out, bolum=None, ru_yeniden=False, onay_ozet=None):
     import etsy_common as E
     on_neden = E.beyan_on_kontrol(en_yeni, ru_yeni, ru.get("description") if ru else None)
     if on_neden:   # karar 3 (Serdar 1 Kas): EN ve RU birlikte, yazimdan ONCE; biri beyansizsa hicbiri yazilmaz (ATLA + neden, FAIL degil)
-        R.update(sonuc="ATLA", neden="beyan on kontrolu: " + "; ".join(on_neden), hata=[], istek=api.calls, kota=api.remaining)
+        R.update(sonuc="ATLANDI", neden="beyan on kontrolu: " + "; ".join(on_neden), hata=[], istek=api.calls, kota=api.remaining)
         (out / f"SONUC_{lid}.json").write_text(json.dumps(R, ensure_ascii=False, indent=1), encoding="utf-8")
         print("SONUC", json.dumps(R, ensure_ascii=False), flush=True)
         return R
@@ -553,7 +553,9 @@ def _ozet_eslesme(out, lid):
 def _toplu_ozet_yaz(out, a, aday, sonuc, api, ara=False):
     oz = dict(aile=a.aile, aday=len(aday), islenen=len(sonuc), pass_=sum(x["sonuc"] == "PASS" for x in sonuc),
               ozet_eslesen=sum(bool(x.get("ozet_eslesme")) for x in sonuc), yarim=[x["ilan"] for x in sonuc if x.get("yarim")],
-              atla=sum(x["sonuc"] == "ATLA" for x in sonuc), fail=[x for x in sonuc if x["sonuc"] in ("FAIL", "DUR", "YARIM")],
+              atla=sum(x["sonuc"] == "ATLA" for x in sonuc),
+              atlandi=[dict(ilan=x["ilan"], neden=x.get("neden")) for x in sonuc if x["sonuc"] == "ATLANDI"],   # karar 3: beyan on kontrolu
+              fail=[x for x in sonuc if x["sonuc"] in ("FAIL", "DUR", "YARIM")],
               kota=api.remaining, ara=ara)
     (out / "TOPLU_OZET.json").write_text(json.dumps(dict(ozet=oz, ilanlar=sonuc), ensure_ascii=False, indent=1), encoding="utf-8")
     return oz
@@ -608,7 +610,7 @@ def toplu(api, shop, a, out):
             print(f"[{n}] {lid} {'YARIM (EN yazildi, RU yok)' if yarim else 'DUR'}: {dur}", flush=True); break
         yarim = bool(R.get("ru_hata")) or bool(R.get("canli_en_yazildi") and R.get("ru_bekleniyor")
                                                    and "RU description (PUT translations/ru)" not in (R.get("yazildi") or []))
-        sonuc.append({**{k: R.get(k) for k in ("ilan", "sonuc", "hata", "yazildi", "canli_en_yazildi")},
+        sonuc.append({**{k: R.get(k) for k in ("ilan", "sonuc", "neden", "hata", "yazildi", "canli_en_yazildi")},
                       "ozet_eslesme": _ozet_eslesme(out, lid), "yarim": yarim})
         _toplu_ozet_yaz(out, a, aday, sonuc, api, ara=True)   # inceleme 23 Eki: zaman asiminda da kayit kalsin
         print(f"[{n}/{min(len(aday), a.limit)}] {lid} {R['sonuc']}{' YARIM (EN yazildi, RU yok)' if yarim else ''} | ozet "

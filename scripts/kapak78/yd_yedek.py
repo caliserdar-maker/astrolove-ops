@@ -58,6 +58,8 @@ def video_yedek(ilanlar, kok):
             b = p.read_bytes()[:12] if p.exists() else b""
             if not h and (len(b) < 8 or b[4:8] != b"ftyp"):
                 h = "MP4 imzasi yok (ftyp)"
+            if h and p.exists():
+                p.unlink()        # inceleme 1 Kas madde 1: gecersiz dosya yedek klasorunde kalip "yedek var" sanilmasin
             satir.append([k["listing_id"], k["cift"], v.get("video_id"), p.stat().st_size if p.exists() else 0, "FAIL" if h else "PASS", h or ""])
     with open(kok / "VIDEO_OZET.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f); w.writerow(["listing_id", "cift", "video_id", "boyut", "durum", "not"]); w.writerows(satir)

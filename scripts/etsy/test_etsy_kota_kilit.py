@@ -97,6 +97,7 @@ def main():
         ("completed -> olc", [kosu(4, kupa, "completed")], False),
         ("kume disi in_progress (etsy-kota baska kosusu / CI) -> olc", [kosu(5, ".github/workflows/etsy-kota.yml", "in_progress"),
                                                                        kosu(6, ".github/workflows/ai-beyan-test.yml", "in_progress")], False),
+        ("kilitsiz ama Etsy anahtarli saglik-raporu in_progress (inceleme madde 7) -> atla", [kosu(8, ".github/workflows/saglik-raporu.yml", "in_progress")], True),
         ("kendi kosusu ignore", [kosu(500, kupa, "in_progress")], False),
         ("bos -> olc", [], False),
     ]
