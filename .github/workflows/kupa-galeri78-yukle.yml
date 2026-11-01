@@ -32,7 +32,7 @@ on:
       sadece: {description: "yalniz bu ilanlar (virgullu listing_id); bos = 78; geri_al icin zorunlu", required: false, default: ""}
       haric: {description: "bu ilanlar haric (virgullu listing_id)", required: false, default: ""}
       azami_ilan: {description: "yaz: kosu basina en fazla ilan", required: false, default: "15"}
-      geri_payi: {description: "yaz: ilan basi kota kapisinda geri alma payi (evet = en kotu + geri alma; hayir = yalniz geri almasiz en kotu, Serdar 1 Kas b; en_az = yalniz en az istek, Serdar 1 Kas)", required: false, default: "evet"}
+      geri_payi: {description: "yaz: ilan basi kota kapisinda geri alma payi (evet = en kotu + geri alma; hayir = yalniz geri almasiz en kotu, Serdar 1 Kas b; en_az = yalniz en az istek; taban = yalniz sert taban 10, Serdar 1 Kas)", required: false, default: "evet"}
       kurtar: {description: "true = hata kaydi olan DEVAM ilanini surdur", required: false, default: "false"}
       metin_yaz: {description: "true = EN aciklama galeriyle birlikte (Serdar 31 Eki onayi; RU yazilmaz). kuru ve yaz AYNI deger (plana bagli)", required: false, default: "false"}
 
@@ -61,7 +61,7 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$MY" =~ ^(true|false)$ ]] || { echo "::error::girdi (metin_yaz)"; exit 1; }
-          [[ "$GP" =~ ^(evet|hayir|en_az)$ ]] || { echo "::error::girdi (geri_payi evet / hayir / en_az)"; exit 1; }
+          [[ "$GP" =~ ^(evet|hayir|en_az|taban)$ ]] || { echo "::error::girdi (geri_payi evet / hayir / en_az / taban)"; exit 1; }
           if [ "$GP" != evet ] && [ "$MOD" != yaz ]; then echo "::error::geri_payi=$GP yalniz mod=yaz"; exit 1; fi
           [[ "$MOD" =~ ^(kuru|yaz|geri_al)$ && "$KT" =~ ^(true|false)$ && "$AI" =~ ^[0-9]{1,2}$ ]] || { echo "::error::girdi (mod / kurtar / azami_ilan)"; exit 1; }
           [[ "$SA" =~ ^([0-9]+(,[0-9]+)*)?$ && "$HA" =~ ^([0-9]+(,[0-9]+)*)?$ ]] || { echo "::error::girdi (sadece / haric)"; exit 1; }

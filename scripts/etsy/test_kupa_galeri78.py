@@ -640,6 +640,8 @@ def ana(tmp):
     kontrol("geri_payi en_az: esik = en az + 2 (< hayir), geri_ertele en_az'da da calisir",
             K.kota_esigi(gd, "en_az") == te and te < th and K.geri_ertele(a1, yd, "en_az") and K.geri_ertele(a2, yd, "en_az") is None,
             f"en_az {K.kota_esigi(gd, 'en_az')} te {te}")
+    kontrol("geri_payi taban: esik 0 (yalniz sert taban), geri_ertele taban'da da calisir",
+            K.kota_esigi(gd, "taban") == 0 and K.geri_ertele(a1, yd, "taban") and K.geri_ertele(a2, yd, "taban") is None)
     kontrol("geri_payi hayir: kalan - geri almasiz en kotu < 10 -> KALAN (neden 'geri alma payi yok'), yazim yok",
             S[lid]["durum"] == "KALAN" and S[lid]["istek"] == 0 and not api.yazimlar
             and "geri alma payi yok" in str(S[lid]["neden"]), f"{S[lid]} kalan {api.remaining}")
