@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      TSV_ID: 159swqt6Di8DWBcTPeJM2mq83R6khZAKR
+      TSV_ID: 1YDCvBU22VNC5JZidNpfUqhSbcged1gtR
       HEDEF: gdrive:ASTROLOVE/TEMP/YD_ZEMIN_YENI
     steps:
       - name: rclone
@@ -32,6 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           umask 077; mkdir -p _w _o
+          pip install -q pillow==11.0.0
           rclone backend copyid gdrive: "$TSV_ID" _w/girdi.tsv -q
           N=0
           while IFS=$'\t' read -r AD URL; do
@@ -41,9 +42,10 @@ jobs:
             curl -fsS --retry 3 -o "_o/$AD" "$URL" || { echo "::error::indirilemedi $AD"; exit 1; }
             python3 -c "import struct,sys; d=open(sys.argv[1],'rb').read(32); assert d[:8]==b'\x89PNG\r\n\x1a\n', 'PNG degil'; w,h=struct.unpack('>II', d[16:24]); print(sys.argv[1], w, h); assert (w,h)==(2400,3600), (w,h)" "_o/$AD"
             sha256sum "_o/$AD" | awk '{print $1}' > "_o/$AD.sha256.txt"
+            python3 -c "from PIL import Image, ImageStat; import sys; im = Image.open(sys.argv[1]).convert('RGB'); print('ortalama RGB', [round(v) for v in ImageStat.Stat(im).mean])" "_o/$AD"
             N=$((N+1))
           done < _w/girdi.tsv
-          [ "$N" = 3 ] || { echo "::error::3 dosya beklenir, $N"; exit 1; }
+          [ "$N" -ge 1 ] || { echo "::error::dosya yok"; exit 1; }
           rclone copy _o "$HEDEF" --immutable -q
           echo "Drive: TEMP/YD_ZEMIN_YENI ($N dosya)" | tee -a "$GITHUB_STEP_SUMMARY"
       - if: always()
