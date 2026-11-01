@@ -75,6 +75,17 @@ class SahteYD(T.Sahte):
         return super().get(path, params, ok404)
 
     def post_file(self, path, files=None, data=None, tekrar=3):
+        if "image" in (files or {}):                    # gercek Etsy: yuklenen gorselin boyutu kayitta (6a HAM kapisi kapak 2400x2400 bekler)
+            fh = files["image"][1]
+            try:
+                fh.seek(0); w_, h_ = Image.open(fh).size; fh.seek(0)
+            except Exception:   # noqa: BLE001
+                w_ = h_ = None
+            r_ = super().post_file(path, files=files, data=data, tekrar=tekrar)
+            for x in self.img:
+                if x["listing_image_id"] == (r_ or {}).get("listing_image_id"):
+                    x.update(full_width=w_, full_height=h_)
+            return r_
         if "image" not in (files or {}) and "alt_text" not in files:
             self.alt_yok += 1
             x = next(y for y in self.img if y["listing_image_id"] == int(files["listing_image_id"][1]))
@@ -140,7 +151,7 @@ BAGLI0 = {v["image_id"] for v in HAM["variation_images"]}
 # SIRALI plan (Serdar 31 Eki 1a) kod okumasi: kapi 4 + on okuma 7 (onbelleksiz) + 13 sil x 3 + 10 yukle x 13 + sira_bag (8 + 2 x (10 x 3 + 8) + 3 + 8)
 # + son (8 + 8 + 3); eski adim_plani 492 idi
 # kod okumasi (inceleme 31 Eki madde 3: sil / bag / sira POST'u 401 yenilemesiyle 4) + geri alma en kotu (madde 1)
-GERI_EN_KOTU = 7 + 13 * ((2 + 1) + (2 + 8)) + 10 * 4 + (8 + 2 * (13 * 4 + 8)) + (4 + 8) + 2 * 8
+GERI_EN_KOTU = 7 + 13 * ((2 + 1) + (2 + 8)) + 10 * 4 + (8 + 2 * (13 * 4 + 8)) + (4 + 8) + 2 * 8 + 4   # + 6a hazirlik okumasi 4
 EN_KOTU = 4 + 7 + 13 * 4 + 10 * 13 + (8 + 2 * (10 * 4 + 8) + 4 + 8) + 8 + 8 + 3 + GERI_EN_KOTU
 
 
@@ -213,8 +224,11 @@ def geri_alma(hz):
     g0 = sorted(HAM["images"], key=lambda x: x["rank"])
     for x in g0:
         rel = f"{LID}_{CIFT}/r{x['rank']}_{x['listing_image_id']}.jpg"
-        b = _io.BytesIO(); Image.new("RGB", (60, 40), (x["rank"] * 9, 30, 60)).save(b, "JPEG"); (yd / rel).parent.mkdir(parents=True, exist_ok=True)
+        b = _io.BytesIO(); Image.new("RGB", (x["full_width"], x["full_height"]) if x["rank"] == 1 else (60, 40), (x["rank"] * 9, 30, 60)).save(b, "JPEG")
+        (yd / rel).parent.mkdir(parents=True, exist_ok=True)
         (yd / rel).write_bytes(b.getvalue()); ls.append({"Path": rel, "Size": len(b.getvalue())})
+    for v in HAM["videos"]:            # 6d: adim 5 yedeginde eski video (yd_yedek.py v_<id>.mp4)
+        rel = f"{LID}_{CIFT}/v_{v['video_id']}.mp4"; (yd / rel).write_bytes(b"\x00\x00\x00\x18ftypmp42eski"); ls.append({"Path": rel, "Size": 16})
     (DEPO / "yl_ga.json").write_text(json.dumps(ls))
     ek = ("--ham-dir", str(hz.parent / "HAM"), "--yedek-dir", str(yd), "--yedek-liste", str(DEPO / "yl_ga.json"))
     api = SahteYD(); api.yukle_hata = {3: ("400", False, 0)}     # 3. yukleme kalici hata (bir_ilan 400 tekrar gondermez)
@@ -234,6 +248,7 @@ def geri_alma(hz):
             {k: rk.get(v) for k, v in api.bag.items()} == eski_rk)
     d = json.loads(dv.read_text())["ilanlar"][LID]
     kontrol(f"geri alma: DEVAM durum GERI_ALINDI ({d.get('durum')})", d.get("durum") == "GERI_ALINDI")
+    geri_hazirlik_kontrol(api, hz, DEPO / "yga", d)
     n0 = len(api.yaz)
     rc2, R2 = yaz(api, hz, po, "yga2", pd, dv, il, *ek)
     kontrol(f"geri alinmis ilan ikinci kosuda surdurulmez (canli != plan -> BLOK), yazim yok ({R2['ilanlar'][0]['durum']})",
@@ -246,13 +261,92 @@ def geri_alma(hz):
             rc3 == 1 and R3["ilanlar"][0]["durum"] == "DUR" and any("HAM" in n for n in R3["ilanlar"][0]["neden"]))
 
 
+def geri_hazirlik_kontrol(api, hz, out, d):
+    """6a (Serdar 1 Kas): geri alinan ilan icin yeni HAM + yeni kimlik adli yedek + KAYNAK_YAMA + LISTE; gercek yd_liste_uret ayni girdilerle
+    HAZIR verir ve LISTE / manifest birebir ayni; yeni hazirla kuru PLAN (canli == HAM)."""
+    import csv as _csv
+    import shutil
+    gh = out / "GERI_HAZIRLIK"
+    oz = json.loads((gh / f"{LID}.json").read_text())
+    h1 = json.loads((gh / "HAM" / f"{LID}.json").read_text())
+    canli = [x["listing_image_id"] for x in sorted(api.img, key=lambda x: x["rank"])]
+    eski = [x["listing_image_id"] for x in sorted(HAM["images"], key=lambda x: x["rank"])]
+    yeni_ad = sorted(p.name for p in (gh / "YEDEK" / f"{LID}_{CIFT}").glob("*.jpg"))
+    bek_ad = sorted(f"r{r}_{i}.jpg" for r, (i, j) in enumerate(zip(canli, eski), 1) if i != j)
+    kontrol(f"6a: GERI_HAZIRLIK HAZIR, DEVAM geri_hazirlik HAZIR ({oz['durum']} {oz['neden'][:1]})", oz["durum"] == "HAZIR" and d.get("geri_hazirlik") == "HAZIR")
+    kontrol(f"6a: yeni HAM canli galeri kimlikleri ({len(canli)}), eskiden farkli {len(bek_ad)}; yedek {len(yeni_ad)} dosya yeni kimlik adiyla",
+            [x["listing_image_id"] for x in sorted(h1["images"], key=lambda x: x["rank"])] == canli and canli != eski and yeni_ad == bek_ad
+            and len(bek_ad) > 0)
+    ky = list(_csv.DictReader(open(gh / "KAYNAK_YAMA.csv")))
+    kontrol(f"6a: KAYNAK_YAMA Botanical {oz['botanical_eski']} -> {oz['botanical_yeni']} (rank 12 yeni kimlik)",
+            ky == [dict(listing_id=LID, kaynak_image_id=str(canli[11]))] and oz["botanical_yeni"] == canli[11])
+    # gercek yd_liste_uret: yeni HAM + yama + genisletilmis yedek listesi ile -> HAZIR, LISTE / manifest ayni
+    d0 = hz.parent; d2 = DEPO / "h_geri"; d2.mkdir()
+    yl = json.loads((d0 / "yl.json").read_text()) + [{"Path": f"{LID}_{CIFT}/{n}", "Size": (gh / "YEDEK" / f"{LID}_{CIFT}" / n).stat().st_size}
+                                                    for n in yeni_ad]
+    (d2 / "yl.json").write_text(json.dumps(yl))
+    with contextlib.redirect_stdout(io.StringIO()):
+        rc = L.main(["liste", "--ciftler", str(d0 / "yd.csv"), "--kaynak", str(KOK / "docs/yd_kapak/KAPAK_KAYNAK.csv"), "--ham-dir", str(gh / "HAM"),
+                     "--kapak-dir", str(d0 / "kapak"), "--qc", str(d0 / "QC.json"), "--alt", str(d0 / "ALT.csv"), "--yedek-ozet", str(d0 / "OZET.md"),
+                     "--yedek-liste", str(d2 / "yl.json"), "--out", str(d2 / "hazir"), "--kaynak-yama", str(gh / "KAYNAK_YAMA.csv")])
+    lo = json.loads((d2 / "hazir" / "LISTE_OZET.json").read_text())["ilanlar"][LID]
+    m_lu = json.loads((d2 / "hazir" / LID / "manifest.json").read_text()); m_gh = json.loads((gh / "LISTE" / LID / "manifest.json").read_text())
+    alan = ("yedek_ids", "yedek_galeri", "yedek_baglar", "eski_kapak", "botanical_id", "ham_sha", "variation_images", "hedef")
+    fark = [k for k in alan if m_lu.get(k) != m_gh.get(k)]
+    kontrol(f"6a: yd_liste_uret (yeni HAM + KAYNAK_YAMA) HAZIR ({lo['durum']} {lo['neden'][:1]}); manifest alanlari ayni (fark {fark}); LISTE ayni",
+            rc == 0 and lo["durum"] == "HAZIR" and not fark
+            and (d2 / "hazir" / LID / f"LISTE_{LID}.csv").read_bytes() == (gh / "LISTE" / LID / f"LISTE_{LID}.csv").read_bytes())
+    sa = copy.deepcopy(api)
+    _, Rk, _ = kuru(sa, d2 / "hazir", "kga_geri")
+    kontrol(f"6a: yeni hazir ile kuru (geri alinmis canli ilan) PLAN, BLOK degil ({Rk['ilanlar'][0]['durum']} {str(Rk['ilanlar'][0]['neden'])[:100]})",
+            Rk["ilanlar"][0]["durum"] == "PLAN")
+    shutil.rmtree(d2 / "hazir" / LID / "hedef", ignore_errors=True)
+
+
+def kota_geri(hz):
+    """6b (Serdar 1 Kas): ilan yazilirken kota tabani -> geri alma da istek gonderemez -> DEVAM GERI_BEKLIYOR; kuru DUR (yeni plan yok);
+    kota yenilenince yazim kosusu ILK IS olarak geri alir (eski 13 + baglar), 6a hazirlik, kosu durur."""
+    ek = ("--ham-dir", str(hz.parent / "HAM"), "--yedek-dir", str(DEPO / "yedek_ga"), "--yedek-liste", str(DEPO / "yl_ga.json"))
+    api = SahteYD(); _, R, po = kuru(api, hz, "kkg"); dv, il = durum_dosyalari("dkg")
+    orig = api._k
+
+    def kes():
+        if kapak_tamam(api):
+            api.remaining = 9
+        return orig()
+    api._k = kes
+    rc, R1 = yaz(api, hz, po, "ykg", R["plan_damga"], dv, il, *ek)
+    api._k = orig
+    d = json.loads(dv.read_text())["ilanlar"][LID]
+    kontrol(f"6b: kota DUR ortasinda -> geri alma denendi, kota yok -> GERI_BEKLIYOR ({d.get('durum')} {str(R1['ilanlar'][0]['neden'])[-120:]})",
+            rc == 1 and d.get("durum") == "GERI_BEKLIYOR" and len(api.img) < 13)
+    api.remaining = 5000
+    _, Rk, _ = kuru(api, hz, "kkg2", dv, il)
+    kontrol(f"6b: GERI_BEKLIYOR ilan kuruda DUR (yeni plan yok) ({Rk['ilanlar'][0]['durum']})", Rk["ilanlar"][0]["durum"] == "DUR"
+            and "GERI_BEKLIYOR" in Rk["ilanlar"][0]["neden"][0])
+    rc, R2 = yaz(api, hz, po, "ykg2", R["plan_damga"], dv, il, *ek)
+    g = sorted(api.img, key=lambda x: (x["rank"], x["listing_image_id"])); g0 = sorted(HAM["images"], key=lambda x: x["rank"])
+    d = json.loads(dv.read_text())["ilanlar"][LID]
+    kontrol(f"6b: kota yenilenince ilk is geri alma: eski 13 gorsel + alt metin, DEVAM GERI_ALINDI, hazirlik {d.get('geri_hazirlik')} "
+            f"({R2['ilanlar'][0]['durum']})", rc == 1 and R2["ilanlar"][0]["durum"] == "FAIL" and len(g) == 13
+            and [x["alt_text"] for x in g] == [x["alt_text"] for x in g0] and d.get("durum") == "GERI_ALINDI" and d.get("geri_hazirlik") == "HAZIR")
+    api.remaining = 50
+    dv3, il3 = durum_dosyalari("dkg3"); dv3.write_text(json.dumps({"ilanlar": {LID: dict(durum="GERI_BEKLIYOR", cift=CIFT)}}))
+    n0 = len(api.yaz)
+    rc, R3 = yaz(api, hz, po, "ykg3", R["plan_damga"], dv3, il3, *ek)
+    kontrol(f"6b: GERI_BEKLIYOR + kota geri alma en kotusunden az -> KALAN, istek yazimi yok ({R3['ilanlar'][0]['durum']})",
+            R3["ilanlar"][0]["durum"] == "KALAN" and len(api.yaz) == n0)
+
+
 class SahteTG(SahteYD):
     """tek gecis (F-B madde 2): envanter PUT / GET, ilan PATCH (baslik + aciklama), video POST / GET / DELETE; PATCH hatasi enjekte edilebilir"""
     def __init__(self, **kw):
         super().__init__(**kw)
         self.inv = copy.deepcopy(HAM["inventory"]); self.L = dict(state="active", title="Eski baslik", description="Eski aciklama")
-        self.vid = [dict(video_id=900001, video_state="active")]; self.patch_hata = 0; self.patchler = []
+        self.vid = [dict(video_id=847831962, video_state="active")]; self.patch_hata = 0; self.patchler = []
         self.put_sonra_hata = 0; self.patch_sonra_hata = 0; self.video_hata = False; self.stil_kaydir = 0   # inceleme madde 13: gercekci hatalar
+        self.ru = dict(title="Старое", description="Старый текст без пометки.", tags=["a", "b"]); self.ru_put = []; self.ru_hata = 0
+        self.ru_sonra_hata = 0
 
     def get(self, path, params=None, ok404=False):
         if path == "/listings/batch/inventory":
@@ -265,6 +359,8 @@ class SahteTG(SahteYD):
             self._k(); self.n_get += 1; return {"results": copy.deepcopy(self.vid)}
         if path == f"/listings/{LID}":
             self._k(); self.n_get += 1; return dict(copy.deepcopy(self.L), listing_id=int(LID))
+        if path.endswith("/translations/ru"):
+            self._k(); self.n_get += 1; return copy.deepcopy(self.ru) if self.ru else ({} if ok404 else {})
         if path.endswith("/variation-images"):
             self._k(); self.n_get += 1; return self.get_vi()
         return super().get(path, params, ok404)
@@ -303,6 +399,15 @@ class SahteTG(SahteYD):
         ad_vid = {a: i for i, a in self._vid_ad().items()}
         return {"results": [dict(property_id=513, value_id=ad_vid.get(k), value=k, image_id=v) for k, v in self.bag.items()]}
 
+    def put(self, path, data):          # updateListingTranslation (6c)
+        self._k(); self.yaz.append(("ru_put",)); self.ru_put.append(dict(data))
+        if self.ru_hata:
+            self.ru_hata -= 1; raise SystemExit("HATA: PUT translations/ru -> 500 (test, uygulanmadi)")
+        self.ru = dict(title=data["title"], description=data["description"], tags=[t for t in data.get("tags", "").split(",") if t])
+        if self.ru_sonra_hata:
+            self.ru_sonra_hata -= 1; raise SystemExit("HATA: PUT translations/ru -> 500 (test, uygulandi)")
+        return dict(self.ru)
+
     def patch(self, path, data):
         self._k(); self.yaz.append(("patch", tuple(sorted(data)))); self.patchler.append(dict(data))
         if self.patch_hata:
@@ -340,8 +445,9 @@ def tek_gecis(hz):
     vd = d / "video"; vd.mkdir(); (vd / "v.mp4").write_bytes(b"\x00\x00\x00\x18ftypmp42test")
     (vd / "VIDEO_MANIFEST.json").write_text(json.dumps({LID: dict(dosya="v.mp4", sha256=Y.sha256(vd / "v.mp4"))}))
     yd = DEPO / "yedek_ga"
-    tg = ("--tek-gecis", "--yapi-plan", str(yplan), "--metin-json", str(d / "metin.json"), "--video-dir", str(vd))
-    ek = tg + ("--ham-dir", str(hz.parent / "HAM"), "--yedek-dir", str(yd), "--yedek-liste", str(DEPO / "yl_ga.json"))
+    tg = ("--tek-gecis", "--yapi-plan", str(yplan), "--metin-json", str(d / "metin.json"), "--video-dir", str(vd),
+          "--ham-dir", str(hz.parent / "HAM"), "--yedek-liste", str(DEPO / "yl_ga.json"))      # 6d: video yedegi kuruda da denetlenir
+    ek = tg + ("--yedek-dir", str(yd))
     api = SahteTG()
     _, R, po = kuru(api, hz, "ktg", None, None, *tg)
     pd = R["plan_damga"]; s = R["ilanlar"][0]
@@ -370,7 +476,7 @@ def tek_gecis(hz):
             rc == 1 and s["durum"] == "FAIL" and any("GERI ALINDI" in n for n in s["neden"]))
     kontrol(f"tek gecis geri alma: galeri eski 13 + alt metin, envanter eski 15 urun ({len(api2.inv['products'])}), metin eski, video eski",
             [x["alt_text"] for x in g] == [x["alt_text"] for x in g0] and len(api2.inv["products"]) == len(HAM["inventory"]["products"])
-            and api2.L["title"] == "Eski baslik" and api2.L["description"] == "Eski aciklama" and [v["video_id"] for v in api2.vid] == [900001])
+            and api2.L["title"] == "Eski baslik" and api2.L["description"] == "Eski aciklama" and [v["video_id"] for v in api2.vid] == [847831962])
 
     def senaryo(ad, **ayar):
         x = SahteTG()
@@ -397,7 +503,7 @@ def tek_gecis(hz):
             f"{str(sx['neden'])[-140:]})", rcx == 1 and sx["durum"] == "FAIL" and eski_hal(x))
     x, rcx, sx, dvx, ilx, pk, pdx = senaryo("vh", video_hata=True)
     kontrol(f"video hatasi: DUR, galeri / envanter / metin yeni kalir, eski video yerinde ({sx['durum']})",
-            rcx == 1 and sx["durum"] == "DUR" and [v["video_id"] for v in x.vid] == [900001] and len(x.inv["products"]) == 140)
+            rcx == 1 and sx["durum"] == "DUR" and [v["video_id"] for v in x.vid] == [847831962] and len(x.inv["products"]) == 140)
     with contextlib.redirect_stdout(io.StringIO()):
         rcy = K.sonlandir(x, "1", arg(hz, DEPO / "yvh2", "--confirm", "YD_KAPAK", "--plan", str(pk / "PLAN_YD.json"), "--plan-damga", pdx,
                                       "--devam", str(dvx), "--ilerleme", str(ilx), "--kosu", "223", *ek))
@@ -412,6 +518,67 @@ def tek_gecis(hz):
     sk = Rk["ilanlar"][0]
     kontrol(f"madde 5: kuruda metin kapisi (yasak ifade + AI beyani yok) -> BLOK, yazim yok ({sk['durum']} {str(sk['neden'])[:120]})",
             sk["durum"] == "BLOK" and "metin kapisi" in sk["neden"][0] and not x.yaz)
+
+
+def tek_gecis_ru_video(hz):
+    """6c RU tek geciste (karar 3: EN + RU birlikte, kuruda), 6d eski video yedegi zorunlu, karar 2 geri almada yedek sha (Serdar 1 Kas)."""
+    import test_yd_yapi as TY
+    from beyan_marka_yaz import BEYAN, RU_BEYAN
+    d = DEPO / "tgr"; d.mkdir()
+    with contextlib.redirect_stdout(io.StringIO()):
+        _, yplan = TY.kuru(TY.Sahte(), d)
+    ru = dict(title="Новый постер", description="Новый текст.\n\n" + RU_BEYAN, tags=["x", "y"])
+    def metin(ru_):
+        m = {LID: dict(title="Cancer and Libra 1st Anniversary Print", description="Yeni aciklama.\n\n" + BEYAN, **({"ru": ru_} if ru_ else {}))}
+        f = d / f"m{len(list(d.glob('m*.json')))}.json"; f.write_text(json.dumps(m)); return f
+    vd = d / "video"; vd.mkdir(); (vd / "v.mp4").write_bytes(b"\x00\x00\x00\x18ftypmp42test")
+    (vd / "VIDEO_MANIFEST.json").write_text(json.dumps({LID: dict(dosya="v.mp4", sha256=Y.sha256(vd / "v.mp4"))}))
+
+    def tgx(mf, yl=DEPO / "yl_ga.json"):
+        return ("--tek-gecis", "--yapi-plan", str(yplan), "--metin-json", str(mf), "--video-dir", str(vd), "--ham-dir", str(hz.parent / "HAM"),
+                "--yedek-liste", str(yl))
+
+    def kos(ad, mf, kur=None, yl=DEPO / "yl_ga.json"):
+        x = SahteTG()
+        _, Rk, pk = kuru(x, hz, f"k{ad}", None, None, *tgx(mf, yl))
+        if Rk["ilanlar"][0]["durum"] != "PLAN":
+            return x, None, Rk["ilanlar"][0], None
+        if kur:
+            kur(x)
+        dvx, ilx = durum_dosyalari(f"d{ad}")
+        rcx, Rx = yaz(x, hz, pk, f"y{ad}", Rk["plan_damga"], dvx, ilx, *tgx(mf, yl), "--yedek-dir", str(DEPO / "yedek_ga"))
+        return x, rcx, Rx["ilanlar"][0], Rk["ilanlar"][0]
+    x, rc, s_, sk = kos("r1", metin(ru))
+    w = [y[0] for y in x.yaz]
+    kontrol(f"6c: RU tek geciste yazildi (EN PATCH -> RU PUT -> video), PASS, olculen istek {s_ and s_['istek']} <= en kotu {sk and sk['en_kotu']}",
+            rc == 0 and s_["durum"] == "PASS" and x.ru["description"] == ru["description"] and x.ru["tags"] == ["x", "y"]
+            and w.index("patch") < w.index("ru_put") < w.index("video") and s_["istek"] <= sk["en_kotu"])
+    x, rc, s_, _ = kos("r2", metin(ru), kur=lambda x: setattr(x, "ru_hata", 1))
+    g = sorted(x.img, key=lambda y: (y["rank"], y["listing_image_id"])); g0 = sorted(HAM["images"], key=lambda y: y["rank"])
+    kontrol(f"6c: RU PUT hatasi -> FAIL + geri alma: EN eski (karar 2: beyansiz eski metin yedek sha ile), RU eski, galeri eski 13 ({s_['durum']})",
+            rc == 1 and s_["durum"] == "FAIL" and x.L["description"] == "Eski aciklama" and x.ru["description"] == "Старый текст без пометки."
+            and [y["alt_text"] for y in g] == [y["alt_text"] for y in g0])
+    x, rc, s_, _ = kos("r3", metin(ru), kur=lambda x: setattr(x, "ru_sonra_hata", 1))
+    kontrol(f"6c + karar 2: RU PUT uygulandi + 500 -> RU eski beyansiz metne yedek sha ile birebir donuldu ({s_['durum']})",
+            rc == 1 and x.ru["description"] == "Старый текст без пометки." and x.ru["tags"] == ["a", "b"] and x.L["description"] == "Eski aciklama")
+    x, rc, s_, _ = kos("r4", metin(dict(ru, description="Новый текст без пометки.")))
+    kontrol(f"karar 3 (YD): RU yeni metin beyansiz -> kuruda BLOK, EN de yazilmaz, Etsy'ye yazim yok ({s_['durum']} {str(s_['neden'])[:120]})",
+            s_["durum"] == "BLOK" and "RU yeni aciklamada AI beyani yok" in str(s_["neden"]) and not x.yaz)
+    x, rc, s_, _ = kos("r5", metin(ru), kur=lambda x: setattr(x, "ru", None))
+    kontrol(f"6c: canli RU ceviri yok -> RU yazilmaz (silme ucu yok), not raporda, PASS ({s_['durum']})",
+            rc == 0 and s_["durum"] == "PASS" and any("RU ceviri yok" in n for n in s_["neden"]) and not x.ru_put)
+    yl2 = DEPO / "yl_videosuz.json"; yl2.write_text(json.dumps([z for z in json.loads((DEPO / "yl_ga.json").read_text()) if not z["Path"].endswith(".mp4")]))
+    x, rc, s_, _ = kos("v1", metin(None), yl=yl2)
+    kontrol(f"6d: eski video adim 5 yedeginde yok -> kuruda BLOK, yazim yok ({s_['durum']} {str(s_['neden'])[:110]})",
+            s_["durum"] == "BLOK" and "video yedegi yok" in str(s_["neden"]) and not x.yaz)
+    x, rc, s_, _ = kos("v2", metin(None), kur=lambda x: setattr(x, "vid", [dict(video_id=777, video_state="active")]))
+    kontrol(f"6d: canli video kuru sonrasi degisti (yedekte yok) -> DUR, eski video SILINMEDI, yeni yuklenmedi ({s_['durum']})",
+            rc == 1 and s_["durum"] == "DUR" and [v["video_id"] for v in x.vid] == [777] and ("video",) not in x.yaz and ("video_sil",) not in x.yaz)
+    R_ = dict(tg_metin_eski=dict(title="Eski baslik", description="Eski aciklama"), tg_metin_eski_sha="0" * 64)
+    x = SahteTG(); x.L.update(title="Yeni", description="Yeni aciklama.\n\n" + BEYAN)
+    so = K.tg_geri(x, "1", LID, {"k": {}}, None, DEPO, R_, None)
+    kontrol(f"karar 2 (YD): beyansiz eski metne donus, sha yedekle ayni degil -> geri alma YOK, sorun ({str(so)[:110]})",
+            any("geri alma izni" in z for z in so) and x.L["description"].startswith("Yeni aciklama") and not x.patchler)
 
 
 def yukleme_hatasi(hz):
@@ -602,11 +769,13 @@ def main():
     yukleme_hatasi(hz)
     geri_alma(hz)
     tek_gecis(hz)
+    tek_gecis_ru_video(hz)
     bag_bos(hz)
     devam_zaten_blok(hz)
     bloklar(hz)
     eski_kapak(hz)
     kota_ve_kilit(hz)
+    kota_geri(hz)
     gec = sum(1 for _, ok in SONUC if ok)
     print(f"yd_kapak_yukle testleri: {gec}/{len(SONUC)} PASS")
     return 0 if gec == len(SONUC) else 1

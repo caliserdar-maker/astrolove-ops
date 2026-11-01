@@ -59,14 +59,22 @@ YD yolu (`scripts/kapak78/yd_kapak_yukle.py` tek gecis) yalniz EN baslik + acikl
   JSON dizesi govde kapsamda; `description: None` kismi yazim sayilir. Surec cikisi alt surecte olculuyor (F8); cikista logging.shutdown.
 - Canli yukleyicilerde yalniz kapi davranisi testi (`--canli`): ilgisiz bir betik degisikligi canli yazimi / geri almayi durdurmaz.
 
-## Acik kararlar (Serdar)
-1. Kismi yazim ile yayina alma: `state=active` (by78_yayinla:202, pod_publish:127, wp_ilan_yayinla:74) ve aciklamasiz updateListing
-   (taslagi otomatik yayina alir) canli aciklamanin beyanini OKUMAZ. Oneri: yayina alan / taslaga dokunan yazimdan once 1 GET ile
-   canli aciklamada beyan kontrolu (ilan basina +1 istek).
-2. Geri alma: eski canli metin beyansizsa kapi geri almayi durdurur (yd tg_geri, kupa_galeri78 desc_once, burc_gift_yaz). Oneri: yalniz
-   yedekteki eski metnin sha'si ile birebir ayni metne donuste izin (istisna kayitli), ya da geri almada metin yerine beyanli yeni metin.
-3. RU sirasi: pod_inventory_update / pod_boy_15 / pod_pilot_15 / beyan_marka_yaz once EN, sonra RU yazar; RU beyansizsa ilan EN-yeni /
-   RU-eski kalir. Oneri: ilan basina iki kapiyi yazimdan once birlikte calistir.
-4. RU yanlis FAIL: RU PUT hep tum metni gonderir; eski RU metni beyansiz ilanda yalniz baslik / etiket duzeltmesi de FAIL olur.
-5. kupa_galeri78 kuru plani (metin_plani) beyan kontrolu yapmaz; canli kupa yazimi bittikten sonra eklenecek (kosu sirasinda kupa koduna
-   dokunulmadi; bugunku kupa metni beyanli, 58 ilan PASS).
+## Kararlar (Serdar 1 Kas, Denetim 20261101A) - uygulandi (dal ai-beyan-v2; kupa 78/78 sonrasi birlestirilir)
+1. Yayina alma: `Etsy.yayin_beyan_kontrol` (`_call` icinde): aciklamasiz updateListing (state=active / taslak guncelleme) once canli ilani
+   okur (bu kosuda 15 dk icinde okunmussa bellekten; yoksa +1 GET, `yayin_okuma` sayaci); ilan active degilse canli aciklamada EN beyan
+   zorunlu. Acikca state=inactive / draft yazimi muaf. Dogrudan requests yolu (by78_yayinla) ayrica cagirir; statik test C state yazan
+   dogrudan istekte `yayin_beyan_kontrol` arar. Sayilan yukleyiciler (kupa, YD, eski78) aciklamasiz updateListing yapmaz: en kotu ek 0.
+2. Geri alma: `geri_alma_izni(ilan, metin, yedek_sha, dil)` yalniz yedek alinirken kaydedilen sha ile birebir ayni metne donuse izin verir
+   (sha yok / farkli -> DUR). Kullanan: yd tg_geri (EN + RU), kupa_galeri78 geri alma (`desc_once_sha` plan alani; eski planlarda yok ->
+   beyansiz eski metne donus DUR), burc_gift_yaz geri al (yedek dosyasindaki metin; `aciklama_sha` varsa o).
+3. RU sirasi: `beyan_on_kontrol(en_yeni, ru_yeni, ru_canli)` yazimdan ONCE; biri beyansizsa hicbiri yazilmaz, ilan ATLANDI / ATLA + neden:
+   pod_inventory_update, pod_boy_15, pod_pilot_15, beyan_marka_yaz (AST testi H3: kontrol ayni fonksiyonda tum yazimlardan once),
+   yd tek gecis (kuruda tg_metin_kapisi -> BLOK).
+4. RU yanlis FAIL: ceviri yaziminda gonderilen RU aciklama canli RU aciklamayla ayniysa (yalniz baslik / etiket) ve beyansizsa yazim izinli;
+   ilan RU_BEYANSIZ listesine (listing_id, burc cifti, dil, tarih, kosu): yerel RU_BEYANSIZ.csv + Drive TEMP/RU_BEYANSIZ/RU_BEYANSIZ_<kosu>_<pid>.csv
+   (rclone varsa). Aciklamaya dokunan RU yaziminda kural aynen.
+5. Kupa kuru plani: `kupa_galeri78.beyan_hata` metin planinda; yeni aciklama beyansizsa plan hatasi (BLOK), yazim yok.
+
+## Hala acik (bilgi)
+- Sorgu dizesi / multipart disi kacis yollari (Etsy'nin PATCH'te sorgu parametresini okuyup okumadigi) dogrulanmadi.
+- RU geri almasinda eski RU metni RU_YASAK ifadesi iceriyorsa ru_yazim_kapisi geri almayi durdurur (elle; sorun raporda).

@@ -62,7 +62,7 @@ class YedekTest(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def ilan(self, lid, cift, bozuk_rank=None):
+    def ilan(self, lid, cift, bozuk_rank=None, video_bozuk=False):
         h = json.loads(json.dumps(HAM)); h["listing"]["listing_id"] = int(lid)
         for g in h["images"]:
             yol = f"{lid}/{g['listing_image_id']}.jpg"
@@ -70,6 +70,10 @@ class YedekTest(unittest.TestCase):
             cdn = (3000, 2250) if wh == (3200, 2400) else wh              # etsystatic uzun kenar 3000 (kosu 40491659087 olcumu)
             S.DOSYA[yol] = jpg((cdn[0] - 8, cdn[1]) if g["rank"] == bozuk_rank else cdn)
             g["url_fullxfull"] = f"{self.url}/{yol}"
+        for v in h.get("videos") or []:                                  # 6d: video da yedeklenir
+            yol = f"{lid}/v{v['video_id']}.mp4"
+            S.DOSYA[yol] = b"\x00\x00\x00\x18ftypmp42" + b"\x00" * 64 if not video_bozuk else b"<html>"
+            v["video_url"] = f"{self.url}/{yol}"
         (self.ham / f"{lid}.json").write_text(json.dumps(h))
         return f"{lid},{cift},A,B\n"
 
@@ -89,6 +93,16 @@ class YedekTest(unittest.TestCase):
         self.assertEqual(len(b), 5)
         self.assertEqual([(x["stil"], x["rank"]) for x in b if x["stil"] == "Botanical"], [("Botanical", "12")])
         self.assertEqual(len(json.loads((d / "GALERI.json").read_text())["gorseller"]), 13)
+        v = list(csv.DictReader(open(self.out / "VIDEO_OZET.csv")))
+        self.assertEqual([(x["video_id"], x["durum"]) for x in v], [("847831962", "PASS")])
+        self.assertTrue((d / "v_847831962.mp4").read_bytes()[4:8] == b"ftyp")
+
+    def test_05_video_bozuk_fail(self):     # 6d: video MP4 degil -> cikis 1, galeri OZET satiri yine PASS (liste kapisi ayni)
+        rc, log, oz = self.kos([self.ilan("4595350971", "CANCER_LIBRA", video_bozuk=True)])
+        self.assertEqual(rc, 1, log)
+        self.assertIn("ilan PASS 1/1", oz)
+        v = list(csv.DictReader(open(self.out / "VIDEO_OZET.csv")))
+        self.assertEqual(v[0]["durum"], "FAIL"); self.assertIn("ftyp", v[0]["not"])
 
     def test_02_boyut_ve_ham_eksik_fail(self):
         rc, log, oz = self.kos([self.ilan("4595350971", "CANCER_LIBRA", bozuk_rank=5), "4595373190,AQUARIUS_AQUARIUS,A,B\n"])

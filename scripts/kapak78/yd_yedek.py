@@ -5,7 +5,10 @@ full_width / full_height; variation_images = Style bagi) + data/pod/yd78_ids.csv
 Islem (yedek_mb_kontrol.py A kismiyla ayni yontem; paylasilan dosyaya dokunmamak icin buraya kopyalandi, Merkez 27 Eki):
 <out>/<listing_id>_<CIFT>/r<rank>_<image_id>.jpg + GALERI.json (gorseller + baglar aynen) + <out>/OZET.md (ilan basina 13 dosya, boyut = JSON; JSON uzun kenari 3000'i asarsa CDN ayni oranda 3000'e kucultur) + <out>/BAGLAR.csv (listing_id, cift, stil, value_id, image_id,
 rank). Indirme etsystatic CDN'den (Etsy API degil).
-Kapilar: yd78 listesindeki her ilanin HAM dosyasi var ve listing_id ayni; yoksa o ilan FAIL (OZET'e yazilir). Cikis: 78/78 PASS ise 0."""
+Kapilar: yd78 listesindeki her ilanin HAM dosyasi var ve listing_id ayni; yoksa o ilan FAIL (OZET'e yazilir). Cikis: 78/78 PASS ise 0.
+VIDEO (Serdar 1 Kas 6d, inceleme madde 11): HAM videos[].video_url -> <out>/<listing_id>_<CIFT>/v_<video_id>.mp4 (MP4 imzasi 'ftyp', boyut > 0)
++ <out>/VIDEO_OZET.csv (listing_id, cift, video_id, boyut, durum, not). yd_kapak_yukle tek geciste eski video bu dosya yedek listesinde
+yoksa silinmez. Video FAIL'i OZET.md galeri satirini degistirmez (liste kapisi ayni), cikis 1 verir."""
 import argparse
 import csv
 import json
@@ -42,6 +45,25 @@ def indir(u, p, tekrar=4):
             if i == tekrar - 1:
                 return f"{type(e).__name__}: {str(e)[:80]}"
             time.sleep(2 ** i)
+
+
+def video_yedek(ilanlar, kok):
+    """6d: ilan videolari (CDN, Etsy API degil). -> FAIL sayisi"""
+    satir = []
+    for k in ilanlar:
+        d = kok / f"{k['listing_id']}_{k['cift']}"; d.mkdir(parents=True, exist_ok=True)
+        for v in k.get("videos") or []:
+            p = d / f"v_{v.get('video_id')}.mp4"
+            h = indir(v.get("video_url") or "", p) if v.get("video_url") else "video_url yok"
+            b = p.read_bytes()[:12] if p.exists() else b""
+            if not h and (len(b) < 8 or b[4:8] != b"ftyp"):
+                h = "MP4 imzasi yok (ftyp)"
+            satir.append([k["listing_id"], k["cift"], v.get("video_id"), p.stat().st_size if p.exists() else 0, "FAIL" if h else "PASS", h or ""])
+    with open(kok / "VIDEO_OZET.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f); w.writerow(["listing_id", "cift", "video_id", "boyut", "durum", "not"]); w.writerows(satir)
+    fail = sum(1 for x in satir if x[4] != "PASS")
+    print(f"VIDEO YEDEK: {len(satir) - fail}/{len(satir)} PASS")
+    return fail
 
 
 def yedek(ilanlar, kok, beklenen=BEKLENEN, baslik="YD 78 galeri yedegi (plan v3 adim 5)"):
@@ -104,7 +126,7 @@ def ilanlar_oku(ham_dir, ciftler):
         if str((h.get("listing") or {}).get("listing_id")) != r["listing_id"]:
             eksik.append((r["listing_id"], r["cift"], "HAM listing_id farkli")); continue
         g = sorted(h.get("images") or [], key=lambda x: x.get("rank") or 0)
-        ilan.append(dict(listing_id=r["listing_id"], cift=r["cift"], gorseller=g, baglar=h.get("variation_images") or []))
+        ilan.append(dict(listing_id=r["listing_id"], cift=r["cift"], gorseller=g, baglar=h.get("variation_images") or [], videos=h.get("videos") or []))
     return rows, ilan, eksik
 
 
@@ -115,6 +137,7 @@ def main(argv=None):
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     rows, ilan, eksik = ilanlar_oku(a.ham_dir, a.ciftler)
     gecti, n, dosya = yedek(ilan, out) if ilan else (0, 0, 0)
+    vfail = video_yedek(ilan, out) if ilan else 0
     if eksik:
         with open(out / "OZET.md", "a", encoding="utf-8") as f:
             f.writelines(f"| {lid} | {c} | 0 | FAIL | {neden} |\n" for lid, c, neden in eksik)
@@ -125,7 +148,7 @@ def main(argv=None):
             for b in k["baglar"]:
                 w.writerow([k["listing_id"], k["cift"], b.get("value"), b.get("value_id"), b.get("image_id"), rk.get(b.get("image_id"), "")])
     print(f"YD YEDEK: ilan PASS {gecti}/{len(rows)} | dosya {dosya} (beklenen {BEKLENEN * len(rows)}) | HAM eksik {len(eksik)}")
-    return 0 if gecti == len(rows) and not eksik else 1
+    return 0 if gecti == len(rows) and not eksik and not vfail else 1
 
 
 if __name__ == "__main__":

@@ -283,7 +283,8 @@ class Sahte:
 
 
 # ------------------------------------------------------------------ test duzeni
-DESC_FARKLI = "A personalized mug for {a} and {b}.\n\n[ HOW TO PERSONALIZE ]\n1. Name Under {a} (up to 10 letters)\n2. Name Under {b} (up to 10 letters)\n"
+BEYAN_T = "We use AI tools to help create the artwork, and every design is reviewed and finished by us."
+DESC_FARKLI = "A personalized mug for {a} and {b}.\n\n" + BEYAN_T + "\n\n[ HOW TO PERSONALIZE ]\n1. Name Under {a} (up to 10 letters)\n2. Name Under {b} (up to 10 letters)\n"
 PER = lambda a, b: [dict(question_id=77, question_text="Personalization", question_type="text_input", required=True,  # noqa: E731
                          max_allowed_characters=256, instructions=f"1. Name Under {a} (max 10)\n2. Name Under {b} (max 10)\n3. Message")]
 
@@ -455,7 +456,7 @@ def birim():
     kontrol("metin: canli Left name / Right name -> First Name / Second Name (Serdar 31 Eki 7a)", d == "DEGISTI" and y ==
             "1. First Name (max 10 letters)\n2. Second Name (max 10 letters)\n3. Message (max 30 characters or blank)", y)
     kontrol("metin: Left / Right sayisi tutmaz -> TEK", K.isim_degistir("Left name, Left name, Right name", "Leo")[1] == "TEK")
-    mp = K.metin_plani({"description": "1. Left name (up to 10 letters)\n2. Right name (up to 10 letters)"},
+    mp = K.metin_plani({"description": "1. Left name (up to 10 letters)\n2. Right name (up to 10 letters)\n\n" + BEYAN_T},
                        [dict(question_id=5, question_text="Personalization", question_type="text_input", instructions=canli)], "Leo", "Leo")
     kontrol("metin: canli Left / Right aciklama + talimat -> yaz, ikisi de First / Second", mp["yaz"] and not mp["hata"]
             and "First Name" in mp["desc_sonra"] and "Left name" not in mp["desc_sonra"]
@@ -484,6 +485,14 @@ def birim():
     mp = K.metin_plani({"description": "Your names"}, [dict(instructions="Your names")], "Leo", "Leo")
     kontrol("metin: kalip yok -> hata (elle)", any("kalibi" in h for h in mp["hata"]))
     kontrol("metin: farkli burc yazim yok", K.metin_plani({"description": "Name Under Leo"}, [], "Aries", "Leo")["yaz"] is False)
+    # karar 5 (Serdar 1 Kas): kuru planda AI beyan kapisi
+    mp = K.metin_plani({"description": "1. Left name (up to 10 letters)\n2. Right name (up to 10 letters)"},
+                       [dict(question_id=5, question_text="Personalization", question_type="text_input", instructions=canli)], "Leo", "Leo")
+    kontrol("karar 5: ayni burc, yeni aciklama beyansiz -> plan hatasi (BLOK), yazim yok", any("AI beyani yok" in h for h in mp["hata"]), mp["hata"])
+    mp = K.metin_plani({"description": TR.en("Cancer", "Libra", "Cancer gifts or Libra gifts", beyan=False)}, [], "Cancer", "Libra")
+    kontrol("karar 5: farkli burc, beyansiz eski kalip -> yaz False + beyan hatasi", mp["yaz"] is False
+            and any("AI beyani yok" in h for h in mp["hata"]), mp["hata"])
+    kontrol("karar 2: plan desc_once_sha = sha(desc_once) (geri alma izni yedekten)", mp["desc_once_sha"] == K.EC.ozet(mp["desc_once"]))
     kontrol("alt metin: YASAK_EN / RU_YASAK kapisi", not K.alt_gecerli("mug printed by Printful") and not K.alt_gecerli("lasts 50 years")
             and K.alt_gecerli("Two mug sizes: 11 oz and 15 oz"))
     ad, mx = K.adim_kur(14, list(range(1, 15)), {1, 8, 9, 10, 11, 12, 13, 14}, list(range(1, 15)), range(7, 15), True)

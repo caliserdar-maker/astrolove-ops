@@ -485,6 +485,18 @@ def main():
     api = Sahte(); api.remaining = None; r, _ = kos(api)
     s.append(("A6: kota basligi okunamadi -> DUR, yazma yok", isinstance(r, str) and "kota" in r and api.yaz == []))
     s += gece_aday()
+    # karar 3 (Serdar 1 Kas): EN ve RU yazimdan ONCE birlikte; RU yeni metin beyansizsa EN de yazilmaz, sonuc ATLA + neden (FAIL degil)
+    eski_ru_plan = m.ru_plan
+    m.ru_plan = lambda desc, aile: ("Новый текст без пометки.", 0, "test: beyansiz RU")
+    try:
+        api = Sahte(ilanlar={"1": (KUPA, 8, "Старый текст.")}); ok3, R3 = kos(api)
+        s.append(("karar 3: RU yeni metin beyansiz -> EN de yazilmaz, ATLA + neden (FAIL degil)",
+                  api.yaz == [] and ok3 is True and R3["sonuc"] == "ATLA" and "beyan on kontrolu" in R3.get("neden", "")
+                  and "RU yeni" in R3["neden"]))
+    finally:
+        m.ru_plan = eski_ru_plan
+    api = Sahte(ilanlar={"1": (KUPA, 8, RU)}); ok4, R4 = kos(api)
+    s.append(("karar 3: iki metin beyanli -> yazim surer (EN PATCH + RU PUT)", ok4 is True and [x[0] for x in api.yaz] == ["patch", "put"]))
     for ad, ok_ in s:
         print(("PASS " if ok_ else "FAIL ") + ad)
     n = sum(ok_ for _, ok_ in s)

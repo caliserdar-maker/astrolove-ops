@@ -320,6 +320,18 @@ def geri_alma_izni(ilan, metin, yedek_sha, dil="en"):
     return s_
 
 
+def beyan_on_kontrol(en_yeni=None, ru_yeni=None, ru_canli=None):
+    """Karar 3 (Serdar 1 Kas): EN + RU yazan ilanda yazimdan ONCE iki yeni metin birlikte denetlenir. None = o dil yazilmayacak.
+    RU: beyanli olmali ya da canli RU aciklamasiyla ayni (karar 4: aciklamaya dokunulmuyor). Donus: neden listesi (bos = yazilabilir).
+    Bos degilse cagiran HICBIR metni yazmaz; ilan ATLANDI + neden (FAIL degil)."""
+    neden = []
+    if en_yeni is not None and not beyan_var(en_yeni, "en"):
+        neden.append(f"EN yeni aciklamada AI beyani yok (\"{AI_BEYAN['en']}\")")
+    if ru_yeni is not None and not beyan_var(ru_yeni, "ru") and not (ru_canli is not None and _beyan_norm(ru_canli) == _beyan_norm(ru_yeni)):
+        neden.append(f"RU yeni aciklamada AI beyani yok (\"{AI_BEYAN['ru']}\")")
+    return neden
+
+
 _BURC = ("Aquarius", "Aries", "Cancer", "Capricorn", "Gemini", "Leo", "Libra", "Pisces", "Sagittarius", "Scorpio", "Taurus", "Virgo")
 _CIFT_TABLO = None
 

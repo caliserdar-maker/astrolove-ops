@@ -3,7 +3,7 @@
 Etsy kurali: "Sellers must disclose within their listing description if an item is created with the use of AI." Kapi tek yerde:
 etsy_common.Etsy._call -> ai_beyan_kapisi (aciklama yazan her istek). Bu test:
   A  kapi birimi: EN updateListing (PATCH / PUT), createDraftListing (POST data / json), ceviri PUT (RU), kismi yazim (aciklamasiz) gecer,
-     celisen govde / tanimsiz dil / beyansiz metin FAIL; YD yolu yalniz EN yazar (RU kapisi YD'de yok; yd_kapak_yukle tek gecis PATCH'i).
+     celisen govde / tanimsiz dil / beyansiz metin FAIL; YD tek gecis EN PATCH + RU PUT (6c, 1 Kas).
   B  _call gercek yol: Etsy._call beyansiz aciklamada istek GONDERMEZ (requests cagrilmaz), beyanliysa gonderir; BEYAN_HATA dolar.
   C  dogrudan requests korumasi (statik): scripts/ altinda Etsy'ye dogrudan requests.post/put/patch yapan ve govdesinde description olan
      her cagrinin 8 satir oncesinde ai_beyan_kapisi( olmali (createDraftListing: by78_taslak, by_taslak_ac, kupa_taslak). Yeni bir
@@ -71,10 +71,16 @@ def birim():
       and not gecer("PATCH", "/shops/1/listings/4595350971", data={"title": "T", "description": d0}))
     yd = (KOK / "scripts/kapak78/yd_kapak_yukle.py").read_text(encoding="utf-8")
     agac = ast.parse(yd)
-    cagri = [n for n in ast.walk(agac) if isinstance(n, ast.Call) and isinstance(n.func, (ast.Attribute, ast.Name))
-             and getattr(n.func, "attr", getattr(n.func, "id", "")) == "ru_yazim_kapisi"]
-    dize = [n for n in ast.walk(agac) if isinstance(n, ast.Constant) and isinstance(n.value, str) and "/translations" in n.value]
-    k("A11 YD yolunda RU ceviri yazimi yok (kodda /translations dizesi ve ru_yazim_kapisi cagrisi yok; yorumlar sayilmaz)", not cagri and not dize)
+    # 6c (Serdar 1 Kas): YD tek geciste RU da yazilir; YALNIZ api.put ile (Etsy._call: ru_yazim_kapisi + ai_beyan_kapisi), dogrudan HTTP yok;
+    # kuruda tg_metin_kapisi EN + RU beyanini birlikte (beyan_on_kontrol) ve RU_YASAK'i denetler
+    ru_yaz = [n for n in ast.walk(agac) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+              and any(isinstance(x, ast.JoinedStr) and "/translations/ru" in ast.unparse(x) for x in n.args[:1])
+              and n.func.attr not in ("get",)]
+    kap = next(n for n in ast.walk(agac) if isinstance(n, ast.FunctionDef) and n.name == "tg_metin_kapisi")
+    kap_src = ast.unparse(kap)
+    k(f"A11 YD RU yazimi yalniz api.put ({[n.func.attr for n in ru_yaz]}), dogrudan requests yok; kuru kapisi beyan_on_kontrol + RU_YASAK",
+      ru_yaz and all(n.func.attr == "put" and ast.unparse(n.func.value) == "api" for n in ru_yaz) and "requests" not in yd
+      and "beyan_on_kontrol" in kap_src and "RU_YASAK" in kap_src)
 
 
 def call_yolu():
@@ -452,6 +458,36 @@ def yayin_ve_geri():
         E.BEYAN_HATA.clear(); E.RU_BEYANSIZ.clear(); E.GERI_IZIN.clear(); E.GERI_ISTISNA.clear()
 
 
+ON_KONTROL = {"scripts/etsy/pod_inventory_update.py", "scripts/pod/pod_boy_15.py", "scripts/pod/pod_pilot_15.py", "scripts/etsy/beyan_marka_yaz.py"}
+YAZ_ATTR = {"patch", "put", "put_json", "post", "post_json", "post_file", "delete", "_yaz_dogrula"}
+
+
+def on_kontrol():
+    """Karar 3: birim + EN ve RU yazan 4 betikte, kontrolu iceren fonksiyonda kontrolden ONCE hicbir yazim cagrisi yok (AST)."""
+    d1, r1 = "x\n\n" + BEYAN, "Текст.\n\n" + RU_BEYAN
+    k("H1 beyan_on_kontrol: iki metin beyanli -> bos; RU beyansiz -> neden; EN beyansiz -> neden; RU yazilmiyorsa (None) yalniz EN",
+      E.beyan_on_kontrol(d1, r1) == [] and len(E.beyan_on_kontrol(d1, "Текст.")) == 1 and len(E.beyan_on_kontrol("x", r1)) == 1
+      and E.beyan_on_kontrol(d1, None) == [] and len(E.beyan_on_kontrol("x", "y")) == 2)
+    k("H2 karar 4 ile uyum: RU aciklamasi canli ile ayni (dokunulmuyor) ve beyansiz -> engel degil",
+      E.beyan_on_kontrol(d1, "Старый текст.", "Старый  текст.") == [] and len(E.beyan_on_kontrol(d1, "Новый.", "Старый.")) == 1)
+    sorun = []
+    for rel in sorted(ON_KONTROL):
+        t = (KOK / rel).read_text(encoding="utf-8"); agac = ast.parse(t)
+        fonks = [n for n in ast.walk(agac) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+        cagri = [n for n in ast.walk(agac) if isinstance(n, ast.Call) and getattr(n.func, "attr", getattr(n.func, "id", "")) == "beyan_on_kontrol"]
+        if not cagri:
+            sorun.append(f"{rel}: beyan_on_kontrol yok"); continue
+        for c in cagri:
+            fn = min([f for f in fonks if f.lineno <= c.lineno <= (f.end_lineno or f.lineno)], key=lambda f: (f.end_lineno or 0) - f.lineno)
+            once = [n.lineno for n in ast.walk(fn) if isinstance(n, ast.Call) and n.lineno < c.lineno
+                    and getattr(n.func, "attr", getattr(n.func, "id", "")) in YAZ_ATTR]
+            sonra = [n.lineno for n in ast.walk(fn) if isinstance(n, ast.Call) and n.lineno > c.lineno
+                     and getattr(n.func, "attr", getattr(n.func, "id", "")) in YAZ_ATTR]
+            if once or not sonra:
+                sorun.append(f"{rel}:{c.lineno} once {once[:3]} sonra {len(sonra)}")
+    k(f"H3 EN + RU yazan {len(ON_KONTROL)} betikte on kontrol, ayni fonksiyonda tum yazimlardan ONCE", not sorun, str(sorun))
+
+
 def main():
     canli = "--canli" in sys.argv
     birim()
@@ -459,6 +495,8 @@ def main():
     kacis()
     cikis()
     yayin_ve_geri()
+    if not canli:
+        on_kontrol()
     eski_kaynak()
     if not canli:                      # depo taramasi yalniz CI'da (inceleme madde 6: ilgisiz betik canli yazimi / geri almayi durdurmasin)
         yazanlar = statik()

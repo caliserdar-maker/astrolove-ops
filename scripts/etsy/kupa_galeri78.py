@@ -56,6 +56,7 @@ import cl_galeri_degistir as G  # noqa: E402
 import eski78_gorsel_yukle as Y  # noqa: E402
 import toplu_oku as TO  # noqa: E402  (Serdar 31 Eki 1a: toplu kapi okumasi, ortak)
 from etsy_common import KOTA_SINIRI, RU_YASAK  # noqa: E402  (Serdar 15 ve 24 Eki: 10; degistirilmez)
+import etsy_common as EC  # noqa: E402  (AI beyan v2, Serdar 1 Kas karar 2 / 5)
 from pod_5x7_kuru import YASAK_EN  # noqa: E402  (urun metni yasaklari; metin_kurali.py main'de yok)
 
 KOK = HERE.parents[1]
@@ -312,6 +313,14 @@ def hedef_en(d0, a, b):
     return d1, ("DEGISTI" if deg and dd != "TEK" else dd), []
 
 
+def beyan_hata(d1, dd):
+    """Karar 5 (Serdar 1 Kas): kuru planda AI beyan kapisi; yeni aciklama beyansizsa plan BLOK (canlida once galeri yuklenip sonra
+    metin PATCH'inde durup kotayi bosa harcamasin)."""
+    if dd == "DEGISTI" and not EC.beyan_var(d1, "en"):
+        return [f"metin: yeni aciklamada AI beyani yok (\"{EC.AI_BEYAN['en']}\"); yazim yok"]
+    return []
+
+
 def metin_plani(L, per, a, b):
     """-> dict(yaz, desc_once, desc_sonra, pers_once, pers_sonra, durum, hata). Aciklama: hedef_en (78 ilan; foto + Latin + ayni burcta
     isim). Kisisellestirme talimati yalniz ayni burcta (isim satirlari)."""
@@ -319,8 +328,9 @@ def metin_plani(L, per, a, b):
     if a.lower() != b.lower():
         d1, dd, h = hedef_en(d0, a, b)
         h += [f"metin: yeni aciklamada yasak ifade / tire {yasak_bul(d1)[:5]}; yazim yok"] if dd == "DEGISTI" and yasak_bul(d1) else []
+        h += beyan_hata(d1, dd)
         return dict(yaz=dd == "DEGISTI" and not h, durum="FARKLI_BURC" + ("+DEGISTI" if dd == "DEGISTI" else ""), hata=h,
-                    desc_once=d0, desc_sonra=d1 if dd == "DEGISTI" else None, pers_once=None, pers_sonra=None)
+                    desc_once=d0, desc_once_sha=EC.ozet(d0), desc_sonra=d1 if dd == "DEGISTI" else None, pers_once=None, pers_sonra=None)
     d1, dd, h0 = hedef_en(d0, a, b)
     q0 = [soru_norm(q) for q in per or []]
     q1, qd = copy.deepcopy(q0), []
@@ -341,11 +351,12 @@ def metin_plani(L, per, a, b):
         hata.append(f"metin: {len(per)} kisisellestirme sorusu (tek soru beklenir; POST tum seti degistirir); BLOK")
     if dd == "DEGISTI" and yasak_bul(d1):
         hata.append(f"metin: yeni aciklamada yasak ifade / tire {yasak_bul(d1)[:5]}; yazim yok")
+    hata += beyan_hata(d1, dd)
     yq = yasak_bul(" ".join(str(q.get(k) or "") for q in q1 for k in ("question_text", "instructions")))
     if yq and q1 != q0:
         hata.append(f"metin: yeni kisisellestirmede yasak ifade / tire {yq[:5]}; yazim yok")
     return dict(yaz=yaz, durum="+".join(sorted(set(durum))), hata=hata,
-                desc_once=d0, desc_sonra=d1 if dd == "DEGISTI" else None,
+                desc_once=d0, desc_once_sha=EC.ozet(d0), desc_sonra=d1 if dd == "DEGISTI" else None,
                 pers_once=q0, pers_sonra=q1 if q1 != q0 else None)
 
 
@@ -988,6 +999,9 @@ def geri_al(api, shop, lid, yd, yedek_dir, K, uzak=""):
         m = yd.get("metin") or {}
         desc = m.get("desc_once") if m.get("yaz") else None
         pers = m.get("pers_once") if m.get("yaz") else None
+        if desc is not None and not EC.beyan_var(desc, "en"):
+            # karar 2 (Serdar 1 Kas): beyansiz eski metne donus yalniz plandaki yedek sha ile birebir; sha yoksa / uymazsa DUR
+            EC.geri_alma_izni(lid, desc, m.get("desc_once_sha"))
         metin_kur(api, shop, lid, desc, pers, K)
         s = []
         bek = [son[k] for k in sorted(son)]

@@ -314,6 +314,10 @@ def liste(a):
     try:
         ilanlar = [r for r in csv.DictReader(open(a.ciftler, encoding="utf-8-sig")) if r.get("listing_id")]
         kaynak = {r["listing_id"]: r["kaynak_image_id"] for r in csv.DictReader(open(a.kaynak, encoding="utf-8-sig")) if r.get("tur") == "yd"}
+        if a.kaynak_yama and Path(a.kaynak_yama).exists():   # 6a (Serdar 1 Kas): geri alinan ilanda Botanical gorseli yeni kimlikle yuklendi
+            for r in csv.DictReader(open(a.kaynak_yama, encoding="utf-8-sig")):
+                if r.get("listing_id") in kaynak and str(r.get("kaynak_image_id") or "").isdigit():
+                    kaynak[r["listing_id"]] = r["kaynak_image_id"]
         qc, qj = qc_oku(a.qc)
         tasima = {r["ad"]: r for r in csv.DictReader(open(Path(a.kapak_dir) / "MANIFEST.csv", encoding="utf-8"))}
         alt = alt_oku(a.alt)
@@ -361,6 +365,7 @@ def main(argv=None):
     for x in ("--ciftler", "--kaynak", "--ham-dir", "--kapak-dir", "--qc", "--alt", "--yedek-ozet", "--yedek-liste", "--out"):
         li.add_argument(x, required=True)
     li.add_argument("--sadece", default="")
+    li.add_argument("--kaynak-yama", default="", help="geri alma sonrasi Botanical kimligi (yd_kapak_yukle GERI_HAZIRLIK/KAYNAK_YAMA.csv; Drive yedek klasoru)")
     li.add_argument("--eski-kapak", default=str(ESKI_KAPAK), help="eski kapak listesi (Serdar 30 Eki)")
     a = ap.parse_args(argv)
     if a.komut == "kimlik":

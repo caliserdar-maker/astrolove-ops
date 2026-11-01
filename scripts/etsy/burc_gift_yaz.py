@@ -37,6 +37,7 @@ import time
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 sys.path.insert(1, str(pathlib.Path(__file__).resolve().parents[1] / "siparis_by"))   # by_sku (YD SKU cozucusu)
 from etsy_common import Etsy, TokenStore, mask  # noqa: E402
+import etsy_common as EC  # noqa: E402  (karar 2, Serdar 1 Kas)
 
 ONAY, ONAY_GERI = "SERDAR_BURC_GIFT", "SERDAR_GERI_AL"
 KOTA_TABAN = 10
@@ -469,6 +470,8 @@ def geri_al(api, shop, lid, yedek, R):
         R["sonuc"] = f"ATLANDI_STATE {x.get('state')}"   # updateListing taslagi yayina alir
         return
     data = {"title": norm(x0.get("title")), "tags": ",".join(x0.get("tags") or []), "description": norm(x0.get("description"))}
+    if not EC.beyan_var(data["description"], "en"):   # karar 2 (Serdar 1 Kas): beyansiz eski metne yalniz yedek dosyasindaki metne birebir donus
+        EC.geri_alma_izni(lid, data["description"], yedek.get("aciklama_sha") or EC.ozet(norm(x0.get("description"))))
     if inv0 is not None:
         data["materials"] = ",".join(x0.get("materials") or [])
         data["shipping_profile_id"] = x0.get("shipping_profile_id")

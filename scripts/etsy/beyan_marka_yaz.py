@@ -424,6 +424,13 @@ def yaz(api, shop, lid, out, bolum=None, ru_yeniden=False, onay_ozet=None):
     for yeni_, eski_ in ((en_yeni, L.get("description")), (ru_yeni, ru.get("description"))):
         if yeni_ and len(TIRE.findall(yeni_)) > len(TIRE.findall(norm(eski_))):
             raise Dur(f"{lid}: yazim uzun/orta tire ekliyor")
+    import etsy_common as E
+    on_neden = E.beyan_on_kontrol(en_yeni, ru_yeni, ru.get("description") if ru else None)
+    if on_neden:   # karar 3 (Serdar 1 Kas): EN ve RU birlikte, yazimdan ONCE; biri beyansizsa hicbiri yazilmaz (ATLA + neden, FAIL degil)
+        R.update(sonuc="ATLA", neden="beyan on kontrolu: " + "; ".join(on_neden), hata=[], istek=api.calls, kota=api.remaining)
+        (out / f"SONUC_{lid}.json").write_text(json.dumps(R, ensure_ascii=False, indent=1), encoding="utf-8")
+        print("SONUC", json.dumps(R, ensure_ascii=False), flush=True)
+        return R
     kota(api)   # taban 10 (CLAUDE.md); baska taban Serdar onayi olmadan konmaz
     k0, sat0, imza0 = korunan(L), satilabilir(inv), teklif_imza(inv)
     try:

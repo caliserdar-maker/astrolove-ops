@@ -47,6 +47,7 @@ import eski78_gorsel_yukle as Y  # noqa: E402
 import yd_liste_uret as LU  # noqa: E402  (eski kapak kurali, Serdar 30 Eki)
 import galeri_v10_yukle as V  # noqa: E402  (yalniz jdump / oku_json / sonuc_yaz; poster yukleyicisi degismez)
 from etsy_common import KOTA_SINIRI  # noqa: E402  (Serdar 15 ve 24 Eki: 10; degistirilmez)
+import etsy_common as EC  # noqa: E402  (AI beyan v2: karar 2 / 3, Serdar 1 Kas)
 import kupa_galeri78 as KG  # noqa: E402  (geri alma motoru: galeri_kur / canli_oku / galeri_sorun ortak; inceleme 31 Eki madde 1)
 
 ONAY = Y.ONAY_YD
@@ -213,7 +214,88 @@ def istek_geri_al():
     canli okuma (kupa_galeri78.canli_oku tekil) + N_ESKI yeniden yukleme x ((2 + 1) + (2 + O)) + N yeni gorsel silme x 4 + sira (O +
     2 x (N_ESKI x 4 + O)) + bag (4 + O) + son okuma (galeri O + var_img O)."""
     O = G.OKUMA_TEKRAR
-    return KG.KAPI_OKUMA + N_ESKI * ((2 + 1) + (2 + O)) + N * 4 + (O + 2 * (N_ESKI * 4 + O)) + (4 + O) + 2 * O
+    return KG.KAPI_OKUMA + N_ESKI * ((2 + 1) + (2 + O)) + N * 4 + (O + 2 * (N_ESKI * 4 + O)) + (4 + O) + 2 * O + GERI_HAZIRLIK_OKUMA
+
+
+GERI_HAZIRLIK_OKUMA = 4     # 6a: geri alma sonrasi yeni HAM (ilan, gorseller, variation-images, envanter)
+
+
+def geri_hazirlik(api, shop, lid, cift, man, a, out):
+    """6a (Serdar 1 Kas, inceleme madde 6): geri alinan ilanda eski gorseller YENI kimliklerle yeniden yuklenmistir; eski HAM / yedek adlari /
+    KAPAK_KAYNAK Botanical kimligi / LISTE artik canliyla uyusmaz (sonraki kuru BLOK verirdi). Uretilir (Etsy'ye yazmaz, 4 okuma):
+      <out>/GERI_HAZIRLIK/HAM/<ilan>.json      canli (geri alinmis) ilan, gorseller, variation-images, envanter (+ HAM videos / personalization)
+      <out>/GERI_HAZIRLIK/YEDEK/<ilan>_<cift>/r<rank>_<yeni_id>.jpg   adim 5 yedeginin ayni rank baytlari, yeni kimlik adiyla
+      <out>/GERI_HAZIRLIK/KAYNAK_YAMA.csv      listing_id, kaynak_image_id (Botanical rank 12 yeni kimlik; yd_liste_uret --kaynak-yama)
+      <out>/GERI_HAZIRLIK/LISTE/<ilan>/        yeni HAM ile LISTE_<ilan>.csv + manifest.json (yd_liste_uret ile ayni kural; dogrulama)
+      <out>/GERI_HAZIRLIK/<ilan>.json          ozet: durum HAZIR / BLOK + neden (HAM kapisi + yedek dosya kapisi)
+    Workflow (yd-kapak-yukle 'Geri alma hazirligi Drive'a') HAM'i envanter klasorune (eskisi HAM_ONCEKI'ye), yedegi adim 5 klasorune,
+    KAYNAK_YAMA'yi yedek klasorune yazar. -> (sorun listesi, ozet)"""
+    import csv
+    import shutil
+    g_out = Path(out) / "GERI_HAZIRLIK"
+    try:
+        h0 = json.loads((Path(a.ham_dir) / f"{lid}.json").read_text(encoding="utf-8"))
+        L = api.get(f"/listings/{lid}") or {}
+        imgs = G.galeri(api, lid)
+        vi = G.var_img(api, shop, lid)
+        inv = api.get(f"/listings/{lid}/inventory") or {}
+    except (Exception, SystemExit) as e:   # noqa: BLE001
+        return [f"geri hazirlik okuma: {str(getattr(e, 'code', None) or e)[:150]}"], None
+    L = dict(L); L.setdefault("listing_id", int(lid))              # getListing yaniti listing_id tasir; yoksa (sahte) ilan no
+    if str(L.get("listing_id")) != str(lid):
+        return [f"geri hazirlik: okunan ilan {L.get('listing_id')} != {lid}"], None
+    h1 = dict(h0, listing=L, images=imgs, variation_images=vi, inventory=inv)
+    g0 = sorted(h0.get("images") or [], key=lambda x: x.get("rank") or 0)
+    g1 = sorted(imgs, key=lambda x: x.get("rank") or 0)
+    sorun = []
+    if [x.get("rank") for x in g0] != [x.get("rank") for x in g1]:
+        return [f"geri hazirlik: canli rank {[x.get('rank') for x in g1]} HAM ile ayni degil; elle bakilmali"], None
+    bot0 = man.get("botanical_id")
+    r_bot = next((x["rank"] for x in g0 if x.get("listing_image_id") == bot0), None)
+    bot1 = next((x["listing_image_id"] for x in g1 if x.get("rank") == r_bot), None)
+    yd = g_out / "YEDEK" / f"{lid}_{cift}"; yd.mkdir(parents=True, exist_ok=True)
+    yeni_liste = list(V.oku_json(a.yedek_liste, []) if a.yedek_liste else [])
+    for x0, x1 in zip(g0, g1):
+        rel = f"{lid}_{cift}/r{x1['rank']}_{x1['listing_image_id']}.jpg"
+        if x1["listing_image_id"] == x0["listing_image_id"]:
+            continue                                            # yerinde kalan gorsel: yedek adi zaten dogru
+        try:
+            src = yedek_yol(a, lid, cift, x0)
+        except Y.Dur as e:
+            sorun.append(f"geri hazirlik yedek: {e}"); continue
+        shutil.copyfile(src, yd / rel.split("/", 1)[1])
+        yeni_liste.append({"Path": rel, "Size": src.stat().st_size})
+    (g_out / "HAM").mkdir(parents=True, exist_ok=True)
+    hp1 = g_out / "HAM" / f"{lid}.json"
+    hp1.write_text(json.dumps(h1, ensure_ascii=False, indent=1), encoding="utf-8")
+    ky = g_out / "KAYNAK_YAMA.csv"
+    satirlar = list(csv.DictReader(open(ky, encoding="utf-8"))) if ky.exists() else []
+    satirlar = [x for x in satirlar if x["listing_id"] != str(lid)] + [dict(listing_id=str(lid), kaynak_image_id=str(bot1 or ""))]
+    with open(ky, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=["listing_id", "kaynak_image_id"]); w.writeheader(); w.writerows(satirlar)
+    _, _, hn = LU.ham_kapisi(h1, bot1)
+    yn = [f"yedekte yok: {x}" for x in (f"{lid}_{cift}/r{y['rank']}_{y['listing_image_id']}.jpg" for y in g1)
+          if not any(z["Path"] == x and int(z.get("Size") or 0) > 0 for z in yeni_liste)]
+    neden = list(hn) + yn + sorun
+    lst = g_out / "LISTE" / lid; lst.mkdir(parents=True, exist_ok=True)
+    m1 = dict(man, yedek_ids=sorted(x["listing_image_id"] for x in g1), yedek_galeri=[x["listing_image_id"] for x in g1],
+              yedek_baglar={b["value"]: dict(property_id=b.get("property_id"), value_id=b.get("value_id"), image_id=b.get("image_id"))
+                            for b in sorted(vi, key=lambda b: b.get("value") or "")},
+              eski_kapak=g1[0]["listing_image_id"] if g1 else None, botanical_id=bot1, ham_sha=LU.sha(hp1))
+    m1["variation_images"] = [dict(v, value_id=(m1["yedek_baglar"].get(v["value"]) or {}).get("value_id", v.get("value_id")))
+                              for v in man.get("variation_images") or []]
+    (lst / "manifest.json").write_text(json.dumps(m1, indent=1, ensure_ascii=False), encoding="utf-8")
+    rows = [dict(hedef_sira=x["sira"], hedef_gorsel=x["ad"], hedef_alt=x["alt"], islem="DEGISTIR", simdi_sira="", simdi_id="")
+            for x in man.get("hedef") or []]
+    rows += [dict(hedef_sira="", hedef_gorsel="", hedef_alt="", islem="CIKAR", simdi_sira=x.get("rank"), simdi_id=x.get("listing_image_id")) for x in g1]
+    with open(lst / f"LISTE_{lid}.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=LU.LISTE_ALAN); w.writeheader(); w.writerows(rows)
+    ozet = dict(ilan=lid, cift=cift, durum="BLOK" if neden else "HAZIR", neden=neden, ham_sha=LU.sha(hp1), botanical_eski=bot0, botanical_yeni=bot1,
+                kimlik={str(x0["listing_image_id"]): x1["listing_image_id"] for x0, x1 in zip(g0, g1)})
+    (g_out / f"{lid}.json").write_text(json.dumps(ozet, indent=1, ensure_ascii=False), encoding="utf-8")
+    log(f"{lid} GERI HAZIRLIK {ozet['durum']}: yeni HAM + {sum(1 for x0, x1 in zip(g0, g1) if x0['listing_image_id'] != x1['listing_image_id'])} "
+        f"yedek adi + Botanical {bot0} -> {bot1}" + (f" | {neden[0][:120]}" if neden else ""))
+    return ([f"geri hazirlik BLOK: {neden[0][:150]}"] if neden else []), ozet
 
 
 def istek(adim, tur, basla=0, ilk=True):
@@ -365,7 +447,16 @@ def tg_metin_kapisi(m):
     y = KG.yasak_bul(t + "\n" + d)
     if y or any(c in t + d for c in "\u2014\u2013"):
         h.append(f"yasak ifade / tire {y[:5]}")
-    return h
+    ru = (m or {}).get("ru")
+    if ru is not None:   # 6c (Serdar 1 Kas): tek geciste RU; karar 3: EN ve RU yazimdan ONCE birlikte (biri beyansizsa hicbiri yazilmaz)
+        rt, rd = ru.get("title") or "", ru.get("description") or ""
+        if not rt.strip() or not rd.strip():
+            h.append("RU title / description bos")
+        h += EC.beyan_on_kontrol(d or None, rd or None)
+        ry = sorted({x.group(0) for x in EC.RU_YASAK.finditer(rt + "\n" + rd + "\n" + ",".join(ru.get("tags") or []))})
+        if ry or any(c in rt + rd for c in "\u2014\u2013"):
+            h.append(f"RU yasak ifade / tire {ry[:5]}")
+    return list(dict.fromkeys(h))
 
 
 def tg_istek():
@@ -374,7 +465,17 @@ def tg_istek():
     import yd_yapi_yaz as YY
     O = G.OKUMA_TEKRAR
     env = YY.OKUMA + 4 + YY.TEKRAR + (1 + 4 + YY.TEKRAR)      # okuma + PUT (3 gonderim + 401) + geri okuma; geri alma GET + PUT + geri okuma
-    return env + (1 + 4 + 1 + 4) + (1 + (2 + O) + KG.VIDEO_DENEME + 4 + O)   # metin (GET + PATCH; geri GET + PATCH) + video
+    ru = (1 + 4) + (1 + 4)                                     # 6c: RU GET + PUT; geri almada GET + PUT
+    return env + (1 + 4 + 1 + 4) + ru + 1 + (1 + (2 + O) + KG.VIDEO_DENEME + 4 + O)   # metin + RU + video yedek okumasi (6d) + video
+
+
+def video_yedek_kapisi(a, lid, cift, vids):
+    """6d (Serdar 1 Kas, inceleme madde 11): eski video SILINMEDEN once adim 5 yedeginde olmali (yd_yedek.py v_<video_id>.mp4, boyut > 0,
+    --yedek-liste lsjson). vids: canli (yazim) ya da HAM (kuru) video kayitlari. -> eksik listesi (bos = gecer)."""
+    boy = {x["Path"]: int(x.get("Size") or 0) for x in (V.oku_json(a.yedek_liste, []) if a.yedek_liste else [])}
+    if not a.yedek_liste:
+        return ["--yedek-liste yok (video yedegi dogrulanamaz)"]
+    return [f"{lid}_{cift}/v_{v.get('video_id')}.mp4" for v in vids or [] if boy.get(f"{lid}_{cift}/v_{v.get('video_id')}.mp4", 0) <= 0]
 
 
 class TgK:
@@ -411,11 +512,28 @@ def tg_metin(api, shop, lid, m, R_):
     if L.get("state") != "active":
         raise Y.Dur(f"tek gecis metin: state {L.get('state')} (active degil); updateListing cagrilmadi")
     eski = dict(title=L.get("title"), description=L.get("description"))
-    if L.get("title") == m["title"] and html.unescape(L.get("description") or "") == m["description"]:
-        return None
-    R_["tg_metin_eski"] = eski
-    api.patch(f"/shops/{shop}/listings/{lid}", {"title": m["title"], "description": m["description"]})   # TEK PATCH
-    return eski
+    en_deg = not (L.get("title") == m["title"] and html.unescape(L.get("description") or "") == m["description"])
+    ru_m, ru0, ru_deg = m.get("ru"), {}, False
+    if ru_m:                                         # 6c: RU canli okunur (tekil GET ceviri yokken bos kayit donebilir, 23 Eki)
+        ru0 = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
+        ru_deg = (html.unescape(ru0.get("title") or ""), html.unescape(ru0.get("description") or ""), list(ru0.get("tags") or [])) != \
+            (ru_m["title"], ru_m["description"], list(ru_m.get("tags") or ru0.get("tags") or []))
+    on = EC.beyan_on_kontrol(m["description"] if en_deg else None, ru_m["description"] if ru_deg else None, ru0.get("description"))
+    if on:                                            # karar 3: yazimdan ONCE birlikte (kuruda tg_metin_kapisi da uygular)
+        raise Y.Dur("tek gecis metin beyan on kontrolu (hicbir metin yazilmadi): " + "; ".join(on))
+    if en_deg:
+        R_["tg_metin_eski"] = eski
+        R_["tg_metin_eski_sha"] = EC.ozet(html.unescape(eski["description"] or ""))   # karar 2: geri almada yedek sha
+        api.patch(f"/shops/{shop}/listings/{lid}", {"title": m["title"], "description": m["description"]})   # TEK PATCH
+    if ru_deg:
+        if not (ru0.get("title") or ru0.get("description")):
+            R_["tg_ru_not"] = "RU ceviri yok: RU yazilmadi (Etsy'de ceviri silme ucu yok; geri alinamazdi)"
+        else:
+            R_["tg_ru_eski"] = dict(title=ru0.get("title"), description=ru0.get("description"), tags=list(ru0.get("tags") or []))
+            R_["tg_ru_eski_sha"] = EC.ozet(html.unescape(ru0.get("description") or ""))
+            api.put(f"/shops/{shop}/listings/{lid}/translations/ru", {"title": ru_m["title"], "description": ru_m["description"],
+                                                                       "tags": ",".join(ru_m.get("tags") or ru0.get("tags") or [])})
+    return eski if en_deg else None
 
 
 def tg_geri(api, shop, lid, tg, adet, out, R_, metin_eski):
@@ -429,10 +547,25 @@ def tg_geri(api, shop, lid, tg, adet, out, R_, metin_eski):
         try:
             L = api.get(f"/listings/{lid}") or {}
             if L.get("title") != me["title"] or html.unescape(L.get("description") or "") != html.unescape(me["description"] or ""):
-                api.patch(f"/shops/{shop}/listings/{lid}", {"title": html.unescape(me["title"] or ""),
-                                                             "description": html.unescape(me["description"] or "")})
+                d0 = html.unescape(me["description"] or "")
+                if not EC.beyan_var(d0, "en"):        # karar 2: beyansiz eski metne yalniz yedek sha ile birebir donus
+                    EC.geri_alma_izni(lid, d0, R_.get("tg_metin_eski_sha"), "en")
+                api.patch(f"/shops/{shop}/listings/{lid}", {"title": html.unescape(me["title"] or ""), "description": d0})
         except (Exception, SystemExit) as e:   # noqa: BLE001
             sorun.append(f"metin geri alma: {str(getattr(e, 'code', None) or e)[:150]}")
+    re_ = R_.get("tg_ru_eski")
+    if re_:                                           # 6c: RU geri alma (karar 2 RU icin de)
+        try:
+            ru = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}
+            d0 = html.unescape(re_["description"] or "")
+            if (html.unescape(ru.get("title") or ""), html.unescape(ru.get("description") or "")) != (html.unescape(re_["title"] or ""), d0) \
+                    or list(ru.get("tags") or []) != list(re_.get("tags") or []):
+                if not EC.beyan_var(d0, "ru"):
+                    EC.geri_alma_izni(lid, d0, R_.get("tg_ru_eski_sha"), "ru")
+                api.put(f"/shops/{shop}/listings/{lid}/translations/ru", {"title": html.unescape(re_["title"] or ""), "description": d0,
+                                                                           "tags": ",".join(re_.get("tags") or [])})
+        except (Exception, SystemExit) as e:   # noqa: BLE001
+            sorun.append(f"RU geri alma: {str(getattr(e, 'code', None) or e)[:150]} (eski RU YEDEK icinde: tg_ru_eski)")
     if "envanter" in (R_.get("yazilan") or []):
         q = R_.get("adet") if R_.get("adet") is not None else adet
         try:
@@ -443,6 +576,49 @@ def tg_geri(api, shop, lid, tg, adet, out, R_, metin_eski):
         except (Exception, SystemExit) as e:   # noqa: BLE001
             sorun.append(f"envanter geri alma: {str(getattr(e, 'code', None) or e)[:150]} (YEDEK_YAPI_{lid}.json ile geri-al)")
     return sorun
+
+
+def geri_girdisi(a):
+    """geri alma girdileri (HAM + adim 5 yedek listesi) verilmis mi; verilmemisse kota DUR'u eski DEVAM (ileri surdurme) yolunda kalir"""
+    return bool(a.ham_dir and a.yedek_liste)
+
+
+def kota_mi(mesajlar):
+    """6b: hata / geri alma sorunu kota tabanindan mi (etsy_common 'DUR: kota ...' / 429 gunluk kota)"""
+    return any(re.search(r"DUR: kota|429 kota|kota sert tabani|kota esigi", str(x)) for x in mesajlar)
+
+
+def gerekli_geri(api, api0, shop, lid, o, dv, devam, hazir, a, out, s):
+    """6b: GERI_BEKLIYOR ilan: kota (geri alma en kotu + taban) varsa galeri (geri_al) + tek gecis kaydi varsa envanter / metin / RU (tg_geri)
+    geri alinir, sonra 6a hazirlik. Her durumda kosu bu ilandan sonra DURUR (yeni ilan baslamaz). -> dur metni"""
+    c0 = api.calls
+    gerek = istek_geri_al() + (tg_istek() if dv.get("tg_kayit") else 0) + KOTA_SINIRI
+    KG.kota_oku(api0, shop)
+    if api0.remaining is not None and int(api0.remaining) < gerek:
+        s.update(durum="KALAN", neden=[f"GERI_BEKLIYOR: kota {api0.remaining} < geri alma en kotu {gerek - KOTA_SINIRI} + {KOTA_SINIRI}"])
+        return s["neden"][0]
+    try:
+        man = json.loads((hazir / lid / "manifest.json").read_text(encoding="utf-8"))
+    except OSError as e:
+        s.update(durum="DUR", neden=[f"GERI_BEKLIYOR: manifest okunamadi ({e})"]); return s["neden"][0]
+    gs = geri_al(api0, shop, lid, o["cift"], man, a, out)
+    tgk = dv.get("tg_kayit")
+    if tgk:
+        try:
+            tg = tg_girdi(a, lid)
+            gs += tg_geri(api0, shop, lid, tg, tgk.get("adet"), Path(a.out) / "ilanlar", dict(tgk), None) if tg else \
+                ["GERI_BEKLIYOR: tek gecis kaydi var ama --tek-gecis girdileri verilmedi (envanter / metin geri alinamaz)"]
+        except (Exception, SystemExit) as e:   # noqa: BLE001
+            gs.append(f"GERI_BEKLIYOR tek gecis: {str(getattr(e, 'code', None) or e)[:150]}")
+    if gs:
+        s.update(durum="DUR", neden=["GERI_BEKLIYOR geri alma tamamlanamadi"] + gs, istek=api0.calls - c0)
+        devam["ilanlar"][lid].update(geri_neden=gs[:3])
+        return f"ilan {lid} GERI_BEKLIYOR geri alma tamamlanamadi; kosu durdu"
+    hs, hoz = geri_hazirlik(api0, shop, lid, o["cift"], man, a, out)
+    devam["ilanlar"][lid].update(durum="GERI_ALINDI", geri_alma="TAMAM", geri_hazirlik=(hoz or {}).get("durum", "FAIL"))
+    s.update(durum="FAIL", neden=["GERI_BEKLIYOR -> GERI ALINDI (eski 13 gorsel + Style baglari" + (" + envanter / metin" if tgk else "") + ")"] + hs,
+             istek=api0.calls - c0)
+    return f"ilan {lid} geri alindi (onceki kota DUR'u); kosu durdu, yeni kuru gerekir"
 
 
 def calistir(api, shop, a):
@@ -488,6 +664,12 @@ def calistir(api, shop, a):
         if dur:
             s.update(durum="KALAN", neden=[dur]); continue
         dv = (devam.get("ilanlar") or {}).get(lid)
+        if (dv or {}).get("durum") == "GERI_BEKLIYOR":          # 6b: onceki kosuda kota yuzunden geri alinamamis ilan
+            if not yazim:
+                s.update(durum="DUR", neden=[f"GERI_BEKLIYOR (kosu {dv.get('geri_kosu')}): yazim kosusu ilk is olarak geri alir; yeni plan yok"])
+                dur = s["neden"][0]; continue
+            dur = gerekli_geri(api, api0, shop, lid, o, dv, devam, hazir, a, out, s)
+            continue
         bitmemis = bool(dv) and dv.get("son_ids") is not None and dv.get("adim", 0) < len(dv.get("plan") or []) \
             and dv.get("durum") != "GERI_ALINDI"                     # geri alinmis ilan surdurulmez (yeni kuru gerekir; canli != plan)
         s["yarim"] = bitmemis or (dv or {}).get("durum") in ("FAIL", "DUR")   # yarim / son okumasi tutmamis ilanin PASS disi
@@ -562,6 +744,13 @@ def calistir(api, shop, a):
                     tg = tg_girdi(a, lid)
                 except Y.Dur as e:
                     s.update(durum="BLOK", neden=[str(e)], istek=api.calls - c0); continue
+                if tg and tg["video"]:     # 6d: kuruda da (HAM videolari): yedek yoksa ilan hic baslamaz
+                    hp = Path(a.ham_dir or "") / f"{lid}.json"
+                    hv = json.loads(hp.read_text(encoding="utf-8")).get("videos") if a.ham_dir and hp.exists() else None
+                    ve = ["HAM yok (--ham-dir)"] if hv is None else video_yedek_kapisi(a, lid, o["cift"], hv)
+                    if ve:
+                        s.update(durum="BLOK", neden=[f"tek gecis video: eski video yedegi yok {ve[:3]} (yd_yedek.py v_<id>.mp4); yazma yok"],
+                                 istek=api.calls - c0); continue
                 if tg:
                     gd.update(tek_gecis=dict(yapi_sha=tg["yapi_sha"], metin_sha=tg["metin_sha"], video_sha=tg["video_sha"]),
                               en_kotu=gd["en_kotu"] + tg_istek())
@@ -599,6 +788,10 @@ def calistir(api, shop, a):
                         R = dict(R, sonuc="FAIL", sorun=(R.get("sorun") or []) + [f"tek gecis metin: {str(getattr(e, 'code', None) or e)[:200]}"])
                     if R["sonuc"] == "PASS" and tg["video"]:
                         try:                                                                    # 4) video EN SON (eski, yeni active olmadan silinmez)
+                            vc = (api.get(f"/listings/{lid}/videos") or {}).get("results") or []
+                            ve = video_yedek_kapisi(a, lid, o["cift"], vc)                      # 6d: eski video yedekte degilse dokunulmaz
+                            if ve:
+                                raise Y.Dur(f"video yedegi yok {ve[:3]}; eski video silinmedi, yeni video yuklenmedi")
                             vk = TgK(ilan_out / f"VIDEO_{lid}.json")
                             R["video"] = KG.video_kur(api, shop, lid, tg["video"], [], vk, "video_yeni")
                         except (Exception, SystemExit) as e:   # noqa: BLE001
@@ -619,6 +812,8 @@ def calistir(api, shop, a):
             s.update(durum=R["sonuc"], neden=R.get("sorun") or [], istek=api.calls - c0)
             if R.get("tg_geri"):
                 s["neden"] += [f"tek gecis geri alma: {x}" for x in R["tg_geri"]] or ["tek gecis envanter / metin geri alindi"]
+            if tgR.get("tg_ru_not"):
+                s["neden"].append(tgR["tg_ru_not"])
             if R["sonuc"] == "DUR_VIDEO":
                 s["durum"] = "DUR"; R = dict(R, sonuc="DUR")
             elif R["sonuc"] != "PASS":            # GERI ALMA (inceleme 31 Eki madde 1): eski 13 + baglar yedekten
@@ -626,10 +821,19 @@ def calistir(api, shop, a):
                 s.update(durum="FAIL" if not gs else "DUR", neden=s["neden"] + (["GERI ALINDI (eski 13 gorsel + Style baglari)"] if not gs else gs),
                          istek=api.calls - c0)
                 R = dict(R, sonuc=s["durum"])
-                if lid in (devam.get("ilanlar") or {}) and not gs:
-                    devam["ilanlar"][lid].update(durum="GERI_ALINDI", geri_alma="TAMAM")
+                if not gs:
+                    hs, hoz = geri_hazirlik(api, shop, lid, o["cift"], man, a, out)              # 6a: yeni HAM + yedek + LISTE
+                    s["neden"] += hs
+                    devam.setdefault("ilanlar", {}).setdefault(lid, {}).update(cift=o["cift"], durum="GERI_ALINDI", geri_alma="TAMAM",
+                                                                              geri_hazirlik=(hoz or {}).get("durum", "FAIL"))
+                elif kota_mi(gs + list(R.get("sorun") or [])) and geri_girdisi(a):   # 6b: KOTA yuzunden geri alinamadi: sonraki yazim kosusunun ilk isi
+                    tgk = {k_: v_ for k_, v_ in tgR.items() if k_ != "tg_geri"}
+                    devam.setdefault("ilanlar", {}).setdefault(lid, {}).update(durum="GERI_BEKLIYOR", cift=o["cift"], geri_neden=gs[:3],
+                                                                              tg_kayit=tgk or None, geri_kosu=a.kosu)
+                    s["neden"].append("GERI_BEKLIYOR: geri alma sonraki yazim kosusunun ilk isi")
             if lid in (devam.get("ilanlar") or {}):
-                devam["ilanlar"][lid]["durum"] = R["sonuc"] if devam["ilanlar"][lid].get("durum") != "GERI_ALINDI" else "GERI_ALINDI"
+                if devam["ilanlar"][lid].get("durum") not in ("GERI_ALINDI", "GERI_BEKLIYOR"):
+                    devam["ilanlar"][lid]["durum"] = R["sonuc"]
             if R["sonuc"] == "PASS":
                 ilerleme_pass(ilerleme, lid, o["cift"], a, R.get("son_ids"), tg_tamam=bool(tg))
             else:
@@ -640,12 +844,20 @@ def calistir(api, shop, a):
                 dur = m; s.update(durum="KALAN", neden=[m], istek=api.calls - c0)
                 log(f"{lid} {o['cift']} KALAN | {m[:140]}"); continue
             s.update(durum="DUR", neden=[m], istek=api.calls - c0)
-            if basladi and yazim and not m.startswith("DUR: kota"):      # yazim sirasinda hata: geri alma (kota tabaninda yok: istek yok)
+            if basladi and yazim:      # yazim sirasinda hata: geri alma (6b, Serdar 1 Kas: kota DUR'unda da denenir)
                 gs = geri_al(api, shop, lid, o["cift"], man, a, out) + list(locals().get("tgR", {}).get("tg_geri") or [])
                 s["neden"] += ["GERI ALINDI (eski 13 gorsel + Style baglari)"] if not gs else gs
                 if not gs:
                     s["durum"] = "FAIL"
-                    devam.setdefault("ilanlar", {}).setdefault(lid, {}).update(durum="GERI_ALINDI", geri_alma="TAMAM", cift=o["cift"])
+                    hs, hoz = geri_hazirlik(api, shop, lid, o["cift"], man, a, out)
+                    s["neden"] += hs
+                    devam.setdefault("ilanlar", {}).setdefault(lid, {}).update(durum="GERI_ALINDI", geri_alma="TAMAM", cift=o["cift"],
+                                                                              geri_hazirlik=(hoz or {}).get("durum", "FAIL"))
+                elif kota_mi(gs + [m]) and geri_girdisi(a):   # 6b: kota yuzunden geri alma da tamamlanamadi (istek gitmez): sonraki kosu ILK IS olarak geri alir
+                    tgk = {k_: v_ for k_, v_ in (locals().get("tgR") or {}).items() if k_ != "tg_geri"}
+                    devam.setdefault("ilanlar", {}).setdefault(lid, {}).update(durum="GERI_BEKLIYOR", cift=o["cift"], geri_neden=gs[:3],
+                                                                              tg_kayit=tgk or None, geri_kosu=a.kosu)
+                    s["neden"].append("GERI_BEKLIYOR: geri alma sonraki yazim kosusunun ilk isi (kota yenilenince)")
             dur = f"ilan {lid} {s['durum']}; kosu durdu"
             if yazim:
                 eski = (ilerleme.get("ilanlar") or {}).get(lid) or {}
@@ -743,7 +955,8 @@ def arg(argv=None):
     ap.add_argument("--ham-dir", default="", help="geri alma: HAM/<ilan>.json klasoru (sha256 = manifest ham_sha)")
     ap.add_argument("--tek-gecis", action="store_true", help="F-B madde 2: envanter + galeri + metin + video ilan basina tek geciste")
     ap.add_argument("--yapi-plan", default="", help="tek gecis: yd_yapi_kuru cikti klasoru (KURU_<ilan>.json, PLAN.csv)")
-    ap.add_argument("--metin-json", default="", help="tek gecis: {ilan: {title, description}} (Serdar onayli metin; yoksa metin yazilmaz)")
+    ap.add_argument("--metin-json", default="", help="tek gecis: {ilan: {title, description, ru: {title, description, tags}}} (Serdar onayli; "
+                                                     "yoksa metin yazilmaz; ru yoksa RU yazilmaz)")
     ap.add_argument("--video-dir", default="", help="tek gecis: VIDEO_MANIFEST.json {ilan: {dosya, sha256}} + mp4'ler (yoksa video yok)")
     ap.add_argument("--yedek-dir", default="_yedek", help="geri alma: adim 5 yedegi yerel klasor (yoksa --yedek-uzak'tan iner)")
     ap.add_argument("--yedek-uzak", default="", help="geri alma: TEMP/YD_KAPAK_V1_YEDEK/<damga> (rclone)")
