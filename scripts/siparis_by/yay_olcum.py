@@ -22,10 +22,11 @@ TEGET = 0.5      # derece: radyal profil +- bu acida 9 profilin ortalamasi (nokt
                  # yay egriligi yanliligi ~ L^2 / (8 r) = 16^2 / 7440 = 0,03 px @2400; yerel olcum 1 Kas: TEGET 0'da komsu sirt farki 5,8 px'e cikiyordu)
 
 
-def _tepe(g, cx, cy, th, r0, bant, esik):
+def _tepe(g, cx, cy, th, r0, bant, esik, teget=None):
+    teget = TEGET if teget is None else teget
     t = np.radians(th)
     rs = np.arange(r0 - bant, r0 + bant, 0.25)
-    ts = np.radians(th + np.linspace(-TEGET, TEGET, 9)) if TEGET > 0 else np.array([t])
+    ts = np.radians(th + np.linspace(-teget, teget, 9)) if teget > 0 else np.array([t])
     xs = cx + rs[None] * np.cos(ts)[:, None]; ys = cy + rs[None] * np.sin(ts)[:, None]
     v = cv2.remap(g, xs.astype(np.float32), ys.astype(np.float32), cv2.INTER_LINEAR).mean(0)
     v = cv2.GaussianBlur(v[None], (0, 0), 2)[0]
@@ -47,8 +48,13 @@ def tablo_r(tab, th):
     return np.interp(np.asarray(th) % 360, np.arange(n + 1) * 360.0 / n, np.r_[tab, tab[:1]])
 
 
-def sirt(g, cx, cy, tab, k=1.0, adim=0.25, bant=14.0, esik=25.0, tur=3, haric=HARIC):
-    """-> P (aci, x, y, r, kontrast) ; tab: merkez etrafinda yaricap tablosu (olcekli goruntude). Yinelemeli aykiri atma."""
+UC_KORU = 8.0    # derece: yay uclarina bu kadar yakin sirt noktalari aykiri elegine girmez (inceleme 1 Kas: eski sol kuyruk 136,5-139,5
+                 # derecede ice kivrilan boncuk zinciri 3 px medyan eleginde atiliyordu)
+
+
+def sirt(g, cx, cy, tab, k=1.0, adim=0.25, bant=14.0, esik=25.0, tur=3, haric=HARIC, teget=None):
+    """-> P (aci, x, y, r, kontrast) ; tab: merkez etrafinda yaricap tablosu (olcekli goruntude). Yinelemeli aykiri atma (tur > 1;
+    uclara UC_KORU derece yakin noktalar haric)."""
     P = None
     for _ in range(tur):
         sat = []
@@ -56,18 +62,20 @@ def sirt(g, cx, cy, tab, k=1.0, adim=0.25, bant=14.0, esik=25.0, tur=3, haric=HA
             if haric and haric[0] <= th <= haric[1]:
                 continue
             r0 = float(tablo_r(tab, th))
-            x = _tepe(g, cx, cy, th, r0, bant * k, esik)
+            x = _tepe(g, cx, cy, th, r0, bant * k, esik, teget)
             if x:
                 t = np.radians(th)
                 sat.append((th, cx + x[0] * np.cos(t), cy + x[0] * np.sin(t), x[0], x[1]))
         P = np.array(sat)
-        if len(P) < 50:
+        if len(P) < 50 or tur == 1:
             return P
         # yerel kayan medyan (21 ornek = ~5 derece; sirala, dairesel) ve 3 px uzerini at
         r = P[:, 3]; n = len(r); w = 10
         ek = np.r_[r[-w:], r, r[:w]]
         med = np.array([np.median(ek[i:i + 2 * w + 1]) for i in range(n)])
-        P = P[np.abs(r - med) <= 3.0 * k]
+        b0, b1 = bos_aci(P)
+        uca = np.minimum((b0 - P[:, 0]) % 360, (P[:, 0] - b1) % 360) <= UC_KORU
+        P = P[(np.abs(r - med) <= 3.0 * k) | uca]
         tab = tablo_yap(P, len(tab))
     return P
 
@@ -104,8 +112,8 @@ def bos_aci(P, kume=1.5, en_az=0.75):
     return [round(float(a0) % 360, 2), round(float(a1) % 360, 2)]
 
 
-def uclar(P, bos_ref, ic=10.0, adim=2.5):
-    """yayin iki ucu, YURUYEREK: referans uclarin (bos_ref) ic derece icinden baslayip sirt noktalari arasinda en cok 'adim' derecelik (eski yayin seyrek sonuk kuyrugu 33 derecede ~2 derece bosluklu)
+def uclar(P, bos_ref, ic=10.0, adim=2.0):
+    """yayin iki ucu, YURUYEREK: referans uclarin (bos_ref) ic derece icinden baslayip sirt noktalari arasinda en cok 'adim' derecelik (eski yayin seyrek sonuk kuyrugu 33 derecede ~2 derece bosluklu; sol kuyrukta 136 -> 133,5 derece 2,5 derece bosluktan sonraki tek boncuk zemin yildizi sayilir)
     bosluklarla aciklik yonune ilerlenir; ulasilan son aci uctur (aciklikta yalitik zemin yildizi / toz sayilmaz). -> [sag_uc, sol_uc]"""
     ang = np.sort(P[:, 0] % 360)
     b0, b1 = bos_ref
@@ -234,7 +242,10 @@ def eski_yol(eski, seed):
     sek = isilti_sektorleri(g, cx, cy, tab)
     Pt = P[~sektorde(P[:, 0], sek)]
     tab = tablo_yap(Pt, 1440, yumusak=YUMUSAK)
-    bos = bos_aci(P)
+    bos = uclar(P, bos_aci(P))                        # cizim acikligi = yuruyerek olculen uclar (kapi ile ayni yontem)
+    # aciklik ICINDE kalan sirt noktalari (uclar haric; or. sol kuyruktan 2,5 derece kopuk 133 derece boncugu = zemin yildizi) atilir
+    ac = lambda X: ~((((X[:, 0] - bos[0]) % 360) > 1e-6) & (((X[:, 0] - bos[0]) % 360) < ((bos[1] - bos[0]) % 360) - 1e-6))  # noqa: E731
+    P, Pt = P[ac(P)], Pt[ac(Pt)]
     return dict(cx=cx, cy=cy, r=tab, bos=bos, P=P, P_kapi=Pt, isilti=sek, sonum=uc_sonumu(Pt, bos))
 
 
@@ -260,5 +271,5 @@ def uc_sonumu(Pt, bos, n=1440, plato=None):
     oran = np.clip(kk / plato, 0, 1)
     gecis = np.clip((UC_BOLGE - uz) / 3.0, 0, 1)                    # uc bolgesi sinirinda 3 derecede yumusak gecis
     t = np.where(ic, 0.0, gecis * oran + (1 - gecis) * 1.0)
-    return t
+    return t * np.clip(uz / 0.5, 0, 1)                             # kesiste 0,5 derecelik yumusak bitis (inceleme: kut kesik)
 
