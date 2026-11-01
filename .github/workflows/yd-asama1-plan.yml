@@ -1,0 +1,84 @@
+name: yd-asama1-plan
+# YD 1. ASAMA PLAN (Serdar 1 Kas): ETSY YOK, KILITSIZ (kilit_bekle cagirmaz -> Etsy kosularini bekletmez). Girdi: yd-asama1 mod=oku ciktisi
+# TEMP/YD_ASAMA1/<ham_damga>/HAM_ASAMA1.json. CDN'den canli rank 1 + video YEDEGI -> TEMP/YD_ASAMA1_YEDEK/<ham_damga>/ (--immutable);
+# Y01 TEMP/YD_KAPAK_V1/<kapak_damga> + <yeni3_damga>; video TEMP/YD_VIDEO_ESLEME/<esleme_damga>/VIDEO_ESLEME.csv.
+# Cikti TEMP/YD_ASAMA1/<damga>/PLAN.json + PLAN.csv + PLAN.md + PLAN_DAMGA.txt. Kod scripts/kapak78/yd_asama1.py plan.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      ham_damga: {description: "TEMP/YD_ASAMA1/<damga> (yd-asama1 mod=oku)", required: true, default: ""}
+      kapak_damga: {description: "ana Y01 seti TEMP/YD_KAPAK_V1/<damga>", required: true, default: "20261027_141146"}
+      yeni3_damga: {description: "3 yeni Y01 TEMP/YD_KAPAK_V1/<damga>", required: true, default: "20261101_092221"}
+      esleme_damga: {description: "TEMP/YD_VIDEO_ESLEME/<damga>", required: true, default: "20261101_143705"}
+env:
+  T: "gdrive:ASTROLOVE/TEMP"
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Girdi kapisi
+        env: {HD: "${{ inputs.ham_damga }}", KD: "${{ inputs.kapak_damga }}", YD: "${{ inputs.yeni3_damga }}", ED: "${{ inputs.esleme_damga }}"}
+        run: |
+          set -euo pipefail
+          D='^[0-9]{8}_[0-9]{6}$'
+          [[ "$HD" =~ $D && "$KD" =~ $D && "$YD" =~ $D && "$ED" =~ $D ]] || { echo "::error::damgalar"; exit 1; }
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+      - name: "Dal ve betik kapisi (Serdar 1 Kas, yalniz --ref yd-asama1; arac main'de YOK)"
+        run: |
+          set -euo pipefail
+          [ "${{ github.ref_name }}" = yd-asama1 ] || { echo "::error::Bu is akisi yalniz dal yd-asama1 uzerinden kosar (ref ${{ github.ref_name }}); Etsy'ye yazma yok"; exit 1; }
+          [ -f scripts/kapak78/yd_asama1.py ] || { echo "::error::scripts/kapak78/yd_asama1.py yok (main'den tetiklendi?); Etsy'ye yazma yok"; exit 1; }
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==12.3.0 numpy==2.5.3
+          sudo apt-get update -qq >/dev/null && sudo apt-get install -y -qq ffmpeg >/dev/null
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"; echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          mkdir -p _o _w
+      - name: Yedek + Y01 + video + plan
+        env: {HD: "${{ inputs.ham_damga }}", KD: "${{ inputs.kapak_damga }}", YD: "${{ inputs.yeni3_damga }}", ED: "${{ inputs.esleme_damga }}"}
+        run: |
+          set -euo pipefail
+          rclone copyto "$T/YD_ASAMA1/$HD/HAM_ASAMA1.json" _w/HAM.json
+          Y="$T/YD_ASAMA1_YEDEK/$HD"
+          # yedek: canli rank 1 + videolar (CDN, Etsy API degil); Drive'da varsa yeniden indirilmez (--immutable)
+          python3 - <<'EOF'
+          import json, pathlib, requests
+          H = json.load(open("_w/HAM.json"))["ilanlar"]; d = pathlib.Path("_w/yedek"); d.mkdir(parents=True, exist_ok=True); n = 0
+          for lid, h in H.items():
+              isler = ([(f"{lid}_{h['gorseller'][0]['id']}.jpg", h['gorseller'][0]['url'])] if h["gorseller"] else []) + \
+                      [(f"{lid}_{v['id']}.mp4", v["url"]) for v in h["videolar"] if v.get("url")]
+              for ad, url in isler:
+                  r = requests.get(url, timeout=120); r.raise_for_status(); (d / ad).write_bytes(r.content); n += 1
+          print("yedek dosya", n)
+          EOF
+          rclone copy _w/yedek "$Y" --immutable -q
+          rclone copy "$T/YD_KAPAK_V1/$KD" _w/y01 --include "/*_Y01.jpg" --include "/MANIFEST.csv" -q
+          rclone copy "$T/YD_KAPAK_V1/$YD" _w/y01b --include "/*_Y01.jpg" --include "/MANIFEST.csv" -q
+          rclone copyto "$T/YD_VIDEO_ESLEME/$ED/VIDEO_ESLEME.csv" _w/VIDEO_ESLEME.csv
+          python3 -c "import csv; print(''.join(r['dosya'] + '\n' for r in csv.DictReader(open('_w/VIDEO_ESLEME.csv'))), end='')" > _w/vlist.txt
+          rclone copy "$T/YD_VIDEO_ORNEK43" _w/v --files-from _w/vlist.txt --transfers 8 -q
+          set +e
+          python3 scripts/kapak78/yd_asama1.py plan --ham _w/HAM.json --yedek _w/yedek --y01 _w/y01b --y01 _w/y01 \
+            --esleme _w/VIDEO_ESLEME.csv --video-kok _w/v --out _o; echo "RC=$?" >> "$GITHUB_ENV"
+          head -12 _o/PLAN.md
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          [ -d _o ] && ls _o/* >/dev/null 2>&1 && rclone copy _o "$T/YD_ASAMA1/${DAMGA}" --immutable -q && echo "::notice::TEMP/YD_ASAMA1/${DAMGA}/" || true
+          rm -rf _w ~/.config/rclone
+          [ "${RC:-x}" = 0 ] || { echo "::error::plan sonuc kodu ${RC:-yok} (BLOK satiri var ya da hata; PLAN.md)"; exit 1; }
