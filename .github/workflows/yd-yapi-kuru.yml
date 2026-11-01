@@ -11,14 +11,15 @@ on:
       sadece: {description: "virgullu listing_id (bos = data/pod/yd78_ids.csv)", required: false, default: ""}
       boy_pid: {description: "Size ozelligi property_id (516 = taksonomi 121 Custom3, Serdar 31 Eki 5a; bos = betik varsayilani 516)", required: false, default: "516"}
       boy_scale_id: {description: "boy ozelligi olcekliyse scale_id (bos = yok)", required: false, default: ""}
+      poster_ref: {description: "wall art fiyat kapisi referans ilani (YD2 gece 1 Kas: 4570143815; bos = betik varsayilani 4570110121)", required: false, default: ""}
 jobs:
   oku:
     runs-on: ubuntu-latest
     timeout-minutes: 140
     steps:
       - name: Girdi kapisi
-        env: {S: "${{ inputs.sadece }}", BP: "${{ inputs.boy_pid }}", BS: "${{ inputs.boy_scale_id }}"}
-        run: '[[ "$S" =~ ^([0-9]+(,[0-9]+)*)?$ && "$BP" =~ ^([0-9]+)?$ && "$BS" =~ ^([0-9]+)?$ ]] || { echo "::error::girdi"; exit 1; }'
+        env: {S: "${{ inputs.sadece }}", BP: "${{ inputs.boy_pid }}", BS: "${{ inputs.boy_scale_id }}", PR: "${{ inputs.poster_ref }}"}
+        run: '[[ "$S" =~ ^([0-9]+(,[0-9]+)*)?$ && "$BP" =~ ^([0-9]+)?$ && "$BS" =~ ^([0-9]+)?$ && "$PR" =~ ^([0-9]+)?$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
@@ -55,9 +56,10 @@ jobs:
           S: ${{ inputs.sadece }}
           BP: ${{ inputs.boy_pid }}
           BS: ${{ inputs.boy_scale_id }}
+          PR: ${{ inputs.poster_ref }}
         run: |
           set +e -o pipefail
-          EK=(); [ -n "$BP" ] && EK+=(--boy-pid "$BP"); [ -n "$BS" ] && EK+=(--boy-scale-id "$BS")
+          EK=(); [ -n "$BP" ] && EK+=(--boy-pid "$BP"); [ -n "$BS" ] && EK+=(--boy-scale-id "$BS"); [ -n "$PR" ] && EK+=(--poster-ref "$PR")
           python3 scripts/etsy/yd_yapi_kuru.py --sadece "$S" "${EK[@]}" --out _out 2>&1 | tee _work/kosu.log
           echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
       - name: Token geri yaz + cikti Drive'a
