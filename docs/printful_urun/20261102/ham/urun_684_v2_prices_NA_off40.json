@@ -1,0 +1,126 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/684/prices?currency=USD&selling_region_name=north_america&offset=40&limit=20",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 684,
+    "placements": [
+     {
+      "id": "default",
+      "title": "Print file",
+      "type": "Sublimation",
+      "technique_key": "sublimation",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 21475,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "13.07",
+       "discounted_price": "13.07"
+      }
+     ]
+    },
+    {
+     "id": 21476,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "13.07",
+       "discounted_price": "13.07"
+      }
+     ]
+    },
+    {
+     "id": 21477,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "13.07",
+       "discounted_price": "13.07"
+      }
+     ]
+    },
+    {
+     "id": 21478,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "13.07",
+       "discounted_price": "13.07"
+      }
+     ]
+    },
+    {
+     "id": 21479,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "13.07",
+       "discounted_price": "13.07"
+      }
+     ]
+    },
+    {
+     "id": 21480,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "13.07",
+       "discounted_price": "13.07"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 46,
+   "limit": 20,
+   "offset": 40
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/684/prices?currency=USD&selling_region_name=north_america&offset=40&limit=20"
+   },
+   "previous": {
+    "href": "https://api.printful.com/v2/catalog-products/684/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20"
+   },
+   "first": {
+    "href": "https://api.printful.com/v2/catalog-products/684/prices?currency=USD&selling_region_name=north_america&limit=20"
+   },
+   "last": {
+    "href": "https://api.printful.com/v2/catalog-products/684/prices?currency=USD&selling_region_name=north_america&offset=40&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/684"
+   }
+  }
+ }
+}

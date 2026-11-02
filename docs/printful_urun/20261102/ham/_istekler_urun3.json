@@ -1,0 +1,566 @@
+[
+ {
+  "yontem": "GET",
+  "yol": "/products/534",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/534",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/534?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/534/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/534/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/534/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/2/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/2/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/3/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/3/prices?currency=USD&selling_region_name=worldwide&offset=40&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/3/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/3/prices?currency=USD&selling_region_name=north_america&offset=40&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/171/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/171/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/172/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/172/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/181/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/181/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/304/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/304/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/601/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/601/prices?currency=USD&selling_region_name=worldwide&offset=40&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/601/prices?currency=USD&selling_region_name=worldwide&offset=60&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/601/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/601/prices?currency=USD&selling_region_name=north_america&offset=40&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/601/prices?currency=USD&selling_region_name=north_america&offset=60&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/614/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/614/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:57:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/616/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/616/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/683/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/683/prices?currency=USD&selling_region_name=worldwide&offset=40&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/683/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/683/prices?currency=USD&selling_region_name=north_america&offset=40&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/684/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/684/prices?currency=USD&selling_region_name=worldwide&offset=40&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/684/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/684/prices?currency=USD&selling_region_name=north_america&offset=40&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/686/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/686/prices?currency=USD&selling_region_name=worldwide&offset=40&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/686/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/686/prices?currency=USD&selling_region_name=north_america&offset=40&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/798/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/798/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1700/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1700/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708/prices?currency=USD&selling_region_name=worldwide&offset=40&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708/prices?currency=USD&selling_region_name=worldwide&offset=60&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708/prices?currency=USD&selling_region_name=worldwide&offset=80&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708/prices?currency=USD&selling_region_name=north_america&offset=20&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708/prices?currency=USD&selling_region_name=north_america&offset=40&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708/prices?currency=USD&selling_region_name=north_america&offset=60&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708/prices?currency=USD&selling_region_name=north_america&offset=80&limit=20",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:16Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:17Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:19Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:20Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:22Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:23Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:25Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:26Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:28Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T15:58:29Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T15:58:30Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:31Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:32Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:34Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:35Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:36Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:38Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:39Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:40Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T15:58:41Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T15:58:43Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:45Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:46Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:47Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:49Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:50Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:52Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:53Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:54Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:56Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/templates/900",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/900/mockup-templates?limit=100",
+  "http": 200,
+  "zaman": "2026-11-02T15:58:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/900/sizes",
+  "http": 400,
+  "zaman": "2026-11-02T15:58:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/900/sizes",
+  "http": 200,
+  "zaman": "2026-11-02T15:59:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/templates/881",
+  "http": 200,
+  "zaman": "2026-11-02T15:59:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/881/mockup-templates?limit=100",
+  "http": 200,
+  "zaman": "2026-11-02T15:59:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/881/sizes",
+  "http": 400,
+  "zaman": "2026-11-02T15:59:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/881/sizes",
+  "http": 200,
+  "zaman": "2026-11-02T15:59:03Z"
+ }
+]

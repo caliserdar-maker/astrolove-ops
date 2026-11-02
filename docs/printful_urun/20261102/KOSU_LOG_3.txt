@@ -1,0 +1,15 @@
+534 eklendi
+FIYAT ek sayfa 50 istek
+[fiyat 20/50 %40] gecen 15s
+[fiyat 40/50 %80] gecen 28s
+[fiyat 50/50 %100] gecen 34s
+FIYAT kapsam eksik kalan: ['938/WW 0/1', '938/NA 0/1', '1716/WW 0/1', '1716/NA 0/1']
+KARGO ek plan 30 istek (urunler ['1', '2'])
+[kargo 25/30 %83] gecen 33s kalan ~6s
+[kargo 30/30 %100] gecen 41s kalan ~0s
+SABLON 900: 1 circle gorseli
+SABLON 881: 2 circle gorseli
+ISTEK 94 | GET 64 | POST yollar ['/v2/shipping-rates'] | 81s
+SINIF {'B': 136, 'C': 45, 'A': 9} toplam 190
+SECILEN satir 205
+RAPOR 25 urun

@@ -1,0 +1,128 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/templates/881",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "version": 100,
+   "variant_mapping": [
+    {
+     "variant_id": 22782,
+     "templates": [
+      {
+       "placement": "front",
+       "template_id": 905495
+      }
+     ]
+    },
+    {
+     "variant_id": 22783,
+     "templates": [
+      {
+       "placement": "front",
+       "template_id": 905496
+      }
+     ]
+    },
+    {
+     "variant_id": 22785,
+     "templates": [
+      {
+       "placement": "front",
+       "template_id": 905497
+      }
+     ]
+    },
+    {
+     "variant_id": 22784,
+     "templates": [
+      {
+       "placement": "front",
+       "template_id": 905498
+      }
+     ]
+    }
+   ],
+   "templates": [
+    {
+     "template_id": 905495,
+     "image_url": "https://files.cdn.printful.com/o/upload/api-template/3a/3a836efbd47a1da23d8aeb223672d71d?v=1749455265",
+     "background_url": null,
+     "background_color": null,
+     "printfile_id": 845,
+     "template_width": 3000,
+     "template_height": 3000.0,
+     "print_area_width": 2476.0,
+     "print_area_height": 2476.0,
+     "print_area_top": 262.0,
+     "print_area_left": 262.0,
+     "is_template_on_front": true,
+     "orientation": "any"
+    },
+    {
+     "template_id": 905496,
+     "image_url": "https://files.cdn.printful.com/o/upload/api-template/4e/4e2aca78d99c0d97d0a45d9329a3cf3e?v=1749455276",
+     "background_url": null,
+     "background_color": null,
+     "printfile_id": 843,
+     "template_width": 3000,
+     "template_height": 3000.0,
+     "print_area_width": 2536.0,
+     "print_area_height": 2520.0,
+     "print_area_top": 241.0,
+     "print_area_left": 233.0,
+     "is_template_on_front": true,
+     "orientation": "any"
+    },
+    {
+     "template_id": 905497,
+     "image_url": "https://files.cdn.printful.com/o/upload/api-template/28/2887f3715d5324f078904f0ac5f63e87?v=1747295393",
+     "background_url": null,
+     "background_color": null,
+     "printfile_id": 838,
+     "template_width": 3000,
+     "template_height": 3000.0,
+     "print_area_width": 2247.0,
+     "print_area_height": 2491.0,
+     "print_area_top": 251.0,
+     "print_area_left": 374.0,
+     "is_template_on_front": true,
+     "orientation": "any"
+    },
+    {
+     "template_id": 905498,
+     "image_url": "https://files.cdn.printful.com/o/upload/api-template/92/9288cbb760925acefe91de889e48355a?v=1747295421",
+     "background_url": null,
+     "background_color": null,
+     "printfile_id": 844,
+     "template_width": 3000,
+     "template_height": 3000.0,
+     "print_area_width": 2705.0,
+     "print_area_height": 2583.0,
+     "print_area_top": 199.0,
+     "print_area_left": 148.0,
+     "is_template_on_front": true,
+     "orientation": "any"
+    }
+   ],
+   "min_dpi": 150,
+   "conflicting_placements": [
+    {
+     "placement": "front",
+     "conflicts": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    }
+   ]
+  },
+  "extra": []
+ }
+}

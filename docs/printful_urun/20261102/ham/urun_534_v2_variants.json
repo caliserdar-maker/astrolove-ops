@@ -1,0 +1,126 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/534/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 13431,
+    "catalog_product_id": 534,
+    "name": "Jigsaw Puzzle (252 pieces)",
+    "size": "252 pieces",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/534/13431_1636542000.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/13431"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/534"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/534/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/13431/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/13431/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/13431/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "label_inside",
+      "height": 1.4,
+      "width": 5.2,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 13432,
+    "catalog_product_id": 534,
+    "name": "Jigsaw Puzzle (520 pieces)",
+    "size": "520 pieces",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/534/13432_1636542010.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/13432"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/534"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/534/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/13432/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/13432/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/13432/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "label_inside",
+      "height": 1.4,
+      "width": 5.2,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/534/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/534"
+   }
+  }
+ }
+}

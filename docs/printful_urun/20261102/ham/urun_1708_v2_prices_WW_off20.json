@@ -1,0 +1,283 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 1708,
+    "placements": [
+     {
+      "id": "default",
+      "title": "Print file",
+      "type": "Digital printing",
+      "technique_key": "digital",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 53540,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "48.48",
+       "discounted_price": "48.48"
+      }
+     ]
+    },
+    {
+     "id": 53541,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "48.48",
+       "discounted_price": "48.48"
+      }
+     ]
+    },
+    {
+     "id": 53542,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "48.48",
+       "discounted_price": "48.48"
+      }
+     ]
+    },
+    {
+     "id": 53543,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "48.48",
+       "discounted_price": "48.48"
+      }
+     ]
+    },
+    {
+     "id": 53544,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "35.60",
+       "discounted_price": "35.60"
+      }
+     ]
+    },
+    {
+     "id": 53545,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "35.60",
+       "discounted_price": "35.60"
+      }
+     ]
+    },
+    {
+     "id": 53546,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "35.60",
+       "discounted_price": "35.60"
+      }
+     ]
+    },
+    {
+     "id": 53547,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "35.60",
+       "discounted_price": "35.60"
+      }
+     ]
+    },
+    {
+     "id": 53548,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "35.60",
+       "discounted_price": "35.60"
+      }
+     ]
+    },
+    {
+     "id": 53549,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "35.60",
+       "discounted_price": "35.60"
+      }
+     ]
+    },
+    {
+     "id": 53550,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "35.60",
+       "discounted_price": "35.60"
+      }
+     ]
+    },
+    {
+     "id": 53551,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "35.60",
+       "discounted_price": "35.60"
+      }
+     ]
+    },
+    {
+     "id": 53552,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "34.15",
+       "discounted_price": "34.15"
+      }
+     ]
+    },
+    {
+     "id": 53553,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "34.15",
+       "discounted_price": "34.15"
+      }
+     ]
+    },
+    {
+     "id": 53554,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "34.15",
+       "discounted_price": "34.15"
+      }
+     ]
+    },
+    {
+     "id": 53555,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "34.15",
+       "discounted_price": "34.15"
+      }
+     ]
+    },
+    {
+     "id": 53556,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "34.15",
+       "discounted_price": "34.15"
+      }
+     ]
+    },
+    {
+     "id": 53557,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "34.15",
+       "discounted_price": "34.15"
+      }
+     ]
+    },
+    {
+     "id": 53558,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "34.15",
+       "discounted_price": "34.15"
+      }
+     ]
+    },
+    {
+     "id": 53559,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "34.15",
+       "discounted_price": "34.15"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 96,
+   "limit": 20,
+   "offset": 20
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1708/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20"
+   },
+   "next": {
+    "href": "https://api.printful.com/v2/catalog-products/1708/prices?currency=USD&selling_region_name=worldwide&offset=40&limit=20"
+   },
+   "previous": {
+    "href": "https://api.printful.com/v2/catalog-products/1708/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "first": {
+    "href": "https://api.printful.com/v2/catalog-products/1708/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "last": {
+    "href": "https://api.printful.com/v2/catalog-products/1708/prices?currency=USD&selling_region_name=worldwide&offset=80&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1708"
+   }
+  }
+ }
+}

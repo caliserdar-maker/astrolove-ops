@@ -1,0 +1,304 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/601/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 601,
+    "placements": [
+     {
+      "id": "default",
+      "title": "Print file",
+      "type": "Sublimation",
+      "technique_key": "sublimation",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 15401,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 15402,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16124,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16125,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16126,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16127,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16128,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16129,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16130,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16131,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 17714,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 17715,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 17716,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 17717,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 17718,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 17719,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 17720,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 17721,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 20302,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 20303,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": [
+    {
+     "quantity": 25,
+     "bulk_discount_percentage": 0.04
+    },
+    {
+     "quantity": 50,
+     "bulk_discount_percentage": 0.05
+    },
+    {
+     "quantity": 75,
+     "bulk_discount_percentage": 0.06
+    },
+    {
+     "quantity": 100,
+     "bulk_discount_percentage": 0.07
+    },
+    {
+     "quantity": 200,
+     "bulk_discount_percentage": 0.09
+    }
+   ]
+  },
+  "extra": [],
+  "paging": {
+   "total": 62,
+   "limit": 20,
+   "offset": 20
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/601/prices?currency=USD&selling_region_name=worldwide&offset=20&limit=20"
+   },
+   "next": {
+    "href": "https://api.printful.com/v2/catalog-products/601/prices?currency=USD&selling_region_name=worldwide&offset=40&limit=20"
+   },
+   "previous": {
+    "href": "https://api.printful.com/v2/catalog-products/601/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "first": {
+    "href": "https://api.printful.com/v2/catalog-products/601/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "last": {
+    "href": "https://api.printful.com/v2/catalog-products/601/prices?currency=USD&selling_region_name=worldwide&offset=60&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/601"
+   }
+  }
+ }
+}

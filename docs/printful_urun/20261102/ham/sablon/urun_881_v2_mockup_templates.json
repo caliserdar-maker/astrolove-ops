@@ -1,0 +1,191 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/881/mockup-templates?limit=100",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "catalog_variant_ids": [
+     22783
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/ceramic_ornament/medium/flat/heart/04_ceramicornaments_heart_base_whitebg.png?v=1749145637",
+    "background_url": null,
+    "background_color": "#ffffff",
+    "printfile_id": 843,
+    "template_width": 2000.0,
+    "template_height": 2000.0,
+    "print_area_width": 1391.0,
+    "print_area_height": 1384.0,
+    "print_area_top": 386.0,
+    "print_area_left": 305.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     22782
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/ceramic_ornament/medium/flat/circle/04_ceramicornaments_circle_base_whitebg.png?v=1749145637",
+    "background_url": null,
+    "background_color": "#ffffff",
+    "printfile_id": 845,
+    "template_width": 2000.0,
+    "template_height": 2000.0,
+    "print_area_width": 1361.0,
+    "print_area_height": 1361.0,
+    "print_area_top": 409.0,
+    "print_area_left": 320.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     22785
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/ceramic_ornament/medium/flat/snowflake/04_ceramicornaments_snowflake_base_whitebg.png?v=1749145637",
+    "background_url": null,
+    "background_color": "#ffffff",
+    "printfile_id": 838,
+    "template_width": 2000.0,
+    "template_height": 2000.0,
+    "print_area_width": 1234.0,
+    "print_area_height": 1367.0,
+    "print_area_top": 403.0,
+    "print_area_left": 386.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     22784
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/ceramic_ornament/medium/flat/star/04_ceramicornaments_star_base_whitebg.png?v=1749145637",
+    "background_url": null,
+    "background_color": "#ffffff",
+    "printfile_id": 844,
+    "template_width": 2000.0,
+    "template_height": 2000.0,
+    "print_area_width": 1494.0,
+    "print_area_height": 1427.0,
+    "print_area_top": 355.0,
+    "print_area_left": 253.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     22782
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/ceramic_ornament/medium/templates/Circle.png?v=1749493366",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 845,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2476.0,
+    "print_area_height": 2476.0,
+    "print_area_top": 262.0,
+    "print_area_left": 262.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     22783
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/ceramic_ornament/medium/templates/Heart.png?v=1749493819",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 843,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2536.0,
+    "print_area_height": 2520.0,
+    "print_area_top": 241.0,
+    "print_area_left": 233.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     22785
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/ceramic_ornament/medium/templates/Snowflake.png?v=1749493595",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 838,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2247.0,
+    "print_area_height": 2491.0,
+    "print_area_top": 251.0,
+    "print_area_left": 374.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     22784
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/ceramic_ornament/medium/templates/Star.png?v=1749493665",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 844,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2705.0,
+    "print_area_height": 2583.0,
+    "print_area_top": 199.0,
+    "print_area_left": 148.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 8,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/881/mockup-templates?limit=100"
+   }
+  }
+ }
+}
