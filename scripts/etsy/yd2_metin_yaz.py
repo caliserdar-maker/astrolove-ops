@@ -8,7 +8,7 @@ yoksa baslik degismez (rapor), 2+ ise ilan yazilmaz.
 Kapilar (yazimdan ONCE, yeni metin): "5x7", "8x10", "Digital card", "Shipped print", "card" (kelime, buyuk / kucuk harf) yok; "5 x 7"
 yalniz SIZES satirinda; uzun / orta tire yok; etsy_common.RU_YASAK (kagit / omur / OBA ... yasaklari) yok; AI beyani var (ortak kapi
 Etsy._call ayrica denetler). Kaynak kapisi: canli aciklama (html.unescape, CRLF -> LF) = 26 Eki yedegi (--ham <lid>.json) ile ayni;
-degilse KAYMA (yazim yok). Kisi adi: canli metindeki ornek isimler (Emma, James; 26 Eki'den beri canli, D1-D6 dokunmaz) BILGI olarak
+degilse KAYMA (yazim yok). Kisi adi: ornek isimler (Serdar 2 Kas izinli liste: Emma, James, Emily; 26 Eki'den beri canli, D1-D6 dokunmaz) BILGI olarak
 raporlanir (Merkez kapisi "kisi adi yok"; Serdar karari pilot raporunda).
 updateListing bir TASLAGI yayina alir (CLAUDE.md 7 Eyl): yazmadan once state okunur, yalniz active ilana yazilir, sonra geri okunur
 (state active, baslik + aciklama beklenen). Geri okuma tutmazsa otomatik geri alma (yedekteki eski baslik + aciklama, etsy_common
@@ -57,7 +57,8 @@ SIZES_SATIR = "14 sizes, from 5 x 7 to 24 x 36 inches, plus A4 to A2. Every styl
 YASAK = [("5x7", re.compile(r"5x7")), ("8x10", re.compile(r"8x10")), ("Digital card", re.compile(r"digital card", re.I)),
          ("Shipped print", re.compile(r"shipped print", re.I)), ("card", re.compile(r"\bcards?\b", re.I)),
          ("tire", re.compile("[–—]"))]
-ORNEK_ISIM = re.compile(r"\b(Emma|James)\b")
+IZINLI_ORNEK_ISIM = ("Emma", "James", "Emily")   # Serdar 2 Kas: "kisi adi yok" magaza sahipleri icindir; ornek isimler izinli, baska isim YOK
+ORNEK_ISIM = re.compile(r"\b(" + "|".join(IZINLI_ORNEK_ISIM) + r")\b")
 
 
 class Kayma(Exception):
@@ -103,7 +104,7 @@ def donustur(desc, title):
         if not E.beyan_var(y, "en"):
             neden.append("sonuc metninde AI beyani yok")
         if ORNEK_ISIM.search(y):
-            notlar.append("BILGI: ornek isimler (Emma, James) canli metinde var; D1-D6 dokunmaz")
+            notlar.append("BILGI: izinli ornek isimler (Serdar 2 Kas: EMMA, JAMES, EMILY) metinde var")
     return y, yt, notlar, neden
 
 
