@@ -32,12 +32,17 @@ jobs:
           [[ "$REF" =~ ^[A-Za-z0-9._/-]{1,80}$ ]] || { echo "::error::ref"; exit 1; }
           if [ "$IS" = metin ] && [ "$MOD" = geri-al ] && [ -z "$YK" ]; then echo "::error::metin geri-al icin yedek_kosu"; exit 1; fi
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref }}
-      - name: Etsy kilidi (sira bekle, iptal yok)
+      - name: Etsy kilidi (sira bekle, iptal yok; kilit kumesi main agacindan, inceleme K2)
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/etsy/kilit_bekle.py
+      - name: Betikler (ref'ten scripts + data; .github main'de kalir)
+        env: {REF: "${{ inputs.ref }}"}
+        run: |
+          set -euo pipefail
+          git fetch -q --depth 1 origin "$REF"
+          git checkout -q FETCH_HEAD -- scripts data
+          echo "betik ref: $REF -> $(git rev-parse FETCH_HEAD)"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

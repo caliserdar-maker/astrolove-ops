@@ -2,11 +2,12 @@ name: yd2-galeri
 
 # YD (1st Anniversary) 2. ASAMA galeri (Serdar 2 Kas "ok"; Merkez GOREV YD2-YUKLE karar 6): rank 1 kapak + video DOKUNMA, rank 2-10 =
 # Y02-Y10 (TEMP/YD_KAPAK_V1/<kapak_damga>; Y01 yuklenmez), kalan 12 eski gorsel CIKAR, Style (513) baglari Y06-Y10. Betikler DALDA (ref,
-# varsayilan yd-asama2): scripts/kapak78/yd_liste_uret.py liste --profil yd2 (SET_KONTROL kapisi, alt metin data/pod/yd2_alt.csv) +
+# varsayilan yd-asama2; yalniz scripts + data ref'ten): scripts/kapak78/yd_liste_uret.py liste --profil yd2 (SET_KONTROL kapisi, alt metin data/pod/yd2_alt.csv) +
 # scripts/kapak78/yd2_galeri_yukle.py (galeri_v10_yukle yd2 profili; ek kapilar: Size 516 = 14 boy, rank 1 = liste kosusundaki kapak).
 # kuru=true (varsayilan): Etsy salt okuma, PLAN_YD2.json + plan_damga. ETSY'YE YAZAR yalniz kuru=false + confirm=YD_GALERI_V2 + plan_damga.
-# Galeri geri alma ELLE, yedekten (TEMP/YD_KAPAK_V1_YEDEK/<yedek_damga>; Serdar kabul etti). Kilit is akisinin en basinda (yd-kapak-yukle
-# ile ayni duzen; CLAUDE.md karar 6b istisnasi YALNIZ yd-kapak-yukle icindir: burada azami_dk ve girdi indirme ayni sinirlarla).
+# Galeri geri alma ELLE, yedekten (TEMP/YD_KAPAK_V1_YEDEK/<yedek_damga>; Serdar kabul etti). Kilit: 6b istisnasi (yd-kapak-yukle) yd2'ye
+# UYGULANMAZ; kilit girdi indirme + liste kapilarindan SONRA, token ve durum okumasindan ONCE. Kilit kumesi main agacindan (betikler ref'ten).
+# SAGITTARIUS_SAGITTARIUS (4595419990) haric girdisinde varsayilan olarak atlanir (Serdar karar 7).
 # Alt metin dosyasi depodan okunur ve sha256 ile Drive TEMP/YD2_ALT/ALT_<sha12>.csv olarak saklanir (Drive kaydi; liste OZET alt_sha).
 # Durum: TEMP/YD2_GALERI/DEVAM.json, ILERLEME.json, SONUC.csv; kosu ciktisi TEMP/YD2_GALERI/KOSU/<run_id>/.
 
@@ -29,6 +30,7 @@ on:
       kurtar: {description: "true: hata kaydi olan ilanda kayitli plan + canli galeriyle surdur", required: false, default: "false"}
       azami_dk: {description: "yazim: kilitten bu sure sonra yeni ilana baslanmaz (dk, 1-75)", required: false, default: "75"}
       bag_onar: {description: "true: yalniz Style baglari (DEVAM kaydi olan ilanlar; confirm YD_GALERI_V2_BAG)", required: false, default: "false"}
+      haric: {description: "atlanacak listing_id (virgullu). Varsayilan SAGITTARIUS_SAGITTARIUS (Serdar karar 7: galeri bekler)", required: false, default: "4595419990"}
       ref: {description: "betik dali / commit", required: true, default: "yd-asama2"}
 
 env:
@@ -71,14 +73,13 @@ jobs:
             [[ "$PD" =~ ^[0-9]+_[0-9a-f]{12}$ ]] || { echo "::error::yazim icin plan_damga (<kosu>_<sha12>)"; exit 1; }
           fi
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref }}
-      - name: Etsy kilidi (sira bekle, iptal yok; Serdar 31 Eki karar 6b, is akisinin en basinda)
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Betikler (ref'ten scripts + data; .github main'de kalir, kilit kumesi main'den; inceleme K2)
+        env: {REF: "${{ inputs.ref }}"}
         run: |
-          python3 scripts/etsy/kilit_bekle.py
-          echo "KILIT_T0=$(date +%s)" >> "$GITHUB_ENV"   # zaman butcesi kilit alindigi andan sayilir
+          set -euo pipefail
+          git fetch -q --depth 1 origin "$REF"
+          git checkout -q FETCH_HEAD -- scripts data
+          echo "betik ref: $REF -> $(git rev-parse FETCH_HEAD)"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -97,7 +98,7 @@ jobs:
           chmod 600 ~/.config/rclone/rclone.conf
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - name: Girdiler (Drive, kilit altinda; en fazla 15 dk) + liste kapilari
+      - name: Girdiler (Drive, KILITSIZ; en fazla 15 dk) + liste kapilari (Etsy istegi yok)
         timeout-minutes: 15
         env:
           KD: ${{ inputs.kapak_damga }}
@@ -105,18 +106,26 @@ jobs:
           YD: ${{ inputs.yedek_damga }}
           EN: ${{ inputs.envanter }}
           SA: ${{ inputs.sadece }}
+          HA: ${{ inputs.haric }}
           KURU: ${{ inputs.kuru }}
           PD: ${{ inputs.plan_damga }}
           BO: ${{ inputs.bag_onar }}
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work _out _in/kapak _in/HAM
+          [[ "$HA" =~ ^([0-9]+(,[0-9]+)*)?$ ]] || { echo "::error::haric"; exit 1; }
           python3 - <<'PY'
           import csv, os
           sa = {x for x in os.environ["SA"].split(",") if x}
-          R = [r for r in csv.DictReader(open("data/pod/yd78_ids.csv")) if not sa or r["listing_id"] in sa]
-          if sa - {r["listing_id"] for r in R}:
-              raise SystemExit(f"sadece: yd78 listesinde olmayan ilan {sorted(sa - {r['listing_id'] for r in R})}")
+          ha = {x for x in os.environ["HA"].split(",") if x}
+          T = [r for r in csv.DictReader(open("data/pod/yd78_ids.csv"))]
+          if (sa | ha) - {r["listing_id"] for r in T}:
+              raise SystemExit(f"sadece / haric: yd78 listesinde olmayan ilan {sorted((sa | ha) - {r['listing_id'] for r in T})}")
+          R = [r for r in T if (not sa or r["listing_id"] in sa) and r["listing_id"] not in ha]   # inceleme K4: haric her zaman uygulanir
+          if not R:
+              raise SystemExit("kapsamda ilan yok")
+          open(os.environ["GITHUB_ENV"], "a").write("SA_EFF=" + ",".join(r["listing_id"] for r in R) + "\n")
+          print(f"haric: {sorted(ha)}")
           open("_work/kapak.txt", "w").writelines(["MANIFEST.csv\n", "ORTAK_Y04.jpg\n"]          # Merkez 27 Eki karar d: Y05 cifte ozel
                                                   + [f"{r['cift']}_Y{k:02d}.jpg\n" for r in R for k in (2, 3, 5, 6, 7, 8, 9, 10)])   # yd2: Y01 yuklenmez
           open("_work/ham.txt", "w").writelines(f"{r['listing_id']}.json\n" for r in R)
@@ -139,8 +148,15 @@ jobs:
           fi
           python3 scripts/kapak78/yd_liste_uret.py liste --ciftler data/pod/yd78_ids.csv --kaynak docs/yd_kapak/KAPAK_KAYNAK.csv \
             --ham-dir _in/HAM --kapak-dir _in/kapak --set-kontrol _work/SET_KONTROL.csv --profil yd2 --alt _work/ALT.csv \
-            --yedek-ozet _work/YEDEK_OZET.md --yedek-liste _work/yedek_ls.json --out _hazir --sadece "$SA"
+            --yedek-ozet _work/YEDEK_OZET.md --yedek-liste _work/yedek_ls.json --out _hazir --sadece "$SA_EFF"
           cp _hazir/LISTE_OZET.md _hazir/LISTE_OZET.json _hazir/ESLEME.csv _out/
+      # inceleme K3: 6b istisnasi yd2'ye genellenmez (KILIT SURESI kurali); kilit girdi indirme + liste kapilarindan SONRA, token ve durumdan ONCE
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/etsy/kilit_bekle.py
+          echo "KILIT_T0=$(date +%s)" >> "$GITHUB_ENV"   # zaman butcesi kilit alindigi andan sayilir
       - name: Durum dosyalari oku (kilit sonrasi)
         env:
           DK: ${{ inputs.devam_kosu }}
