@@ -148,6 +148,23 @@ def main():
                 and f.n_yukle == 9 and len(f.silinenler) == 12 and KAPAK_ID not in f.silinenler)
         kontrol("yazim yd2: Style baglari Starlit 6, Timeless 7, First Page 8, Layers 9, Botanical 10",
                 {k: rk.get(v) for k, v in f.bag.items()} == L.STIL_SIRA)
+        class Itici(SahteYD2):   # Etsy ilk yuklemeyi rank 1'e koyarsa (kapak itilir)
+            def post_file(self, path, files=None, data=None, tekrar=3):
+                once = {x["listing_image_id"] for x in self.img}
+                r = super().post_file(path, files=files, data=data, tekrar=tekrar)
+                yeni = [x for x in self.img if x["listing_image_id"] not in once]
+                if yeni and self.n_yukle == 1:
+                    y = yeni[0]; eski = y["rank"]
+                    for x in self.img:
+                        if x is not y and x["rank"] < eski:
+                            x["rank"] += 1
+                    y["rank"] = 1
+                return r
+        fi = Itici(h); o4 = t0 / "o4"; o4.mkdir()
+        rc, R4 = kos(T10.Coklu({LID: fi}), hz, o4, kuru=False, plan=t0 / "PLAN.json", damga=R["plan_damga"])
+        kontrol(f"yazim yd2: ilk yukleme kapagi iterse ilk yuklemeden sonra DUR (yukleme {fi.n_yukle}, silme {len(fi.silinenler)}, rc {rc})",
+                rc != 0 and fi.n_yukle == 1 and len(fi.silinenler) == 2 and not any(y[0] == "bag" for y in fi.yaz)   # 2 = on silme (22 > 20)
+                and "rank 1" in json.dumps(R4, ensure_ascii=False))
         h5 = ham2(); h5["images"][0]["listing_image_id"] = 99000002
         o5 = t0 / "o5"; o5.mkdir()
         rc, R5 = kos(T10.Coklu({LID: SahteYD2(h5)}), hz, o5)
