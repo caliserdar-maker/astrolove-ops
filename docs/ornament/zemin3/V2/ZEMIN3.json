@@ -1,0 +1,41 @@
+{
+ "EMERALD_1264.png": {
+  "boyut": [
+   1264,
+   1264
+  ],
+  "mod": "RGB",
+  "sha256": "f0d1483b42810dd0f99e85af3e9ec05f2873d4fdca24c2f0a8f35b0f7492efd1",
+  "ortalama_rgb": [
+   2.0,
+   27.0,
+   10.8
+  ]
+ },
+ "RUBY_1264.png": {
+  "boyut": [
+   1264,
+   1264
+  ],
+  "mod": "RGB",
+  "sha256": "7c009226598720039dc47350018fb23a9881007b7d97cd48a9ee1390d650f939",
+  "ortalama_rgb": [
+   62.7,
+   0.9,
+   6.5
+  ]
+ },
+ "SAPPHIRE_1264.png": {
+  "boyut": [
+   1264,
+   1264
+  ],
+  "mod": "RGB",
+  "sha256": "29df83c0cf1d0df42e765304e6e9950d3171fbf9fc5ca300978801d6647e7ee0",
+  "ortalama_rgb": [
+   0.7,
+   9.3,
+   53.4
+  ]
+ }
+}
