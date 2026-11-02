@@ -138,6 +138,10 @@ def urun_ozet(ham, pid, a):
                 r[v.get('id')] = min(ps)
         return r
     fWW, fNA = fiyat('WW'), fiyat('NA')
+    # fiyat yaniti katalog varyant listesinde olmayan kimlikler de iceriyor (or. 358: 22522 2.25); yalniz listelenen varyantlar
+    gecerli = {v.get('id') for v in (vs2 or vs1)}
+    fWW = {k: v for k, v in fWW.items() if k in gecerli}
+    fNA = {k: v for k, v in fNA.items() if k in gecerli}
     # ana baski alani: ilk varyantin 'default' / 'front' yerlesimi
     ana_yer, pfs = None, []
     for v in liste_l(pf.get('variant_printfiles')):
