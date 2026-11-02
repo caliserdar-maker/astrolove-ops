@@ -147,7 +147,11 @@ def oku(ham):
             continue
         v1 = json.loads((ham / f"urun_{pid}_v1.json").read_text(encoding="utf-8"))
         r1 = (v1.get("yanit") or {}).get("result")
-        for v in (r1.get("variants") or []) if isinstance(r1, dict) else []:
+        vs = (r1.get("variants") or []) if isinstance(r1, dict) else []
+        if not vs:  # yalniz v2'de olan urun (kosu 41415291964: 1664/1729 cam atlandi)
+            v2v = json.loads((ham / f"urun_{pid}_v2_variants.json").read_text(encoding="utf-8"))
+            vs = liste((v2v.get("yanit") or {}).get("data"))
+        for v in vs:
             if isinstance(v, dict) and v.get("id") is not None:
                 for ulke in ULKELER:
                     plan.append((pid, v.get("id"), ulke))
@@ -280,6 +284,7 @@ PAKET = r"ribbon|string|packag|gift|hole|magnetic|bundle|pack"
 YUZ = r"sided|side print|2-side"
 KALINLIK = r"thickness"
 MENSE = r"sourced from"
+KISIT = r"cannot be shipped|available in the us only|ships to"
 
 
 def olcu_satir(ac, boyut):
@@ -308,6 +313,7 @@ def urun_veri(ham, pid):
     U["vs1"] = liste(r1.get("variants"))
     U["p2"] = sozluk(yanit(U["v2"]).get("data"))
     U["vs2"] = liste(yanit(U["v2_variants"]).get("data"))
+    U["v2var"] = {v.get("id"): v for v in U["vs2"]}
     pf = sozluk(yanit(U["printfiles"]).get("result"))
     U["pf_id"] = {x.get("printfile_id"): x for x in liste(pf.get("printfiles"))}
     U["pf_var"] = {x.get("variant_id"): sozluk(x.get("placements")) for x in liste(pf.get("variant_printfiles"))}
@@ -398,8 +404,12 @@ def rapor(cikti):
                 "fill_mode": "; ".join(f"{y}={x.get('fill_mode')}" for y, x in pf) or YOK,
                 "can_rotate": "; ".join(f"{y}={x.get('can_rotate')}" for y, x in pf) or YOK,
                 "tasma_payi": " / ".join(aciklama_satir(ac, r"bleed")) or YOK,
+                "baski_alani_inch_v2": "; ".join(f"{d.get('placement')}={d.get('width')}x{d.get('height')}" for d in
+                                                liste(sozluk(U["v2var"].get(vid)).get("placement_dimensions"))) or YOK,
+                "alan_fiyat_v2_usd_north_america": "; ".join(f"{i}:{pr}" for i, _, pr in U["yer_fiyat2"]["USD_north_america"]) or YOK,
+                "kisit_aciklama": " / ".join(aciklama_satir(ac, KISIT)) or YOK,
             }
-            gonderim_var, gonderim_yok, cikis = [], [], set()
+            gonderim_var, gonderim_yok, cikis, gumruk = [], [], set(), []
             for ulke in ULKELER:
                 x1, x2 = K1.get((pid, vid, ulke)), K2.get((pid, vid, ulke))
                 if x1 is None:
@@ -407,11 +417,19 @@ def rapor(cikti):
                     continue
                 s1, s2 = liste(yanit(x1).get("result")), liste(yanit(x2).get("data"))
                 e = en_ucuz(s1) if http(x1) == 200 else None
+                if e is None and http(x2) == 200 and en_ucuz(s2):
+                    o = en_ucuz(s2)
+                    e = {"id": o.get("shipping"), "name": o.get("shipping_method_name"), "rate": o.get("rate"),
+                         "currency": o.get("currency"), "minDeliveryDays": o.get("min_delivery_days"),
+                         "maxDeliveryDays": o.get("max_delivery_days"), "minDeliveryDate": o.get("min_delivery_date"),
+                         "maxDeliveryDate": o.get("max_delivery_date"), "kaynak": "v2"}
                 m2 = next((y for y in s2 if e and y.get("shipping") == e.get("id")), None) or (en_ucuz(s2) if http(x2) == 200 else None)
                 dep = sorted({sh.get("departure_country") for sh in liste((m2 or {}).get("shipments")) if sh.get("departure_country")})
                 gum = sorted({str(sh.get("customs_fees_possible")) for sh in liste((m2 or {}).get("shipments"))
                               if "customs_fees_possible" in sh})
                 takip = {**(anahtar_bul(e, "track") if e else {}), **(anahtar_bul(m2, "track") if m2 else {})}
+                if "True" in gum:
+                    gumruk.append(ulke)
                 if e:
                     s[f"kargo_{ulke}_usd"] = e.get("rate")
                     gonderim_var.append(ulke)
@@ -431,8 +449,10 @@ def rapor(cikti):
                     "http_v2": http(x2), "ucret_v2": m2.get("rate") if m2 else YOK,
                     "cikis_ulkesi_v2": ", ".join(dep) or YOK, "gumruk_olasi_v2": ", ".join(gum) or YOK,
                     "takip_api": json.dumps(takip, ensure_ascii=False) if takip else YOK,
+                    "kargo_kaynagi": (e.get("kaynak") or "v1") if e else YOK,
                     "hata_v1": "" if e else hata_mesaj(x1)})
             s["gonderim_var_9ulke"] = ", ".join(gonderim_var) or ("sorgulanmadi" if not uru["kargo_var"] else "yok")
+            s["gumruk_olasi_ulkeler_v2"] = ", ".join(gumruk) or ("sorgulanmadi" if not uru["kargo_var"] else "yok")
             s["gonderim_yok_9ulke"] = "; ".join(gonderim_yok) or ("sorgulanmadi" if not uru["kargo_var"] else "yok")
             s["cikis_ulkesi_v2"] = ", ".join(sorted(cikis)) or ("sorgulanmadi" if not uru["kargo_var"] else YOK)
             satirlar.append(s)
@@ -484,6 +504,36 @@ def kargo_hucre(ks):
     return f"{a} ({'/'.join(yon)}, {'/'.join(gun)} g{ek})"
 
 
+def fiyat_ozet(u, kol):
+    """kol: fiyat_usd_v2 (worldwide) / fiyat_usd_v2_north_america. Aralik + farkliysa boy basina dokum."""
+    cift = [(v["sekil_boyut_api"], pr.split(":")[-1]) for v in u["varyant"] for pr in v[kol].split("; ") if ":" in pr]
+    a = aralik([x for _, x in cift])
+    if len({x for _, x in cift}) > 1:
+        a += " (" + "; ".join(f"{b} {x}" for b, x in cift) + ")"
+    return a
+
+
+# Bagimsiz inceleme (2 Kas) bulgulari: aciklama metni ile API verisi arasindaki celiskiler. Her satir ham dosyaya dayanir.
+CELISKI = [
+    "634: v1 `price` 8.37 ve v1 back `additional_price` 1.49 = v2 north_america fiyati; v2 worldwide 10.25 ve back 1.50 "
+    "(urun_634_v2_prices_USD*.json). Diger urunlerde v1 = v2 worldwide.",
+    "634: aciklamada hem 'Magnetic back' hem 'Two-sided print' var; API'de back placement var (urun_634_v2.json).",
+    "634: kalinlik aciklamada 0.37″ (9 mm), v1 olcu tablosunda Height 0.35 in / 0.9 cm; tablo notu 'Actual product measurements "
+    "may vary by up to 1/2\"' (urun_634_v1_sizes.json).",
+    "634: printfile 585x945 px, 150 dpi (diger urunlerde 200-300 dpi) (urun_634_printfiles.json).",
+    "793: aciklama '4 shapes (Rectangle, Scalloped, Circle, Heart)'; API varyantlari yalniz Circle ve Rectangle. Circle '3″ (7.8 cm)' "
+    "(3″ = 7.62 cm); v2 baski alani 3.31x3.31 in (urun_793_v2*.json).",
+    "881 ve 900: Circle icin ayni printfile 845 (954x954 px, 300 dpi = 3.18 in); aciklama capi 2.76″ (881) ve 2.99″ (900).",
+    "900: aciklama 'bundles of 3, 5, or 10', 901: '3, 5, or 10-unit packs'; API'de ikisinde de yalniz 4 sekil varyanti var, paket "
+    "varyanti yok (urun_900/901_v2_variants.json).",
+    "1664: '5 Pieces' varyanti 5'li paket (tek tasarim): 82.98 USD worldwide; tekli 19.00. Baski alani 3.75x3.75 in, urun 3.5″.",
+    "1729: aciklama 'Gift packaging included'; paketsiz varyantlar (Circle, Heart) 5.59, paketliler 7.73 USD. Printfile 900 px = 3.0 in, "
+    "urun 3.5″.",
+    "1664 ve 1729: v2 availability worldwide 'not fulfillable' (793/794 yalniz ABD urunleriyle ayni deger; 881/900/901 'in stock'). "
+    "Bolge bazli availability sorgulanmadi; hangi bolgede uretilebildigi bilinmiyor.",
+]
+
+
 def md(urunler, kargo, ham):
     ist = jy(ham, "_istekler.json") or []
     post = sorted({x["yol"] for x in ist if x["yontem"] == "POST"})
@@ -492,46 +542,72 @@ def md(urunler, kargo, ham):
          f"Kaynak: Printful API v1 + v2, ham yanitlar `ham/`. Son istek {zaman}. Istek {len(ist)}: GET "
          f"{sum(1 for x in ist if x['yontem'] == 'GET')}, POST {sum(1 for x in ist if x['yontem'] == 'POST')} (yalniz {', '.join(post) or 'yok'}).",
          "", "Notlar:",
-         "- Fiyat USD = v1 `variants[].price` (kargo haric); v1'de olmayan urunde v2 `prices?currency=USD&selling_region_name=worldwide`.",
+         "- Fiyat USD (kargo haric): WW = v2 `prices?currency=USD&selling_region_name=worldwide`; NA = north_america. v1 `price` "
+         "NA ile ayni (CSV `fiyat_usd_v1`). EUR CSV'de (`fiyat_eur_v2`, `fiyat_eur_v2_europe`). Arka yuz ek ucreti ayri yazildi.",
          "- Olcu, malzeme, kurdele/paket: urun aciklama metni (API, aynen); aciklamada olcu yoksa v1 /products/{id}/sizes tablosu. Hesap yok.",
+         "- Baski alani inch = v2 `placement_dimensions`. Tasma payi: API vermedi (aciklamada ve alanlarda yok).",
          "- Uretim yeri = v2 /v2/shipping-rates `shipments[].departure_country` (hedef ulke basina). v1 `availability_status` "
-         "bolgesi ayrica CSV'de (`uretim_bolgesi_durum_v1`); uretim yeriyle ayni sey degil (881: v1 'US', cikis LV).",
-         "- Satilabildigi bolge = 9 ulke kargo sorgusunda ucret donen ulkeler; donmeyende API hata mesaji.",
-         "- Kargo: 1 adet, ornek adres (merkez posta kodu), USD, en ucuz secenek. Takip: yanitlarda takip alani yok -> API vermedi.",
+         "bolgesi CSV'de (`uretim_bolgesi_durum_v1`); uretim yeriyle ayni sey degil (881: v1 'US', cikis LV).",
+         "- Satilabildigi bolge = 9 ulke kargo sorgusunda ucret donen ulkeler; donmeyende API hata mesaji. "
+         "Gumruk = v2 `customs_fees_possible: true` (alici gumruk/vergi odeyebilir).",
+         "- Kargo: 1 adet, ornek adres (merkez posta kodu), USD, en ucuz secenek (hep STANDARD 'Flat Rate'; diger secenek CO2 "
+         "offset, daha pahali). Takip: yanitlarda takip alani yok -> API vermedi.",
+         "- Gun = API `minDeliveryDays`-`maxDeliveryDays`; is/takvim gunu oldugunu API belirtmiyor. Tarihler KARGO.csv'de.",
          "", "## 1. Urunler", "",
-         "| urun | sekil/olcu | yuz | fiyat USD | uretim yeri (cikis ulkesi) | satilabildigi bolgeler (9 ulke testi) | baski dosyasi piksel (dpi) |",
+         "| urun | sekil/olcu | yuz | fiyat USD (WW / NA) | uretim yeri (cikis ulkesi) | satilabildigi bolgeler (9 ulke testi) | baski dosyasi piksel (dpi) / alan inch |",
          "|---|---|---|---|---|---|---|"]
     for u in urunler:
         sekil = list(dict.fromkeys(f"{v['sekil_boyut_api']}: " + (v["olcu_aciklama"] if v["olcu_aciklama"] != YOK else
                                    (f"v1 olcu tablosu: {v['olcu_tablo_v1']}" if v["olcu_tablo_v1"] != YOK else YOK))
                                    for v in u["varyant"]))
-        if u["kaynak"] == "v1":
-            fiyat = aralik([v["fiyat_usd_v1"] for v in u["varyant"]])
-        else:
-            fiyat = aralik([pr.split(":")[-1] for v in u["varyant"] for pr in v["fiyat_usd_v2"].split("; ")]) + " (v2)"
+        v0 = u["varyant"][0] if u["varyant"] else {}
+        fiyat = f"WW {fiyat_ozet(u, 'fiyat_usd_v2')} / NA {fiyat_ozet(u, 'fiyat_usd_v2_north_america')}"
+        arka = [x for x in v0.get("alan_fiyat_v2_usd", "").split("; ") if x.startswith("back:")]
+        arka_na = [x for x in v0.get("alan_fiyat_v2_usd_north_america", "").split("; ") if x.startswith("back:")]
+        if arka:
+            fiyat += f"; arka yuz ek: WW {arka[0][5:]} / NA {arka_na[0][5:] if arka_na else YOK}"
         grup = {}
         for hedef, dep in u["cikis"].items():
             grup.setdefault(", ".join(sorted(dep)) or "-", []).append(hedef)
-        cik = "; ".join(f"{d} (hedef {', '.join(h)})" for d, h in grup.items() if d != "-") or (
-            "sorgulanmadi" if not u["kargo_var"] else YOK)
+        cik = "; ".join(f"{d} (hedef {', '.join(h)})" for d, h in grup.items() if d != "-")
         var = sorted({b for v in u["varyant"] for b in v["gonderim_var_9ulke"].split(", ")} - {"yok", "sorgulanmadi"},
                      key=ULKELER.index)
+        gum = sorted({b for v in u["varyant"] for b in v["gumruk_olasi_ulkeler_v2"].split(", ")} - {"yok", "sorgulanmadi"},
+                     key=ULKELER.index)
+        uyg = sorted({x for v in u["varyant"] for x in v["uygunluk_v2"].split("; ")})
         if not u["kargo_var"]:
-            uyg = sorted({x for v in u["varyant"] for x in v["uygunluk_v2"].split("; ")})
-            bol = f"kargo sorgulanmadi (v1 HTTP {u['http_v1']}); v2 uygunluk: {', '.join(uyg)}"
+            cik = "sorgulanmadi"
+            bol = (f"KARGO SORGULANMADI (betik kargo planini v1 varyantlarindan kurdu; urun v1'de yok, HTTP {u['http_v1']}). "
+                   f"v2 uygunluk: {', '.join(uyg)}")
         elif u["yalniz_abd"]:
             bol = "**YALNIZ ABD** (API: ships to United States only)"
         else:
             bol = ", ".join(var) + ("" if len(var) == len(ULKELER) else " (eksik ulke: tablo 2)")
-        px = list(dict.fromkeys(f"{v['printfile_px']} ({v['printfile_dpi'].split('=')[-1]} dpi)" for v in u["varyant"]))
-        L.append(f"| {u['id']} {u['ad']} | {'<br>'.join(sekil) or YOK} | {u['yuz']} | {fiyat} | {cik} | {bol} | {'<br>'.join(px) or YOK} |")
-    L += ["", "## 2. Kargo ucreti (USD, 1 adet, en ucuz yontem). Hucre: ucret (yontem id, min-max is gunu)", "",
+            if gum:
+                bol += f"; gumruk olasi: {', '.join(gum)}"
+        kis = v0.get("kisit_aciklama", YOK)
+        if kis != YOK and not u["yalniz_abd"]:
+            bol += f"; aciklama: {kis}"
+        px = list(dict.fromkeys(f"{v['printfile_px']} ({v['printfile_dpi'].split('=')[-1]} dpi) / {v['baski_alani_inch_v2']}"
+                                for v in u["varyant"]))
+        L.append(f"| {u['id']} {u['ad']} | {'<br>'.join(sekil) or YOK} | {u['yuz']} | {fiyat} | {cik or YOK} | {bol} | "
+                 f"{'<br>'.join(px) or YOK} |")
+    L += ["", "## 2. Kargo ucreti (USD, 1 adet, en ucuz yontem). Hucre: ucret (yontem id, min-max gun). "
+          "† = v2 customs_fees_possible true (alici gumruk/vergi odeyebilir)", "",
           "| urun | " + " | ".join(ULKELER) + " |", "|---|" + "---|" * len(ULKELER)]
     for u in urunler:
-        hucre = [kargo_hucre([k for k in kargo if k["urun_id"] == u["id"] and k["ulke"] == ul]) for ul in ULKELER]
+        hucre = []
+        for ul in ULKELER:
+            ks = [k for k in kargo if k["urun_id"] == u["id"] and k["ulke"] == ul]
+            h = kargo_hucre(ks) if u["kargo_var"] else "sorgulanmadi"
+            if any(k["gumruk_olasi_v2"] == "True" for k in ks):
+                h += " †"
+            hucre.append(h)
         L.append(f"| {u['id']} {u['ad']} | " + " | ".join(hucre) + " |")
     adlar = sorted({(k["yontem_id"], re.sub(r"\s*\(Estimated delivery.*", "", k["yontem_adi"])) for k in kargo if k["ucret"] != YOK})
-    L += ["", "Yontem adlari (v1 `name`, tahmini teslim tarihi kismi atildi): " + "; ".join(f"{i} = {a}" for i, a in adlar), ""]
+    L += ["", "Yontem adlari (v1 `name`, tahmini teslim tarihi kismi atildi): " + "; ".join(f"{i} = {a}" for i, a in adlar), "",
+          "## 2b. Aciklama metni ile API verisi arasindaki celiskiler (bagimsiz inceleme, ham dosyaya dayali)", ""]
+    L += [f"- {c}" for c in CELISKI] + [""]
     L += ["## 3. Urun ayrintilari", ""]
     for u in urunler:
         v0 = u["varyant"][0] if u["varyant"] else {}
@@ -540,18 +616,20 @@ def md(urunler, kargo, ham):
               f" | durdurulmus: {u['durdu'] if u['durdu'] is not None else YOK}",
               f"- yuz: {u['yuz']} | alanlar: {u['alan']}",
               f"- baski teknigi (v2 placement:technique): {', '.join(u['teknik'])}",
-              f"- alan ek ucreti: v1 files {v0.get('arka_ek_ucret_v1_usd', YOK)} | v2 USD {v0.get('alan_fiyat_v2_usd', YOK)}"
-              f" | v2 EUR {v0.get('alan_fiyat_v2_eur', YOK)}",
+              f"- alan ek ucreti: v1 files {v0.get('arka_ek_ucret_v1_usd', YOK)} | v2 USD WW {v0.get('alan_fiyat_v2_usd', YOK)}"
+              f" | v2 USD NA {v0.get('alan_fiyat_v2_usd_north_america', YOK)} | v2 EUR WW {v0.get('alan_fiyat_v2_eur', YOK)}",
               f"- malzeme: {v0.get('malzeme_aciklama', YOK)} | kalinlik: {v0.get('kalinlik_aciklama', YOK)}",
               f"- kurdele/paket: {v0.get('paket_kurdele_aciklama', YOK)}",
               f"- mense: {v0.get('mense_aciklama', YOK)} | v1 origin_country: {v0.get('origin_country_v1', YOK)}",
+              f"- kisit (aciklama): {v0.get('kisit_aciklama', YOK)}",
               f"- tasma payi: {v0.get('tasma_payi', YOK)}", "",
-              "| varyant | ad | USD v1 | USD v2 | EUR v2 | EUR europe | USD north_america | v1 bolge | v2 uygunluk | printfile | px | dpi | fill |",
-              "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+              "| varyant | ad | USD v1 | USD v2 WW | USD v2 NA | EUR v2 WW | EUR v2 europe | v1 bolge | v2 uygunluk | printfile | px | dpi | fill | alan inch |",
+              "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
         for v in u["varyant"]:
-            L.append(f"| {v['varyant_id']} | {v['varyant_adi']} | {v['fiyat_usd_v1']} | {v['fiyat_usd_v2']} | {v['fiyat_eur_v2']} | "
-                     f"{v['fiyat_eur_v2_europe']} | {v['fiyat_usd_v2_north_america']} | {v['uretim_bolgesi_durum_v1']} | "
-                     f"{v['uygunluk_v2']} | {v['printfile_id']} | {v['printfile_px']} | {v['printfile_dpi']} | {v['fill_mode']} |")
+            L.append(f"| {v['varyant_id']} | {v['varyant_adi']} | {v['fiyat_usd_v1']} | {v['fiyat_usd_v2']} | "
+                     f"{v['fiyat_usd_v2_north_america']} | {v['fiyat_eur_v2']} | {v['fiyat_eur_v2_europe']} | "
+                     f"{v['uretim_bolgesi_durum_v1']} | {v['uygunluk_v2']} | {v['printfile_id']} | {v['printfile_px']} | "
+                     f"{v['printfile_dpi']} | {v['fill_mode']} | {v['baski_alani_inch_v2']} |")
         L += ["", "Aciklama metni (API, aynen):", "", "```", (u["aciklama"] or YOK).strip(), "```", ""]
     return "\n".join(L) + "\n"
 

@@ -32,7 +32,7 @@ def main(c):
 
     def esit(ad, a, b):
         say[0] += 1
-        if str(a) != str(b):
+        if ("" if a is None else str(a)) != ("" if b is None else str(b)):
             hata.append(f"{ad}: rapor={a!r} ham={b!r}")
 
     for x in j("_istekler.json") or []:
@@ -145,17 +145,29 @@ def main(c):
         pid = m.group(1)
         h = [x.strip() for x in satir.strip().strip("|").split("|")]
         kay, vs = varyantlar(pid)
+        for etk, cur in (("WW", "USD"), ("NA", "USD_north_america")):
+            f = sorted({float(p.split(":")[-1]) for v in vs for p in v2fiyat(pid, cur, v.get("id")).split("; ") if ":" in p})
+            m2 = re.search(rf"{etk} ([\d.]+)(?:-([\d.]+))?", h[3])
+            sayi = [float(x) for x in m2.groups() if x] if m2 else []
+            esit(f"MD1 fiyat {etk} {pid}", sayi and [sayi[0], sayi[-1]], f and [f[0], f[-1]])
+            d = D(D(j(f"urun_{pid}_v2_prices_{cur}.json").get("yanit")).get("data"))
+            back = [x.get("price") for x in L(D(d.get("product")).get("placements")) if x.get("id") == "back"]
+            m3 = re.search(rf"arka yuz ek: WW ([\d.]+) / NA ([\d.]+)", h[3])
+            esit(f"MD1 arka {etk} {pid}", (m3.group(1 if etk == "WW" else 2) if m3 else None), back[0] if back else None)
         if kay == "v1":
-            f = sorted({float(v["price"]) for v in vs if v.get("price") not in (None, "")})
-        else:
-            f = sorted({float(p.split(":")[-1]) for v in vs for p in v2fiyat(pid, "USD", v.get("id")).split("; ") if ":" in p})
-        sayi = [float(x) for x in re.findall(r"\d+\.\d+", h[3])]
-        esit(f"MD1 fiyat {pid}", sayi and [sayi[0], sayi[-1]], f and [f[0], f[-1]])
+            for v in vs:
+                na = v2fiyat(pid, "USD_north_america", v.get("id")).split(":")[-1]
+                if str(v.get("price")) != na:
+                    hata.append(f"BILGI {pid}/{v.get('id')}: v1 price {v.get('price')} != v2 NA {na}")
         px = set()
         pf = D(D(j(f"urun_{pid}_printfiles.json").get("yanit")).get("result"))
         for x in L(pf.get("printfiles")):
             px.add(f"{x.get('width')}x{x.get('height')}")
-        esit(f"MD1 px {pid}", sorted(set(re.findall(r"\d+x\d+", h[6]))), sorted(px))
+        esit(f"MD1 px {pid}", sorted(set(re.findall(r"(?<![\d.])\d+x\d+(?![\d.])", h[6]))), sorted(px))
+        inch = {f"{d.get('placement')}={d.get('width')}x{d.get('height')}" for v in L(D(j(f"urun_{pid}_v2_variants.json").get("yanit")).get("data"))
+                for d in L(v.get("placement_dimensions"))}
+        sag = {x.strip() for parca in h[6].split("<br>") for x in parca.split(" / ", 1)[-1].split(";")}
+        esit(f"MD1 alan inch {pid}", sorted(sag), sorted(inch) or ["API vermedi"])
         ks = [(k, x) for k, x in K1.items() if k[0] == pid]
         abd_disi = [x for k, x in ks if k[2] != "US"]
         yalniz = bool(abd_disi) and all(ucuz(x) is None and "united states only" in json.dumps(x.get("yanit")).lower()
@@ -173,6 +185,10 @@ def main(c):
         for u, hc in zip(ulk, h):
             xs = [x for k, x in K1.items() if k[0] == pid and k[2] == u]
             oran = sorted({float(ucuz(x)["rate"]) for x in xs if ucuz(x)})
+            gum = any(s_.get("customs_fees_possible") is True for k, x in K2.items() if k[0] == pid and k[2] == u
+                      for o in L(D(x.get("yanit")).get("data")) if ucuz(K1.get(k)) and o.get("shipping") == ucuz(K1[k]).get("id")
+                      for s_ in L(o.get("shipments")))
+            esit(f"MD2 {pid} {u} gumruk", hc.endswith("†"), gum)
             if not xs:
                 esit(f"MD2 {pid} {u}", hc, "sorgulanmadi")
             elif not oran:
