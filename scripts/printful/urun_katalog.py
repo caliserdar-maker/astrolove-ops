@@ -10,7 +10,8 @@ Modlar:
   liste <ham>                  urun basina GET: v1 urun, printfiles, v2 urun, v2 varyantlar, v2 fiyat (worldwide / north_america, USD)
   tablo <cikti>                ham'dan TUM_LISTE.csv + sinif (A / B / C) (API yok)
   detay <ham> <id1,id2,...>    secilen urunler: tum varyantlar icin POST /v2/shipping-rates (US DE GB CA AU; 1 ve 2 adet) + v2 availability
-  secilen <cikti> <ids>        ham'dan SECILEN25.csv (API yok)"""
+  secilen <cikti> <ids>        ham'dan SECILEN25.csv (API yok)
+  ek3 <ham> <ids>              urun3: fiyat ek sayfalari, 534, eksik kargo, 900 / 881 sablon (yalniz okuma)"""
 import csv
 import importlib.util
 import json
@@ -59,6 +60,24 @@ def sar(y, yol, g, k, v):
 
 def liste_l(x):
     return [e for e in x if isinstance(e, dict)] if isinstance(x, list) else []
+
+
+def fiyat_yukle(ham, pid, etk):
+    """v2 prices: ilk sayfa + ek sayfalar (urun3: urun_<id>_v2_prices_<etk>_off<N>.json). Donus: ({varyant: en dusuk fiyat}, toplam)."""
+    ham = Path(ham)
+    dosyalar = [ham / f'urun_{pid}_v2_prices_{etk}.json'] + sorted(ham.glob(f'urun_{pid}_v2_prices_{etk}_off*.json'),
+                                                                   key=lambda f: int(re.search(r'_off(\d+)', f.name).group(1)))
+    r, top = {}, None
+    for f in dosyalar:
+        y = (j(f) or {}).get('yanit') or {}
+        d = y.get('data') if isinstance(y, dict) else None
+        if top is None and isinstance(y.get('paging'), dict):
+            top = y['paging'].get('total')
+        for v in liste_l(d.get('variants') if isinstance(d, dict) else None):
+            ps = [float(t[k]) for t in liste_l(v.get('techniques')) for k in ('price', 'discounted_price') if t.get(k) not in (None, '')]
+            if ps:
+                r[v.get('id')] = min(ps + ([r[v.get('id')]] if v.get('id') in r else []))
+    return r, top
 
 
 def kategori_kok(kat):
@@ -136,18 +155,9 @@ def urun_ozet(ham, pid, a):
     pf = pf if isinstance(pf, dict) else {}
     pfid = {x.get('printfile_id'): x for x in liste_l(pf.get('printfiles'))}
     yerler = pf.get('available_placements') or {}
-    def fiyat(etk):
-        d = ((j(ham / f'urun_{pid}_v2_prices_{etk}.json') or {}).get('yanit') or {}).get('data')
-        d = d if isinstance(d, dict) else {}
-        r = {}
-        for v in liste_l(d.get('variants')):
-            ps = [float(t[k]) for t in liste_l(v.get('techniques')) for k in ('price', 'discounted_price') if t.get(k) not in (None, '')]
-            if ps:
-                r[v.get('id')] = min(ps)
-        return r, (d.get('paging') if isinstance(d, dict) else None) or ((j(ham / f'urun_{pid}_v2_prices_{etk}.json') or {}).get('yanit') or {}).get('paging')
-    (fWW, pgW), (fNA, pgN) = fiyat('WW'), fiyat('NA')
-    def kapsam(pg, f):
-        t = (pg or {}).get('total') if isinstance(pg, dict) else None
+    (fWW, tW), (fNA, tN) = fiyat_yukle(ham, pid, 'WW'), fiyat_yukle(ham, pid, 'NA')
+    fWW_ham, fNA_ham = dict(fWW), dict(fNA)
+    def kapsam(t, f):
         return f'{len(f)}/{t}' if t is not None else str(len(f))
     # fiyat yaniti katalog varyant listesinde olmayan kimlikler de iceriyor (or. 358: 22522 2.25); yalniz listelenen varyantlar
     gecerli = {v.get('id') for v in (vs2 or vs1)}
@@ -253,7 +263,7 @@ def urun_ozet(ham, pid, a):
                 en_ucuz_usd_v2_WW=min(fWW.values()) if fWW else '', en_ucuz_usd_v2_NA=min(fNA.values()) if fNA else '',
                 en_ucuz_usd_v1=v1min if v1min is not None else '',
                 temsil_varyant=temsil_id if temsil_id is not None else '', temsil_usd_v2_WW=fWW.get(temsil_id, ''), temsil_usd_v1=v1p.get(temsil_id, '') if siniflar else '',
-                fiyat_kapsam_WW=kapsam(pgW, fWW), fiyat_kapsam_NA=kapsam(pgN, fNA),
+                fiyat_kapsam_WW=kapsam(tW, fWW_ham), fiyat_kapsam_NA=kapsam(tN, fNA_ham),
                 aciklama_olcu=(cap_m.group(0)[:40] if cap_m else ''), malzeme_v1=';'.join(mal), satis_kisiti=';'.join(kisit),
                 v1_bolgeler=','.join(b for b in bolge if b), sinif=sinif, uygun_varyantlar=uygun_var, gerekce=gerekce,
                 kaynak='Printful API (v1 /products, /mockup-generator/printfiles, v2 catalog-products, v2 prices)')
@@ -280,9 +290,7 @@ def cmd_detay(ham, ids):
         k, v = ok.istek(f'/v2/catalog-products/{pid}/availability?limit=100&selling_region_name=worldwide', token)
         yaz(ham / f'urun_{pid}_v2_availability.json', sar('GET', f'/v2/catalog-products/{pid}/availability?selling_region_name=worldwide', None, k, v))
         vs = liste_l(((j(ham / f'urun_{pid}_v2_variants.json') or {}).get('yanit') or {}).get('data'))
-        pr = ((j(ham / f'urun_{pid}_v2_prices_WW.json') or {}).get('yanit') or {}).get('data')
-        pr = {v.get('id'): min((float(t['price']) for t in liste_l(v.get('techniques')) if t.get('price') not in (None, '')), default=9e9)
-              for v in liste_l(pr.get('variants'))} if isinstance(pr, dict) else {}
+        pr = fiyat_yukle(ham, pid, 'WW')[0]
         vs = sorted(vs, key=lambda v: (pr.get(v.get('id'), 9e9), v.get('id')))
         for vv in vs[:KARGO_VARYANT_SINIR]:
             for u in ULKELER:
@@ -304,6 +312,125 @@ def cmd_detay(ham, ids):
     return 0
 
 
+def _gorsel_indir(url, hedef):
+    import urllib.request
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': 'astrolove-ops'}), timeout=60) as y:
+            b = y.read()
+        Path(hedef).write_bytes(b)
+        return 200, len(b)
+    except Exception as e:
+        return str(e)[:120], 0
+
+
+def kargo_sorgu(ham, token, plan, kayit):
+    t0 = time.time()
+    for n, (pid, vid, u, q) in enumerate(plan, 1):
+        g = {'recipient': {'country_code': u, **ADRES[u]}, 'order_items': [{'source': 'catalog', 'catalog_variant_id': vid, 'quantity': q}], 'currency': 'USD'}
+        k, v = ok.istek('/v2/shipping-rates', token, g)
+        kayit.append({'urun': pid, 'varyant': vid, 'ulke': u, 'adet': q, **sar('POST', '/v2/shipping-rates', g, k, v)})
+        if n % 25 == 0 or n == len(plan):
+            gg = time.time() - t0
+            print(f'[kargo {n}/{len(plan)} %{100 * n // len(plan)}] gecen {int(gg)}s kalan ~{int(gg * (len(plan) - n) / n)}s', flush=True)
+
+
+def cmd_ek3(ham, sec_ids):
+    """urun3 (Merkez 2 Kas, Serdar onayi, tek seferlik 3. kosu): YALNIZ OKUMA. (1) v2 prices kalan sayfalar (tum adaylar, WW / NA),
+    (2) 534 Jigsaw Puzzle (v1 kategori Collections; inceleme 7), (3) secilen urunlerde en ucuz 6 varyant degistiyse eksik kargo sorgusu,
+    (4) 900 Ceramic Ornament 2-Side (ve karsilastirma icin 881) baski sablonu: v1 printfiles + mockup-generator/templates, v2 mockup-templates,
+    v2 sizes, sablon gorselleri (CDN GET)."""
+    ham = Path(ham)
+    ok.POST_IZIN = {'/v2/shipping-rates'}
+    token = os.environ['PRINTFUL_TOKEN'].strip()
+    ok.ISTEKLER.clear()
+    t0 = time.time()
+    A = j(ham / '_adaylar.json')
+    if '534' not in A['aday']:
+        A['aday']['534'] = dict(kok='Collections (v1 ve v2 main_category 123 New products; elle eklendi: inceleme 7)', alt='New products', kaynak=['v1', 'v2'])
+        yaz(ham / '_adaylar.json', A)
+        for ad, yol in (('v1', '/products/534'), ('printfiles', '/mockup-generator/printfiles/534'),
+                        ('v2', '/v2/catalog-products/534?selling_region_name=worldwide'),
+                        ('v2_variants', '/v2/catalog-products/534/catalog-variants?limit=100&selling_region_name=worldwide'),
+                        ('v2_prices_WW', '/v2/catalog-products/534/prices?currency=USD&selling_region_name=worldwide'),
+                        ('v2_prices_NA', '/v2/catalog-products/534/prices?currency=USD&selling_region_name=north_america')):
+            k, v = ok.istek(yol, token)
+            yaz(ham / f'urun_534_{ad}.json', sar('GET', yol, None, k, v))
+        print('534 eklendi', flush=True)
+    ids = sorted(A['aday'], key=int)
+    bolge = {'WW': 'worldwide', 'NA': 'north_america'}
+    eksik = []
+    for pid in ids:
+        for etk in ('WW', 'NA'):
+            y = (j(ham / f'urun_{pid}_v2_prices_{etk}.json') or {}).get('yanit') or {}
+            pg = y.get('paging') if isinstance(y, dict) else None
+            if isinstance(pg, dict) and pg.get('total') is not None:
+                lim = int(pg.get('limit') or 20)
+                for off in range(lim, int(pg['total']), lim):
+                    eksik.append((pid, etk, off, lim))
+    print(f'FIYAT ek sayfa {len(eksik)} istek', flush=True)
+    for n, (pid, etk, off, lim) in enumerate(eksik, 1):
+        yol = f'/v2/catalog-products/{pid}/prices?currency=USD&selling_region_name={bolge[etk]}&offset={off}&limit={lim}'
+        k, v = ok.istek(yol, token)
+        yaz(ham / f'urun_{pid}_v2_prices_{etk}_off{off}.json', sar('GET', yol, None, k, v))
+        if n % 20 == 0 or n == len(eksik):
+            g = time.time() - t0
+            print(f'[fiyat {n}/{len(eksik)} %{100 * n // len(eksik)}] gecen {int(g)}s', flush=True)
+    # kapsam denetimi
+    kotu = []
+    for pid in ids:
+        for etk in ('WW', 'NA'):
+            f, top = fiyat_yukle(ham, pid, etk)
+            if top is not None and len(f) < int(top):
+                kotu.append(f'{pid}/{etk} {len(f)}/{top}')
+    print('FIYAT kapsam eksik kalan:', kotu or 'yok', flush=True)
+    # kargo: secilen urunlerde yeni en ucuz 6 varyant icin eksik sorgu
+    kg = j(ham / 'kargo_v2.json') or []
+    var = {(str(x['urun']), x['varyant'], x['ulke'], x['adet']) for x in kg}
+    plan = []
+    for pid in sec_ids:
+        vs = liste_l(((j(ham / f'urun_{pid}_v2_variants.json') or {}).get('yanit') or {}).get('data'))
+        pr = fiyat_yukle(ham, pid, 'WW')[0]
+        for vv in sorted(vs, key=lambda v: (pr.get(v.get('id'), 9e9), v.get('id')))[:KARGO_VARYANT_SINIR]:
+            for u in ULKELER:
+                for q in (1, 2):
+                    if (pid, vv['id'], u, q) not in var:
+                        plan.append((pid, vv['id'], u, q))
+    print(f'KARGO ek plan {len(plan)} istek (urunler {sorted({p[0] for p in plan}, key=int)})', flush=True)
+    kargo_sorgu(ham, token, plan, kg)
+    yaz(ham / 'kargo_v2.json', kg)
+    # 900 (+881 karsilastirma) sablon
+    sb = ham / 'sablon'; sb.mkdir(exist_ok=True)
+    for pid in ('900', '881'):
+        for ad, yol in (('v1_templates', f'/mockup-generator/templates/{pid}'), ('v2_mockup_templates', f'/v2/catalog-products/{pid}/mockup-templates?limit=100'),
+                        ('v2_sizes', f'/v2/catalog-products/{pid}/sizes'), ('v1_sizes', f'/products/{pid}/sizes')):
+            k, v = ok.istek(yol, token)
+            yaz(sb / f'urun_{pid}_{ad}.json', sar('GET', yol, None, k, v))
+        urls = set()
+        y = ((j(sb / f'urun_{pid}_v2_mockup_templates.json') or {}).get('yanit') or {}).get('data')
+        for t in liste_l(y):
+            for kk in ('image_url', 'background_url'):
+                if t.get(kk):
+                    urls.add(t[kk])
+        y1 = ((j(sb / f'urun_{pid}_v1_templates.json') or {}).get('yanit') or {}).get('result')
+        for t in liste_l((y1 or {}).get('templates') if isinstance(y1, dict) else None):
+            for kk in ('image_url', 'background_url'):
+                if t.get(kk):
+                    urls.add(t[kk])
+        kay = []
+        for u in sorted(urls):
+            if not re.search(r'circle', u, re.I):
+                continue
+            ad = f'urun_{pid}_' + re.sub(r'[^A-Za-z0-9._-]', '_', u.split('//', 1)[-1].split('?')[0])[-90:]
+            k, b = _gorsel_indir(u, sb / ad)
+            kay.append(dict(url=u, dosya=ad, http=k, bayt=b))
+        yaz(sb / f'urun_{pid}_gorseller.json', kay)
+        print(f'SABLON {pid}: {len(kay)} circle gorseli', flush=True)
+    yaz(ham / '_istekler_urun3.json', ok.ISTEKLER)
+    post = sorted({x['yol'] for x in ok.ISTEKLER if x['yontem'] == 'POST'})
+    print(f'ISTEK {len(ok.ISTEKLER)} | GET {sum(1 for x in ok.ISTEKLER if x["yontem"] == "GET")} | POST yollar {post} | {int(time.time() - t0)}s', flush=True)
+    return 0
+
+
 def cmd_secilen(cikti, ids):
     c = Path(cikti); ham = c / 'ham'
     A = j(ham / '_adaylar.json')['aday']
@@ -320,12 +447,7 @@ def cmd_secilen(cikti, ids):
         pf = ((j(ham / f'urun_{pid}_printfiles.json') or {}).get('yanit') or {}).get('result') or {}
         pfid = {x.get('printfile_id'): x for x in liste_l(pf.get('printfiles'))}
         vpf = {x.get('variant_id'): x.get('placements') or {} for x in liste_l(pf.get('variant_printfiles'))}
-        def fiy(etk):
-            d = ((j(ham / f'urun_{pid}_v2_prices_{etk}.json') or {}).get('yanit') or {}).get('data')
-            d = d if isinstance(d, dict) else {}
-            return {v.get('id'): min((float(t[k]) for t in liste_l(v.get('techniques')) for k in ('price', 'discounted_price') if t.get(k) not in (None, '')), default=None)
-                    for v in liste_l(d.get('variants'))}
-        fWW, fNA = fiy('WW'), fiy('NA')
+        fWW, fNA = fiyat_yukle(ham, pid, 'WW')[0], fiyat_yukle(ham, pid, 'NA')[0]
         av = liste_l(((j(ham / f'urun_{pid}_v2_availability.json') or {}).get('yanit') or {}).get('data'))
         avm = {x.get('catalog_variant_id'): ';'.join(f"{sr.get('name')}:{sr.get('availability')}" for t in liste_l(x.get('techniques')) for sr in liste_l(t.get('selling_regions'))) for x in av}
         for i, v in enumerate(vs):
@@ -379,6 +501,8 @@ if __name__ == '__main__':
         sys.exit(cmd_tablo(sys.argv[2]))
     if m == 'detay':
         sys.exit(cmd_detay(sys.argv[2], sys.argv[3].split(',')))
+    if m == 'ek3':
+        sys.exit(cmd_ek3(sys.argv[2], sys.argv[3].split(',')))
     if m == 'secilen':
         sys.exit(cmd_secilen(sys.argv[2], sys.argv[3].split(',')))
     sys.exit(__doc__)
