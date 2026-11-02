@@ -13,7 +13,10 @@ Stiller:
             (kenara uzaklik eski x 1,5).
   FirstPage: yeni krem doku + bordo cerceve KODLA (8x10'dan olculen renk orani / FWHM), dort kenar payi esit = 8x10 yan payi x 1,5.
   Layers A KIRP: 8x10 zemin x1,8 (Lanczos; ogeler BY_SCALE'de) -> 4320x5400, iki yandan esit 360 px kirpilir.
-  (Layers B Serdar 1 Kas F 3. kosu karariyla birakildi.)
+  (Layers B Serdar 1 Kas F 3. kosu karariyla birakildi; F5'te B'ye donuldu.)
+  Layers B2 (F6, Serdar 2 Kas: B yerlesimi RED, icerik yukari toplanmis): eski 8x10 x1,5 kemerin duz bolumunden (8x10 satir 1250) ikiye
+            ayrilir, alt parca 900 satir iner, arada kemer uzatma bandi (sutun medyani + yeni doku; eski piksel degil); ogeler uc dikey
+            grupta tasinir (YEAR ONE 0, buyuk sembol 450, alttakiler 900). Kapi: icerik kutusu alt / ust bosluk orani eski 8x10 +-%10.
   Botanical: yeni tirtikli kagit + adacayi doku (ESRGAN) + 2 cicek dali kagit koselerine sabit (kagit kenarina uzaklik eski x 1,5).
 Kullanim: by_stil4.py --kod <KOD_REF> --doku-dizin <dir: 2_Timeless/3_FirstPage/5_Botanical _2x3_kaynak.png> --esrgan <pth> --out <dir>
           [--hizli]  (yalniz yerel deneme: ESRGAN yerine Lanczos; uretimde kullanilmaz)"""
@@ -57,6 +60,15 @@ DIKIS_YEREL_ESIK = 2.3   # ONERI (Serdar onayi yok): yerel dikis karo dE76 EN BU
 #                          Mahy vd. 1994 / Sharma 2003). Yerel olcum 1 Kas (hizli doku): cikti p95 1,38 max 1,95; yeni doku tabani p95 0,93,
 #                          eski doku tabani p95 0,75 (taban esik olarak kullanilmadi: iki farkli kagidin gecisi tabandan buyuk olmak zorunda)
 DIKIS_DE, DIKIS_GRAD = 3.0, 1.5   # ONERI (Serdar onayi yok): dikis renk basamagi dE76 <= 3; kenar gradyani p99 <= 1,5 x yeni doku p99
+# F6 (Serdar 2 Kas: Layers B yeni 12x18 RED, icerik yukari toplanmis, alt ~1/5 bos; eski 8x10'da kemer asagi iner, baslik + tarih alta yakin)
+UZAT = round(5400 - 3000 * K)   # 900: kemer uzatma bandi (12x18 px) = tuval - eski 8x10 x1,5; tuval tam dolar (eklenen yeni doku bandi yok)
+UZAT_Y8 = 1250         # kesim satiri (eski 8x10): kemerin DUZ bolumu ic kemer cy 1037 ile on duzlemin en ust noktasi 1463 (sol kenar) arasi
+#                        (olcum 2 Kas kemer_geo); 1060-1440 satirlarinda kemer sutun medyani satirdan satira en cok 8-12 seviye (doku), ic kemer 5
+UZAT_ORT = 45          # uzatma bandi sutun rengi: kesim satirinin +-45 satiri (12x18) sutun medyani (ONERI)
+UZAT_GECIS = 180       # bant <-> eski piksel gecisi (12x18 satir, smoothstep; ONERI). F6 it. 1 (yerel) 60: eski kemer dokusu (burusuk) ile
+#                        sentez dokusu (yeni kagit) arasi sinir yakin planda seciliyordu (kapilar PASS); it. 2: 180 (~0,6 inc) yumusak gecis
+OGE_ORTA = 0.5         # buyuk sembol kaymasi = UZAT x 0,5 (ust grup YEAR ONE 0, alt gruplar UZAT; ONERI, Serdar onayi yok)
+BOSLUK_TOL = 0.10      # gorev metni F6: icerik kutusu alt / ust bosluk orani eski 8x10 oraninin +-%10'u
 
 
 def lum(a):
@@ -763,11 +775,30 @@ def kemer_geo(e):
     return g
 
 
-def kemer_geo_maske(g, H, W, olcek, oy=0):
-    """geometrik kemer maskesi (True = kemer katmani) H x W tuvalde; piksel merkezi -> eski 8x10: x8 = (X + 0,5) / olcek - 0,5."""
+def uzat_y8(H, olcek, ys, D):
+    """F6 Layers B2: tuval satiri -> eski 8x10 satiri (parcali): Y < ys ust parca (Y / olcek), ys <= Y < ys + D uzatma bandi (sabit = kesim
+    satiri; kemerin duz bolumu), Y >= ys + D alt parca (Y - D) / olcek. Piksel merkezi kurali kemer_geo_maske ile ayni."""
+    Y = np.arange(H, dtype=np.float64)
+    Yk = np.where(Y < ys, Y, np.where(Y < ys + D, ys, Y - D))
+    return (Yk + 0.5) / olcek - 0.5
+
+
+def bosluk_orani(m):
+    """F6 icerik kutusu dikey dengesi: oge maskesinin (True = oge pikseli) ust bosluk = ilk oge satiri, alt bosluk = H - 1 - son oge satiri;
+    oran = alt / ust. Oge yoksa None."""
+    r = np.where(m.any(1))[0]
+    if not r.size:
+        return dict(ust=None, alt=None, oran=None)
+    u, a_ = int(r.min()), int(m.shape[0] - 1 - r.max())
+    return dict(ust=u, alt=a_, oran=round(a_ / max(u, 1), 4))
+
+
+def kemer_geo_maske(g, H, W, olcek, oy=0, y8=None):
+    """geometrik kemer maskesi (True = kemer katmani) H x W tuvalde; piksel merkezi -> eski 8x10: x8 = (X + 0,5) / olcek - 0,5.
+    y8 verilirse (F6 uzat_y8) satir eslemesi ondan alinir."""
     k = g["ic_kemer"]; sl, sg = g["on_duzlem"]["sol"], g["on_duzlem"]["sag"]
     x8 = ((np.arange(W, dtype=np.float64) + 0.5) / olcek - 0.5)[None, :]
-    y8 = ((np.arange(H, dtype=np.float64) - oy + 0.5) / olcek - 0.5)[:, None]
+    y8 = ((np.arange(H, dtype=np.float64) - oy + 0.5) / olcek - 0.5)[:, None] if y8 is None else np.asarray(y8, np.float64)[:, None]
     ux = np.abs((x8 - k["cx"]) / k["a"]); uy = np.abs((y8 - k["cy"]) / k["b"])
     ic = ((y8 >= k["cy"]) & (ux <= 1)) | ((ux ** k["n"] + uy ** k["n"]) <= 1)
     cizgi = np.where(x8 < k["cx"], sl["egim"] * x8 + sl["kesisim"], sg["egim"] * x8 + sg["kesisim"])
@@ -867,6 +898,8 @@ def main(argv=None):
 
     def kayit(ad, img, e, fn, fark=None):
         Image.fromarray(img).save(out / f"{ad}_12x18.jpg", quality=95, subsampling=0, dpi=(300, 300))
+        if fark is not None:   # F6: oge maskesi (14 boy bosluk orani kapisi icin)
+            Image.fromarray(np.asarray(fark, bool)).save(out / f"OGE_{ad}.png")
         for (x, y) in YAKIN.get(ad, []):
             yakin.append((f"{ad} ({x},{y})", img[y:y + 600, x:x + 600]))
         s8 = ogeler(bp1, e, fn)
@@ -891,7 +924,7 @@ def main(argv=None):
         rap["Timeless"] = dict(zemin=yon, yerlesim=yer, kapi=kap, susleme_oge_kesisim_px=kes, atanamayan_parca_px=int(p["diger"].sum()) if "diger" in p else 0,
                                pass_=bool(all(v["pass_"] for v in kap.values()) and kes == 0 and "diger" not in p
                                           and set(yer) == {"yay", "dal_sol_ust", "dal_sol_alt", "dal_sag_alt"}))
-        kayit("Timeless", son, e, "timeless")
+        kayit("Timeless", son, e, "timeless", fark)
 
     if "FirstPage" in stiller:
         e = eski("3_FirstPage")
@@ -915,95 +948,157 @@ def main(argv=None):
                                                       "-> olcum; 5x7 A sayfasindan dikey ortali kirpma. Ogeler (isim / yazi) yalniz 12x18'de; kose penceresinde oge yok",
                                 kose_tasma_eski_8x10_kaynak_bilgi=o["kose_tasma_8x10"],
                                 pass_=bool(kc["pass_"] and kose_oztest(K)["pass_"] and kose_oztest(1.0)["pass_"] and og12["pass_"] and og8["pass_"] and boy_ok))
-        kayit("FirstPage", son, e, "first_page")
+        kayit("FirstPage", son, e, "first_page", fark)
         kose_yakin(out, e, o, son, xs12, ys12, boy_img["8x10"])
 
     if "Layers" in stiller:
         e = eski("4_Layers")
         duz = np.median(e[2600:2950, 800:1600].reshape(-1, 3), 0)
         km = kemer_maske(e, duz)                                        # kemer (esik 25): kesim kapisi bununla (degismedi)
-        # B USTE SABIT (Serdar 1 Kas karar b): zemin = YENI duz seftali doku (4_Layers_2x3_kaynak.png, ESRGAN, esit olcek); kemer katmanlari
-        # ESKI 8x10 pikseli x1,5 uste sabit (oy = 0), tam genislik; yazilar ayni donusumle.
-        # F5 (Serdar 1 Kas karar b): (a) karisim TUM yukseklikte (eski [:4500] siniri kalkti; 4. kosu satir 4500'de yatay kesim), (b) kemer
-        # maskesi renk farkindan degil GEOMETRIDEN (kemer_geo: ic kemer super-elips + iki on duzlem dogrusu), kagit lekeleri maskeye girmez.
+        # B2 (F6, Serdar 2 Kas): B (F5) ust parca x1,5 uste sabit + alta 900 satir yeni doku idi (RED: icerik yukari toplanmis). B2:
+        # eski 8x10 x1,5 kemerin DUZ bolumunden (UZAT_Y8) ikiye ayrilir; alt parca UZAT (900) satir asagi kayar, arada kemer UZATMA BANDI.
+        # Bant kemer sutunlarinda eski piksel DEGIL: kesim satiri cevresi sutun medyani (eski renk / golge profili) + yeni doku yuksek frekansi
+        # (kemer pikseli ayna / desen kopyasi yok, tek yonde olcekleme yok). Kemer cekirdegi (bant disi) eski piksel x1,5 AYNEN.
+        # Zemin (kemer + pay disi) F5 ile ayni: YENI duz seftali doku, geometrik maske + 120 px rampa. Ogeler eski 8x10 yerlesiminde cizilir
+        # (yeniden cizim yok, ayni by_poster), uc dikey grupta TASINIR: YEAR ONE 0, buyuk sembol UZAT x OGE_ORTA, alttakiler UZAT.
         zemB, yonB = doku(Path(a.doku_dizin, "4_Layers_2x3_kaynak.png"), a.esrgan, a.hizli)
-        ust = np.zeros((5400, 3600, 3), np.float32)
-        ust[:4500] = cv2.resize(e, (3600, 4500), interpolation=cv2.INTER_LANCZOS4).astype(np.float32)
+        ys = round(UZAT_Y8 * K); D = UZAT
+        ust0 = cv2.resize(e, (3600, 4500), interpolation=cv2.INTER_LANCZOS4).astype(np.float32)
+        ust = np.full((5400, 3600, 3), np.nan, np.float32)
+        ust[:ys] = ust0[:ys]; ust[ys + D:] = ust0[ys:]
+        prof = np.median(ust0[ys - UZAT_ORT:ys + UZAT_ORT], 0)                 # (3600, 3) sutun rengi
+        Lz = lum(zemB); hp = Lz - cv2.GaussianBlur(Lz, (0, 0), 6)
+        s0, s1 = ys - UZAT_GECIS, ys + D + UZAT_GECIS
+        sent = prof[None] + hp[s0:s1, :, None]
+        tt = np.ones(s1 - s0, np.float32)                                    # sentez agirligi: gecislerde smoothstep
+        r_ = np.arange(UZAT_GECIS, dtype=np.float32) / UZAT_GECIS; sm = r_ * r_ * (3 - 2 * r_)
+        tt[:UZAT_GECIS] = sm; tt[-UZAT_GECIS:] = sm[::-1]
+        eskiler = np.where(np.isnan(ust[s0:s1]), sent, ust[s0:s1])
+        ust[s0:s1] = eskiler * (1 - tt[:, None, None]) + sent * tt[:, None, None]
+        nan_px = int(np.isnan(ust).any(2).sum())                            # eski kaynak / sentez disi tuval pikseli (0 olmali)
+        ust = np.nan_to_num(ust)
         g = kemer_geo(e)
-        Mg = kemer_geo_maske(g, 5400, 3600, K)
+        y8 = uzat_y8(5400, K, ys, D)
+        Mg = kemer_geo_maske(g, 5400, 3600, K, y8=y8)
         Mp = cv2.dilate(Mg.astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * KEMER_PAY + 1, 2 * KEMER_PAY + 1)))
         uz = cv2.distanceTransform((1 - Mp).astype(np.uint8), cv2.DIST_L2, 5)
         t_ = np.clip(1 - uz / KEMER_RAMPA, 0, 1); w2 = t_ * t_ * (3 - 2 * t_)
-        eski_yok = int((w2[4500:] > 0).sum())                          # eski goruntu 4500 satir; altinda eski piksel YOK (0 olmali)
         Bz = np.clip(ust * w2[..., None] + zemB.astype(np.float32) * (1 - w2[..., None]), 0, 255).astype(np.uint8)
-        b, fB = ogeli_blok(bp, "layers", Bz[:4500], S)
-        B = Bz.copy(); B[:4500] = b
-        fBt = np.zeros((5400, 3600), bool); fBt[:4500] = fB
+        # ogeler: eski 8x10 yerlesimli tuvale (C, 4500 satir) her grubun HEDEF zemini tasinir, ogeler cizilir, degisen pikseller geri tasinir
+        s8 = ogeler(bp1, e, "layers")
+        f8 = np.abs(s8.astype(np.int16) - e.astype(np.int16)).max(2) > 2
+        r8 = np.where(f8.any(1))[0]; bl = np.split(r8, np.where(np.diff(r8) > 20)[0] + 1)
+        gr = [(int(b_[0]), int(b_[-1]), int(f8[b_[0]:b_[-1] + 1].sum())) for b_ in bl]
+        bi = int(np.argmax([x[2] for x in gr]))                             # en buyuk alanli grup = buyuk sembol
+        if bi == 0 or bi == len(gr) - 1:
+            raise SystemExit(f"DUR: Layers oge gruplari beklenmedik {gr}")
+        m1 = round((gr[bi - 1][1] + gr[bi][0]) / 2 * K); m2 = round((gr[bi][1] + gr[bi + 1][0]) / 2 * K)
+        bantlar = [(0, m1, 0), (m1, m2, round(D * OGE_ORTA)), (m2, 4500, D)]
+        C = np.zeros((4500, 3600, 3), np.uint8)
+        for a0, a1, s_ in bantlar:
+            C[a0:a1] = Bz[a0 + s_:a1 + s_]
+        Cb, _ = ogeli_blok(bp, "layers", C, S)
+        B = Bz.copy(); fBt = np.zeros((5400, 3600), bool)
+        for a0, a1, s_ in bantlar:
+            d_ = (Cb[a0:a1] != C[a0:a1]).any(2)
+            B[a0 + s_:a1 + s_][d_] = Cb[a0:a1][d_]
+            fBt[a0 + s_:a1 + s_] = d_
         ogesiz = ~(cv2.dilate(fBt.astype(np.uint8), np.ones((15, 15), np.uint8)) > 0)
-        # KEMER KESIM KAPISI (Serdar 1 Kas): eski kemer (esik 25) pikselleri x1,5 ile tuvale tasinir; tuval disina dusen = kesilen (0 olmali)
+        # KEMER KESIM KAPISI (Serdar 1 Kas): eski kemer (esik 25) pikselleri B2 eslemesiyle tuvale; tuval disina dusen = kesilen (0 olmali)
         ky, kx = np.where(km)
         X_, Y_ = (kx + 0.5) * K, (ky + 0.5) * K
+        Y_ = np.where(Y_ >= ys, Y_ + D, Y_)
         kes = int(((X_ < 0) | (X_ >= 3600) | (Y_ < 0) | (Y_ >= 5400)).sum())
-        # geometrik maske de tuvalde mi (eski 8x10 tum alani x1,5 = 3600x4500 icinde; kesilen 0)
-        # kemer cekirdegi orijinal mi: w = 1, geometrik maske ve oge disi pikselde |B - eski x1,5| (kayit oncesi, uint8 yuvarlama)
-        cek = (w2 >= 0.999) & Mg & ogesiz
-        cek[4500:] = False
+        bant = np.zeros(5400, bool); bant[s0:s1] = True                     # sentez + gecis satirlari
+        cek = (w2 >= 0.999) & Mg & ogesiz & ~bant[:, None]
         cek_fark = np.abs(B.astype(np.float32) - ust)[cek] if cek.any() else np.zeros(1)
-        # leke bilgisi: eski renk maskesi (esik 12) ile geometrik maske farki (leke / acik yan duzlem pikselleri; 12x18 px)
-        km12 = cv2.resize(kemer_maske(e, duz, KEMER_ESIK).astype(np.uint8), (3600, 4500), interpolation=cv2.INTER_NEAREST) > 0
-        leke_disarida = int((km12 & ~Mp[:4500].astype(bool)).sum())
-        # YATAY CIZGI DEDEKTORU (F5): tum yukseklik, zemin bolgesi (geometrik kemer + pay disi, oge disi)
+        km12 = np.zeros((5400, 3600), bool)
+        km12_ = cv2.resize(kemer_maske(e, duz, KEMER_ESIK).astype(np.uint8), (3600, 4500), interpolation=cv2.INTER_NEAREST) > 0
+        km12[:ys] = km12_[:ys]; km12[ys + D:] = km12_[ys:]
+        leke_disarida = int((km12 & ~Mp.astype(bool)).sum())
+        # YATAY CIZGI DEDEKTORU (F5, aynen): tum yukseklik, zemin bolgesi (geometrik kemer + pay disi, oge disi)
         Lb = lum(B)
         gecerli = ~(Mp > 0) & ogesiz
         (c_max, c_y, c_x), c_prof = yatay_cizgi(Lb, gecerli, CIZGI_PEN)
         (c_tam, c_ty, _), _ = yatay_cizgi(Lb, gecerli, 3600)
-        (z_max, z_y, z_x), _ = yatay_cizgi(lum(zemB), gecerli, CIZGI_PEN)   # taban: yeni doku tek basina, ayni bolge
+        (z_max, z_y, z_x), _ = yatay_cizgi(lum(zemB), gecerli, CIZGI_PEN)
         cizgi_grafik(c_prof, out / "CIZGI_KESIT_Layers_B.png", CIZGI_ESIK, c_y)
-        # YEREL DIKIS (F5): eski -> yeni doku gecisinin ortasi (w = 0,5) cevresinde +-20 px iki bant, 64 px karolarda dE76
+        # YENI (F6): ayni dedektor KEMER icinde, YENI piksel satirlarinda (sentez + gecis [s0, s1), sinir satir ciftleri dahil: s0 - 1 .. s1).
+        # Bu satirlarin disi eski piksel x1,5 (kemer_cekirdek kapisi fark 0). Taban (bilgi): eski kemer x1,5 ayni dedektor, kesim satiri
+        # cevresi +-360 satir (olcum 2 Kas: eski kemerin kendi dokusu satir 1799'da 1,144, 2197'de 1,098; esik 1,0 eski pikselde de asiliyor)
+        Mi = cv2.erode(Mg.astype(np.uint8), np.ones((2 * KEMER_PAY + 1, 2 * KEMER_PAY + 1), np.uint8)) > 0
+        kb = np.zeros(5400, bool); kb[s0 - 1:s1 + 1] = True
+        (k_max, k_y, k_x), _ = yatay_cizgi(Lb, Mi & ogesiz & kb[:, None], CIZGI_PEN)
+        Mg0 = kemer_geo_maske(g, 4500, 3600, K)
+        Mi0 = cv2.erode(Mg0.astype(np.uint8), np.ones((2 * KEMER_PAY + 1, 2 * KEMER_PAY + 1), np.uint8)) > 0
+        kb0 = np.zeros(4500, bool); kb0[ys - 360:ys + 360] = True
+        (k0_max, k0_y, _), _ = yatay_cizgi(lum(ust0), Mi0 & kb0[:, None], CIZGI_PEN)
+        hpb = Lb - cv2.GaussianBlur(Lb, (0, 0), 6)                        # bilgi: kemer ici doku (yuksek frekans std) bant vs eski
+        kat = Mi & ogesiz
+        dok = dict(bant=round(float(hpb[ys + 60:ys + D - 60][kat[ys + 60:ys + D - 60]].std()), 3),
+                   eski_ust=round(float(hpb[ys - 400:s0][kat[ys - 400:s0]].std()), 3))
+        # YEREL DIKIS (F5, aynen)
         dk = dikis_yerel(B, uz, ogesiz, KEMER_RAMPA / 2, 20)
         dk_taban = dikis_yerel(zemB, uz, ogesiz, KEMER_RAMPA / 2, 20)
-        dk_eski = dikis_yerel(np.clip(ust, 0, 255).astype(np.uint8), uz, ogesiz & (np.arange(5400)[:, None] < 4500), KEMER_RAMPA / 2, 20)
+        dk_eski = dikis_yerel(np.clip(ust, 0, 255).astype(np.uint8), uz, ogesiz & ~bant[:, None], KEMER_RAMPA / 2, 20)
         dk_uc = dikis_yerel(B, uz, ogesiz, KEMER_RAMPA / 2, 20, uc=True)
-        # kenar gradyani (onceki kapi, kalir): rampa ortasinda B gradyan p99 / yeni doku gradyan p99
         gB = cv2.Sobel(Lb, cv2.CV_32F, 1, 0) ** 2 + cv2.Sobel(Lb, cv2.CV_32F, 0, 1) ** 2
-        Lz = lum(zemB); gZ = cv2.Sobel(Lz, cv2.CV_32F, 1, 0) ** 2 + cv2.Sobel(Lz, cv2.CV_32F, 0, 1) ** 2
+        gZ = cv2.Sobel(Lz, cv2.CV_32F, 1, 0) ** 2 + cv2.Sobel(Lz, cv2.CV_32F, 0, 1) ** 2
         kenar = (w2 > 0.3) & (w2 < 0.7) & ogesiz
         g_or = float(np.sqrt(np.percentile(gB[kenar], 99)) / max(np.sqrt(np.percentile(gZ, 99)), 1e-6)) if kenar.any() else None
+        # YENI (F6): icerik kutusu dikey dengesi (alt / ust bosluk) eski 8x10 oraninin +-BOSLUK_TOL'u
+        bo8, bo = bosluk_orani(f8), bosluk_orani(fBt)
+        bo_ok = bool(bo["oran"] is not None and abs(bo["oran"] / bo8["oran"] - 1) <= BOSLUK_TOL)
+        oge_kemer = int((fBt & Mg).sum()); oge_kemer8 = int((f8 & kemer_geo_maske(g, 3000, 2400, 1.0)).sum())
+        su = sift_afin(lum(e[:UZAT_Y8]), lum(B[:ys]))
+        sa = sift_afin(lum(e[UZAT_Y8:DUZ_Y]), lum(B[ys + D:round(DUZ_Y * K) + D]))
         tasarim = np.where(fBt)
         zr = np.median(zemB.reshape(-1, 3), 0)
-        rap["Layers_B"] = dict(ust_olcek=1.5, zemin=yonB, yeni_doku_medyan_rgb=zr.round(1).tolist(), eski_duz_rgb=np.asarray(duz).round(1).tolist(),
+        rap["Layers_B"] = dict(yerlesim="B2 (F6)", ust_olcek=1.5, zemin=yonB, yeni_doku_medyan_rgb=zr.round(1).tolist(), eski_duz_rgb=np.asarray(duz).round(1).tolist(),
+                               uzatma=dict(kesim_satiri_8x10=UZAT_Y8, kesim_satiri_12x18=ys, bant_satir=D, sentez_gecis_satir=[s0, s1],
+                                           sutun_medyan_pencere=UZAT_ORT, gecis=UZAT_GECIS, bant_kemer_px_sentez=int((Mg & bant[:, None]).sum()),
+                                           tanim="bant kemer sutunlari: eski sutun medyani + yeni doku yuksek frekansi (sigma 6); eski piksel degil"),
+                               oge_gruplari_8x10=[dict(satir=[x[0], x[1]], px=x[2]) for x in gr],
+                               oge_bantlari_12x18=[dict(satir=[a0, a1], kayma=s_) for a0, a1, s_ in bantlar],
                                kemer_geometri=g, kemer_pay_px=KEMER_PAY, kemer_rampa_px=KEMER_RAMPA,
-                               eski_piksel_4500_alti_px=eski_yok, leke_px_maske_disinda_bilgi=leke_disarida,
+                               kaynaksiz_tuval_px=nan_px, leke_px_maske_disinda_bilgi=leke_disarida,
                                kemer_kesim=dict(kemer_px_8x10=int(km.sum()), kesilen_px=kes, kesilen_oran=round(kes / max(int(km.sum()), 1), 6),
-                                                geometrik_maske_px_12x18=int(Mg.sum()), geometrik_4500_alti_px=int(Mg[4500:].sum())),
+                                                geometrik_maske_px_12x18=int(Mg.sum())),
                                kemer_cekirdek=dict(px_12x18=int(cek.sum()), fark_max=round(float(cek_fark.max()), 3), fark_p99=round(float(np.percentile(cek_fark, 99)), 3)),
                                yatay_cizgi=dict(tanim=f"ardisik satir lum farki, {CIZGI_PEN} px sutun penceresinde gecerli (zemin, oge disi) sutun ortalamasi; tum yukseklik",
                                                 max=round(c_max, 3), satir=c_y, pencere_x=c_x, esik_oneri=CIZGI_ESIK,
                                                 tam_satir_3600_max_bilgi=round(c_tam, 3), tam_satir_satir=c_ty,
                                                 taban_yeni_doku_max=round(z_max, 3), taban_satir=z_y, kesit_grafik="CIZGI_KESIT_Layers_B.png"),
-                               dikis_yerel=dict(tanim="w = 0,5 cizgisinin (kemer payindan 30 px) +-20 px iki yani, 64 px karo, karo basina iki yan ortalama Lab farki dE76",
+                               kemer_ici_cizgi=dict(tanim="ayni dedektor, kemer ici (pay kadar asindirilmis geometrik maske), oge disi, yeni piksel satirlari s0-1..s1",
+                                                    max=round(k_max, 3), satir=k_y, pencere_x=k_x, esik_oneri=CIZGI_ESIK,
+                                                    taban_eski_kemer_x1_5_kesim_360_max_bilgi=round(k0_max, 3), taban_satir=k0_y,
+                                                    doku_std_bilgi=dok),
+                               dikis_yerel=dict(tanim="w = 0,5 cizgisinin (kemer payindan 60 px) +-20 px iki yani, 64 px karo, karo basina iki yan ortalama Lab farki dE76",
                                                 cikti=dk, taban_yeni_doku=dk_taban, taban_eski_doku=dk_eski, rampa_uclari_0_20_vs_60_80_bilgi=dk_uc,
                                                 esik_oneri=DIKIS_YEREL_ESIK),
                                kenar_gradyan_orani_p99=round(g_or, 3) if g_or else None, esik_gradyan=DIKIS_GRAD,
-                               eklenen_bant=[4500, 5400], eklenen_bantta_oge_px=int(fBt[4500:].sum()),
+                               bosluk=dict(eski_8x10=bo8, yeni_12x18=bo, tolerans=BOSLUK_TOL,
+                                           oran_bagil=round(bo["oran"] / bo8["oran"], 4) if bo["oran"] else None, pass_=bo_ok),
+                               oge_kemer_kesisim_px=oge_kemer, oge_kemer_kesisim_eski_8x10_px=oge_kemer8,
                                tasarim_kutu=[int(tasarim[1].min()), int(tasarim[0].min()), int(tasarim[1].max()), int(tasarim[0].max())],
-                               tasarim_alt_bosluk_px=int(5400 - 1 - tasarim[0].max()),
-                               sift_ust=sift_afin(lum(e[:DUZ_Y]), lum(B[:round(DUZ_Y * K)])))
+                               sift_ust=su, sift_alt=sa)
         L_ = rap["Layers_B"]
-        L_["pass_"] = bool(kes == 0 and eski_yok == 0 and float(cek_fark.max()) <= 1.0 and L_["eklenen_bantta_oge_px"] == 0
-                           and L_["sift_ust"].get("pass_", False) and c_max <= CIZGI_ESIK
+        L_["pass_"] = bool(kes == 0 and nan_px == 0 and float(cek_fark.max()) <= 1.0 and oge_kemer == 0
+                           and su.get("pass_", False) and sa.get("pass_", False) and c_max <= CIZGI_ESIK and k_max <= CIZGI_ESIK
                            and dk["max"] is not None and dk["max"] <= DIKIS_YEREL_ESIK
-                           and g_or is not None and g_or <= DIKIS_GRAD)
+                           and g_or is not None and g_or <= DIKIS_GRAD and bo_ok)
         Image.fromarray(B).save(out / "Layers_B_12x18.jpg", quality=95, subsampling=0, dpi=(300, 300))
-        # yakin planlar: eski 4500 bolgesi x2 (satir 4200-4800, sol 600 px) ve kemer alt ucu rampa x2
-        yakin.append(("Layers_B 4500 bolgesi", B[4350:4650, 0:300]))
-        ys_, xs_ = np.where((w2 > 0.3) & (w2 < 0.7))
-        if ys_.size:
-            j_ = int(np.argmax(ys_)); cy_, cx_ = int(ys_[j_]), int(xs_[j_])
-            yakin.append(("Layers_B rampa alt uc", B[max(0, cy_ - 150):cy_ + 150, max(0, cx_ - 150):cx_ + 150]))
-        Image.fromarray(np.ascontiguousarray(B[4200:4800, 0:600])).resize((1200, 1200), Image.NEAREST).save(out / "LB_4500_YAKIN_x2.jpg", quality=92)
-        s8 = ogeler(bp1, e, "layers")
+        Image.fromarray(fBt).save(out / "OGE_Layers_B.png")
+        yakin.append(("Layers_B ust gecis (sol)", B[s0 - 200:s0 + 400, 0:600]))
+        yakin.append(("Layers_B alt gecis (sol)", B[s1 - 400:s1 + 200, 0:600]))
+        yakin.append(("Layers_B alt gecis (sag)", B[s1 - 400:s1 + 200, 3000:3600]))
+        Image.fromarray(np.ascontiguousarray(B[s1 - 300:s1 + 300, 0:600])).resize((1200, 1200), Image.NEAREST).save(out / "LB_GECIS_YAKIN_x2.jpg", quality=92)
         kontak.append(("Layers_B", s8, B))
+        h_ = 1200                                                           # F6 teslim: eski 8x10 | yeni 12x18 yan yana, gercek oran
+        a8_ = Image.fromarray(s8).resize((round(2400 * h_ / 3000), h_), Image.LANCZOS)
+        a12_ = Image.fromarray(B).resize((round(3600 * h_ / 5400), h_), Image.LANCZOS)
+        yy_ = Image.new("RGB", (a8_.width + a12_.width + 60, h_ + 40), (230, 230, 230)); yy_.paste(a8_, (20, 20)); yy_.paste(a12_, (a8_.width + 40, 20))
+        yy_.save(out / "F6_LAYERS_B_ESKI_YENI.jpg", quality=85)
         print(f"Layers tamam ({time.time() - t0:.0f}s)", flush=True)
 
     if "Botanical" in stiller:
@@ -1047,7 +1142,7 @@ def main(argv=None):
         ada = {ad: int(((cv2.dilate(m_.astype(np.uint8), np.ones((201, 201), np.uint8)) > 0) & ~kmd & (dEs > 13.5)).sum()) for ad, m_ in p.items()}
         rap["Botanical"] = dict(zemin=yon, yerlesim=yer, kapi=kap, susleme_oge_kesisim_px=kes, adacayi_ustu_aktarilmayan_px_bilgi=ada,
                                 pass_=bool(all(v["pass_"] for v in kap.values()) and kes == 0 and set(yer) == {"cicek_sag_ust", "cicek_sol_alt"}))
-        kayit("Botanical", son, e, "botanical")
+        kayit("Botanical", son, e, "botanical", fark)
 
     # ---- kontak: her stil eski 8x10 | yeni 12x18, ayni yukseklik
     h = 900

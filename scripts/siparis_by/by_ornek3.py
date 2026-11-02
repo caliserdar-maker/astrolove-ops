@@ -252,6 +252,8 @@ def main(argv=None):
     mk = cv2.GaussianBlur(cv2.dilate(fark, np.ones((5, 5), np.uint8)), (0, 0), 1.5)[..., None]
     son = z.copy()
     son[oy:oy + 4500] = np.clip(blok * (1 - mk) + ciz * mk, 0, 255).astype(np.uint8)
+    oge_t = np.zeros(son.shape[:2], bool); oge_t[oy:oy + 4500] = fark > 0         # F6: oge maskesi (14 boy bosluk orani kapisi; gorsel degismez)
+    Image.fromarray(oge_t).save(out / "OGE_Starlit.png")
     ogem = cv2.dilate(fark.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
     yay12 = cv2.resize(maske, (3600, 4500), interpolation=cv2.INTER_LINEAR) > 0.05
     kes12 = int((ogem & yay12).sum())                                  # KAPI: yay hicbir ogeye (8 px pay) degmez

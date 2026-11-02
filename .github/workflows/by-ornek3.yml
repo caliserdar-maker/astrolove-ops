@@ -6,6 +6,8 @@ name: by-ornek3
 # DAL yd-stil4 (Denetim 20261101F): bu dalda is akisi kalan 4 stilin 12x18 ORNEGINI uretir (scripts/siparis_by/by_stil4.py):
 # Timeless / FirstPage / Botanical yeni Canva 2:3 dokular (TEMP/YD_ZEMIN_YENI, sha256 kapisi) + Layers A (B Serdar 1 Kas karariyla birakildi).
 # Cikti TEMP/YD_STIL4_ORNEK/<damga>/.
+# F6 (Serdar 2 Kas): Layers B2 yerlesimi (kemer uzatma + oge gruplari) + Starlit (by_ornek3, main ile ayni zemin sha) + 5 stil x 14 boy
+# kontak ve icerik kutusu bosluk orani kapisi (yd_f6_boy_kontak.py). F6 adimi yalniz 4 stil birlikte istendiginde kosar. ETSY YOK.
 permissions:
   contents: read
 on:
@@ -14,7 +16,7 @@ on:
       pair: {description: "cift", required: true, default: "CANCER_LIBRA"}
       n1: {description: "isim 1", required: true, default: "EMMA"}
       n2: {description: "isim 2", required: true, default: "JAMES"}
-      stiller: {description: "F5 (Serdar 1 Kas karar b): FirstPage,Layers (Layers = B); Timeless / Botanical dokunulmaz", required: true, default: "FirstPage,Layers"}
+      stiller: {description: "F6: 4 stil (Layers = B2); 14 boy kontak icin dordu birlikte", required: true, default: "Timeless,FirstPage,Layers,Botanical"}
 jobs:
   ornek:
     runs-on: ubuntu-24.04
@@ -26,6 +28,7 @@ jobs:
       SHA_B: 7a68c2b76d481a4c715b2aa8599651f375b14b84678345ca82c05ecaafdf96b0   # 5_Botanical_2x3_kaynak.png
       SHA_L: 73a43564bb1506c089f0c371ed08af7941d108e51acd4441cc45f171d28f81f8   # 4_Layers_2x3_kaynak.png (Serdar 1 Kas karar b; kosu 41303795895)
       ESRGAN_SHA: 49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb
+      SHA_S: 335292a2191075571452417a2751e7fa30c0f489b09a2c5716ed838d0d9a4a3a   # 1_Starlit_2x3_kaynak.png (main by-ornek3.yml ZEMIN_SHA)
     steps:
       - name: Girdi kapisi
         env: {P: "${{ inputs.pair }}", A: "${{ inputs.n1 }}", B: "${{ inputs.n2 }}"}
@@ -77,6 +80,18 @@ jobs:
             --pair "$P" --n1 "$A" --n2 "$B" --stiller "$ST" > _o/LOG.txt 2>&1 || RC=$?
           echo "KOD=$RC" >> "$GITHUB_ENV"
           tail -25 _o/LOG.txt
+          if [ "$ST" = "Timeless,FirstPage,Layers,Botanical" ]; then
+            mkdir -p _o/starlit _o/F6
+            rclone copyto "gdrive:ASTROLOVE/TEMP/YD_ZEMIN_YENI/1_Starlit_2x3_kaynak.png" _doku/1_Starlit_2x3_kaynak.png -q \
+              && echo "$SHA_S  _doku/1_Starlit_2x3_kaynak.png" | sha256sum -c - >> _o/ZEMIN_SHA.txt 2>&1 || { echo "::error::Starlit zemin"; echo "KOD=1" >> "$GITHUB_ENV"; exit 0; }
+            RC3=0; BY_SCALE=2 python3 scripts/siparis_by/by_ornek3.py --kod _kod --zemin _doku/1_Starlit_2x3_kaynak.png --esrgan _x2plus.pth \
+              --out _o/starlit --pair "$P" --n1 "$A" --n2 "$B" > _o/starlit/LOG.txt 2>&1 || RC3=$?
+            echo "starlit rc=$RC3"; tail -3 _o/starlit/LOG.txt
+            cp _o/starlit/ORNEK3_12x18_v3.jpg _o/starlit/OGE_Starlit.png _o/ 2>/dev/null || { echo "::error::Starlit cikti yok"; echo "KOD=1" >> "$GITHUB_ENV"; exit 0; }
+            RC6=0; python3 scripts/siparis_by/yd_f6_boy_kontak.py --kod _kod --dizin _o --out _o/F6 --pair "$P" --n1 "$A" --n2 "$B" > _o/F6/LOG.txt 2>&1 || RC6=$?
+            cat _o/F6/LOG.txt | tail -8
+            [ "$RC6" = 0 ] || { echo "::error::F6 kontak hata"; echo "KOD=1" >> "$GITHUB_ENV"; }
+          fi
       - name: Drive'a yaz
         if: always()
         run: |
