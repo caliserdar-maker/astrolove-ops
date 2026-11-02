@@ -13,7 +13,8 @@ raporlanir (Merkez kapisi "kisi adi yok"; Serdar karari pilot raporunda).
 updateListing bir TASLAGI yayina alir (CLAUDE.md 7 Eyl): yazmadan once state okunur, yalniz active ilana yazilir, sonra geri okunur
 (state active, baslik + aciklama beklenen). Geri okuma tutmazsa otomatik geri alma (yedekteki eski baslik + aciklama, etsy_common
 geri_alma_izni sha kapisi) ve kosu durur.
-Modlar: kontrol (SALT OKUMA, ilan basina 1 GET) | yaz (--onay SERDAR_YD2_METIN; ilan basina 3: GET + PATCH + GET; AI beyan kapisi
+Modlar: oku (SALT OKUMA, ilan basina 1 GET; Merkez 2 Kas: canli state + baslik + aciklama = yazim kosularinin YENI_<lid>.txt'si mi;
+kaynak kapisi / 26 Eki yedegi YOK; OKU_<lid>.json + BASLIK.csv) | kontrol (SALT OKUMA, ilan basina 1 GET) | yaz (--onay SERDAR_YD2_METIN; ilan basina 3: GET + PATCH + GET; AI beyan kapisi
 yayin denetimi eklerse +1) | geri-al (--onay SERDAR_YD2_METIN_GERI_AL; --yedek-dir YEDEK_METIN_<lid>.json).
 Kota: KOTA_SINIRI 10 (etsy_common); ilana baslamadan kalan >= ILAN_UST + KOTA_SINIRI.
 Cikti <out>: SONUC.json, SONUC.csv, YENI_<lid>.txt (yeni metin), YEDEK_METIN_<lid>.json (eski baslik + aciklama + sha)."""
@@ -108,6 +109,56 @@ def donustur(desc, title):
     return y, yt, notlar, neden
 
 
+def yeni_oku(path):
+    """YENI_<lid>.txt (yazim kosusu: f"{yt}\n\n{yeni}\n") -> (baslik, aciklama)."""
+    t = path.read_text(encoding="utf-8")
+    if "\n\n" not in t:
+        raise Fail(f"{path.name} bicimi beklenen degil")
+    b, d = t.split("\n\n", 1)
+    return b, d[:-1] if d.endswith("\n") else d
+
+
+def grup(title):
+    t = (title or "").lower()
+    if "husband" in t:
+        return "A Husband"
+    if "boyfriend" in t:
+        return "B Boyfriend"
+    if "1st wedding" in t or "first wedding" in t:
+        return "C 1st Wedding"
+    return "diger"
+
+
+def oku_isle(api, lid, yeni_dir, out):
+    """SALT OKUMA: tek GET /listings/{lid}; canli = YENI_<lid>.txt mi."""
+    R = dict(listing_id=lid, sonuc="", neden="", notlar="", istek_once=api.calls, baslik_degisti=False)
+    try:
+        L = api.get(f"/listings/{lid}") or {}
+        st, d0, t0 = L.get("state"), norm(L.get("description")), html.unescape(L.get("title") or "")
+        tags = list(L.get("tags") or [])
+        (out / f"OKU_{lid}.json").write_text(json.dumps(dict(listing_id=lid, state=st, title=t0, description=d0, tags=tags,
+                                                             description_sha=E.ozet(d0)), ensure_ascii=False, indent=1),
+                                             encoding="utf-8")
+        R.update(state_once=st, title=t0, tags=tags)
+        yp = pathlib.Path(yeni_dir) / f"YENI_{lid}.txt"
+        if not yp.exists():
+            R.update(sonuc="YENI_YOK", neden=f"{yp.name} yok")
+        else:
+            yb, yd = yeni_oku(yp)
+            fark = []
+            if st != "active":
+                fark.append(f"state {st}")
+            if t0 != yb:
+                fark.append("baslik YENI'den farkli")
+            if d0 != norm(yd):
+                fark.append("aciklama YENI'den farkli")
+            R.update(sonuc="FARK" if fark else "ESIT", neden="; ".join(fark))
+    except (Exception, SystemExit) as e:   # noqa: BLE001
+        R.update(sonuc="FAIL", neden=f"{type(e).__name__}: {str(e)[:300]}", iz=traceback.format_exc()[-800:])
+    R.update(istek=api.calls - R.pop("istek_once"), kota_sonra=api.remaining)
+    return R
+
+
 def ilan_isle(api, shop, lid, ham_dir, out, mod):
     R = dict(listing_id=lid, sonuc="", neden="", notlar="", istek_once=api.calls, baslik_degisti=False)
     try:
@@ -187,14 +238,15 @@ def calis(api, shop, a, out):
         sec = [x for x in sec if x in var]
     sonuc, t0, fail_seri = [], time.time(), 0
     for i, lid in enumerate(sec, 1):
-        r = ilan_isle(api, shop, lid, a.ham_dir if a.mod != "geri-al" else a.yedek_dir, out, a.mod)
+        r = (oku_isle(api, lid, a.yeni_dir, out) if a.mod == "oku"
+             else ilan_isle(api, shop, lid, a.ham_dir if a.mod != "geri-al" else a.yedek_dir, out, a.mod))
         sonuc.append(r)
         gec = time.time() - t0
         print(f"[{i}/{len(sec)}] %{100 * i // len(sec)} {lid} {r['sonuc']} {r.get('neden', '')} | istek {api.calls} kota {api.remaining} | "
               f"gecen {gec:.0f} sn kalan ~{gec / i * (len(sec) - i):.0f} sn", flush=True)
         fail_seri = fail_seri + 1 if r["sonuc"] in ("FAIL", "BLOK", "KAYMA") else 0
         # inceleme O1: yazan modda her FAIL'de kosu durur (otomatik geri alma TAMAM olsa da); O3: kontrol modu 78'in hepsini tarar
-        if r["sonuc"] == "KOTA" or (a.mod != "kontrol" and (r["sonuc"] == "FAIL" or fail_seri >= 3)):
+        if r["sonuc"] == "KOTA" or (a.mod not in ("kontrol", "oku") and (r["sonuc"] == "FAIL" or fail_seri >= 3)):
             break
     say = {}
     for r in sonuc:
@@ -207,16 +259,25 @@ def calis(api, shop, a, out):
         for r in sonuc:
             w.writerow([r["listing_id"], r["sonuc"], r.get("baslik_degisti"), r.get("state_once"), r.get("istek"), r.get("kota_sonra"),
                         r.get("geri_alma", ""), r.get("neden", ""), r.get("notlar", "")])
+    if a.mod == "oku":
+        cift = {r["listing_id"]: r.get("cift", "") for r in csv.DictReader(open(a.liste, encoding="utf-8-sig"))}
+        with open(out / "BASLIK.csv", "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f); w.writerow(["listing_id", "cift", "state", "title", "karakter", "kelime", "grup", "tags"])
+            for r in sonuc:
+                t = r.get("title") or ""
+                w.writerow([r["listing_id"], cift.get(r["listing_id"], ""), r.get("state_once"), t, len(t), len(t.split()),
+                            grup(t), "|".join(r.get("tags") or [])])
     print(f"::notice::YD2 METIN {a.mod}: {say} | istek {api.calls} | kota {api.remaining}", flush=True)
-    iyi = {"kontrol": {"PLAN"}, "yaz": {"TAMAM"}, "geri-al": {"GERI_ALINDI"}}[a.mod]
+    iyi = {"oku": {"ESIT"}, "kontrol": {"PLAN"}, "yaz": {"TAMAM"}, "geri-al": {"GERI_ALINDI"}}[a.mod]
     return 0 if sonuc and all(r["sonuc"] in iyi for r in sonuc) and len(sonuc) == len(sec) else 1
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mod", required=True, choices=["kontrol", "yaz", "geri-al"])
+    ap.add_argument("--mod", required=True, choices=["oku", "kontrol", "yaz", "geri-al"])
     ap.add_argument("--ham-dir", default="", help="26 Eki okuma yedegi HAM/<lid>.json (kaynak kapisi)")
     ap.add_argument("--yedek-dir", default="", help="geri-al: YEDEK_METIN_<lid>.json klasoru")
+    ap.add_argument("--yeni-dir", default="", help="oku: yazim kosularinin YENI_<lid>.txt klasoru")
     ap.add_argument("--liste", default=str(KOK.parents[1] / "data/pod/yd78_ids.csv"))
     ap.add_argument("--sadece", default=""); ap.add_argument("--haric", default="")
     ap.add_argument("--onay", default=""); ap.add_argument("--out", required=True)
@@ -225,7 +286,9 @@ def main(argv=None):
         raise SystemExit(f"DUR: {a.mod} icin --onay {ONAY[a.mod]}")
     if a.mod == "geri-al" and not a.yedek_dir:
         raise SystemExit("DUR: geri-al icin --yedek-dir")
-    if a.mod != "geri-al" and not a.ham_dir:
+    if a.mod == "oku" and not a.yeni_dir:
+        raise SystemExit("DUR: oku icin --yeni-dir")
+    if a.mod in ("kontrol", "yaz") and not a.ham_dir:
         raise SystemExit("DUR: --ham-dir (26 Eki yedegi) gerekli")
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")

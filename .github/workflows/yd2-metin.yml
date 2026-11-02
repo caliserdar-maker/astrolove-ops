@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       is: {description: "profil | metin", required: true, default: "metin"}
-      mod: {description: "kontrol | yaz | geri-al", required: true, default: "kontrol"}
+      mod: {description: "oku | kontrol | yaz | geri-al (oku: SALT OKUMA, metin; canli = YENI_<ilan>.txt mi)", required: true, default: "kontrol"}
       onay: {description: "yazan modlar icin onay sozcugu", required: false, default: ""}
       sadece: {description: "metin: virgullu listing_id (bos = 78)", required: false, default: ""}
       haric: {description: "metin: virgullu listing_id, atlanir", required: false, default: ""}
@@ -27,7 +27,8 @@ jobs:
       - name: Girdi kapisi
         env: {IS: "${{ inputs.is }}", MOD: "${{ inputs.mod }}", S: "${{ inputs.sadece }}", H: "${{ inputs.haric }}", YK: "${{ inputs.yedek_kosu }}", REF: "${{ inputs.ref }}"}
         run: |
-          [[ "$IS" =~ ^(profil|metin)$ && "$MOD" =~ ^(kontrol|yaz|geri-al)$ ]] || { echo "::error::is / mod"; exit 1; }
+          [[ "$IS" =~ ^(profil|metin)$ && "$MOD" =~ ^(oku|kontrol|yaz|geri-al)$ ]] || { echo "::error::is / mod"; exit 1; }
+          if [ "$MOD" = oku ] && [ "$IS" != metin ]; then echo "::error::oku yalniz is=metin"; exit 1; fi
           [[ "$S" =~ ^([0-9]+(,[0-9]+)*)?$ && "$H" =~ ^([0-9]+(,[0-9]+)*)?$ && "$YK" =~ ^([A-Za-z0-9_]+)?$ ]] || { echo "::error::sadece / haric / yedek_kosu"; exit 1; }
           [[ "$REF" =~ ^[A-Za-z0-9._/-]{1,80}$ ]] || { echo "::error::ref"; exit 1; }
           if [ "$IS" = metin ] && [ "$MOD" = geri-al ] && [ -z "$YK" ]; then echo "::error::metin geri-al icin yedek_kosu"; exit 1; fi
@@ -64,9 +65,27 @@ jobs:
         env: {IS: "${{ inputs.is }}", MOD: "${{ inputs.mod }}", YK: "${{ inputs.yedek_kosu }}"}
         run: |
           set -euo pipefail
-          umask 077; mkdir -p _work _out _in/HAM _in/YEDEK
+          umask 077; mkdir -p _work _out _in/HAM _in/YEDEK _in/YENI
           if [ "$IS" = metin ]; then
-            if [ "$MOD" = geri-al ]; then
+            if [ "$MOD" = oku ]; then
+              # yalniz YAZIM kosularinin YENI dosyalari (metin_yaz_<run>_<deneme>); ayni ilan iki farkli metinle varsa DUR
+              rclone copy "gdrive:ASTROLOVE/TEMP/YD2_YUKLE" _work/yenik --include "metin_yaz_*/YENI_*.txt" --transfers 8 -q
+              python3 - <<'PY'
+          import hashlib, pathlib, shutil, sys
+          g = {}
+          for f in sorted(pathlib.Path("_work/yenik").glob("metin_yaz_*/YENI_*.txt")):
+              g.setdefault(f.name, []).append(f)
+          kaynak = []
+          for ad, fs in sorted(g.items()):
+              sh = {hashlib.sha256(f.read_bytes()).hexdigest() for f in fs}
+              if len(sh) > 1:
+                  sys.exit(f"DUR: {ad} farkli icerikle {len(fs)} yazim klasorunde: {[f.parent.name for f in fs]}")
+              shutil.copy(fs[0], f"_in/YENI/{ad}")
+              kaynak.append(f"{ad}\t{fs[0].parent.name}\t{len(fs)}\t{sh.pop()[:12]}\n")
+          pathlib.Path("_out/YENI_KAYNAK.tsv").write_text("dosya\tklasor\tkopya\tsha12\n" + "".join(kaynak))
+          print(f"YENI: {len(g)} ilan")
+          PY
+            elif [ "$MOD" = geri-al ]; then
               rclone copy "gdrive:ASTROLOVE/TEMP/YD2_YUKLE/$YK" _in/YEDEK --include "YEDEK_METIN_*.json" -q
               echo "yedek: $(ls _in/YEDEK | wc -l)"
             else
@@ -91,7 +110,7 @@ jobs:
           if [ "$IS" = profil ]; then
             python3 scripts/etsy/yd2_profil_teslim.py --mod "$MOD" --onay "$ONAY" --out _out 2>&1 | tee _work/kosu.log
           else
-            python3 scripts/etsy/yd2_metin_yaz.py --mod "$MOD" --onay "$ONAY" --ham-dir _in/HAM --yedek-dir _in/YEDEK \
+            python3 scripts/etsy/yd2_metin_yaz.py --mod "$MOD" --onay "$ONAY" --ham-dir _in/HAM --yedek-dir _in/YEDEK --yeni-dir _in/YENI \
               --sadece "$S" --haric "$H" --out _out 2>&1 | tee _work/kosu.log
           fi
           echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
