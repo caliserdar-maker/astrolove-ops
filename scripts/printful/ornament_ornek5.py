@@ -435,14 +435,17 @@ def boya_sec(Y, model, z, tur, td, pp, s0, sabit=None):
         kaz = c if tur == 'koyu' else 1.0
         dg = o4.doku_ayarla(Y, model, z, kaz, td)
         rgb = o4.boya(Y, model, z, kaz, td, dg)
-        ok = {k: kontrast_yeni(rgb, Y['M'][k], tur) for k in ('isim1', 'isim2', 'tarih')}
+        ok = {k: kontrast_yeni(rgb, Y['M'][k], tur) for k in ('isim1', 'isim2', 'tarih', 'kucuk_sol', 'kucuk_sag')}   # Serdar: kucuk burclar da
         if um is not None:
             ok['halka_uclari'] = kontrast_yeni(rgb, Y['M']['halka'] * um[0], tur)           # incelme bolgesi, genislik >= 2 px (0.17 mm)
             ok['halka_uclari_2px_alti'] = kontrast_yeni(rgb, Y['M']['halka'] * um[1], tur, cekirdek=0.5)   # bilgi, kapi disi
-        en = min(v['deger'] for kk, v in ok.items() if kk != 'halka_uclari_2px_alti' and v.get('deger') is not None)
+        # Serdar 2 Kas aksam: RUBY (koyu, altin) kapisi = ortanca kontrast; kati deger yalniz bilgi. Acik zemin kati olcutle.
+        anahtar = 'ortanca_bilgi' if tur == 'koyu' else 'deger'
+        en = min(v[anahtar] for kk, v in ok.items() if kk != 'halka_uclari_2px_alti' and v.get('deger') is not None)
+        en_kati = min(v['deger'] for kk, v in ok.items() if kk != 'halka_uclari_2px_alti' and v.get('deger') is not None)
         if en >= o4.HEDEF:
             break
-    return dict(deger=c, rgb=rgb, ok=ok, en=en, dg=dg, Lc=Lc, kazanc=kaz)
+    return dict(deger=c, rgb=rgb, ok=ok, en=en, en_kati=en_kati, kapi_olcutu=('ortanca' if tur == 'koyu' else 'kati'), dg=dg, Lc=Lc, kazanc=kaz)
 
 
 def main():
@@ -559,7 +562,8 @@ def main():
                      kontrast_olcutu=('Serdar 2 Kas: acik zeminde zeminin koyu %5 / ogenin acik %5; koyu zeminde zeminin acik %5 / ogenin koyu %5; '
                                       'zemin ogenin 6-12 px cevresi; oge alfa >= 0.9 murekkep. Halka uclari: incelme bolgesinde genislik >= 2 px (kapi); '
                                       '2 px alti alfa >= 0.5 ile ayri (bilgi)'),
-                     en_kotu_kontrast=round(b['en'], 2), hedef_tuttu=b['en'] >= o4.HEDEF,
+                     en_kotu_kontrast=round(b['en'], 2), hedef_tuttu=b['en'] >= o4.HEDEF, kapi_olcutu=b['kapi_olcutu'],
+                     en_kotu_kati_bilgi=round(b['en_kati'], 2),
                      kontrast=b['ok'],
                      bosluk_px=bosluklar(Y['E']), sembol_kutu=list(kutu(Y['E'], 'sembol')),
                      sembol_px=[kutu(Y['E'], 'sembol')[2] - kutu(Y['E'], 'sembol')[0], kutu(Y['E'], 'sembol')[3] - kutu(Y['E'], 'sembol')[1]],
@@ -582,24 +586,53 @@ def main():
                   'leke b', sum((v['acik_piksel'] or 0) for v in lk.values()), 'doku', min(r['doku_oge'].values()), max(r['doku_oge'].values()),
                   'uc2px_mm', (r.get('halka_uc') or {}).get('sag', {}).get('ince_2px_mm'), flush=True)
     R['sonuc'] = sonuc
+    # R2 (yalniz bilgi, Serdar): RUBY A, yazilarda (isim, tarih, logo) gomulu kenar YOK; halka %20 kalir; altin 1.12
+    z, tur = zem['RUBY']
+    AKTIF.update(A=True, pvar=None)
+    o4.YAZI_OGE = A_YAZI_OGE
+    o4.GOMU_OGE = {k: 0.0 for k in YAZI}
+    r2, r2_rgb = {}, []
+    for sad in ('A-T1', 'A-T2'):
+        Y, s0 = secenek[sad]
+        sx = Y['E']['sembol']
+        model = o1.Model(td, sx[0], sx[1], 4800 * (o1.bbox(sx[1], 0.5)[2] - o1.bbox(sx[1], 0.5)[0]) / 2084)
+        b = boya_sec(Y, model, z, tur, td, pp, s0, sabit=ALTIN_SABIT)
+        r2[sad] = dict(ortanca_en_kotu=round(b['en'], 2), kati_en_kotu=round(b['en_kati'], 2),
+                       kontrast={k: (v.get('ortanca_bilgi'), v.get('deger')) for k, v in b['ok'].items()})
+        r2_rgb.append(b['rgb'])
+        o1.kaydet(b['rgb'], O / f'RUBY_R2_{sad}_954.png')
+        print('R2', sad, json.dumps(r2[sad]), flush=True)
+    o4.GOMU_OGE = {}
+    R['R2_bilgi'] = dict(tanim='RUBY A, yazilarda gomulu kenar yok (halka %20), altin 1.12; kapi degil, bilgi', sonuc=r2)
+    im = o4.onizleme(r2_rgb, ara=24)
+    font_r2 = ImageFont.truetype(str(K / 'EBGaramond-Italic.ttf'), 25)
+    b_ = Image.new('RGB', (im.width, im.height + 70), 'white'); b_.paste(im, (0, 0)); d_ = ImageDraw.Draw(b_)
+    tile = (im.width - 24) // 2
+    for i, sad in enumerate(('A-T1', 'A-T2')):
+        d_.text((i * (tile + 24) + 6, im.height + 6), f'RUBY R2 {sad} (bilgi): yazida gomulu kenar yok', fill=(20, 20, 20), font=font_r2)
+        d_.text((i * (tile + 24) + 6, im.height + 36), f'kontrast ortanca {r2[sad]["ortanca_en_kotu"]}, kati {r2[sad]["kati_en_kotu"]}', fill=(20, 20, 20), font=font_r2)
+    b_.save(O / 'RUBY_R2_BILGI.png', dpi=(300, 300))
     # onizleme 3 x 3 + etiket
     font = ImageFont.truetype(str(K / 'EBGaramond-Italic.ttf'), 30)
+    font_k = ImageFont.truetype(str(K / 'EBGaramond-Italic.ttf'), 25)
     satirlar = []
     for zad, _, _ in SATIR:
         im = o4.onizleme([rgbler[(zad, s)] for s in secenek], ara=24)
         tile = (im.width - 48) // 3
-        b = Image.new('RGB', (im.width, im.height + 120), 'white'); b.paste(im, (0, 0)); d = ImageDraw.Draw(b)
+        b = Image.new('RGB', (im.width, im.height + 162), 'white'); b.paste(im, (0, 0)); d = ImageDraw.Draw(b)
         for i, s in enumerate(secenek):
             r = sonuc[zad][s]
             hu = r.get('halka_uc') or {}
             la = sum(v['alfa_lt_09'] for k_, v in r['leke'].items() if k_ in LEKE_KAPI_OGE)
             lb = sum((v['acik_piksel'] or 0) for v in r['leke'].values())
-            t = (f'{zad} {s}: bosluk {r["bosluk_px"][0]}/{r["bosluk_px"][1]}/{r["bosluk_px"][2]} px, sembol ust y {r["sembol_kutu"][1]}, isim-guvenli {r["isim_guvenli_daireye_px"]} px\n'
-                 f'{r["ton"]}, kontrast {r["en_kotu_kontrast"]} {"PASS" if r["hedef_tuttu"] else "FAIL"}, leke a {la} b {lb}\n'
-                 f'uc < 2 px sag / sol {hu.get("sag", {}).get("ince_2px_mm")} / {hu.get("sol", {}).get("ince_2px_mm")} mm, '
-                 f'halka gomulu kenar {"%100 (V4)" if s == "V4" else "%20"}')
+            u2 = r['kontrast'].get('halka_uclari_2px_alti', {}).get('deger')
+            t = (f'{zad} {s}\n'
+                 f'bosluk {r["bosluk_px"][0]}/{r["bosluk_px"][1]}/{r["bosluk_px"][2]} px, sembol y {r["sembol_kutu"][1]}, isim-sinir {r["isim_guvenli_daireye_px"]} px\n'
+                 f'{r["ton"]}; kontrast ({r["kapi_olcutu"]}) {r["en_kotu_kontrast"]} {"PASS" if r["hedef_tuttu"] else "FAIL"}, kati {r["en_kotu_kati_bilgi"]}\n'
+                 f'leke a {la} b {lb}; halka gomulu kenar {"%100" if s == "V4" else "%20"}\n'
+                 f'uc < 0.17 mm: {hu.get("sag", {}).get("ince_2px_mm")} / {hu.get("sol", {}).get("ince_2px_mm")} mm, kontrast {u2}')
             for j, line in enumerate(t.split('\n')):
-                d.text((i * (tile + 24) + 6, im.height + 8 + j * 34), line, fill=(20, 20, 20), font=font)
+                d.text((i * (tile + 24) + 6, im.height + 8 + j * 30), line, fill=(20, 20, 20), font=font_k)
         satirlar.append(b)
     o = Image.new('RGB', (max(s.width for s in satirlar), sum(s.height for s in satirlar) + 24 * (len(satirlar) - 1)), 'white')
     y = 0

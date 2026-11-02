@@ -232,6 +232,7 @@ RENK_DONUSUM = None                       # f(cc, model) -> cc: altin -> bronz (
 SON_KIRP = None                           # f(cc) -> cc: doku sonrasi (bronz acik ucu siniri)
 DIS_GOLGE = None                          # dict(kayma, sigma, opak, koyu): zemin tonlu dis golge (acik zeminler)
 TINT_HARIC = ()                           # golge tonu karisimi uygulanmayan ogeler (V5: yazilar)
+GOMU_OGE = {}                             # oge basina gomulu kenar carpani (V5 R2 bilgi: yazilarda 0)
 OGE_SON = None                            # f(ad, cc_dokusuz, cc_dokulu) -> cc: oge basina doku sonrasi (V5: bronz yazi)
 
 
@@ -392,7 +393,7 @@ def boya(Y, model, zemin, kazanc, td, doku_guc, doku_kapali=False, butunlesme=Tr
             alt_sag = np.clip(m - sh(m, -GOMU_KAYMA), 0, 1)         # sag alt ic kenari
             ust_sol = cv2.GaussianBlur(ust_sol, (0, 0), GOMU_SIGMA) * m
             alt_sag = cv2.GaussianBlur(alt_sag, (0, 0), GOMU_SIGMA) * m
-            kk = GOMU_YAZI if ad in YAZI_OGE else 1.0
+            kk = GOMU_OGE.get(ad, GOMU_YAZI if ad in YAZI_OGE else 1.0)
             gk, ga = GOMU_KOYU * kk, GOMU_ACIK * kk
             cc = cc * (1 - gk * ust_sol[..., None]) + koyu_t * gk * ust_sol[..., None]
             cc = cc * (1 - ga * alt_sag[..., None]) + acik_t * ga * alt_sag[..., None]
