@@ -19,6 +19,7 @@ name: ornament-printful-katalog
 # mod=ornek4 (Merkez STIL3_V4, Serdar 2 Kas): scripts/printful/ornament_ornek4.py; LOGO_1 siparis-gpt; cikti STIL3_V4/.
 # mod=ornek5 (Merkez STIL3_V5, Serdar 2 Kas aksam): ornament_ornek5.py; acik zeminler gecici/ornament-sembol-renk 2877495 zemin_acik/.
 # mod=urun3 (Merkez 2 Kas, Serdar onayi, tek seferlik): fiyat ek sayfalari, 534, eksik kargo, 900/881 sablon; yalniz okuma.
+# mod=drive_kopya: veri = daldaki docs/ornament/ornek/... klasoru, alt = Drive TEMP altindaki hedef (ORNAMENT_ORNEK_*/...); yalniz kopya.
 # mod=kaynak_kopya (Serdar 2 Kas aksam): yalniz cancer / libra_symbol_gold.png Drive -> dal docs/ornament/kaynak/, sha kontrolu.
 # mod=urun_drive: API yok; daldaki docs/printful_urun/<alt>/ RAPOR.md + TUM_LISTE.csv + SECILEN25.csv'yi Drive'a yazar.
 # mod=ornek3 (Merkez STIL3_V3, Serdar 2 Kas): halkali + halkasiz x 3 zemin (zemin3/V2), scripts/printful/ornament_ornek3.py; cikti STIL3_V3/.
@@ -57,7 +58,7 @@ jobs:
           python-version: "3.13"
       - name: Girdi
         run: |
-          case "$MOD" in tam|ek|rapor|zemin3|ornek|ornek2|ornek3|ornek4|ornek5|urun1|urun2|urun3|urun_drive|kaynak_kopya) ;; *) echo "::error::bilinmeyen mod ($MOD)"; exit 1;; esac
+          case "$MOD" in tam|ek|rapor|zemin3|ornek|ornek2|ornek3|ornek4|ornek5|urun1|urun2|urun3|urun_drive|kaynak_kopya|drive_kopya) ;; *) echo "::error::bilinmeyen mod ($MOD)"; exit 1;; esac
           if [ "$MOD" != tam ] && [ ! -f s/docs/ornament/ham/_adaylar.json ]; then echo "::error::dalda ham yok"; exit 1; fi
           echo "ref ${GITHUB_REF_NAME} | betik $(git -C main rev-parse --short HEAD) | dal $(git -C s rev-parse --short HEAD)"
       - name: rclone kur
@@ -316,6 +317,19 @@ jobs:
           [ -z "$DIS" ] || { echo "::error::izinli klasor disi: $DIS"; exit 1; }
           git commit -qm "printful urun taramasi $MOD (kosu ${GITHUB_RUN_ID}, $ALT)" && git push -q origin "HEAD:${DAL}"
           exit $k
+      - name: Daldaki cikti klasorunu Drive'a kopyala (drive_kopya; yalniz kopya, API / token yok)
+        if: env.MOD == 'drive_kopya'
+        env:
+          VERI: ${{ inputs.veri }}
+          ALT: ${{ inputs.alt }}
+        run: |
+          set -euo pipefail
+          case "$VERI" in docs/ornament/ornek/*) ;; *) echo "::error::kaynak yalniz docs/ornament/ornek/ altinda"; exit 1;; esac
+          case "$ALT" in ORNAMENT_ORNEK_*) ;; *) echo "::error::hedef ORNAMENT_ORNEK_* olmali"; exit 1;; esac
+          [ -d "s/$VERI" ] || { echo "::error::klasor yok: $VERI"; exit 1; }
+          rclone copy "s/$VERI" "gdrive:ASTROLOVE/TEMP/$ALT" -q
+          rclone lsl "gdrive:ASTROLOVE/TEMP/$ALT"
+          echo "::notice::Drive TEMP/$ALT <- $VERI (dal $(git -C s rev-parse --short HEAD))"
       - name: Kucuk burc kaynak kopyasi (kaynak_kopya; yalniz Drive indirme + sha + dal; Etsy / Printful / token YOK)
         if: env.MOD == 'kaynak_kopya'
         run: |
