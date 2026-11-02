@@ -1,0 +1,2969 @@
+{
+ "kaynak_sha256": {
+  "CANCER_LIBRA_ana.png": "e86c2629629305fd90bbb66494238faef9b4ad1acb815eb7b3ed55e7f44fc2d2",
+  "Cinzel.ttf": "f4d83d34d1f6c741193e4acf4b3dff9531e5a67b6aa65228d00a7db72a4e0f34",
+  "EBGaramond-Italic.ttf": "bba2c4499c93c9612b90b9825d32b07da52fce2fe57562a1eb6b833553f93c4e",
+  "EMERALD_1264.png": "cb2f153fb953a53ce5b3696952c2b8825599c387df122fc640d9f56c07a86456",
+  "HALKA_BLUE_16x20.png": "2a11ac819c611eaa84e60e469316f345eaa8eb48f6e9e6113d9a7831ab2fa410",
+  "RUBY_1264.png": "c0bddf95d768bd46e9c4672835f8e3e7c5b906ea03da4778b1b155b464604742",
+  "SAPPHIRE_1264.png": "99f2e901f4850344cf58add275fec8d02fa8e244f0d6985ab125d616f7e6a6a0",
+  "alfa_ogeler.npz": "d373403191a6245eccf386f0aa01d6380996b72e22d20e3ae8c7c5f6839d16e9",
+  "cancer_libra_alfa.png": "f946f5611431bdf976dce3475db8fd653faf1242ca267c365e2e29c8b3c8a8c2",
+  "cancer_symbol_gold.png": "2b5a32121ce8fa92ceef1a386f5ab1742a573681c30e742223be75005816cf28",
+  "libra_symbol_gold.png": "6fe2d0355ee56f8468eb637d3ca6445fd517983b00e51bce76cac218864f6a4b",
+  "tek_doku.py": "1889906fb29920e9294d5c343ace09b2295d81e4c49153d2badfb8d5101ddbad"
+ },
+ "sabit": {
+  "guvenli_r": 380.3,
+  "guvenli_pay": 15,
+  "halka_ust_min": 222.0,
+  "halka_tepe_px": 7.0,
+  "hedef_kontrast": {
+   "SAPPHIRE_GOLD": 5.0,
+   "EMERALD_GOLD": 4.5,
+   "RUBY_GOLD": 5.0
+  }
+ },
+ "poster_halka": {
+  "merkez": [
+   2399.2,
+   2402.5
+  ],
+  "R": 1670.1,
+  "w_max": 19.76,
+  "bos_aci": [
+   44,
+   136
+  ],
+  "genislik_ornek": {
+   "270": 19.49,
+   "300": 12.01,
+   "330": 10.3,
+   "0": 10.08,
+   "20": 6.39,
+   "30": 2.82,
+   "35": 1.59,
+   "40": 0.38,
+   "140": 0.43,
+   "145": 1.64,
+   "150": 2.58,
+   "160": 6.07,
+   "180": 10.03,
+   "210": 9.45,
+   "240": 11.72
+  }
+ },
+ "sonsuz": {
+  "genisletme_hedef_px": 1.25,
+  "acma3_kayip": 0.0,
+  "bilesen": 1,
+  "en_ince_tahmin_px": 3.82
+ },
+ "arama_son_red": [
+  {
+   "Rc": 306.0,
+   "ihlal": [
+    "isim1",
+    "tarih"
+   ],
+   "cak": []
+  },
+  {
+   "Rc": 305.0,
+   "ihlal": [
+    "isim1",
+    "tarih"
+   ],
+   "cak": []
+  },
+  {
+   "Rc": 304.0,
+   "ihlal": [
+    "tarih"
+   ],
+   "cak": []
+  }
+ ],
+ "yerlesim": {
+  "halka_merkez_y": 529.3,
+  "halka_Rc": 303.0,
+  "halka_dis_cap_px": 610.0,
+  "halka_dis_cap_mm": 51.65,
+  "halka_dis_cap_v1": 554.1,
+  "halka_kazanc_yuzde": 10.1,
+  "halka_ust_y": 222,
+  "centik_alt": 216.9,
+  "sembol_px": [
+   378,
+   358
+  ],
+  "sembol_mm": [
+   32.0,
+   30.31
+  ],
+  "sembol_kazanc_yuzde": 9.9,
+  "en_dis_r": 364.3,
+  "guvenli_daireye_pay": 16.0,
+  "ust_min_y": 222,
+  "kenar_payi_gorunen": 49.2,
+  "ihlal": {
+   "halka": false,
+   "sembol": false,
+   "isim1": false,
+   "isim2": false,
+   "sonsuz": false,
+   "kucuk_sol": false,
+   "kucuk_sag": false,
+   "tarih": false
+  },
+  "cakisma": [],
+  "oge": {
+   "halka": {
+    "kutu": [
+     173,
+     223,
+     781,
+     732
+    ],
+    "w_mm": 51.48,
+    "h_mm": 43.1
+   },
+   "sembol": {
+    "kutu": [
+     288,
+     313,
+     666,
+     671
+    ],
+    "w_mm": 32.0,
+    "h_mm": 30.31
+   },
+   "isim1": {
+    "kutu": [
+     283,
+     754,
+     399,
+     783
+    ],
+    "w_mm": 9.82,
+    "h_mm": 2.46
+   },
+   "isim2": {
+    "kutu": [
+     550,
+     754,
+     671,
+     791
+    ],
+    "w_mm": 10.24,
+    "h_mm": 3.13
+   },
+   "sonsuz": {
+    "kutu": [
+     445,
+     759,
+     505,
+     779
+    ],
+    "w_mm": 5.08,
+    "h_mm": 1.69
+   },
+   "kucuk_sol": {
+    "kutu": [
+     308,
+     680,
+     373,
+     738
+    ],
+    "w_mm": 5.5,
+    "h_mm": 4.91
+   },
+   "kucuk_sag": {
+    "kutu": [
+     573,
+     679,
+     648,
+     739
+    ],
+    "w_mm": 6.35,
+    "h_mm": 5.08
+   },
+   "tarih": {
+    "kutu": [
+     377,
+     804,
+     577,
+     835
+    ],
+    "w_mm": 16.93,
+    "h_mm": 2.62
+   }
+  },
+  "isim_buyuk_harf_mm": 2.38,
+  "tarih_buyuk_harf_mm": 2.02
+ },
+ "stil": {
+  "SAPPHIRE_GOLD": {
+   "hale_s": 0.0,
+   "altin_kazanc": 1.04,
+   "en_kotu_kontrast": 5.01,
+   "hedef": 5.0,
+   "hedef_tuttu": 1.0,
+   "okunurluk_once": {
+    "isim1": {
+     "yazi_rgb": [
+      204,
+      142,
+      29
+     ],
+     "zemin_rgb": [
+      0,
+      11,
+      60
+     ],
+     "kontrast": 6.67,
+     "kontrast_acik5": 5.86
+    },
+    "isim2": {
+     "yazi_rgb": [
+      211,
+      148,
+      32
+     ],
+     "zemin_rgb": [
+      0,
+      14,
+      68
+     ],
+     "kontrast": 6.98,
+     "kontrast_acik5": 6.03
+    },
+    "tarih": {
+     "yazi_rgb": [
+      180,
+      121,
+      22
+     ],
+     "zemin_rgb": [
+      0,
+      10,
+      55
+     ],
+     "kontrast": 5.17,
+     "kontrast_acik5": 4.68
+    }
+   },
+   "okunurluk": {
+    "isim1": {
+     "yazi_rgb": [
+      211,
+      148,
+      32
+     ],
+     "zemin_rgb": [
+      0,
+      11,
+      60
+     ],
+     "kontrast": 7.18,
+     "kontrast_acik5": 6.31
+    },
+    "isim2": {
+     "yazi_rgb": [
+      217,
+      154,
+      36
+     ],
+     "zemin_rgb": [
+      0,
+      14,
+      68
+     ],
+     "kontrast": 7.47,
+     "kontrast_acik5": 6.46
+    },
+    "tarih": {
+     "yazi_rgb": [
+      186,
+      126,
+      24
+     ],
+     "zemin_rgb": [
+      0,
+      10,
+      55
+     ],
+     "kontrast": 5.53,
+     "kontrast_acik5": 5.01
+    }
+   },
+   "halka_parlaklik_govde": {
+    "min": 145.0,
+    "max": 145.0
+   },
+   "halka_aci": [
+    {
+     "aci": 1,
+     "genislik_px": 3.69,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.8
+    },
+    {
+     "aci": 3,
+     "genislik_px": 3.35,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 131.7
+    },
+    {
+     "aci": 5,
+     "genislik_px": 3.41,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.5
+    },
+    {
+     "aci": 7,
+     "genislik_px": 3.23,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 131.2
+    },
+    {
+     "aci": 9,
+     "genislik_px": 3.08,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 129.1
+    },
+    {
+     "aci": 11,
+     "genislik_px": 2.97,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.5
+    },
+    {
+     "aci": 13,
+     "genislik_px": 2.83,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.1
+    },
+    {
+     "aci": 15,
+     "genislik_px": 2.75,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 128.5
+    },
+    {
+     "aci": 17,
+     "genislik_px": 2.65,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 126.2
+    },
+    {
+     "aci": 19,
+     "genislik_px": 2.45,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 127.4
+    },
+    {
+     "aci": 21,
+     "genislik_px": 2.08,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 124.7
+    },
+    {
+     "aci": 23,
+     "genislik_px": 1.98,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 122.7
+    },
+    {
+     "aci": 25,
+     "genislik_px": 1.78,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 121.0
+    },
+    {
+     "aci": 27,
+     "genislik_px": 1.54,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 117.0
+    },
+    {
+     "aci": 29,
+     "genislik_px": 1.17,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 106.4
+    },
+    {
+     "aci": 31,
+     "genislik_px": 0.87,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 98.2
+    },
+    {
+     "aci": 33,
+     "genislik_px": 0.74,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 87.6
+    },
+    {
+     "aci": 35,
+     "genislik_px": 0.63,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 84.8
+    },
+    {
+     "aci": 37,
+     "genislik_px": 0.53,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 77.1
+    },
+    {
+     "aci": 39,
+     "genislik_px": 0.35,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 64.1
+    },
+    {
+     "aci": 41,
+     "genislik_px": 0.32,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 62.5
+    },
+    {
+     "aci": 43,
+     "genislik_px": 0.28,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 48.1
+    },
+    {
+     "aci": 137,
+     "genislik_px": 0.29,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 51.4
+    },
+    {
+     "aci": 139,
+     "genislik_px": 0.31,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 62.6
+    },
+    {
+     "aci": 141,
+     "genislik_px": 0.37,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 66.6
+    },
+    {
+     "aci": 143,
+     "genislik_px": 0.51,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 75.5
+    },
+    {
+     "aci": 145,
+     "genislik_px": 0.64,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 80.5
+    },
+    {
+     "aci": 147,
+     "genislik_px": 0.78,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 88.4
+    },
+    {
+     "aci": 149,
+     "genislik_px": 0.84,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 95.1
+    },
+    {
+     "aci": 151,
+     "genislik_px": 1.04,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 104.3
+    },
+    {
+     "aci": 153,
+     "genislik_px": 1.37,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 114.9
+    },
+    {
+     "aci": 155,
+     "genislik_px": 1.6,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 118.4
+    },
+    {
+     "aci": 157,
+     "genislik_px": 1.95,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 123.3
+    },
+    {
+     "aci": 159,
+     "genislik_px": 2.04,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 123.9
+    },
+    {
+     "aci": 161,
+     "genislik_px": 2.26,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 124.9
+    },
+    {
+     "aci": 163,
+     "genislik_px": 2.26,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 124.9
+    },
+    {
+     "aci": 165,
+     "genislik_px": 2.35,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 125.0
+    },
+    {
+     "aci": 167,
+     "genislik_px": 2.65,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 128.9
+    },
+    {
+     "aci": 169,
+     "genislik_px": 2.76,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 129.7
+    },
+    {
+     "aci": 171,
+     "genislik_px": 2.89,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 127.7
+    },
+    {
+     "aci": 173,
+     "genislik_px": 3.13,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.1
+    },
+    {
+     "aci": 175,
+     "genislik_px": 3.42,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.8
+    },
+    {
+     "aci": 177,
+     "genislik_px": 3.36,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 131.6
+    },
+    {
+     "aci": 179,
+     "genislik_px": 3.69,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 131.6
+    },
+    {
+     "aci": 181,
+     "genislik_px": 3.47,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.8
+    },
+    {
+     "aci": 183,
+     "genislik_px": 3.96,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.6
+    },
+    {
+     "aci": 185,
+     "genislik_px": 3.66,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.7
+    },
+    {
+     "aci": 187,
+     "genislik_px": 4.02,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.4
+    },
+    {
+     "aci": 189,
+     "genislik_px": 3.81,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.7
+    },
+    {
+     "aci": 191,
+     "genislik_px": 3.96,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.7
+    },
+    {
+     "aci": 193,
+     "genislik_px": 4.02,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.2
+    },
+    {
+     "aci": 195,
+     "genislik_px": 3.94,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.0
+    },
+    {
+     "aci": 197,
+     "genislik_px": 3.91,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.5
+    },
+    {
+     "aci": 199,
+     "genislik_px": 4.01,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.4
+    },
+    {
+     "aci": 201,
+     "genislik_px": 3.78,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.7
+    },
+    {
+     "aci": 203,
+     "genislik_px": 3.83,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.6
+    },
+    {
+     "aci": 205,
+     "genislik_px": 3.72,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.9
+    },
+    {
+     "aci": 207,
+     "genislik_px": 3.41,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.9
+    },
+    {
+     "aci": 209,
+     "genislik_px": 3.51,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.4
+    },
+    {
+     "aci": 211,
+     "genislik_px": 3.29,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.1
+    },
+    {
+     "aci": 213,
+     "genislik_px": 2.96,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.9
+    },
+    {
+     "aci": 215,
+     "genislik_px": 2.72,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 128.7
+    },
+    {
+     "aci": 217,
+     "genislik_px": 2.72,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 128.9
+    },
+    {
+     "aci": 219,
+     "genislik_px": 2.75,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.4
+    },
+    {
+     "aci": 221,
+     "genislik_px": 2.78,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 129.6
+    },
+    {
+     "aci": 223,
+     "genislik_px": 2.85,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.5
+    },
+    {
+     "aci": 225,
+     "genislik_px": 3.0,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 131.3
+    },
+    {
+     "aci": 227,
+     "genislik_px": 3.29,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.6
+    },
+    {
+     "aci": 229,
+     "genislik_px": 3.33,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.7
+    },
+    {
+     "aci": 231,
+     "genislik_px": 3.53,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.6
+    },
+    {
+     "aci": 233,
+     "genislik_px": 3.65,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.1
+    },
+    {
+     "aci": 235,
+     "genislik_px": 3.67,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.3
+    },
+    {
+     "aci": 237,
+     "genislik_px": 3.88,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.5
+    },
+    {
+     "aci": 239,
+     "genislik_px": 4.08,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.0
+    },
+    {
+     "aci": 241,
+     "genislik_px": 4.24,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.4
+    },
+    {
+     "aci": 243,
+     "genislik_px": 4.2,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.1
+    },
+    {
+     "aci": 245,
+     "genislik_px": 4.7,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.3
+    },
+    {
+     "aci": 247,
+     "genislik_px": 5.16,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.5
+    },
+    {
+     "aci": 249,
+     "genislik_px": 5.47,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.7
+    },
+    {
+     "aci": 251,
+     "genislik_px": 5.98,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.8
+    },
+    {
+     "aci": 253,
+     "genislik_px": 6.22,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.8
+    },
+    {
+     "aci": 255,
+     "genislik_px": 6.24,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.2
+    },
+    {
+     "aci": 257,
+     "genislik_px": 6.7,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.9
+    },
+    {
+     "aci": 259,
+     "genislik_px": 6.71,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.6
+    },
+    {
+     "aci": 261,
+     "genislik_px": 6.88,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.6
+    },
+    {
+     "aci": 263,
+     "genislik_px": 6.87,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.0
+    },
+    {
+     "aci": 265,
+     "genislik_px": 7.13,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.0
+    },
+    {
+     "aci": 267,
+     "genislik_px": 6.62,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.5
+    },
+    {
+     "aci": 269,
+     "genislik_px": 7.11,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.6
+    },
+    {
+     "aci": 271,
+     "genislik_px": 7.11,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.4
+    },
+    {
+     "aci": 273,
+     "genislik_px": 6.62,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.2
+    },
+    {
+     "aci": 275,
+     "genislik_px": 7.18,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.9
+    },
+    {
+     "aci": 277,
+     "genislik_px": 6.91,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.2
+    },
+    {
+     "aci": 279,
+     "genislik_px": 6.96,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.2
+    },
+    {
+     "aci": 281,
+     "genislik_px": 6.84,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.5
+    },
+    {
+     "aci": 283,
+     "genislik_px": 6.77,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.3
+    },
+    {
+     "aci": 285,
+     "genislik_px": 6.54,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.8
+    },
+    {
+     "aci": 287,
+     "genislik_px": 6.18,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.7
+    },
+    {
+     "aci": 289,
+     "genislik_px": 5.97,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.6
+    },
+    {
+     "aci": 291,
+     "genislik_px": 5.86,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.1
+    },
+    {
+     "aci": 293,
+     "genislik_px": 5.45,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.4
+    },
+    {
+     "aci": 295,
+     "genislik_px": 4.99,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.7
+    },
+    {
+     "aci": 297,
+     "genislik_px": 4.49,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.1
+    },
+    {
+     "aci": 299,
+     "genislik_px": 4.48,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.2
+    },
+    {
+     "aci": 301,
+     "genislik_px": 4.14,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.8
+    },
+    {
+     "aci": 303,
+     "genislik_px": 4.18,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.3
+    },
+    {
+     "aci": 305,
+     "genislik_px": 3.92,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.3
+    },
+    {
+     "aci": 307,
+     "genislik_px": 3.89,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.9
+    },
+    {
+     "aci": 309,
+     "genislik_px": 3.86,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.0
+    },
+    {
+     "aci": 311,
+     "genislik_px": 3.65,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.8
+    },
+    {
+     "aci": 313,
+     "genislik_px": 3.61,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.5
+    },
+    {
+     "aci": 315,
+     "genislik_px": 3.55,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.0
+    },
+    {
+     "aci": 317,
+     "genislik_px": 3.45,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.0
+    },
+    {
+     "aci": 319,
+     "genislik_px": 3.2,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.0
+    },
+    {
+     "aci": 321,
+     "genislik_px": 3.19,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.8
+    },
+    {
+     "aci": 323,
+     "genislik_px": 3.18,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.4
+    },
+    {
+     "aci": 325,
+     "genislik_px": 3.22,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.5
+    },
+    {
+     "aci": 327,
+     "genislik_px": 3.33,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.0
+    },
+    {
+     "aci": 329,
+     "genislik_px": 3.58,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.5
+    },
+    {
+     "aci": 331,
+     "genislik_px": 3.7,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.8
+    },
+    {
+     "aci": 333,
+     "genislik_px": 3.63,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.1
+    },
+    {
+     "aci": 335,
+     "genislik_px": 4.07,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.4
+    },
+    {
+     "aci": 337,
+     "genislik_px": 4.08,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.9
+    },
+    {
+     "aci": 339,
+     "genislik_px": 4.03,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.6
+    },
+    {
+     "aci": 341,
+     "genislik_px": 4.28,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.4
+    },
+    {
+     "aci": 343,
+     "genislik_px": 4.14,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.3
+    },
+    {
+     "aci": 345,
+     "genislik_px": 4.19,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.9
+    },
+    {
+     "aci": 347,
+     "genislik_px": 4.27,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.8
+    },
+    {
+     "aci": 349,
+     "genislik_px": 4.2,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.5
+    },
+    {
+     "aci": 351,
+     "genislik_px": 4.07,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.8
+    },
+    {
+     "aci": 353,
+     "genislik_px": 4.17,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.1
+    },
+    {
+     "aci": 355,
+     "genislik_px": 3.74,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.5
+    },
+    {
+     "aci": 357,
+     "genislik_px": 3.97,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.3
+    },
+    {
+     "aci": 359,
+     "genislik_px": 3.51,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.6
+    }
+   ]
+  },
+  "EMERALD_GOLD": {
+   "hale_s": 0.5,
+   "altin_kazanc": 1.12,
+   "en_kotu_kontrast": 4.55,
+   "hedef": 4.5,
+   "hedef_tuttu": 1.0,
+   "okunurluk_once": {
+    "isim1": {
+     "yazi_rgb": [
+      204,
+      142,
+      29
+     ],
+     "zemin_rgb": [
+      1,
+      70,
+      26
+     ],
+     "kontrast": 3.94,
+     "kontrast_acik5": 2.92
+    },
+    "isim2": {
+     "yazi_rgb": [
+      211,
+      148,
+      32
+     ],
+     "zemin_rgb": [
+      1,
+      64,
+      23
+     ],
+     "kontrast": 4.57,
+     "kontrast_acik5": 2.91
+    },
+    "tarih": {
+     "yazi_rgb": [
+      180,
+      121,
+      22
+     ],
+     "zemin_rgb": [
+      1,
+      60,
+      22
+     ],
+     "kontrast": 3.42,
+     "kontrast_acik5": 2.31
+    }
+   },
+   "okunurluk": {
+    "isim1": {
+     "yazi_rgb": [
+      223,
+      160,
+      39
+     ],
+     "zemin_rgb": [
+      0,
+      39,
+      14
+     ],
+     "kontrast": 7.07,
+     "kontrast_acik5": 5.99
+    },
+    "isim2": {
+     "yazi_rgb": [
+      229,
+      168,
+      42
+     ],
+     "zemin_rgb": [
+      0,
+      36,
+      13
+     ],
+     "kontrast": 7.91,
+     "kontrast_acik5": 6.24
+    },
+    "tarih": {
+     "yazi_rgb": [
+      198,
+      136,
+      28
+     ],
+     "zemin_rgb": [
+      0,
+      33,
+      12
+     ],
+     "kontrast": 5.63,
+     "kontrast_acik5": 4.55
+    }
+   },
+   "halka_parlaklik_govde": {
+    "min": 145.0,
+    "max": 145.0
+   },
+   "halka_aci": [
+    {
+     "aci": 1,
+     "genislik_px": 3.69,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.5
+    },
+    {
+     "aci": 3,
+     "genislik_px": 3.35,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.0
+    },
+    {
+     "aci": 5,
+     "genislik_px": 3.41,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.5
+    },
+    {
+     "aci": 7,
+     "genislik_px": 3.23,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.6
+    },
+    {
+     "aci": 9,
+     "genislik_px": 3.08,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.8
+    },
+    {
+     "aci": 11,
+     "genislik_px": 2.97,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.1
+    },
+    {
+     "aci": 13,
+     "genislik_px": 2.83,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.1
+    },
+    {
+     "aci": 15,
+     "genislik_px": 2.75,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.4
+    },
+    {
+     "aci": 17,
+     "genislik_px": 2.65,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.6
+    },
+    {
+     "aci": 19,
+     "genislik_px": 2.45,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.8
+    },
+    {
+     "aci": 21,
+     "genislik_px": 2.08,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 127.5
+    },
+    {
+     "aci": 23,
+     "genislik_px": 1.98,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 125.2
+    },
+    {
+     "aci": 25,
+     "genislik_px": 1.78,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 123.6
+    },
+    {
+     "aci": 27,
+     "genislik_px": 1.54,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 119.5
+    },
+    {
+     "aci": 29,
+     "genislik_px": 1.17,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 108.6
+    },
+    {
+     "aci": 31,
+     "genislik_px": 0.87,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 102.9
+    },
+    {
+     "aci": 33,
+     "genislik_px": 0.74,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 95.1
+    },
+    {
+     "aci": 35,
+     "genislik_px": 0.63,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 94.9
+    },
+    {
+     "aci": 37,
+     "genislik_px": 0.53,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 90.4
+    },
+    {
+     "aci": 39,
+     "genislik_px": 0.35,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 88.0
+    },
+    {
+     "aci": 41,
+     "genislik_px": 0.32,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 85.0
+    },
+    {
+     "aci": 43,
+     "genislik_px": 0.28,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 71.5
+    },
+    {
+     "aci": 137,
+     "genislik_px": 0.29,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 74.0
+    },
+    {
+     "aci": 139,
+     "genislik_px": 0.31,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 80.9
+    },
+    {
+     "aci": 141,
+     "genislik_px": 0.37,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 83.0
+    },
+    {
+     "aci": 143,
+     "genislik_px": 0.51,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 91.8
+    },
+    {
+     "aci": 145,
+     "genislik_px": 0.64,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 98.7
+    },
+    {
+     "aci": 147,
+     "genislik_px": 0.78,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 106.3
+    },
+    {
+     "aci": 149,
+     "genislik_px": 0.84,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 110.4
+    },
+    {
+     "aci": 151,
+     "genislik_px": 1.04,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 115.6
+    },
+    {
+     "aci": 153,
+     "genislik_px": 1.37,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 120.3
+    },
+    {
+     "aci": 155,
+     "genislik_px": 1.6,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 122.9
+    },
+    {
+     "aci": 157,
+     "genislik_px": 1.95,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 127.3
+    },
+    {
+     "aci": 159,
+     "genislik_px": 2.04,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 127.9
+    },
+    {
+     "aci": 161,
+     "genislik_px": 2.26,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 129.5
+    },
+    {
+     "aci": 163,
+     "genislik_px": 2.26,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 129.2
+    },
+    {
+     "aci": 165,
+     "genislik_px": 2.35,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 129.4
+    },
+    {
+     "aci": 167,
+     "genislik_px": 2.65,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.8
+    },
+    {
+     "aci": 169,
+     "genislik_px": 2.76,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.6
+    },
+    {
+     "aci": 171,
+     "genislik_px": 2.89,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 131.4
+    },
+    {
+     "aci": 173,
+     "genislik_px": 3.13,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.8
+    },
+    {
+     "aci": 175,
+     "genislik_px": 3.42,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.9
+    },
+    {
+     "aci": 177,
+     "genislik_px": 3.36,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.8
+    },
+    {
+     "aci": 179,
+     "genislik_px": 3.69,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.8
+    },
+    {
+     "aci": 181,
+     "genislik_px": 3.47,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.3
+    },
+    {
+     "aci": 183,
+     "genislik_px": 3.96,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.0
+    },
+    {
+     "aci": 185,
+     "genislik_px": 3.66,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.5
+    },
+    {
+     "aci": 187,
+     "genislik_px": 4.02,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.6
+    },
+    {
+     "aci": 189,
+     "genislik_px": 3.81,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.2
+    },
+    {
+     "aci": 191,
+     "genislik_px": 3.96,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.1
+    },
+    {
+     "aci": 193,
+     "genislik_px": 4.02,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.3
+    },
+    {
+     "aci": 195,
+     "genislik_px": 3.94,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.4
+    },
+    {
+     "aci": 197,
+     "genislik_px": 3.91,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.6
+    },
+    {
+     "aci": 199,
+     "genislik_px": 4.01,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.9
+    },
+    {
+     "aci": 201,
+     "genislik_px": 3.78,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.4
+    },
+    {
+     "aci": 203,
+     "genislik_px": 3.83,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.5
+    },
+    {
+     "aci": 205,
+     "genislik_px": 3.72,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.6
+    },
+    {
+     "aci": 207,
+     "genislik_px": 3.41,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.4
+    },
+    {
+     "aci": 209,
+     "genislik_px": 3.51,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.7
+    },
+    {
+     "aci": 211,
+     "genislik_px": 3.29,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.7
+    },
+    {
+     "aci": 213,
+     "genislik_px": 2.96,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.9
+    },
+    {
+     "aci": 215,
+     "genislik_px": 2.72,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.2
+    },
+    {
+     "aci": 217,
+     "genislik_px": 2.72,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.6
+    },
+    {
+     "aci": 219,
+     "genislik_px": 2.75,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.0
+    },
+    {
+     "aci": 221,
+     "genislik_px": 2.78,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 131.8
+    },
+    {
+     "aci": 223,
+     "genislik_px": 2.85,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.2
+    },
+    {
+     "aci": 225,
+     "genislik_px": 3.0,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.7
+    },
+    {
+     "aci": 227,
+     "genislik_px": 3.29,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.1
+    },
+    {
+     "aci": 229,
+     "genislik_px": 3.33,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.9
+    },
+    {
+     "aci": 231,
+     "genislik_px": 3.53,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.8
+    },
+    {
+     "aci": 233,
+     "genislik_px": 3.65,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.1
+    },
+    {
+     "aci": 235,
+     "genislik_px": 3.67,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.5
+    },
+    {
+     "aci": 237,
+     "genislik_px": 3.88,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.8
+    },
+    {
+     "aci": 239,
+     "genislik_px": 4.08,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.3
+    },
+    {
+     "aci": 241,
+     "genislik_px": 4.24,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.3
+    },
+    {
+     "aci": 243,
+     "genislik_px": 4.2,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.6
+    },
+    {
+     "aci": 245,
+     "genislik_px": 4.7,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.7
+    },
+    {
+     "aci": 247,
+     "genislik_px": 5.16,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.9
+    },
+    {
+     "aci": 249,
+     "genislik_px": 5.47,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.4
+    },
+    {
+     "aci": 251,
+     "genislik_px": 5.98,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.0
+    },
+    {
+     "aci": 253,
+     "genislik_px": 6.22,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.6
+    },
+    {
+     "aci": 255,
+     "genislik_px": 6.24,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.0
+    },
+    {
+     "aci": 257,
+     "genislik_px": 6.7,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.0
+    },
+    {
+     "aci": 259,
+     "genislik_px": 6.71,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.2
+    },
+    {
+     "aci": 261,
+     "genislik_px": 6.88,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 141.3
+    },
+    {
+     "aci": 263,
+     "genislik_px": 6.87,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.2
+    },
+    {
+     "aci": 265,
+     "genislik_px": 7.13,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 141.1
+    },
+    {
+     "aci": 267,
+     "genislik_px": 6.62,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 141.8
+    },
+    {
+     "aci": 269,
+     "genislik_px": 7.11,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.7
+    },
+    {
+     "aci": 271,
+     "genislik_px": 7.11,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.5
+    },
+    {
+     "aci": 273,
+     "genislik_px": 6.62,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 141.3
+    },
+    {
+     "aci": 275,
+     "genislik_px": 7.18,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.1
+    },
+    {
+     "aci": 277,
+     "genislik_px": 6.91,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.1
+    },
+    {
+     "aci": 279,
+     "genislik_px": 6.96,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.4
+    },
+    {
+     "aci": 281,
+     "genislik_px": 6.84,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 141.1
+    },
+    {
+     "aci": 283,
+     "genislik_px": 6.77,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.8
+    },
+    {
+     "aci": 285,
+     "genislik_px": 6.54,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.0
+    },
+    {
+     "aci": 287,
+     "genislik_px": 6.18,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.1
+    },
+    {
+     "aci": 289,
+     "genislik_px": 5.97,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.0
+    },
+    {
+     "aci": 291,
+     "genislik_px": 5.86,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.2
+    },
+    {
+     "aci": 293,
+     "genislik_px": 5.45,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.7
+    },
+    {
+     "aci": 295,
+     "genislik_px": 4.99,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.1
+    },
+    {
+     "aci": 297,
+     "genislik_px": 4.49,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.6
+    },
+    {
+     "aci": 299,
+     "genislik_px": 4.48,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.4
+    },
+    {
+     "aci": 301,
+     "genislik_px": 4.14,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.3
+    },
+    {
+     "aci": 303,
+     "genislik_px": 4.18,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.8
+    },
+    {
+     "aci": 305,
+     "genislik_px": 3.92,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.7
+    },
+    {
+     "aci": 307,
+     "genislik_px": 3.89,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.7
+    },
+    {
+     "aci": 309,
+     "genislik_px": 3.86,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.9
+    },
+    {
+     "aci": 311,
+     "genislik_px": 3.65,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.3
+    },
+    {
+     "aci": 313,
+     "genislik_px": 3.61,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.0
+    },
+    {
+     "aci": 315,
+     "genislik_px": 3.55,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.6
+    },
+    {
+     "aci": 317,
+     "genislik_px": 3.45,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.0
+    },
+    {
+     "aci": 319,
+     "genislik_px": 3.2,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.2
+    },
+    {
+     "aci": 321,
+     "genislik_px": 3.19,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.6
+    },
+    {
+     "aci": 323,
+     "genislik_px": 3.18,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.8
+    },
+    {
+     "aci": 325,
+     "genislik_px": 3.22,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.0
+    },
+    {
+     "aci": 327,
+     "genislik_px": 3.33,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.1
+    },
+    {
+     "aci": 329,
+     "genislik_px": 3.58,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.3
+    },
+    {
+     "aci": 331,
+     "genislik_px": 3.7,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.0
+    },
+    {
+     "aci": 333,
+     "genislik_px": 3.63,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.0
+    },
+    {
+     "aci": 335,
+     "genislik_px": 4.07,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.3
+    },
+    {
+     "aci": 337,
+     "genislik_px": 4.08,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.2
+    },
+    {
+     "aci": 339,
+     "genislik_px": 4.03,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.2
+    },
+    {
+     "aci": 341,
+     "genislik_px": 4.28,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.5
+    },
+    {
+     "aci": 343,
+     "genislik_px": 4.14,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.2
+    },
+    {
+     "aci": 345,
+     "genislik_px": 4.19,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.2
+    },
+    {
+     "aci": 347,
+     "genislik_px": 4.27,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.0
+    },
+    {
+     "aci": 349,
+     "genislik_px": 4.2,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.6
+    },
+    {
+     "aci": 351,
+     "genislik_px": 4.07,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.6
+    },
+    {
+     "aci": 353,
+     "genislik_px": 4.17,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.0
+    },
+    {
+     "aci": 355,
+     "genislik_px": 3.74,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.7
+    },
+    {
+     "aci": 357,
+     "genislik_px": 3.97,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.3
+    },
+    {
+     "aci": 359,
+     "genislik_px": 3.51,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.8
+    }
+   ]
+  },
+  "RUBY_GOLD": {
+   "hale_s": 0.0,
+   "altin_kazanc": 1.12,
+   "en_kotu_kontrast": 5.25,
+   "hedef": 5.0,
+   "hedef_tuttu": 1.0,
+   "okunurluk_once": {
+    "isim1": {
+     "yazi_rgb": [
+      204,
+      142,
+      29
+     ],
+     "zemin_rgb": [
+      70,
+      0,
+      6
+     ],
+     "kontrast": 5.89,
+     "kontrast_acik5": 5.46
+    },
+    "isim2": {
+     "yazi_rgb": [
+      211,
+      148,
+      32
+     ],
+     "zemin_rgb": [
+      66,
+      0,
+      5
+     ],
+     "kontrast": 6.49,
+     "kontrast_acik5": 6.01
+    },
+    "tarih": {
+     "yazi_rgb": [
+      180,
+      121,
+      22
+     ],
+     "zemin_rgb": [
+      66,
+      0,
+      6
+     ],
+     "kontrast": 4.6,
+     "kontrast_acik5": 4.3
+    }
+   },
+   "okunurluk": {
+    "isim1": {
+     "yazi_rgb": [
+      223,
+      160,
+      39
+     ],
+     "zemin_rgb": [
+      70,
+      0,
+      6
+     ],
+     "kontrast": 7.26,
+     "kontrast_acik5": 6.73
+    },
+    "isim2": {
+     "yazi_rgb": [
+      230,
+      168,
+      42
+     ],
+     "zemin_rgb": [
+      66,
+      0,
+      5
+     ],
+     "kontrast": 8.08,
+     "kontrast_acik5": 7.48
+    },
+    "tarih": {
+     "yazi_rgb": [
+      198,
+      136,
+      28
+     ],
+     "zemin_rgb": [
+      66,
+      0,
+      6
+     ],
+     "kontrast": 5.62,
+     "kontrast_acik5": 5.25
+    }
+   },
+   "halka_parlaklik_govde": {
+    "min": 145.0,
+    "max": 145.0
+   },
+   "halka_aci": [
+    {
+     "aci": 1,
+     "genislik_px": 3.69,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 131.6
+    },
+    {
+     "aci": 3,
+     "genislik_px": 3.35,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.5
+    },
+    {
+     "aci": 5,
+     "genislik_px": 3.41,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.2
+    },
+    {
+     "aci": 7,
+     "genislik_px": 3.23,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 131.8
+    },
+    {
+     "aci": 9,
+     "genislik_px": 3.08,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 129.8
+    },
+    {
+     "aci": 11,
+     "genislik_px": 2.97,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 131.0
+    },
+    {
+     "aci": 13,
+     "genislik_px": 2.83,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.7
+    },
+    {
+     "aci": 15,
+     "genislik_px": 2.75,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 129.9
+    },
+    {
+     "aci": 17,
+     "genislik_px": 2.65,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 127.6
+    },
+    {
+     "aci": 19,
+     "genislik_px": 2.45,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 128.3
+    },
+    {
+     "aci": 21,
+     "genislik_px": 2.08,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 125.3
+    },
+    {
+     "aci": 23,
+     "genislik_px": 1.98,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 123.8
+    },
+    {
+     "aci": 25,
+     "genislik_px": 1.78,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 122.0
+    },
+    {
+     "aci": 27,
+     "genislik_px": 1.54,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 118.0
+    },
+    {
+     "aci": 29,
+     "genislik_px": 1.17,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 107.3
+    },
+    {
+     "aci": 31,
+     "genislik_px": 0.87,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 98.7
+    },
+    {
+     "aci": 33,
+     "genislik_px": 0.74,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 89.0
+    },
+    {
+     "aci": 35,
+     "genislik_px": 0.63,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 86.0
+    },
+    {
+     "aci": 37,
+     "genislik_px": 0.53,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 80.7
+    },
+    {
+     "aci": 39,
+     "genislik_px": 0.35,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 67.9
+    },
+    {
+     "aci": 41,
+     "genislik_px": 0.32,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 64.8
+    },
+    {
+     "aci": 43,
+     "genislik_px": 0.28,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 52.7
+    },
+    {
+     "aci": 137,
+     "genislik_px": 0.29,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 57.4
+    },
+    {
+     "aci": 139,
+     "genislik_px": 0.31,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 69.0
+    },
+    {
+     "aci": 141,
+     "genislik_px": 0.37,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 72.7
+    },
+    {
+     "aci": 143,
+     "genislik_px": 0.51,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 80.6
+    },
+    {
+     "aci": 145,
+     "genislik_px": 0.64,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 85.1
+    },
+    {
+     "aci": 147,
+     "genislik_px": 0.78,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 93.1
+    },
+    {
+     "aci": 149,
+     "genislik_px": 0.84,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 98.9
+    },
+    {
+     "aci": 151,
+     "genislik_px": 1.04,
+     "parlaklik": null,
+     "renk_ort_kapsamli": 106.6
+    },
+    {
+     "aci": 153,
+     "genislik_px": 1.37,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 115.5
+    },
+    {
+     "aci": 155,
+     "genislik_px": 1.6,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 119.6
+    },
+    {
+     "aci": 157,
+     "genislik_px": 1.95,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 123.9
+    },
+    {
+     "aci": 159,
+     "genislik_px": 2.04,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 125.0
+    },
+    {
+     "aci": 161,
+     "genislik_px": 2.26,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 126.5
+    },
+    {
+     "aci": 163,
+     "genislik_px": 2.26,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 126.1
+    },
+    {
+     "aci": 165,
+     "genislik_px": 2.35,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 126.6
+    },
+    {
+     "aci": 167,
+     "genislik_px": 2.65,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.2
+    },
+    {
+     "aci": 169,
+     "genislik_px": 2.76,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.6
+    },
+    {
+     "aci": 171,
+     "genislik_px": 2.89,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 128.8
+    },
+    {
+     "aci": 173,
+     "genislik_px": 3.13,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.6
+    },
+    {
+     "aci": 175,
+     "genislik_px": 3.42,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.3
+    },
+    {
+     "aci": 177,
+     "genislik_px": 3.36,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.3
+    },
+    {
+     "aci": 179,
+     "genislik_px": 3.69,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.0
+    },
+    {
+     "aci": 181,
+     "genislik_px": 3.47,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.1
+    },
+    {
+     "aci": 183,
+     "genislik_px": 3.96,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.6
+    },
+    {
+     "aci": 185,
+     "genislik_px": 3.66,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.7
+    },
+    {
+     "aci": 187,
+     "genislik_px": 4.02,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.7
+    },
+    {
+     "aci": 189,
+     "genislik_px": 3.81,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.1
+    },
+    {
+     "aci": 191,
+     "genislik_px": 3.96,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.2
+    },
+    {
+     "aci": 193,
+     "genislik_px": 4.02,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.6
+    },
+    {
+     "aci": 195,
+     "genislik_px": 3.94,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.3
+    },
+    {
+     "aci": 197,
+     "genislik_px": 3.91,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.6
+    },
+    {
+     "aci": 199,
+     "genislik_px": 4.01,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.3
+    },
+    {
+     "aci": 201,
+     "genislik_px": 3.78,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.7
+    },
+    {
+     "aci": 203,
+     "genislik_px": 3.83,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.2
+    },
+    {
+     "aci": 205,
+     "genislik_px": 3.72,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.0
+    },
+    {
+     "aci": 207,
+     "genislik_px": 3.41,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.3
+    },
+    {
+     "aci": 209,
+     "genislik_px": 3.51,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.9
+    },
+    {
+     "aci": 211,
+     "genislik_px": 3.29,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.8
+    },
+    {
+     "aci": 213,
+     "genislik_px": 2.96,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 131.8
+    },
+    {
+     "aci": 215,
+     "genislik_px": 2.72,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 129.6
+    },
+    {
+     "aci": 217,
+     "genislik_px": 2.72,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 129.8
+    },
+    {
+     "aci": 219,
+     "genislik_px": 2.75,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.9
+    },
+    {
+     "aci": 221,
+     "genislik_px": 2.78,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.2
+    },
+    {
+     "aci": 223,
+     "genislik_px": 2.85,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 130.4
+    },
+    {
+     "aci": 225,
+     "genislik_px": 3.0,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 131.3
+    },
+    {
+     "aci": 227,
+     "genislik_px": 3.29,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.7
+    },
+    {
+     "aci": 229,
+     "genislik_px": 3.33,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.3
+    },
+    {
+     "aci": 231,
+     "genislik_px": 3.53,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.2
+    },
+    {
+     "aci": 233,
+     "genislik_px": 3.65,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.8
+    },
+    {
+     "aci": 235,
+     "genislik_px": 3.67,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.9
+    },
+    {
+     "aci": 237,
+     "genislik_px": 3.88,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.2
+    },
+    {
+     "aci": 239,
+     "genislik_px": 4.08,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.4
+    },
+    {
+     "aci": 241,
+     "genislik_px": 4.24,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.3
+    },
+    {
+     "aci": 243,
+     "genislik_px": 4.2,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.9
+    },
+    {
+     "aci": 245,
+     "genislik_px": 4.7,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.1
+    },
+    {
+     "aci": 247,
+     "genislik_px": 5.16,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.3
+    },
+    {
+     "aci": 249,
+     "genislik_px": 5.47,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.8
+    },
+    {
+     "aci": 251,
+     "genislik_px": 5.98,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.7
+    },
+    {
+     "aci": 253,
+     "genislik_px": 6.22,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.0
+    },
+    {
+     "aci": 255,
+     "genislik_px": 6.24,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.6
+    },
+    {
+     "aci": 257,
+     "genislik_px": 6.7,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.3
+    },
+    {
+     "aci": 259,
+     "genislik_px": 6.71,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.1
+    },
+    {
+     "aci": 261,
+     "genislik_px": 6.88,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.0
+    },
+    {
+     "aci": 263,
+     "genislik_px": 6.87,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.5
+    },
+    {
+     "aci": 265,
+     "genislik_px": 7.13,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.4
+    },
+    {
+     "aci": 267,
+     "genislik_px": 6.62,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.9
+    },
+    {
+     "aci": 269,
+     "genislik_px": 7.11,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.3
+    },
+    {
+     "aci": 271,
+     "genislik_px": 7.11,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.0
+    },
+    {
+     "aci": 273,
+     "genislik_px": 6.62,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 140.5
+    },
+    {
+     "aci": 275,
+     "genislik_px": 7.18,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.3
+    },
+    {
+     "aci": 277,
+     "genislik_px": 6.91,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.5
+    },
+    {
+     "aci": 279,
+     "genislik_px": 6.96,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.4
+    },
+    {
+     "aci": 281,
+     "genislik_px": 6.84,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.7
+    },
+    {
+     "aci": 283,
+     "genislik_px": 6.77,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 139.5
+    },
+    {
+     "aci": 285,
+     "genislik_px": 6.54,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.9
+    },
+    {
+     "aci": 287,
+     "genislik_px": 6.18,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.9
+    },
+    {
+     "aci": 289,
+     "genislik_px": 5.97,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.5
+    },
+    {
+     "aci": 291,
+     "genislik_px": 5.86,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.1
+    },
+    {
+     "aci": 293,
+     "genislik_px": 5.45,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 138.3
+    },
+    {
+     "aci": 295,
+     "genislik_px": 4.99,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 136.8
+    },
+    {
+     "aci": 297,
+     "genislik_px": 4.49,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 137.4
+    },
+    {
+     "aci": 299,
+     "genislik_px": 4.48,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.4
+    },
+    {
+     "aci": 301,
+     "genislik_px": 4.14,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.8
+    },
+    {
+     "aci": 303,
+     "genislik_px": 4.18,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.7
+    },
+    {
+     "aci": 305,
+     "genislik_px": 3.92,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.8
+    },
+    {
+     "aci": 307,
+     "genislik_px": 3.89,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.1
+    },
+    {
+     "aci": 309,
+     "genislik_px": 3.86,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.4
+    },
+    {
+     "aci": 311,
+     "genislik_px": 3.65,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.4
+    },
+    {
+     "aci": 313,
+     "genislik_px": 3.61,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.1
+    },
+    {
+     "aci": 315,
+     "genislik_px": 3.55,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.1
+    },
+    {
+     "aci": 317,
+     "genislik_px": 3.45,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.2
+    },
+    {
+     "aci": 319,
+     "genislik_px": 3.2,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.9
+    },
+    {
+     "aci": 321,
+     "genislik_px": 3.19,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.4
+    },
+    {
+     "aci": 323,
+     "genislik_px": 3.18,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.1
+    },
+    {
+     "aci": 325,
+     "genislik_px": 3.22,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.0
+    },
+    {
+     "aci": 327,
+     "genislik_px": 3.33,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 132.8
+    },
+    {
+     "aci": 329,
+     "genislik_px": 3.58,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.4
+    },
+    {
+     "aci": 331,
+     "genislik_px": 3.7,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.7
+    },
+    {
+     "aci": 333,
+     "genislik_px": 3.63,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.4
+    },
+    {
+     "aci": 335,
+     "genislik_px": 4.07,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.6
+    },
+    {
+     "aci": 337,
+     "genislik_px": 4.08,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.3
+    },
+    {
+     "aci": 339,
+     "genislik_px": 4.03,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.0
+    },
+    {
+     "aci": 341,
+     "genislik_px": 4.28,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.8
+    },
+    {
+     "aci": 343,
+     "genislik_px": 4.14,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.5
+    },
+    {
+     "aci": 345,
+     "genislik_px": 4.19,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.8
+    },
+    {
+     "aci": 347,
+     "genislik_px": 4.27,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.8
+    },
+    {
+     "aci": 349,
+     "genislik_px": 4.2,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.1
+    },
+    {
+     "aci": 351,
+     "genislik_px": 4.07,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.2
+    },
+    {
+     "aci": 353,
+     "genislik_px": 4.17,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.4
+    },
+    {
+     "aci": 355,
+     "genislik_px": 3.74,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 134.7
+    },
+    {
+     "aci": 357,
+     "genislik_px": 3.97,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 135.4
+    },
+    {
+     "aci": 359,
+     "genislik_px": 3.51,
+     "parlaklik": 145.0,
+     "renk_ort_kapsamli": 133.2
+    }
+   ]
+  }
+ },
+ "sekil": {
+  "ham": {
+   "boyut": [
+    8185,
+    7702
+   ],
+   "kutu": [
+    0,
+    0,
+    8185,
+    7702
+   ],
+   "en_boy": 1.0627,
+   "alan_kutu_orani": 0.1635,
+   "kalinlik_kutu_genisligine": 0.03058,
+   "kucuk_bilesen_atilan": 1
+  },
+  "ana": {
+   "boyut": [
+    4141,
+    3932
+   ],
+   "kutu": [
+    305,
+    293,
+    3839,
+    3636
+   ],
+   "en_boy": 1.0571,
+   "alan_kutu_orani": 0.1599,
+   "kalinlik_kutu_genisligine": 0.03086,
+   "kucuk_bilesen_atilan": 0
+  },
+  "hizali": {
+   "calisma_genisligi": 1200,
+   "olcek": 1.0,
+   "oteleme": [
+    -1,
+    3
+   ],
+   "ncc": 0.9565,
+   "iou": 0.8998,
+   "tolerans2px_ortusme": 0.9859,
+   "ham_fazla": 0.0145,
+   "ana_fazla": 0.0137
+  }
+ }
+}
