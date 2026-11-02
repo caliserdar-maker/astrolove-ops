@@ -937,22 +937,30 @@ def orta_kes(z, ht, c=None):
 
 
 def orta_kes_sec(z, ht):
-    """F7 it. 2 (kosu 41418784010: Botanical 3:4 dikis 1,008 > esik 1,0): kesim merkezi ht/2 + k x 100 (k = -4..4; ust / alt 600 satir
-    kenar bandi dokunulmaz) adaylarindan dikis kapisinin PAYI (esik - olcum) en buyuk olan secilir. Kapi ve esik degismez."""
+    """Kesim merkezi secimi. Inceleme 2 Kas (ORTA-3): pay (esik - olcum) en buyukte secmek esigi yukselten (dokusu guclu) bantlari
+    seciyordu. Kural: ortadaki kesim (ht / 2, it. 1 ile ayni) kapidan geciyorsa o; gecmiyorsa ht/2 + k x 100 (k -4..4; ust / alt 600
+    satir dokunulmaz) adaylarindan kapidan GECENLER arasinda cikti cizgi degeri EN KUCUK olan; hic gecen yoksa ortadaki (FAIL kalir)."""
     if ht == z.shape[0]:
         zem, b = orta_kes(z, ht)
         return zem, b, kesim_kapi(z, zem, b)
+    zem, b = orta_kes(z, ht); kk = kesim_kapi(z, zem, b)
+    if kk["pass_"]:
+        kk["secim"] = "orta"
+        return zem, b, kk
     R, O = z.shape[0] - ht, KES_ORT
     en = None; aday = []
     for k in range(-KES_ARA // 100, KES_ARA // 100 + 1):
         c = ht // 2 + 100 * k
-        if c - O // 2 < 600 or c + O // 2 + R > z.shape[0] - 600:
+        if k == 0 or c - O // 2 < 600 or c + O // 2 + R > z.shape[0] - 600:
             continue
-        zem, b = orta_kes(z, ht, c); kk = kesim_kapi(z, zem, b)
-        pay = kk["esik"] - kk["dikis_cizgi_max"]; aday.append([c, round(pay, 3)])
-        if en is None or pay > en[0]:
-            en = (pay, zem, b, kk)
-    en[3]["aday_kesim_pay"] = aday
+        z2, b2 = orta_kes(z, ht, c); k2 = kesim_kapi(z, z2, b2)
+        aday.append([c, k2["dikis_cizgi_max"], k2["esik"], k2["pass_"]])
+        if k2["pass_"] and (en is None or k2["dikis_cizgi_max"] < en[0]):
+            en = (k2["dikis_cizgi_max"], z2, b2, k2)
+    if en is None:
+        kk.update(secim="orta (aday gecmedi)", aday=aday)
+        return zem, b, kk
+    en[3].update(secim="aday (en kucuk cizgi)", orta_cizgi=kk["dikis_cizgi_max"], orta_esik=kk["esik"], aday=aday)
     return en[1], en[2], en[3]
 
 
