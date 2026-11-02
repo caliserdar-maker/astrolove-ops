@@ -1,0 +1,165 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/900",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 900,
+    "main_category_id": 254,
+    "type": "DECOR",
+    "description": "Shiny from all angles, these two-sided ornaments bring double the cheer. Great for personal gifting or maxing your seasonal decor, they come in four festive shapes with a high-gloss finish. Available solo or in three, five, or ten-unit packs.\n\n• 100% ceramic\n• Circle-shaped diameter: 2.99″ (7.6 cm)\n• Heart-shaped size: 2.91″ × 2.68″ (7.4 cm × 6.8 cm)\n• Star-shaped size: 3.35″ × 2.68″ (8.5 cm × 6.8 cm)\n• Snowflake-shaped size: 2.17″ × 2.99″ (5.5 cm × 7.6 cm)\n• Ornament thickness: 0.1″ (2.5 mm)\n• Glossy finish\n• Two-sided print with the same design\n• Gold-colored string included\n• Available individually or in bundles of 3, 5, or 10\n• Blank product sourced from China",
+    "type_name": "Ornament | Ceramic | Double-Sided",
+    "title": "Ceramic Ornaments, 2-Side Print",
+    "brand": null,
+    "model": "Ornament | Ceramic | Double-Sided",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/f3/f359f82e8ed7045d3d53c943e0f82488_l",
+    "variant_count": 4,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "2-Side print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 23133,
+     "product_id": 900,
+     "name": "Ceramic Ornaments, 2-Side Print (1 pc / Circle)",
+     "size": "Circle",
+     "color": "1 pc",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/900/23133_1748861540.jpg",
+     "price": "7.73",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23144,
+     "product_id": 900,
+     "name": "Ceramic Ornaments, 2-Side Print (1 pc / Heart)",
+     "size": "Heart",
+     "color": "1 pc",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/900/23144_1748861566.jpg",
+     "price": "7.73",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23155,
+     "product_id": 900,
+     "name": "Ceramic Ornaments, 2-Side Print (1 pc / Snowflake)",
+     "size": "Snowflake",
+     "color": "1 pc",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/900/23155_1748861648.jpg",
+     "price": "7.73",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23151,
+     "product_id": 900,
+     "name": "Ceramic Ornaments, 2-Side Print (1 pc / Star)",
+     "size": "Star",
+     "color": "1 pc",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/900/23151_1749454717.jpg",
+     "price": "7.73",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

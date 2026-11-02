@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/690/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 19390,
+    "catalog_product_id": 690,
+    "name": "Can-Shaped Glass (16 oz With Lid & Straw)",
+    "size": "16 oz With Lid & Straw",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/690/19390_1713180166.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19390"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/690"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/690/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19390/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19390/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19390/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 3.73,
+      "width": 9.36,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17354,
+    "catalog_product_id": 690,
+    "name": "Can-Shaped Glass (16 oz)",
+    "size": "16 oz",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/690/17354_1686301548.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17354"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/690"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/690/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17354/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17354/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17354/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 3.73,
+      "width": 9.36,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/690/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/690"
+   }
+  }
+ }
+}

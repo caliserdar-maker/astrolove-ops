@@ -1,0 +1,79 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/672",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 672,
+   "available_placements": {
+    "front": "Front print",
+    "back": "Back print",
+    "label_inside": "Branding"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 421,
+     "width": 3024,
+     "height": 2052,
+     "dpi": 214,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 422,
+     "width": 1050,
+     "height": 600,
+     "dpi": 150,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 16708,
+     "placements": {
+      "front": 421,
+      "back": 421,
+      "label_inside": 422
+     }
+    },
+    {
+     "variant_id": 16704,
+     "placements": {
+      "front": 421,
+      "back": 421,
+      "label_inside": 422
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat Lifestyle",
+    "Flat Lifestyle 2",
+    "Flat Lifestyle 3",
+    "Men's",
+    "Product details",
+    "Women's",
+    "Women's 2",
+    "Women's Lifestyle",
+    "template"
+   ],
+   "options": [
+    "Back",
+    "Back 2",
+    "Branding",
+    "Front",
+    "Front 2",
+    "Left Front",
+    "Product details",
+    "Product details 2",
+    "Right Back"
+   ]
+  },
+  "extra": []
+ }
+}

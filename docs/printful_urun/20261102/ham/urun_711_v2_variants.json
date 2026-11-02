@@ -1,0 +1,158 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/711/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 17483,
+    "catalog_product_id": 711,
+    "name": "Sublimated Sherpa Blanket (Tan / 37″×57″)",
+    "size": "37″×57″",
+    "color": "Tan",
+    "color_code": "#f0d8bc",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/711/17483_1691154680.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17483"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/711"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/711/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17483/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17483/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17483/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 60.0,
+      "width": 40.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 40.0,
+      "width": 60.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17482,
+    "catalog_product_id": 711,
+    "name": "Sublimated Sherpa Blanket (Tan / 50″×60″)",
+    "size": "50″×60″",
+    "color": "Tan",
+    "color_code": "#f0d8bc",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/711/17482_1691154685.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17482"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/711"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/711/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17482/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17482/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17482/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 63.0,
+      "width": 53.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 53.0,
+      "width": 63.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17449,
+    "catalog_product_id": 711,
+    "name": "Sublimated Sherpa Blanket (Tan / 60″×80″)",
+    "size": "60″×80″",
+    "color": "Tan",
+    "color_code": "#f0d8bc",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/711/17449_1691153819.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17449"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/711"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/711/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17449/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17449/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17449/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 83.01,
+      "width": 62.51,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 62.51,
+      "width": 83.01,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/711/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/711"
+   }
+  }
+ }
+}

@@ -1,0 +1,222 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/594?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 594,
+   "type": "CUT-SEW",
+   "main_category_id": 129,
+   "name": "All-Over Print Gym Bag",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/ed/ed1e2bcfb0b0e2e680f14f2b50e0ea25_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Ready to get your fitness on? Add some punch to pumping iron with this all-over print gym bag. Made from 100% polyester and sturdy, water-resistant fabric, this bag is fun meets function. And it’s got pockets! \n\n• 100% polyester\n• Fabric weight: 9 oz./yd.² (305 g/m²)\n• Capacity: 7.93 gallons (30 l)\n• Water-resistant and durable \n• Sturdy fabric with fusible backing to add firmness \n• T-piping for stability \n• Dual padded handles \n• Inside pocket for valuables",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "bottom",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "side_right",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "side_left",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "pocket",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "pocket_dtfabric"
+     ]
+    },
+    {
+     "placement": "label_inside",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "label_inside_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "black": "Black",
+      "clear": "Clear"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/594"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/594/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/594/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/594/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/594/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/594/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/594/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

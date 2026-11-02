@@ -1,0 +1,246 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/89/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 49855,
+    "catalog_product_id": 89,
+    "name": "All-Over Print Basic Pillow Case 14″×14″",
+    "size": "14″×14″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/89/49855_1782979387.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49855"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/89"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/89/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49855/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49855/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49855/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 15.0,
+      "width": 15.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 15.0,
+      "width": 15.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49856,
+    "catalog_product_id": 89,
+    "name": "All-Over Print Basic Pillow Case 16″×16″",
+    "size": "16″×16″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/89/49856_1782979357.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49856"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/89"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/89/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49856/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49856/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49856/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 17.0,
+      "width": 17.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 17.0,
+      "width": 17.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 4568,
+    "catalog_product_id": 89,
+    "name": "All-Over Print Basic Pillow Case 18″×18″",
+    "size": "18″×18″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/89/4568_1581582604.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4568"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/89"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/89/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4568/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4568/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4568/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 19.0,
+      "width": 19.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 19.0,
+      "width": 19.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 9514,
+    "catalog_product_id": 89,
+    "name": "All-Over Print Basic Pillow Case 20″×12″",
+    "size": "20″×12″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/89/9514_1581582630.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/9514"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/89"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/89/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/9514/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/9514/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/9514/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 13.0,
+      "width": 21.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 13.0,
+      "width": 21.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 11076,
+    "catalog_product_id": 89,
+    "name": "All-Over Print Basic Pillow Case 22″×22″",
+    "size": "22″×22″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/89/11076_1581582662.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/11076"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/89"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/89/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/11076/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/11076/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/11076/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 23.0,
+      "width": 23.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 23.0,
+      "width": 23.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 5,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/89/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/89"
+   }
+  }
+ }
+}

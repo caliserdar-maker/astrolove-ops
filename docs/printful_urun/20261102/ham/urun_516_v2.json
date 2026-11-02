@@ -1,0 +1,156 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/516?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 516,
+   "type": "EMBROIDERY-PATCH",
+   "main_category_id": 215,
+   "name": "Embroidered Patches",
+   "brand": "Gunold",
+   "model": "003",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/52/52dda392a73af8e9d253005b3698d571_l",
+   "variant_count": 10,
+   "is_discontinued": false,
+   "description": "Spice up your outfit by adding an eye-catching embroidered patch. Thanks to its durable twill fabric, the patch is resilient to heat. Order it today and get ready to start embellishing!\n\n• 26% cotton, 74% polyester\n• 3″ (7.6 cm) in diameter\n• Attachment options: iron-on, sew-on, or safety pin\n• Blank product sourced from China",
+   "sizes": [
+    "Circular ⌀3 in",
+    "Square 3″×3″",
+    "Rectangle 3.5″×2.25″",
+    "Oval 2.6″×4″",
+    "Heart - 3.1″×2.8″",
+    "Oval 4″×2.6″",
+    "Rectangle 3″×2″"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#0a0a0a"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "embroidery",
+     "display_name": "Embroidery",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "embroidery_patch_front",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": [
+        {
+         "name": "thread_colors",
+         "techniques": [
+          "embroidery"
+         ],
+         "type": "array",
+         "values": {
+          "#FFFFFF": "1801 White",
+          "#000000": "1800 Black",
+          "#96A1A8": "1718 Grey",
+          "#A67843": "1672 Old Gold",
+          "#FFCC00": "1951 Gold",
+          "#E25C27": "1987 Orange",
+          "#CC3366": "1910 Flamingo",
+          "#CC3333": "1839 Red",
+          "#660000": "1784 Maroon",
+          "#333366": "1966 Navy",
+          "#005397": "1842 Royal",
+          "#3399FF": "1695 Aqua/Teal",
+          "#6B5294": "1832 Purple",
+          "#01784E": "1751 Kelly Green",
+          "#7BA35A": "1848 Kiwi Green"
+         }
+        }
+       ]
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/516"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/516/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/516/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/516/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/516/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/516/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/516/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

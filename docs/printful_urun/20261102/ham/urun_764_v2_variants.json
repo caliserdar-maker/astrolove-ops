@@ -1,0 +1,114 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/764/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 19461,
+    "catalog_product_id": 764,
+    "name": "Can Cooler (White / Regular 12 oz)",
+    "size": "Regular 12 oz",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/764/19461_1714133014.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19461"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/764"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/764/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19461/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19461/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19461/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 5.09,
+      "width": 4.2,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 5.09,
+      "width": 4.2,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19462,
+    "catalog_product_id": 764,
+    "name": "Can Cooler (White / Slim 12 oz)",
+    "size": "Slim 12 oz",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/764/19462_1714133025.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19462"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/764"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/764/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19462/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19462/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19462/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "back",
+      "height": 6.95,
+      "width": 3.59,
+      "orientation": "any"
+     },
+     {
+      "placement": "front",
+      "height": 6.95,
+      "width": 3.59,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/764/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/764"
+   }
+  }
+ }
+}

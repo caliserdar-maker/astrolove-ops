@@ -1,0 +1,114 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/433",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 433,
+    "main_category_id": 197,
+    "type": "POSTCARD",
+    "description": "These postcards are made from thick high-quality matte paper, so they serve as a great addition to a gift or just a thoughtful written note to a friend.\n• Cardboard paper\n• Paper weight: 7.67–10.32 oz/yd² (260–350 g/m²)\n• Size: 4″ × 6″ (101 × 152 mm)\n• Paper thickness: 0.013″ (0.34 mm)\n• Coated outer surface\n• Blank product materials sourced from Sweden, US, Brazil, or China",
+    "type_name": "Postcard | Standard | White",
+    "title": "Standard Postcard",
+    "brand": null,
+    "model": "Postcard | Standard | White",
+    "image": "https://files.cdn.printful.com/o/products/433/product_1602054891.jpg",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 11513,
+     "product_id": 433,
+     "name": "Standard Postcards (4″×6″)",
+     "size": "4″×6″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/433/11513_1592384192.jpg",
+     "price": "1.53",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "AU": "Australia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

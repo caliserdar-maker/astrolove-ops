@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/407?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 407,
+   "type": "MUG",
+   "main_category_id": 195,
+   "name": "Enamel Mug",
+   "brand": null,
+   "model": "Enamel Mug",
+   "image": "https://files.cdn.printful.com/products/407/product_1580740276.jpg",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Every happy camper needs a unique camper mug. It's lightweight, durable and multifunctional. Use it for your favorite beverage or a hot meal, and attach it to your bag for easy access on a hike.\n\n• Material: Enamel\n• Dimensions: height 3.14″ (8 cm), diameter 3.25″(8.25 cm)\n• Lead and BPA-free material\n• White coating with a silver rim\n• Hand-wash only\n• Blank product sourced from China\n\nAttention! Don't heat liquids or food directly in the mug—it can damage the coating.\n\nDisclaimer: The Enamel Mug is susceptible to staining when used with certain beverages, including coffee, tea, and natural juices. That’s a normal characteristic of enamel products and not specific to our mug alone. Due to the enamel’s rough and porous surface texture, particles from these drinks may easily adhere to the mug, resulting in stains over time. Stains can be effectively removed by applying lemon juice or soda to the affected area and gently scrubbing with a hard sponge.",
+   "sizes": [
+    "12 oz"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/407"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/407/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/407/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/407/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/407/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/407/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/407/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

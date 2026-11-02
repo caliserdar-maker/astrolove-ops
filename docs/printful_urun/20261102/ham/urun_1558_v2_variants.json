@@ -1,0 +1,208 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1558/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 49337,
+    "catalog_product_id": 1558,
+    "name": "Generic brand  (White / 8.5''x11'')",
+    "size": "8.5″×11″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1558/49337_1777375331.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49337"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1558"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1558/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49337/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49337/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49337/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "cover",
+      "height": 11.25,
+      "width": 17.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_1",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_2",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_3",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_4",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_5",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_6",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_7",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_8",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_9",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_10",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_11",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_12",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_13",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_14",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_15",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_16",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_17",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_18",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_19",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_20",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_21",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_22",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_23",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_24",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1558/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1558"
+   }
+  }
+ }
+}

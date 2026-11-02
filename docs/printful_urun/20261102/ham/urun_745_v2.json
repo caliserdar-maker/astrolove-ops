@@ -1,0 +1,173 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/745?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 745,
+   "type": "CUT-SEW",
+   "main_category_id": 189,
+   "name": "Pet Leash",
+   "brand": null,
+   "model": "Pet Leash",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/1a/1a1ff074f5d9972cf4ad79f73f5881f8_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Style up your pet with a premium-quality leash—a must-have accessory for any fashionable pet wardrobe. It’s made to last and features a padded handle for comfort during walks.\n\n• Durable 100% polyester webbing\n• 92% polyester, 8% spandex handle inside\n• Black 100% polyester sponge handle padding\n• Metal snap hook and D-ring\n• Leash length: 6 ft. (1.83 m)\n• Leash width: 1″ (2.54 cm)\n• Blank product sourced from China\n\nHand wash with mild detergent or machine wash on a gentle cycle in a mesh bag. Air dry.",
+   "sizes": [
+    "6 ft."
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "label_inside",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "label_inside_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": [
+      "white",
+      "clear",
+      "black"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/745"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/745/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/745/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/745/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/745/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/745/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/745/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

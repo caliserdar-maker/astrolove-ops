@@ -1,0 +1,2078 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/683/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16892,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 11 Pro Max)",
+    "size": "iPhone 11 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16892_1681967451.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16892"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16892/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16892/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16892/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16890,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 11 Pro)",
+    "size": "iPhone 11 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16890_1681967457.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16890"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16890/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16890/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16890/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16888,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 11)",
+    "size": "iPhone 11",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16888_1681967457.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16888"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16888/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16888/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16888/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16894,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 12 Mini)",
+    "size": "iPhone 12 Mini",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16894_1681967461.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16894"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16894/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16894/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16894/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16900,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 12 Pro Max)",
+    "size": "iPhone 12 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16900_1681967467.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16900"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16900/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16900/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16900/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16896,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 12 Pro)",
+    "size": "iPhone 12 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16896_1681967473.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16896"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16896/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16896/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16896/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16898,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 12)",
+    "size": "iPhone 12",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16898_1681967478.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16898"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16898/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16898/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16898/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16902,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 13 Mini)",
+    "size": "iPhone 13 Mini",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16902_1681967483.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16902"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16902/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16902/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16902/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16908,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 13 Pro Max)",
+    "size": "iPhone 13 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16908_1681967484.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16908"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16908/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16908/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16908/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16904,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 13 Pro)",
+    "size": "iPhone 13 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16904_1681967488.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16904"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16904/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16904/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16904/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16906,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 13)",
+    "size": "iPhone 13",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16906_1681967496.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16906"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16906/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16906/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16906/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16914,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 14 Plus)",
+    "size": "iPhone 14 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16914_1681967519.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16914"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16914/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16914/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16914/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16916,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 14 Pro Max)",
+    "size": "iPhone 14 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16916_1681967508.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16916"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16916/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16916/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16916/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16912,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 14 Pro)",
+    "size": "iPhone 14 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16912_1681967516.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16912"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16912/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16912/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16912/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16910,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 14)",
+    "size": "iPhone 14",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16910_1681967517.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16910"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16910/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16910/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16910/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17724,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 15 Plus)",
+    "size": "iPhone 15 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/17724_1693906240.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17724"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17724/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17724/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17724/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17728,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 15 Pro Max)",
+    "size": "iPhone 15 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/17728_1693906251.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17728"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17728/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17728/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17728/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17726,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 15 Pro)",
+    "size": "iPhone 15 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/17726_1693906251.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17726"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17726/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17726/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17726/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17722,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 15)",
+    "size": "iPhone 15",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/17722_1693906251.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17722"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17722/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17722/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17722/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20295,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 16 Plus)",
+    "size": "iPhone 16 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/20295_1727078552.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20295"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20295/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20295/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20295/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20297,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 16 Pro Max)",
+    "size": "iPhone 16 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/20297_1727078552.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20297"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20297/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20297/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20297/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20296,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 16 Pro)",
+    "size": "iPhone 16 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/20296_1727078553.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20296"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20296/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20296/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20296/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20294,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 16)",
+    "size": "iPhone 16",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/20294_1727078554.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20294"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20294/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20294/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20294/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34011,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 17 Air)",
+    "size": "iPhone 17 Air",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/34011_1757671302.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34011"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34011/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34011/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34011/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34015,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 17 Pro Max)",
+    "size": "iPhone 17 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/34015_1757671351.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34015"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34015/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34015/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34015/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34013,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 17 Pro)",
+    "size": "iPhone 17 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/34013_1757671329.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34013"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34013/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34013/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34013/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34009,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Glossy / iPhone 17)",
+    "size": "iPhone 17",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/34009_1757671278.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34009"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34009/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34009/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34009/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16893,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 11 Pro Max)",
+    "size": "iPhone 11 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16893_1681967527.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16893"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16893/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16893/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16893/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16891,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 11 Pro)",
+    "size": "iPhone 11 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16891_1681967528.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16891"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16891/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16891/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16891/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16889,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 11)",
+    "size": "iPhone 11",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16889_1681967538.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16889"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16889/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16889/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16889/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16895,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 12 Mini)",
+    "size": "iPhone 12 Mini",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16895_1681967548.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16895"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16895/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16895/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16895/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16901,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 12 Pro Max)",
+    "size": "iPhone 12 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16901_1681967548.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16901"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16901/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16901/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16901/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16897,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 12 Pro)",
+    "size": "iPhone 12 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16897_1681967549.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16897"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16897/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16897/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16897/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16899,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 12)",
+    "size": "iPhone 12",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16899_1681967559.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16899"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16899/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16899/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16899/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16903,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 13 Mini)",
+    "size": "iPhone 13 Mini",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16903_1681967568.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16903"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16903/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16903/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16903/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16909,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 13 Pro Max)",
+    "size": "iPhone 13 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16909_1681967568.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16909"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16909/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16909/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16909/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16905,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 13 Pro)",
+    "size": "iPhone 13 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16905_1681967579.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16905"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16905/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16905/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16905/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16907,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 13)",
+    "size": "iPhone 13",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16907_1681967579.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16907"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16907/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16907/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16907/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16915,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 14 Plus)",
+    "size": "iPhone 14 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16915_1681967579.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16915"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16915/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16915/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16915/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16917,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 14 Pro Max)",
+    "size": "iPhone 14 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16917_1681967589.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16917"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16917/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16917/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16917/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16913,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 14 Pro)",
+    "size": "iPhone 14 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16913_1681967589.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16913"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16913/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16913/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16913/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16911,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 14)",
+    "size": "iPhone 14",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/16911_1681967599.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16911"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16911/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16911/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16911/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17725,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 15 Plus)",
+    "size": "iPhone 15 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/17725_1693906220.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17725"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17725/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17725/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17725/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17729,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 15 Pro Max)",
+    "size": "iPhone 15 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/17729_1693906220.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17729"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17729/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17729/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17729/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17727,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 15 Pro)",
+    "size": "iPhone 15 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/17727_1693906220.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17727"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17727/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17727/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17727/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17723,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 15)",
+    "size": "iPhone 15",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/17723_1693906220.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17723"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17723/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17723/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17723/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20299,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 16 Plus)",
+    "size": "iPhone 16 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/20299_1726639728.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20299"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20299/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20299/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20299/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20301,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 16 Pro Max)",
+    "size": "iPhone 16 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/20301_1726639738.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20301"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20301/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20301/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20301/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20300,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 16 Pro)",
+    "size": "iPhone 16 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/20300_1726639738.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20300"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20300/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20300/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20300/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20298,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 16)",
+    "size": "iPhone 16",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/20298_1726639738.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20298"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20298/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20298/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20298/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34012,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 17 Air)",
+    "size": "iPhone 17 Air",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/34012_1757671302.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34012"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34012/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34012/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34012/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34016,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 17 Pro Max)",
+    "size": "iPhone 17 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/34016_1757671350.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34016"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34016/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34016/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34016/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34014,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 17 Pro)",
+    "size": "iPhone 17 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/34014_1757671328.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34014"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34014/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34014/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34014/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34010,
+    "catalog_product_id": 683,
+    "name": "Snap Case for iPhone® (Matte / iPhone 17)",
+    "size": "iPhone 17",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/683/34010_1757671278.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34010"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34010/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34010/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34010/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.32,
+      "width": 4.43,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 54,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/683/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/683"
+   }
+  }
+ }
+}

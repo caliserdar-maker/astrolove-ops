@@ -1,0 +1,70 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/565",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 565,
+   "available_placements": {
+    "front": "Front print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 235,
+     "width": 1800,
+     "height": 1800,
+     "dpi": 150,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 14453,
+     "placements": {
+      "front": 235
+     }
+    },
+    {
+     "variant_id": 14454,
+     "placements": {
+      "front": 235
+     }
+    },
+    {
+     "variant_id": 14455,
+     "placements": {
+      "front": 235
+     }
+    },
+    {
+     "variant_id": 14456,
+     "placements": {
+      "front": 235
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Folded",
+    "Men's",
+    "Women's",
+    "Women's 2",
+    "Women's Lifestyle"
+   ],
+   "options": [
+    "Front",
+    "Front 2",
+    "Front template",
+    "Left",
+    "Left Front",
+    "Zoomed-in"
+   ]
+  },
+  "extra": []
+ }
+}

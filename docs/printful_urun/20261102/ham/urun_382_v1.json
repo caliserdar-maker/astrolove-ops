@@ -1,0 +1,141 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/382",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 382,
+    "main_category_id": 195,
+    "type": "DRINKWARE",
+    "description": "This 17-ounce, double-walled stainless steel water bottle is perfect for your daily outings. It will keep your drink of choice hot or cold for hours. It also features an odor- and leak-proof cap. Throw it in your car's cup holder on your way to work, take it with you on hikes, or toss it in your bag for any time you get thirsty.\n\n• High-grade stainless steel\n• 17 oz (500 ml)\n• Dimensions: 10.5″ × 2.85″ (27 × 7 cm)\n• Vacuum flask\n• Double-wall construction\n• Bowling pin shape\n• Glossy finish\n• Odorless and leak-proof cap\n• Insulated for hot and cold liquids (keeps the liquid hot or cold for 6 h)\n• Patented ORCA coating for vibrant colors\n• Hand-wash only\n• Blank product sourced from China\n\nDisclaimer: Keeping water in the bottle for over 24 hours is unhygienic and can result in an unpleasant smell.",
+    "type_name": "Water Bottle | Stainless Steel",
+    "title": "Stainless Steel Water Bottle",
+    "brand": null,
+    "model": "Water Bottle | Stainless Steel",
+    "image": "https://files.cdn.printful.com/o/products/382/product_1614007264.jpg",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 16030,
+     "product_id": 382,
+     "name": "Stainless Steel Water Bottle (Black / 17 oz)",
+     "size": "17 oz",
+     "color": "Black",
+     "color_code": "#020202",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/382/16030_1661782722.jpg",
+     "price": "24.39",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10798,
+     "product_id": 382,
+     "name": "Stainless Steel Water Bottle 17 oz",
+     "size": "17 oz",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/382/10798_1614007341.jpg",
+     "price": "24.39",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

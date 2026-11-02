@@ -1,0 +1,158 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/786/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 19902,
+    "catalog_product_id": 786,
+    "name": "Notepad (White / 11″×8.5″)",
+    "size": "11″×8.5″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/786/19902_1719551667.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19902"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/786"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/786/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19902/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19902/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19902/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 11.25,
+      "width": 8.75,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.75,
+      "width": 11.25,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19900,
+    "catalog_product_id": 786,
+    "name": "Notepad (White / 4.25″×9″ Magnetic)",
+    "size": "4.25″×9″ Magnetic",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/786/19900_1719551697.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19900"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/786"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/786/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19900/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19900/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19900/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 9.25,
+      "width": 4.5,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 4.5,
+      "width": 9.25,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19901,
+    "catalog_product_id": 786,
+    "name": "Notepad (White / 5.5″×6″)",
+    "size": "5.5″×6″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/786/19901_1719551708.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19901"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/786"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/786/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19901/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19901/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19901/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.25,
+      "width": 5.75,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 5.75,
+      "width": 6.25,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/786/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/786"
+   }
+  }
+ }
+}

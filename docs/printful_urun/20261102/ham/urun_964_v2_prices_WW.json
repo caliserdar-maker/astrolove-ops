@@ -1,0 +1,144 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/964/prices?currency=USD&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 964,
+    "placements": [
+     {
+      "id": "front",
+      "title": "Front print",
+      "type": "Knitting",
+      "technique_key": "knitwear",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     },
+     {
+      "id": "back",
+      "title": "Back print",
+      "type": "Knitting",
+      "technique_key": "knitwear",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 24565,
+     "techniques": [
+      {
+       "technique_key": "knitwear",
+       "technique_display_name": "Knitting",
+       "price": "37.74",
+       "discounted_price": "37.74"
+      }
+     ]
+    },
+    {
+     "id": 24566,
+     "techniques": [
+      {
+       "technique_key": "knitwear",
+       "technique_display_name": "Knitting",
+       "price": "37.74",
+       "discounted_price": "37.74"
+      }
+     ]
+    },
+    {
+     "id": 24567,
+     "techniques": [
+      {
+       "technique_key": "knitwear",
+       "technique_display_name": "Knitting",
+       "price": "37.74",
+       "discounted_price": "37.74"
+      }
+     ]
+    },
+    {
+     "id": 24568,
+     "techniques": [
+      {
+       "technique_key": "knitwear",
+       "technique_display_name": "Knitting",
+       "price": "37.74",
+       "discounted_price": "37.74"
+      }
+     ]
+    },
+    {
+     "id": 24569,
+     "techniques": [
+      {
+       "technique_key": "knitwear",
+       "technique_display_name": "Knitting",
+       "price": "37.74",
+       "discounted_price": "37.74"
+      }
+     ]
+    },
+    {
+     "id": 24570,
+     "techniques": [
+      {
+       "technique_key": "knitwear",
+       "technique_display_name": "Knitting",
+       "price": "37.74",
+       "discounted_price": "37.74"
+      }
+     ]
+    },
+    {
+     "id": 24571,
+     "techniques": [
+      {
+       "technique_key": "knitwear",
+       "technique_display_name": "Knitting",
+       "price": "39.74",
+       "discounted_price": "39.74"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 7,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/964/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/964"
+   }
+  }
+ }
+}

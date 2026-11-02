@@ -1,0 +1,124 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1426?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1426,
+   "type": "SUBLIMATION",
+   "main_category_id": 255,
+   "name": "Lightweight Summer Blanket",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/c7/c7715f40a705ff6bec5d912333da5180_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Wrap yourself in softness with this cozy fleece blanket. Its smooth texture and vibrant colors make it a go-to accent for the couch, bedroom, or on-the-road comfort. Choose from three sizes to find the perfect fit for your space or routine.\n\n• Soft 100% polyester fleece\n• Fabric weight: 9.29 oz./yd² (315 g/m²)\n• Thickness: 0.1″ (0.2 cm)\n• Three size options for home or travel\n• Artwork appears on one side\n• White reverse side\n• Blank product sourced from the United Kingdom",
+   "sizes": [
+    "30″×40″",
+    "50″×60″",
+    "60″×80″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1426"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1426/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1426/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1426/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1426/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1426/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1426/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

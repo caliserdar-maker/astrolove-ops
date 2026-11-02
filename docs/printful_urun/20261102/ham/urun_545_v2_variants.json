@@ -1,0 +1,114 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/545/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 13802,
+    "catalog_product_id": 545,
+    "name": "All-Over Print Headband (White / L)",
+    "size": "L",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/545/13802_1637746837.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/13802"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/545"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/545/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/13802/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/13802/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/13802/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 5.0,
+      "width": 22.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 1.0,
+      "width": 2.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16363,
+    "catalog_product_id": 545,
+    "name": "All-Over Print Headband (White / M)",
+    "size": "M",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/545/16363_1671190237.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16363"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/545"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/545/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16363/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16363/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16363/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 5.0,
+      "width": 22.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 1.0,
+      "width": 2.5,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/545/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/545"
+   }
+  }
+ }
+}

@@ -1,0 +1,142 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/389",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 389,
+    "main_category_id": 81,
+    "type": "CUT-SEW",
+    "description": "If you feel like you're carrying half of your belongings with you at all times, this backpack is for you! It has a spacious inside compartment (with a pocket for your laptop), and a hidden back pocket for safekeeping your most valuable items.\n\n• Made from 100% polyester\n• Fabric weight: 9 oz./yd.² (305 g/m²)\n• Dimensions: 16.1″ (41 cm) in height, 12.2″ (31 cm) in width, and 5.5″ (14 cm) in diameter\n• Capacity: 5.3 gallons (20 l)\n• Max weight: 44 lbs (20 kg)\n• Water-resistant material\n• Large inside pocket with a separate pocket for a 15” laptop, a hidden pocket with zipper on the back of the bag\n• Top zipper has 2 sliders, and there are zipper pullers attached to each slider\n• Silky lining, piped inside hems, and a soft mesh back\n• Padded ergonomic bag straps from polyester with plastic strap regulators\n• Blank product components sourced from China",
+    "type_name": "All-Over Print Minimalist Backpack",
+    "title": "All-Over Print Minimalist Backpack",
+    "brand": null,
+    "model": "All-Over Print Minimalist Backpack",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/7a/7a042b22c29c6a2449672eec62ec2619_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "stitch_color",
+      "title": "Stitch color",
+      "type": "radio",
+      "values": {
+       "black": "Black",
+       "clear": "Clear"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "top",
+      "type": "top",
+      "title": "Top panel",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "bottom",
+      "type": "bottom",
+      "title": "Bottom panel",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 10876,
+     "product_id": 389,
+     "name": "All-Over Print Minimalist Backpack",
+     "size": "One size",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/389/10876_1582111512.jpg",
+     "price": "37.82",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

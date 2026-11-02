@@ -1,0 +1,130 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/798?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 798,
+   "type": "PHONE-CASE",
+   "main_category_id": 244,
+   "name": "MagSafe Tough Case for iPhone®",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/5e/5e1ab23037c1e43edbadc93e716472d3_l",
+   "variant_count": 36,
+   "is_discontinued": false,
+   "description": "Protect your phone with this tough, dual-layer case. Its impact-resistant shell and shock-absorbing liner keep your device safe, while built-in MagSafe® magnets ensure secure attachment and faster wireless charging.\n\n• Polycarbonate outer shell\n• Thermoplastic Polyurethane inner liner\n• Dual-layer protection\n• Precisely aligned port openings\n• MagSafe® compatible\n• Induction charging-compatible\n• Matte or gloss finish\n• Blank product sourced from Korea\n\nDisclaimer: Keep away from liquids containing high alcohol levels, as designs on the phone case may rub off. Keep away from direct sunlight to prevent yellowing. \n\nImportant: This product can’t be shipped to South Korea, Hong Kong, Taiwan, Japan, or Singapore. If your shipping address is in these regions, please choose a different product.",
+   "sizes": [
+    "iPhone 15",
+    "iPhone 15 Pro",
+    "iPhone 15 Plus",
+    "iPhone 15 Pro Max",
+    "iPhone 16",
+    "iPhone 16 Pro",
+    "iPhone 16 Pro Max",
+    "iPhone 16 Plus",
+    "iPhone 14",
+    "iPhone 14 Pro",
+    "iPhone 14 Plus",
+    "iPhone 14 Pro Max",
+    "iPhone 17",
+    "iPhone 17 Air",
+    "iPhone 17 Pro",
+    "iPhone 17 Pro Max",
+    "iPhone 18 Pro",
+    "iPhone 18 Pro Max",
+    "iPhone Duo",
+    "iPhone 18 Fold"
+   ],
+   "colors": [
+    {
+     "name": "Glossy",
+     "value": "#ffffff"
+    },
+    {
+     "name": "Matte",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/798"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/798/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/798/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/798/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/798/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/798/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

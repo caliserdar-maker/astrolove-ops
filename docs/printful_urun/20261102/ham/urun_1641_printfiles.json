@@ -1,0 +1,87 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1641",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 1641,
+   "available_placements": {
+    "embroidery_apparel_front": "Front",
+    "embroidery_apparel_back": "Back",
+    "embroidery_large_front": "Large front"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 136,
+     "width": 1200,
+     "height": 1200,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 222,
+     "width": 3000,
+     "height": 1800,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 52106,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136,
+      "embroidery_large_front": 222
+     }
+    },
+    {
+     "variant_id": 52107,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136,
+      "embroidery_large_front": 222
+     }
+    },
+    {
+     "variant_id": 52110,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136,
+      "embroidery_large_front": 222
+     }
+    },
+    {
+     "variant_id": 52108,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136,
+      "embroidery_large_front": 222
+     }
+    },
+    {
+     "variant_id": 52109,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136,
+      "embroidery_large_front": 222
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat"
+   ],
+   "options": [
+    "Back",
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

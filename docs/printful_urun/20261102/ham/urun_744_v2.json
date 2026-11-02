@@ -1,0 +1,228 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/744?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 744,
+   "type": "CUT-SEW",
+   "main_category_id": 270,
+   "name": "All-Over Print Utility Crossbody Bag",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/b9/b996a4c6e8e9b1959a997b21fe9931f7_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "This bag is sturdy, stylish, and ready to go wherever you do. With adjustable straps and two spacious pockets, it’s the ultimate accessory for hiking, festivals, and everyday use.\n\n• 100% polyester\n• Fabric weight: 9 oz./yd.² (305 g/m²)\n• Bag size: 5.7″ × 7.7″ × 2″ (14.5 cm × 19.5 cm × 5 cm)\n• Capacity: 0.37 gallons (1.4 l)\n• Water-resistant and durable\n• Sturdy fabric with fusible backing to add firmness\n• Inside and outside pockets\n• Adjustable strap\n• Two-way zipper\n• Blank product components sourced from China",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "pocket",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "pocket_dtfabric"
+     ]
+    },
+    {
+     "placement": "front",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "inside_pocket",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "details",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "label_outside",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "back_large",
+      "back_dtf",
+      "label_inside_dtf",
+      "label_outside_dtfabric",
+      "label_outside_dtf"
+     ]
+    },
+    {
+     "placement": "label_inside",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "label_inside_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "black": "Black",
+      "clear": "Clear"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/744"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/744/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/744/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/744/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/744/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/744/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/744/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

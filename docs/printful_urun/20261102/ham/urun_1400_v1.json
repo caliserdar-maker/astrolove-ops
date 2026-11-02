@@ -1,0 +1,104 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1400",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1400,
+    "main_category_id": 274,
+    "type": "DIRECT-TO-FABRIC",
+    "description": "Add a personalized touch to every meal with these durable cotton twill placemats. Featuring vibrant printing on one side, a natural cotton backing, and a sturdy double-layer construction, they're designed to elevate everyday dining and special occasions alike while standing up to regular use.\n\n• 100% cotton twill\n• Durable double-layer fabric\n• One-sided print with natural backing\n• Fade-resistant design\n• Hemmed edges for added durability\n• Vintage-inspired look and feel\n• Easy to clean and maintain",
+    "type_name": "Placemat | Single",
+    "title": "Cotton Placemat, 1pc",
+    "brand": null,
+    "model": "Placemat | Single",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/11/11821774ad1b511e6e9c10cc7d288b3c_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIRECT-TO-FABRIC",
+      "display_name": "All-over cotton",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 26727,
+     "product_id": 1400,
+     "name": "Generic brand (18\" × 14\")",
+     "size": "18″×14″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1400/26727_1758610938.jpg",
+     "price": "13.56",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": [
+      {
+       "name": "Cotton",
+       "percentage": 100.0
+      }
+     ]
+    }
+   ]
+  },
+  "extra": []
+ }
+}

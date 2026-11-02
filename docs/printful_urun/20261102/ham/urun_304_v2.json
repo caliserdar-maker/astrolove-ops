@@ -1,0 +1,123 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/304?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 304,
+   "type": "FRAMED-POSTER",
+   "main_category_id": 56,
+   "name": "Enhanced Matte Paper Framed Poster (cm)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/products/304/product_1613463672.jpg",
+   "variant_count": 24,
+   "is_discontinued": false,
+   "description": "Add a bold statement piece to any room with this framed poster. Printed on quality, thick, matte paper.\n\n• Paper weight: 189 g/m²\n• 0.26 mm (10.3 mil) thick\n• Black and white frame made from semi-hardwood alder\n• Oak frame made from solid oak\n• Acrylite front protector\n• Hanging hardware included\n• 21 × 30cm posters are size A4\n• Blank product components in the US sourced from Japan and the US\n• Blank product components in the EU sourced from Japan and Latvia\n\nHow to attach hooks on 61 × 91 cm horizontal frames:\nPlace each of the mounting hooks 2.5 cm from frame corners when hanging horizontally.",
+   "sizes": [
+    "21×30 cm",
+    "30×40 cm",
+    "50×70 cm",
+    "61×91 cm",
+    "A1 (59.4×84.1 cm)",
+    "A2 (42×59.4 cm)",
+    "30×45 cm",
+    "40×50 cm",
+    "45×61 cm"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#000000"
+    },
+    {
+     "name": "Oak",
+     "value": "#DCB68F"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/304"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/304/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/304/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/304/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/304/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/304/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/304/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

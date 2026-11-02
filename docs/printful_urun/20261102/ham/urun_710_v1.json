@@ -1,0 +1,107 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/710",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 710,
+    "main_category_id": 252,
+    "type": "SUBLIMATION",
+    "description": "Crafted from resilient fabric, this table runner is both soft and enduring. Whether for everyday elegance or holiday charm, it will make meal times with loved ones a little more special. Treat yourself to this delightful table accessory or consider it as a thoughtful gift for someone special.\n\n• 100% polyester\n• Full coverage sublimation\n• Size: 90″ × 16″ (229 cm × 41 cm)\n• The reverse side is off-white\n• Blank product sourced from China",
+    "type_name": "Runner | Table",
+    "title": "Table Runner",
+    "brand": null,
+    "model": "Runner | Table",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/7f/7f30cf56c526f50dafd467c96690b08e_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 17485,
+     "product_id": 710,
+     "name": "Table Runner (White / 90″×16″)",
+     "size": "90″×16″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/710/17485_1689856957.jpg",
+     "price": "25.24",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

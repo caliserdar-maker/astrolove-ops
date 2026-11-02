@@ -1,0 +1,22 @@
+ADAY 189 urun (haric alt kategori ['Flip flops', 'Shoes', 'Socks'])
+[10/189 %5] gecen 58s kalan ~1044s
+[20/189 %10] gecen 98s kalan ~834s
+[30/189 %15] gecen 138s kalan ~734s
+[40/189 %21] gecen 177s kalan ~662s
+[50/189 %26] gecen 219s kalan ~609s
+[60/189 %31] gecen 260s kalan ~559s
+[70/189 %37] gecen 300s kalan ~510s
+[80/189 %42] gecen 340s kalan ~463s
+[90/189 %47] gecen 378s kalan ~416s
+[100/189 %52] gecen 417s kalan ~371s
+[110/189 %58] gecen 456s kalan ~328s
+[120/189 %63] gecen 498s kalan ~286s
+[130/189 %68] gecen 542s kalan ~246s
+[140/189 %74] gecen 584s kalan ~204s
+[150/189 %79] gecen 627s kalan ~163s
+[160/189 %84] gecen 669s kalan ~121s
+[170/189 %89] gecen 712s kalan ~79s
+[180/189 %95] gecen 755s kalan ~37s
+[189/189 %100] gecen 793s kalan ~0s
+ISTEK 1142 | GET 1142 | diger 0
+SINIF {'B': 144, 'C': 42, 'A': 3} toplam 189

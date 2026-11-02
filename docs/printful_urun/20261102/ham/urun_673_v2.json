@@ -1,0 +1,109 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/673?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 673,
+   "type": "STICKER",
+   "main_category_id": 202,
+   "name": "Kiss-Cut Holographic Stickers",
+   "brand": null,
+   "model": "Kiss-Cut Holographic Stickers",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/a9/a962d22dbd03b9ae1cf9e473526ab5d2_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Add some sparkle to your life with these holographic stickers. Made from high-quality vinyl, they’re easy to peel and stick, and their adhesive backing ensures long-lasting durability. The unique holographic effect catches the light in a mesmerizing way, making them the ultimate eye-catcher.\n\n• Hot-embossed, which creates a deep 3D pattern\n• Durable vinyl, perfect for indoor use\n• Fast and easy bubble-free application\n\nDisclaimer: Please note that this product is suitable for indoor use only.",
+   "sizes": [
+    "3″×3″",
+    "4″×4″",
+    "5.5″×5.5″"
+   ],
+   "colors": [
+    {
+     "name": "Grey",
+     "value": "#bdbcbc"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/673"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/673/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/673/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/673/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/673/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/673/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/673/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

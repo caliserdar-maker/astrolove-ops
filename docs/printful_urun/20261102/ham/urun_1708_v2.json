@@ -1,0 +1,151 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1708,
+   "type": "FRAMED-POSTER",
+   "main_category_id": 56,
+   "name": "Matte Colored Frame Posters",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/9c/9ceac088df57a8c9bd2017b88c11c654_l",
+   "variant_count": 96,
+   "is_discontinued": false,
+   "description": "Showcase your artwork with a premium framed print featuring a matte paper finish and a solid pinewood frame. Each piece is professionally assembled with crystal-clear plexiglass, a durable scratch-resistant finish, and pre-installed hanging hardware, arriving fully assembled and ready to hang.\n\n• Premium matte paper\n• Multiple sizes\n• 100% real pinewood frame with matte finish\n• Crystal-clear, shatter-resistant plexiglass\n• Durable scratch-resistant finish\n• Rigid paper backing\n• Pre-installed hanging hardware\n•Picture frame manufactured in Italy",
+   "sizes": [
+    "24″×36″",
+    "18″×24″",
+    "16″×20″",
+    "8″×10″",
+    "11″×14″",
+    "12″×18″",
+    "20″×30″",
+    "5″×7″",
+    "12″×16″",
+    "9″×11″",
+    "16″×24″",
+    "16.5″×23.4″",
+    "11.7″×16.5″",
+    "8″×12″",
+    "12″×12″",
+    "16″×16″",
+    "20″×20″"
+   ],
+   "colors": [
+    {
+     "name": "Forest Green",
+     "value": "#297d37"
+    },
+    {
+     "name": "Lilac",
+     "value": "#a17bb7"
+    },
+    {
+     "name": "Mint Green",
+     "value": "#9fd6be"
+    },
+    {
+     "name": "Ocean Blue",
+     "value": "#2146a9"
+    },
+    {
+     "name": "Orange",
+     "value": "#f47237"
+    },
+    {
+     "name": "Pink",
+     "value": "#fbc4cb"
+    },
+    {
+     "name": "Red",
+     "value": "#a53d38"
+    },
+    {
+     "name": "Yellow",
+     "value": "#fcd951"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1708"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1708/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1708/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1708/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1708/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1708/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

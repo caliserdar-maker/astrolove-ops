@@ -1,0 +1,6854 @@
+[
+ {
+  "yontem": "GET",
+  "yol": "/products",
+  "http": 200,
+  "zaman": "2026-11-02T14:51:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/categories",
+  "http": 200,
+  "zaman": "2026-11-02T14:51:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products?limit=100&offset=0&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:51:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products?limit=100&offset=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:51:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products?limit=100&offset=200&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:51:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products?limit=100&offset=300&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:51:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products?limit=100&offset=400&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products?limit=100&offset=500&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/2",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/2",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/2?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/2/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/2/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/2/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/3",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/3",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/3?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/3/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/3/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/3/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/19",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/19",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/19?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/19/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/19/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/19/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/83",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/83",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/83?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/83/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/83/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/83/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/84",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:28Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/84",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:28Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/84?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/84/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/84/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/84/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/89",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/89",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/89?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/89/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/89/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/89/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/171",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/171",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/171?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/171/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/171/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/171/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/172",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/172",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/172?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/172/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/172/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/172/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/181",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/181",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/181?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/181/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/181/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/181/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/214",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/214",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/214?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/214/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/214/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/214/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/215",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/215",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/215?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/215/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/215/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/215/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/259",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/259",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/259?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/259/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/259/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/259/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:52:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/262",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/262",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/262?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/262/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/262/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/262/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/267",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/267",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/267?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/267/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/267/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/267/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/268",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/268",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/268?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/268/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/268/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/268/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/274",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/274",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/274?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/274/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/274/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/274/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/279",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/279",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/279?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/279/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/279/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/279/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/297",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/297",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/297?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/297/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/297/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/297/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/300",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/300",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/300?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/300/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/300/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/300/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/304",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/304",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/304?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/304/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/304/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/304/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/350",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/350",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/350?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/350/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/350/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/350/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/358",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/358",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/358?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/358/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/358/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/358/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/366",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/366",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/366?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/366/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/366/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/366/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/367",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/367",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/367?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/367/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/367/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/367/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/378",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/378",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/378?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/378/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/378/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/378/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/382",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/382",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/382?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/382/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/382/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/382/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/389",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/389",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/389?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/389/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/389/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/389/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:53:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/394",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/394",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/394?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/394/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/394/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/394/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/395",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/395",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/395?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/395/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/395/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/395/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/403",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/403",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/403?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/403/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/403/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/403/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/407",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/407",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/407?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/407/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/407/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/407/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/420",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/420",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/420?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/420/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/420/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/420/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/433",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/433",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/433?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/433/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/433/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/433/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/465",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/465",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/465?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/465/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/465/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/465/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/474",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/474",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:28Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/474?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:28Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/474/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/474/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/474/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/490",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/490",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/490?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/490/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/490/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/490/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/505",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/505",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/505?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/505/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/505/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/505/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/516",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/516",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/516?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/516/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/516/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/516/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/518",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/518",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/518?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/518/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/518/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/518/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/528",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/528",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/528?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/528/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/528/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/528/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/530",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/530",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/530?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/530/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/530/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/530/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/536",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/536",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/536?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/536/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/536/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/536/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:54:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/545",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/545",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/545?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/545/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/545/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/545/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/565",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/565",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/565?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/565/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/565/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/565/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/568",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/568",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/568?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/568/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/568/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/568/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/583",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/583",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/583?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/583/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/583/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/583/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/585",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/585",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/585?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/585/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/585/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/585/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/588",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/588",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/588?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/588/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/588/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/588/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/594",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/594",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/594?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/594/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/594/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/594/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:28Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/601",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/601",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/601?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/601/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/601/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/601/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/605",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/605",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/605?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/605/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/605/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/605/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/611",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/611",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/611?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/611/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/611/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/611/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/614",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/614",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/614?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/614/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/614/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/614/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/616",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/616",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/616?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/616/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/616/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/616/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/630",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/630",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/630?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/630/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/630/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/630/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/632",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/632",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/632?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/632/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/632/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/632/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/634",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/634",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/634?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/634/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:55:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/634/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/634/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/635",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/635",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/635?selling_region_name=worldwide",
+  "http": 404,
+  "zaman": "2026-11-02T14:56:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/635/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 404,
+  "zaman": "2026-11-02T14:56:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/635/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/635/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/640",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/640",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/640?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/640/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/640/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/640/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/641",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/641",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/641?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/641/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/641/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/641/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/645",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/645",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/645?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/645/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/645/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/645/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/653",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/653",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/653?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/653/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/653/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/653/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/656",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/656",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/656?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/656/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/656/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/656/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/660",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/660",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/660?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/660/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/660/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:28Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/660/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/663",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/663",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/663?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/663/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/663/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/663/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/672",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/672",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/672?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/672/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/672/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/672/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/673",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/673",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/673?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/673/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/673/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/673/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/675",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/675",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/675?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/675/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/675/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/675/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/678",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/678",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/678?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/678/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/678/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/678/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/681",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/681",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/681?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/681/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/681/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/681/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/682",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/682",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/682?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/682/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/682/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/682/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/683",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/683",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/683?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/683/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:56:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/683/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/683/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/684",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/684",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/684?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/684/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/684/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/684/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/686",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/686",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/686?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/686/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/686/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/686/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/690",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/690",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/690?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/690/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/690/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/690/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/691",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/691",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/691?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/691/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/691/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/691/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/706",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/706",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/706?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/706/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/706/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/706/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/708",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/708",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/708?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/708/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/708/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/708/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/709",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/709",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/709?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/709/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/709/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:28Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/709/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/710",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/710",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/710?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/710/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/710/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/710/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/711",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/711",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/711?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/711/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/711/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/711/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/716",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/716",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/716?selling_region_name=worldwide",
+  "http": 404,
+  "zaman": "2026-11-02T14:57:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/716/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 404,
+  "zaman": "2026-11-02T14:57:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/716/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/716/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/724",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/724",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/724?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/724/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/724/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/724/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/742",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/742",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/742?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/742/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/742/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/742/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/743",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/743",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/743?selling_region_name=worldwide",
+  "http": 404,
+  "zaman": "2026-11-02T14:57:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/743/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 404,
+  "zaman": "2026-11-02T14:57:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/743/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/743/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/744",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/744",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/744?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/744/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/744/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/744/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/745",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/745",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/745?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/745/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/745/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/745/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:57:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/746",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/746",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/746?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/746/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/746/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/746/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/749",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/749",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/749?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/749/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/749/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/749/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/750",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/750",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/750?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/750/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/750/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/750/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/751",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/751",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/751?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/751/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/751/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/751/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/761",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/761",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/761?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/761/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/761/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/761/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/764",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/764",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/764?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/764/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/764/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/764/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/779",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/779",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/779?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/779/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/779/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/779/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/786",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/786",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:28Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/786?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/786/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/786/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/786/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/788",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/788",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/788?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/788/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/788/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/788/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/789",
+  "http": 404,
+  "zaman": "2026-11-02T14:58:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/789",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/789?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/789/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/789/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/789/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/793",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/793",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/793?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/793/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/793/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/793/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/794",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/794",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/794?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/794/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/794/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/794/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/795",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/795",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/795?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/795/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/795/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/795/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/798",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/798",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/798?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/798/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/798/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/798/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/799",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/799",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/799?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/799/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/799/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/799/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/804",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/804",
+  "http": 200,
+  "zaman": "2026-11-02T14:58:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/804?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/804/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/804/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/804/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/805",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/805",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/805?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/805/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/805/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/805/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/837",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/837",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/837?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/837/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/837/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/837/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/847",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/847",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/847?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/847/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/847/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/847/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/848",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/848",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/848?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/848/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/848/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/848/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/853",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/853",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/853?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/853/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/853/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/853/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/861",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/861",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/861?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/861/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/861/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/861/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/867",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/867",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/867?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/867/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:28Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/867/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/867/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/873",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/873",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/873?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/873/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/873/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/873/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/874",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/874",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/874?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/874/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/874/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/874/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/875",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/875",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/875?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/875/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/875/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/875/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/881",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/881",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/881?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/881/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/881/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/881/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/883",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/883",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/883?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/883/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/883/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/883/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/884",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/884",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/884?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/884/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/884/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/884/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/885",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/885",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/885?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/885/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/885/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/885/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/886",
+  "http": 200,
+  "zaman": "2026-11-02T14:59:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/886",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/886?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/886/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/886/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/886/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/887",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/887",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/887?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/887/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/887/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/887/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/888",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/888",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/888?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/888/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/888/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/888/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/889",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/889",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/889?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/889/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/889/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/889/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/890",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/890",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/890?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/890/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/890/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/890/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/891",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/891",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/891?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/891/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/891/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/891/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/894",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/894",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/894?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/894/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:28Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/894/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/894/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/900",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/900",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/900?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/900/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/900/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/900/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/901",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/901",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/901?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/901/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/901/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/901/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/902",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/902",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/902?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/902/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/902/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/902/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/904",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/904",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/904?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/904/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/904/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/904/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/905",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/905",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/905?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/905/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/905/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/905/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/906",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/906",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/906?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/906/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/906/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/906/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/908",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/908",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/908?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/908/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/908/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/908/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:00:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/909",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/909",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/909?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/909/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/909/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/909/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/911",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/911",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/911?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/911/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/911/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/911/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/921",
+  "http": 404,
+  "zaman": "2026-11-02T15:01:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/921",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/921?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/921/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 404,
+  "zaman": "2026-11-02T15:01:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/921/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/921/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/922",
+  "http": 404,
+  "zaman": "2026-11-02T15:01:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/922",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/922?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/922/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/922/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/922/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/924",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/924",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/924?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/924/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/924/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/924/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/926",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/926",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/926?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/926/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/926/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/926/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/927",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/927",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/927?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/927/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/927/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/927/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/934",
+  "http": 404,
+  "zaman": "2026-11-02T15:01:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/934",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/934?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/934/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/934/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/934/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/935",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/935",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/935?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/935/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/935/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/935/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/938",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/938",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/938?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/938/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/938/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/938/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/946",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/946",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/946?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/946/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/946/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/946/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/947",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/947",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/947?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/947/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/947/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/947/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/948",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/948",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/948?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/948/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/948/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/948/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/949",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/949",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/949?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/949/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/949/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/949/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:01:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/957",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/957",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/957?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/957/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/957/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/957/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/963",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/963",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/963?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/963/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/963/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/963/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/964",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/964",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/964?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/964/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/964/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/964/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/973",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/973",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/973?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/973/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/973/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/973/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/974",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/974",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/974?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/974/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/974/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/974/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1011",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1011",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1011?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1011/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1011/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1011/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1013",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1013",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1013?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1013/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1013/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1013/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:28Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1399",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1399",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1399?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1399/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1399/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1399/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1400",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1400",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1400?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1400/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1400/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1400/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1423",
+  "http": 404,
+  "zaman": "2026-11-02T15:02:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1423",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1423?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1423/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1423/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1423/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1424",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1424",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1424?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1424/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1424/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1424/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1425",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1425",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1425?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1425/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1425/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1425/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1426",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1426",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1426?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1426/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1426/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1426/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1427",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1427",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1427?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1427/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1427/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1427/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1428",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1428",
+  "http": 200,
+  "zaman": "2026-11-02T15:02:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1428?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1428/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1428/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1428/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1429",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1429",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1429?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1429/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1429/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1429/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1435",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1435",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1435?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1435/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1435/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1435/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1439",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1439",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1439?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:12Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1439/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1439/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1439/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1466",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1466",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1466?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1466/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1466/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1466/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1467",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1467",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1467?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1467/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1467/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1467/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1470",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1470",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1470?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1470/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1470/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1470/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1552",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1552",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:28Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1552?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1552/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1552/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1552/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1553",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1553",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1553?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1553/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1553/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1553/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1556",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1556",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1556?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1556/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1556/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1556/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1558",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1558",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1558?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1558/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1558/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1558/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1562",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1562",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1562?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1562/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:48Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1562/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1562/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1563",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1563",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1563?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1563/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1563/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1563/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1564",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1564",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1564?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1564/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1564/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1564/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1582",
+  "http": 200,
+  "zaman": "2026-11-02T15:03:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1582",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1582?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1582/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1582/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:02Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1582/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1583",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:03Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1583",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:04Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1583?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1583/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:05Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1583/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:06Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1583/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1632",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:07Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1632",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:08Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1632?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1632/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:09Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1632/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:10Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1632/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:11Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1641",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1641",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:13Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1641?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:14Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1641/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:15Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1641/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1641/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:16Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1643",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:17Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1643",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1643?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:18Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1643/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:19Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1643/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1643/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:20Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1651",
+  "http": 404,
+  "zaman": "2026-11-02T15:04:21Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1651",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1651?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:22Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1651/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1651/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:23Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1651/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:24Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1652",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:25Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1652",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1652?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:26Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1652/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:27Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1652/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:28Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1652/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1656",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1656",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1656?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1656/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1656/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1656/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1664",
+  "http": 404,
+  "zaman": "2026-11-02T15:04:34Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1664",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:35Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1664?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1664/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:36Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1664/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:37Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1664/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1683",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:38Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1683",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1683?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:39Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1683/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:40Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1683/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1683/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:41Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1700",
+  "http": 404,
+  "zaman": "2026-11-02T15:04:42Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1700",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1700?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:43Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1700/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:44Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1700/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1700/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:45Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1708",
+  "http": 404,
+  "zaman": "2026-11-02T15:04:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1708",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:47Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:49Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:50Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1712",
+  "http": 404,
+  "zaman": "2026-11-02T15:04:51Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1712",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1712?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:52Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1712/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:53Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1712/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1712/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:54Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1716",
+  "http": 404,
+  "zaman": "2026-11-02T15:04:55Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1716",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1716?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:56Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1716/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:57Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1716/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1716/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:58Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/products/1729",
+  "http": 404,
+  "zaman": "2026-11-02T15:04:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1729",
+  "http": 200,
+  "zaman": "2026-11-02T15:04:59Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1729?selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:05:00Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1729/catalog-variants?limit=100&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:05:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1729/prices?currency=USD&selling_region_name=worldwide",
+  "http": 200,
+  "zaman": "2026-11-02T15:05:01Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1729/prices?currency=USD&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T15:05:02Z"
+ }
+]

@@ -1,0 +1,118 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/395?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 395,
+   "type": "SUBLIMATION",
+   "main_category_id": 255,
+   "name": "Throw Blanket",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/7a/7a7486c4b4144d3f02d9484a231242e1_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Do you feel that your home is missing an eye-catching, yet practical design element? Solve this problem with a soft silk touch throw blanket that's ideal for lounging on the couch during chilly evenings.\n\n• 100% polyester\n• Soft silk touch fabric\n• Printing on one side\n• White reverse side\n• Machine-washable\n• Hypoallergenic\n• Flame retardant\n• Blank product sourced from China",
+   "sizes": [
+    "50″×60″",
+    "60″×80″",
+    "30″×40″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/395"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/395/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/395/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/395/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/395/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/395/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/395/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,284 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/588/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 15136,
+    "catalog_product_id": 588,
+    "name": "Glossy Metal Print (White / 11″×14″)",
+    "size": "11″×14″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/588/15136_1652708736.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15136"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/588"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/588/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15136/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15136/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15136/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.5,
+      "width": 11.5,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.5,
+      "width": 14.5,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15135,
+    "catalog_product_id": 588,
+    "name": "Glossy Metal Print (White / 12″×12″)",
+    "size": "12″×12″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/588/15135_1652708737.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15135"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/588"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/588/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15135/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15135/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15135/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.25,
+      "width": 12.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15137,
+    "catalog_product_id": 588,
+    "name": "Glossy Metal Print (White / 16″×20″)",
+    "size": "16″×20″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/588/15137_1652708746.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15137"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/588"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/588/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15137/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15137/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15137/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.13,
+      "width": 16.13,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.13,
+      "width": 20.13,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15138,
+    "catalog_product_id": 588,
+    "name": "Glossy Metal Print (White / 20″×30″)",
+    "size": "20″×30″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/588/15138_1652708746.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15138"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/588"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/588/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15138/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15138/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15138/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 30.25,
+      "width": 20.25,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 20.25,
+      "width": 30.25,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15139,
+    "catalog_product_id": 588,
+    "name": "Glossy Metal Print (White / 24″×36″)",
+    "size": "24″×36″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/588/15139_1652708747.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15139"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/588"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/588/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15139/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15139/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15139/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.25,
+      "width": 24.25,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.25,
+      "width": 36.25,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15134,
+    "catalog_product_id": 588,
+    "name": "Glossy Metal Print (White / 8″×10″)",
+    "size": "8″×10″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/588/15134_1652708758.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15134"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/588"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/588/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15134/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15134/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15134/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.25,
+      "width": 8.25,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.25,
+      "width": 10.25,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 6,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/588/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/588"
+   }
+  }
+ }
+}

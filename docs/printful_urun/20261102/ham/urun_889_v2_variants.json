@@ -1,0 +1,64 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/889/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 22813,
+    "catalog_product_id": 889,
+    "name": "Pickle Ball paddle (Wood / 7.5″ × 15.5″)",
+    "size": "7.5″ × 15.5″",
+    "color": "Wood",
+    "color_code": "#f8ddb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/889/22813_1748333233.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22813"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/889"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/889/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22813/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22813/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22813/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 11.95,
+      "width": 8.47,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/889/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/889"
+   }
+  }
+ }
+}

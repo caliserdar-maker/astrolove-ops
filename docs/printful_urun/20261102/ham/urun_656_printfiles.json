@@ -1,0 +1,80 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/656",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 656,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 183,
+     "width": 900,
+     "height": 900,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 184,
+     "width": 1200,
+     "height": 1200,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 419,
+     "width": 1800,
+     "height": 1800,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 16366,
+     "placements": {
+      "default": 183
+     }
+    },
+    {
+     "variant_id": 16367,
+     "placements": {
+      "default": 184
+     }
+    },
+    {
+     "variant_id": 16465,
+     "placements": {
+      "default": 419
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat Lifestyle",
+    "Flat Lifestyle 2",
+    "Flat Lifestyle 3",
+    "Flat Lifestyle 4",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Template"
+   ],
+   "options": [
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

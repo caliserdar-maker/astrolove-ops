@@ -1,0 +1,93 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/279",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 279,
+   "available_placements": {
+    "front": "Front & Pocket",
+    "top": "Top panel",
+    "bottom": "Bottom panel",
+    "pocket": "Inside Pocket"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 126,
+     "width": 2175,
+     "height": 3075,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 127,
+     "width": 1950,
+     "height": 1200,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 128,
+     "width": 4200,
+     "height": 1200,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 129,
+     "width": 4200,
+     "height": 750,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 9063,
+     "placements": {
+      "front": 126,
+      "top": 128,
+      "bottom": 129,
+      "pocket": 127
+     }
+    }
+   ],
+   "option_groups": [
+    "Boy's",
+    "Default",
+    "Flat Lifestyle",
+    "Girl's",
+    "Girl's 2",
+    "Lifestyle",
+    "Men's",
+    "Men's Lifestyle",
+    "Product details",
+    "Women's",
+    "Women's Lifestyle"
+   ],
+   "options": [
+    "Back",
+    "Bottom",
+    "Bottom panel",
+    "Front",
+    "Front & Pocket",
+    "Front 2",
+    "Inside pocket print",
+    "Left",
+    "Product details",
+    "Product details 2",
+    "Right",
+    "Top panel"
+   ]
+  },
+  "extra": []
+ }
+}

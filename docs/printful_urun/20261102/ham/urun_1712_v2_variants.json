@@ -1,0 +1,482 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1712/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 53899,
+    "catalog_product_id": 1712,
+    "name": "Port Authority A900 (OSFA / Brown)",
+    "size": "OSFA",
+    "color": "Brown",
+    "color_code": "#4c341f",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1712/53899_1790588895.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53899"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1712"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1712/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53899/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53899/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53899/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 10.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53900,
+    "catalog_product_id": 1712,
+    "name": "Port Authority A900 (OSFA / Burgundy)",
+    "size": "OSFA",
+    "color": "Burgundy",
+    "color_code": "#500314",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1712/53900_1790588895.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53900"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1712"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1712/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53900/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53900/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53900/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 10.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53901,
+    "catalog_product_id": 1712,
+    "name": "Port Authority A900 (OSFA / Dark Green)",
+    "size": "OSFA",
+    "color": "Dark Green",
+    "color_code": "#01331a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1712/53901_1790588895.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53901"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1712"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1712/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53901/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53901/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53901/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 10.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53902,
+    "catalog_product_id": 1712,
+    "name": "Port Authority A900 (OSFA / Deep Black)",
+    "size": "OSFA",
+    "color": "Deep Black",
+    "color_code": "#0f0f0f",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1712/53902_1790588895.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53902"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1712"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1712/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53902/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53902/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53902/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 10.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53892,
+    "catalog_product_id": 1712,
+    "name": "Port Authority A900 (OSFA / Duck Brown)",
+    "size": "OSFA",
+    "color": "Duck Brown",
+    "color_code": "#7c4612",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1712/53892_1790588895.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53892"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1712"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1712/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53892/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53892/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53892/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 10.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53893,
+    "catalog_product_id": 1712,
+    "name": "Port Authority A900 (OSFA / Parcel Blue)",
+    "size": "OSFA",
+    "color": "Parcel Blue",
+    "color_code": "#027db0",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1712/53893_1790588895.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53893"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1712"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1712/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53893/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53893/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53893/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 10.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53894,
+    "catalog_product_id": 1712,
+    "name": "Port Authority A900 (OSFA / Rich Red)",
+    "size": "OSFA",
+    "color": "Rich Red",
+    "color_code": "#8f0111",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1712/53894_1790588895.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53894"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1712"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1712/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53894/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53894/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53894/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 10.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53891,
+    "catalog_product_id": 1712,
+    "name": "Port Authority A900 (OSFA / Sahara)",
+    "size": "OSFA",
+    "color": "Sahara",
+    "color_code": "#c5bca9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1712/53891_1790588895.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53891"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1712"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1712/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53891/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53891/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53891/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 10.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53895,
+    "catalog_product_id": 1712,
+    "name": "Port Authority A900 (OSFA / Storm Grey)",
+    "size": "OSFA",
+    "color": "Storm Grey",
+    "color_code": "#3f4243",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1712/53895_1790588896.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53895"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1712"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1712/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53895/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53895/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53895/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 10.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53896,
+    "catalog_product_id": 1712,
+    "name": "Port Authority A900 (OSFA / True Navy)",
+    "size": "OSFA",
+    "color": "True Navy",
+    "color_code": "#101d3c",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1712/53896_1790588895.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53896"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1712"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1712/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53896/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53896/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53896/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 10.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53897,
+    "catalog_product_id": 1712,
+    "name": "Port Authority A900 (OSFA / True Royal)",
+    "size": "OSFA",
+    "color": "True Royal",
+    "color_code": "#0c3b9a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1712/53897_1790588896.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53897"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1712"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1712/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53897/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53897/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53897/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 10.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53898,
+    "catalog_product_id": 1712,
+    "name": "Port Authority A900 (OSFA / White)",
+    "size": "OSFA",
+    "color": "White",
+    "color_code": "#FFFFFF",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1712/53898_1790588894.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53898"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1712"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1712/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53898/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53898/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53898/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 10.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 12,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1712/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1712"
+   }
+  }
+ }
+}

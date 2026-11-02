@@ -1,0 +1,254 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/906/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 23245,
+    "catalog_product_id": 906,
+    "name": "Jigsaw Puzzle with Tin (White (glossy) / 10″×8″ (110 pcs))",
+    "size": "10″×8″ (110 pcs)",
+    "color": "White (glossy)",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/906/23245_1753187088.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23245"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/906"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/906/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23245/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23245/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23245/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 7.83,
+      "width": 9.84,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23246,
+    "catalog_product_id": 906,
+    "name": "Jigsaw Puzzle with Tin (White (glossy) / 10″×8″ (30 pcs))",
+    "size": "10″×8″ (30 pcs)",
+    "color": "White (glossy)",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/906/23246_1753187088.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23246"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/906"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/906/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23246/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23246/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23246/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 7.83,
+      "width": 9.84,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23247,
+    "catalog_product_id": 906,
+    "name": "Jigsaw Puzzle with Tin (White (glossy) / 14″×11″ (252 pcs))",
+    "size": "14″×11″ (252 pcs)",
+    "color": "White (glossy)",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/906/23247_1753187098.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23247"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/906"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/906/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23247/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23247/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23247/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23248,
+    "catalog_product_id": 906,
+    "name": "Jigsaw Puzzle with Tin (White (glossy) / 21″×15.5″ (500 pcs))",
+    "size": "21″×15.5″ (500 pcs)",
+    "color": "White (glossy)",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/906/23248_1753187098.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23248"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/906"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/906/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23248/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23248/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23248/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 15.5,
+      "width": 20.98,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23249,
+    "catalog_product_id": 906,
+    "name": "Jigsaw Puzzle with Tin (White (glossy) / 30″×20″ (1000 pcs))",
+    "size": "30″×20″ (1000 pcs)",
+    "color": "White (glossy)",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/906/23249_1753187098.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23249"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/906"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/906/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23249/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23249/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23249/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 20.5,
+      "width": 30.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23250,
+    "catalog_product_id": 906,
+    "name": "Jigsaw Puzzle with Tin (White (glossy) / 40″×28″ (2000 pcs))",
+    "size": "40″×28″ (2000 pcs)",
+    "color": "White (glossy)",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/906/23250_1753187099.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23250"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/906"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/906/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23250/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23250/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23250/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 28.4,
+      "width": 40.25,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 6,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/906/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/906"
+   }
+  }
+ }
+}

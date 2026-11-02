@@ -1,0 +1,184 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/568",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 568,
+    "main_category_id": 232,
+    "type": "POSTCARD",
+    "description": "Expressing your sentiments or planning an event can be hard. Take some of the weight off of your shoulders by getting yourself an authentic greeting card! \n\n• Material: 14.77 oz/yd² (350 g/m²) paperboard\n• Sizes: Small: 4″ × 6″ (101 × 152 mm)\nMedium: 5″ × 7″ (127 × 178 mm)\nLarge: 5.83″ × 8.27″ (148 × 210 mm)\n• Product weight: Small: 0.39 oz (11 g)\nMedium: 0.6 oz (17 g)\nLarge: 0.85 oz (24 g)\n• Toner-based printing\n• Vibrant colors\n• Comes with a complimentary envelope ",
+    "type_name": "Greeting Card | Rectangle | White",
+    "title": "Greeting Card",
+    "brand": null,
+    "model": "Greeting Card | Rectangle | White",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/0d/0dad96768105cdc5580e5c7961908fe4_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "inside1",
+      "type": "inside1",
+      "title": "Inside 1",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "inside2",
+      "type": "inside2",
+      "title": "Inside 2",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 14457,
+     "product_id": 568,
+     "name": "Greeting Card (4″×6″)",
+     "size": "4″×6″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/568/14457_1645785140.jpg",
+     "price": "2.55",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 14460,
+     "product_id": 568,
+     "name": "Greeting Card (5.83″×8.27″)",
+     "size": "5.83″×8.27″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/568/14460_1645785150.jpg",
+     "price": "3.50",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 14458,
+     "product_id": 568,
+     "name": "Greeting Card (5″×7″)",
+     "size": "5″×7″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/568/14458_1645785151.jpg",
+     "price": "2.95",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

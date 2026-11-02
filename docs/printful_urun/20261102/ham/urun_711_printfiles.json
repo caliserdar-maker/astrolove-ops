@@ -1,0 +1,85 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/711",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 711,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 208,
+     "width": 9450,
+     "height": 7950,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 271,
+     "width": 12451,
+     "height": 9376,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 477,
+     "width": 9000,
+     "height": 6000,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": true
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 17483,
+     "placements": {
+      "default": 477
+     }
+    },
+    {
+     "variant_id": 17482,
+     "placements": {
+      "default": 208
+     }
+    },
+    {
+     "variant_id": 17449,
+     "placements": {
+      "default": 271
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Folded",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Men's",
+    "Product details",
+    "Templates",
+    "Women's",
+    "Women's Lifestyle"
+   ],
+   "options": [
+    "Back",
+    "Front",
+    "Front 2",
+    "Product details",
+    "Product details 2"
+   ]
+  },
+  "extra": []
+ }
+}

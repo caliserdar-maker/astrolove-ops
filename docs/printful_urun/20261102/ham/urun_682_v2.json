@@ -1,0 +1,145 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/682?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 682,
+   "type": "PHONE-CASE",
+   "main_category_id": 198,
+   "name": "Hardcover Bound Notebook | JournalBook",
+   "brand": "JournalBook",
+   "model": "JournalBook | Notebook | Hardcover Bound",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/95/95cd4a3b32550902b33655279d454489_l",
+   "variant_count": 9,
+   "is_discontinued": false,
+   "description": "Whether crafting a masterpiece or brainstorming the next big idea, this notebook will inspire your inner wordsmith. The product features 80 lined, cream-colored pages, a built-in elastic closure, and a matching ribbon page marker. Plus, the expandable inner pocket is perfect for storing loose notes and business cards, so you’ll never lose track of important information. \n\n• Cover material: UltraHyde hardcover paper\n• Size: 5.5\" × 8.5\" (13.97 cm × 21.59 cm)\n• Weight: 10.9 oz (309 g)\n• 80 pages of lined, cream-colored paper\n• Matching elastic closure and ribbon marker\n• Expandable inner pocket",
+   "sizes": [
+    "5.5″×8.5″"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#161616"
+    },
+    {
+     "name": "Blue",
+     "value": "#0045a6"
+    },
+    {
+     "name": "Lime",
+     "value": "#f0ff00"
+    },
+    {
+     "name": "Navy",
+     "value": "#1e2c4a"
+    },
+    {
+     "name": "Orange",
+     "value": "#ff7a10"
+    },
+    {
+     "name": "Red",
+     "value": "#f40023"
+    },
+    {
+     "name": "Silver",
+     "value": "#cdcdcd"
+    },
+    {
+     "name": "Turquoise",
+     "value": "#119584"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/682"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/682/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/682/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/682/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/682/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/682/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/682/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

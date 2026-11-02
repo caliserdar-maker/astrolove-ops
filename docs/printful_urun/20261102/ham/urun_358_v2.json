@@ -1,0 +1,126 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/358?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 358,
+   "type": "STICKER",
+   "main_category_id": 202,
+   "name": "Kiss-Cut Stickers",
+   "brand": null,
+   "model": "Kiss Cut Stickers",
+   "image": "https://files.cdn.printful.com/products/358/product_1553084472.jpg",
+   "variant_count": 4,
+   "is_discontinued": false,
+   "description": "These stickers are printed on durable, high opacity adhesive vinyl which makes them perfect for regular use, as well as for covering other stickers or paint. The high-quality vinyl ensures there are no bubbles when applying the stickers.\n\n•  High opacity film that’s impossible to see through\n•  Fast and easy bubble-free application\n•  Durable vinyl\n•  95µ density\n\nDon't forget to clean the surface before applying the sticker.",
+   "sizes": [
+    "3″×3″",
+    "4″×4″",
+    "5.5″×5.5″",
+    "15″×3.75″",
+    "2″×2″",
+    "6″×6″",
+    "3″×4″",
+    "4″×6″",
+    "6″×8″",
+    "8″×10″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "custom_border_color",
+     "techniques": [
+      "digital"
+     ],
+     "type": "string",
+     "values": [
+      "#FFFFFF"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/358"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/358/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/358/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/358/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/358/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/358/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/358/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

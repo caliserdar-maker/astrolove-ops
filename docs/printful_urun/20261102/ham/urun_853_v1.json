@@ -1,0 +1,143 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/853",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 853,
+    "main_category_id": 251,
+    "type": "SUBLIMATION",
+    "description": "Keep your desk looking sharp with a smooth, anti-slip mat designed for gaming or work. Whether you’re gaming, working, or just trying to keep your coffee mug from sliding around, this desk mat has you covered. The anti-slip backing keeps your setup steady, and the hemmed edges ensure durability.\n\n• 100% polyester top\n• Anti-slip natural rubber base\n• Thickness: 0.12″ (3 mm)\n• Hemmed edges\n• Blank product sourced from China",
+    "type_name": "Desk Mat | Rectangle | White",
+    "title": "Desk Mat",
+    "brand": null,
+    "model": "Desk Mat | Rectangle | White",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/8b/8b44bab674807711bfb96ef6effe3ab3_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 22325,
+     "product_id": 853,
+     "name": "Desk Mat (Black / 12″×18″)",
+     "size": "12″×18″",
+     "color": "Black",
+     "color_code": "#050505",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/853/22325_1739779438.jpg",
+     "price": "9.89",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22326,
+     "product_id": 853,
+     "name": "Desk Mat (Black / 12″×22″)",
+     "size": "12″×22″",
+     "color": "Black",
+     "color_code": "#050505",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/853/22326_1739779449.jpg",
+     "price": "10.91",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22327,
+     "product_id": 853,
+     "name": "Desk Mat (Black / 16″×32″)",
+     "size": "16″×32″",
+     "color": "Black",
+     "color_code": "#050505",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/853/22327_1739778075.jpg",
+     "price": "16.75",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

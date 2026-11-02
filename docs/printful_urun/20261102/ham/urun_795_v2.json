@@ -1,0 +1,119 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/795?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 795,
+   "type": "FRAMED-POSTER",
+   "main_category_id": 56,
+   "name": "Matte Paper Framed Poster With Mat (in)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/9d/9dfc8ba1d5270d681856bcd552e7bdc8_l",
+   "variant_count": 15,
+   "is_discontinued": false,
+   "description": "Make a statement in any room with this framed poster, printed on thick matte paper.\n\n• Ayous wood .75″ (1.9 cm) thick frame from renewable forests\n• Paper thickness: 10.3 mil (0.26 mm)\n• Paper weight: 189 g/m²\n• Lightweight\n• Acrylite front protector\n• Hanging hardware included\n• Blank product components sourced from Japan and the US\n\nHow to attach hooks on 24″ × 36″ horizontal frames:\nPlace each of the mounting hooks 1 inch (2.5 cm) from frame corners when hanging horizontally.",
+   "sizes": [
+    "12″×16″",
+    "12″×18″",
+    "16″×20″",
+    "18″×24″",
+    "24″×36″"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#000000"
+    },
+    {
+     "name": "Red Oak",
+     "value": "#D4A489"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/795"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/795/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/795/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/795/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/795/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/795/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/795/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

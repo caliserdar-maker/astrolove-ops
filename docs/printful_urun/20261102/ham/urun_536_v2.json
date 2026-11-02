@@ -1,0 +1,154 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/536?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 536,
+   "type": "EMBROIDERY",
+   "main_category_id": 255,
+   "name": "Embroidered Premium Sherpa Blanket | Port Authority BP40",
+   "brand": "Port Authority",
+   "model": "BP40",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/ae/ae3a7724e35a7f986307ade04c3f4b7b_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "There’s something special about having that one blanket you know will bring you comfort no matter when and where. It’s time to take a new one home—the embroidered premium sherpa blanket has sheeny fleece fabric on one side and super-soft sherpa fabric on the other that’ll keep you warm and snug. The blanket’s plush look makes it a great home accessory as well as the perfect travel buddy.\n\n• 100% polyester fleece on one side\n• 100% polyester sherpa on the other side\n• 50″ × 60″ (127.0 cm × 152.4 cm)\n• Blank product sourced from Thailand",
+   "sizes": [
+    "50″×60″"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#131313"
+    },
+    {
+     "name": "Fireside Brown",
+     "value": "#482f2c"
+    },
+    {
+     "name": "Heather Grey",
+     "value": "#716a69"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "embroidery",
+     "display_name": "Embroidery",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "embroidery_corner_right",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": [
+        {
+         "name": "thread_colors",
+         "techniques": [
+          "embroidery"
+         ],
+         "type": "array",
+         "values": {
+          "#FFFFFF": "1801 White",
+          "#000000": "1800 Black",
+          "#96A1A8": "1718 Grey",
+          "#A67843": "1672 Old Gold",
+          "#FFCC00": "1951 Gold",
+          "#E25C27": "1987 Orange",
+          "#CC3366": "1910 Flamingo",
+          "#CC3333": "1839 Red",
+          "#660000": "1784 Maroon",
+          "#333366": "1966 Navy",
+          "#005397": "1842 Royal",
+          "#3399FF": "1695 Aqua/Teal",
+          "#6B5294": "1832 Purple",
+          "#01784E": "1751 Kelly Green",
+          "#7BA35A": "1848 Kiwi Green"
+         }
+        }
+       ]
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/536"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/536/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/536/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/536/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/536/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/536/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/536/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/793/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 20250,
+    "catalog_product_id": 793,
+    "name": "Acrylic Ornaments (Circle)",
+    "size": "Circle",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/793/20250_1722582892.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20250"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/793"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/793/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20250/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20250/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20250/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 3.31,
+      "width": 3.31,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20248,
+    "catalog_product_id": 793,
+    "name": "Acrylic Ornaments (Rectangle)",
+    "size": "Rectangle",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/793/20248_1722582902.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20248"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/793"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/793/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20248/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20248/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20248/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 3.25,
+      "width": 4.25,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/793/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/793"
+   }
+  }
+ }
+}

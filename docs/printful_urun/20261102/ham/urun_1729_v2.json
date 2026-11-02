@@ -1,0 +1,95 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1729?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1729,
+   "type": "DECOR",
+   "main_category_id": 254,
+   "name": "Crystal Glass Ornament",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/37/374c87749ebfff486b7f6b1cf4f354fe_l",
+   "variant_count": 6,
+   "is_discontinued": false,
+   "description": "These classic crystal glass ornaments are made for showcasing your artwork and adding a personalized touch to any decoration. Customize them with your design and create beautiful ornaments for gifts, seasonal decorating, or your online store. Each ornament features beveled edges, a one-sided print, a red ribbon for hanging, and comes in gift-ready packaging.\n\n• 100% crystal glass\n• Size: 3.5″ (88.9 mm)\n• Available as a single ornament or in bundles of 5\n• One design for the whole bundle\n• Beveled edges\n• One-sided print\n• Red ribbon for hanging\n• Gift packaging included",
+   "sizes": [
+    "Circle",
+    "Heart",
+    "Circle + White Gift Packaging",
+    "Heart + White Gift Packaging",
+    "Circle + Gold Gift Packaging",
+    "Heart + Gold Gift Packaging"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1729"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1729/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1729/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1729/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1729/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1729/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1729/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,158 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/847/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 22232,
+    "catalog_product_id": 847,
+    "name": "Under Armour Under Armour Team Hustle Backpack 6.0 (Black)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#1a1a1a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/847/22232_1739947432.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22232"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/847"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/847/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22232/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22232/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22232/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_backpack",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22233,
+    "catalog_product_id": 847,
+    "name": "Under Armour Under Armour Team Hustle Backpack 6.0 (Castlerock)",
+    "size": "One size",
+    "color": "Castlerock",
+    "color_code": "#898a84",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/847/22233_1739947432.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22233"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/847"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/847/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22233/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22233/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22233/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_backpack",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22234,
+    "catalog_product_id": 847,
+    "name": "Under Armour Under Armour Team Hustle Backpack 6.0 (Midnight Navy)",
+    "size": "One size",
+    "color": "Midnight Navy",
+    "color_code": "#24263a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/847/22234_1739947432.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22234"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/847"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/847/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22234/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22234/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22234/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_backpack",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/847/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/847"
+   }
+  }
+ }
+}

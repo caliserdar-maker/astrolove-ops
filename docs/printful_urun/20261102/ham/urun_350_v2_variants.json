@@ -1,0 +1,150 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/350/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 9987,
+    "catalog_product_id": 350,
+    "name": "All-Over Print Fanny Pack (M/L)",
+    "size": "M/L",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/350/9987_1550755443.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/9987"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/350"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/350/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/9987/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/9987/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/9987/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 7.0,
+      "width": 19.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 7.0,
+      "width": 19.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "top",
+      "height": 7.0,
+      "width": 19.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "pocket",
+      "height": 10.0,
+      "width": 9.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 1.0,
+      "width": 2.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 9986,
+    "catalog_product_id": 350,
+    "name": "All-Over Print Fanny Pack (S/M)",
+    "size": "S/M",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/350/9986_1550755447.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/9986"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/350"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/350/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/9986/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/9986/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/9986/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 7.0,
+      "width": 19.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 7.0,
+      "width": 19.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "top",
+      "height": 7.0,
+      "width": 19.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "pocket",
+      "height": 10.0,
+      "width": 9.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 1.0,
+      "width": 2.5,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/350/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/350"
+   }
+  }
+ }
+}

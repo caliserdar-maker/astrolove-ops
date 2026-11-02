@@ -1,0 +1,146 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/403?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 403,
+   "type": "MUG",
+   "main_category_id": 195,
+   "name": "White Ceramic Mug with Color Inside",
+   "brand": null,
+   "model": "White Ceramic Mug with Color Inside",
+   "image": "https://files.cdn.printful.com/products/403/product_1595515161.jpg",
+   "variant_count": 16,
+   "is_discontinued": false,
+   "description": "Add a splash of color to your morning coffee or tea ritual! These ceramic mugs not only have a  beautiful design on them, but also a colorful rim, handle, and inside, so the mug is bound to spice up your mug rack.\n\n• Ceramic\n• 11 oz mug dimensions: 3.79″ (9.6 cm) in height, 3.25″ (8.3 cm) in diameter\n• 15 oz mug dimensions: 4.69″ (11.9 cm) in height, 3.35″ (8.5 cm) in diameter\n• Colored rim, inside, and handle",
+   "sizes": [
+    "11 oz",
+    "15 oz",
+    "11 oz Full Bleed",
+    "15 oz Full Bleed"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#050505"
+    },
+    {
+     "name": "Blue",
+     "value": "#1e9fcd"
+    },
+    {
+     "name": "Dark Blue",
+     "value": "#1b1b51"
+    },
+    {
+     "name": "Dark Green",
+     "value": "#226653"
+    },
+    {
+     "name": "Golden Yellow",
+     "value": "#feba45"
+    },
+    {
+     "name": "Green",
+     "value": "#b2d264"
+    },
+    {
+     "name": "Orange",
+     "value": "#f85625"
+    },
+    {
+     "name": "Pink",
+     "value": "#f6a1b1"
+    },
+    {
+     "name": "Red",
+     "value": "#e32a2d"
+    },
+    {
+     "name": "Yellow",
+     "value": "#ffdc3a"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/403"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/403/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/403/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/403/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/403/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/403/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/403/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

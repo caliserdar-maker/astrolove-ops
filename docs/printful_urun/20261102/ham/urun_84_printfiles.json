@@ -1,0 +1,71 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/84",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 84,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 6,
+     "width": 2550,
+     "height": 2475,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 4533,
+     "placements": {
+      "default": 6
+     }
+    },
+    {
+     "variant_id": 8904,
+     "placements": {
+      "default": 6
+     }
+    },
+    {
+     "variant_id": 8905,
+     "placements": {
+      "default": 6
+     }
+    }
+   ],
+   "option_groups": [
+    "Default",
+    "Flat",
+    "Flat Lifestyle",
+    "Halloween",
+    "Holiday season",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Multi-product",
+    "On Hanger",
+    "Product details",
+    "Spring/summer vibes"
+   ],
+   "options": [
+    "Back",
+    "Front",
+    "Mockup",
+    "Product details",
+    "Template"
+   ]
+  },
+  "extra": []
+ }
+}

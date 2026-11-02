@@ -1,0 +1,143 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/927?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 927,
+   "type": "SUBLIMATION",
+   "main_category_id": 88,
+   "name": "All-Over Print 5-Color Strap Apron",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/f1/f1fb1777ba5cb6df6cf7fd31ddc1d4b4_l",
+   "variant_count": 5,
+   "is_discontinued": false,
+   "description": "Add a pop of character to your cooking routine with this strap apron. Its smooth polyester fabric and easy tie-back fit keep you comfortable while protecting your clothes.\n\n\n• 100% polyester\n• Size: 31.5″ × 25.6″ (80 cm × 65 cm)\n• Comfortable tie-back closure\n• One size fits most\n• Design appears on one side\n• Blank product sourced from Vietnam",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "Beige",
+     "value": "#E6CAB4"
+    },
+    {
+     "name": "Black",
+     "value": "#070709"
+    },
+    {
+     "name": "Blue",
+     "value": "#7ECCEE"
+    },
+    {
+     "name": "Pink",
+     "value": "#F3D6E5"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/927"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/927/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/927/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/927/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/927/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/927/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/927/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

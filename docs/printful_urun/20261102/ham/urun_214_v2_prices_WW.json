@@ -1,0 +1,143 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/214/prices?currency=USD&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 214,
+    "placements": [
+     {
+      "id": "front",
+      "title": "Front print",
+      "type": "All-over synthetic",
+      "technique_key": "cut-sew",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     },
+     {
+      "id": "back",
+      "title": "Back print",
+      "type": "All-over synthetic",
+      "technique_key": "cut-sew",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 7907,
+     "techniques": [
+      {
+       "technique_key": "cut-sew",
+       "technique_display_name": "All-over synthetic",
+       "price": "18.75",
+       "discounted_price": "18.75"
+      }
+     ]
+    },
+    {
+     "id": 9515,
+     "techniques": [
+      {
+       "technique_key": "cut-sew",
+       "technique_display_name": "All-over synthetic",
+       "price": "19.95",
+       "discounted_price": "19.95"
+      }
+     ]
+    },
+    {
+     "id": 11077,
+     "techniques": [
+      {
+       "technique_key": "cut-sew",
+       "technique_display_name": "All-over synthetic",
+       "price": "22.25",
+       "discounted_price": "22.25"
+      }
+     ]
+    },
+    {
+     "id": 49604,
+     "techniques": [
+      {
+       "technique_key": "cut-sew",
+       "technique_display_name": "All-over synthetic",
+       "price": "15.50",
+       "discounted_price": "15.50"
+      }
+     ]
+    },
+    {
+     "id": 49605,
+     "techniques": [
+      {
+       "technique_key": "cut-sew",
+       "technique_display_name": "All-over synthetic",
+       "price": "16.50",
+       "discounted_price": "16.50"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": [
+    {
+     "quantity": 25,
+     "bulk_discount_percentage": 0.05
+    },
+    {
+     "quantity": 100,
+     "bulk_discount_percentage": 0.06
+    },
+    {
+     "quantity": 200,
+     "bulk_discount_percentage": 0.07
+    },
+    {
+     "quantity": 300,
+     "bulk_discount_percentage": 0.08
+    },
+    {
+     "quantity": 500,
+     "bulk_discount_percentage": 0.09
+    }
+   ]
+  },
+  "extra": [],
+  "paging": {
+   "total": 5,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/214/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/214"
+   }
+  }
+ }
+}

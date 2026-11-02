@@ -1,0 +1,188 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/673",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 673,
+    "main_category_id": 202,
+    "type": "STICKER",
+    "description": "Add some sparkle to your life with these holographic stickers. Made from high-quality vinyl, they’re easy to peel and stick, and their adhesive backing ensures long-lasting durability. The unique holographic effect catches the light in a mesmerizing way, making them the ultimate eye-catcher.\n\n• Hot-embossed, which creates a deep 3D pattern\n• Durable vinyl, perfect for indoor use\n• Fast and easy bubble-free application\n\nDisclaimer: Please note that this product is suitable for indoor use only.",
+    "type_name": "Stickers | Kiss Cut | Holographic",
+    "title": "Kiss-Cut Holographic Stickers",
+    "brand": null,
+    "model": "Kiss-Cut Holographic Stickers",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/a9/a962d22dbd03b9ae1cf9e473526ab5d2_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 16705,
+     "product_id": 673,
+     "name": "Kiss-Cut Holographic Stickers (3″×3″in)",
+     "size": "3″×3″",
+     "color": "Grey",
+     "color_code": "#bdbcbc",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/673/16705_1678965852.jpg",
+     "price": "4.16",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16706,
+     "product_id": 673,
+     "name": "Kiss-Cut Holographic Stickers (4″×4″in)",
+     "size": "4″×4″",
+     "color": "Grey",
+     "color_code": "#bdbcbc",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/673/16706_1678965856.jpg",
+     "price": "4.43",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16707,
+     "product_id": 673,
+     "name": "Kiss-Cut Holographic Stickers (5.5″×5.5″in)",
+     "size": "5.5″×5.5″",
+     "color": "Grey",
+     "color_code": "#bdbcbc",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/673/16707_1678965861.jpg",
+     "price": "4.68",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

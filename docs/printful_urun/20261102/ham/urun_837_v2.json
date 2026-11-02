@@ -1,0 +1,107 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/837?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 837,
+   "type": "MUG",
+   "main_category_id": 195,
+   "name": "Latte Mug",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/5d/5d6c0345378792bf216f8b31b85b10b3_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Hear that? That’s the sound of your quiet, stress-free morning. Kick off your morning coffee ritual or cozy up with a late-night tea with this mug. It’s dishwasher safe—so that’s one less thing for you to worry about. It’s also suitable for microwaves, so feel free to try those mug cake recipes!\n\n• 100% white ceramic\n• Height: 4″ (10.16 cm)\n• Diameter: 3.6″ (9.14 cm)\n• Volume: 12oz\n• Made free of BPA and lead\n• Dishwasher and microwave-safe\n• Classic cone shape\n• Glossy ceramic finish\n• Product sourced from China, decorated in the US",
+   "sizes": [
+    "12 oz"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/837"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/837/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/837/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/837/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/837/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/837/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/837/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

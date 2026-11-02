@@ -1,0 +1,133 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/420?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 420,
+   "type": "CUT-SEW",
+   "main_category_id": 126,
+   "name": "All-Over Print Neck Gaiter",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/8c/8c218f78e3622b8d06982e56187777ac_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "This neck gaiter is a versatile accessory that can be used as a face covering, headband, bandana, wristband, and neck warmer. Upgrade your accessory game and find a matching face shield for each of your outfits. \n\n- Fabric composition: 93% polyester, 7% elastane\n- Fabric weight: 7.08 oz./yd.² (240 g/m²)\n- Breathable fabric\n- Smooth, comfortable 2-way stretch fabric that stretches and recovers on the cross and lengthwise grains\n- Washable and reusable\n- One size\n- Printed on one side, the reverse side is left blank\n- Blank product components in the EU sourced from Lithuania\n- Blank product components in the US sourced from Mexico",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "white": "White",
+      "black": "Black"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/420"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/420/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/420/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/420/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/420/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/420/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/420/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

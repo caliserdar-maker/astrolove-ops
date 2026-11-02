@@ -1,0 +1,143 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/888?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 888,
+   "type": "DECOR",
+   "main_category_id": 16,
+   "name": "Clear Tote Bag",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/9b/9bc36f5a5490cc29329e71716d3e56ff_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Clear, chic, and stadium-ready. This tote is made for everyday hauling—from concerts to beach days—with a sleek, transparent look and sturdy build.\n\n• TPU (rubber-like clear material)\n• 0.02″ (0.5 mm) thick\n• Bag size: 12″ × 6″ × 12″ (30.5 cm × 15.3 cm × 30.5 cm)\n• Open main compartment\n• Blank product sourced from China\n\nDisclaimer: Due to the transparent material and this product’s handcrafted process, touch marks and fingerprints may appear on the surface. These do not affect its quality or durability.",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "label_inside",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "label_inside_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/888"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/888/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/888/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/888/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/888/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/888/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/888/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

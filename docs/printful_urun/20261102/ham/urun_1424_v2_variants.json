@@ -1,0 +1,368 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1424/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 44139,
+    "catalog_product_id": 1424,
+    "name": "Lumient  (Christmas Warmth / 4oz)",
+    "size": "4oz",
+    "color": "Christmas Warmth",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1424/44139_1762849512.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44139"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1424"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1424/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44139/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44139/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44139/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.77,
+      "width": 2.04,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44143,
+    "catalog_product_id": 1424,
+    "name": "Lumient  (Christmas Warmth / 9oz)",
+    "size": "9oz",
+    "color": "Christmas Warmth",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1424/44143_1762849534.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44143"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1424"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1424/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44143/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44143/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44143/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44144,
+    "catalog_product_id": 1424,
+    "name": "Lumient  (Cinnamon Vanilla / 9oz)",
+    "size": "9oz",
+    "color": "Cinnamon Vanilla",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1424/44144_1762849534.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44144"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1424"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1424/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44144/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44144/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44144/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44145,
+    "catalog_product_id": 1424,
+    "name": "Lumient  (Coconut Cream + Cardamom / 9oz)",
+    "size": "9oz",
+    "color": "Coconut Cream + Cardamom",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1424/44145_1762849534.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44145"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1424"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1424/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44145/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44145/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44145/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44140,
+    "catalog_product_id": 1424,
+    "name": "Lumient  (Peppered Passionfruit / 4oz)",
+    "size": "4oz",
+    "color": "Peppered Passionfruit",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1424/44140_1762849513.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44140"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1424"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1424/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44140/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44140/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44140/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.77,
+      "width": 2.04,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44141,
+    "catalog_product_id": 1424,
+    "name": "Lumient  (Unscented / 4oz)",
+    "size": "4oz",
+    "color": "Unscented",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1424/44141_1762849513.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44141"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1424"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1424/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44141/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44141/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44141/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.77,
+      "width": 2.04,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44146,
+    "catalog_product_id": 1424,
+    "name": "Lumient  (Unscented / 9oz)",
+    "size": "9oz",
+    "color": "Unscented",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1424/44146_1762849534.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44146"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1424"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1424/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44146/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44146/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44146/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44142,
+    "catalog_product_id": 1424,
+    "name": "Lumient  (White Sage + Lavender / 4oz)",
+    "size": "4oz",
+    "color": "White Sage + Lavender",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1424/44142_1762849512.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44142"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1424"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1424/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44142/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44142/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44142/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.77,
+      "width": 2.04,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44147,
+    "catalog_product_id": 1424,
+    "name": "Lumient  (White Sage + Lavender / 9oz)",
+    "size": "9oz",
+    "color": "White Sage + Lavender",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1424/44147_1762849534.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44147"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1424"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1424/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44147/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44147/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44147/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 9,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1424/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1424"
+   }
+  }
+ }
+}

@@ -1,0 +1,121 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/974?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 974,
+   "type": "STICKER",
+   "main_category_id": 202,
+   "name": "Kiss-Cut Vinyl Decals",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/11/115cae7c9624af70b84e73cbfe27b6d4_l",
+   "variant_count": 4,
+   "is_discontinued": false,
+   "description": "Add a touch of personality to your belongings with kiss-cut vinyl decals. The satin finish gives them a sleek look, while the bubble-free design makes them easy to apply. They’re durable, dishwasher-safe, and removable without leaving residue — perfect for decorating laptops, bottles, or notebooks.\n\n• Vinyl with satin finish\n• Sizes: 3″ × 4″ (7.6 × 10.2 cm), 4″ × 6″ (10.2 × 15.2 cm), 6″ × 8″ (15.2 × 20.3 cm), 8″ × 10″ (20.3 × 25.4 cm)\n• Removable adhesive\n• Bubble-free application\n• Water, scratch, and UV resistant\n• Dishwasher-safe\n• Perfect for indoor and outdoor use\n• Blank product sourced from the US",
+   "sizes": [
+    "3″×4″",
+    "4″×6″",
+    "6″×8″",
+    "8″×10″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "custom_border_color",
+     "techniques": [
+      "digital"
+     ],
+     "type": "string",
+     "values": [
+      "#FFFFFF"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/974"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/974/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/974/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/974/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/974/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/974/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/974/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

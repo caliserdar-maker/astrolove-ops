@@ -1,0 +1,122 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1582/prices?currency=USD&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 1582,
+    "placements": [
+     {
+      "id": "front",
+      "title": "Front print",
+      "type": "All-over cotton",
+      "technique_key": "direct-to-fabric",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     },
+     {
+      "id": "back",
+      "title": "Back print",
+      "type": "All-over cotton",
+      "technique_key": "direct-to-fabric",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 49859,
+     "techniques": [
+      {
+       "technique_key": "direct-to-fabric",
+       "technique_display_name": "All-over cotton",
+       "price": "17.65",
+       "discounted_price": "17.65"
+      }
+     ]
+    },
+    {
+     "id": 49860,
+     "techniques": [
+      {
+       "technique_key": "direct-to-fabric",
+       "technique_display_name": "All-over cotton",
+       "price": "18.67",
+       "discounted_price": "18.67"
+      }
+     ]
+    },
+    {
+     "id": 49861,
+     "techniques": [
+      {
+       "technique_key": "direct-to-fabric",
+       "technique_display_name": "All-over cotton",
+       "price": "20.71",
+       "discounted_price": "20.71"
+      }
+     ]
+    },
+    {
+     "id": 49862,
+     "techniques": [
+      {
+       "technique_key": "direct-to-fabric",
+       "technique_display_name": "All-over cotton",
+       "price": "19.69",
+       "discounted_price": "19.69"
+      }
+     ]
+    },
+    {
+     "id": 49863,
+     "techniques": [
+      {
+       "technique_key": "direct-to-fabric",
+       "technique_display_name": "All-over cotton",
+       "price": "22.85",
+       "discounted_price": "22.85"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 5,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1582/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1582"
+   }
+  }
+ }
+}

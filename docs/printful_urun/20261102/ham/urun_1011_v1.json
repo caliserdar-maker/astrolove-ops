@@ -1,0 +1,285 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1011",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1011,
+    "main_category_id": 190,
+    "type": "POSTCARD",
+    "description": "Keep track of important dates in 2026 with a calendar that reflects your style and spirit! This stylish calendar not only helps you stay organized but also works as a decorative piece with unique artwork to go with each month. \n\n• Paper pages bound with a silver-color metal wire\n• Paper weight: 8 oz/yd² (271 g/m²)",
+    "type_name": "Calendar | Wall | 2026",
+    "title": "Wall Calendar (2026)",
+    "brand": null,
+    "model": "Calendar | Wall | 2026",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/24/2418a90235665bc8bb304426d1e9731e_l",
+    "variant_count": 4,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "cover",
+      "type": "cover",
+      "title": "Cover",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "january",
+      "type": "january",
+      "title": "January",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "february",
+      "type": "february",
+      "title": "February",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "march",
+      "type": "march",
+      "title": "March",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "april",
+      "type": "april",
+      "title": "April",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "may",
+      "type": "may",
+      "title": "May",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "june",
+      "type": "june",
+      "title": "June",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "july",
+      "type": "july",
+      "title": "July",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "august",
+      "type": "august",
+      "title": "August",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "september",
+      "type": "september",
+      "title": "September",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "october",
+      "type": "october",
+      "title": "October",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "november",
+      "type": "november",
+      "title": "November",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "december",
+      "type": "december",
+      "title": "December",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "USA"
+   },
+   "variants": [
+    {
+     "id": 25051,
+     "product_id": 1011,
+     "name": "Wall Calendar (2026) (Start w/ MON / 11″×17″)",
+     "size": "11″×17″",
+     "color": "Start w/ MON",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1011/25051_1755153472.jpg",
+     "price": "19.72",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": [
+      {
+       "name": "Paper",
+       "percentage": 99.0
+      },
+      {
+       "name": "Metal Wire",
+       "percentage": 1.0
+      }
+     ]
+    },
+    {
+     "id": 25053,
+     "product_id": 1011,
+     "name": "Wall Calendar (2026) (Start w/ MON / 8.26″×11.69″)",
+     "size": "8.26″×11.69″",
+     "color": "Start w/ MON",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1011/25053_1755153473.jpg",
+     "price": "12.43",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": [
+      {
+       "name": "Paper",
+       "percentage": 99.0
+      },
+      {
+       "name": "Metal Wire",
+       "percentage": 1.0
+      }
+     ]
+    },
+    {
+     "id": 25052,
+     "product_id": 1011,
+     "name": "Wall Calendar (2026) (Start w/ SUN / 11″×17″)",
+     "size": "11″×17″",
+     "color": "Start w/ SUN",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1011/25052_1755153473.jpg",
+     "price": "19.72",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": [
+      {
+       "name": "Paper",
+       "percentage": 99.0
+      },
+      {
+       "name": "Metal Wire",
+       "percentage": 1.0
+      }
+     ]
+    },
+    {
+     "id": 25054,
+     "product_id": 1011,
+     "name": "Wall Calendar (2026) (Start w/ SUN / 8.26″×11.69″)",
+     "size": "8.26″×11.69″",
+     "color": "Start w/ SUN",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1011/25054_1755153483.jpg",
+     "price": "12.43",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": [
+      {
+       "name": "Paper",
+       "percentage": 99.0
+      },
+      {
+       "name": "Metal Wire",
+       "percentage": 1.0
+      }
+     ]
+    }
+   ]
+  },
+  "extra": []
+ }
+}

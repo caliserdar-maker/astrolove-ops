@@ -1,0 +1,330 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/935/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 23880,
+    "catalog_product_id": 935,
+    "name": "Generic brand (Black / 22oz)",
+    "size": "22oz",
+    "color": "Black",
+    "color_code": "#0b0b0b",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/935/23880_1764676493.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23880"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/935"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/935/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23880/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23880/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23880/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 9.17,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23883,
+    "catalog_product_id": 935,
+    "name": "Generic brand (Grey / 22oz)",
+    "size": "22oz",
+    "color": "Grey",
+    "color_code": "#5d5d5d",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/935/23883_1764676493.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23883"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/935"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/935/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23883/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23883/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23883/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 9.17,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23884,
+    "catalog_product_id": 935,
+    "name": "Generic brand (Mint Green / 22oz)",
+    "size": "22oz",
+    "color": "Mint Green",
+    "color_code": "#3ec5cd",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/935/23884_1764676493.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23884"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/935"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/935/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23884/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23884/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23884/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 9.17,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23881,
+    "catalog_product_id": 935,
+    "name": "Generic brand (Navy / 22oz)",
+    "size": "22oz",
+    "color": "Navy",
+    "color_code": "#343e63",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/935/23881_1764676493.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23881"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/935"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/935/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23881/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23881/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23881/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 9.17,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23885,
+    "catalog_product_id": 935,
+    "name": "Generic brand (Orange / 22oz)",
+    "size": "22oz",
+    "color": "Orange",
+    "color_code": "#f2681d",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/935/23885_1764676493.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23885"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/935"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/935/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23885/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23885/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23885/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 9.17,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23886,
+    "catalog_product_id": 935,
+    "name": "Generic brand (Pebble Blue / 22oz)",
+    "size": "22oz",
+    "color": "Pebble Blue",
+    "color_code": "#0accf7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/935/23886_1764676493.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23886"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/935"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/935/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23886/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23886/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23886/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 9.17,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23887,
+    "catalog_product_id": 935,
+    "name": "Generic brand (Red / 22oz)",
+    "size": "22oz",
+    "color": "Red",
+    "color_code": "#d61a13",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/935/23887_1764676493.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23887"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/935"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/935/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23887/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23887/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23887/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 9.17,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23882,
+    "catalog_product_id": 935,
+    "name": "Generic brand (White / 22oz)",
+    "size": "22oz",
+    "color": "White",
+    "color_code": "#FFFFFF",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/935/23882_1764676493.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23882"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/935"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/935/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23882/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23882/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23882/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 9.17,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 8,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/935/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/935"
+   }
+  }
+ }
+}

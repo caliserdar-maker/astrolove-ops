@@ -1,0 +1,76 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/745/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 19126,
+    "catalog_product_id": 745,
+    "name": "Pet Leash (White / 6 ft.)",
+    "size": "6 ft.",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/745/19126_1709038896.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19126"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/745"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/745/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19126/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19126/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19126/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.46,
+      "width": 82.59,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 1.46,
+      "width": 82.59,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 4.0,
+      "width": 7.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/745/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/745"
+   }
+  }
+ }
+}

@@ -1,0 +1,187 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/927",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 927,
+    "main_category_id": 88,
+    "type": "SUBLIMATION",
+    "description": "Add a pop of character to your cooking routine with this strap apron. Its smooth polyester fabric and easy tie-back fit keep you comfortable while protecting your clothes.\n\n\n• 100% polyester\n• Size: 31.5″ × 25.6″ (80 cm × 65 cm)\n• Comfortable tie-back closure\n• One size fits most\n• Design appears on one side\n• Blank product sourced from Vietnam",
+    "type_name": "All-Over Print 5-Color Strap Apron",
+    "title": "All-Over Print 5-Color Strap Apron",
+    "brand": null,
+    "model": "All-Over Print 5-Color Strap Apron",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/f1/f1fb1777ba5cb6df6cf7fd31ddc1d4b4_l",
+    "variant_count": 5,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "USA"
+   },
+   "variants": [
+    {
+     "id": 23725,
+     "product_id": 927,
+     "name": "Generic brand (One size / Beige)",
+     "size": "One size",
+     "color": "Beige",
+     "color_code": "#E6CAB4",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/927/23725_1762439407.jpg",
+     "price": "23.34",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23723,
+     "product_id": 927,
+     "name": "Generic brand (One size / Black)",
+     "size": "One size",
+     "color": "Black",
+     "color_code": "#070709",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/927/23723_1762439408.jpg",
+     "price": "23.34",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23726,
+     "product_id": 927,
+     "name": "Generic brand (One size / Blue)",
+     "size": "One size",
+     "color": "Blue",
+     "color_code": "#7ECCEE",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/927/23726_1762439408.jpg",
+     "price": "23.34",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23727,
+     "product_id": 927,
+     "name": "Generic brand (One size / Pink)",
+     "size": "One size",
+     "color": "Pink",
+     "color_code": "#F3D6E5",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/927/23727_1762439408.jpg",
+     "price": "23.34",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23724,
+     "product_id": 927,
+     "name": "Generic brand (One size / White)",
+     "size": "One size",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/927/23724_1762439408.jpg",
+     "price": "23.34",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

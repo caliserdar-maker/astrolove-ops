@@ -1,0 +1,220 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/616",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 616,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 46,
+     "width": 6600,
+     "height": 5400,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 51,
+     "width": 5400,
+     "height": 5400,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 373,
+     "width": 4200,
+     "height": 4200,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 374,
+     "width": 5400,
+     "height": 4200,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 376,
+     "width": 7800,
+     "height": 6000,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 379,
+     "width": 11400,
+     "height": 7800,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 480,
+     "width": 9600,
+     "height": 6600,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 482,
+     "width": 3600,
+     "height": 3000,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 484,
+     "width": 4200,
+     "height": 3300,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 486,
+     "width": 4800,
+     "height": 3900,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 488,
+     "width": 6000,
+     "height": 4200,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 490,
+     "width": 9000,
+     "height": 6600,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 492,
+     "width": 10200,
+     "height": 7800,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 15701,
+     "placements": {
+      "default": 373
+     }
+    },
+    {
+     "variant_id": 15702,
+     "placements": {
+      "default": 374
+     }
+    },
+    {
+     "variant_id": 15703,
+     "placements": {
+      "default": 51
+     }
+    },
+    {
+     "variant_id": 15704,
+     "placements": {
+      "default": 46
+     }
+    },
+    {
+     "variant_id": 15705,
+     "placements": {
+      "default": 376
+     }
+    },
+    {
+     "variant_id": 15706,
+     "placements": {
+      "default": 379
+     }
+    },
+    {
+     "variant_id": 17621,
+     "placements": {
+      "default": 486
+     }
+    },
+    {
+     "variant_id": 17622,
+     "placements": {
+      "default": 488
+     }
+    },
+    {
+     "variant_id": 17624,
+     "placements": {
+      "default": 490
+     }
+    },
+    {
+     "variant_id": 17626,
+     "placements": {
+      "default": 480
+     }
+    },
+    {
+     "variant_id": 17625,
+     "placements": {
+      "default": 492
+     }
+    },
+    {
+     "variant_id": 17620,
+     "placements": {
+      "default": 482
+     }
+    },
+    {
+     "variant_id": 17623,
+     "placements": {
+      "default": 484
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Multi-product",
+    "Product details",
+    "Template"
+   ],
+   "options": [
+    "Front",
+    "Product details",
+    "Product details 2"
+   ]
+  },
+  "extra": []
+ }
+}

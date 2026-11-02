@@ -1,0 +1,129 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1700?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1700,
+   "type": "POSTER",
+   "main_category_id": 55,
+   "name": "Fine Art Matte Paper Poster (in)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/98/98bd894ca0aed207a79f2a21ba0ba9ad_l",
+   "variant_count": 28,
+   "is_discontinued": false,
+   "description": "Bring your artwork to life with high-quality fine art paper prints designed to showcase every detail. With a soft textured surface and archival quality, these prints are ideal for displaying artwork, landscapes, portraits, and more. Available in multiple sizes and in both horizontal and vertical orientations.\n\n• Fine art paper\n• Paper weight: 285 g/m²\n• Soft textured surface\n• Archival quality\n• Giclée print with bright, intense colors\n• Multiple sizes available\n• Horizontal and vertical options available\n• Blank product sourced from the USA",
+   "sizes": [
+    "5″×7″",
+    "6″×8″",
+    "8″×10″",
+    "8″×12″",
+    "8″×20″",
+    "9″×11″",
+    "10″×10″",
+    "10″×24″",
+    "11″×14″",
+    "11″×17″",
+    "12″×16″",
+    "12″×18″",
+    "16″×16″",
+    "14″×14″",
+    "16″×20″",
+    "16″×24″",
+    "18″×18″",
+    "18″×24″",
+    "20″×20″",
+    "20″×24″",
+    "20″×28″",
+    "20″×30″",
+    "24″×24″",
+    "24″×32″",
+    "24″×36″",
+    "11.69″×16.54″",
+    "A2 (16.5″×23.3″)",
+    "A1 (23.3″×33.1″)"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1700"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1700/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1700/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1700/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1700/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1700/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

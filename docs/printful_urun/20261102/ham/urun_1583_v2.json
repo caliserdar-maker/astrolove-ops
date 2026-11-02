@@ -1,0 +1,143 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1583?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1583,
+   "type": "DIRECT-TO-FABRIC",
+   "main_category_id": 258,
+   "name": "All-Over Print Cotton Pillow Case",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/25/253063b7b7b7ad0c6ca74e6716808402_l",
+   "variant_count": 5,
+   "is_discontinued": false,
+   "description": "Bring comfort and style to your home with this premium cotton pillow case. Made from durable, midweight cotton with a crisp finish, it's perfect for showcasing vibrant all-over prints. This product includes the pillow case only—pillow insert not included.\n\n100% cotton\nFabric weight: 263 gsm\nDurable, structured cotton fabric\nPrint on both sides\nHidden zipper\nMachine-washable\nIdeal for indoor use",
+   "sizes": [
+    "14″×14″",
+    "16″×16″",
+    "18″×18″",
+    "22″×22″",
+    "20″×12″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "direct-to-fabric",
+     "display_name": "All-over cotton",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "direct-to-fabric",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "direct-to-fabric",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "direct-to-fabric",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "white": "White",
+      "black": "Black"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1583"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1583/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1583/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1583/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1583/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1583/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1583/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

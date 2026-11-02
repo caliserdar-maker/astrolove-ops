@@ -1,0 +1,123 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/742?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 742,
+   "type": "DRINKWARE",
+   "main_category_id": 238,
+   "name": "Insulated Tumbler with a Straw",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/a4/a4bcec2c594defdaf96c4c940ba8c905_l",
+   "variant_count": 5,
+   "is_discontinued": false,
+   "description": "Upgrade your drinkware game and add a splash of color to your day with this insulated tumbler. Cheers to style and functionality in every sip!\n\n• High-grade stainless steel tumbler\n• 20 oz. (600 ml)\n• Tumbler size: 4″ × 7.2″ (10.1 cm × 18.2 cm)\n• Includes straw and lid\n• Blank product sourced from China and printed in the US\n\nDisclaimer: \n• Not dishwasher or microwave safe. Hand-wash only.\n• Not leak-proof. To prevent potential leaks, we recommend keeping the tumbler upright at all times.",
+   "sizes": [
+    "20 oz"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#000000"
+    },
+    {
+     "name": "Mint",
+     "value": "#cee5bd"
+    },
+    {
+     "name": "Navy",
+     "value": "#213c51"
+    },
+    {
+     "name": "Pink",
+     "value": "#ffa7b1"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/742"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/742/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/742/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/742/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/742/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/742/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/742/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

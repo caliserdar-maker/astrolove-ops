@@ -1,0 +1,89 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/681",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 681,
+   "available_placements": {
+    "front": "Front print",
+    "back": "Back print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 435,
+     "width": 1130,
+     "height": 1034,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 16865,
+     "placements": {
+      "front": 435,
+      "back": 435
+     }
+    },
+    {
+     "variant_id": 16866,
+     "placements": {
+      "front": 435,
+      "back": 435
+     }
+    },
+    {
+     "variant_id": 16867,
+     "placements": {
+      "front": 435,
+      "back": 435
+     }
+    },
+    {
+     "variant_id": 16868,
+     "placements": {
+      "front": 435,
+      "back": 435
+     }
+    },
+    {
+     "variant_id": 16869,
+     "placements": {
+      "front": 435,
+      "back": 435
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Flat 3",
+    "Flat 4",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Lifestyle 6",
+    "Lifestyle 7",
+    "Lifestyle 8",
+    "Templates"
+   ],
+   "options": [
+    "Back",
+    "Front",
+    "Left Back",
+    "Left Front",
+    "Right Back",
+    "Right Front"
+   ]
+  },
+  "extra": []
+ }
+}

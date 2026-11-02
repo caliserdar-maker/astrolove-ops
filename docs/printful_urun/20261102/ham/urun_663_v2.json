@@ -1,0 +1,108 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/663?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 663,
+   "type": "MUG",
+   "main_category_id": 195,
+   "name": "Travel Mug with a Handle",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/38/38d259e30dff715402ef6b87aac89f5c_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Sip in style and comfort with an elevated travel mug.  With its sleek and durable design, you’ll love taking this mug wherever you go. It fits into most car cup holders and has a spill-proof plastic lid. Commute to work or go on new adventures—this travel mug will keep your beverage safe and at just the right temperature.\n\n• Made with stainless steel\n• Hand-wash only\n• Blank product sourced from China\n\n25 oz (739 ml) size:\n\n• Height: 7.9″ (20 cm)\n• Upper diameter: 3.3″ (8.4 cm)\n• Bottom diameter: 2.7″ (7 cm)\n• Comes with a plastic press-in lid\n\n40 oz (1183 ml) size:\n\n• Height: 10.4″ (26.5 cm)\n• Upper diameter: 3.9″ (9.9 cm)\n• Bottom diameter: 2.9″ (7.4 cm)\n• Comes with a plastic straw and screw-on lid\n\nCaution! To prevent steam pressure buildup, always open the lid before placing it on a hot drink.",
+   "sizes": [
+    "25 oz",
+    "40 oz"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/663"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/663/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/663/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/663/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/663/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/663/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/663/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

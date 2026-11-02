@@ -1,0 +1,129 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1429?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1429,
+   "type": "SUBLIMATION",
+   "main_category_id": 189,
+   "name": "Pet Feeding Mat",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/32/32cb61a99ca5e9be2681e1ddd696205d_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Make mealtime cleaner and more comfortable with this cushioned pet feeding mat. Its soft microfiber surface and absorbent memory foam help manage drips and splashes, while the non-slip backing keeps bowls in place. The smooth top adds a fun touch to your pet’s feeding area and blends easily with home decor.\n\n• Soft microfiber surface\n• Absorbent memory foam interior\n• Available in different shapes and sizes\n• Non-slip backing to keep bowls steady\n• Blank product sourced from China\n\nDisclaimer: The mat sizes may vary by ±1″ (2.5 cm).",
+   "sizes": [
+    "Bone shape 19″×14″",
+    "Bone shape 30″×18″",
+    "Fish shape 19″×14″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1429"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1429/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1429/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1429/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1429/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1429/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1429/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/433?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 433,
+   "type": "POSTCARD",
+   "main_category_id": 197,
+   "name": "Standard Postcard",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/products/433/product_1602054891.jpg",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "These postcards are made from thick high-quality matte paper, so they serve as a great addition to a gift or just a thoughtful written note to a friend.\n• Cardboard paper\n• Paper weight: 7.67–10.32 oz/yd² (260–350 g/m²)\n• Size: 4″ × 6″ (101 × 152 mm)\n• Paper thickness: 0.013″ (0.34 mm)\n• Coated outer surface\n• Blank product materials sourced from Sweden, US, Brazil, or China",
+   "sizes": [
+    "4″×6″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/433"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/433/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/433/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/433/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/433/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/433/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/433/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

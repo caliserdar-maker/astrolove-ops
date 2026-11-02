@@ -1,0 +1,140 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/673/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16705,
+    "catalog_product_id": 673,
+    "name": "Kiss-Cut Holographic Stickers (3″×3″in)",
+    "size": "3″×3″",
+    "color": "Grey",
+    "color_code": "#bdbcbc",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/673/16705_1678965852.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16705"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/673"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/673/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16705/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16705/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16705/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16706,
+    "catalog_product_id": 673,
+    "name": "Kiss-Cut Holographic Stickers (4″×4″in)",
+    "size": "4″×4″",
+    "color": "Grey",
+    "color_code": "#bdbcbc",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/673/16706_1678965856.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16706"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/673"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/673/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16706/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16706/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16706/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16707,
+    "catalog_product_id": 673,
+    "name": "Kiss-Cut Holographic Stickers (5.5″×5.5″in)",
+    "size": "5.5″×5.5″",
+    "color": "Grey",
+    "color_code": "#bdbcbc",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/673/16707_1678965861.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16707"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/673"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/673/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16707/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16707/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16707/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 5.5,
+      "width": 5.5,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/673/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/673"
+   }
+  }
+ }
+}

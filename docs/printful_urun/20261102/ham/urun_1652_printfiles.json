@@ -1,0 +1,76 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1652",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 1652,
+   "available_placements": {
+    "front": "Front print",
+    "back": "Back print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 1984,
+     "width": 2175,
+     "height": 2888,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1985,
+     "width": 5885,
+     "height": 9317,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1986,
+     "width": 4008,
+     "height": 5680,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 52332,
+     "placements": {
+      "front": 1984,
+      "back": 1984
+     }
+    },
+    {
+     "variant_id": 52333,
+     "placements": {
+      "front": 1986,
+      "back": 1986
+     }
+    },
+    {
+     "variant_id": 52334,
+     "placements": {
+      "front": 1985,
+      "back": 1985
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Templates"
+   ],
+   "options": [
+    "Back",
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

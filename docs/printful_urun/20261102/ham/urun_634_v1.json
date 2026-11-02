@@ -1,0 +1,306 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/634",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 634,
+    "main_category_id": 254,
+    "type": "DECOR",
+    "description": "Add a cozy vibe to your home with these double-sided wooden ornaments. Made from Hinoki wood, they’re durable yet lightweight and soft to the touch.\n\n• Material: solid, natural Hinoki wood\n• Ornament thickness 0.37″ (9 mm)\n• Comes with a red paper ribbon and a hole to thread it through\n• Magnetic back\n• Two-sided print \n• Product sourced from Korea\n\nDisclaimers: \n• This product is made from natural wood, so darker-colored wooden knots and other slight imperfections may appear anywhere on the ornament.\n• Due to the characteristics of Hinoki wood, it’s expected to have naturally occurring resin on these wooden ornaments.\n\nImportant: This product cannot be shipped to South Korea, Hong Kong, Taiwan, Japan, or Singapore. If your shipping address is in these regions, please choose a different product.",
+    "type_name": "Ornaments | Wood",
+    "title": "Wooden Ornaments",
+    "brand": null,
+    "model": "Ornaments | Wood",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/ef/ef50d0c418f9f4879bc3e81edc092891_l",
+    "variant_count": 6,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": "1.49",
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 16092,
+     "product_id": 634,
+     "name": "Wooden Ornaments (Wood / Bell)",
+     "size": "Bell",
+     "color": "Wood",
+     "color_code": "#f8ddb7",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/634/16092_1661492431.jpg",
+     "price": "8.37",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16088,
+     "product_id": 634,
+     "name": "Wooden Ornaments (Wood / Heart)",
+     "size": "Heart",
+     "color": "Wood",
+     "color_code": "#f8ddb7",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/634/16088_1661492441.jpg",
+     "price": "8.37",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16091,
+     "product_id": 634,
+     "name": "Wooden Ornaments (Wood / Oval)",
+     "size": "Oval",
+     "color": "Wood",
+     "color_code": "#f8ddb7",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/634/16091_1661492451.jpg",
+     "price": "8.37",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16089,
+     "product_id": 634,
+     "name": "Wooden Ornaments (Wood / Star)",
+     "size": "Star",
+     "color": "Wood",
+     "color_code": "#f8ddb7",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/634/16089_1661492451.jpg",
+     "price": "8.37",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16093,
+     "product_id": 634,
+     "name": "Wooden Ornaments (Wood / Stocking)",
+     "size": "Stocking",
+     "color": "Wood",
+     "color_code": "#f8ddb7",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/634/16093_1661492461.jpg",
+     "price": "8.37",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16090,
+     "product_id": 634,
+     "name": "Wooden Ornaments (Wood / Tree)",
+     "size": "Tree",
+     "color": "Wood",
+     "color_code": "#f8ddb7",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/634/16090_1661492461.jpg",
+     "price": "8.37",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,1394 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/798/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 20691,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 14 Plus)",
+    "size": "iPhone 14 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20691_1728028166.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20691"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20691/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20691/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20691/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20693,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 14 Pro Max)",
+    "size": "iPhone 14 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20693_1728028156.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20693"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20693/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20693/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20693/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20689,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 14 Pro)",
+    "size": "iPhone 14 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20689_1728028156.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20689"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20689/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20689/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20689/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20687,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 14)",
+    "size": "iPhone 14",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20687_1728028156.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20687"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20687/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20687/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20687/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20323,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 15 Plus)",
+    "size": "iPhone 15 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20323_1727265869.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20323"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20323/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20323/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20323/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20325,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 15 Pro Max)",
+    "size": "iPhone 15 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20325_1727265879.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20325"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20325/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20325/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20325/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20321,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 15 Pro)",
+    "size": "iPhone 15 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20321_1727265883.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20321"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20321/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20321/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20321/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20319,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 15)",
+    "size": "iPhone 15",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20319_1727265883.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20319"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20319/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20319/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20319/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20333,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 16 Plus)",
+    "size": "iPhone 16 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20333_1727265890.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20333"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20333/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20333/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20333/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20331,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 16 Pro Max)",
+    "size": "iPhone 16 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20331_1727265894.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20331"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20331/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20331/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20331/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20329,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 16 Pro)",
+    "size": "iPhone 16 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20329_1727265900.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20329"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20329/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20329/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20329/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20327,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 16)",
+    "size": "iPhone 16",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20327_1727265906.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20327"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20327/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20327/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20327/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34003,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 17 Air)",
+    "size": "iPhone 17 Air",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/34003_1757663256.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34003"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34003/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34003/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34003/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34007,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 17 Pro Max)",
+    "size": "iPhone 17 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/34007_1757663265.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34007"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34007/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34007/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34007/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34005,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 17 Pro)",
+    "size": "iPhone 17 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/34005_1757663265.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34005"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34005/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34005/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34005/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34001,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 17)",
+    "size": "iPhone 17",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/34001_1757663265.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34001"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34001/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34001/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34001/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53190,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 18 Pro Max)",
+    "size": "iPhone 18 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/53190_1788339350.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53190"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53190/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53190/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53190/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53188,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Glossy / iPhone 18 Pro)",
+    "size": "iPhone 18 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/53188_1788339360.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53188"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53188/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53188/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53188/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20692,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 14 Plus)",
+    "size": "iPhone 14 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20692_1728028146.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20692"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20692/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20692/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20692/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20694,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 14 Pro Max)",
+    "size": "iPhone 14 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20694_1728028146.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20694"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20694/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20694/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20694/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20690,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 14 Pro)",
+    "size": "iPhone 14 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20690_1728028145.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20690"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20690/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20690/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20690/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20688,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 14)",
+    "size": "iPhone 14",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20688_1728028145.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20688"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20688/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20688/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20688/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20322,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 15 Plus)",
+    "size": "iPhone 15 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20322_1727265927.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20322"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20322/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20322/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20322/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20324,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 15 Pro Max)",
+    "size": "iPhone 15 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20324_1727265937.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20324"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20324/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20324/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20324/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20320,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 15 Pro)",
+    "size": "iPhone 15 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20320_1727265937.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20320"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20320/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20320/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20320/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20318,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 15)",
+    "size": "iPhone 15",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20318_1727265940.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20318"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20318/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20318/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20318/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20332,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 16 Plus)",
+    "size": "iPhone 16 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20332_1727265948.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20332"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20332/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20332/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20332/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20330,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 16 Pro Max)",
+    "size": "iPhone 16 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20330_1727265948.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20330"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20330/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20330/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20330/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20328,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 16 Pro)",
+    "size": "iPhone 16 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20328_1727265958.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20328"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20328/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20328/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20328/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20326,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 16)",
+    "size": "iPhone 16",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/20326_1727265959.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20326"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20326/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20326/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20326/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34004,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 17 Air)",
+    "size": "iPhone 17 Air",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/34004_1757663245.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34004"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34004/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34004/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34004/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34008,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 17 Pro Max)",
+    "size": "iPhone 17 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/34008_1757663245.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34008"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34008/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34008/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34008/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34006,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 17 Pro)",
+    "size": "iPhone 17 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/34006_1757663255.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34006"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34006/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34006/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34006/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34002,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 17)",
+    "size": "iPhone 17",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/34002_1757663255.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34002"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34002/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34002/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34002/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53191,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 18 Pro Max)",
+    "size": "iPhone 18 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/53191_1788339309.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53191"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53191/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53191/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53191/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53189,
+    "catalog_product_id": 798,
+    "name": "MagSafe® Tough Case for iPhone® (Matte / iPhone 18 Pro)",
+    "size": "iPhone 18 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/798/53189_1788339320.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53189"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/798"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53189/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53189/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53189/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 36,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/798/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/798"
+   }
+  }
+ }
+}

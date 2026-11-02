@@ -1,0 +1,15 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/635?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 404,
+ "yanit": {
+  "data": "Product 635 is not available in the selected selling region.",
+  "error": {
+   "reason": "NotFound",
+   "message": "Product 635 is not available in the selected selling region."
+  }
+ }
+}

@@ -1,0 +1,133 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/724?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 724,
+   "type": "POSTCARD",
+   "main_category_id": 190,
+   "name": "Set of Business Cards",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/60/6009b4c36801c6751747c730a3a1cd34_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Leave a lasting impression with this finely crafted set of business cards. Double-sided printing ensures maximum messaging potential, and the uncoated paper adds an elegant touch.\n\n• Paper in the US: Mohawk uncoated cover paper\n• Paper in EU: Munken Lynx, 300 g/m²\n• Size: 3.5″× 2″ (9 × 5 cm)\n• Single-sided or double-sided print \n• Set of 50 or 100 business cards\n• Blank product sourced from the United States or Latvia",
+   "sizes": [
+    "50 pieces",
+    "100 pieces"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/724"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/724/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/724/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/724/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/724/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/724/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/724/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

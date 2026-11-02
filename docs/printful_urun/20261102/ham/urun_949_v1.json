@@ -1,0 +1,183 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/949",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 949,
+    "main_category_id": 190,
+    "type": "POSTCARD",
+    "description": "Stay organized in style with this sleek desk calendar—perfect for keeping track of your days at work, home, or anywhere in between. Printed on smooth satin-finish paper and spiral-bound with a sturdy tent backing, it’s a practical, polished addition to any workspace. Compact, freestanding, and easy to customize with your design.\n\n• Paper weight: 7.37 oz./yd² (250 g/m²)\n• Product weight: 5.5 oz (155 g)\n• Size: 10″ × 5″ (25.4 cm × 12.7 cm)\n• Satin-finish paper for a premium look and feel\n• Black spiral binding\n• Table-top tent card for freestanding display\n• Blank product sourced from Germany or Japan\n• Paper sourced from Austria",
+    "type_name": "Calendar | Simplex | Desk",
+    "title": "Simplex Desk Calendar",
+    "brand": null,
+    "model": "Calendar | Simplex | Desk",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/13/13ee0403662b7467c234e0dc02337252_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "cover",
+      "type": "cover",
+      "title": "Cover",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "january",
+      "type": "january",
+      "title": "January",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "february",
+      "type": "february",
+      "title": "February",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "march",
+      "type": "march",
+      "title": "March",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "april",
+      "type": "april",
+      "title": "April",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "may",
+      "type": "may",
+      "title": "May",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "june",
+      "type": "june",
+      "title": "June",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "july",
+      "type": "july",
+      "title": "July",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "august",
+      "type": "august",
+      "title": "August",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "september",
+      "type": "september",
+      "title": "September",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "october",
+      "type": "october",
+      "title": "October",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "november",
+      "type": "november",
+      "title": "November",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "december",
+      "type": "december",
+      "title": "December",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 24308,
+     "product_id": 949,
+     "name": "Generic brand (10\" x 5\" / Satin)",
+     "size": "10″×5″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/949/24308_1754043737.jpg",
+     "price": "9.20",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

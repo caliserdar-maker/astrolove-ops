@@ -1,0 +1,134 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/171?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 171,
+   "type": "POSTER",
+   "main_category_id": 55,
+   "name": "Premium Luster Photo Paper Poster (in)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/products/171/product_1613463439.jpg",
+   "variant_count": 30,
+   "is_discontinued": false,
+   "description": "This poster has a partly glossy, partly matte finish and it'll add a touch of sophistication to any room.\n\n• 10 mil (0.25 mm) thick\n• Slightly glossy\n• Fingerprint resistant \n• Paper sourced from Japan",
+   "sizes": [
+    "8″×10″",
+    "10″×10″",
+    "12″×12″",
+    "14″×14″",
+    "12″×16″",
+    "12″×18″",
+    "16″×16″",
+    "16″×20″",
+    "18″×18″",
+    "18″×24″",
+    "24″×36″",
+    "11″×14″",
+    "5″×7″",
+    "20″×30″",
+    "A1 (23.3″×33.1″)",
+    "A2 (16.5″×23.3″)",
+    "6″×8″",
+    "8″×12″",
+    "8″×20″",
+    "9″×11″",
+    "10″×24″",
+    "11″×17″",
+    "16″×24″",
+    "20″×20″",
+    "20″×24″",
+    "20″×28″",
+    "24″×24″",
+    "24″×32″",
+    "28″×40″",
+    "28″×28″",
+    "30″×40″",
+    "11.69″×16.54″",
+    "8.27″×11.69″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/171"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/171/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/171/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/171/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/171/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/171/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

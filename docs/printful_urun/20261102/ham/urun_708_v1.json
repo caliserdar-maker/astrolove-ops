@@ -1,0 +1,128 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/708",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 708,
+    "main_category_id": 252,
+    "type": "SUBLIMATION",
+    "description": "Revamp your dining experience with our custom cloth napkin set. Every pack comes with 4 soft, lightweight, and pliable napkins, each with a unique design for that personal touch. Great for special dinners or everyday use, these napkins add a dash of design and comfort to any mealtime. \n\n• 100% polyester \n• Soft-to-the-touch broadcloth fabric\n• 20″ x 20″ (50.8 cm x 50.8 cm) \n• Printed top with non-printed white bottom \n• Hemmed on all sides",
+    "type_name": "Napkin | Cloth | Set of 4",
+    "title": "Cloth Napkin Set (4)",
+    "brand": null,
+    "model": "Napkin | Cloth | Set of 4",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/e9/e963979e998e97d0aa4208d7d83a3553_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "first",
+      "type": "first",
+      "title": "First",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "second",
+      "type": "second",
+      "title": "Second",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "third",
+      "type": "third",
+      "title": "Third",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "fourth",
+      "type": "fourth",
+      "title": "Fourth",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 17399,
+     "product_id": 708,
+     "name": "Cloth Napkin Set (4) (White / 20″×20″)",
+     "size": "20″×20″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/708/17399_1688709743.jpg",
+     "price": "26.93",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

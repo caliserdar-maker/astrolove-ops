@@ -1,0 +1,378 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/366/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 10449,
+    "catalog_product_id": 366,
+    "name": "Framed Poster with Frame Mat (cm) 21×30 cm Black",
+    "size": "21×30 cm",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": "",
+    "image": "https://files.cdn.printful.com/products/366/10449_1557310228.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10449"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/366"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/366/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10449/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10449/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10449/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 11.81,
+      "width": 8.27,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.27,
+      "width": 11.81,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10453,
+    "catalog_product_id": 366,
+    "name": "Framed Poster with Frame Mat (cm) 21×30 cm White",
+    "size": "21×30 cm",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": "",
+    "image": "https://files.cdn.printful.com/products/366/10453_1557310243.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10453"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/366"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/366/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10453/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10453/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10453/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 11.81,
+      "width": 8.27,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.27,
+      "width": 11.81,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10450,
+    "catalog_product_id": 366,
+    "name": "Framed Poster with Frame Mat (cm) 30×40 cm Black",
+    "size": "30×40 cm",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": "",
+    "image": "https://files.cdn.printful.com/products/366/10450_1557310266.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10450"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/366"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/366/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10450/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10450/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10450/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10454,
+    "catalog_product_id": 366,
+    "name": "Framed Poster with Frame Mat (cm) 30×40 cm White",
+    "size": "30×40 cm",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": "",
+    "image": "https://files.cdn.printful.com/products/366/10454_1557310279.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10454"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/366"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/366/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10454/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10454/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10454/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10451,
+    "catalog_product_id": 366,
+    "name": "Framed Poster with Frame Mat (cm) 50×70 cm Black",
+    "size": "50×70 cm",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": "",
+    "image": "https://files.cdn.printful.com/products/366/10451_1557310307.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10451"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/366"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/366/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10451/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10451/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10451/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 27.56,
+      "width": 19.69,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 19.69,
+      "width": 27.56,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10455,
+    "catalog_product_id": 366,
+    "name": "Framed Poster with Frame Mat (cm) 50×70 cm White",
+    "size": "50×70 cm",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": "",
+    "image": "https://files.cdn.printful.com/products/366/10455_1557310322.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10455"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/366"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/366/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10455/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10455/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10455/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 27.56,
+      "width": 19.69,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 19.69,
+      "width": 27.56,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10452,
+    "catalog_product_id": 366,
+    "name": "Framed Poster with Frame Mat (cm) 61×91 cm Black",
+    "size": "61×91 cm",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": "",
+    "image": "https://files.cdn.printful.com/products/366/10452_1557310338.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10452"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/366"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/366/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10452/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10452/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10452/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10456,
+    "catalog_product_id": 366,
+    "name": "Framed Poster with Frame Mat (cm) 61×91 cm White",
+    "size": "61×91 cm",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": "",
+    "image": "https://files.cdn.printful.com/products/366/10456_1557310359.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10456"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/366"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/366/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10456/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10456/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10456/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 8,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/366/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/366"
+   }
+  }
+ }
+}

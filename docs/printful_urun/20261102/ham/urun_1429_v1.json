@@ -1,0 +1,143 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1429",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1429,
+    "main_category_id": 189,
+    "type": "SUBLIMATION",
+    "description": "Make mealtime cleaner and more comfortable with this cushioned pet feeding mat. Its soft microfiber surface and absorbent memory foam help manage drips and splashes, while the non-slip backing keeps bowls in place. The smooth top adds a fun touch to your pet’s feeding area and blends easily with home decor.\n\n• Soft microfiber surface\n• Absorbent memory foam interior\n• Available in different shapes and sizes\n• Non-slip backing to keep bowls steady\n• Blank product sourced from China\n\nDisclaimer: The mat sizes may vary by ±1″ (2.5 cm).",
+    "type_name": "Pet | Feeding Mat",
+    "title": "Pet Feeding Mat",
+    "brand": null,
+    "model": "Pet | Feeding Mat",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/32/32cb61a99ca5e9be2681e1ddd696205d_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 44161,
+     "product_id": 1429,
+     "name": "Bone shape (19\" x 14\") / White",
+     "size": "Bone shape 19″×14″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1429/44161_1763032968.jpg",
+     "price": "16.88",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44162,
+     "product_id": 1429,
+     "name": "Bone shape (30\" × 18\") / White",
+     "size": "Bone shape 30″×18″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1429/44162_1763033000.jpg",
+     "price": "27.88",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44163,
+     "product_id": 1429,
+     "name": "Fish shape (19\" × 14\") / White",
+     "size": "Fish shape 19″×14″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1429/44163_1763033028.jpg",
+     "price": "16.88",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,121 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1428",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1428,
+    "main_category_id": 254,
+    "type": "SUBLIMATION",
+    "description": "Add a classic touch to holiday decorating with this rustic Christmas stocking. The plaid cuff and soft texture make it a cozy addition to fireplaces, stair rails, and gift displays. It’s a simple way for shoppers to bring warmth and personality into their seasonal decor.\n\n• 100% recycled polyester boot and plaid cuff\n• Size: 10.25″ × 16″ (26 cm × 40.6 cm)\n• One-sided design\n• Cream-colored back\n• Hanging loop for easy display\n• Two cuff color options: red/black and white/black\n• Blank product sourced from China",
+    "type_name": "Stocking | Christmas | Rustic",
+    "title": "Rustic Christmas Stocking",
+    "brand": null,
+    "model": "Stocking | Christmas | Rustic",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/4e/4ee684cba39291ab95682b342fa1116e_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 44159,
+     "product_id": 1428,
+     "name": "Generic brand (One size / Red and Black/Natural)",
+     "size": "One size",
+     "color": "Red and Black/Natural",
+     "color_code": "#feedda",
+     "color_code2": "#d04343",
+     "image": "https://files.cdn.printful.com/products/1428/44159_1762865458.jpg",
+     "price": "17.17",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44160,
+     "product_id": 1428,
+     "name": "Generic brand (One size / White and Black/Natural)",
+     "size": "One size",
+     "color": "White and Black/Natural",
+     "color_code": "#feedda",
+     "color_code2": "#ffffff",
+     "image": "https://files.cdn.printful.com/products/1428/44160_1762865458.jpg",
+     "price": "17.17",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

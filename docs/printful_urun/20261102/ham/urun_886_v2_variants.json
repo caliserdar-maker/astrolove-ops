@@ -1,0 +1,330 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/886/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 22799,
+    "catalog_product_id": 886,
+    "name": "Microfiber Duvet Cover (Cream / King)",
+    "size": "King",
+    "color": "Cream",
+    "color_code": "#fffae6",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/886/22799_1747640240.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22799"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/886"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/886/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22799/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22799/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22799/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 90.0,
+      "width": 106.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22797,
+    "catalog_product_id": 886,
+    "name": "Microfiber Duvet Cover (Cream / Queen)",
+    "size": "Queen",
+    "color": "Cream",
+    "color_code": "#fffae6",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/886/22797_1747640214.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22797"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/886"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/886/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22797/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22797/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22797/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 90.0,
+      "width": 90.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22795,
+    "catalog_product_id": 886,
+    "name": "Microfiber Duvet Cover (Cream / Twin XL)",
+    "size": "Twin XL",
+    "color": "Cream",
+    "color_code": "#fffae6",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/886/22795_1747640193.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22795"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/886"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/886/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22795/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22795/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22795/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 93.0,
+      "width": 70.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22793,
+    "catalog_product_id": 886,
+    "name": "Microfiber Duvet Cover (Cream / Twin)",
+    "size": "Twin",
+    "color": "Cream",
+    "color_code": "#fffae6",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/886/22793_1747640169.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22793"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/886"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/886/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22793/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22793/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22793/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 90.0,
+      "width": 70.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22800,
+    "catalog_product_id": 886,
+    "name": "Microfiber Duvet Cover (White / King)",
+    "size": "King",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/886/22800_1747640239.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22800"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/886"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/886/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22800/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22800/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22800/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 90.0,
+      "width": 106.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22798,
+    "catalog_product_id": 886,
+    "name": "Microfiber Duvet Cover (White / Queen)",
+    "size": "Queen",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/886/22798_1747640214.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22798"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/886"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/886/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22798/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22798/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22798/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 90.0,
+      "width": 90.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22796,
+    "catalog_product_id": 886,
+    "name": "Microfiber Duvet Cover (White / Twin XL)",
+    "size": "Twin XL",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/886/22796_1747640193.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22796"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/886"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/886/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22796/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22796/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22796/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 93.0,
+      "width": 70.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22794,
+    "catalog_product_id": 886,
+    "name": "Microfiber Duvet Cover (White / Twin)",
+    "size": "Twin",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/886/22794_1747640168.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22794"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/886"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/886/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22794/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22794/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22794/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 90.0,
+      "width": 70.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 8,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/886/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/886"
+   }
+  }
+ }
+}

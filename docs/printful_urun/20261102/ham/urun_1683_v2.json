@@ -1,0 +1,140 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1683?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1683,
+   "type": "DTFILM",
+   "main_category_id": 48,
+   "name": "Carry-All Tote | Comfort Colors® CCNT0",
+   "brand": "Comfort Colors",
+   "model": "CCNT0",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/95/95a76c0ef08ad07594390223ddb8a972_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Looking for a versatile tote bag with a clean, modern style? This bag is a practical choice for everyday errands, travel, work, and life on the go. Made from durable fabric with a smooth matte finish, it combines a sleek look with dependable functionality. The spacious zippered main compartment helps keep your belongings secure, while sturdy webbing handles make it easy to carry wherever the day takes you.\n\n•100% nylon taslon\n•One size: 17 3/4\" x 18 7/8\" (45.08 cm x 47.9 cm)\n•Durable construction with a smooth matte finish\n•Zippered main compartment for secure storage\n•Dyed-to-match zip closure and handles\n•Durable pinched webbing handles for comfortable carrying\n•Signature twill label on the front bottom webbing\n•Blank product sourced from Cambodia",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "Bay",
+     "value": "#C3CFC1"
+    },
+    {
+     "name": "Black",
+     "value": "#202020"
+    },
+    {
+     "name": "Ivory",
+     "value": "#fcf0d6"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "dtfilm",
+     "display_name": "DTF printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "dtfilm",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "dtfilm",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "dtfilm",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1683"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1683/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1683/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1683/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1683/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1683/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1683/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

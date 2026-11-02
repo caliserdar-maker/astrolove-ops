@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/663/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16440,
+    "catalog_product_id": 663,
+    "name": "Travel Mug with a Handle (White / 25 oz)",
+    "size": "25 oz",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/663/16440_1678345370.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16440"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/663"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/663/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16440/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16440/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16440/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 3.8,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19514,
+    "catalog_product_id": 663,
+    "name": "Travel Mug with a Handle (White / 40 oz)",
+    "size": "40 oz",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/663/19514_1717737722.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19514"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/663"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/663/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19514/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19514/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19514/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 5.24,
+      "width": 10.71,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/663/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/663"
+   }
+  }
+ }
+}

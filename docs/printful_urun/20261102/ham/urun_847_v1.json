@@ -1,0 +1,175 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/847",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 847,
+    "main_category_id": 81,
+    "type": "EMBROIDERY",
+    "description": "Your go-to backpack for work, workouts, and everything in between. Water-resistant with a soft-lined laptop sleeve, expandable storage, and a balanced strap system for all-day comfort.\n\n• 93% polyester, 7% nylon\n• Highly water-resistant and stain-resistant UA Storm fabric\n• Dimensions: H 20.1″ (51.1 cm), W 12.6″ (32 cm), D 6.6″ (16.8 cm)\n• Capacity: 7.24 gal. (27.4 l)\n• LEVELED™ strap system for an even weight distribution\n• Soft-lined laptop pocket that fits a 16″ laptop\n• Side water bottle pocket that fits a 32 oz. bottle\n• Secure zip front pockets\n• Blank product sourced from Cambodia",
+    "type_name": "Under Armour | Hustle Backpack 6.0",
+    "title": "Under Armour Backpack",
+    "brand": "Under Armour",
+    "model": "Hustle Backpack 6.0",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/66/6620edc496944e36ff9a7907c162ef8a_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "thread_colors_apparel",
+      "title": "Flat thread colors",
+      "type": "multi_select",
+      "values": {
+       "#FFFFFF": "1801 White",
+       "#000000": "1800 Black",
+       "#96A1A8": "1718 Grey",
+       "#A67843": "1672 Old Gold",
+       "#FFCC00": "1951 Gold",
+       "#E25C27": "1987 Orange",
+       "#CC3366": "1910 Flamingo",
+       "#CC3333": "1839 Red",
+       "#660000": "1784 Maroon",
+       "#333366": "1966 Navy",
+       "#005397": "1842 Royal",
+       "#3399FF": "1695 Aqua/Teal",
+       "#6B5294": "1832 Purple",
+       "#01784E": "1751 Kelly Green",
+       "#7BA35A": "1848 Kiwi Green"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Embroidery notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "EMBROIDERY",
+      "display_name": "Embroidery",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "embroidery_apparel_front",
+      "title": "Front",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 22232,
+     "product_id": 847,
+     "name": "Under Armour Under Armour Team Hustle Backpack 6.0 (Black)",
+     "size": "One size",
+     "color": "Black",
+     "color_code": "#1a1a1a",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/847/22232_1739947432.jpg",
+     "price": "62.37",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22233,
+     "product_id": 847,
+     "name": "Under Armour Under Armour Team Hustle Backpack 6.0 (Castlerock)",
+     "size": "One size",
+     "color": "Castlerock",
+     "color_code": "#898a84",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/847/22233_1739947432.jpg",
+     "price": "62.37",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22234,
+     "product_id": 847,
+     "name": "Under Armour Under Armour Team Hustle Backpack 6.0 (Midnight Navy)",
+     "size": "One size",
+     "color": "Midnight Navy",
+     "color_code": "#24263a",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/847/22234_1739947432.jpg",
+     "price": "62.37",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

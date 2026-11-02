@@ -1,0 +1,150 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1652",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1652,
+    "main_category_id": 296,
+    "type": "SUBLIMATION",
+    "description": "Designed to deliver vibrant colors on both sides through dye sublimation, it offers a stylish and versatile way to make a statement-whether you're representing a brand, celebrating a cause, or adding a personal touch to your garden, storefront, or event space.\n\n- 100% polyester\n-Lightweight fabric\n- Available in three sizes: 12″ × 18″, 24″ × 36″, 36″ × 60″\n- Decoration method: Dye sublimation\n-Print on both sides\n- Hemmed edges\n\nDisclaimers:\n- Does not include a flagpole or fastening system\n- Flag's cut-and-sew construction may cause slight variations in final dimensions",
+    "type_name": "Outdoor Flag with Rod Pocket",
+    "title": "Outdoor Flag with Rod Pocket",
+    "brand": null,
+    "model": "Outdoor Flag with Rod Pocket",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/ae/aeaaed05832d5cf2a7ec4106380a62ae_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 52332,
+     "product_id": 1652,
+     "name": "Generic brand (12'' x 18'')",
+     "size": "12″×18″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1652/52332_1784012363.jpg",
+     "price": "12.40",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 52333,
+     "product_id": 1652,
+     "name": "Generic brand (24'' x 36'')",
+     "size": "24″×36″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1652/52333_1784012416.jpg",
+     "price": "24.43",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 52334,
+     "product_id": 1652,
+     "name": "Generic brand (36'' x 60'')",
+     "size": "36″×60″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1652/52334_1784012416.jpg",
+     "price": "53.04",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

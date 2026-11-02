@@ -1,0 +1,140 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1429/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 44161,
+    "catalog_product_id": 1429,
+    "name": "Bone shape (19\" x 14\") / White",
+    "size": "Bone shape 19″×14″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1429/44161_1763032968.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44161"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1429"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1429/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44161/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44161/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44161/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 16.0,
+      "width": 21.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44162,
+    "catalog_product_id": 1429,
+    "name": "Bone shape (30\" × 18\") / White",
+    "size": "Bone shape 30″×18″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1429/44162_1763033000.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44162"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1429"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1429/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44162/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44162/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44162/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 20.0,
+      "width": 32.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44163,
+    "catalog_product_id": 1429,
+    "name": "Fish shape (19\" × 14\") / White",
+    "size": "Fish shape 19″×14″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1429/44163_1763033028.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44163"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1429"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1429/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44163/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44163/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44163/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 16.0,
+      "width": 21.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1429/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1429"
+   }
+  }
+ }
+}

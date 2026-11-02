@@ -1,0 +1,254 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/911/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 23505,
+    "catalog_product_id": 911,
+    "name": "Wrapping Papers (White Glossy / 30″×180″)",
+    "size": "30″×180″",
+    "color": "White Glossy",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/911/23505_1750164799.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23505"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/911"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/911/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23505/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23505/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23505/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 36.0,
+      "width": 30.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23503,
+    "catalog_product_id": 911,
+    "name": "Wrapping Papers (White Glossy / 30″×36″)",
+    "size": "30″×36″",
+    "color": "White Glossy",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/911/23503_1750164937.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23503"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/911"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/911/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23503/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23503/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23503/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 36.0,
+      "width": 30.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23501,
+    "catalog_product_id": 911,
+    "name": "Wrapping Papers (White Glossy / 30″×72″)",
+    "size": "30″×72″",
+    "color": "White Glossy",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/911/23501_1750164840.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23501"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/911"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/911/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23501/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23501/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23501/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 36.0,
+      "width": 30.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23506,
+    "catalog_product_id": 911,
+    "name": "Wrapping Papers (White Matte / 30″×180″)",
+    "size": "30″×180″",
+    "color": "White Matte",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/911/23506_1750164794.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23506"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/911"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/911/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23506/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23506/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23506/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 36.0,
+      "width": 30.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23504,
+    "catalog_product_id": 911,
+    "name": "Wrapping Papers (White Matte / 30″×36″)",
+    "size": "30″×36″",
+    "color": "White Matte",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/911/23504_1750164938.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23504"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/911"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/911/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23504/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23504/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23504/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 36.0,
+      "width": 30.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23502,
+    "catalog_product_id": 911,
+    "name": "Wrapping Papers (White Matte / 30″×72″)",
+    "size": "30″×72″",
+    "color": "White Matte",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/911/23502_1750164840.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23502"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/911"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/911/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23502/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23502/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23502/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 36.0,
+      "width": 30.25,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 6,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/911/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/911"
+   }
+  }
+ }
+}

@@ -1,0 +1,99 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/779",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 779,
+    "main_category_id": 264,
+    "type": "DRINKWARE",
+    "description": "Keep it classy with this elegant rocks glass. Ideal for whiskey and cocktail lovers, it features a classic style and is made from sturdy, quality glass. \n\n• Glass material\n• Volume: 10.5 oz. (311 ml)\n• Height: 3.4″ (8.64 cm)\n• Diameter: 3.2″ (8.13 cm)\n• Blank product sourced from the United States\n\nDisclaimer: Not dishwasher or microwave safe. Hand-wash only.",
+    "type_name": "Rocks Glass | 10.5oz",
+    "title": "Rocks Glass",
+    "brand": null,
+    "model": "Rocks Glass | 10.5oz",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/64/64a02fd448440b783d964b0d9f42e22f_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 19793,
+     "product_id": 779,
+     "name": "Rocks Glass (10.5 oz)",
+     "size": "10.5 oz",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/779/19793_1719573440.jpg",
+     "price": "8.92",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

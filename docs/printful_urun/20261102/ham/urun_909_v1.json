@@ -1,0 +1,99 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/909",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 909,
+    "main_category_id": 238,
+    "type": "SUBLIMATION",
+    "description": "Stay sippin’ in style. This 20-oz stainless steel tumbler keeps your drinks hot or cold on the go with a sleek, glossy finish and a spill-resistant lid. Perfect for daily commutes, workouts, or cozy mornings.\n• Tapered stainless steel body\n• Transparent press-in plastic lid\n• Capacity: 20 oz (600 ml)\n• Height: 6.77″ (17.20 cm)\n• Diameter: 2.83″–3.39″ (7.20 cm–8.60 cm)\n• Weight: 11.04 oz (313 g)\n• Double-walled vacuum seal insulation\n• Glossy finish\n• Dishwasher-safe\n• Blank product sourced from China",
+    "type_name": "Tumbler | Tapered | Stainless Steel | 20oz",
+    "title": "Tapered Stainless Steel Tumbler 20 oz",
+    "brand": null,
+    "model": "Tumbler | Tapered | Stainless Steel | 20oz",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/00/0031e5dc0aec346bbaa80f374158a78e_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 23470,
+     "product_id": 909,
+     "name": "Stainless Steel Tumbler (20 oz) (White / 20oz)",
+     "size": "20oz",
+     "color": "White",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/909/23470_1759304140.jpg",
+     "price": "24.97",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

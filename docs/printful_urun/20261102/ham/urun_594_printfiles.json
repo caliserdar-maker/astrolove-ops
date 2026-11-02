@@ -1,0 +1,77 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/594",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 594,
+   "available_placements": {
+    "front": "Front print",
+    "back": "Back print",
+    "bottom": "Bottom print",
+    "side_right": "Right side",
+    "side_left": "Left side",
+    "pocket": "Pocket",
+    "label_inside": "Inside label"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 64,
+     "width": 375,
+     "height": 150,
+     "dpi": 150,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 327,
+     "width": 2850,
+     "height": 2325,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 15155,
+     "placements": {
+      "front": 327,
+      "back": 327,
+      "bottom": 327,
+      "side_right": 327,
+      "side_left": 327,
+      "pocket": 327,
+      "label_inside": 64
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Men's Lifestyle",
+    "Product details",
+    "Product specs",
+    "Template",
+    "Women's Lifestyle"
+   ],
+   "options": [
+    "Back",
+    "Bottom",
+    "Front",
+    "Inside Label",
+    "Left Front",
+    "Left Side",
+    "Pocket",
+    "Product details 2",
+    "Right Front",
+    "Right Side",
+    "Top"
+   ]
+  },
+  "extra": []
+ }
+}

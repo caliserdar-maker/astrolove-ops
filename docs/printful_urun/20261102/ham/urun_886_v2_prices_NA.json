@@ -1,0 +1,139 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/886/prices?currency=USD&selling_region_name=north_america",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 886,
+    "placements": [
+     {
+      "id": "front",
+      "title": "Front print",
+      "type": "Sublimation",
+      "technique_key": "sublimation",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 22793,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "67.69",
+       "discounted_price": "67.69"
+      }
+     ]
+    },
+    {
+     "id": 22794,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "67.69",
+       "discounted_price": "67.69"
+      }
+     ]
+    },
+    {
+     "id": 22795,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "67.95",
+       "discounted_price": "67.95"
+      }
+     ]
+    },
+    {
+     "id": 22796,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "67.95",
+       "discounted_price": "67.95"
+      }
+     ]
+    },
+    {
+     "id": 22797,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "80.87",
+       "discounted_price": "80.87"
+      }
+     ]
+    },
+    {
+     "id": 22798,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "80.87",
+       "discounted_price": "80.87"
+      }
+     ]
+    },
+    {
+     "id": 22799,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "94.95",
+       "discounted_price": "94.95"
+      }
+     ]
+    },
+    {
+     "id": 22800,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "94.95",
+       "discounted_price": "94.95"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 8,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/886/prices?currency=USD&selling_region_name=north_america&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/886"
+   }
+  }
+ }
+}

@@ -1,0 +1,152 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/672?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 672,
+   "type": "DECOR",
+   "main_category_id": 16,
+   "name": "All-Over Print Crossbody Bag",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/c9/c97eee111c050ec8a271b9fcfb6094b5_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Keep your style on point and your hands free with our versatile crossbody bag. It’s made of premium faux leather and features dark gray hardware. Thanks to the zip-top closure and multiple inside pockets, you can keep your essentials secure and organized. Transform this crossbody bag with removable wrist and shoulder straps to style it for day-to-night looks.\n\n• Outer fabric: faux leather \n• Lining: 100% polyester\n• 11″ × 8″ × 1.5″ (27.9 cm × 20.3 cm × 3.8 cm)\n• Dark gray hardware\n• Zip-top closure\n• Inside zip and slip pockets\n• Adjustable, removable wrist and shoulder straps\n• Strap drop length: 14″- 27″",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#000000"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "label_inside",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "label_inside_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/672"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/672/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/672/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/672/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/672/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/672/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/672/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

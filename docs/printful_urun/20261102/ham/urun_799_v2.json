@@ -1,0 +1,120 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/799?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 799,
+   "type": "PHONE-CASE",
+   "main_category_id": 244,
+   "name": "MagSafe® Clear Case for iPhone",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/98/981f1213c885898083de728fff199735_l",
+   "variant_count": 18,
+   "is_discontinued": false,
+   "description": "This sleek, durable case protects your phone and is easy to hold. The MagSafe® magnets ensure secure attachment and faster wireless charging.\n\n• Hybrid thermoplastic polyurethane and polycarbonate\n• Solid, durable polycarbonate back\n• Secure yet flexible thermoplastic polyurethane sides\n• Raised bezel front\n• Precisely aligned port openings\n• Easy to snap on and off\n• MagSafe® compatible\n• Wireless charging-compatible\n• Graphics are UV-printed onto the case with a smooth, matte finish\n• The SE case fits the 2020 iPhone® SE model\n• Blank product sourced from China or South Korea\n\nDisclaimer: The case may include a protective film on the inside that needs to be removed before use.\n\nImportant: Cases for the iPhone 15 and iPhone 16 series can’t be shipped to South Korea, Hong Kong, Taiwan, Japan, or Singapore. If your shipping address is in these regions, please choose a different iPhone case.",
+   "sizes": [
+    "iPhone 14",
+    "iPhone 14 Pro",
+    "iPhone 14 Plus",
+    "iPhone 14 Pro Max",
+    "iPhone 15",
+    "iPhone 15 Pro",
+    "iPhone 15 Plus",
+    "iPhone 15 Pro Max",
+    "iPhone 16",
+    "iPhone 16 Pro",
+    "iPhone 16 Plus",
+    "iPhone 16 Pro Max",
+    "iPhone 17",
+    "iPhone 17 Air",
+    "iPhone 17 Pro",
+    "iPhone 17 Pro Max",
+    "iPhone 18 Pro",
+    "iPhone 18 Pro Max",
+    "iPhone 18 Fold"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/799"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/799/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/799/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/799/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/799/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/799/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

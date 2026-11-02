@@ -1,0 +1,830 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/304",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 304,
+    "main_category_id": 56,
+    "type": "FRAMED-POSTER",
+    "description": "Add a bold statement piece to any room with this framed poster. Printed on quality, thick, matte paper.\n\n• Paper weight: 189 g/m²\n• 0.26 mm (10.3 mil) thick\n• Black and white frame made from semi-hardwood alder\n• Oak frame made from solid oak\n• Acrylite front protector\n• Hanging hardware included\n• 21 × 30cm posters are size A4\n• Blank product components in the US sourced from Japan and the US\n• Blank product components in the EU sourced from Japan and Latvia\n\nHow to attach hooks on 61 × 91 cm horizontal frames:\nPlace each of the mounting hooks 2.5 cm from frame corners when hanging horizontally.",
+    "type_name": "Paper Poster (cm) | Framed | Matte",
+    "title": "Enhanced Matte Paper Framed Poster (cm)",
+    "brand": null,
+    "model": "Paper Poster (cm) | Framed | Matte",
+    "image": "https://files.cdn.printful.com/o/products/304/product_1613463672.jpg",
+    "variant_count": 24,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 19644,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster (cm) (Black / 30×45 cm)",
+     "size": "30×45 cm",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/19644_1715167285.jpg",
+     "price": "32.77",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19645,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster (cm) (Black / 40×50 cm)",
+     "size": "40×50 cm",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/19645_1715167285.jpg",
+     "price": "42.61",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19646,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster (cm) (Black / 45×61 cm)",
+     "size": "45×61 cm",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/19646_1715167295.jpg",
+     "price": "46.30",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19642,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster (cm) (Black / A1 (59.4×84.1 cm))",
+     "size": "A1 (59.4×84.1 cm)",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/19642_1714721488.jpg",
+     "price": "76.25",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19643,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster (cm) (Black / A2 (42×59.4 cm))",
+     "size": "A2 (42×59.4 cm)",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/19643_1714721491.jpg",
+     "price": "46.95",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19652,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster (cm) (Oak / A1 (59.4×84.1 cm))",
+     "size": "A1 (59.4×84.1 cm)",
+     "color": "Oak",
+     "color_code": "#DCB68F",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/19652_1714721501.jpg",
+     "price": "76.50",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19653,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster (cm) (Oak / A2 (42×59.4 cm))",
+     "size": "A2 (42×59.4 cm)",
+     "color": "Oak",
+     "color_code": "#DCB68F",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/19653_1714721509.jpg",
+     "price": "46.95",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19649,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster (cm) (White / 30×45 cm)",
+     "size": "30×45 cm",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/19649_1715167316.jpg",
+     "price": "32.77",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19650,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster (cm) (White / 40×50 cm)",
+     "size": "40×50 cm",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/19650_1715167316.jpg",
+     "price": "42.61",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19651,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster (cm) (White / 45×61 cm)",
+     "size": "45×61 cm",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/19651_1715167316.jpg",
+     "price": "46.30",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19647,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster (cm) (White / A1 (59.4×84.1 cm))",
+     "size": "A1 (59.4×84.1 cm)",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/19647_1714721514.jpg",
+     "price": "74.95",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19648,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster (cm) (White / A2 (42×59.4 cm))",
+     "size": "A2 (42×59.4 cm)",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/19648_1714721520.jpg",
+     "price": "46.95",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 9356,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster 21×30 cm Black",
+     "size": "21×30 cm",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/9356_1533214709.jpg",
+     "price": "21.95",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 11790,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster 21×30 cm Oak",
+     "size": "21×30 cm",
+     "color": "Oak",
+     "color_code": "#DCB68F",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/11790_1606316346.jpg",
+     "price": "23.50",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10296,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster 21×30 cm White",
+     "size": "21×30 cm",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/10296_1621601504.jpg",
+     "price": "21.95",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 9357,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster 30×40 cm Black",
+     "size": "30×40 cm",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/9357_1533214752.jpg",
+     "price": "32.77",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 11791,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster 30×40 cm Oak",
+     "size": "30×40 cm",
+     "color": "Oak",
+     "color_code": "#DCB68F",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/11791_1606316351.jpg",
+     "price": "34.25",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10297,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster 30×40 cm White",
+     "size": "30×40 cm",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/10297_1621601522.jpg",
+     "price": "30.12",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 9358,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster 50×70 cm Black",
+     "size": "50×70 cm",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/9358_1533623727.jpg",
+     "price": "58.95",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 11792,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster 50×70 cm Oak",
+     "size": "50×70 cm",
+     "color": "Oak",
+     "color_code": "#DCB68F",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/11792_1606316361.jpg",
+     "price": "63.50",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10298,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster 50×70 cm White",
+     "size": "50×70 cm",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/10298_1621601542.jpg",
+     "price": "58.95",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 9359,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster 61×91 cm Black",
+     "size": "61×91 cm",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/9359_1533214735.jpg",
+     "price": "79.02",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 11793,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster 61×91 cm Oak",
+     "size": "61×91 cm",
+     "color": "Oak",
+     "color_code": "#DCB68F",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/11793_1606316373.jpg",
+     "price": "88.25",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10299,
+     "product_id": 304,
+     "name": "Enhanced Matte Paper Framed Poster 61×91 cm White",
+     "size": "61×91 cm",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/304/10299_1621601563.jpg",
+     "price": "78.03",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

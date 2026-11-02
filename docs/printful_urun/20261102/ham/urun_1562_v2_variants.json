@@ -1,0 +1,114 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1562/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 49344,
+    "catalog_product_id": 1562,
+    "name": "BagBase Quadra QD815 | Airside Cross Body Bag (Black / One size)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#171717",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1562/49344_1777374634.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49344"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1562"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1562/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49344/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49344/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49344/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_backpack",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49345,
+    "catalog_product_id": 1562,
+    "name": "BagBase Quadra QD815 | Airside Cross Body Bag (Natural Stone / One size)",
+    "size": "One size",
+    "color": "Natural Stone",
+    "color_code": "#d6d1c6",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1562/49345_1777374645.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49345"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1562"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1562/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49345/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49345/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49345/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_backpack",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1562/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1562"
+   }
+  }
+ }
+}

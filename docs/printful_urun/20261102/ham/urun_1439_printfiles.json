@@ -1,0 +1,110 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1439",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 1439,
+   "available_placements": {
+    "embroidery_patch_front": "Patch"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 266,
+     "width": 900,
+     "height": 900,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 342,
+     "width": 1050,
+     "height": 675,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 343,
+     "width": 900,
+     "height": 900,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 345,
+     "width": 1200,
+     "height": 780,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 44241,
+     "placements": {
+      "embroidery_patch_front": 342
+     }
+    },
+    {
+     "variant_id": 44243,
+     "placements": {
+      "embroidery_patch_front": 343
+     }
+    },
+    {
+     "variant_id": 44247,
+     "placements": {
+      "embroidery_patch_front": 345
+     }
+    },
+    {
+     "variant_id": 44245,
+     "placements": {
+      "embroidery_patch_front": 266
+     }
+    },
+    {
+     "variant_id": 44242,
+     "placements": {
+      "embroidery_patch_front": 342
+     }
+    },
+    {
+     "variant_id": 44244,
+     "placements": {
+      "embroidery_patch_front": 343
+     }
+    },
+    {
+     "variant_id": 44248,
+     "placements": {
+      "embroidery_patch_front": 345
+     }
+    },
+    {
+     "variant_id": 44246,
+     "placements": {
+      "embroidery_patch_front": 266
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Template"
+   ],
+   "options": [
+    "Back",
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,155 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/490?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 490,
+   "type": "CUT-SEW",
+   "main_category_id": 21,
+   "name": "All-Over Print Flag",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/e2/e2a78fddf9c7adb68ebc0172cae2c67f_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Who doesn’t want to turn their house into a home? Brighten up your space by adding this unique flag to your wall. Your flag won’t crease or shrink thanks to the polyester material and will last a long time.\n\n• 100% polyester\n• Knitted fabric\n• Fabric weight: 4.42 oz/yd² (150 g/m²) \n• Print on one side\n• Blank reverse side\n• 2 iron grommets\n• Blank product components sourced from China and Israel",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "label_inside",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "label_inside_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "white": "White",
+      "black": "Black",
+      "clear": "Clear"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/490"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/490/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/490/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/490/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/490/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/490/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/490/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,109 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1466",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 1466,
+   "available_placements": {
+    "front": "Front print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 1564,
+     "width": 2700,
+     "height": 3600,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1565,
+     "width": 2100,
+     "height": 2775,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1566,
+     "width": 1500,
+     "height": 2100,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1567,
+     "width": 1350,
+     "height": 2213,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 46014,
+     "placements": {
+      "front": 1567
+     }
+    },
+    {
+     "variant_id": 46016,
+     "placements": {
+      "front": 1566
+     }
+    },
+    {
+     "variant_id": 46018,
+     "placements": {
+      "front": 1565
+     }
+    },
+    {
+     "variant_id": 46020,
+     "placements": {
+      "front": 1564
+     }
+    },
+    {
+     "variant_id": 46015,
+     "placements": {
+      "front": 1567
+     }
+    },
+    {
+     "variant_id": 46017,
+     "placements": {
+      "front": 1566
+     }
+    },
+    {
+     "variant_id": 46019,
+     "placements": {
+      "front": 1565
+     }
+    },
+    {
+     "variant_id": 46021,
+     "placements": {
+      "front": 1564
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Templates"
+   ],
+   "options": [
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

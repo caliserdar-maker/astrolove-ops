@@ -1,0 +1,76 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/389",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 389,
+   "available_placements": {
+    "front": "Front print",
+    "top": "Top panel",
+    "bottom": "Bottom panel"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 201,
+     "width": 2100,
+     "height": 2850,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 202,
+     "width": 4200,
+     "height": 1650,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 203,
+     "width": 4200,
+     "height": 1125,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 10876,
+     "placements": {
+      "front": 201,
+      "top": 202,
+      "bottom": 203
+     }
+    }
+   ],
+   "option_groups": [
+    "Boy's Lifestyle",
+    "Boy's Lifestyle 2",
+    "Default",
+    "Girl's Lifestyle",
+    "Lifestyle 1",
+    "Lifestyle 2",
+    "Men's Lifestyle"
+   ],
+   "options": [
+    "Back",
+    "Bottom",
+    "Front",
+    "Left",
+    "Left Front",
+    "Right",
+    "Right Front",
+    "Top",
+    "Zoomed-in"
+   ]
+  },
+  "extra": []
+ }
+}

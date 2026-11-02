@@ -1,0 +1,743 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/267",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 267,
+    "main_category_id": 244,
+    "type": "PHONE-CASE",
+    "description": "This sleek Samsung® case protects your phone from scratches, dust, oil, and dirt. It has a solid back and flexible sides that make it easy to take on and off, with precisely aligned cuts and holes. \n\n• Solid polycarbonate back\n• 0.02″ (0.5 mm) raised bezel\n• See-through sides\n• Wireless charging compatible\n• Easy to take on and off\n\nImportant: This product can’t be shipped to South Korea, Hong Kong, Taiwan, Japan, or Singapore. If your shipping address is in these regions, please choose a different product.",
+    "type_name": "Samsung | Cell Phone Case | Clear",
+    "title": "Clear Case for Samsung®",
+    "brand": null,
+    "model": "Samsung | Cell Phone Case | Clear",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/7c/7c7a0c9bba1ab7ead3c03753adc262b6_l",
+    "variant_count": 18,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 11348,
+     "product_id": 267,
+     "name": "Clear Case for Samsung® (Samsung Galaxy S20 Plus)",
+     "size": "Samsung Galaxy S20 Plus",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/11348_1584528498.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 11349,
+     "product_id": 267,
+     "name": "Clear Case for Samsung® (Samsung Galaxy S20 Ultra)",
+     "size": "Samsung Galaxy S20 Ultra",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/11349_1584528399.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 11347,
+     "product_id": 267,
+     "name": "Clear Case for Samsung® (Samsung Galaxy S20)",
+     "size": "Samsung Galaxy S20",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/11347_1584528512.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 12027,
+     "product_id": 267,
+     "name": "Clear Case for Samsung® (Samsung Galaxy S21 Plus)",
+     "size": "Samsung Galaxy S21 Plus",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/12027_1615296293.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 12026,
+     "product_id": 267,
+     "name": "Clear Case for Samsung® (Samsung Galaxy S21 Ultra)",
+     "size": "Samsung Galaxy S21 Ultra",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/12026_1615296332.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 12025,
+     "product_id": 267,
+     "name": "Clear Case for Samsung® (Samsung Galaxy S21)",
+     "size": "Samsung Galaxy S21",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/12025_1615296198.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 14634,
+     "product_id": 267,
+     "name": "Clear Case for Samsung® (Samsung Galaxy S22 Plus)",
+     "size": "Samsung Galaxy S22 Plus",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/14634_1645797547.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 14635,
+     "product_id": 267,
+     "name": "Clear Case for Samsung® (Samsung Galaxy S22 Ultra)",
+     "size": "Samsung Galaxy S22 Ultra",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/14635_1645797548.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 14633,
+     "product_id": 267,
+     "name": "Clear Case for Samsung® (Samsung Galaxy S22)",
+     "size": "Samsung Galaxy S22",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/14633_1645797555.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 21482,
+     "product_id": 267,
+     "name": "Clear Case for Samsung® (Samsung Galaxy S25 Plus)",
+     "size": "Samsung Galaxy S25 Plus",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/21482_1738053259.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 21483,
+     "product_id": 267,
+     "name": "Clear Case for Samsung® (Samsung Galaxy S25 Ultra)",
+     "size": "Samsung Galaxy S25 Ultra",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/21483_1738053270.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 21481,
+     "product_id": 267,
+     "name": "Clear Case for Samsung® (Samsung Galaxy S25)",
+     "size": "Samsung Galaxy S25",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/21481_1738053422.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 18750,
+     "product_id": 267,
+     "name": "Samsung Case (Samsung Galaxy S23 Plus)",
+     "size": "Samsung Galaxy S23 Plus",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/18750_1707912851.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 18751,
+     "product_id": 267,
+     "name": "Samsung Case (Samsung Galaxy S23 Ultra)",
+     "size": "Samsung Galaxy S23 Ultra",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/18751_1707912854.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 18749,
+     "product_id": 267,
+     "name": "Samsung Case (Samsung Galaxy S23)",
+     "size": "Samsung Galaxy S23",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/18749_1707912854.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 18735,
+     "product_id": 267,
+     "name": "Samsung Case (Samsung Galaxy S24 Plus)",
+     "size": "Samsung Galaxy S24 Plus",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/18735_1705299929.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 18736,
+     "product_id": 267,
+     "name": "Samsung Case (Samsung Galaxy S24 Ultra)",
+     "size": "Samsung Galaxy S24 Ultra",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/18736_1705299934.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 18734,
+     "product_id": 267,
+     "name": "Samsung Case (Samsung Galaxy S24)",
+     "size": "Samsung Galaxy S24",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/267/18734_1705299937.jpg",
+     "price": "9.57",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

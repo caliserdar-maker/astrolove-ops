@@ -1,0 +1,290 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/634/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16092,
+    "catalog_product_id": 634,
+    "name": "Wooden Ornaments (Wood / Bell)",
+    "size": "Bell",
+    "color": "Wood",
+    "color_code": "#f8ddb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/634/16092_1661492431.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16092"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/634"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/634/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16092/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16092/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16092/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.3,
+      "width": 3.9,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 6.3,
+      "width": 3.9,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16088,
+    "catalog_product_id": 634,
+    "name": "Wooden Ornaments (Wood / Heart)",
+    "size": "Heart",
+    "color": "Wood",
+    "color_code": "#f8ddb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/634/16088_1661492441.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16088"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/634"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/634/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16088/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16088/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16088/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.3,
+      "width": 3.9,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 6.3,
+      "width": 3.9,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16091,
+    "catalog_product_id": 634,
+    "name": "Wooden Ornaments (Wood / Oval)",
+    "size": "Oval",
+    "color": "Wood",
+    "color_code": "#f8ddb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/634/16091_1661492451.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16091"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/634"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/634/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16091/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16091/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16091/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.3,
+      "width": 3.9,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 6.3,
+      "width": 3.9,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16089,
+    "catalog_product_id": 634,
+    "name": "Wooden Ornaments (Wood / Star)",
+    "size": "Star",
+    "color": "Wood",
+    "color_code": "#f8ddb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/634/16089_1661492451.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16089"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/634"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/634/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16089/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16089/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16089/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.3,
+      "width": 3.9,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 6.3,
+      "width": 3.9,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16093,
+    "catalog_product_id": 634,
+    "name": "Wooden Ornaments (Wood / Stocking)",
+    "size": "Stocking",
+    "color": "Wood",
+    "color_code": "#f8ddb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/634/16093_1661492461.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16093"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/634"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/634/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16093/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16093/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16093/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.3,
+      "width": 3.9,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 6.3,
+      "width": 3.9,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16090,
+    "catalog_product_id": 634,
+    "name": "Wooden Ornaments (Wood / Tree)",
+    "size": "Tree",
+    "color": "Wood",
+    "color_code": "#f8ddb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/634/16090_1661492461.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16090"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/634"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/634/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16090/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16090/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16090/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.3,
+      "width": 3.9,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 6.3,
+      "width": 3.9,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 6,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/634/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/634"
+   }
+  }
+ }
+}

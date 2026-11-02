@@ -1,0 +1,82 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/279/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 9063,
+    "catalog_product_id": 279,
+    "name": "All-Over Print Backpack",
+    "size": "One size",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/279/9063_1534847488.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/9063"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/279"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/279/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/9063/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/9063/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/9063/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 20.5,
+      "width": 14.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "top",
+      "height": 8.0,
+      "width": 28.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "bottom",
+      "height": 5.0,
+      "width": 28.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "pocket",
+      "height": 8.0,
+      "width": 13.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/279/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/279"
+   }
+  }
+ }
+}

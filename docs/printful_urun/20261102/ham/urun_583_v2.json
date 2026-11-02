@@ -1,0 +1,122 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/583?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 583,
+   "type": "SUBLIMATION",
+   "main_category_id": 251,
+   "name": "Gaming Mouse Pad",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/17/1753cc3ed8f6b1f796c1f86bc140ee37_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "With its large size and quality edge stitching, this gaming mouse pad turns your gaming setup into a professional gaming station ready for Dota, CSGO, and more. Don’t worry about jerky mouse movements ever again, as the under layer features a reliable non-slip surface that keeps the entire mat firmly rooted to your table.\n\n• 100% polyester\n• Rubber non-slip base\n• Sizes: 36″ × 18″ (91.4 cm × 45.7 cm), 18″ × 16″ (45.8 cm × 40.7 cm)\n• Vibrant prints, long lasting\n• High-quality edge stitching that doesn’t peel\n• Non-slip surface\n• Rounded edges\n• Blank product sourced from China\n\nDisclaimer: Not machine washable. Spot clean gently to preserve quality and appearance.",
+   "sizes": [
+    "36″×18″",
+    "18″×16″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/583"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/583/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/583/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/583/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/583/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/583/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/583/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

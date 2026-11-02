@@ -1,0 +1,178 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1651/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 52328,
+    "catalog_product_id": 1651,
+    "name": "Generic brand  (Ecru / 4.75″×4.75″)",
+    "size": "4.75″×4.75″",
+    "color": "Ecru",
+    "color_code": "#f5efd5",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1651/52328_1783681609.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52328"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1651"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1651/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52328/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52328/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52328/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 4.75,
+      "width": 4.75,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52330,
+    "catalog_product_id": 1651,
+    "name": "Generic brand  (Ecru / 6.5″×6.5″)",
+    "size": "6.5″×6.5″",
+    "color": "Ecru",
+    "color_code": "#f5efd5",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1651/52330_1783681610.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52330"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1651"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1651/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52330/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52330/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52330/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.34,
+      "width": 6.34,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52329,
+    "catalog_product_id": 1651,
+    "name": "Generic brand  (White / 4.75″×4.75″)",
+    "size": "4.75″×4.75″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1651/52329_1783681620.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52329"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1651"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1651/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52329/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52329/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52329/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 4.75,
+      "width": 4.75,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52331,
+    "catalog_product_id": 1651,
+    "name": "Generic brand  (White / 6.5″×6.5″)",
+    "size": "6.5″×6.5″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1651/52331_1783681620.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52331"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1651"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1651/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52331/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52331/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52331/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.34,
+      "width": 6.34,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1651/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1651"
+   }
+  }
+ }
+}

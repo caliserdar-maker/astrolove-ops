@@ -1,0 +1,121 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/518?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 518,
+   "type": "SUBLIMATION",
+   "main_category_id": 251,
+   "name": "Mouse Pad",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/83/83dfc4934273f68021ef5d0324168e39_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Every mouse needs a good mouse pad! Our mouse pad offers supreme grip and effortless mouse movement, and it does so with style.\n\n• Soft polyester surface \n• Natural rubber base\n• Rounded edges\n• 2.8 oz (79.4 g)\n• Size: 8.7″ × 7.1″ × 0.12″ (220 × 180 × 3 mm) \n• Blank product sourced from China\n\nAttention: Avoid placing the pad under direct sunlight to prevent fading.",
+   "sizes": [
+    "8.7\"x7.1\""
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/518"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/518/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/518/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/518/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/518/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/518/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/518/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

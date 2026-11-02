@@ -1,0 +1,842 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1553/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 49313,
+    "catalog_product_id": 1553,
+    "name": "BagBase W101 | Bag of Life - Long Handles (Black / One size)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#090909",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1553/49313_1776180130.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49313"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1553"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1553/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49313/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49313/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49313/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49314,
+    "catalog_product_id": 1553,
+    "name": "BagBase W101 | Bag of Life - Long Handles (Bottle Green / One size)",
+    "size": "One size",
+    "color": "Bottle Green",
+    "color_code": "#05442f",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1553/49314_1776180140.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49314"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1553"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1553/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49314/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49314/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49314/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49315,
+    "catalog_product_id": 1553,
+    "name": "BagBase W101 | Bag of Life - Long Handles (Burgundy / One size)",
+    "size": "One size",
+    "color": "Burgundy",
+    "color_code": "#491729",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1553/49315_1776180140.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49315"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1553"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1553/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49315/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49315/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49315/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49316,
+    "catalog_product_id": 1553,
+    "name": "BagBase W101 | Bag of Life - Long Handles (Classic Pink / One size)",
+    "size": "One size",
+    "color": "Classic Pink",
+    "color_code": "#ffbfd9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1553/49316_1776180150.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49316"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1553"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1553/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49316/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49316/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49316/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49317,
+    "catalog_product_id": 1553,
+    "name": "BagBase W101 | Bag of Life - Long Handles (Classic Red / One size)",
+    "size": "One size",
+    "color": "Classic Red",
+    "color_code": "#9f0019",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1553/49317_1776180151.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49317"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1553"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1553/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49317/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49317/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49317/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49318,
+    "catalog_product_id": 1553,
+    "name": "BagBase W101 | Bag of Life - Long Handles (Coral / One size)",
+    "size": "One size",
+    "color": "Coral",
+    "color_code": "#ff5a4e",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1553/49318_1776180151.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49318"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1553"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1553/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49318/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49318/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49318/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49319,
+    "catalog_product_id": 1553,
+    "name": "BagBase W101 | Bag of Life - Long Handles (French Navy / One size)",
+    "size": "One size",
+    "color": "French Navy",
+    "color_code": "#0d151c",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1553/49319_1776180161.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49319"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1553"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1553/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49319/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49319/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49319/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49320,
+    "catalog_product_id": 1553,
+    "name": "BagBase W101 | Bag of Life - Long Handles (Light Grey / One size)",
+    "size": "One size",
+    "color": "Light Grey",
+    "color_code": "#bfc1c2",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1553/49320_1776180172.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49320"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1553"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1553/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49320/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49320/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49320/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49321,
+    "catalog_product_id": 1553,
+    "name": "BagBase W101 | Bag of Life - Long Handles (Mint / One size)",
+    "size": "One size",
+    "color": "Mint",
+    "color_code": "#6ef9e0",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1553/49321_1776180172.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49321"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1553"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1553/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49321/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49321/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49321/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49322,
+    "catalog_product_id": 1553,
+    "name": "BagBase W101 | Bag of Life - Long Handles (Mustard / One size)",
+    "size": "One size",
+    "color": "Mustard",
+    "color_code": "#d39e22",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1553/49322_1776180172.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49322"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1553"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1553/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49322/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49322/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49322/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49323,
+    "catalog_product_id": 1553,
+    "name": "BagBase W101 | Bag of Life - Long Handles (Natural / One size)",
+    "size": "One size",
+    "color": "Natural",
+    "color_code": "#fffbf1",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1553/49323_1776180182.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49323"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1553"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1553/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49323/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49323/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49323/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49324,
+    "catalog_product_id": 1553,
+    "name": "BagBase W101 | Bag of Life - Long Handles (Orange / One size)",
+    "size": "One size",
+    "color": "Orange",
+    "color_code": "#f95200",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1553/49324_1776180202.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49324"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1553"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1553/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49324/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49324/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49324/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 9.75,
+      "width": 9.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 12,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1553/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1553"
+   }
+  }
+ }
+}

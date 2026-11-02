@@ -1,0 +1,149 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/545?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 545,
+   "type": "CUT-SEW",
+   "main_category_id": 217,
+   "name": "All-Over Print Headband",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/e2/e27e7c277d9e21d1c66bca5be286bada_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "This soft, stretchy headband adds that extra bit of comfort for your workouts, while also being stylish enough to rock with a Friday-night look. Don’t miss out on getting your own!\n\n• 78% polyester, 22% elastane for fulfillment in the US\n• 84% polyester, 16% elastane for fulfillment in EU\n• Fabric weight: 8.56 oz./yd.² (290 g/m²) in the US\n• Fabric weight: 6.78 oz./yd.² (230 g/m²) in EU\n• Moisture-wicking\n• Blank product components sourced from Mexico and China",
+   "sizes": [
+    "L",
+    "M"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "label_inside",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "label_inside_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "white": "White",
+      "black": "Black"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/545"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/545/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/545/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/545/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/545/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/545/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/545/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

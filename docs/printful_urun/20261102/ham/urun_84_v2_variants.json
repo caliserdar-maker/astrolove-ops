@@ -1,0 +1,158 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/84/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 4533,
+    "catalog_product_id": 84,
+    "name": "All-Over Tote (Black)",
+    "size": "15″×15″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/84/4533_1530790503.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4533"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/84"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/84/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4533/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4533/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4533/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.5,
+      "width": 17.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "default",
+      "height": 33.0,
+      "width": 17.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 8904,
+    "catalog_product_id": 84,
+    "name": "All-Over Tote (Red)",
+    "size": "15″×15″",
+    "color": "Red",
+    "color_code": "#c5262a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/84/8904_1530790515.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/8904"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/84"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/84/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/8904/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/8904/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/8904/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.5,
+      "width": 17.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "default",
+      "height": 33.0,
+      "width": 17.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 8905,
+    "catalog_product_id": 84,
+    "name": "All-Over Tote (Yellow)",
+    "size": "15″×15″",
+    "color": "Yellow",
+    "color_code": "#de9219",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/84/8905_1530790527.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/8905"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/84"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/84/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/8905/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/8905/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/8905/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.5,
+      "width": 17.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "default",
+      "height": 33.0,
+      "width": 17.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/84/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/84"
+   }
+  }
+ }
+}

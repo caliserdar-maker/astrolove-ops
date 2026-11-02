@@ -1,0 +1,109 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/653",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 653,
+    "main_category_id": 238,
+    "type": "DRINKWARE",
+    "description": "Enjoy your refreshing drinks in this shaker pint glass! It can hold up to 16 oz and will be a durable, high-quality addition to your glassware collection. What’s more, you can even use it as a mixing glass for cocktail evenings. \n\n• Glass material\n• Volume: 16 oz (473 ml)\n• Not dishwasher or microwave safe\n• Simple yet durable design\n• Can be used as a mixing glass\n• Product sourced from China\n\nDisclaimer: This is a handmade product from natural materials, so the glass may have some tiny imperfections, such as bubbles and dots.",
+    "type_name": "Pint Glass | 16oz | Clear",
+    "title": "Shaker Pint Glass (16 oz)",
+    "brand": null,
+    "model": "Pint Glass | 16oz | Clear",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/62/6225a66e6c7a4f34734e3ddb668e4a49_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 16359,
+     "product_id": 653,
+     "name": "Shaker Pint Glass (16 oz)",
+     "size": "16 oz",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/653/16359_1672323391.jpg",
+     "price": "15.26",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

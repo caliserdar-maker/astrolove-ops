@@ -1,0 +1,70 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/505/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 12917,
+    "catalog_product_id": 505,
+    "name": "Kiss cut sticker sheet (White / 5.83″×8.27″)",
+    "size": "5.83″×8.27″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/505/12917_1629116996.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/12917"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/505"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/505/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/12917/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/12917/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/12917/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 8.27,
+      "width": 5.83,
+      "orientation": "any"
+     },
+     {
+      "placement": "background",
+      "height": 8.51,
+      "width": 6.07,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/505/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/505"
+   }
+  }
+ }
+}

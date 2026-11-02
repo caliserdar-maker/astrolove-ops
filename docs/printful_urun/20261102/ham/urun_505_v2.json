@@ -1,0 +1,119 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/505?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 505,
+   "type": "STICKER",
+   "main_category_id": 202,
+   "name": "Kiss-Cut Sticker Sheet",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/76/7658fa12bc07c99e823fbc140595bc24_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "These glossy stickers are designed just for you. Give your favorite items, like a notepad, laptop, or phone case an extra glow and personal touch. \n\n• Film type: MPI 3000 Gloss HOP (EU), Promotional Monomeric PVC (US)\n• 0.12″ (0.3 cm) white sticker border \n• Glossy finish\n• Fast and easy application\n• 2–3 year durability\n• Indoor use\n• Blank product sourced from Japan\n\nDon't forget to clean the surface before applying the stickers.",
+   "sizes": [
+    "5.83″×8.27″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "background",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/505"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/505/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/505/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/505/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/505/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/505/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/505/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

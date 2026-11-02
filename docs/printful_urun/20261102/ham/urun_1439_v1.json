@@ -1,0 +1,349 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1439",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1439,
+    "main_category_id": 215,
+    "type": "EMBROIDERY-PATCH",
+    "description": "Give your worn-in clothes a second life or create bold designs that represent you or your brand. The hook-and-loop backing attachment ensures a secure hold while allowing effortless customization whenever you want.\n\n• Twill fabric (26% cotton, 74% polyester)\n• Hook-and-loop backing for easy attach-and-remove use\n• Attachment option: hook-and-loop backing – ideal for reusable, interchangeable patches without ironing or sewing\n• Blank product sourced from China",
+    "type_name": "Patch | Embroidered | Tactical",
+    "title": "Embroidered Tactical Patches",
+    "brand": "Gunold",
+    "model": "003velcro",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/7a/7acefe20374440b06a3b2b32da880524_l",
+    "variant_count": 8,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "thread_colors_patch_front",
+      "title": "Patch front thread colors",
+      "type": "multi_select",
+      "values": {
+       "#FFFFFF": "1801 White",
+       "#000000": "1800 Black",
+       "#96A1A8": "1718 Grey",
+       "#A67843": "1672 Old Gold",
+       "#FFCC00": "1951 Gold",
+       "#E25C27": "1987 Orange",
+       "#CC3366": "1910 Flamingo",
+       "#CC3333": "1839 Red",
+       "#660000": "1784 Maroon",
+       "#333366": "1966 Navy",
+       "#005397": "1842 Royal",
+       "#3399FF": "1695 Aqua/Teal",
+       "#6B5294": "1832 Purple",
+       "#01784E": "1751 Kelly Green",
+       "#7BA35A": "1848 Kiwi Green"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Embroidery notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "thread_colors_outline",
+      "title": "Outline color",
+      "type": "multi_select",
+      "values": {
+       "#FFFFFF": "1801 White",
+       "#000000": "1800 Black",
+       "#96A1A8": "1718 Grey",
+       "#A67843": "1672 Old Gold",
+       "#FFCC00": "1951 Gold",
+       "#E25C27": "1987 Orange",
+       "#CC3366": "1910 Flamingo",
+       "#CC3333": "1839 Red",
+       "#660000": "1784 Maroon",
+       "#333366": "1966 Navy",
+       "#005397": "1842 Royal",
+       "#3399FF": "1695 Aqua/Teal",
+       "#6B5294": "1832 Purple",
+       "#01784E": "1751 Kelly Green",
+       "#7BA35A": "1848 Kiwi Green"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "EMBROIDERY",
+      "display_name": "Embroidery",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "embroidery_patch_front",
+      "type": "embroidery_patch_front",
+      "title": "Patch",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 44245,
+     "product_id": 1439,
+     "name": "Embroidered Patches with Velcro (Black / Circular ⌀3 in)",
+     "size": "Circular ⌀3 in",
+     "color": "Black",
+     "color_code": "#0a0a0a",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1439/44245_1768491732.jpg",
+     "price": "8.50",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44247,
+     "product_id": 1439,
+     "name": "Embroidered Patches with Velcro (Black / Oval 4″×2.6″)",
+     "size": "Oval 4″×2.6″",
+     "color": "Black",
+     "color_code": "#0a0a0a",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1439/44247_1768491751.jpg",
+     "price": "8.50",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44241,
+     "product_id": 1439,
+     "name": "Embroidered Patches with Velcro (Black / Rectangle 3.5″×2.25″)",
+     "size": "Rectangle 3.5″×2.25″",
+     "color": "Black",
+     "color_code": "#0a0a0a",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1439/44241_1768491761.jpg",
+     "price": "8.50",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44243,
+     "product_id": 1439,
+     "name": "Embroidered Patches with Velcro (Black / Square 3″×3″)",
+     "size": "Square 3″×3″",
+     "color": "Black",
+     "color_code": "#0a0a0a",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1439/44243_1768491761.jpg",
+     "price": "8.50",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44246,
+     "product_id": 1439,
+     "name": "Embroidered Patches with Velcro (White / Circular ⌀3 in)",
+     "size": "Circular ⌀3 in",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1439/44246_1768491771.jpg",
+     "price": "8.50",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44248,
+     "product_id": 1439,
+     "name": "Embroidered Patches with Velcro (White / Oval 4″×2.6″)",
+     "size": "Oval 4″×2.6″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1439/44248_1768491792.jpg",
+     "price": "8.50",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44242,
+     "product_id": 1439,
+     "name": "Embroidered Patches with Velcro (White / Rectangle 3.5″×2.25″)",
+     "size": "Rectangle 3.5″×2.25″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1439/44242_1768491792.jpg",
+     "price": "8.50",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44244,
+     "product_id": 1439,
+     "name": "Embroidered Patches with Velcro (White / Square 3″×3″)",
+     "size": "Square 3″×3″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1439/44244_1768491802.jpg",
+     "price": "8.50",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

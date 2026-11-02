@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1467/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 46023,
+    "catalog_product_id": 1467,
+    "name": "Generic brand (58'' × 102'' / Cotton Twill)",
+    "size": "58″×102″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1467/46023_1767622652.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46023"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1467"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1467/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46023/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46023/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46023/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 104.0,
+      "width": 60.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 46022,
+    "catalog_product_id": 1467,
+    "name": "Generic brand (58'' × 58'' / Cotton Twill)",
+    "size": "58″×58″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1467/46022_1767622653.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46022"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1467"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1467/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46022/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46022/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46022/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 60.0,
+      "width": 60.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1467/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1467"
+   }
+  }
+ }
+}

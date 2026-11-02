@@ -1,0 +1,253 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1641?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1641,
+   "type": "T-SHIRT",
+   "main_category_id": 48,
+   "name": "Shopping bag 2.0 | Stanley/Stella STAU117",
+   "brand": "Stanley/Stella",
+   "model": "STAU117",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/f4/f493daaaefd738d8d6257d37086e2c8f_l",
+   "variant_count": 5,
+   "is_discontinued": false,
+   "description": "Made from durable recycled cotton canvas and designed with both long and short reinforced handles, this versatile shopping bag is built for everyday use. \n\n• 100% recycled cotton canvas\n• Fabric weight: 400 g/m²\n• Fabric washed for a soft, durable finish\n• One size: 38.5 cm × 61 cm × 19 cm (15.2″ × 24″ × 7.5″)\n• Long strap length: 60 cm (23.6″)\n• Hidden snap closure\n• Bottom and side gussets for extra capacity\n• Long and short reinforced handles\n• Internal pocket\n• Herringbone tape finished inside seams\n• Single-needle topstitching at top edge",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#000000"
+    },
+    {
+     "name": "French Navy",
+     "value": "#000a21"
+    },
+    {
+     "name": "Latte",
+     "value": "#c9965f"
+    },
+    {
+     "name": "Natural Raw",
+     "value": "#fff5e8"
+    },
+    {
+     "name": "Worker Blue",
+     "value": "#00125c"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "embroidery",
+     "display_name": "Embroidery",
+     "is_default": true
+    },
+    {
+     "key": "dtfilm",
+     "display_name": "DTF printing",
+     "is_default": false
+    }
+   ],
+   "placements": [
+    {
+     "placement": "embroidery_apparel_front",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": [
+        {
+         "name": "thread_colors",
+         "techniques": [
+          "embroidery"
+         ],
+         "type": "array",
+         "values": {
+          "#FFFFFF": "1801 White",
+          "#000000": "1800 Black",
+          "#96A1A8": "1718 Grey",
+          "#A67843": "1672 Old Gold",
+          "#FFCC00": "1951 Gold",
+          "#E25C27": "1987 Orange",
+          "#CC3366": "1910 Flamingo",
+          "#CC3333": "1839 Red",
+          "#660000": "1784 Maroon",
+          "#333366": "1966 Navy",
+          "#005397": "1842 Royal",
+          "#3399FF": "1695 Aqua/Teal",
+          "#6B5294": "1832 Purple",
+          "#01784E": "1751 Kelly Green",
+          "#7BA35A": "1848 Kiwi Green"
+         }
+        }
+       ]
+      }
+     ],
+     "placement_options": [
+      {
+       "name": "unlimited_color",
+       "techniques": [
+        "embroidery"
+       ],
+       "type": "bool",
+       "values": [
+        true,
+        false
+       ]
+      }
+     ],
+     "conflicting_placements": [
+      "embroidery_neckline"
+     ]
+    },
+    {
+     "placement": "embroidery_apparel_back",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": [
+        {
+         "name": "thread_colors",
+         "techniques": [
+          "embroidery"
+         ],
+         "type": "array",
+         "values": {
+          "#FFFFFF": "1801 White",
+          "#000000": "1800 Black",
+          "#96A1A8": "1718 Grey",
+          "#A67843": "1672 Old Gold",
+          "#FFCC00": "1951 Gold",
+          "#E25C27": "1987 Orange",
+          "#CC3366": "1910 Flamingo",
+          "#CC3333": "1839 Red",
+          "#660000": "1784 Maroon",
+          "#333366": "1966 Navy",
+          "#005397": "1842 Royal",
+          "#3399FF": "1695 Aqua/Teal",
+          "#6B5294": "1832 Purple",
+          "#01784E": "1751 Kelly Green",
+          "#7BA35A": "1848 Kiwi Green"
+         }
+        }
+       ]
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "front_dtf_tote",
+     "technique": "dtfilm",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "back_dtf_tote",
+     "technique": "dtfilm",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "dtg",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "lifelike",
+     "techniques": [
+      "dtg"
+     ],
+     "type": "bool",
+     "values": [
+      true,
+      false
+     ]
+    },
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1641"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1641/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1641/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1641/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1641/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1641/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1641/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

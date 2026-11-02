@@ -1,0 +1,136 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/516",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 516,
+   "available_placements": {
+    "embroidery_patch_front": "Patch"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 266,
+     "width": 900,
+     "height": 900,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 342,
+     "width": 1050,
+     "height": 675,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 343,
+     "width": 900,
+     "height": 900,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 344,
+     "width": 930,
+     "height": 840,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 345,
+     "width": 1200,
+     "height": 780,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 15563,
+     "placements": {
+      "embroidery_patch_front": 342
+     }
+    },
+    {
+     "variant_id": 15569,
+     "placements": {
+      "embroidery_patch_front": 344
+     }
+    },
+    {
+     "variant_id": 15560,
+     "placements": {
+      "embroidery_patch_front": 343
+     }
+    },
+    {
+     "variant_id": 15736,
+     "placements": {
+      "embroidery_patch_front": 345
+     }
+    },
+    {
+     "variant_id": 12981,
+     "placements": {
+      "embroidery_patch_front": 266
+     }
+    },
+    {
+     "variant_id": 15565,
+     "placements": {
+      "embroidery_patch_front": 342
+     }
+    },
+    {
+     "variant_id": 15571,
+     "placements": {
+      "embroidery_patch_front": 344
+     }
+    },
+    {
+     "variant_id": 15562,
+     "placements": {
+      "embroidery_patch_front": 343
+     }
+    },
+    {
+     "variant_id": 15738,
+     "placements": {
+      "embroidery_patch_front": 345
+     }
+    },
+    {
+     "variant_id": 12983,
+     "placements": {
+      "embroidery_patch_front": 266
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Men's Lifestyle",
+    "Men's Lifestyle 2",
+    "Template",
+    "Women's Lifestyle"
+   ],
+   "options": [
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

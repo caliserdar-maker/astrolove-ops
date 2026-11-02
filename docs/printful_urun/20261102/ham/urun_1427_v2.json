@@ -1,0 +1,122 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1427?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1427,
+   "type": "SUBLIMATION",
+   "main_category_id": 254,
+   "name": "Christmas Tree Skirt",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/e1/e1bdf732b4db7600f52fd1f5d1e66d8a_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Make your holiday decor feel extra cozy with this soft fleece tree skirt. Its plush feel and cream base color add warmth and charm to any setting. Perfect for displaying gifts and creating a festive centerpiece under your tree.\n\n• 100% polyester fleece\n• Diameter: 44″ (111.7 cm)\n• Open slit for easy fit around the tree base\n• Hemmed edges\n• Design appears on one side\n\nDisclaimer: Size may vary by ±2.5″ (±6.35 cm)",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1427"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1427/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1427/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1427/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1427/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1427/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1427/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

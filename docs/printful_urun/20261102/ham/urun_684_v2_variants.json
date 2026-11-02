@@ -1,0 +1,1774 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/684/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16920,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S10 Plus)",
+    "size": "Samsung Galaxy S10 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16920_1682428914.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16920"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16920/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16920/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16920/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16918,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S10)",
+    "size": "Samsung Galaxy S10",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16918_1682428923.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16918"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16918/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16918/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16918/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16922,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S10e)",
+    "size": "Samsung Galaxy S10e",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16922_1682428923.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16922"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16922/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16922/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16922/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16930,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S20 FE)",
+    "size": "Samsung Galaxy S20 FE",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16930_1682428934.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16930"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16930/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16930/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16930/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16926,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S20 Plus)",
+    "size": "Samsung Galaxy S20 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16926_1682428944.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16926"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16926/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16926/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16926/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16928,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S20 Ultra)",
+    "size": "Samsung Galaxy S20 Ultra",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16928_1682428944.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16928"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16928/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16928/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16928/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16924,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S20)",
+    "size": "Samsung Galaxy S20",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16924_1682428947.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16924"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16924/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16924/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16924/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16932,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S21 FE)",
+    "size": "Samsung Galaxy S21 FE",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16932_1682428954.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16932"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16932/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16932/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16932/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16936,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S21 Plus)",
+    "size": "Samsung Galaxy S21 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16936_1682428960.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16936"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16936/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16936/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16936/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16938,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S21 Ultra)",
+    "size": "Samsung Galaxy S21 Ultra",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16938_1682428960.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16938"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16938/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16938/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16938/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16934,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S21)",
+    "size": "Samsung Galaxy S21",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16934_1682428965.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16934"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16934/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16934/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16934/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16942,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S22 Plus)",
+    "size": "Samsung Galaxy S22 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16942_1682428971.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16942"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16942/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16942/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16942/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16944,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S22 Ultra)",
+    "size": "Samsung Galaxy S22 Ultra",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16944_1682428981.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16944"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16944/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16944/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16944/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16940,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S22)",
+    "size": "Samsung Galaxy S22",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16940_1682428981.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16940"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16940/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16940/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16940/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16948,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S23 Plus)",
+    "size": "Samsung Galaxy S23 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16948_1682428984.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16948"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16948/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16948/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16948/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16950,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S23 Ultra)",
+    "size": "Samsung Galaxy S23 Ultra",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16950_1682428994.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16950"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16950/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16950/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16950/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16946,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S23)",
+    "size": "Samsung Galaxy S23",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16946_1682428994.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16946"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16946/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16946/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16946/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18738,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S24 Plus)",
+    "size": "Samsung Galaxy S24 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/18738_1705299131.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18738"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18738/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18738/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18738/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18739,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S24 Ultra)",
+    "size": "Samsung Galaxy S24 Ultra",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/18739_1705299136.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18739"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18739/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18739/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18739/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18737,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S24)",
+    "size": "Samsung Galaxy S24",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/18737_1705299137.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18737"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18737/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18737/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18737/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21477,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S25 Plus)",
+    "size": "Samsung Galaxy S25 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/21477_1738586472.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21477"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21477/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21477/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21477/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21479,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S25 Ultra)",
+    "size": "Samsung Galaxy S25 Ultra",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/21479_1738586472.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21479"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21479/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21479/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21479/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21475,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S25)",
+    "size": "Samsung Galaxy S25",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/21475_1738586472.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21475"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21475/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21475/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21475/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16921,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S10 Plus)",
+    "size": "Samsung Galaxy S10 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16921_1682428994.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16921"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16921/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16921/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16921/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16919,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S10)",
+    "size": "Samsung Galaxy S10",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16919_1682429004.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16919"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16919/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16919/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16919/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16923,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S10e)",
+    "size": "Samsung Galaxy S10e",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16923_1682429005.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16923"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16923/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16923/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16923/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16931,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S20 FE)",
+    "size": "Samsung Galaxy S20 FE",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16931_1682429015.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16931"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16931/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16931/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16931/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16927,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S20 Plus)",
+    "size": "Samsung Galaxy S20 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16927_1682429015.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16927"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16927/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16927/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16927/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16929,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S20 Ultra)",
+    "size": "Samsung Galaxy S20 Ultra",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16929_1682429025.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16929"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16929/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16929/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16929/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16925,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S20)",
+    "size": "Samsung Galaxy S20",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16925_1682429025.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16925"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16925/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16925/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16925/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16933,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S21 FE)",
+    "size": "Samsung Galaxy S21 FE",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16933_1682429036.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16933"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16933/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16933/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16933/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16937,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S21 Plus)",
+    "size": "Samsung Galaxy S21 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16937_1682429036.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16937"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16937/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16937/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16937/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16939,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S21 Ultra)",
+    "size": "Samsung Galaxy S21 Ultra",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16939_1682429045.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16939"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16939/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16939/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16939/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16935,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S21)",
+    "size": "Samsung Galaxy S21",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16935_1682429046.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16935"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16935/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16935/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16935/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16943,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S22 Plus)",
+    "size": "Samsung Galaxy S22 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16943_1682429046.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16943"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16943/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16943/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16943/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16945,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S22 Ultra)",
+    "size": "Samsung Galaxy S22 Ultra",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16945_1682429056.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16945"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16945/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16945/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16945/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16941,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S22)",
+    "size": "Samsung Galaxy S22",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16941_1682429066.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16941"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16941/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16941/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16941/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16949,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S23 Plus)",
+    "size": "Samsung Galaxy S23 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16949_1682429066.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16949"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16949/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16949/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16949/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16951,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S23 Ultra)",
+    "size": "Samsung Galaxy S23 Ultra",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16951_1682429066.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16951"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16951/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16951/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16951/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16947,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S23)",
+    "size": "Samsung Galaxy S23",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/16947_1682429076.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16947"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16947/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16947/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16947/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18741,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S24 Plus)",
+    "size": "Samsung Galaxy S24 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/18741_1705299147.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18741"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18741/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18741/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18741/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18742,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S24 Ultra)",
+    "size": "Samsung Galaxy S24 Ultra",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/18742_1705299151.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18742"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18742/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18742/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18742/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18740,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S24)",
+    "size": "Samsung Galaxy S24",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/18740_1705299151.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18740"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18740/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18740/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18740/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21478,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S25 Plus)",
+    "size": "Samsung Galaxy S25 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/21478_1738586483.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21478"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21478/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21478/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21478/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21480,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S25 Ultra)",
+    "size": "Samsung Galaxy S25 Ultra",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/21480_1738586483.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21480"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21480/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21480/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21480/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21476,
+    "catalog_product_id": 684,
+    "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S25)",
+    "size": "Samsung Galaxy S25",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/684/21476_1738586483.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21476"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/684"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21476/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21476/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21476/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.56,
+      "width": 4.49,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 46,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/684"
+   }
+  }
+ }
+}

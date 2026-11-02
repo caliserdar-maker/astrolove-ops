@@ -1,0 +1,216 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/957/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 24964,
+    "catalog_product_id": 957,
+    "name": "Generic brand  (Satin / 2″×2″)",
+    "size": "2″×2″",
+    "color": "Satin",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/957/24964_1755857371.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24964"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/957"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/957/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24964/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24964/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24964/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 2.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 24965,
+    "catalog_product_id": 957,
+    "name": "Generic brand  (Satin / 3″×3″)",
+    "size": "3″×3″",
+    "color": "Satin",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/957/24965_1755857373.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24965"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/957"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/957/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24965/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24965/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24965/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 24966,
+    "catalog_product_id": 957,
+    "name": "Generic brand  (Satin / 4″×4″)",
+    "size": "4″×4″",
+    "color": "Satin",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/957/24966_1755857373.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24966"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/957"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/957/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24966/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24966/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24966/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 24967,
+    "catalog_product_id": 957,
+    "name": "Generic brand  (Satin / 5″×5″)",
+    "size": "5″×5″",
+    "color": "Satin",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/957/24967_1755857373.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24967"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/957"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/957/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24967/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24967/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24967/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 5.0,
+      "width": 5.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 24968,
+    "catalog_product_id": 957,
+    "name": "Generic brand  (Satin / 6″×6″)",
+    "size": "6″×6″",
+    "color": "Satin",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/957/24968_1755857383.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24968"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/957"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/957/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24968/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24968/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24968/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.0,
+      "width": 6.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 5,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/957/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/957"
+   }
+  }
+ }
+}

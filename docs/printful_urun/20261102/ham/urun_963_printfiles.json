@@ -1,0 +1,96 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/963",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 963,
+   "available_placements": {
+    "front": "Front print",
+    "top": "Top print",
+    "bottom": "Bottom print",
+    "label_inside": "Branding"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 356,
+     "width": 1050,
+     "height": 600,
+     "dpi": 150,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1342,
+     "width": 2754,
+     "height": 4340,
+     "dpi": 216,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1343,
+     "width": 2929,
+     "height": 1633,
+     "dpi": 216,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1344,
+     "width": 5998,
+     "height": 1508,
+     "dpi": 216,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 24563,
+     "placements": {
+      "front": 1342,
+      "top": 1344,
+      "bottom": 1343,
+      "label_inside": 356
+     }
+    },
+    {
+     "variant_id": 24564,
+     "placements": {
+      "front": 1342,
+      "top": 1344,
+      "bottom": 1343,
+      "label_inside": 356
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Men's",
+    "Product details",
+    "Template",
+    "Women's"
+   ],
+   "options": [
+    "Back",
+    "Bottom",
+    "Branding",
+    "Front",
+    "Front 2",
+    "Left",
+    "Left Front",
+    "Product details",
+    "Product details 2",
+    "Right",
+    "Right Front",
+    "Top"
+   ]
+  },
+  "extra": []
+ }
+}

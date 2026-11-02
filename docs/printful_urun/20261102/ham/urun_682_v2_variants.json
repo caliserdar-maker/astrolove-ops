@@ -1,0 +1,368 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/682/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16952,
+    "catalog_product_id": 682,
+    "name": "Hardcover Bound Notebook | JournalBook® (Black / 5.5″×8.5″)",
+    "size": "5.5″×8.5″",
+    "color": "Black",
+    "color_code": "#161616",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/682/16952_1683889985.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16952"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/682"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/682/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16952/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16952/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16952/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 5.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16953,
+    "catalog_product_id": 682,
+    "name": "Hardcover Bound Notebook | JournalBook® (Blue / 5.5″×8.5″)",
+    "size": "5.5″×8.5″",
+    "color": "Blue",
+    "color_code": "#0045a6",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/682/16953_1683889989.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16953"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/682"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/682/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16953/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16953/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16953/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 5.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16954,
+    "catalog_product_id": 682,
+    "name": "Hardcover Bound Notebook | JournalBook® (Lime / 5.5″×8.5″)",
+    "size": "5.5″×8.5″",
+    "color": "Lime",
+    "color_code": "#f0ff00",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/682/16954_1683889990.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16954"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/682"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/682/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16954/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16954/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16954/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 5.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16955,
+    "catalog_product_id": 682,
+    "name": "Hardcover Bound Notebook | JournalBook® (Navy / 5.5″×8.5″)",
+    "size": "5.5″×8.5″",
+    "color": "Navy",
+    "color_code": "#1e2c4a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/682/16955_1683889990.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16955"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/682"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/682/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16955/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16955/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16955/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 5.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18659,
+    "catalog_product_id": 682,
+    "name": "Hardcover Bound Notebook | JournalBook® (Orange / 5.5″×8.5″)",
+    "size": "5.5″×8.5″",
+    "color": "Orange",
+    "color_code": "#ff7a10",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/682/18659_1702466518.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18659"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/682"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/682/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18659/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18659/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18659/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 5.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16956,
+    "catalog_product_id": 682,
+    "name": "Hardcover Bound Notebook | JournalBook® (Red / 5.5″×8.5″)",
+    "size": "5.5″×8.5″",
+    "color": "Red",
+    "color_code": "#f40023",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/682/16956_1683889993.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16956"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/682"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/682/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16956/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16956/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16956/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 5.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16957,
+    "catalog_product_id": 682,
+    "name": "Hardcover Bound Notebook | JournalBook® (Silver / 5.5″×8.5″)",
+    "size": "5.5″×8.5″",
+    "color": "Silver",
+    "color_code": "#cdcdcd",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/682/16957_1683889996.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16957"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/682"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/682/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16957/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16957/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16957/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 5.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18658,
+    "catalog_product_id": 682,
+    "name": "Hardcover Bound Notebook | JournalBook® (Turquoise / 5.5″×8.5″)",
+    "size": "5.5″×8.5″",
+    "color": "Turquoise",
+    "color_code": "#119584",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/682/18658_1702466530.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18658"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/682"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/682/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18658/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18658/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18658/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 5.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16958,
+    "catalog_product_id": 682,
+    "name": "Hardcover Bound Notebook | JournalBook® (White / 5.5″×8.5″)",
+    "size": "5.5″×8.5″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/682/16958_1683890001.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16958"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/682"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/682/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16958/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16958/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16958/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 5.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 9,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/682/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/682"
+   }
+  }
+ }
+}

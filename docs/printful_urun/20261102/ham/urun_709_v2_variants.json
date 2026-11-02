@@ -1,0 +1,82 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/709/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 17484,
+    "catalog_product_id": 709,
+    "name": "Placemat Set (4) (White / 18″ × 14″)",
+    "size": "18″ × 14″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/709/17484_1689333353.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17484"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/709"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/709/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17484/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17484/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17484/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "first",
+      "height": 15.5,
+      "width": 19.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "second",
+      "height": 15.5,
+      "width": 19.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "third",
+      "height": 15.5,
+      "width": 19.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "fourth",
+      "height": 15.5,
+      "width": 19.5,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/709/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/709"
+   }
+  }
+ }
+}

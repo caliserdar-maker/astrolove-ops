@@ -1,0 +1,177 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1552?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1552,
+   "type": "EMBROIDERY",
+   "main_category_id": 16,
+   "name": "Everyday Crossbody Bag | QS309",
+   "brand": "BagBase",
+   "model": "Quadra QS309",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/06/06f747ab45000b19c22ca50f6a162eeb_l",
+   "variant_count": 4,
+   "is_discontinued": false,
+   "description": "Looking for a versatile unisex bag with a classic silhouette? This bag is an excellent choice for everyday use. It is a practical crossbody bag with a minimalist design that easily matches a variety of styles. The adjustable shoulder strap ensures comfortable carrying, while the zip closure helps keep your essentials safe and secure. Compact yet spacious enough for everyday items.\n\n• 100% recycled polyester\n• One size: 17.72″ x 8.66″ x 4.72″ (45cm x 22 cm x 12 cm)\n• Capacity: 12 liters\n• Water repellent fabric\n• Two-way zippered opening for easy access\n• External front pocket with cord adjuster\n• Two internal padded slip pockets\n• Self-fabric adjustable shoulder strap\n• Adjustable shoulder strap\n• Blank product sourced from China",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#000000"
+    },
+    {
+     "name": "Fresh Green",
+     "value": "#e5f0e2"
+    },
+    {
+     "name": "Fresh Pink",
+     "value": "#ffeae4"
+    },
+    {
+     "name": "Natural Stone",
+     "value": "#f2eee4"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "embroidery",
+     "display_name": "Embroidery",
+     "is_default": true
+    },
+    {
+     "key": "dtfilm",
+     "display_name": "DTF printing",
+     "is_default": false
+    }
+   ],
+   "placements": [
+    {
+     "placement": "embroidery_apparel_front",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": [
+        {
+         "name": "thread_colors",
+         "techniques": [
+          "embroidery"
+         ],
+         "type": "array",
+         "values": {
+          "#FFFFFF": "1801 White",
+          "#000000": "1800 Black",
+          "#96A1A8": "1718 Grey",
+          "#A67843": "1672 Old Gold",
+          "#FFCC00": "1951 Gold",
+          "#E25C27": "1987 Orange",
+          "#CC3366": "1910 Flamingo",
+          "#CC3333": "1839 Red",
+          "#660000": "1784 Maroon",
+          "#333366": "1966 Navy",
+          "#005397": "1842 Royal",
+          "#3399FF": "1695 Aqua/Teal",
+          "#6B5294": "1832 Purple",
+          "#01784E": "1751 Kelly Green",
+          "#7BA35A": "1848 Kiwi Green"
+         }
+        }
+       ]
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "embroidery_neckline"
+     ]
+    },
+    {
+     "placement": "front_dtf_backpack",
+     "technique": "dtfilm",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1552"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1552/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1552/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1552/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1552/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1552/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1552/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

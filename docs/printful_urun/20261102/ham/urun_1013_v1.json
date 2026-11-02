@@ -1,0 +1,170 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1013",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1013,
+    "main_category_id": 198,
+    "type": "POSTCARD",
+    "description": "A versatile softcover journal perfect for notes, journaling, or sketches. Add your custom inner prints for a personal touch.\n• Paper weight: 120 g/m²\n• One size: 5.75\" × 8\"\n• 100 or 200 perforated pages\n• Lined pages for structured writing\n• Satin finish cover with rounded corners\n• Blank product sourced from the USA",
+    "type_name": "Journal | Soft Cover | Inside Prints",
+    "title": "Softcover Journal with Inside Prints",
+    "brand": null,
+    "model": "Journal | Soft Cover | Inside Prints",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/f8/f858cb1505a04d010bde3f19ac1f2767_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "outside_cover",
+      "type": "outside_cover",
+      "title": "Outside cover",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "inside_cover",
+      "type": "inside_cover",
+      "title": "Inside cover",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page1_front",
+      "type": "page1_front",
+      "title": "Page 1 front",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page1_back",
+      "type": "page1_back",
+      "title": "Page 1 back",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page2_front",
+      "type": "page2_front",
+      "title": "Page 2 front",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page2_back",
+      "type": "page2_back",
+      "title": "Page 2 back",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page3_front",
+      "type": "page3_front",
+      "title": "Page 3 front",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page3_back",
+      "type": "page3_back",
+      "title": "Page 3 back",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 31976,
+     "product_id": 1013,
+     "name": "Generic brand  (5.75″×8″ / 100 pages (50 sheets))",
+     "size": "100 pages (50 sheets)",
+     "color": "5.75″×8″",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1013/31976_1755758967.jpg",
+     "price": "7.31",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 31977,
+     "product_id": 1013,
+     "name": "Generic brand  (5.75″×8″ / 200 pages (100 sheets))",
+     "size": "200 pages (100 sheets)",
+     "color": "5.75″×8″",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1013/31977_1755758977.jpg",
+     "price": "8.62",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

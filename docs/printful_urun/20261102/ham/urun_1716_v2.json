@@ -1,0 +1,107 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1716?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1716,
+   "type": "MUG",
+   "main_category_id": 195,
+   "name": "White Ceramic Latte Mug, 25oz",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/be/be85b911840f9ebd173607e376b271cf_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Go big on your daily brew with this roomy 25oz ceramic latte mug. Its smooth white finish, comfy C-handle, and vibrant printed design make coffee, tea, or a seriously generous latte that little bit better. Microwave and dishwasher safe for easy everyday use.",
+   "sizes": [
+    "25oz"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1716"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1716/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1716/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1716/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1716/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1716/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1716/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

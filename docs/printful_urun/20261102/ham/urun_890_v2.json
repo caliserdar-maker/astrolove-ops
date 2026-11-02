@@ -1,0 +1,127 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/890?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 890,
+   "type": "SUBLIMATION",
+   "main_category_id": 48,
+   "name": "Weekender Bag",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/a2/a25f395d769dca0eef830efc8b9b51ba_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Big, bold, and ready to roam. This roomy tote features soft rope handles, a wrinkle-free finish, and plenty of space for your weekend essentials.\n\n• 100% spun polyester exterior\n• 50% cotton, 50% polyester cream sheeting interior lining\n• Cream-colored cotton rope handles through metal grommets\n• Size: 24″ × 13″ × 5.5″ (60.9 × 33 × 14 cm)\n• Blank product sourced from China",
+   "sizes": [
+    "24″×13″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/890"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/890/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/890/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/890/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/890/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/890/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/890/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

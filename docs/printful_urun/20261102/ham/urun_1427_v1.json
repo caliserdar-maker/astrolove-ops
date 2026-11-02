@@ -1,0 +1,99 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1427",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1427,
+    "main_category_id": 254,
+    "type": "SUBLIMATION",
+    "description": "Make your holiday decor feel extra cozy with this soft fleece tree skirt. Its plush feel and cream base color add warmth and charm to any setting. Perfect for displaying gifts and creating a festive centerpiece under your tree.\n\n• 100% polyester fleece\n• Diameter: 44″ (111.7 cm)\n• Open slit for easy fit around the tree base\n• Hemmed edges\n• Design appears on one side\n\nDisclaimer: Size may vary by ±2.5″ (±6.35 cm)",
+    "type_name": "Tree Skirt | Christmas",
+    "title": "Christmas Tree Skirt",
+    "brand": null,
+    "model": "Tree Skirt | Christmas",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/e1/e1bdf732b4db7600f52fd1f5d1e66d8a_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 44158,
+     "product_id": 1427,
+     "name": "Generic brand (One size)",
+     "size": "One size",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1427/44158_1762860097.jpg",
+     "price": "43.95",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

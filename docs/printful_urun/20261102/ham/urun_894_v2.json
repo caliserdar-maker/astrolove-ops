@@ -1,0 +1,127 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/894?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 894,
+   "type": "SUBLIMATION",
+   "main_category_id": 88,
+   "name": "All-Over Print Apron",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/3d/3dffdebf0d068caf5405957aea9e596f_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Cooking just got cooler. This custom apron features a clean front, button-adjustable straps, and durable fabric that withstands spills. One size, all style—perfect for grilling, baking, or anything in between.\n\n• 100% polyester\n• Size: 27.6″ × 30.3″ (70 cm × 77 cm)\n• Weight: 10.9 oz (310 g) \n• Button-adjustable black twill straps\n• One size fits most\n• Blank product sourced from China",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/894"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/894/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/894/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/894/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/894/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/894/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/894/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

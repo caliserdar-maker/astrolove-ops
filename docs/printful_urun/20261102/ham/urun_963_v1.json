@@ -1,0 +1,142 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/963",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 963,
+    "main_category_id": 81,
+    "type": "CUT-SEW",
+    "description": "Express your style with a backpack that’s equal parts trendy and practical. It provides spacious compartments, a secure laptop pocket, and a comfy fit to keep you ready for work, weekend trips, and last-minute adventures.\n\n• 100% polyester\n• Fabric weight: 9.73 oz./yd.² (330 g/m²)\n• Capacity: 4.3 gallons (16.1 l)\n• Maximum weight limit: 11.02 lbs (5 kg)\n• Spacious main compartment with multiple pockets\n• 2 front pockets\n• Mesh pockets on both sides\n• Hidden back pocket\n• Zippered laptop pocket\n• Adjustable straps\n• Blank product sourced from China",
+    "type_name": "All-Over Print Utility Backpack",
+    "title": "All-Over Print Utility Backpack",
+    "brand": null,
+    "model": "All-Over Print Utility Backpack",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/c2/c2cc2e1877dc2d3313b69bfcb852d690_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "top",
+      "type": "top",
+      "title": "Top print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "bottom",
+      "type": "bottom",
+      "title": "Bottom print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "label_inside",
+      "type": "label_inside",
+      "title": "Branding",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 24563,
+     "product_id": 963,
+     "name": "All-Over Print Utility Backpack (Black)",
+     "size": "One size",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/963/24563_1760010359.jpg",
+     "price": "45.90",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 24564,
+     "product_id": 963,
+     "name": "All-Over Print Utility Backpack (White)",
+     "size": "One size",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/963/24564_1760010360.jpg",
+     "price": "45.90",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

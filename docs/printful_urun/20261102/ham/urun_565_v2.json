@@ -1,0 +1,208 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/565?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 565,
+   "type": "T-SHIRT",
+   "main_category_id": 88,
+   "name": "Organic Cotton Apron | SOL'S 03569",
+   "brand": "SOL'S",
+   "model": "03569",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/c3/c3a83f22e5b5c237d9e74d0a6da018cc_l",
+   "variant_count": 4,
+   "is_discontinued": false,
+   "description": "Whether you’re crafting a simple lunch or a fancy dinner, an apron can be your shield against food spills, heat, or dirt. Order the 100% organic cotton apron and rock your kitchen in style!\n\n• 100% organic cotton\n• Fabric weight: 7.08 oz/yd² (240 g/m²) \n• Adjustable straps\n• Large front pocket in the front with 2 compartments\n• Blank product sourced from Bangladesh",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#1f1f1f"
+    },
+    {
+     "name": "Navy",
+     "value": "#373b45"
+    },
+    {
+     "name": "Red",
+     "value": "#ff2448"
+    },
+    {
+     "name": "Rope",
+     "value": "#ffead1"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "dtg",
+     "display_name": "DTG printing",
+     "is_default": true
+    },
+    {
+     "key": "embroidery",
+     "display_name": "Embroidery",
+     "is_default": false
+    }
+   ],
+   "placements": [
+    {
+     "placement": "embroidery_chest_center",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": [
+        {
+         "name": "thread_colors",
+         "techniques": [
+          "embroidery"
+         ],
+         "type": "array",
+         "values": {
+          "#FFFFFF": "1801 White",
+          "#000000": "1800 Black",
+          "#96A1A8": "1718 Grey",
+          "#A67843": "1672 Old Gold",
+          "#FFCC00": "1951 Gold",
+          "#E25C27": "1987 Orange",
+          "#CC3366": "1910 Flamingo",
+          "#CC3333": "1839 Red",
+          "#660000": "1784 Maroon",
+          "#333366": "1966 Navy",
+          "#005397": "1842 Royal",
+          "#3399FF": "1695 Aqua/Teal",
+          "#6B5294": "1832 Purple",
+          "#01784E": "1751 Kelly Green",
+          "#7BA35A": "1848 Kiwi Green"
+         }
+        }
+       ]
+      }
+     ],
+     "placement_options": [
+      {
+       "name": "unlimited_color",
+       "techniques": [
+        "embroidery"
+       ],
+       "type": "bool",
+       "values": [
+        true,
+        false
+       ]
+      }
+     ],
+     "conflicting_placements": [
+      "embroidery_chest_left",
+      "embroidery_chest_right",
+      "embroidery_neckline"
+     ]
+    },
+    {
+     "placement": "front",
+     "technique": "dtg",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "dtg",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "lifelike",
+     "techniques": [
+      "dtg"
+     ],
+     "type": "bool",
+     "values": [
+      true,
+      false
+     ]
+    },
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/565"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/565/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/565/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/565/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/565/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/565/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/565/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

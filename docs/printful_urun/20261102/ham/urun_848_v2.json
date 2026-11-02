@@ -1,0 +1,115 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/848?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 848,
+   "type": "DRINKWARE",
+   "main_category_id": 191,
+   "name": "Flip Straw Water Bottle | CamelBak Thrive",
+   "brand": "CamelBak",
+   "model": "Thrive",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/1b/1bae8a320c861d651627d1c74a62af57_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Stay hydrated in style with this flip straw water bottle, made from 50% recycled plastic. Resistant to stains, shattering, and odors, it keeps your drinks fresh, while the leak-proof cover and bite valve prevent spills. This extra-large bottle is ideal for extended gym, work, or study sessions!\n\n• BPA-free Tritan® Renew 50% recycled material \n• 25 oz. (739 ml) \n• Dimensions: 10″ × 3″ (25.4 × 7.62 cm)\n• Stain, shatter, and odor-resistant\n• Leak-proof mouthpiece cover and spill-proof bite valve\n• Pivoting carry handle\n• Blank product sourced from China",
+   "sizes": [
+    "25 oz"
+   ],
+   "colors": [
+    {
+     "name": "Charcoal",
+     "value": "#7d7d7d"
+    },
+    {
+     "name": "Clear",
+     "value": "#ffffff"
+    },
+    {
+     "name": "Oxford Blue",
+     "value": "#3282c9"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/848"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/848/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/848/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/848/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/848/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/848/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/848/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

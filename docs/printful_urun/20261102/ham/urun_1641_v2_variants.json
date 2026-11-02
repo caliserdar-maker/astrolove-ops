@@ -1,0 +1,396 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1641/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 52106,
+    "catalog_product_id": 1641,
+    "name": "Stanley/Stella SAAU046 / STAU117 | Shopping Bag 2.0 (Black / One size)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1641/52106_1790337048.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52106"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1641"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1641/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52106/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52106/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52106/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_large_front",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52107,
+    "catalog_product_id": 1641,
+    "name": "Stanley/Stella SAAU046 / STAU117 | Shopping Bag 2.0 (French Navy / One size)",
+    "size": "One size",
+    "color": "French Navy",
+    "color_code": "#000a21",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1641/52107_1790578142.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52107"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1641"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1641/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52107/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52107/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52107/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_large_front",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52108,
+    "catalog_product_id": 1641,
+    "name": "Stanley/Stella SAAU046 / STAU117 | Shopping Bag 2.0 (Latte / One size)",
+    "size": "One size",
+    "color": "Latte",
+    "color_code": "#c9965f",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1641/52108_1790578152.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52108"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1641"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1641/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52108/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52108/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52108/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_large_front",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52109,
+    "catalog_product_id": 1641,
+    "name": "Stanley/Stella SAAU046 / STAU117 | Shopping Bag 2.0 (Natural Raw / One size)",
+    "size": "One size",
+    "color": "Natural Raw",
+    "color_code": "#fff5e8",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1641/52109_1790578166.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52109"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1641"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1641/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52109/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52109/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52109/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_large_front",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52110,
+    "catalog_product_id": 1641,
+    "name": "Stanley/Stella SAAU046 / STAU117 | Shopping Bag 2.0 (Worker Blue / One size)",
+    "size": "One size",
+    "color": "Worker Blue",
+    "color_code": "#00125c",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1641/52110_1790578176.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52110"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1641"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1641/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52110/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52110/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52110/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_large_front",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_back",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 9.5,
+      "width": 9.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 5,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1641/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1641"
+   }
+  }
+ }
+}

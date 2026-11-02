@@ -1,0 +1,187 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1632",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1632,
+    "main_category_id": 101,
+    "type": "DTFILM",
+    "description": "Looking for a practical sling bag with a laid-back, adventure-ready style? This bag is a great choice for everyday carry, travel, and life on the go. Designed with a clean, versatile look, it pairs easily with casual outfits while keeping your essentials organized and within reach. The adjustable strap allows for comfortable crossbody or shoulder wear, and multiple zippered compartments provide convenient storage for your daily necessities.\n\n•100% nylon taslan\n•One size: 8\" x 5\" (20.32 cm x 12.7 cm)\n•Durable and lightweight construction\n•Interior pocket\n•Adjustable waist strap for a customized fit\n•Can be worn as a crossbody or over one shoulder\n•Dyed-to-match metal zipper pulls and molded zipper\n•Blank product sourced from Kazakhstan.",
+    "type_name": "Sling Bag | Comfort Colors CCSB0",
+    "title": "Sling Bag | Comfort Colors CCSB0",
+    "brand": "Comfort Colors",
+    "model": "CCSB0",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/55/55c6b523e75cc4b8e4126944ed0aa1c2_l",
+    "variant_count": 5,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DTFILM",
+      "display_name": "DTF printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "front_dtf",
+      "type": "front_dtf",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 51576,
+     "product_id": 1632,
+     "name": "Comfort Colors® CCSB0 (One size / Bay)",
+     "size": "One size",
+     "color": "Bay",
+     "color_code": "#C3CFC1",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1632/51576_1783005191.jpg",
+     "price": "21.80",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 51577,
+     "product_id": 1632,
+     "name": "Comfort Colors® CCSB0 (One size / Black)",
+     "size": "One size",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1632/51577_1783005201.jpg",
+     "price": "21.80",
+     "in_stock": false,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "supplier_out_of_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 51578,
+     "product_id": 1632,
+     "name": "Comfort Colors® CCSB0 (One size / Chambray)",
+     "size": "One size",
+     "color": "Chambray",
+     "color_code": "#D9EDF5",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1632/51578_1783005213.jpg",
+     "price": "21.80",
+     "in_stock": false,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "supplier_out_of_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 51579,
+     "product_id": 1632,
+     "name": "Comfort Colors® CCSB0 (One size / Ivory)",
+     "size": "One size",
+     "color": "Ivory",
+     "color_code": "#FFF7E7",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1632/51579_1783005213.jpg",
+     "price": "21.80",
+     "in_stock": false,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "supplier_out_of_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 51580,
+     "product_id": 1632,
+     "name": "Comfort Colors® CCSB0 (One size / Rose Quartz)",
+     "size": "One size",
+     "color": "Rose Quartz",
+     "color_code": "#f4b5da",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1632/51580_1783005213.jpg",
+     "price": "21.80",
+     "in_stock": false,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "supplier_out_of_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

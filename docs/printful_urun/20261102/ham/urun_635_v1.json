@@ -1,0 +1,263 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/635",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 635,
+    "main_category_id": 22,
+    "type": "EMBROIDERY",
+    "description": "Want to stay ready for anything? This pocket-size, incredibly absorbent cotton hand towel has got you covered. Made from 100% cotton and soft yet durable fabric, this quick-drying hand towel is the perfect addition to your everyday essentials.\n\n• 100% cotton \n• 25 × 25 cm\n• Absorbent and durable \n• Blank product sourced from Japan\n\nImportant: This product is available in East Asia* only. If your shipping address is outside this region, please choose a different product. \n\n*Japan, Hong Kong, Indonesia, South Korea, Malaysia, Philippines, Singapore, Thailand, Taiwan, Vietnam",
+    "type_name": "Towel | Hand | Cotton | Imabari",
+    "title": "Cotton Hand Towel | Imabari",
+    "brand": "Imabari",
+    "model": "Cotton Hand Towel",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/7c/7c37ae68534bc60dae1bf06128368c3f_l",
+    "variant_count": 7,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "thread_colors_corner_right",
+      "title": "Right corner thread colors",
+      "type": "multi_select",
+      "values": {
+       "#FFFFFF": "1801 White",
+       "#000000": "1800 Black",
+       "#96A1A8": "1718 Grey",
+       "#A67843": "1672 Old Gold",
+       "#FFCC00": "1951 Gold",
+       "#E25C27": "1987 Orange",
+       "#CC3366": "1910 Flamingo",
+       "#CC3333": "1839 Red",
+       "#660000": "1784 Maroon",
+       "#333366": "1966 Navy",
+       "#005397": "1842 Royal",
+       "#3399FF": "1695 Aqua/Teal",
+       "#6B5294": "1832 Purple",
+       "#01784E": "1751 Kelly Green",
+       "#7BA35A": "1848 Kiwi Green"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Embroidery notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "EMBROIDERY",
+      "display_name": "Embroidery",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "embroidery_corner_right",
+      "type": "embroidery_corner_right",
+      "title": "Right corner",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 16272,
+     "product_id": 635,
+     "name": "Cotton Hand Towel | Imabari (Cappuccino / One size)",
+     "size": "One size",
+     "color": "Cappuccino",
+     "color_code": "#b67e65",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/635/16272_1665387055.jpg",
+     "price": "9.50",
+     "in_stock": true,
+     "availability_regions": {
+      "JP": "Japan"
+     },
+     "availability_status": [
+      {
+       "region": "JP",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16273,
+     "product_id": 635,
+     "name": "Cotton Hand Towel | Imabari (Light Blue / One size)",
+     "size": "One size",
+     "color": "Light Blue",
+     "color_code": "#d4eeff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/635/16273_1665387055.jpg",
+     "price": "9.50",
+     "in_stock": true,
+     "availability_regions": {
+      "JP": "Japan"
+     },
+     "availability_status": [
+      {
+       "region": "JP",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16274,
+     "product_id": 635,
+     "name": "Cotton Hand Towel | Imabari (Light Pink / One size)",
+     "size": "One size",
+     "color": "Light Pink",
+     "color_code": "#ffdbdf",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/635/16274_1665387067.jpg",
+     "price": "9.50",
+     "in_stock": true,
+     "availability_regions": {
+      "JP": "Japan"
+     },
+     "availability_status": [
+      {
+       "region": "JP",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16275,
+     "product_id": 635,
+     "name": "Cotton Hand Towel | Imabari (Moss Green / One size)",
+     "size": "One size",
+     "color": "Moss Green",
+     "color_code": "#8d6913",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/635/16275_1665387068.jpg",
+     "price": "9.50",
+     "in_stock": true,
+     "availability_regions": {
+      "JP": "Japan"
+     },
+     "availability_status": [
+      {
+       "region": "JP",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16276,
+     "product_id": 635,
+     "name": "Cotton Hand Towel | Imabari (Navy Blue / One size)",
+     "size": "One size",
+     "color": "Navy Blue",
+     "color_code": "#0e2b49",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/635/16276_1665387077.jpg",
+     "price": "9.50",
+     "in_stock": true,
+     "availability_regions": {
+      "JP": "Japan"
+     },
+     "availability_status": [
+      {
+       "region": "JP",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16277,
+     "product_id": 635,
+     "name": "Cotton Hand Towel | Imabari (White / One size)",
+     "size": "One size",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/635/16277_1665387077.jpg",
+     "price": "9.50",
+     "in_stock": true,
+     "availability_regions": {
+      "JP": "Japan"
+     },
+     "availability_status": [
+      {
+       "region": "JP",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16271,
+     "product_id": 635,
+     "name": "Cotton Hand Towel|Imabari Flag Towel (Asphalt Black / One size)",
+     "size": "One size",
+     "color": "Asphalt Black",
+     "color_code": "#070707",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/635/16271_1665387079.jpg",
+     "price": "9.50",
+     "in_stock": true,
+     "availability_regions": {
+      "JP": "Japan"
+     },
+     "availability_status": [
+      {
+       "region": "JP",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

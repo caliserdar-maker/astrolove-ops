@@ -1,0 +1,246 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/214/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 49604,
+    "catalog_product_id": 214,
+    "name": "All-Over Print Premium Pillow 14″×14″",
+    "size": "14″×14″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/214/49604_1787221751.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49604"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/214"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/214/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49604/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49604/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49604/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 15.0,
+      "width": 15.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 15.0,
+      "width": 15.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49605,
+    "catalog_product_id": 214,
+    "name": "All-Over Print Premium Pillow 16″×16″",
+    "size": "16″×16″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/214/49605_1787221751.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49605"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/214"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/214/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49605/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49605/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49605/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 17.0,
+      "width": 17.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 17.0,
+      "width": 17.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 9515,
+    "catalog_product_id": 214,
+    "name": "All-Over Print Premium Pillow 18″×18″",
+    "size": "18″×18″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/214/9515_1787221751.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/9515"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/214"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/214/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/9515/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/9515/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/9515/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 19.0,
+      "width": 19.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 19.0,
+      "width": 19.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 7907,
+    "catalog_product_id": 214,
+    "name": "All-Over Print Premium Pillow 20″×12″",
+    "size": "20″×12″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/214/7907_1787221751.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/7907"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/214"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/214/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/7907/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/7907/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/7907/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 13.0,
+      "width": 21.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 13.0,
+      "width": 21.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 11077,
+    "catalog_product_id": 214,
+    "name": "All-Over Print Premium Pillow 22″×22″",
+    "size": "22″×22″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/214/11077_1787221761.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/11077"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/214"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/214/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/11077/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/11077/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/11077/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 23.0,
+      "width": 23.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 23.0,
+      "width": 23.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 5,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/214/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/214"
+   }
+  }
+ }
+}

@@ -1,0 +1,140 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/853/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 22325,
+    "catalog_product_id": 853,
+    "name": "Desk Mat (Black / 12″×18″)",
+    "size": "12″×18″",
+    "color": "Black",
+    "color_code": "#050505",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/853/22325_1739779438.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22325"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/853"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/853/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22325/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22325/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22325/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.8,
+      "width": 18.7,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22326,
+    "catalog_product_id": 853,
+    "name": "Desk Mat (Black / 12″×22″)",
+    "size": "12″×22″",
+    "color": "Black",
+    "color_code": "#050505",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/853/22326_1739779449.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22326"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/853"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/853/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22326/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22326/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22326/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.8,
+      "width": 22.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22327,
+    "catalog_product_id": 853,
+    "name": "Desk Mat (Black / 16″×32″)",
+    "size": "16″×32″",
+    "color": "Black",
+    "color_code": "#050505",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/853/22327_1739778075.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22327"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/853"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/853/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22327/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22327/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22327/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 17.32,
+      "width": 33.07,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/853/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/853"
+   }
+  }
+ }
+}

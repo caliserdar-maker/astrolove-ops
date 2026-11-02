@@ -1,0 +1,114 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/746",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 746,
+    "main_category_id": 254,
+    "type": "SUBLIMATION",
+    "description": "Whether you’re celebrating a special occasion, expressing support for a cause, or adding a welcoming touch to your home, the garden flag is your go-to choice for versatile and durable outdoor decor.\n\n• 100% polyester\n• Size: 12″ × 17″ (30 × 43 cm)\n• Fabric weight: 1.2 oz./yd.² (34 g/m²)\n• Pole hem\n• Blank product sourced from China and printed in the US\n\nDisclaimers: \n• Each garden flag may vary slightly in size and may not be perfectly evenly cut\n• The flag pole is not included",
+    "type_name": "Flag | Garden",
+    "title": "Garden Flag",
+    "brand": null,
+    "model": "Garden Flag",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/dc/dc54473d74e14d38850f6e962eeff48a_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 19211,
+     "product_id": 746,
+     "name": "Garden Flag (White / 12″×17″)",
+     "size": "12″×17″",
+     "color": "White",
+     "color_code": "#dddddd",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/746/19211_1711012217.jpg",
+     "price": "8.84",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

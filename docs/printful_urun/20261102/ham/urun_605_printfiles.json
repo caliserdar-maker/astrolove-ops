@@ -1,0 +1,189 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/605",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 605,
+   "available_placements": {
+    "front": "Front print",
+    "back": "Back print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 335,
+     "width": 423,
+     "height": 234,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 336,
+     "width": 318,
+     "height": 318,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 337,
+     "width": 294,
+     "height": 258,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 15524,
+     "placements": {
+      "front": 336,
+      "back": 337
+     }
+    },
+    {
+     "variant_id": 15533,
+     "placements": {
+      "front": 335,
+      "back": 335
+     }
+    },
+    {
+     "variant_id": 15528,
+     "placements": {
+      "front": 336,
+      "back": 337
+     }
+    },
+    {
+     "variant_id": 15537,
+     "placements": {
+      "front": 335,
+      "back": 335
+     }
+    },
+    {
+     "variant_id": 15530,
+     "placements": {
+      "front": 336,
+      "back": 337
+     }
+    },
+    {
+     "variant_id": 15539,
+     "placements": {
+      "front": 335,
+      "back": 335
+     }
+    },
+    {
+     "variant_id": 15525,
+     "placements": {
+      "front": 336,
+      "back": 337
+     }
+    },
+    {
+     "variant_id": 15534,
+     "placements": {
+      "front": 335,
+      "back": 335
+     }
+    },
+    {
+     "variant_id": 15526,
+     "placements": {
+      "front": 336,
+      "back": 337
+     }
+    },
+    {
+     "variant_id": 15535,
+     "placements": {
+      "front": 335,
+      "back": 335
+     }
+    },
+    {
+     "variant_id": 15532,
+     "placements": {
+      "front": 336,
+      "back": 337
+     }
+    },
+    {
+     "variant_id": 15541,
+     "placements": {
+      "front": 335,
+      "back": 335
+     }
+    },
+    {
+     "variant_id": 15529,
+     "placements": {
+      "front": 336,
+      "back": 337
+     }
+    },
+    {
+     "variant_id": 15538,
+     "placements": {
+      "front": 335,
+      "back": 335
+     }
+    },
+    {
+     "variant_id": 15527,
+     "placements": {
+      "front": 336,
+      "back": 337
+     }
+    },
+    {
+     "variant_id": 15536,
+     "placements": {
+      "front": 335,
+      "back": 335
+     }
+    },
+    {
+     "variant_id": 15531,
+     "placements": {
+      "front": 336,
+      "back": 337
+     }
+    },
+    {
+     "variant_id": 15540,
+     "placements": {
+      "front": 335,
+      "back": 335
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Flat 3",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Lifestyle 6",
+    "Product specs"
+   ],
+   "options": [
+    "Back",
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

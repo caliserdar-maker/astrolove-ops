@@ -1,0 +1,73 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/630",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 630,
+   "available_placements": {
+    "front": "Front print",
+    "label_inside": "Branding"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 64,
+     "width": 375,
+     "height": 150,
+     "dpi": 150,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 380,
+     "width": 4125,
+     "height": 4125,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 16031,
+     "placements": {
+      "front": 380,
+      "label_inside": 64
+     }
+    },
+    {
+     "variant_id": 16032,
+     "placements": {
+      "front": 380,
+      "label_inside": 64
+     }
+    },
+    {
+     "variant_id": 16033,
+     "placements": {
+      "front": 380,
+      "label_inside": 64
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Lifestyle 1",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Product details",
+    "Template"
+   ],
+   "options": [
+    "Branding",
+    "Front",
+    "Product details"
+   ]
+  },
+  "extra": []
+ }
+}

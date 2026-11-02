@@ -1,0 +1,110 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/906",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 906,
+   "available_placements": {
+    "front": "Front print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 1249,
+     "width": 2953,
+     "height": 2350,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1250,
+     "width": 6295,
+     "height": 4650,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1251,
+     "width": 9075,
+     "height": 6150,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1253,
+     "width": 12075,
+     "height": 8520,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1254,
+     "width": 4200,
+     "height": 3300,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 23249,
+     "placements": {
+      "front": 1251
+     }
+    },
+    {
+     "variant_id": 23245,
+     "placements": {
+      "front": 1249
+     }
+    },
+    {
+     "variant_id": 23246,
+     "placements": {
+      "front": 1249
+     }
+    },
+    {
+     "variant_id": 23247,
+     "placements": {
+      "front": 1254
+     }
+    },
+    {
+     "variant_id": 23248,
+     "placements": {
+      "front": 1250
+     }
+    },
+    {
+     "variant_id": 23250,
+     "placements": {
+      "front": 1253
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Flat 3",
+    "Lifestyle",
+    "Product details",
+    "Template"
+   ],
+   "options": [
+    "Front",
+    "Product details"
+   ]
+  },
+  "extra": []
+ }
+}

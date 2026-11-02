@@ -1,0 +1,111 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/382?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 382,
+   "type": "DRINKWARE",
+   "main_category_id": 195,
+   "name": "Stainless Steel Water Bottle",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/products/382/product_1614007264.jpg",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "This 17-ounce, double-walled stainless steel water bottle is perfect for your daily outings. It will keep your drink of choice hot or cold for hours. It also features an odor- and leak-proof cap. Throw it in your car's cup holder on your way to work, take it with you on hikes, or toss it in your bag for any time you get thirsty.\n\n• High-grade stainless steel\n• 17 oz (500 ml)\n• Dimensions: 10.5″ × 2.85″ (27 × 7 cm)\n• Vacuum flask\n• Double-wall construction\n• Bowling pin shape\n• Glossy finish\n• Odorless and leak-proof cap\n• Insulated for hot and cold liquids (keeps the liquid hot or cold for 6 h)\n• Patented ORCA coating for vibrant colors\n• Hand-wash only\n• Blank product sourced from China\n\nDisclaimer: Keeping water in the bottle for over 24 hours is unhygienic and can result in an unpleasant smell.",
+   "sizes": [
+    "17 oz"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#020202"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/382"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/382/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/382/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/382/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/382/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/382/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/382/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

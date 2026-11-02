@@ -1,0 +1,143 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/656",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 656,
+    "main_category_id": 267,
+    "type": "STICKER",
+    "description": "Showcase adventures and inspiration, or simply keep your space organized with our premium magnets. They feature a modern matte finish on top and a strong magnetic material on the back, so they’ll hold up well and look great for years to come. These magnets are a practical and stylish solution for holding up photos, notes, or other small items.\n\n• Made from 0.5 mm flexible vinyl\n• Premium matte finish\n• Magnetic black backing",
+    "type_name": "Magnet | Die Cut",
+    "title": "Die-Cut Magnets",
+    "brand": null,
+    "model": "Magnet | Die Cut",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/24/24b767af95768718c7a62fcb817d01a4_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "United States"
+   },
+   "variants": [
+    {
+     "id": 16366,
+     "product_id": 656,
+     "name": "Die Cut Magnets (3″×3″)",
+     "size": "3″×3″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/656/16366_1677238293.jpg",
+     "price": "3.39",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16367,
+     "product_id": 656,
+     "name": "Die Cut Magnets (4″×4″)",
+     "size": "4″×4″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/656/16367_1677238303.jpg",
+     "price": "3.91",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16465,
+     "product_id": 656,
+     "name": "Die-Cut Magnets (6″×6″)",
+     "size": "6″×6″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/656/16465_1677238303.jpg",
+     "price": "5.99",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

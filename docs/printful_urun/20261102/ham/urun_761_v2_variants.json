@@ -1,0 +1,64 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/761/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 19454,
+    "catalog_product_id": 761,
+    "name": "Shower Curtain (White / 71″×74″)",
+    "size": "71″×74″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/761/19454_1713503163.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19454"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/761"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/761/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19454/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19454/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19454/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 77.0,
+      "width": 73.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/761/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/761"
+   }
+  }
+ }
+}

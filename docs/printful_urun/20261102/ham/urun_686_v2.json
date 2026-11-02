@@ -1,0 +1,136 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/686?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 686,
+   "type": "PHONE-CASE",
+   "main_category_id": 244,
+   "name": "Tough Case for Samsung",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/c6/c6d9effd965c5c7e223a01696a96e2a6_l",
+   "variant_count": 46,
+   "is_discontinued": false,
+   "description": "Make your phone look like a work of art with this tough-yet-sleek phone case. Made with impact-resistant and shock-absorbing materials, it’ll keep your phone safe from bumps and scratches. Plus, the dual-layer design offers extra durability and protection. It’s time to add some fun, protective flair to your phone!\n\n• Outer shell: Polycarbonate (PC)\n• Liner: Polyurethane (TPU) \n• Precisely aligned port openings\n• Induction charger compatible\n\nImportant: This product cannot be shipped to South Korea, Hong Kong, Taiwan, Japan, or Singapore. If your shipping address is in these regions, please choose a different product.",
+   "sizes": [
+    "Samsung Galaxy S10 Plus",
+    "Samsung Galaxy S10",
+    "Samsung Galaxy S10e",
+    "Samsung Galaxy S20 FE",
+    "Samsung Galaxy S20 Plus",
+    "Samsung Galaxy S20 Ultra",
+    "Samsung Galaxy S20",
+    "Samsung Galaxy S21 FE",
+    "Samsung Galaxy S21 Plus",
+    "Samsung Galaxy S21 Ultra",
+    "Samsung Galaxy S21",
+    "Samsung Galaxy S22 Plus",
+    "Samsung Galaxy S22 Ultra",
+    "Samsung Galaxy S22",
+    "Samsung Galaxy S23 Plus",
+    "Samsung Galaxy S23 Ultra",
+    "Samsung Galaxy S23",
+    "Samsung Galaxy S24",
+    "Samsung Galaxy S24 Plus",
+    "Samsung Galaxy S24 Ultra",
+    "Samsung Galaxy S25",
+    "Samsung Galaxy S25 Plus",
+    "Samsung Galaxy S25 Ultra",
+    "Samsung Galaxy S26",
+    "Samsung Galaxy S26 Plus",
+    "Samsung Galaxy S26 Ultra"
+   ],
+   "colors": [
+    {
+     "name": "Glossy",
+     "value": "#ffffff"
+    },
+    {
+     "name": "Matte",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/686"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/686/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/686/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/686/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/686/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/686/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

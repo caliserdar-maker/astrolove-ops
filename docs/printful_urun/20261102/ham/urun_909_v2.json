@@ -1,0 +1,122 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/909?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 909,
+   "type": "SUBLIMATION",
+   "main_category_id": 238,
+   "name": "Tapered Stainless Steel Tumbler 20 oz",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/00/0031e5dc0aec346bbaa80f374158a78e_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Stay sippin’ in style. This 20-oz stainless steel tumbler keeps your drinks hot or cold on the go with a sleek, glossy finish and a spill-resistant lid. Perfect for daily commutes, workouts, or cozy mornings.\n• Tapered stainless steel body\n• Transparent press-in plastic lid\n• Capacity: 20 oz (600 ml)\n• Height: 6.77″ (17.20 cm)\n• Diameter: 2.83″–3.39″ (7.20 cm–8.60 cm)\n• Weight: 11.04 oz (313 g)\n• Double-walled vacuum seal insulation\n• Glossy finish\n• Dishwasher-safe\n• Blank product sourced from China",
+   "sizes": [
+    "20oz"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/909"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/909/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/909/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/909/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/909/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/909/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/909/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,141 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/585",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 585,
+    "main_category_id": 238,
+    "type": "DRINKWARE",
+    "description": "Enjoy hot or cold drinks on the go with this stylish stainless steel tumbler! This reusable tumbler with a metal straw is a perfect combo for hot or cold drinks at any time of the day.\n\n• High-grade stainless steel tumbler\n• 20 oz (600 ml)\n• Tumbler size: 3.11″ × 8.42″ (7.9 cm × 21.4 cm)\n• Straw and lid included with the tumbler\n• A cylindrical shape (top to bottom)\n\nDisclaimer: Not dishwasher or microwave safe. Hand-wash only.",
+    "type_name": "Tumbler | 20oz | Stainless Steel",
+    "title": "Stainless Steel Tumbler",
+    "brand": null,
+    "model": "Tumbler | 20oz | Stainless Steel",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/cf/cf742bc2278471fa6e9a74aeb76192d9_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 15004,
+     "product_id": 585,
+     "name": "Stainless Steel Tumbler (Black / 20 oz)",
+     "size": "20 oz",
+     "color": "Black",
+     "color_code": "#121214",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/585/15004_1651745397.jpg",
+     "price": "21.80",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15005,
+     "product_id": 585,
+     "name": "Stainless Steel Tumbler (White / 20 oz)",
+     "size": "20 oz",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/585/15005_1651745409.jpg",
+     "price": "21.80",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

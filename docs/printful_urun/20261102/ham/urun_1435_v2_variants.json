@@ -1,0 +1,178 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1435/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 45888,
+    "catalog_product_id": 1435,
+    "name": "White Coined Napkins BP1122 (100 pcs / 4.8″×4.8″)",
+    "size": "4.8″×4.8″",
+    "color": "100 pcs",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1435/45888_1764764849.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/45888"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1435"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1435/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/45888/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/45888/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/45888/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.88,
+      "width": 2.88,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 45890,
+    "catalog_product_id": 1435,
+    "name": "White Coined Napkins BP1122 (100 pcs / 6.5″×6.5″)",
+    "size": "6.5″×6.5″",
+    "color": "100 pcs",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1435/45890_1764764873.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/45890"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1435"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1435/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/45890/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/45890/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/45890/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 4.25,
+      "width": 4.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 45889,
+    "catalog_product_id": 1435,
+    "name": "White Coined Napkins BP1122 (50 pcs / 4.8″×4.8″)",
+    "size": "4.8″×4.8″",
+    "color": "50 pcs",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1435/45889_1764764849.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/45889"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1435"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1435/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/45889/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/45889/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/45889/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.88,
+      "width": 2.88,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 45891,
+    "catalog_product_id": 1435,
+    "name": "White Coined Napkins BP1122 (50 pcs / 6.5″×6.5″)",
+    "size": "6.5″×6.5″",
+    "color": "50 pcs",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1435/45891_1764764873.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/45891"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1435"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1435/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/45891/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/45891/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/45891/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 4.25,
+      "width": 4.25,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1435/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1435"
+   }
+  }
+ }
+}

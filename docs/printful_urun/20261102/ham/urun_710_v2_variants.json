@@ -1,0 +1,64 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/710/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 17485,
+    "catalog_product_id": 710,
+    "name": "Table Runner (White / 90″×16″)",
+    "size": "90″×16″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/710/17485_1689856957.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17485"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/710"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/710/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17485/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17485/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17485/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 92.5,
+      "width": 18.5,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/710/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/710"
+   }
+  }
+ }
+}

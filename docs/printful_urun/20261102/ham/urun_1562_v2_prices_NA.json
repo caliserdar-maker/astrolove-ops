@@ -1,0 +1,101 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1562/prices?currency=USD&selling_region_name=north_america",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 1562,
+    "placements": [
+     {
+      "id": "embroidery_apparel_front",
+      "title": "Front",
+      "type": "Embroidery",
+      "technique_key": "embroidery",
+      "placement_options": [],
+      "price": "2.95",
+      "discounted_price": "2.95",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     },
+     {
+      "id": "front_dtf_backpack",
+      "title": "Front print",
+      "type": "DTF printing",
+      "technique_key": "dtfilm",
+      "placement_options": [],
+      "price": "5.95",
+      "discounted_price": "5.95",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 49344,
+     "techniques": [
+      {
+       "technique_key": "embroidery",
+       "technique_display_name": "Embroidery",
+       "price": "28.24",
+       "discounted_price": "28.24"
+      },
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "27.48",
+       "discounted_price": "27.48"
+      }
+     ]
+    },
+    {
+     "id": 49345,
+     "techniques": [
+      {
+       "technique_key": "embroidery",
+       "technique_display_name": "Embroidery",
+       "price": "28.24",
+       "discounted_price": "28.24"
+      },
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "27.48",
+       "discounted_price": "27.48"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1562/prices?currency=USD&selling_region_name=north_america&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1562"
+   }
+  }
+ }
+}

@@ -1,0 +1,97 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/568",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 568,
+   "available_placements": {
+    "front": "Front print",
+    "inside1": "Inside 1",
+    "inside2": "Inside 2",
+    "back": "Back print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 226,
+     "width": 1842,
+     "height": 1240,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 287,
+     "width": 2146,
+     "height": 1546,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 289,
+     "width": 2526,
+     "height": 1794,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 14457,
+     "placements": {
+      "front": 226,
+      "inside1": 226,
+      "inside2": 226,
+      "back": 226
+     }
+    },
+    {
+     "variant_id": 14460,
+     "placements": {
+      "front": 289,
+      "inside1": 289,
+      "inside2": 289,
+      "back": 289
+     }
+    },
+    {
+     "variant_id": 14458,
+     "placements": {
+      "front": 287,
+      "inside1": 287,
+      "inside2": 287,
+      "back": 287
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Flat 3",
+    "Flat 4",
+    "Flat 5",
+    "Flat 6",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Templates"
+   ],
+   "options": [
+    "Back",
+    "Front",
+    "Inside",
+    "Inside 1",
+    "Inside 2",
+    "Outside"
+   ]
+  },
+  "extra": []
+ }
+}

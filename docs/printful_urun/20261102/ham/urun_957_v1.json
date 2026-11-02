@@ -1,0 +1,212 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/957",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 957,
+    "main_category_id": 202,
+    "type": "STICKER",
+    "description": "These die-cut stickers are made to stick — and stay. Crafted from premium vinyl with a matte finish, they resist scratches, water, and sunlight, making them perfect for decorating laptops, bottles, or outdoor gear. Easy to peel and apply, they’ll add a touch of personality to any surface.\n\n• Vinyl with matte finish\n• Sizes: 2″ × 2″ (5.1 × 5.1 cm), 3″ × 3″ (7.6 × 7.6 cm), 4″ × 4″ (10.2 × 10.2 cm), 5″ × 5″ (12.7 × 12.7 cm), 6″ × 6″ (15.2 × 15.2 cm)\n• Water and weather resistant, rated to last over 5 years\n• Easy-peel backing\n• Blank product sourced from the US",
+    "type_name": "Stickers | Die Cut",
+    "title": "Die-Cut Stickers",
+    "brand": null,
+    "model": "Stickers | Die Cut",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/6a/6ac009e08af2f2e0a0d16cc0230e4817_l",
+    "variant_count": 5,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 24964,
+     "product_id": 957,
+     "name": "Generic brand  (Satin / 2″×2″)",
+     "size": "2″×2″",
+     "color": "Satin",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/957/24964_1755857371.jpg",
+     "price": "3.86",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": [
+      {
+       "name": "water-resistant vinyl",
+       "percentage": 100.0
+      }
+     ]
+    },
+    {
+     "id": 24965,
+     "product_id": 957,
+     "name": "Generic brand  (Satin / 3″×3″)",
+     "size": "3″×3″",
+     "color": "Satin",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/957/24965_1755857373.jpg",
+     "price": "4.36",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": [
+      {
+       "name": "water-resistant vinyl",
+       "percentage": 100.0
+      }
+     ]
+    },
+    {
+     "id": 24966,
+     "product_id": 957,
+     "name": "Generic brand  (Satin / 4″×4″)",
+     "size": "4″×4″",
+     "color": "Satin",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/957/24966_1755857373.jpg",
+     "price": "4.84",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": [
+      {
+       "name": "water-resistant vinyl",
+       "percentage": 100.0
+      }
+     ]
+    },
+    {
+     "id": 24967,
+     "product_id": 957,
+     "name": "Generic brand  (Satin / 5″×5″)",
+     "size": "5″×5″",
+     "color": "Satin",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/957/24967_1755857373.jpg",
+     "price": "5.33",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": [
+      {
+       "name": "water-resistant vinyl",
+       "percentage": 100.0
+      }
+     ]
+    },
+    {
+     "id": 24968,
+     "product_id": 957,
+     "name": "Generic brand  (Satin / 6″×6″)",
+     "size": "6″×6″",
+     "color": "Satin",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/957/24968_1755857383.jpg",
+     "price": "6.08",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": [
+      {
+       "name": "water-resistant vinyl",
+       "percentage": 100.0
+      }
+     ]
+    }
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,172 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/750",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 750,
+    "main_category_id": 189,
+    "type": "CUT-SEW",
+    "description": "Style your pet with a premium collar and leash set. The adjustable collar comes in three sizes to ensure a perfect fit, paired with a durable leash that features a padded handle for comfortable walks. It’s ideal for pet owners who value functionality and fashion.\n\n• Durable 100% polyester webbing\n• 92% polyester, 8% spandex collar and leash handle inside\n• Black 100% polyester sponge collar and handle padding\n• Metal snap hook and D-ring for the leash\n• Black plastic main buckle, adjustable buckle, and strap holder for the collar\n• Leash length: 6 ft. (1.83 m)\n• Leash and collar width: 1″ (2.54 cm)\n• 3 collar sizes available: S 11.8″–17.8″ (30–45 cm), M 13.5″–20.5″ (35–52 cm), L 14.8″–23.8″ (38–60 cm)\n• Adjustable collar length\n• Blank product sourced from China\n\nHand wash with mild detergent or machine wash on a gentle cycle in a mesh bag. Air dry.",
+    "type_name": "Pet | Collar & Leash Set",
+    "title": "Pet Collar & Leash",
+    "brand": null,
+    "model": "Pet Collar & Leash Set",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/0d/0dff5fcfbf5ce4ef23351a9468751de4_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "front",
+      "type": "front",
+      "title": "Leash front",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Leash back",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Collar",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "label_inside",
+      "type": "label_inside",
+      "title": "Branding",
+      "additional_price": "2.95",
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 19191,
+     "product_id": 750,
+     "name": "Pet Collar & Leash (White / L)",
+     "size": "L",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/750/19191_1709130691.jpg",
+     "price": "33.69",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19190,
+     "product_id": 750,
+     "name": "Pet Collar & Leash (White / M)",
+     "size": "M",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/750/19190_1709130691.jpg",
+     "price": "33.69",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19189,
+     "product_id": 750,
+     "name": "Pet Collar & Leash (White / S)",
+     "size": "S",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/750/19189_1709130696.jpg",
+     "price": "33.69",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

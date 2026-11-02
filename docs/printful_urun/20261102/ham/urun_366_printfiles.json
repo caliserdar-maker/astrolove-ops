@@ -1,0 +1,124 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/366",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 366,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 15,
+     "width": 4800,
+     "height": 3600,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 39,
+     "width": 10800,
+     "height": 7200,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 106,
+     "width": 3544,
+     "height": 2480,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 113,
+     "width": 8268,
+     "height": 5906,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 10449,
+     "placements": {
+      "default": 106
+     }
+    },
+    {
+     "variant_id": 10450,
+     "placements": {
+      "default": 15
+     }
+    },
+    {
+     "variant_id": 10451,
+     "placements": {
+      "default": 113
+     }
+    },
+    {
+     "variant_id": 10452,
+     "placements": {
+      "default": 39
+     }
+    },
+    {
+     "variant_id": 10453,
+     "placements": {
+      "default": 106
+     }
+    },
+    {
+     "variant_id": 10454,
+     "placements": {
+      "default": 15
+     }
+    },
+    {
+     "variant_id": 10455,
+     "placements": {
+      "default": 113
+     }
+    },
+    {
+     "variant_id": 10456,
+     "placements": {
+      "default": 39
+     }
+    }
+   ],
+   "option_groups": [
+    "Lifestyle",
+    "Lifestyle 10",
+    "Lifestyle 11",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Lifestyle 6",
+    "Lifestyle 7",
+    "Lifestyle 8",
+    "Lifestyle 9",
+    "Person",
+    "Transparent",
+    "template"
+   ],
+   "options": [
+    "Front",
+    "Lifestyle 1",
+    "Person",
+    "Transparent"
+   ]
+  },
+  "extra": []
+ }
+}

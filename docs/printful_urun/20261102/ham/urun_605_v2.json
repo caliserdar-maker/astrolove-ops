@@ -1,0 +1,165 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/605?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 605,
+   "type": "PHONE-CASE",
+   "main_category_id": 245,
+   "name": "Rubber Case for AirPods®",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/ef/ef181b7a0c99f895af52b60c017d6d03_l",
+   "variant_count": 18,
+   "is_discontinued": false,
+   "description": "Get a two-in-one deal with these Rubber Case for AirPods®: an impact-absorbing protector for your earbuds and a stylish accessory you can attach to your clothes and bags with a metal carabiner. This case is made from a durable TPU material and works with both wireless and regular AirPod® chargers. \n\n• Thermoplastic polyurethane (TPU) material\n• Impact-absorbing\n• Protects AirPods® from bumps, drops, and scratches\n• Comes with a metal carabiner for easy carrying\n• Compatible with both wireless and a regular charger\n• Available for AirPods® and AirPods® Pro\n• Blank product sourced from Korea\n\nThe AirPods® Case is compatible with the 1st and 2nd generation AirPods®. AirPods® Pro Case is compatible with AirPods® Pro.\n\nDisclaimer: The product doesn’t include AirPods® or AirPods® charger.\n\nImportant: This product can’t be shipped to South Korea, Hong Kong, Taiwan,  Japan, or Singapore. If your shipping address is in these regions, please choose a different product.",
+   "sizes": [
+    "AirPods",
+    "AirPods Pro"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#3b3b3b"
+    },
+    {
+     "name": "Blue",
+     "value": "#00ccff"
+    },
+    {
+     "name": "Grey",
+     "value": "#b1b4b4"
+    },
+    {
+     "name": "Mint",
+     "value": "#b5ffe9"
+    },
+    {
+     "name": "Navy",
+     "value": "#1b4982"
+    },
+    {
+     "name": "Pink",
+     "value": "#ffc1cd"
+    },
+    {
+     "name": "Red",
+     "value": "#f52f2f"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    },
+    {
+     "name": "Yellow",
+     "value": "#ffcc00"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/605"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/605/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/605/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/605/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/605/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/605/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

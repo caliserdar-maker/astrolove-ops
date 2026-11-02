@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/394/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 10984,
+    "catalog_product_id": 394,
+    "name": "Laptop Sleeve 13″",
+    "size": "13″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/394/10984_1737468114.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10984"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/394"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/394/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10984/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10984/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10984/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 11.5,
+      "width": 15.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 10985,
+    "catalog_product_id": 394,
+    "name": "Laptop Sleeve 15″",
+    "size": "15″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/394/10985_1737468120.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10985"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/394"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/394/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10985/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10985/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10985/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 15.5,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/394/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/394"
+   }
+  }
+ }
+}

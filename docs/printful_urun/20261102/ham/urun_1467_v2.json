@@ -1,0 +1,122 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1467?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1467,
+   "type": "DIRECT-TO-FABRIC",
+   "main_category_id": 252,
+   "name": "Cotton Tablecloths",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/77/77043de828edcb01e783dfe924788f6c_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Bring style and personality to any dining space with this premium cotton twill tablecloth. Designed for both everyday meals and special occasions, it features vibrant, fade-resistant printing and durable hemmed edges for a polished look that lasts.\n\n• 100% cotton twill\n• Available in 2 sizes: 58″ × 58″ and 58″ × 102″\n• Fade-resistant print\n• One-sided print\n• Hemmed edges for added durability\n• White thread color",
+   "sizes": [
+    "58″×58″",
+    "58″×102″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "direct-to-fabric",
+     "display_name": "All-over cotton",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "direct-to-fabric",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "direct-to-fabric",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": [
+      "white",
+      "clear",
+      "black"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1467"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1467/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1467/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1467/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1467/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1467/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1467/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

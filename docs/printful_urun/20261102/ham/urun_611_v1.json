@@ -1,0 +1,117 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/611",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 611,
+    "main_category_id": 249,
+    "type": "SUBLIMATION",
+    "description": "This cork-back coaster is a perfect match for your favorite mug! Create a homey feel while protecting your coffee table or nightstand from mug stains and moisture. The coaster is waterproof and heat-resistant, designed to last a long time. Buy it for yourself or as a lovely gift for your friends and family.\n\n• Hardboard MDF 0.12″ (3 mm)\n• Cork 0.04″ (1 mm)\n• High-gloss coating on top\n• Size: 3.74″ × 3.74″ × 0.16″ (95 × 95 × 4 mm)\n• Rounded corners\n• Water-repellent, heat-resistant, and non-slip\n• Easy to clean\n\nThe displayed price is for a single item.",
+    "type_name": "Coaster | White w/Cork-Back",
+    "title": "Cork-Back Coaster",
+    "brand": null,
+    "model": "Coaster | White w/Cork-Back",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/d4/d41d6e69b8c865b6a4546ce030775f2f_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 15662,
+     "product_id": 611,
+     "name": "Cork Back Coaster (3.74″×3.74″)",
+     "size": "3.74″×3.74″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/611/15662_1660029236.jpg",
+     "price": "5.55",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

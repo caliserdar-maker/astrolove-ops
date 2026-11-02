@@ -1,0 +1,155 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1439?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1439,
+   "type": "EMBROIDERY-PATCH",
+   "main_category_id": 215,
+   "name": "Embroidered Tactical Patches",
+   "brand": "Gunold",
+   "model": "003velcro",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/7a/7acefe20374440b06a3b2b32da880524_l",
+   "variant_count": 8,
+   "is_discontinued": false,
+   "description": "Give your worn-in clothes a second life or create bold designs that represent you or your brand. The hook-and-loop backing attachment ensures a secure hold while allowing effortless customization whenever you want.\n\n• Twill fabric (26% cotton, 74% polyester)\n• Hook-and-loop backing for easy attach-and-remove use\n• Attachment option: hook-and-loop backing – ideal for reusable, interchangeable patches without ironing or sewing\n• Blank product sourced from China",
+   "sizes": [
+    "Rectangle 3.5″×2.25″",
+    "Square 3″×3″",
+    "Circular ⌀3 in",
+    "Oval 4″×2.6″",
+    "Name Tag 4″×1″",
+    "Rectangle 3″×2″"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#0a0a0a"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "embroidery",
+     "display_name": "Embroidery",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "embroidery_patch_front",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": [
+        {
+         "name": "thread_colors",
+         "techniques": [
+          "embroidery"
+         ],
+         "type": "array",
+         "values": {
+          "#FFFFFF": "1801 White",
+          "#000000": "1800 Black",
+          "#96A1A8": "1718 Grey",
+          "#A67843": "1672 Old Gold",
+          "#FFCC00": "1951 Gold",
+          "#E25C27": "1987 Orange",
+          "#CC3366": "1910 Flamingo",
+          "#CC3333": "1839 Red",
+          "#660000": "1784 Maroon",
+          "#333366": "1966 Navy",
+          "#005397": "1842 Royal",
+          "#3399FF": "1695 Aqua/Teal",
+          "#6B5294": "1832 Purple",
+          "#01784E": "1751 Kelly Green",
+          "#7BA35A": "1848 Kiwi Green"
+         }
+        }
+       ]
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1439"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1439/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1439/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1439/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1439/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1439/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1439/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

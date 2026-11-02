@@ -1,0 +1,127 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/883?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 883,
+   "type": "SUBLIMATION",
+   "main_category_id": 230,
+   "name": "Hand Towel",
+   "brand": null,
+   "model": "Generic",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/8d/8de2e4f34ac87cfcb72dcea526c572fe_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Add a stylish touch to your bathroom with this soft and absorbent hand towel. Vibrant finish on the front, cozy cotton on the back—because details matter.\n\n• 52% polyester, 48% cotton\n• Soft polyester front and absorbent white cotton back\n• Fabric weight: 14.1 oz./yd.² (400 g/m²)\n• Size: 16″ × 28″ (40.6cm × 71.1 cm)\n• Blank product sourced from China\n\nDisclaimer: Machine wash in cold water (max. 90°F / 30°C). Not suitable for bleaching, ironing, dry cleaning, or tumble drying with heat.",
+   "sizes": [
+    "28″ × 16″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/883"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/883/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/883/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/883/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/883/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/883/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/883/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

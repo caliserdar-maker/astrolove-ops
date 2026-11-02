@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/583/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 14943,
+    "catalog_product_id": 583,
+    "name": "Gaming Mouse Pad (White / 18″×16″)",
+    "size": "18″×16″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/583/14943_1649422095.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14943"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/583"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/583/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14943/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14943/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14943/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.5,
+      "width": 18.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 14942,
+    "catalog_product_id": 583,
+    "name": "Gaming Mouse Pad (White / 36″×18″)",
+    "size": "36″×18″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/583/14942_1649422105.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14942"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/583"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/583/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14942/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14942/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14942/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.5,
+      "width": 36.5,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/583/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/583"
+   }
+  }
+ }
+}

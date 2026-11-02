@@ -1,0 +1,160 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/795",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 795,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 15,
+     "width": 4800,
+     "height": 3600,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 17,
+     "width": 5400,
+     "height": 3600,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 38,
+     "width": 7200,
+     "height": 5400,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 39,
+     "width": 10800,
+     "height": 7200,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 41,
+     "width": 6000,
+     "height": 4800,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 20256,
+     "placements": {
+      "default": 15
+     }
+    },
+    {
+     "variant_id": 20259,
+     "placements": {
+      "default": 17
+     }
+    },
+    {
+     "variant_id": 20262,
+     "placements": {
+      "default": 41
+     }
+    },
+    {
+     "variant_id": 20265,
+     "placements": {
+      "default": 38
+     }
+    },
+    {
+     "variant_id": 20268,
+     "placements": {
+      "default": 39
+     }
+    },
+    {
+     "variant_id": 20257,
+     "placements": {
+      "default": 15
+     }
+    },
+    {
+     "variant_id": 20260,
+     "placements": {
+      "default": 17
+     }
+    },
+    {
+     "variant_id": 20263,
+     "placements": {
+      "default": 41
+     }
+    },
+    {
+     "variant_id": 20266,
+     "placements": {
+      "default": 38
+     }
+    },
+    {
+     "variant_id": 20269,
+     "placements": {
+      "default": 39
+     }
+    },
+    {
+     "variant_id": 20258,
+     "placements": {
+      "default": 15
+     }
+    },
+    {
+     "variant_id": 20261,
+     "placements": {
+      "default": 17
+     }
+    },
+    {
+     "variant_id": 20264,
+     "placements": {
+      "default": 41
+     }
+    },
+    {
+     "variant_id": 20267,
+     "placements": {
+      "default": 38
+     }
+    },
+    {
+     "variant_id": 20270,
+     "placements": {
+      "default": 39
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Lifestyle",
+    "Templates"
+   ],
+   "options": [
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,172 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/901",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 901,
+    "main_category_id": 254,
+    "type": "DECOR",
+    "description": "Shiny from all angles—these two-sided ornaments bring double the cheer. Great for personal gifting or maxing your seasonal decor, they come in 4 festive shapes with a high-gloss finish. Available solo or in 3, 5, or 10-unit packs.\n\n• White aluminum base\n• Round-shaped diameter: 3.5″ (89 mm)\n• Bell-shaped size: 3.31″ × 3.31″ (84 mm × 84 mm)\n• Oval-shaped size: 2.36″ × 2.99″ (60 mm × 76 mm)\n• Tree-shaped size: 3.39″ × 3.94″ (86 mm × 100 mm)\n• Ornament thickness: 0.025″ (0.6 mm)\n• Glossy finish\n• Red ribbon included\n• Blank product sourced from China\n\nDisclaimer: The displayed price is for a single item.",
+    "type_name": "Ornament | Christmas | Metal",
+    "title": "Metal Christmas Ornament",
+    "brand": null,
+    "model": "Ornament | Christmas | Metal",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/6e/6e6e9f0b75ecc1ba810719df62d1d7da_l",
+    "variant_count": 4,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "USA"
+   },
+   "variants": [
+    {
+     "id": 23138,
+     "product_id": 901,
+     "name": "Metal Christmas Ornament (White aluminum / Bell)",
+     "size": "Bell",
+     "color": "White aluminum",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/901/23138_1748884814.jpg",
+     "price": "4.74",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23135,
+     "product_id": 901,
+     "name": "Metal Christmas Ornament (White aluminum / Oval)",
+     "size": "Oval",
+     "color": "White aluminum",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/901/23135_1748884818.jpg",
+     "price": "4.61",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23136,
+     "product_id": 901,
+     "name": "Metal Christmas Ornament (White aluminum / Round)",
+     "size": "Round",
+     "color": "White aluminum",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/901/23136_1748884823.jpg",
+     "price": "4.61",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23137,
+     "product_id": 901,
+     "name": "Metal Christmas Ornament (White aluminum / Tree)",
+     "size": "Tree",
+     "color": "White aluminum",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/901/23137_1748884824.jpg",
+     "price": "4.61",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

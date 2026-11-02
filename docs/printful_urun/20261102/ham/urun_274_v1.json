@@ -1,0 +1,199 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/274",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 274,
+    "main_category_id": 48,
+    "type": "CUT-SEW",
+    "description": "A trendy beach bag, where you can put everything that matters when hitting those warm beaches.\n\n• 100% polyester\n• Maximum weight limit – 44lbs (20kg)\n• Large inside pocket\n• Comfortable cotton webbing handles\n• Vibrant colors that won't fade\n• Available in one size",
+    "type_name": "All-Over Print Large Tote Bag w/ Pocket",
+    "title": "All-Over Print Large Tote Bag w/ Pocket",
+    "brand": null,
+    "model": "All-Over Print Large Tote Bag w/ Pocket",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/dc/dc9e348381cbeb3db14ae61f926968e9_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "stitch_color",
+      "title": "Stitch color",
+      "type": "radio",
+      "values": {
+       "black": "Black",
+       "clear": "Clear"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "pocket",
+      "type": "pocket",
+      "title": "Inside Pocket",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 9039,
+     "product_id": 274,
+     "name": "All-Over Print Large Tote Bag w/ Pocket (Black)",
+     "size": "16″×20″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/274/9039_1530789433.jpg",
+     "price": "23.88",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 9040,
+     "product_id": 274,
+     "name": "All-Over Print Large Tote Bag w/ Pocket (Red)",
+     "size": "16″×20″",
+     "color": "Red",
+     "color_code": "#c5262a",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/274/9040_1530789448.jpg",
+     "price": "23.88",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 9041,
+     "product_id": 274,
+     "name": "All-Over Print Large Tote Bag w/ Pocket (Yellow)",
+     "size": "16″×20″",
+     "color": "Yellow",
+     "color_code": "#de9219",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/274/9041_1530789461.jpg",
+     "price": "23.88",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

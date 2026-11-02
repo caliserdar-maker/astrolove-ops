@@ -1,0 +1,157 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/709?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 709,
+   "type": "SUBLIMATION",
+   "main_category_id": 252,
+   "name": "Placemat Set (4)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/97/9788fffc304521918bc6a02e845979d3_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Show off your taste and dine in style! Every set comes with 4 high-quality, water-resistant placemats, all with a unique pattern for that special touch. Whether for daily dining or festive feasts, these placemats will add a dash of personal charm to your every get-together. \n\n• 100% polyester fabric broadcloth\n• Comes as a set of four\n• Size: 18″ × 14″ (45.7 cm × 35.5 cm)\n• Customizable front\n• Water-resistant\n• Hemmed on all sides\n• Sewn two-ply for a high-quality look\n• Blank product sourced from China",
+   "sizes": [
+    "18″ × 14″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "first",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "second",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "third",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "fourth",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/709"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/709/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/709/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/709/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/709/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/709/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/709/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,94 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/300/prices?currency=USD&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 300,
+    "placements": [
+     {
+      "id": "default",
+      "title": "Print file",
+      "type": "Sublimation",
+      "technique_key": "sublimation",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 9323,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "9.75",
+       "discounted_price": "9.75"
+      }
+     ]
+    },
+    {
+     "id": 9324,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "10.95",
+       "discounted_price": "10.95"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": [
+    {
+     "quantity": 25,
+     "bulk_discount_percentage": 0.05
+    },
+    {
+     "quantity": 50,
+     "bulk_discount_percentage": 0.08
+    },
+    {
+     "quantity": 75,
+     "bulk_discount_percentage": 0.11
+    },
+    {
+     "quantity": 100,
+     "bulk_discount_percentage": 0.14
+    },
+    {
+     "quantity": 200,
+     "bulk_discount_percentage": 0.17
+    }
+   ]
+  },
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/300/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/300"
+   }
+  }
+ }
+}

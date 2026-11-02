@@ -1,0 +1,113 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/706",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 706,
+    "main_category_id": 254,
+    "type": "DECOR",
+    "description": "Wrap your gifts in style with these premium wrapping paper sheets! Get three high-quality, matte-finished sheets and add a touch of elegance to birthdays, anniversaries, and other celebrations.\n\n• Size: 28.75″ × 19.75″ (73 × 50.2 cm)\n• Thickness: 70# uncoated text\n• Printing on one side\n• White reverse side\n• A set of 3 sheets\n• Matte finish\n• Blank product sourced from the United States",
+    "type_name": "Wrapping Paper | Sheets | Set of 3",
+    "title": "Wrapping Paper Sheets (3)",
+    "brand": null,
+    "model": "Wrapping Paper | Sheets | Set of 3",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/2f/2f96e969b6c8c36eb338d71aeff576f0_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "first",
+      "type": "first",
+      "title": "First",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "second",
+      "type": "second",
+      "title": "Second",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "third",
+      "type": "third",
+      "title": "Third",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "United States"
+   },
+   "variants": [
+    {
+     "id": 17373,
+     "product_id": 706,
+     "name": "Wrapping Paper Sheets (White Matte / 28.75″×19.75″)",
+     "size": "28.75″×19.75″",
+     "color": "White Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/706/17373_1687435633.jpg",
+     "price": "9.31",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

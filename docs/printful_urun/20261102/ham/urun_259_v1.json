@@ -1,0 +1,149 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/259",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 259,
+    "main_category_id": 22,
+    "type": "SUBLIMATION",
+    "description": "Give your bathroom a vibrant look and wrap yourself up with this super soft and cozy all-over sublimation towel.\n\n• Fabric composition in the US: 52% cotton, 48% polyester\n• Fabric composition in EU: 50% cotton, 50% polyester\n• Fabric weight in the US: 10.6 oz./yd.² (360 g/m²)\n• Fabric weight in EU: 11.8 oz./yd.² (400 g/m²)\n• Small: 30″ × 60″ × 0.28″ (76 × 152 × 0.7 cm)\n• Large: 36″ × 72″ × 0.28″ (91.4 × 182.9 × 0.71 cm)\n• Printed on one side only\n• The non-printed side is made of terry fabric, making the towel more water-absorbent\n• Blank product sourced from China",
+    "type_name": "Towel | Beach | White",
+    "title": "Beach Towel",
+    "brand": null,
+    "model": "Towel | Beach | White",
+    "image": "https://files.cdn.printful.com/o/products/259/product_1606198364.jpg",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 8874,
+     "product_id": 259,
+     "name": "Beach Towel 30″×60″",
+     "size": "30″×60″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/259/8874_1530796574.jpg",
+     "price": "29.40",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22610,
+     "product_id": 259,
+     "name": "Beach Towel 36″×72″",
+     "size": "36″×72″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/259/22610_1755069287.jpg",
+     "price": "32.53",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "stocked_on_demand"
+      },
+      {
+       "region": "EU_LV",
+       "status": "stocked_on_demand"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

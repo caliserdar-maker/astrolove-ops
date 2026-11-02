@@ -1,0 +1,117 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/973?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 973,
+   "type": "SUBLIMATION",
+   "main_category_id": 21,
+   "name": "Indoor Wall Tapestry",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/4f/4f9e96f6b0dab46d94fa5472563eae3a_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Dress up your walls with custom-printed indoor tapestries. Made from durable polyester, and designed to showcase your creativity in vibrant color.\n\n• 100% polyester\n• 2 sizes: 26\" × 36\" (66 × 91.5 cm), 50\" × 62\" (127 × 157.5 cm)\n• Machine washable in cold water, tumble dry low, do not bleach\n• Blank product sourced from China",
+   "sizes": [
+    "50″×60″",
+    "26″×36″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/973"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/973/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/973/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/973/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/973/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/973/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/973/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

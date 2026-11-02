@@ -1,0 +1,92 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/716",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 716,
+    "main_category_id": 254,
+    "type": "DECOR",
+    "description": "Warm the hearts of your loved ones with this Christmas stocking! A timeless symbol of joy and giving, it’s a must-add to your holiday decorations. The stocking’s softness invites warm feelings, while the white fold-over cuff adds an elegant touch to its festive look. With a loop for hanging, showcase it on your festive display with pride.\n\n• 100% polyester \n• 7″ × 18″ (17.8 cm × 45.7 cm)\n• Off-white color fill on the other side\n• White fold-over cuff \n• Comes with a loop for hanging it up\n• Blank product sourced from China",
+    "type_name": "Stocking | Christmas",
+    "title": "Christmas Stocking",
+    "brand": null,
+    "model": "Stocking | Christmas",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/99/997b99d47a09697397f6bdd63d0e57f5_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 17599,
+     "product_id": 716,
+     "name": "Christmas Stocking (White)",
+     "size": "One size",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/716/17599_1694763188.jpg",
+     "price": "11.17",
+     "in_stock": false,
+     "availability_regions": {},
+     "availability_status": [],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

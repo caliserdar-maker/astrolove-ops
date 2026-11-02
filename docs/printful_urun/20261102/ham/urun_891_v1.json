@@ -1,0 +1,143 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/891",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 891,
+    "main_category_id": 16,
+    "type": "SUBLIMATION",
+    "description": "Travel just got an upgrade. This suitcase glides like a dream with 360° wheels, keeps your essentials safe with a built-in lock, and offers plenty of room, plus a little extra in the large size. With bold design, a durable build, and smart inner pockets, it’s your new favorite travel mate.\n\n• 100% polycarbonate front \n• Black ABS back hard-shell\n• Sizes: Small (22″ × 14″ × 9″), Medium (26″ × 18″ × 10″), Large (30″ × 20″ × 11″) with optional extended storage\n• 4 double-wheels with 360° swivel\n• 2 inner pockets\n• Built-in safety lock\n• Blank product sourced from China",
+    "type_name": "Suitcase | White",
+    "title": "Suitcase",
+    "brand": null,
+    "model": "Suitcase | White",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/a0/a0f72ff13a26229db743e1e10b6d701f_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 22817,
+     "product_id": 891,
+     "name": "Suitcase (Black / Large)",
+     "size": "Large",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/891/22817_1748241386.jpg",
+     "price": "175.91",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22816,
+     "product_id": 891,
+     "name": "Suitcase (Black / Medium)",
+     "size": "Medium",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/891/22816_1748241396.jpg",
+     "price": "151.77",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22815,
+     "product_id": 891,
+     "name": "Suitcase (Black / Small)",
+     "size": "Small",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/891/22815_1748339905.jpg",
+     "price": "132.79",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

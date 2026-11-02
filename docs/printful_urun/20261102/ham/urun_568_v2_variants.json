@@ -1,0 +1,266 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/568/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 14457,
+    "catalog_product_id": 568,
+    "name": "Greeting Card (4″×6″)",
+    "size": "4″×6″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/568/14457_1645785140.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14457"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/568"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/568/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14457/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14457/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14457/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.14,
+      "width": 4.13,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "back",
+      "height": 6.14,
+      "width": 4.13,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "front",
+      "height": 4.13,
+      "width": 6.14,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "back",
+      "height": 4.13,
+      "width": 6.14,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "inside1",
+      "height": 6.14,
+      "width": 4.13,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "inside2",
+      "height": 6.14,
+      "width": 4.13,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "inside1",
+      "height": 4.13,
+      "width": 6.14,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "inside2",
+      "height": 4.13,
+      "width": 6.14,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 14460,
+    "catalog_product_id": 568,
+    "name": "Greeting Card (5.83″×8.27″)",
+    "size": "5.83″×8.27″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/568/14460_1645785150.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14460"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/568"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/568/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14460/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14460/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14460/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 8.42,
+      "width": 5.98,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "inside1",
+      "height": 8.42,
+      "width": 5.98,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "inside2",
+      "height": 8.42,
+      "width": 5.98,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "back",
+      "height": 8.42,
+      "width": 5.98,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "front",
+      "height": 5.98,
+      "width": 8.42,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "inside1",
+      "height": 5.98,
+      "width": 8.42,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "inside2",
+      "height": 5.98,
+      "width": 8.42,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "back",
+      "height": 5.98,
+      "width": 8.42,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 14458,
+    "catalog_product_id": 568,
+    "name": "Greeting Card (5″×7″)",
+    "size": "5″×7″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/568/14458_1645785151.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14458"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/568"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/568/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14458/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14458/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14458/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 7.15,
+      "width": 5.15,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "inside1",
+      "height": 7.15,
+      "width": 5.15,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "inside2",
+      "height": 7.15,
+      "width": 5.15,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "back",
+      "height": 7.15,
+      "width": 5.15,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "front",
+      "height": 5.15,
+      "width": 7.15,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "inside1",
+      "height": 5.15,
+      "width": 7.15,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "inside2",
+      "height": 5.15,
+      "width": 7.15,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "back",
+      "height": 5.15,
+      "width": 7.15,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/568/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/568"
+   }
+  }
+ }
+}

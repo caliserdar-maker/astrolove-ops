@@ -1,0 +1,168 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/528",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 528,
+    "main_category_id": 48,
+    "type": "T-SHIRT",
+    "description": "With its 30 lbs maximum carrying weight, the spacious organic denim tote bag will easily hold your books, groceries, or even gym gear. The long handles will provide extra comfort while the inside pocket will hold and hide your smaller valuables. Order it today and get carried away!\n\n• 100% organic cotton\n• Fabric weight: 9.0 oz/yd² (305 g/m²)\n• 19.6″ × 18.1″ ( 50 cm × 46 cm)\n• Handle length 23.6″ (60 cm), width 1.5″ (4 cm) \n• Maximum weight limit: 30 lbs (13.6 kg)\n• Double-stitched top seam\n• Cross stitching on handles for more stability\n• Small inside pocket",
+    "type_name": "Mantis M196 | Organic Denim Tote Bag",
+    "title": "Organic Denim Tote Bag | Mantis M196",
+    "brand": "Mantis",
+    "model": "M196",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/e3/e3482be25d0105f695ff27830072287b_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "thread_colors_apparel",
+      "title": "Flat thread colors",
+      "type": "multi_select",
+      "values": {
+       "#FFFFFF": "1801 White",
+       "#000000": "1800 Black",
+       "#96A1A8": "1718 Grey",
+       "#A67843": "1672 Old Gold",
+       "#FFCC00": "1951 Gold",
+       "#E25C27": "1987 Orange",
+       "#CC3366": "1910 Flamingo",
+       "#CC3333": "1839 Red",
+       "#660000": "1784 Maroon",
+       "#333366": "1966 Navy",
+       "#005397": "1842 Royal",
+       "#3399FF": "1695 Aqua/Teal",
+       "#6B5294": "1832 Purple",
+       "#01784E": "1751 Kelly Green",
+       "#7BA35A": "1848 Kiwi Green"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Embroidery notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "lifelike",
+      "title": "Lifelike",
+      "type": "bool",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DTG",
+      "display_name": "DTG printing",
+      "is_default": true
+     },
+     {
+      "key": "EMBROIDERY",
+      "display_name": "Embroidery",
+      "is_default": false
+     },
+     {
+      "key": "DTFILM",
+      "display_name": "DTF printing",
+      "is_default": false
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "embroidery_apparel_front",
+      "type": "embroidery_apparel_front",
+      "title": "Front",
+      "additional_price": "2.95",
+      "options": []
+     },
+     {
+      "id": "front_dtf_tote",
+      "type": "front_dtf_tote",
+      "title": "Front",
+      "additional_price": "5.95",
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "Bangladesh"
+   },
+   "variants": [
+    {
+     "id": 13313,
+     "product_id": 528,
+     "name": "Mantis M196 Organic Denim tote bag (Denim Blue / One size)",
+     "size": "One size",
+     "color": "Denim Blue",
+     "color_code": "#2f435c",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/528/13313_1631094521.jpg",
+     "price": "27.75",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

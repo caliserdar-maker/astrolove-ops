@@ -1,0 +1,103 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/690?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 690,
+   "type": "DRINKWARE",
+   "main_category_id": 264,
+   "name": "Can-Shaped Glass (16 oz)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/0b/0b46772924715003ebd0ef10e0c9b00b_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Whether you enjoy drinking refreshing sodas, iced coffees, cocktails, or even fancy mocktails, this glass is a perfect choice. With its trendy design and the timeless appeal of glassware, it will become a staple for your beverages.  \n\n• Glass material\n• Volume: 16 oz. (473 ml)\n• Size: 5.5″ × 3″ (14 cm × 7.6 cm)\n• Not dishwasher or microwave safe\n• Blank product sourced from China",
+   "sizes": [
+    "16 oz",
+    "16 oz With Lid & Straw"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/690"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/690/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/690/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/690/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/690/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/690/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/690/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

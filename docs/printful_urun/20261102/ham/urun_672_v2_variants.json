@@ -1,0 +1,126 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/672/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16708,
+    "catalog_product_id": 672,
+    "name": "All-Over Print Crossbody Bag (Black)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/672/16708_1679643890.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16708"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/672"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/672/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16708/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16708/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16708/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.59,
+      "width": 14.13,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 9.59,
+      "width": 14.13,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 4.0,
+      "width": 7.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16704,
+    "catalog_product_id": 672,
+    "name": "All-Over Print Crossbody Bag (White)",
+    "size": "One size",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/672/16704_1679643890.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16704"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/672"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/672/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16704/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16704/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16704/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.59,
+      "width": 14.13,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 9.59,
+      "width": 14.13,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 4.0,
+      "width": 7.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/672/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/672"
+   }
+  }
+ }
+}

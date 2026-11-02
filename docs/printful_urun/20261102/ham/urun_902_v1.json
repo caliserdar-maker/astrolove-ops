@@ -1,0 +1,144 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/902",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 902,
+    "main_category_id": 189,
+    "type": "SUBLIMATION",
+    "description": "Give your pet’s look a playful twist with this bandana collar. Made from durable polyester fabric, it’s built to last through playtime and washes. The adjustable black collar ensures a secure fit and comes in 4 sizes to suit most pets.\n\n• 100% polyester\n• Adjustable black collar with plastic buckle\n• 4 sizes: S, M, L, XL\n• Collar circumference: S: 10″–16.75″ (25.4 cm–42.5 cm); M: 12″–20.25″ (30.5 cm–51.4 cm); L: 14.25″–23″ (36.2 cm–58.4 cm); XL: 15.5″–23.5″ (39.4 cm–59.7 cm)\n• Durable construction, machine washable (max 90ºF (30ºC))\n• White reverse\n• Blank product sourced from China\n\nDisclaimer: Product size may vary by ±1″ (2.5 cm).",
+    "type_name": "Pet | Bandana | Collar",
+    "title": "Pet Bandana Collar",
+    "brand": null,
+    "model": "Pet | Bandana | Collar",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/9c/9c74adba0beaa01bf15330ab4bf4c86b_l",
+    "variant_count": 4,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 23140,
+     "product_id": 902,
+     "name": "Pet Bandana Collar (Black / L)",
+     "size": "L",
+     "color": "Black",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/902/23140_1748927735.jpg",
+     "price": "17.93",
+     "in_stock": false,
+     "availability_regions": {},
+     "availability_status": [],
+     "material": []
+    },
+    {
+     "id": 23141,
+     "product_id": 902,
+     "name": "Pet Bandana Collar (Black / M)",
+     "size": "M",
+     "color": "Black",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/902/23141_1748927741.jpg",
+     "price": "16.10",
+     "in_stock": false,
+     "availability_regions": {},
+     "availability_status": [],
+     "material": []
+    },
+    {
+     "id": 23142,
+     "product_id": 902,
+     "name": "Pet Bandana Collar (Black / S)",
+     "size": "S",
+     "color": "Black",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/902/23142_1748927742.jpg",
+     "price": "16.10",
+     "in_stock": false,
+     "availability_regions": {},
+     "availability_status": [],
+     "material": []
+    },
+    {
+     "id": 23143,
+     "product_id": 902,
+     "name": "Pet Bandana Collar (Black / XL)",
+     "size": "XL",
+     "color": "Black",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/902/23143_1748927742.jpg",
+     "price": "17.93",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

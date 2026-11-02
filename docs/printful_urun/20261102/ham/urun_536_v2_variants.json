@@ -1,0 +1,158 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/536/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 13444,
+    "catalog_product_id": 536,
+    "name": "Embroidered Premium Sherpa Blanket | Port Authority BP40 (Black / 50″×60″)",
+    "size": "50″×60″",
+    "color": "Black",
+    "color_code": "#131313",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/536/13444_1640694536.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/13444"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/536"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/536/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/13444/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/13444/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/13444/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_corner_right",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_large_corner_right",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 13445,
+    "catalog_product_id": 536,
+    "name": "Embroidered Premium Sherpa Blanket | Port Authority BP40 (Fireside Brown / 50″×60″)",
+    "size": "50″×60″",
+    "color": "Fireside Brown",
+    "color_code": "#482f2c",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/536/13445_1640694539.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/13445"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/536"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/536/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/13445/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/13445/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/13445/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_corner_right",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_large_corner_right",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 13446,
+    "catalog_product_id": 536,
+    "name": "Embroidered Premium Sherpa Blanket | Port Authority BP40 (Hearth Grey / 50″×60″)",
+    "size": "50″×60″",
+    "color": "Heather Grey",
+    "color_code": "#716a69",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/536/13446_1640694537.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/13446"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/536"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/536/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/13446/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/13446/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/13446/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_corner_right",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_large_corner_right",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/536/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/536"
+   }
+  }
+ }
+}

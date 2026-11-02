@@ -1,0 +1,330 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1439/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 44245,
+    "catalog_product_id": 1439,
+    "name": "Embroidered Patches with Velcro (Black / Circular ⌀3 in)",
+    "size": "Circular ⌀3 in",
+    "color": "Black",
+    "color_code": "#0a0a0a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1439/44245_1768491732.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44245"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1439"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1439/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44245/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44245/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44245/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44247,
+    "catalog_product_id": 1439,
+    "name": "Embroidered Patches with Velcro (Black / Oval 4″×2.6″)",
+    "size": "Oval 4″×2.6″",
+    "color": "Black",
+    "color_code": "#0a0a0a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1439/44247_1768491751.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44247"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1439"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1439/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44247/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44247/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44247/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 2.6,
+      "width": 4.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44241,
+    "catalog_product_id": 1439,
+    "name": "Embroidered Patches with Velcro (Black / Rectangle 3.5″×2.25″)",
+    "size": "Rectangle 3.5″×2.25″",
+    "color": "Black",
+    "color_code": "#0a0a0a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1439/44241_1768491761.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44241"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1439"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1439/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44241/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44241/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44241/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 2.25,
+      "width": 3.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44243,
+    "catalog_product_id": 1439,
+    "name": "Embroidered Patches with Velcro (Black / Square 3″×3″)",
+    "size": "Square 3″×3″",
+    "color": "Black",
+    "color_code": "#0a0a0a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1439/44243_1768491761.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44243"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1439"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1439/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44243/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44243/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44243/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44246,
+    "catalog_product_id": 1439,
+    "name": "Embroidered Patches with Velcro (White / Circular ⌀3 in)",
+    "size": "Circular ⌀3 in",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1439/44246_1768491771.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44246"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1439"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1439/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44246/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44246/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44246/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44248,
+    "catalog_product_id": 1439,
+    "name": "Embroidered Patches with Velcro (White / Oval 4″×2.6″)",
+    "size": "Oval 4″×2.6″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1439/44248_1768491792.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44248"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1439"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1439/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44248/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44248/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44248/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 2.6,
+      "width": 4.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44242,
+    "catalog_product_id": 1439,
+    "name": "Embroidered Patches with Velcro (White / Rectangle 3.5″×2.25″)",
+    "size": "Rectangle 3.5″×2.25″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1439/44242_1768491792.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44242"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1439"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1439/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44242/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44242/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44242/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 2.25,
+      "width": 3.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44244,
+    "catalog_product_id": 1439,
+    "name": "Embroidered Patches with Velcro (White / Square 3″×3″)",
+    "size": "Square 3″×3″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1439/44244_1768491802.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44244"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1439"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1439/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44244/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44244/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44244/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 8,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1439/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1439"
+   }
+  }
+ }
+}

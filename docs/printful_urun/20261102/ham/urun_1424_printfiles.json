@@ -1,0 +1,101 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1424",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 1424,
+   "available_placements": {
+    "front": "Front print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 1363,
+     "width": 612,
+     "height": 531,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1365,
+     "width": 900,
+     "height": 600,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 44139,
+     "placements": {
+      "front": 1363
+     }
+    },
+    {
+     "variant_id": 44143,
+     "placements": {
+      "front": 1365
+     }
+    },
+    {
+     "variant_id": 44144,
+     "placements": {
+      "front": 1365
+     }
+    },
+    {
+     "variant_id": 44145,
+     "placements": {
+      "front": 1365
+     }
+    },
+    {
+     "variant_id": 44140,
+     "placements": {
+      "front": 1363
+     }
+    },
+    {
+     "variant_id": 44141,
+     "placements": {
+      "front": 1363
+     }
+    },
+    {
+     "variant_id": 44146,
+     "placements": {
+      "front": 1365
+     }
+    },
+    {
+     "variant_id": 44142,
+     "placements": {
+      "front": 1363
+     }
+    },
+    {
+     "variant_id": 44147,
+     "placements": {
+      "front": 1365
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Lifestyle",
+    "Templates"
+   ],
+   "options": [
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

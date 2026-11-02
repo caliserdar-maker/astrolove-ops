@@ -1,0 +1,170 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/297",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 297,
+    "main_category_id": 88,
+    "type": "EMBROIDERY",
+    "description": "Thanks to this embroidered apron you don't have to worry about keeping your clothes clean when cooking! The neck loop and long ties, two front pockets, and intricate embroidery in front all come together in an eye-catching and comfy accessory that'll make you long for more time in the kitchen.\r\n\r\n• 70% polyester, 30% cotton\r\n• Fabric weight: 9 oz/yd² (305 g/m²)\r\n• Size: 20″ × 30″ (50.8 cm × 76.2 cm)\r\n• Adjustable neck loop and long ties\r\n• Two front pockets\r\n• Blank product sourced from China",
+    "type_name": "Liberty Bags 5502 | Caroline AL2B Butcher Style Cotton Twill Apron",
+    "title": "Embroidered Apron | Liberty Bags 5502",
+    "brand": "Liberty Bags",
+    "model": "5502",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/b1/b1504be1bd986f72acdf3c427e0cce4a_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "thread_colors_apparel",
+      "title": "Flat thread colors",
+      "type": "multi_select",
+      "values": {
+       "#FFFFFF": "1801 White",
+       "#000000": "1800 Black",
+       "#96A1A8": "1718 Grey",
+       "#A67843": "1672 Old Gold",
+       "#FFCC00": "1951 Gold",
+       "#E25C27": "1987 Orange",
+       "#CC3366": "1910 Flamingo",
+       "#CC3333": "1839 Red",
+       "#660000": "1784 Maroon",
+       "#333366": "1966 Navy",
+       "#005397": "1842 Royal",
+       "#3399FF": "1695 Aqua/Teal",
+       "#6B5294": "1832 Purple",
+       "#01784E": "1751 Kelly Green",
+       "#7BA35A": "1848 Kiwi Green"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Embroidery notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "EMBROIDERY",
+      "display_name": "Embroidery",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "embroidery_apparel_front",
+      "title": "Front",
+      "additional_price": null,
+      "options": [
+       {
+        "id": "full_color",
+        "type": "bool",
+        "title": "Unlimited color",
+        "additional_price": 3.5
+       }
+      ]
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 9287,
+     "product_id": 297,
+     "name": "Liberty Bags 5502 Embroidered Apron (Black)",
+     "size": "One size",
+     "color": "Black",
+     "color_code": "#0f0e0e",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/297/9287_1528280550.jpg",
+     "price": "17.64",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "CA": "Canada"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "CA",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 9286,
+     "product_id": 297,
+     "name": "Liberty Bags 5502 Embroidered Apron (White)",
+     "size": "One size",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/297/9286_1528280538.jpg",
+     "price": "17.64",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "CA": "Canada"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "CA",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,138 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/887/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 22801,
+    "catalog_product_id": 887,
+    "name": "All-Over Print Shopping Bag (Black / One size)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/887/22801_1753774084.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22801"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/887"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/887/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22801/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22801/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22801/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 28.0,
+      "width": 24.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 28.0,
+      "width": 24.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 4.0,
+      "width": 7.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "details",
+      "height": 28.0,
+      "width": 56.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22802,
+    "catalog_product_id": 887,
+    "name": "All-Over Print Shopping Bag (White / One size)",
+    "size": "One size",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/887/22802_1753774095.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22802"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/887"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/887/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22802/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22802/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22802/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 28.0,
+      "width": 24.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 28.0,
+      "width": 24.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 4.0,
+      "width": 7.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "details",
+      "height": 28.0,
+      "width": 56.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/887/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/887"
+   }
+  }
+ }
+}

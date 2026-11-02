@@ -1,0 +1,140 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/530?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 530,
+   "type": "CUT-SEW",
+   "main_category_id": 217,
+   "name": "All-Over Print Recycled Scrunchie",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/69/69fd9744e329b24e8a556511b925fcb5_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Keep your hair in check with this scrunchie! The trendy, stylish scrunchie will add the final touch to your outfit. Get yours now!\n\n• 91% recycled polyester, 9% spandex\n• Four-way stretch microfiber fabric\n• Breathable and fast-drying material\n• Smooth and stretchy fabric outside, elastic inside\n• Made of leftover materials from the manufacturing of other products\n• Fabric weight: 5.13 oz. /yd. ² (174 g/m²)\n• One size\n• Removable bow detail\n• Blank product components sourced from China",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "details",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "white": "White",
+      "black": "Black"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/530"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/530/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/530/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/530/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/530/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/530/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/530/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

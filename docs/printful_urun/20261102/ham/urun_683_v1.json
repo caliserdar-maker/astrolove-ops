@@ -1,0 +1,2075 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/683",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 683,
+    "main_category_id": 244,
+    "type": "PHONE-CASE",
+    "description": "This premium phone case is made for all minimalist style lovers. It’s classy and lightweight but will certainly do the job when it comes to keeping your phone safe.\n• Made of polycarbonate (PC) material\n• Wireless charging compatible\n• Precisely aligned port openings\n• Blank product sourced from the Republic of Korea\n\nDisclaimer: Keep away from liquids containing high alcohol levels, as designs on the phone case may rub off. Keep away from direct sunlight to prevent yellowing.\n\nImportant: This product can’t be shipped to South Korea, Hong Kong, Taiwan, Japan, or Singapore. If your shipping address is in these regions, please choose a different product.",
+    "type_name": "iPhone | Cell Phone Case | Snap | Clear",
+    "title": "Snap Case for iPhone",
+    "brand": null,
+    "model": "iPhone | Cell Phone Case | Snap | Clear",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/64/6402785e940aaa300f63b2c4b37c73d0_l",
+    "variant_count": 54,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "Korea"
+   },
+   "variants": [
+    {
+     "id": 16892,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 11 Pro Max)",
+     "size": "iPhone 11 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16892_1681967451.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16890,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 11 Pro)",
+     "size": "iPhone 11 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16890_1681967457.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16888,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 11)",
+     "size": "iPhone 11",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16888_1681967457.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16894,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 12 Mini)",
+     "size": "iPhone 12 Mini",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16894_1681967461.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16900,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 12 Pro Max)",
+     "size": "iPhone 12 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16900_1681967467.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16896,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 12 Pro)",
+     "size": "iPhone 12 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16896_1681967473.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16898,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 12)",
+     "size": "iPhone 12",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16898_1681967478.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16902,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 13 Mini)",
+     "size": "iPhone 13 Mini",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16902_1681967483.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16908,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 13 Pro Max)",
+     "size": "iPhone 13 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16908_1681967484.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16904,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 13 Pro)",
+     "size": "iPhone 13 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16904_1681967488.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16906,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 13)",
+     "size": "iPhone 13",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16906_1681967496.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16914,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 14 Plus)",
+     "size": "iPhone 14 Plus",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16914_1681967519.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16916,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 14 Pro Max)",
+     "size": "iPhone 14 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16916_1681967508.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16912,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 14 Pro)",
+     "size": "iPhone 14 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16912_1681967516.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16910,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 14)",
+     "size": "iPhone 14",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16910_1681967517.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17724,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 15 Plus)",
+     "size": "iPhone 15 Plus",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/17724_1693906240.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17728,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 15 Pro Max)",
+     "size": "iPhone 15 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/17728_1693906251.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17726,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 15 Pro)",
+     "size": "iPhone 15 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/17726_1693906251.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17722,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 15)",
+     "size": "iPhone 15",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/17722_1693906251.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20295,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 16 Plus)",
+     "size": "iPhone 16 Plus",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/20295_1727078552.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20297,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 16 Pro Max)",
+     "size": "iPhone 16 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/20297_1727078552.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20296,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 16 Pro)",
+     "size": "iPhone 16 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/20296_1727078553.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20294,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 16)",
+     "size": "iPhone 16",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/20294_1727078554.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 34011,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 17 Air)",
+     "size": "iPhone 17 Air",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/34011_1757671302.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 34015,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 17 Pro Max)",
+     "size": "iPhone 17 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/34015_1757671351.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 34013,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 17 Pro)",
+     "size": "iPhone 17 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/34013_1757671329.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 34009,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Glossy / iPhone 17)",
+     "size": "iPhone 17",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/34009_1757671278.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16893,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 11 Pro Max)",
+     "size": "iPhone 11 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16893_1681967527.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16891,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 11 Pro)",
+     "size": "iPhone 11 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16891_1681967528.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16889,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 11)",
+     "size": "iPhone 11",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16889_1681967538.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16895,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 12 Mini)",
+     "size": "iPhone 12 Mini",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16895_1681967548.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16901,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 12 Pro Max)",
+     "size": "iPhone 12 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16901_1681967548.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16897,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 12 Pro)",
+     "size": "iPhone 12 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16897_1681967549.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16899,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 12)",
+     "size": "iPhone 12",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16899_1681967559.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16903,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 13 Mini)",
+     "size": "iPhone 13 Mini",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16903_1681967568.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16909,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 13 Pro Max)",
+     "size": "iPhone 13 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16909_1681967568.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16905,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 13 Pro)",
+     "size": "iPhone 13 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16905_1681967579.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16907,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 13)",
+     "size": "iPhone 13",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16907_1681967579.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16915,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 14 Plus)",
+     "size": "iPhone 14 Plus",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16915_1681967579.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16917,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 14 Pro Max)",
+     "size": "iPhone 14 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16917_1681967589.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16913,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 14 Pro)",
+     "size": "iPhone 14 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16913_1681967589.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16911,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 14)",
+     "size": "iPhone 14",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/16911_1681967599.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17725,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 15 Plus)",
+     "size": "iPhone 15 Plus",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/17725_1693906220.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17729,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 15 Pro Max)",
+     "size": "iPhone 15 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/17729_1693906220.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17727,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 15 Pro)",
+     "size": "iPhone 15 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/17727_1693906220.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17723,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 15)",
+     "size": "iPhone 15",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/17723_1693906220.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20299,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 16 Plus)",
+     "size": "iPhone 16 Plus",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/20299_1726639728.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20301,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 16 Pro Max)",
+     "size": "iPhone 16 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/20301_1726639738.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20300,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 16 Pro)",
+     "size": "iPhone 16 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/20300_1726639738.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20298,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 16)",
+     "size": "iPhone 16",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/20298_1726639738.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 34012,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 17 Air)",
+     "size": "iPhone 17 Air",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/34012_1757671302.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 34016,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 17 Pro Max)",
+     "size": "iPhone 17 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/34016_1757671350.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 34014,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 17 Pro)",
+     "size": "iPhone 17 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/34014_1757671328.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 34010,
+     "product_id": 683,
+     "name": "Snap Case for iPhone® (Matte / iPhone 17)",
+     "size": "iPhone 17",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/683/34010_1757671278.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

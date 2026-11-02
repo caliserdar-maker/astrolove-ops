@@ -1,0 +1,124 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/407",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 407,
+    "main_category_id": 195,
+    "type": "MUG",
+    "description": "Every happy camper needs a unique camper mug. It's lightweight, durable and multifunctional. Use it for your favorite beverage or a hot meal, and attach it to your bag for easy access on a hike.\n\n• Material: Enamel\n• Dimensions: height 3.14″ (8 cm), diameter 3.25″(8.25 cm)\n• Lead and BPA-free material\n• White coating with a silver rim\n• Hand-wash only\n• Blank product sourced from China\n\nAttention! Don't heat liquids or food directly in the mug—it can damage the coating.\n\nDisclaimer: The Enamel Mug is susceptible to staining when used with certain beverages, including coffee, tea, and natural juices. That’s a normal characteristic of enamel products and not specific to our mug alone. Due to the enamel’s rough and porous surface texture, particles from these drinks may easily adhere to the mug, resulting in stains over time. Stains can be effectively removed by applying lemon juice or soda to the affected area and gently scrubbing with a hard sponge.",
+    "type_name": "Mug | Glossy | Enamel | White w/Silver Rim",
+    "title": "Enamel Mug",
+    "brand": null,
+    "model": "Enamel Mug",
+    "image": "https://files.cdn.printful.com/o/products/407/product_1580740276.jpg",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 11189,
+     "product_id": 407,
+     "name": "Enamel Mug (White / 12 oz)",
+     "size": "12 oz",
+     "color": "White",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/407/11189_1583837391.jpg",
+     "price": "12.67",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "EU_ES": "Spain",
+      "CA": "Canada",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_ES",
+       "status": "in_stock"
+      },
+      {
+       "region": "CA",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

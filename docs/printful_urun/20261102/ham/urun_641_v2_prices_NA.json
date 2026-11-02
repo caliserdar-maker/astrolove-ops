@@ -1,0 +1,100 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/641/prices?currency=USD&selling_region_name=north_america",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 641,
+    "placements": [
+     {
+      "id": "front",
+      "title": "Front print",
+      "type": "DTG printing",
+      "technique_key": "dtg",
+      "placement_options": [],
+      "price": "6.25",
+      "discounted_price": "6.25",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     },
+     {
+      "id": "back",
+      "title": "Back print",
+      "type": "DTG printing",
+      "technique_key": "dtg",
+      "placement_options": [],
+      "price": "6.25",
+      "discounted_price": "6.25",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 16287,
+     "techniques": [
+      {
+       "technique_key": "dtg",
+       "technique_display_name": "DTG printing",
+       "price": "17.50",
+       "discounted_price": "17.50"
+      }
+     ]
+    },
+    {
+     "id": 16288,
+     "techniques": [
+      {
+       "technique_key": "dtg",
+       "technique_display_name": "DTG printing",
+       "price": "17.50",
+       "discounted_price": "17.50"
+      }
+     ]
+    },
+    {
+     "id": 16289,
+     "techniques": [
+      {
+       "technique_key": "dtg",
+       "technique_display_name": "DTG printing",
+       "price": "17.50",
+       "discounted_price": "17.50"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/641/prices?currency=USD&selling_region_name=north_america&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/641"
+   }
+  }
+ }
+}

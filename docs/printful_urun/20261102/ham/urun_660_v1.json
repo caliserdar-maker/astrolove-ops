@@ -1,0 +1,149 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/660",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 660,
+    "main_category_id": 268,
+    "type": "STICKER",
+    "description": "Express yourself in a meaningful way with top-quality pin buttons. They’re lightweight, sturdy, and easy to put on. With a scratch and UV-resistant coating and a glossy finish, these pin buttons are made to last. Show off the things you care about and add a pop of personality to your clothing or accessories with vibrant pin buttons.  \n\n• They come in a set of 5 \n• Made of tinplate\n• Scratch and UV-resistant mylar coating\n• Glossy finish\n• Easy to put on",
+    "type_name": "Buttons | Set of 5",
+    "title": "Set of Pin Buttons",
+    "brand": null,
+    "model": "Buttons | Set of 5",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/10/101733006241d5b615735542f3b7888d_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "First",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "first",
+      "type": "first",
+      "title": "Second",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "second",
+      "type": "second",
+      "title": "Third",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "third",
+      "type": "third",
+      "title": "Fourth",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "fourth",
+      "type": "fourth",
+      "title": "Fifth",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 16411,
+     "product_id": 660,
+     "name": "Set of Pin Buttons (White / 1.25″)",
+     "size": "1.25″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/660/16411_1676018939.jpg",
+     "price": "7.73",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16412,
+     "product_id": 660,
+     "name": "Set of Pin Buttons (White / 2.25″)",
+     "size": "2.25″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/660/16412_1676018939.jpg",
+     "price": "8.67",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

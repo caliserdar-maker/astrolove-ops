@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/653?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 653,
+   "type": "DRINKWARE",
+   "main_category_id": 238,
+   "name": "Shaker Pint Glass (16 oz)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/62/6225a66e6c7a4f34734e3ddb668e4a49_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Enjoy your refreshing drinks in this shaker pint glass! It can hold up to 16 oz and will be a durable, high-quality addition to your glassware collection. What’s more, you can even use it as a mixing glass for cocktail evenings. \n\n• Glass material\n• Volume: 16 oz (473 ml)\n• Not dishwasher or microwave safe\n• Simple yet durable design\n• Can be used as a mixing glass\n• Product sourced from China\n\nDisclaimer: This is a handmade product from natural materials, so the glass may have some tiny imperfections, such as bubbles and dots.",
+   "sizes": [
+    "16 oz"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/653"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/653/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/653/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/653/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/653/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/653/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/653/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,332 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/964?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 964,
+   "type": "KNITWEAR",
+   "main_category_id": 189,
+   "name": "Knitted Pet Sweater",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/eb/ebf707cd19523c53f01245813e33baf0_l",
+   "variant_count": 7,
+   "is_discontinued": false,
+   "description": "Keep your furry friend warm and adorable with this soft, knitted sweater. Designed for comfort and cuteness, it’s perfect for chilly walks, cozy naps, or seasonal photo ops. Made with a soft cotton-blend knit, it has a snug and comfy fit.\n\n• 55% cotton, 45% polyester\n• Jacquard knit\n• Lightweight, soft fabric\n• Sizes 2XS–2XL (fits most small to medium-sized pets)\n• Fully knitted construction\n• Clean, finished edges for comfort and durability\n• OEKO-TEX® certified yarns\n• Blank product sourced and fulfilled in China",
+   "sizes": [
+    "2XS",
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL",
+    "2XL"
+   ],
+   "colors": [
+    {
+     "name": "Custom",
+     "value": "#dedede"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "knitwear",
+     "display_name": "Knitting",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "knitting",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": [
+        {
+         "name": "yarn_colors",
+         "techniques": [
+          "knitting"
+         ],
+         "type": "array",
+         "values": [
+          "#090909",
+          "#404040",
+          "#563c33",
+          "#d52213",
+          "#6e5242",
+          "#7f6a53",
+          "#cd5e38",
+          "#b57648",
+          "#d1773b",
+          "#d68785",
+          "#c6b5a7",
+          "#d6c6b4",
+          "#dcd3cc",
+          "#edd9d9",
+          "#e2dfdc",
+          "#fdfafa",
+          "#999996",
+          "#dda032",
+          "#d1c6ae",
+          "#eddea4",
+          "#48542e",
+          "#6e8c4b",
+          "#c0c1bd",
+          "#243f33",
+          "#c5d1d0",
+          "#175387",
+          "#237d96",
+          "#787979",
+          "#343d55",
+          "#4e59be",
+          "#566e99",
+          "#504372",
+          "#4c1c29",
+          "#f66274",
+          "#eda6b4",
+          "#ddabc8"
+         ]
+        }
+       ]
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "knitting",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": [
+        {
+         "name": "yarn_colors",
+         "techniques": [
+          "knitting"
+         ],
+         "type": "array",
+         "values": [
+          "#090909",
+          "#404040",
+          "#563c33",
+          "#d52213",
+          "#6e5242",
+          "#7f6a53",
+          "#cd5e38",
+          "#b57648",
+          "#d1773b",
+          "#d68785",
+          "#c6b5a7",
+          "#d6c6b4",
+          "#dcd3cc",
+          "#edd9d9",
+          "#e2dfdc",
+          "#fdfafa",
+          "#999996",
+          "#dda032",
+          "#d1c6ae",
+          "#eddea4",
+          "#48542e",
+          "#6e8c4b",
+          "#c0c1bd",
+          "#243f33",
+          "#c5d1d0",
+          "#175387",
+          "#237d96",
+          "#787979",
+          "#343d55",
+          "#4e59be",
+          "#566e99",
+          "#504372",
+          "#4c1c29",
+          "#f66274",
+          "#eda6b4",
+          "#ddabc8"
+         ]
+        }
+       ]
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "knitting",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": [
+        {
+         "name": "yarn_colors",
+         "techniques": [
+          "knitting"
+         ],
+         "type": "array",
+         "values": [
+          "#090909",
+          "#404040",
+          "#563c33",
+          "#d52213",
+          "#6e5242",
+          "#7f6a53",
+          "#cd5e38",
+          "#b57648",
+          "#d1773b",
+          "#d68785",
+          "#c6b5a7",
+          "#d6c6b4",
+          "#dcd3cc",
+          "#edd9d9",
+          "#e2dfdc",
+          "#fdfafa",
+          "#999996",
+          "#dda032",
+          "#d1c6ae",
+          "#eddea4",
+          "#48542e",
+          "#6e8c4b",
+          "#c0c1bd",
+          "#243f33",
+          "#c5d1d0",
+          "#175387",
+          "#237d96",
+          "#787979",
+          "#343d55",
+          "#4e59be",
+          "#566e99",
+          "#504372",
+          "#4c1c29",
+          "#f66274",
+          "#eda6b4",
+          "#ddabc8"
+         ]
+        }
+       ]
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "base_color",
+     "techniques": [
+      "knitting"
+     ],
+     "type": "string",
+     "values": [
+      "#090909",
+      "#404040",
+      "#563c33",
+      "#d52213",
+      "#6e5242",
+      "#7f6a53",
+      "#cd5e38",
+      "#b57648",
+      "#d1773b",
+      "#d68785",
+      "#c6b5a7",
+      "#d6c6b4",
+      "#dcd3cc",
+      "#edd9d9",
+      "#e2dfdc",
+      "#fdfafa",
+      "#999996",
+      "#dda032",
+      "#d1c6ae",
+      "#eddea4",
+      "#48542e",
+      "#6e8c4b",
+      "#c0c1bd",
+      "#243f33",
+      "#c5d1d0",
+      "#175387",
+      "#237d96",
+      "#787979",
+      "#343d55",
+      "#4e59be",
+      "#566e99",
+      "#504372",
+      "#4c1c29",
+      "#f66274",
+      "#eda6b4",
+      "#ddabc8"
+     ]
+    },
+    {
+     "name": "color_reduction_mode",
+     "techniques": [
+      "knitting"
+     ],
+     "type": "string",
+     "values": [
+      "solid",
+      "pixelated"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/964"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/964/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/964/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/964/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/964/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/964/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/964/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

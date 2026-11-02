@@ -1,0 +1,393 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/601",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 601,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 331,
+     "width": 1392,
+     "height": 2220,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 15381,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15392,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15382,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15393,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15383,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15394,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15385,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15396,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15384,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15395,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15386,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15397,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15387,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15398,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15389,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15400,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15388,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15399,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15390,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15401,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15391,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 15402,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 16124,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 16125,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 16128,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 16129,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 16126,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 16127,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 16130,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 16131,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 17714,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 17715,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 17716,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 17717,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 17718,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 17719,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 17720,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 17721,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20302,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20306,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20303,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20307,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20304,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20308,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20305,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20309,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 33985,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 33989,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 33986,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 33990,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 33987,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 33991,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 33988,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 33992,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 52384,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 52385,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 52386,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 52387,
+     "placements": {
+      "default": 331
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Product specs",
+    "Template"
+   ],
+   "options": [
+    "Front",
+    "Right"
+   ]
+  },
+  "extra": []
+ }
+}

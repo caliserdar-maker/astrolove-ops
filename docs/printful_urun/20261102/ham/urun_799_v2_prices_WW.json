@@ -1,0 +1,249 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/799/prices?currency=USD&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 799,
+    "placements": [
+     {
+      "id": "default",
+      "title": "Print file",
+      "type": "UV printing",
+      "technique_key": "uv",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 20340,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 20341,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 20342,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 20343,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 20344,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 20345,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 20346,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 20347,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 20348,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 20349,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 20350,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 20351,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 33997,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 33998,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 33999,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 34000,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 52391,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    },
+    {
+     "id": 52392,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "13.75",
+       "discounted_price": "13.75"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 18,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/799/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/799"
+   }
+  }
+ }
+}

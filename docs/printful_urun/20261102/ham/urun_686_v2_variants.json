@@ -1,0 +1,1774 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/686/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16975,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S20 FE)",
+    "size": "Samsung Galaxy S20 FE",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16975_1683879448.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16975"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16975/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16975/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16975/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16977,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S20 Plus)",
+    "size": "Samsung Galaxy S20 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16977_1683879448.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16977"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16977/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16977/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16977/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16979,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S20 Ultra)",
+    "size": "Samsung Galaxy S20 Ultra",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16979_1683879458.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16979"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16979/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16979/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16979/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16981,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S20)",
+    "size": "Samsung Galaxy S20",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16981_1683879468.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16981"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16981/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16981/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16981/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16983,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S21 FE)",
+    "size": "Samsung Galaxy S21 FE",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16983_1683879469.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16983"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16983/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16983/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16983/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16985,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S21 Plus)",
+    "size": "Samsung Galaxy S21 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16985_1683879479.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16985"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16985/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16985/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16985/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16987,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S21 Ultra)",
+    "size": "Samsung Galaxy S21 Ultra",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16987_1683879479.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16987"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16987/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16987/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16987/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16989,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S21)",
+    "size": "Samsung Galaxy S21",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16989_1683879489.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16989"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16989/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16989/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16989/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16991,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S22 Plus)",
+    "size": "Samsung Galaxy S22 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16991_1683879489.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16991"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16991/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16991/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16991/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16993,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S22 Ultra)",
+    "size": "Samsung Galaxy S22 Ultra",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16993_1683879499.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16993"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16993/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16993/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16993/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16995,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S22)",
+    "size": "Samsung Galaxy S22",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16995_1683879500.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16995"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16995/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16995/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16995/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16997,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S23 Plus)",
+    "size": "Samsung Galaxy S23 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16997_1683879510.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16997"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16997/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16997/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16997/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16999,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S23 Ultra)",
+    "size": "Samsung Galaxy S23 Ultra",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16999_1683879530.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16999"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16999/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16999/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16999/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17001,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S23)",
+    "size": "Samsung Galaxy S23",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/17001_1683879530.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17001"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17001/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17001/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17001/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18744,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S24 Plus)",
+    "size": "Samsung Galaxy S24 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/18744_1705299399.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18744"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18744/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18744/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18744/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18745,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S24 Ultra)",
+    "size": "Samsung Galaxy S24 Ultra",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/18745_1705299400.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18745"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18745/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18745/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18745/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18743,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S24)",
+    "size": "Samsung Galaxy S24",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/18743_1705299410.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18743"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18743/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18743/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18743/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21471,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S25 Plus)",
+    "size": "Samsung Galaxy S25 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/21471_1738068080.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21471"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21471/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21471/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21471/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21473,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S25 Ultra)",
+    "size": "Samsung Galaxy S25 Ultra",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/21473_1738068080.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21473"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21473/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21473/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21473/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21469,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S25)",
+    "size": "Samsung Galaxy S25",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/21469_1738068080.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21469"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21469/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21469/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21469/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49328,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S26 Plus)",
+    "size": "Samsung Galaxy S26 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/49328_1776237184.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49328"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49328/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49328/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49328/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49329,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S26 Ultra)",
+    "size": "Samsung Galaxy S26 Ultra",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/49329_1776237194.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49329"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49329/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49329/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49329/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49327,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Glossy / Samsung Galaxy S26)",
+    "size": "Samsung Galaxy S26",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/49327_1776237194.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49327"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49327/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49327/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49327/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16976,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S20 FE)",
+    "size": "Samsung Galaxy S20 FE",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16976_1683879560.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16976"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16976/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16976/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16976/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16978,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S20 Plus)",
+    "size": "Samsung Galaxy S20 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16978_1683879570.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16978"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16978/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16978/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16978/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16980,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S20 Ultra)",
+    "size": "Samsung Galaxy S20 Ultra",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16980_1683879570.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16980"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16980/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16980/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16980/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16982,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S20)",
+    "size": "Samsung Galaxy S20",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16982_1683879570.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16982"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16982/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16982/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16982/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16984,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S21 FE)",
+    "size": "Samsung Galaxy S21 FE",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16984_1683879580.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16984"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16984/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16984/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16984/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16986,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S21 Plus)",
+    "size": "Samsung Galaxy S21 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16986_1683879591.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16986"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16986/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16986/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16986/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16988,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S21 Ultra)",
+    "size": "Samsung Galaxy S21 Ultra",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16988_1683879713.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16988"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16988/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16988/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16988/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16990,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S21)",
+    "size": "Samsung Galaxy S21",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16990_1683879703.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16990"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16990/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16990/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16990/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16992,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S22 Plus)",
+    "size": "Samsung Galaxy S22 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16992_1683879611.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16992"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16992/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16992/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16992/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16994,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S22 Ultra)",
+    "size": "Samsung Galaxy S22 Ultra",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16994_1683879612.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16994"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16994/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16994/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16994/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16996,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S22)",
+    "size": "Samsung Galaxy S22",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16996_1683879622.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16996"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16996/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16996/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16996/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16998,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S23 Plus)",
+    "size": "Samsung Galaxy S23 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/16998_1683879622.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16998"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16998/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16998/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16998/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17000,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S23 Ultra)",
+    "size": "Samsung Galaxy S23 Ultra",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/17000_1683879622.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17000"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17000/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17000/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17000/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17002,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S23)",
+    "size": "Samsung Galaxy S23",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/17002_1683879683.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17002"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17002/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17002/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17002/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18747,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S24 Plus)",
+    "size": "Samsung Galaxy S24 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/18747_1705299410.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18747"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18747/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18747/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18747/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18748,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S24 Ultra)",
+    "size": "Samsung Galaxy S24 Ultra",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/18748_1705299420.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18748"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18748/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18748/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18748/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18746,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S24)",
+    "size": "Samsung Galaxy S24",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/18746_1705299420.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18746"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18746/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18746/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18746/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21472,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S25 Plus)",
+    "size": "Samsung Galaxy S25 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/21472_1737960312.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21472"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21472/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21472/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21472/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21474,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S25 Ultra)",
+    "size": "Samsung Galaxy S25 Ultra",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/21474_1737960312.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21474"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21474/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21474/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21474/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21470,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S25)",
+    "size": "Samsung Galaxy S25",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/21470_1737960316.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21470"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21470/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21470/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21470/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49330,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S26 Plus)",
+    "size": "Samsung Galaxy S26 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/49330_1776237143.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49330"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49330/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49330/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49330/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49331,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S26 Ultra)",
+    "size": "Samsung Galaxy S26 Ultra",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/49331_1776237153.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49331"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49331/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49331/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49331/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49332,
+    "catalog_product_id": 686,
+    "name": "Tough Case for Samsung® (Matte / Samsung Galaxy S26)",
+    "size": "Samsung Galaxy S26",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/686/49332_1776237164.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49332"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/686"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49332/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49332/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49332/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.68,
+      "width": 4.65,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 46,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/686/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/686"
+   }
+  }
+ }
+}

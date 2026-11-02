@@ -1,0 +1,48 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1562",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 1562,
+   "available_placements": {
+    "embroidery_apparel_front": "Front"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 1549,
+     "width": 900,
+     "height": 600,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 49344,
+     "placements": {
+      "embroidery_apparel_front": 1549
+     }
+    },
+    {
+     "variant_id": 49345,
+     "placements": {
+      "embroidery_apparel_front": 1549
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat"
+   ],
+   "options": [
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/382/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16030,
+    "catalog_product_id": 382,
+    "name": "Stainless Steel Water Bottle (Black / 17 oz)",
+    "size": "17 oz",
+    "color": "Black",
+    "color_code": "#020202",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/382/16030_1661782722.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16030"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/382"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/382/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16030/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16030/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16030/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 5.27,
+      "width": 8.52,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 10798,
+    "catalog_product_id": 382,
+    "name": "Stainless Steel Water Bottle 17 oz",
+    "size": "17 oz",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/382/10798_1614007341.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10798"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/382"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/382/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10798/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10798/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10798/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 5.27,
+      "width": 8.52,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/382/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/382"
+   }
+  }
+ }
+}

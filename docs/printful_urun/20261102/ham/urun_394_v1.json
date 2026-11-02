@@ -1,0 +1,149 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/394",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 394,
+    "main_category_id": 250,
+    "type": "SUBLIMATION",
+    "description": "Protect your laptop in style—get this snug, lightweight laptop sleeve! To prevent any scratch marks, it contains an internal padded zipper and its interior is fully lined with faux fur. What’s more, it’s made from a material that’s resistant to water, oil, and heat, making sure your laptop sleeve looks as sharp as you any day of the week!\r\n\r\n• 100% neoprene\r\n• 13″ sleeve weight: 6.49 oz (220 g)\r\n• 15″ sleeve weight: 8.8 oz (250 g)\r\n• Lightweight and resistant to water, oil, and heat\r\n• Snug fit\r\n• Faux fur interior lining\r\n• Top-loading zippered enclosure with two sliders\r\n• Padded zipper binding\r\n• Blank product sourced from China",
+    "type_name": "Laptop Sleeve | White",
+    "title": "Laptop Sleeve",
+    "brand": null,
+    "model": "Laptop Sleeve | White",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/02/022e7ef918b642b66d60b3ce3cb5e5ee_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 10984,
+     "product_id": 394,
+     "name": "Laptop Sleeve 13″",
+     "size": "13″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/394/10984_1737468114.jpg",
+     "price": "21.58",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10985,
+     "product_id": 394,
+     "name": "Laptop Sleeve 15″",
+     "size": "15″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/394/10985_1737468120.jpg",
+     "price": "23.66",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

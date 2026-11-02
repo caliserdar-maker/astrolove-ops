@@ -1,0 +1,99 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/904",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 904,
+    "main_category_id": 239,
+    "type": "SUBLIMATION",
+    "description": "Give your ride an upgrade with this metal license plate frame. Built from durable aluminum with a glossy finish, it stands out on the road while holding up to the elements. Designed for hassle-free installation with pre-drilled holes and a clean, high-visibility design.\n\n• 100% aluminum\n• Size: 12.3″ × 6.5″ (31.1 cm × 16.5 cm)\n• Weight: 85 g (3 oz)\n• Pre-drilled holes for easy mounting (no screws included)\n• Glossy finish\n• Silver-colored backing\n• Blank product sourced from the US\n\nDisclaimer: Check local regulations regarding license plate frame size and shape.",
+    "type_name": "License Plate | Frame | Metal",
+    "title": "Metal License Plate Frame",
+    "brand": null,
+    "model": "License Plate | Frame | Metal",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/6e/6e1171d437eb77a8d7ec9916cc4f6fbb_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "US"
+   },
+   "variants": [
+    {
+     "id": 23234,
+     "product_id": 904,
+     "name": "Metal License Plate Frame (White Front, Silver Back / 12.25″×6.5″)",
+     "size": "12.25″×6.5″",
+     "color": "White Front, Silver Back",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/904/23234_1749103636.jpg",
+     "price": "13.16",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

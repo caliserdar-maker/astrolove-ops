@@ -1,0 +1,157 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/630?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 630,
+   "type": "CUT-SEW",
+   "main_category_id": 217,
+   "name": "All-Over Print Bandana",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/3d/3d2c903719c4ade552b062343c7f902e_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Get ready to make a statement with this all-over print bandana. Mix up your outfits by using this as a headband, necktie, or armband. In fact, why not get a second bandana to match your pet? Grab a few and hit the streets in style!\n\n• Fabric composition in the EU: 65% recycled polyester, 35% polyester\n• Fabric composition in the US: 100% recycled polyester\n• Fabric weight in the EU: 2.95 oz./yd.² (100 g/m²)\n• Fabric weight in the US: 3.24 oz./yd.² (110 g/m²)\n• Fabric specifications in the EU: Breathable; moisture-wicking material with UPF50+ protection\n• Lightweight and soft to the touch\n• Double-folded edges\n• Single-sided print\n• Multifunctional \n• The fabric is OEKO-TEX 100 standard certified\n• The recycled content of this product is certified under GRS (Global Recycled Standard)\n• Blank product components sourced from China/Mexico\n\nImportant sizing information: the smallest bandana size is made for small pets and won’t fit a grown-up. Please choose the medium or large size if you’re ordering for a grown-up.",
+   "sizes": [
+    "S",
+    "M",
+    "L"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "label_inside",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "label_inside_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "white": "White",
+      "black": "Black",
+      "clear": "Clear"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/630"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/630/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/630/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/630/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/630/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/630/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/630/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

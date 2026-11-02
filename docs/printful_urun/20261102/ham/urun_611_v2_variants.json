@@ -1,0 +1,64 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/611/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 15662,
+    "catalog_product_id": 611,
+    "name": "Cork Back Coaster (3.74″×3.74″)",
+    "size": "3.74″×3.74″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/611/15662_1660029236.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15662"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/611"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/611/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15662/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15662/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15662/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 3.94,
+      "width": 3.94,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/611/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/611"
+   }
+  }
+ }
+}

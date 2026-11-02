@@ -1,0 +1,172 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/794",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 794,
+    "main_category_id": 254,
+    "type": "DECOR",
+    "description": "Personalize your festive tree or home with these high-quality metal ornaments. Choose your favorite from 4 charming shapes (Rectangle, Scalloped, Pet Paw, and Tag) or get all of them for creative variety. Includes a red ribbon for easy hanging.\n\n• Material: metal aluminum\n• Sizes: Rectangle and Scalloped 3″ × 4″ (7.62 × 10.16 cm), Pet Paw 3.5″ x 3.75″ (8.89 × 9.53 cm), Tag 3″ x 5″ (7.62 × 12.7 cm)\n• Ornament thickness 0.04″ (1 mm)\n• Comes with a red ribbon and a hole to thread it through\n• Blank product sourced from China\n\nDisclaimer: This product is available in the US only. If your shipping address is outside this region, please choose a different product.",
+    "type_name": "Ornament | Metal",
+    "title": "Metal Ornaments",
+    "brand": null,
+    "model": "Ornament | Metal",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/ae/aeae32812182f83a8b6c81f13267e88b_l",
+    "variant_count": 4,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "USA"
+   },
+   "variants": [
+    {
+     "id": 20253,
+     "product_id": 794,
+     "name": "Metal Ornaments (Pet Paw)",
+     "size": "Pet Paw",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/794/20253_1722605579.jpg",
+     "price": "8.27",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20255,
+     "product_id": 794,
+     "name": "Metal Ornaments (Rectangle)",
+     "size": "Rectangle",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/794/20255_1722605586.jpg",
+     "price": "8.27",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20252,
+     "product_id": 794,
+     "name": "Metal Ornaments (Scalloped)",
+     "size": "Scalloped",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/794/20252_1722605589.jpg",
+     "price": "8.27",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20254,
+     "product_id": 794,
+     "name": "Metal Ornaments (Tag)",
+     "size": "Tag",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/794/20254_1722605596.jpg",
+     "price": "8.27",
+     "in_stock": false,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "supplier_out_of_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

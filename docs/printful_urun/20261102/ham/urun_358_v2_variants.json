@@ -1,0 +1,178 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/358/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 10163,
+    "catalog_product_id": 358,
+    "name": "Kiss Cut Stickers (3″×3″in)",
+    "size": "3″×3″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/358/10163_1553083889.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10163"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/358"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/358/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10163/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10163/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10163/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 10164,
+    "catalog_product_id": 358,
+    "name": "Kiss Cut Stickers (4″×4″in)",
+    "size": "4″×4″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/358/10164_1553083894.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10164"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/358"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/358/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10164/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10164/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10164/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 10165,
+    "catalog_product_id": 358,
+    "name": "Kiss Cut Stickers (5.5″×5.5″in)",
+    "size": "5.5″×5.5″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/358/10165_1553083897.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10165"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/358"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/358/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10165/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10165/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10165/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 5.5,
+      "width": 5.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16362,
+    "catalog_product_id": 358,
+    "name": "Kiss Cut Stickers (White / 15″×3.75″)",
+    "size": "15″×3.75″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/358/16362_1671002231.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16362"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/358"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/358/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16362/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16362/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16362/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 3.75,
+      "width": 15.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/358/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/358"
+   }
+  }
+ }
+}

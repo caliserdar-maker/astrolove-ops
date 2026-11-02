@@ -1,0 +1,142 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/887",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 887,
+    "main_category_id": 16,
+    "type": "CUT-SEW",
+    "description": "Replace single-use plastic bags with this stylish, handy shopping bag that you can keep in your purse or pocket. It’s light yet sturdy, and has handles as part of the construction for extra durability.\n\n• 100% polyester\n• 4.13 oz/yd² (140 g/m²)\n• Bag size: 16.9″ × 17.5″ (43 cm × 44.5 cm)\n• Handle length: 7.7″ (19.5 cm), width 2″ (5 cm)\n• Open main compartment\n• Blank product sourced from China",
+    "type_name": "All-Over Print Shopping Bag",
+    "title": "All-Over Print Shopping Bag",
+    "brand": null,
+    "model": "All-Over Print Shopping Bag",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/0c/0c1088454808826946ce4c21b6dad7a0_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "details",
+      "type": "details",
+      "title": "Details",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "label_inside",
+      "type": "label_inside",
+      "title": "Branding",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 22801,
+     "product_id": 887,
+     "name": "All-Over Print Shopping Bag (Black / One size)",
+     "size": "One size",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/887/22801_1753774084.jpg",
+     "price": "17.34",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22802,
+     "product_id": 887,
+     "name": "All-Over Print Shopping Bag (White / One size)",
+     "size": "One size",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/887/22802_1753774095.jpg",
+     "price": "17.34",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

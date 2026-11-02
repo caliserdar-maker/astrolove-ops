@@ -1,0 +1,589 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/640",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 640,
+    "main_category_id": 55,
+    "type": "FRAMED-POSTER",
+    "description": "Bring creativity and fun into your space with original artwork. This matte poster comes with a lightweight wooden hanger and will fit any interior decor. Use it as a statement piece or to create more depth on your gallery wall.\n\n• Hangers made from natural wood\n• Hanger piece thickness: 0.2″ (0.5 mm)\n• Hanger piece width: 0.79″ (2 cm)\n• Paper weight: 192 g/m²\n• Poster secured by magnets\n• Comes with a matching string\n• Wood sourced from the Baltics\n• Paper sourced from Japan\n• Blank product sourced from the UK",
+    "type_name": "Paper Poster (in) | w/Hanger | Matte",
+    "title": "Enhanced Matte Paper Poster With Hanger (in)",
+    "brand": null,
+    "model": "Paper Poster (in) | w/Hanger | Matte",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/a5/a5b9548dae9fd4df4398fc97adc8d199_l",
+    "variant_count": 16,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "UK"
+   },
+   "variants": [
+    {
+     "id": 16228,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (Oak / 10″×10″)",
+     "size": "10″×10″",
+     "color": "Oak",
+     "color_code": "#e5c9ae",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16228_1663669683.jpg",
+     "price": "18.21",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16230,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (Oak / 12″×12″)",
+     "size": "12″×12″",
+     "color": "Oak",
+     "color_code": "#e5c9ae",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16230_1663669693.jpg",
+     "price": "19.25",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16231,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (Oak / 12″×16″)",
+     "size": "12″×16″",
+     "color": "Oak",
+     "color_code": "#e5c9ae",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16231_1663669693.jpg",
+     "price": "19.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16233,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (Oak / 14″×14″)",
+     "size": "14″×14″",
+     "color": "Oak",
+     "color_code": "#e5c9ae",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16233_1663669704.jpg",
+     "price": "21.59",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16234,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (Oak / 16″×16″)",
+     "size": "16″×16″",
+     "color": "Oak",
+     "color_code": "#e5c9ae",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16234_1663669714.jpg",
+     "price": "22.11",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16235,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (Oak / 16″×20″)",
+     "size": "16″×20″",
+     "color": "Oak",
+     "color_code": "#e5c9ae",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16235_1663669714.jpg",
+     "price": "22.19",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16236,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (Oak / 18″×18″)",
+     "size": "18″×18″",
+     "color": "Oak",
+     "color_code": "#e5c9ae",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16236_1663669724.jpg",
+     "price": "25.49",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16238,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (Oak / 24″×36″)",
+     "size": "24″×36″",
+     "color": "Oak",
+     "color_code": "#e5c9ae",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16238_1663669736.jpg",
+     "price": "32.77",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16216,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (White / 10″×10″)",
+     "size": "10″×10″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16216_1663669759.jpg",
+     "price": "18.21",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16218,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (White / 12″×12″)",
+     "size": "12″×12″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16218_1663669770.jpg",
+     "price": "19.25",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16219,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (White / 12″×16″)",
+     "size": "12″×16″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16219_1663669776.jpg",
+     "price": "19.51",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16221,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (White / 14″×14″)",
+     "size": "14″×14″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16221_1663669787.jpg",
+     "price": "21.59",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16222,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (White / 16″×16″)",
+     "size": "16″×16″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16222_1663669798.jpg",
+     "price": "22.11",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16223,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (White / 16″×20″)",
+     "size": "16″×20″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16223_1663669807.jpg",
+     "price": "22.63",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16224,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (White / 18″×18″)",
+     "size": "18″×18″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16224_1663669808.jpg",
+     "price": "25.49",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16226,
+     "product_id": 640,
+     "name": "Enhanced Matte Paper Poster With Hanger (White / 24″×36″)",
+     "size": "24″×36″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/640/16226_1663669837.jpg",
+     "price": "32.77",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

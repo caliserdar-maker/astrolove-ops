@@ -1,0 +1,128 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/884?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 884,
+   "type": "SUBLIMATION",
+   "main_category_id": 230,
+   "name": "Bath Mat",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/48/482aba86e1c88a3282efaf031317d66e_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Soft where it counts. This memory foam bath mat adds everyday comfort and a clean look to any bathroom, with a non-slip back that helps keep things steady. A small upgrade that makes a noticeable difference.\n\n• 100% memory foam microfiber face\n• Anti-slip polyester backing\n• Blank product sourced from China\n\nDisclaimer: Bath mat sizes may vary by ±0.75″ (1.9 cm) for the small mat and ±1″ (2.5 cm) for the large mat.",
+   "sizes": [
+    "24″×17″",
+    "34″×21″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/884"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/884/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/884/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/884/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/884/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/884/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/884/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

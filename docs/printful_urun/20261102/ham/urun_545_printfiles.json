@@ -1,0 +1,74 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/545",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 545,
+   "available_placements": {
+    "default": "Base",
+    "label_inside": "Inside label"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 64,
+     "width": 375,
+     "height": 150,
+     "dpi": 150,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 279,
+     "width": 3300,
+     "height": 750,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 16363,
+     "placements": {
+      "default": 279,
+      "label_inside": 64
+     }
+    },
+    {
+     "variant_id": 13802,
+     "placements": {
+      "default": 279,
+      "label_inside": 64
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Ghost",
+    "Men's",
+    "Men's 2",
+    "Product details",
+    "Template",
+    "Women's",
+    "Women's 2"
+   ],
+   "options": [
+    "Back",
+    "Default",
+    "Front",
+    "Inside Label",
+    "Left Back",
+    "Left Front",
+    "Product details",
+    "Right Back",
+    "Right Front"
+   ]
+  },
+  "extra": []
+ }
+}

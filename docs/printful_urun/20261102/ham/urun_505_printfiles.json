@@ -1,0 +1,68 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/505",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 505,
+   "available_placements": {
+    "default": "Print file",
+    "background": "Background"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 256,
+     "width": 1750,
+     "height": 2482,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 259,
+     "width": 1822,
+     "height": 2554,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 12917,
+     "placements": {
+      "default": 256,
+      "background": 259
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Holiday season",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Spring/summer vibes",
+    "Valentine's Day",
+    "template"
+   ],
+   "options": [
+    "Background",
+    "Christmas",
+    "Christmas 2",
+    "Front",
+    "Spring/Summer",
+    "Spring/Summer 2",
+    "Sticker",
+    "Valentine's Day",
+    "Valentine's Day 2"
+   ]
+  },
+  "extra": []
+ }
+}

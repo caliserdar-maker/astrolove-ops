@@ -1,0 +1,121 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/675?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 675,
+   "type": "SUBLIMATION",
+   "main_category_id": 271,
+   "name": "Yoga Mat",
+   "brand": null,
+   "model": "Yoga Mat",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/7f/7f5b93c735bf44dc657fd20da58dba97_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Whether you’re exercising, stretching, or meditating, it’s worth having a yoga mat that brings you joy and matches your style. It’s easy to carry and provides both stability and comfort with anti-slip rubber on the bottom and soft microsuede on top.\n\n• Rubber mat with a microsuede top\n• Anti-slip rubber bottom\n• Size: 24″ × 68″ (61 cm × 173 cm)\n• Weight: 62 oz. (1.75 kg)\n• Mat thickness: 0.12″ (3 mm)\n• Product sourced from China",
+   "sizes": [
+    "24″×68″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/675"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/675/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/675/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/675/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/675/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/675/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/675/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,146 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/746?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 746,
+   "type": "SUBLIMATION",
+   "main_category_id": 254,
+   "name": "Garden Flag",
+   "brand": null,
+   "model": "Garden Flag",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/dc/dc54473d74e14d38850f6e962eeff48a_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Whether you’re celebrating a special occasion, expressing support for a cause, or adding a welcoming touch to your home, the garden flag is your go-to choice for versatile and durable outdoor decor.\n\n• 100% polyester\n• Size: 12″ × 17″ (30 × 43 cm)\n• Fabric weight: 1.2 oz./yd.² (34 g/m²)\n• Pole hem\n• Blank product sourced from China and printed in the US\n\nDisclaimers: \n• Each garden flag may vary slightly in size and may not be perfectly evenly cut\n• The flag pole is not included",
+   "sizes": [
+    "12″×17″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#dddddd"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/746"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/746/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/746/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/746/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/746/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/746/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/746/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

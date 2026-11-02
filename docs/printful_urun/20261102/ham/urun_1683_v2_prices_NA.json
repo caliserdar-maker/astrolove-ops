@@ -1,0 +1,100 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1683/prices?currency=USD&selling_region_name=north_america",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 1683,
+    "placements": [
+     {
+      "id": "front",
+      "title": "Front print",
+      "type": "DTF printing",
+      "technique_key": "dtfilm",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     },
+     {
+      "id": "back",
+      "title": "Back print",
+      "type": "DTF printing",
+      "technique_key": "dtfilm",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 53100,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "55.43",
+       "discounted_price": "55.43"
+      }
+     ]
+    },
+    {
+     "id": 53101,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "55.43",
+       "discounted_price": "55.43"
+      }
+     ]
+    },
+    {
+     "id": 53102,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "55.43",
+       "discounted_price": "55.43"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1683/prices?currency=USD&selling_region_name=north_america&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1683"
+   }
+  }
+ }
+}

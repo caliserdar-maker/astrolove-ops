@@ -1,0 +1,156 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/214?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 214,
+   "type": "CUT-SEW",
+   "main_category_id": 258,
+   "name": "All-Over Print Premium Pillow",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/f8/f8f08e9fe5e868d738198ed371e8c045_l",
+   "variant_count": 5,
+   "is_discontinued": false,
+   "description": "Want to add a splash of color to your home? This premium feel pillow with a shape-retaining insert is just what you're looking for! It'll make any room luxurious and provide the perfect excuse for a quick power nap.\n\n• 100% polyester case\n• Fabric weight: 8.1 oz/yd² (275 g/m²)\n• Fabric with a linen feel\n• Hidden zipper\n• Machine-washable case\n• Shape-retaining 100% polyester insert included (handwash only)\n• Blank product components in Mexico sourced from China and Mexico\n• Blank product components in the EU sourced from China and Poland",
+   "sizes": [
+    "20″×12″",
+    "18″×18″",
+    "22″×22″",
+    "14″×14″",
+    "16″×16″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "white": "White",
+      "black": "Black"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/214"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/214/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/214/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/214/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/214/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/214/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/214/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,122 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/934?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 934,
+   "type": "SUBLIMATION",
+   "main_category_id": 230,
+   "name": "Doormat",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/e7/e7cac7009f835917b740dd2d75d9fb2f_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Give your entryway a warm and welcoming touch with this sturdy coir doormat. Its natural texture helps brush off dirt, while the clean, simple look works with any home style. Use it in a protected outdoor area to keep floors cleaner and add personality to your doorstep.\n\n• Grade A tufted coir coconut fiber\n• 24″ × 16″ (61 cm × 40.6 cm)\n• Thickness: 0.59″ (1.5 cm)\n• Black vinyl backing for added stability\n• Suitable for covered outdoor areas\n• Blank product sourced from China\n\nDisclaimer: Use in a covered, weather-protected area. Avoid direct sunlight and excess moisture. Some natural fiber shedding is normal — just shake the mat to remove loose fibers.",
+   "sizes": [
+    "24″×16″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/934"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/934/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/934/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/934/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/934/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/934/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/934/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

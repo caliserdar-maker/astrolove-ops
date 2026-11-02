@@ -1,0 +1,216 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/742/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 19107,
+    "catalog_product_id": 742,
+    "name": "Insulated Tumbler with a Straw (Black / 20 oz)",
+    "size": "20 oz",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/742/19107_1709285872.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19107"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/742"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/742/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19107/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19107/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19107/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 10.06,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19108,
+    "catalog_product_id": 742,
+    "name": "Insulated Tumbler with a Straw (Mint / 20 oz)",
+    "size": "20 oz",
+    "color": "Mint",
+    "color_code": "#cee5bd",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/742/19108_1709285879.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19108"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/742"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/742/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19108/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19108/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19108/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 10.06,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19109,
+    "catalog_product_id": 742,
+    "name": "Insulated Tumbler with a Straw (Navy / 20 oz)",
+    "size": "20 oz",
+    "color": "Navy",
+    "color_code": "#213c51",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/742/19109_1709285879.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19109"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/742"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/742/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19109/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19109/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19109/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 10.06,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19110,
+    "catalog_product_id": 742,
+    "name": "Insulated Tumbler with a Straw (Pink / 20 oz)",
+    "size": "20 oz",
+    "color": "Pink",
+    "color_code": "#ffa7b1",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/742/19110_1709285879.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19110"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/742"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/742/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19110/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19110/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19110/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 10.06,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19111,
+    "catalog_product_id": 742,
+    "name": "Insulated Tumbler with a Straw (White / 20 oz)",
+    "size": "20 oz",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/742/19111_1709285880.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19111"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/742"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/742/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19111/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19111/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19111/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.0,
+      "width": 10.06,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 5,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/742/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/742"
+   }
+  }
+ }
+}

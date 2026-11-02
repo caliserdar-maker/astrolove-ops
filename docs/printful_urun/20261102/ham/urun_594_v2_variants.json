@@ -1,0 +1,100 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/594/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 15155,
+    "catalog_product_id": 594,
+    "name": "All-Over Print Gym Bag (White / One size)",
+    "size": "One size",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/594/15155_1652879339.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15155"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/594"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/594/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15155/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15155/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15155/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 15.5,
+      "width": 19.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 15.5,
+      "width": 19.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "side_right",
+      "height": 15.5,
+      "width": 19.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "side_left",
+      "height": 15.5,
+      "width": 19.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "bottom",
+      "height": 15.5,
+      "width": 19.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 1.0,
+      "width": 2.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "pocket",
+      "height": 15.5,
+      "width": 19.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/594/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/594"
+   }
+  }
+ }
+}

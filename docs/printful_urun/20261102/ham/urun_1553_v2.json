@@ -1,0 +1,258 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1553?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1553,
+   "type": "DTFILM",
+   "main_category_id": 48,
+   "name": "Cotton Color Tote Bag | Westford Mill W101",
+   "brand": "BagBase",
+   "model": "W101",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/1f/1f48ca2ef9e7088273e16de23fd15ade_l",
+   "variant_count": 12,
+   "is_discontinued": false,
+   "description": "Made from lightweight yet durable fabric, this versatile tote bag is perfect for everyday use—whether you're heading to the shops, carrying books. \n\n• 100% cotton\n• Fabric weight: 140 g/m²\n• One size: 15″ × 16.5″ (38 cm × 42 cm)\n• Medium-length carrying handles (67 cm)\n• Capacity: 10 litres\n• One large main compartment\n• Blank product sourced from Pakistan",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#090909"
+    },
+    {
+     "name": "Bottle Green",
+     "value": "#05442f"
+    },
+    {
+     "name": "Burgundy",
+     "value": "#491729"
+    },
+    {
+     "name": "Classic Pink",
+     "value": "#ffbfd9"
+    },
+    {
+     "name": "Classic Red",
+     "value": "#9f0019"
+    },
+    {
+     "name": "Coral",
+     "value": "#ff5a4e"
+    },
+    {
+     "name": "French Navy",
+     "value": "#0d151c"
+    },
+    {
+     "name": "Light Grey",
+     "value": "#bfc1c2"
+    },
+    {
+     "name": "Mint",
+     "value": "#6ef9e0"
+    },
+    {
+     "name": "Mustard",
+     "value": "#d39e22"
+    },
+    {
+     "name": "Natural",
+     "value": "#fffbf1"
+    },
+    {
+     "name": "Orange",
+     "value": "#f95200"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "embroidery",
+     "display_name": "Embroidery",
+     "is_default": true
+    },
+    {
+     "key": "dtfilm",
+     "display_name": "DTF printing",
+     "is_default": false
+    }
+   ],
+   "placements": [
+    {
+     "placement": "embroidery_apparel_front",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": [
+        {
+         "name": "thread_colors",
+         "techniques": [
+          "embroidery"
+         ],
+         "type": "array",
+         "values": {
+          "#FFFFFF": "1801 White",
+          "#000000": "1800 Black",
+          "#96A1A8": "1718 Grey",
+          "#A67843": "1672 Old Gold",
+          "#FFCC00": "1951 Gold",
+          "#E25C27": "1987 Orange",
+          "#CC3366": "1910 Flamingo",
+          "#CC3333": "1839 Red",
+          "#660000": "1784 Maroon",
+          "#333366": "1966 Navy",
+          "#005397": "1842 Royal",
+          "#3399FF": "1695 Aqua/Teal",
+          "#6B5294": "1832 Purple",
+          "#01784E": "1751 Kelly Green",
+          "#7BA35A": "1848 Kiwi Green"
+         }
+        }
+       ]
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "embroidery_neckline"
+     ]
+    },
+    {
+     "placement": "embroidery_apparel_back",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": [
+        {
+         "name": "thread_colors",
+         "techniques": [
+          "embroidery"
+         ],
+         "type": "array",
+         "values": {
+          "#FFFFFF": "1801 White",
+          "#000000": "1800 Black",
+          "#96A1A8": "1718 Grey",
+          "#A67843": "1672 Old Gold",
+          "#FFCC00": "1951 Gold",
+          "#E25C27": "1987 Orange",
+          "#CC3366": "1910 Flamingo",
+          "#CC3333": "1839 Red",
+          "#660000": "1784 Maroon",
+          "#333366": "1966 Navy",
+          "#005397": "1842 Royal",
+          "#3399FF": "1695 Aqua/Teal",
+          "#6B5294": "1832 Purple",
+          "#01784E": "1751 Kelly Green",
+          "#7BA35A": "1848 Kiwi Green"
+         }
+        }
+       ]
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "front_dtf_tote",
+     "technique": "dtfilm",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "back_dtf_tote",
+     "technique": "dtfilm",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1553"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1553/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1553/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1553/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1553/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1553/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1553/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

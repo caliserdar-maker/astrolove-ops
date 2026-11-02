@@ -1,0 +1,91 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/901",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 901,
+   "available_placements": {
+    "front": "Front print",
+    "back": "Back print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 866,
+     "width": 525,
+     "height": 650,
+     "dpi": 200,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 867,
+     "width": 725,
+     "height": 839,
+     "dpi": 200,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 868,
+     "width": 750,
+     "height": 750,
+     "dpi": 200,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 869,
+     "width": 716,
+     "height": 722,
+     "dpi": 200,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 23138,
+     "placements": {
+      "front": 869,
+      "back": 869
+     }
+    },
+    {
+     "variant_id": 23135,
+     "placements": {
+      "front": 866,
+      "back": 866
+     }
+    },
+    {
+     "variant_id": 23136,
+     "placements": {
+      "front": 868,
+      "back": 868
+     }
+    },
+    {
+     "variant_id": 23137,
+     "placements": {
+      "front": 867,
+      "back": 867
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Templates"
+   ],
+   "options": [
+    "Back",
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

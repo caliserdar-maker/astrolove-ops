@@ -1,0 +1,114 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/645?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 645,
+   "type": "CANDLE",
+   "main_category_id": 256,
+   "name": "Glass Jar Soy Wax Candle",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/0a/0a996b0eb6387b9d936fbf6170d67f8c_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "With its sleek glass jar, this candle functions as stylish home decor. Light it up and watch how its soft glow brings the room to life!\n\n• Soy wax\n• Cotton wick\n• 3.76″ × 3.13″  (95 × 79 mm) glass vessel\n• Product weight: 1.2 lbs (570 g)\n• Unscented, has a pleasant natural aroma\n• Blank product sourced from Latvia",
+   "sizes": [
+    "Scented",
+    "Unscented"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#fffaf1"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/645"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/645/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/645/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/645/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/645/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/645/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/645/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

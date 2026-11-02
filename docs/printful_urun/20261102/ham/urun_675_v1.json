@@ -1,0 +1,107 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/675",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 675,
+    "main_category_id": 271,
+    "type": "SUBLIMATION",
+    "description": "Whether you’re exercising, stretching, or meditating, it’s worth having a yoga mat that brings you joy and matches your style. It’s easy to carry and provides both stability and comfort with anti-slip rubber on the bottom and soft microsuede on top.\n\n• Rubber mat with a microsuede top\n• Anti-slip rubber bottom\n• Size: 24″ × 68″ (61 cm × 173 cm)\n• Weight: 62 oz. (1.75 kg)\n• Mat thickness: 0.12″ (3 mm)\n• Product sourced from China",
+    "type_name": "Yoga Mat",
+    "title": "Yoga Mat",
+    "brand": null,
+    "model": "Yoga Mat",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/7f/7f5b93c735bf44dc657fd20da58dba97_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 16714,
+     "product_id": 675,
+     "name": "Yoga Mat",
+     "size": "24″×68″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/675/16714_1680266097.jpg",
+     "price": "43.18",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

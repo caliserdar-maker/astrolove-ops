@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1428/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 44159,
+    "catalog_product_id": 1428,
+    "name": "Generic brand (One size / Red and Black/Natural)",
+    "size": "One size",
+    "color": "Red and Black/Natural",
+    "color_code": "#feedda",
+    "color_code2": "#d04343",
+    "image": "https://files.cdn.printful.com/products/1428/44159_1762865458.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44159"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1428"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1428/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44159/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44159/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44159/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.82,
+      "width": 10.61,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 44160,
+    "catalog_product_id": 1428,
+    "name": "Generic brand (One size / White and Black/Natural)",
+    "size": "One size",
+    "color": "White and Black/Natural",
+    "color_code": "#feedda",
+    "color_code2": "#ffffff",
+    "image": "https://files.cdn.printful.com/products/1428/44160_1762865458.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44160"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1428"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1428/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44160/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44160/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44160/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.82,
+      "width": 10.61,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1428/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1428"
+   }
+  }
+ }
+}

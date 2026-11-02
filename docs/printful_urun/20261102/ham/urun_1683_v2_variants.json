@@ -1,0 +1,158 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1683/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 53101,
+    "catalog_product_id": 1683,
+    "name": "Comfort Colors CCNT0 | Carry-All Tote (Bay / One Size)",
+    "size": "One size",
+    "color": "Bay",
+    "color_code": "#C3CFC1",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1683/53101_1786609460.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53101"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53101/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53101/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53101/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 12.0,
+      "width": 4.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 12.0,
+      "width": 4.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53100,
+    "catalog_product_id": 1683,
+    "name": "Comfort Colors CCNT0 | Carry-All Tote (Black / One Size)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#202020",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1683/53100_1786609460.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53100"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53100/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53100/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53100/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 12.0,
+      "width": 4.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 12.0,
+      "width": 4.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53102,
+    "catalog_product_id": 1683,
+    "name": "Comfort Colors CCNT0 | Carry-All Tote (Ivory / One Size)",
+    "size": "One size",
+    "color": "Ivory",
+    "color_code": "#fcf0d6",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1683/53102_1786609460.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53102"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1683"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1683/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53102/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53102/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53102/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 12.0,
+      "width": 4.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 12.0,
+      "width": 4.5,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1683/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1683"
+   }
+  }
+ }
+}

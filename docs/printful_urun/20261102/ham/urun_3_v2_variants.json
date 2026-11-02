@@ -1,0 +1,1960 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/3/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 19296,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (10″×10″)",
+    "size": "10″×10″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19296_1712914360.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19296"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19296/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19296/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19296/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 13.0,
+      "width": 13.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19297,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (10″×20″)",
+    "size": "10″×20″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19297_1712914542.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19297"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19297/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19297/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19297/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 13.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 13.0,
+      "width": 23.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19298,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (11″×14″)",
+    "size": "11″×14″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19298_1712915016.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19298"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19298/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19298/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19298/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 17.0,
+      "width": 14.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 17.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19299,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (12″×18″)",
+    "size": "12″×18″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19299_1712914785.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19299"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19299/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19299/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19299/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 21.0,
+      "width": 15.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 21.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19300,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (12″×24″)",
+    "size": "12″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19300_1712914545.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19300"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19300/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19300/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19300/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 15.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 27.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19301,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (12″×36″)",
+    "size": "12″×36″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19301_1712914712.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19301"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19301/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19301/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19301/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 39.0,
+      "width": 15.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 39.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19302,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (14″×14″)",
+    "size": "14″×14″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19302_1712914400.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19302"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19302/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19302/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19302/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 17.0,
+      "width": 17.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19303,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (16″×24″)",
+    "size": "16″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19303_1712914803.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19303"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19303/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19303/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19303/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 19.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 19.0,
+      "width": 27.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19304,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (16″×32″)",
+    "size": "16″×32″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19304_1712914562.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19304"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19304/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19304/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19304/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 35.0,
+      "width": 19.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 19.0,
+      "width": 35.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19305,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (16″×48″)",
+    "size": "16″×48″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19305_1712914734.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19305"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19305/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19305/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19305/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 51.0,
+      "width": 19.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 19.0,
+      "width": 51.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19306,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (18″×18″)",
+    "size": "18″×18″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19306_1712914410.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19306"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19306/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19306/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19306/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 21.0,
+      "width": 21.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19307,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (18″×26″)",
+    "size": "18″×26″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19307_1712915022.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19307"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19307/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19307/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19307/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 29.0,
+      "width": 21.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 21.0,
+      "width": 29.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19308,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (20″×20″)",
+    "size": "20″×20″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19308_1712914411.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19308"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19308/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19308/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19308/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 23.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19309,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (20″×24″)",
+    "size": "20″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19309_1712915028.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19309"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19309/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19309/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19309/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 23.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 27.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19310,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (20″×28″)",
+    "size": "20″×28″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19310_1712915037.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19310"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19310/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19310/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19310/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 31.0,
+      "width": 23.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 31.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19311,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (20″×30″)",
+    "size": "20″×30″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19311_1712914813.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19311"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19311/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19311/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19311/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 33.0,
+      "width": 23.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 33.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19312,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (20″×40″)",
+    "size": "20″×40″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19312_1712914679.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19312"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19312/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19312/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19312/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 43.0,
+      "width": 23.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 43.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19313,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (20″×60″)",
+    "size": "20″×60″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19313_1712914742.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19313"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19313/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19313/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19313/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 63.0,
+      "width": 23.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 63.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19314,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (24″×24″)",
+    "size": "24″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19314_1712914421.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19314"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19314/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19314/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19314/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 27.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19315,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (24″×30″)",
+    "size": "24″×30″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19315_1712914996.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19315"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19315/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19315/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19315/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 33.0,
+      "width": 27.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 33.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19316,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (24″×32″)",
+    "size": "24″×32″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19316_1712914918.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19316"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19316/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19316/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19316/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 35.0,
+      "width": 27.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 35.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19317,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (24″×48″)",
+    "size": "24″×48″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19317_1712914682.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19317"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19317/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19317/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19317/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 51.0,
+      "width": 27.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 51.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19318,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (26″×26″)",
+    "size": "26″×26″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19318_1712915088.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19318"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19318/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19318/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19318/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 29.0,
+      "width": 29.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19319,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (26″×40″)",
+    "size": "26″×40″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19319_1712915047.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19319"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19319/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19319/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19319/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 43.0,
+      "width": 29.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 29.0,
+      "width": 43.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19320,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (28″×28″)",
+    "size": "28″×28″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19320_1712914431.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19320"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19320/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19320/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19320/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 31.0,
+      "width": 31.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19321,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (28″×40″)",
+    "size": "28″×40″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19321_1712914924.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19321"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19321/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19321/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19321/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 43.0,
+      "width": 31.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 31.0,
+      "width": 43.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19322,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (30″×30″)",
+    "size": "30″×30″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19322_1712914441.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19322"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19322/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19322/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19322/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 33.0,
+      "width": 33.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19323,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (30″×40″)",
+    "size": "30″×40″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19323_1712915068.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19323"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19323/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19323/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19323/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 43.0,
+      "width": 33.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 33.0,
+      "width": 43.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19324,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (30″×60″)",
+    "size": "30″×60″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19324_1712914689.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19324"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19324/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19324/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19324/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 63.0,
+      "width": 33.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 33.0,
+      "width": 63.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19325,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (32″×32″)",
+    "size": "32″×32″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19325_1712914441.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19325"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19325/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19325/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19325/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 35.0,
+      "width": 35.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19326,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (32″×48″)",
+    "size": "32″×48″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19326_1712914836.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19326"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19326/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19326/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19326/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 51.0,
+      "width": 35.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 35.0,
+      "width": 51.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19327,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (36″×36″)",
+    "size": "36″×36″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19327_1712914451.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19327"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19327/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19327/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19327/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 39.0,
+      "width": 39.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19328,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (37″×37″)",
+    "size": "37″×37″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19328_1712914452.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19328"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19328/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19328/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19328/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 40.0,
+      "width": 40.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19329,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (40″×55″)",
+    "size": "40″×55″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19329_1712915078.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19329"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19329/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19329/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19329/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 58.0,
+      "width": 43.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 43.0,
+      "width": 58.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19330,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (40″×60″)",
+    "size": "40″×60″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19330_1712914846.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19330"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19330/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19330/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19330/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 63.0,
+      "width": 43.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 43.0,
+      "width": 63.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19291,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (6″×6″)",
+    "size": "6″×6″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19291_1712914461.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19291"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19291/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19291/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19291/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 9.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19293,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (8″×10″)",
+    "size": "8″×10″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19293_1712914965.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19293"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19293/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19293/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19293/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 13.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 13.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19294,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (8″×12″)",
+    "size": "8″×12″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19294_1712914773.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19294"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19294/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19294/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19294/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 15.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19292,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (8″×8″)",
+    "size": "8″×8″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19292_1712914461.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19292"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19292/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19292/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19292/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 11.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19295,
+    "catalog_product_id": 3,
+    "name": "Canvas (in) (9″×12″)",
+    "size": "9″×12″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/19295_1712914874.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19295"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19295/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19295/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19295/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 15.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 823,
+    "catalog_product_id": 3,
+    "name": "Canvas 12″×12″",
+    "size": "12″×12″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/823_1712914471.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/823"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/823/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/823/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/823/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 18.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 5,
+    "catalog_product_id": 3,
+    "name": "Canvas 12″×16″",
+    "size": "12″×16″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/5_1712914884.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/5"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/5/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/5/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/5/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 22.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 22.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 824,
+    "catalog_product_id": 3,
+    "name": "Canvas 16″×16″",
+    "size": "16″×16″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/824_1712914481.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/824"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/824/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/824/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/824/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 22.0,
+      "width": 22.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 6,
+    "catalog_product_id": 3,
+    "name": "Canvas 16″×20″",
+    "size": "16″×20″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/6_1712914986.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/6"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/6/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/6/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/6/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 26.0,
+      "width": 22.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 22.0,
+      "width": 26.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 7,
+    "catalog_product_id": 3,
+    "name": "Canvas 18″×24″",
+    "size": "18″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/7_1712914904.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/7"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/7/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/7/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/7/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 30.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 30.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 825,
+    "catalog_product_id": 3,
+    "name": "Canvas 24″×36″",
+    "size": "24″×36″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/3/825_1712914824.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/825"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/3"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/825/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/825/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/825/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 42.0,
+      "width": 30.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 30.0,
+      "width": 42.0,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 46,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/3/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/3"
+   }
+  }
+ }
+}

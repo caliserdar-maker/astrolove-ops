@@ -1,0 +1,376 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1641",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1641,
+    "main_category_id": 48,
+    "type": "T-SHIRT",
+    "description": "Made from durable recycled cotton canvas and designed with both long and short reinforced handles, this versatile shopping bag is built for everyday use. \n\n• 100% recycled cotton canvas\n• Fabric weight: 400 g/m²\n• Fabric washed for a soft, durable finish\n• One size: 38.5 cm × 61 cm × 19 cm (15.2″ × 24″ × 7.5″)\n• Long strap length: 60 cm (23.6″)\n• Hidden snap closure\n• Bottom and side gussets for extra capacity\n• Long and short reinforced handles\n• Internal pocket\n• Herringbone tape finished inside seams\n• Single-needle topstitching at top edge",
+    "type_name": "Stanley/Stella SAAU046 / STAU117 | Shopping Bag 2.0",
+    "title": "Shopping bag 2.0 | Stanley/Stella STAU117",
+    "brand": "Stanley/Stella",
+    "model": "STAU117",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/f4/f493daaaefd738d8d6257d37086e2c8f_l",
+    "variant_count": 5,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "thread_colors_apparel",
+      "title": "Flat thread colors",
+      "type": "multi_select",
+      "values": {
+       "#FFFFFF": "1801 White",
+       "#000000": "1800 Black",
+       "#96A1A8": "1718 Grey",
+       "#A67843": "1672 Old Gold",
+       "#FFCC00": "1951 Gold",
+       "#E25C27": "1987 Orange",
+       "#CC3366": "1910 Flamingo",
+       "#CC3333": "1839 Red",
+       "#660000": "1784 Maroon",
+       "#333366": "1966 Navy",
+       "#005397": "1842 Royal",
+       "#3399FF": "1695 Aqua/Teal",
+       "#6B5294": "1832 Purple",
+       "#01784E": "1751 Kelly Green",
+       "#7BA35A": "1848 Kiwi Green"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "thread_colors_apparel_back",
+      "title": "Apparel back thread colors",
+      "type": "multi_select",
+      "values": {
+       "#FFFFFF": "1801 White",
+       "#000000": "1800 Black",
+       "#96A1A8": "1718 Grey",
+       "#A67843": "1672 Old Gold",
+       "#FFCC00": "1951 Gold",
+       "#E25C27": "1987 Orange",
+       "#CC3366": "1910 Flamingo",
+       "#CC3333": "1839 Red",
+       "#660000": "1784 Maroon",
+       "#333366": "1966 Navy",
+       "#005397": "1842 Royal",
+       "#3399FF": "1695 Aqua/Teal",
+       "#6B5294": "1832 Purple",
+       "#01784E": "1751 Kelly Green",
+       "#7BA35A": "1848 Kiwi Green"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Embroidery notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "EMBROIDERY",
+      "display_name": "Embroidery",
+      "is_default": true
+     },
+     {
+      "key": "DTFILM",
+      "display_name": "DTF printing",
+      "is_default": false
+     }
+    ],
+    "files": [
+     {
+      "id": "embroidery_apparel_front",
+      "type": "embroidery_apparel_front",
+      "title": "Front",
+      "additional_price": "2.95",
+      "options": [
+       {
+        "id": "full_color",
+        "type": "bool",
+        "title": "Unlimited color",
+        "additional_price": 3.5
+       }
+      ]
+     },
+     {
+      "id": "embroidery_apparel_back",
+      "type": "embroidery_apparel_back",
+      "title": "Back",
+      "additional_price": "2.95",
+      "options": []
+     },
+     {
+      "id": "front_dtf_tote",
+      "type": "front_dtf_tote",
+      "title": "Front",
+      "additional_price": "5.95",
+      "options": []
+     },
+     {
+      "id": "back_dtf_tote",
+      "type": "back_dtf_tote",
+      "title": "Back",
+      "additional_price": "5.95",
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 52106,
+     "product_id": 1641,
+     "name": "Stanley/Stella SAAU046 / STAU117 | Shopping Bag 2.0 (Black / One size)",
+     "size": "One size",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1641/52106_1790337048.jpg",
+     "price": "19.99",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "EU_ES": "Spain",
+      "US": "United States",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_ES",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 52107,
+     "product_id": 1641,
+     "name": "Stanley/Stella SAAU046 / STAU117 | Shopping Bag 2.0 (French Navy / One size)",
+     "size": "One size",
+     "color": "French Navy",
+     "color_code": "#000a21",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1641/52107_1790578142.jpg",
+     "price": "19.99",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "EU_ES": "Spain",
+      "US": "United States",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_ES",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 52108,
+     "product_id": 1641,
+     "name": "Stanley/Stella SAAU046 / STAU117 | Shopping Bag 2.0 (Latte / One size)",
+     "size": "One size",
+     "color": "Latte",
+     "color_code": "#c9965f",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1641/52108_1790578152.jpg",
+     "price": "19.99",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "EU_ES": "Spain",
+      "US": "United States",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_ES",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 52109,
+     "product_id": 1641,
+     "name": "Stanley/Stella SAAU046 / STAU117 | Shopping Bag 2.0 (Natural Raw / One size)",
+     "size": "One size",
+     "color": "Natural Raw",
+     "color_code": "#fff5e8",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1641/52109_1790578166.jpg",
+     "price": "19.99",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "EU_ES": "Spain",
+      "US": "United States",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_ES",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 52110,
+     "product_id": 1641,
+     "name": "Stanley/Stella SAAU046 / STAU117 | Shopping Bag 2.0 (Worker Blue / One size)",
+     "size": "One size",
+     "color": "Worker Blue",
+     "color_code": "#00125c",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1641/52110_1790578176.jpg",
+     "price": "19.99",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "EU_ES": "Spain",
+      "US": "United States",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_ES",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

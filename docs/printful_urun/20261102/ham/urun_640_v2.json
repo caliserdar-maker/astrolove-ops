@@ -1,0 +1,122 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/640?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 640,
+   "type": "FRAMED-POSTER",
+   "main_category_id": 55,
+   "name": "Enhanced Matte Paper Poster With Hanger (in)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/a5/a5b9548dae9fd4df4398fc97adc8d199_l",
+   "variant_count": 16,
+   "is_discontinued": false,
+   "description": "Bring creativity and fun into your space with original artwork. This matte poster comes with a lightweight wooden hanger and will fit any interior decor. Use it as a statement piece or to create more depth on your gallery wall.\n\n• Hangers made from natural wood\n• Hanger piece thickness: 0.2″ (0.5 mm)\n• Hanger piece width: 0.79″ (2 cm)\n• Paper weight: 192 g/m²\n• Poster secured by magnets\n• Comes with a matching string\n• Wood sourced from the Baltics\n• Paper sourced from Japan\n• Blank product sourced from the UK",
+   "sizes": [
+    "10″×10″",
+    "11″×14″",
+    "12″×12″",
+    "12″×16″",
+    "12″×18″",
+    "14″×14″",
+    "16″×16″",
+    "16″×20″",
+    "18″×18″",
+    "18″×24″",
+    "24″×36″",
+    "8″×10″"
+   ],
+   "colors": [
+    {
+     "name": "Oak",
+     "value": "#e5c9ae"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/640"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/640/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/640/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/640/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/640/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/640/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,129 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/616?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 616,
+   "type": "CANVAS",
+   "main_category_id": 57,
+   "name": "Thin Canvas (in)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/62/62cbc590fd27ad5c88ff36182cb761d3_l",
+   "variant_count": 13,
+   "is_discontinued": false,
+   "description": "Style rooms with this slimmer-than-ever thin canvas! Order it and hang it straight away with built-in wall mounts and rubber pads on the back ready to protect against damage.\n• 0.75″ (19.05 mm) thick canvas\n• Canvas fabric weight: 10.15 +/- 0.74 oz/yd² (344 g/m² +/- 25g/m²)\n• Wall mounts attached\n• Rubber pads on the back to avoid damage\n• Slimmer than regular canvases",
+   "sizes": [
+    "12″×12″",
+    "12″×16″",
+    "16″×16″",
+    "16″×20″",
+    "18″×24″",
+    "24″×36″",
+    "8″×10″",
+    "11″×14″",
+    "12″×18″",
+    "9″×12″",
+    "20″×28″",
+    "24″×32″",
+    "20″×30″",
+    "15″×30″ (V) / 30″×15″ H)",
+    "36″×48″ (V) / 48″×36″ (H)",
+    "32″×48″ (V) / 48″×32″ (H)",
+    "16″×24″ (V) / 24″×16″ (H)",
+    "30″×40″ (V) / 40″×30″ (H)",
+    "15″×30″ (V) / 30″×15″ (H)",
+    "24″×30″ (V) / 30″×24″ (H)",
+    "20″×40″ (V) / 40″×20″ (H)",
+    "40″×60″ (V) / 60″×40″ (H)",
+    "30″×60″ (V) / 60″×30″ (H)",
+    "20″×60″ (V) / 60″×20″ (H)",
+    "16″×48″ (V) / 48″×16″ (H)",
+    "14″×14″",
+    "20″×20″",
+    "24″×24″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/616"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/616/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/616/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/616/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/616/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/616/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

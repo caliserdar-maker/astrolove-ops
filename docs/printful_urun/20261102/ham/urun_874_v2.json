@@ -1,0 +1,115 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/874?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 874,
+   "type": "PHONE-CASE",
+   "main_category_id": 267,
+   "name": "Car Magnets",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/ed/ed0afbd732b23caca7feaf526cb189ee_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Add your vibe to your ride with these sleek magnets. These car magnets stick strong and stay sharp—rain or shine. With a matte finish, they’re made to last and swap around as often as your mood changes.\n• 100% vinyl\n• Matte finish\n• Black magnetic backing\n• Weather-resistant\n• Blank product sourced from the US",
+   "sizes": [
+    "5″×5″",
+    "10″×3″",
+    "7.5″×4.5″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/874"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/874/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/874/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/874/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/874/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/874/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/874/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

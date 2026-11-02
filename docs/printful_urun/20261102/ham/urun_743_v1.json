@@ -1,0 +1,151 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/743",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 743,
+    "main_category_id": 258,
+    "type": "CUT-SEW",
+    "description": "Snuggle up with a custom-shaped pillow. Soft, zipper-free, and with a vibrant print, it’s perfect for treating yourself or surprising someone special. Available in 3 sizes.\n\n• 100% soft polyester\n• 3 sizes available: S 10″ × 10″ (25.4 × 25.4 cm), M 16″ × 16″ (40.6 × 40.6 cm), L 22″ × 22″ (55.8 × 55.8 cm)\n• Thickness: 3″–5″(7.6–12.7 cm)\n• Print on one side, color white on the other side\n• Sealed design without zipper\n• Blank product sourced from the USA\n\nSpot wash with warm water.\n\nImportant: This product is available in the US only. If your shipping address is outside this region, please choose a different product.",
+    "type_name": "Pillow | Custom Shaped",
+    "title": "Custom Shaped Pillow",
+    "brand": null,
+    "model": "Pillow | Custom Shaped",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/e6/e60c2db1850c32634433d0540cf5b9fd_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 19122,
+     "product_id": 743,
+     "name": "Custom Shaped Pillow (10″×10″)",
+     "size": "10″×10″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/743/19122_1709810630.jpg",
+     "price": "14.51",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19123,
+     "product_id": 743,
+     "name": "Custom Shaped Pillow (16″×16″)",
+     "size": "16″×16″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/743/19123_1709810630.jpg",
+     "price": "16.60",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19124,
+     "product_id": 743,
+     "name": "Custom Shaped Pillow (22″×22″)",
+     "size": "22″×22″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/743/19124_1709810633.jpg",
+     "price": "19.25",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

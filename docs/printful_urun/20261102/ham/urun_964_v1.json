@@ -1,0 +1,373 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/964",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 964,
+    "main_category_id": 189,
+    "type": "KNITWEAR",
+    "description": "Keep your furry friend warm and adorable with this soft, knitted sweater. Designed for comfort and cuteness, it’s perfect for chilly walks, cozy naps, or seasonal photo ops. Made with a soft cotton-blend knit, it has a snug and comfy fit.\n\n• 55% cotton, 45% polyester\n• Jacquard knit\n• Lightweight, soft fabric\n• Sizes 2XS–2XL (fits most small to medium-sized pets)\n• Fully knitted construction\n• Clean, finished edges for comfort and durability\n• OEKO-TEX® certified yarns\n• Blank product sourced and fulfilled in China",
+    "type_name": "Knitwear | Pet Sweater",
+    "title": "Knitted Pet Sweater",
+    "brand": null,
+    "model": "Knitwear | Pet Sweater",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/eb/ebf707cd19523c53f01245813e33baf0_l",
+    "variant_count": 7,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "trim_color",
+      "title": "Trim color",
+      "type": "single_line_text",
+      "values": {
+       "#090909": "Black",
+       "#404040": "Charcoal",
+       "#563c33": "Soil",
+       "#d52213": "Chili",
+       "#6e5242": "Toffee",
+       "#7f6a53": "Peanut",
+       "#cd5e38": "Burnt Orange",
+       "#b57648": "Rust",
+       "#d1773b": "Orange",
+       "#d68785": "Coral",
+       "#c6b5a7": "Coco",
+       "#d6c6b4": "Taupe",
+       "#dcd3cc": "Sand",
+       "#edd9d9": "Light Pink",
+       "#e2dfdc": "Bone",
+       "#fdfafa": "Bleach",
+       "#999996": "Grey",
+       "#dda032": "Mustard",
+       "#d1c6ae": "Beige",
+       "#eddea4": "Mellow",
+       "#48542e": "Olive",
+       "#6e8c4b": "Grass",
+       "#c0c1bd": "Light Grey",
+       "#243f33": "Pine",
+       "#c5d1d0": "Powder",
+       "#175387": "Yale Blue",
+       "#237d96": "Cyan",
+       "#787979": "Dark Grey",
+       "#343d55": "Navy",
+       "#4e59be": "Royal",
+       "#566e99": "Denim",
+       "#504372": "Violet",
+       "#4c1c29": "Burgundy",
+       "#f66274": "Hot Pink",
+       "#eda6b4": "Pink",
+       "#ddabc8": "Lilac"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "yarn_colors",
+      "title": "Yarn colors",
+      "type": "multi_select",
+      "values": {
+       "#090909": "Black",
+       "#404040": "Charcoal",
+       "#563c33": "Soil",
+       "#d52213": "Chili",
+       "#6e5242": "Toffee",
+       "#7f6a53": "Peanut",
+       "#cd5e38": "Burnt Orange",
+       "#b57648": "Rust",
+       "#d1773b": "Orange",
+       "#d68785": "Coral",
+       "#c6b5a7": "Coco",
+       "#d6c6b4": "Taupe",
+       "#dcd3cc": "Sand",
+       "#edd9d9": "Light Pink",
+       "#e2dfdc": "Bone",
+       "#fdfafa": "Bleach",
+       "#999996": "Grey",
+       "#dda032": "Mustard",
+       "#d1c6ae": "Beige",
+       "#eddea4": "Mellow",
+       "#48542e": "Olive",
+       "#6e8c4b": "Grass",
+       "#c0c1bd": "Light Grey",
+       "#243f33": "Pine",
+       "#c5d1d0": "Powder",
+       "#175387": "Yale Blue",
+       "#237d96": "Cyan",
+       "#787979": "Dark Grey",
+       "#343d55": "Navy",
+       "#4e59be": "Royal",
+       "#566e99": "Denim",
+       "#504372": "Violet",
+       "#4c1c29": "Burgundy",
+       "#f66274": "Hot Pink",
+       "#eda6b4": "Pink",
+       "#ddabc8": "Lilac"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "base_color",
+      "title": "Base color",
+      "type": "single_line_text",
+      "values": {
+       "#090909": "Black",
+       "#404040": "Charcoal",
+       "#563c33": "Soil",
+       "#d52213": "Chili",
+       "#6e5242": "Toffee",
+       "#7f6a53": "Peanut",
+       "#cd5e38": "Burnt Orange",
+       "#b57648": "Rust",
+       "#d1773b": "Orange",
+       "#d68785": "Coral",
+       "#c6b5a7": "Coco",
+       "#d6c6b4": "Taupe",
+       "#dcd3cc": "Sand",
+       "#edd9d9": "Light Pink",
+       "#e2dfdc": "Bone",
+       "#fdfafa": "Bleach",
+       "#999996": "Grey",
+       "#dda032": "Mustard",
+       "#d1c6ae": "Beige",
+       "#eddea4": "Mellow",
+       "#48542e": "Olive",
+       "#6e8c4b": "Grass",
+       "#c0c1bd": "Light Grey",
+       "#243f33": "Pine",
+       "#c5d1d0": "Powder",
+       "#175387": "Yale Blue",
+       "#237d96": "Cyan",
+       "#787979": "Dark Grey",
+       "#343d55": "Navy",
+       "#4e59be": "Royal",
+       "#566e99": "Denim",
+       "#504372": "Violet",
+       "#4c1c29": "Burgundy",
+       "#f66274": "Hot Pink",
+       "#eda6b4": "Pink",
+       "#ddabc8": "Lilac"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "KNITWEAR",
+      "display_name": "Knitting",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 24571,
+     "product_id": 964,
+     "name": "Knitted Pet Sweater (Custom / 2XL)",
+     "size": "2XL",
+     "color": "Custom",
+     "color_code": "#dedede",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/964/24571_1759903657.jpg",
+     "price": "39.74",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 24565,
+     "product_id": 964,
+     "name": "Knitted Pet Sweater (Custom / 2XS)",
+     "size": "2XS",
+     "color": "Custom",
+     "color_code": "#dedede",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/964/24565_1759903656.jpg",
+     "price": "37.74",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 24569,
+     "product_id": 964,
+     "name": "Knitted Pet Sweater (Custom / L)",
+     "size": "L",
+     "color": "Custom",
+     "color_code": "#dedede",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/964/24569_1759903657.jpg",
+     "price": "37.74",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 24568,
+     "product_id": 964,
+     "name": "Knitted Pet Sweater (Custom / M)",
+     "size": "M",
+     "color": "Custom",
+     "color_code": "#dedede",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/964/24568_1759903658.jpg",
+     "price": "37.74",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 24567,
+     "product_id": 964,
+     "name": "Knitted Pet Sweater (Custom / S)",
+     "size": "S",
+     "color": "Custom",
+     "color_code": "#dedede",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/964/24567_1759903656.jpg",
+     "price": "37.74",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 24570,
+     "product_id": 964,
+     "name": "Knitted Pet Sweater (Custom / XL)",
+     "size": "XL",
+     "color": "Custom",
+     "color_code": "#dedede",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/964/24570_1759903657.jpg",
+     "price": "37.74",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 24566,
+     "product_id": 964,
+     "name": "Knitted Pet Sweater (Custom / XS)",
+     "size": "XS",
+     "color": "Custom",
+     "color_code": "#dedede",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/964/24566_1759903658.jpg",
+     "price": "37.74",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

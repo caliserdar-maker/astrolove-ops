@@ -1,0 +1,586 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/616/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 15701,
+    "catalog_product_id": 616,
+    "name": "Thin Canvas (12″×12″)",
+    "size": "12″×12″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/616/15701_1660725254.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15701"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/616"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15701/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15701/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15701/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 14.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15702,
+    "catalog_product_id": 616,
+    "name": "Thin Canvas (12″×16″)",
+    "size": "12″×16″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/616/15702_1660725256.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15702"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/616"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15702/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15702/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15702/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 14.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15703,
+    "catalog_product_id": 616,
+    "name": "Thin Canvas (16″×16″)",
+    "size": "16″×16″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/616/15703_1660725264.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15703"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/616"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15703/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15703/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15703/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 18.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15704,
+    "catalog_product_id": 616,
+    "name": "Thin Canvas (16″×20″)",
+    "size": "16″×20″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/616/15704_1660725266.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15704"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/616"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15704/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15704/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15704/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 22.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 22.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15705,
+    "catalog_product_id": 616,
+    "name": "Thin Canvas (18″×24″)",
+    "size": "18″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/616/15705_1660725274.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15705"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/616"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15705/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15705/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15705/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 26.0,
+      "width": 20.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 26.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15706,
+    "catalog_product_id": 616,
+    "name": "Thin Canvas (24″×36″)",
+    "size": "24″×36″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/616/15706_1660725285.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15706"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/616"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15706/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15706/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15706/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 38.0,
+      "width": 26.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 26.0,
+      "width": 38.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17621,
+    "catalog_product_id": 616,
+    "name": "Thin Canvas (in) (11″×14″)",
+    "size": "11″×14″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/616/17621_1692688959.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17621"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/616"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17621/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17621/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17621/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 13.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 13.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17622,
+    "catalog_product_id": 616,
+    "name": "Thin Canvas (in) (12″×18″)",
+    "size": "12″×18″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/616/17622_1692688962.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17622"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/616"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17622/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17622/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17622/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 14.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17624,
+    "catalog_product_id": 616,
+    "name": "Thin Canvas (in) (20″×28″)",
+    "size": "20″×28″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/616/17624_1692688969.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17624"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/616"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17624/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17624/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17624/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 30.0,
+      "width": 22.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 22.0,
+      "width": 30.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17626,
+    "catalog_product_id": 616,
+    "name": "Thin Canvas (in) (20″×30″)",
+    "size": "20″×30″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/616/17626_1692688970.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17626"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/616"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17626/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17626/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17626/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 32.0,
+      "width": 22.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 22.0,
+      "width": 32.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17625,
+    "catalog_product_id": 616,
+    "name": "Thin Canvas (in) (24″×32″)",
+    "size": "24″×32″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/616/17625_1692688979.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17625"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/616"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17625/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17625/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17625/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 34.0,
+      "width": 26.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 26.0,
+      "width": 34.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17620,
+    "catalog_product_id": 616,
+    "name": "Thin Canvas (in) (8″×10″)",
+    "size": "8″×10″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/616/17620_1692688979.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17620"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/616"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17620/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17620/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17620/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 10.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 12.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17623,
+    "catalog_product_id": 616,
+    "name": "Thin Canvas (in) (9″×12″)",
+    "size": "9″×12″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/616/17623_1692688979.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17623"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/616"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17623/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17623/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17623/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 13,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/616/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/616"
+   }
+  }
+ }
+}

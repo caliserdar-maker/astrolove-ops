@@ -1,0 +1,128 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/420",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 420,
+    "main_category_id": 126,
+    "type": "CUT-SEW",
+    "description": "This neck gaiter is a versatile accessory that can be used as a face covering, headband, bandana, wristband, and neck warmer. Upgrade your accessory game and find a matching face shield for each of your outfits. \n\n- Fabric composition: 93% polyester, 7% elastane\n- Fabric weight: 7.08 oz./yd.² (240 g/m²)\n- Breathable fabric\n- Smooth, comfortable 2-way stretch fabric that stretches and recovers on the cross and lengthwise grains\n- Washable and reusable\n- One size\n- Printed on one side, the reverse side is left blank\n- Blank product components in the EU sourced from Lithuania\n- Blank product components in the US sourced from Mexico",
+    "type_name": "All-Over Print Neck Gaiter",
+    "title": "All-Over Print Neck Gaiter",
+    "brand": null,
+    "model": "All-Over Print Neck Gaiter",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/8c/8c218f78e3622b8d06982e56187777ac_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "stitch_color",
+      "title": "Stitch color",
+      "type": "radio",
+      "values": {
+       "white": "White",
+       "black": "Black"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 11414,
+     "product_id": 420,
+     "name": "All-Over Print Neck Gaiter",
+     "size": "One size",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/420/11414_1585808212.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

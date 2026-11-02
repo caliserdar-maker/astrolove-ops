@@ -1,0 +1,138 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1558",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 1558,
+   "available_placements": {
+    "cover": "Cover",
+    "page_1": "Page 1",
+    "page_2": "Page 2",
+    "page_3": "Page 3",
+    "page_4": "Page 4",
+    "page_5": "Page 5",
+    "page_6": "Page 6",
+    "page_7": "Page 7",
+    "page_8": "Page 8",
+    "page_9": "Page 9",
+    "page_10": "Page 10",
+    "page_11": "Page 11",
+    "page_12": "Page 12",
+    "page_13": "Page 13",
+    "page_14": "Page 14",
+    "page_15": "Page 15",
+    "page_16": "Page 16",
+    "page_17": "Page 17",
+    "page_18": "Page 18",
+    "page_19": "Page 19",
+    "page_20": "Page 20",
+    "page_21": "Page 21",
+    "page_22": "Page 22",
+    "page_23": "Page 23",
+    "page_24": "Page 24"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 1682,
+     "width": 5175,
+     "height": 3375,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1683,
+     "width": 2625,
+     "height": 3375,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 49337,
+     "placements": {
+      "cover": 1682,
+      "page_1": 1683,
+      "page_2": 1683,
+      "page_3": 1683,
+      "page_4": 1683,
+      "page_5": 1683,
+      "page_6": 1683,
+      "page_7": 1683,
+      "page_8": 1683,
+      "page_9": 1683,
+      "page_10": 1683,
+      "page_11": 1683,
+      "page_12": 1683,
+      "page_13": 1683,
+      "page_14": 1683,
+      "page_15": 1683,
+      "page_16": 1683,
+      "page_17": 1683,
+      "page_18": 1683,
+      "page_19": 1683,
+      "page_20": 1683,
+      "page_21": 1683,
+      "page_22": 1683,
+      "page_23": 1683,
+      "page_24": 1683
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Templates"
+   ],
+   "options": [
+    "Back Cover",
+    "Cover",
+    "Front Cover",
+    "Page 1",
+    "Page 10",
+    "Page 11",
+    "Page 12",
+    "Page 13",
+    "Page 14",
+    "Page 15",
+    "Page 16",
+    "Page 17",
+    "Page 18",
+    "Page 19",
+    "Page 2",
+    "Page 20",
+    "Page 21",
+    "Page 22",
+    "Page 23",
+    "Page 24",
+    "Page 3",
+    "Page 4",
+    "Page 5",
+    "Page 6",
+    "Page 7",
+    "Page 8",
+    "Page 9",
+    "Spread 1",
+    "Spread 10",
+    "Spread 11",
+    "Spread 12",
+    "Spread 13",
+    "Spread 2",
+    "Spread 3",
+    "Spread 4",
+    "Spread 5",
+    "Spread 6",
+    "Spread 7",
+    "Spread 8",
+    "Spread 9"
+   ]
+  },
+  "extra": []
+ }
+}

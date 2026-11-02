@@ -1,0 +1,165 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1435",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1435,
+    "main_category_id": 230,
+    "type": "POSTCARD",
+    "description": "Bring elegance and fun to any social gathering with White Coined Napkins. \n\n• Soft, three-ply custom white paper\n• Two sizes: luncheon (6.5″ × 6.5″) and beverage (4.8″ × 4.8″)\n• Available in packs of 50 and 100\n• Smooth texture with coined edge borders\n• Blanks sourced from the USA \n\nDisclaimer: The ink used in fulfillment may leave a faint shadow around the design's border, as well as specks on the napkin's edge.",
+    "type_name": "Napkins | Coined | White",
+    "title": "White Coined Napkins",
+    "brand": null,
+    "model": "Napkins | Coined | White",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/a5/a5176f1e8e2b99fe97be0723c8cbf0cb_l",
+    "variant_count": 4,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 45888,
+     "product_id": 1435,
+     "name": "White Coined Napkins BP1122 (100 pcs / 4.8″×4.8″)",
+     "size": "4.8″×4.8″",
+     "color": "100 pcs",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1435/45888_1764764849.jpg",
+     "price": "40.39",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 45890,
+     "product_id": 1435,
+     "name": "White Coined Napkins BP1122 (100 pcs / 6.5″×6.5″)",
+     "size": "6.5″×6.5″",
+     "color": "100 pcs",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1435/45890_1764764873.jpg",
+     "price": "44.41",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 45889,
+     "product_id": 1435,
+     "name": "White Coined Napkins BP1122 (50 pcs / 4.8″×4.8″)",
+     "size": "4.8″×4.8″",
+     "color": "50 pcs",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1435/45889_1764764849.jpg",
+     "price": "26.02",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 45891,
+     "product_id": 1435,
+     "name": "White Coined Napkins BP1122 (50 pcs / 6.5″×6.5″)",
+     "size": "6.5″×6.5″",
+     "color": "50 pcs",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1435/45891_1764764873.jpg",
+     "price": "34.82",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

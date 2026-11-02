@@ -1,0 +1,127 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/889?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 889,
+   "type": "SUBLIMATION",
+   "main_category_id": 271,
+   "name": "Pickleball Paddle (Set)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/10/106728a0c7cb1053c0fc4f3698009ce8_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Game on! This pickleball set comes with 2 sturdy wooden paddles and 2 bright yellow balls, so you’re ready to rally in style. It includes a see-through bag made for beach trips, park days, or spontaneous matches—just grab it and go play!\n\n• 100% wood paddles with black edges\n• Soft poly-cotton handle grips for comfort\n• Set includes 2 paddles, 2 plastic balls, and a carry bag\n• Same design on both sides of each paddle\n• Blank product sourced from China",
+   "sizes": [
+    "7.5″ × 15.5″"
+   ],
+   "colors": [
+    {
+     "name": "Wood",
+     "value": "#f8ddb7"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/889"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/889/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/889/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/889/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/889/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/889/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/889/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

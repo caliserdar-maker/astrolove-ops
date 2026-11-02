@@ -1,0 +1,99 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/890",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 890,
+    "main_category_id": 48,
+    "type": "SUBLIMATION",
+    "description": "Big, bold, and ready to roam. This roomy tote features soft rope handles, a wrinkle-free finish, and plenty of space for your weekend essentials.\n\n• 100% spun polyester exterior\n• 50% cotton, 50% polyester cream sheeting interior lining\n• Cream-colored cotton rope handles through metal grommets\n• Size: 24″ × 13″ × 5.5″ (60.9 × 33 × 14 cm)\n• Blank product sourced from China",
+    "type_name": "Bag | Weekender | White",
+    "title": "Weekender Bag",
+    "brand": null,
+    "model": "Bag | Weekender | White",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/a2/a25f395d769dca0eef830efc8b9b51ba_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 22814,
+     "product_id": 890,
+     "name": "Weekender Bag (White / 24″×13″)",
+     "size": "24″×13″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/890/22814_1747920854.jpg",
+     "price": "31.63",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

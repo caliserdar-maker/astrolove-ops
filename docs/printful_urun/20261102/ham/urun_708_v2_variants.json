@@ -1,0 +1,82 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/708/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 17399,
+    "catalog_product_id": 708,
+    "name": "Cloth Napkin Set (4) (White / 20″×20″)",
+    "size": "20″×20″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/708/17399_1688709743.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17399"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17399/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17399/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17399/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "first",
+      "height": 21.5,
+      "width": 21.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "second",
+      "height": 21.5,
+      "width": 21.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "third",
+      "height": 21.5,
+      "width": 21.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "fourth",
+      "height": 21.5,
+      "width": 21.5,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/708/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/708"
+   }
+  }
+ }
+}

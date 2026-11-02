@@ -1,0 +1,209 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/924",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 924,
+    "main_category_id": 230,
+    "type": "DECOR",
+    "description": "Available in 6 sizes, this soft yet durable area rug adds style and comfort to any room. Its coated backing keeps it in place, and the customizable surface lets you add color, pattern, or graphics to suit any home.\n\n• 100% Polyester Chenille \n•  Hemmed edges \n•  Grey underside \n•  3 sizes: 24″×36″″; 36″×60″; 48″×72″ \n•  One-sided print \n•  Blank product sourced from China \n\nDisclaimer: This is a pre-constructed item. Sizes may vary slightly: 24\" × 36\" ± 2\", 36\" × 60\" ± 3\", 48\" × 72\" ± 3.5\".",
+    "type_name": "Rug | Area",
+    "title": "Area Rug",
+    "brand": null,
+    "model": "Rug | Area",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/ff/ffb57c4bdb5235917d3ad7cae6594de5_l",
+    "variant_count": 6,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 23702,
+     "product_id": 924,
+     "name": "24\" × 36\"",
+     "size": "24″×36″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/924/23702_1764662081.jpg",
+     "price": "24.54",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23705,
+     "product_id": 924,
+     "name": "36\" × 24\"",
+     "size": "36″×24″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/924/23705_1764662081.jpg",
+     "price": "24.54",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23703,
+     "product_id": 924,
+     "name": "36\" × 60\"",
+     "size": "36″×60″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/924/23703_1764662091.jpg",
+     "price": "49.16",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23704,
+     "product_id": 924,
+     "name": "48\" × 72\"",
+     "size": "48″×72″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/924/23704_1764662101.jpg",
+     "price": "76.76",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23706,
+     "product_id": 924,
+     "name": "60\" × 36\"",
+     "size": "60″×36″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/924/23706_1764662102.jpg",
+     "price": "49.16",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23707,
+     "product_id": 924,
+     "name": "72\" × 48\"",
+     "size": "72″×48″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/924/23707_1764662102.jpg",
+     "price": "76.76",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

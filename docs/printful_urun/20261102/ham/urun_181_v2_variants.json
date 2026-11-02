@@ -1,0 +1,1204 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/181/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 10996,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 11 Pro Max)",
+    "size": "iPhone 11 Pro Max",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/10996_1582202496.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10996"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10996/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10996/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10996/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 10995,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 11 Pro)",
+    "size": "iPhone 11 Pro",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/10995_1582202476.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10995"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10995/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10995/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10995/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 10994,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 11)",
+    "size": "iPhone 11",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/10994_1582202453.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10994"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10994/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10994/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10994/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 11703,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 12 mini)",
+    "size": "iPhone 12 mini",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/11703_1603890456.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/11703"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/11703/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/11703/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/11703/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 11705,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 12 Pro Max)",
+    "size": "iPhone 12 Pro Max",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/11705_1603890473.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/11705"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/11705/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/11705/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/11705/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 11808,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 12 Pro)",
+    "size": "iPhone 12 Pro",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/11808_1603890467.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/11808"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/11808/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/11808/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/11808/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 11704,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 12)",
+    "size": "iPhone 12",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/11704_1603890447.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/11704"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/11704/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/11704/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/11704/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 13428,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 13 mini)",
+    "size": "iPhone 13 mini",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/13428_1634114663.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/13428"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/13428/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/13428/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/13428/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 13801,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 13 Pro Max)",
+    "size": "iPhone 13 Pro Max",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/13801_1640167403.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/13801"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/13801/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/13801/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/13801/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 13800,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 13 Pro)",
+    "size": "iPhone 13 Pro",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/13800_1640167403.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/13800"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/13800/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/13800/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/13800/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 13427,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 13)",
+    "size": "iPhone 13",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/13427_1634124751.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/13427"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/13427/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/13427/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/13427/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16242,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 14 Plus)",
+    "size": "iPhone 14 Plus",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/16242_1663736652.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16242"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16242/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16242/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16242/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16243,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 14 Pro Max)",
+    "size": "iPhone 14 Pro Max",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/16243_1663736622.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16243"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16243/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16243/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16243/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16241,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 14 Pro)",
+    "size": "iPhone 14 Pro",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/16241_1663736618.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16241"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16241/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16241/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16241/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16240,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 14)",
+    "size": "iPhone 14",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/16240_1663736639.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16240"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16240/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16240/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16240/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17617,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 15 Plus)",
+    "size": "iPhone 15 Plus",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/17617_1693475846.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17617"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17617/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17617/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17617/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17619,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 15 Pro Max)",
+    "size": "iPhone 15 Pro Max",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/17619_1693475857.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17619"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17619/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17619/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17619/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17618,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 15 Pro)",
+    "size": "iPhone 15 Pro",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/17618_1693475847.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17618"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17618/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17618/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17618/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17616,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 15)",
+    "size": "iPhone 15",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/17616_1693475846.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17616"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17616/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17616/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17616/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20291,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 16 Plus)",
+    "size": "iPhone 16 Plus",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/20291_1724920067.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20291"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20291/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20291/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20291/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20293,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 16 Pro Max)",
+    "size": "iPhone 16 Pro Max",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/20293_1724920067.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20293"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20293/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20293/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20293/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20292,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 16 Pro)",
+    "size": "iPhone 16 Pro",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/20292_1724920071.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20292"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20292/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20292/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20292/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20290,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 16)",
+    "size": "iPhone 16",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/20290_1724920077.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20290"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20290/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20290/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20290/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33994,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 17 Air)",
+    "size": "iPhone 17 Air",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/33994_1757655346.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33994"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33994/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33994/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33994/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33996,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 17 Pro Max)",
+    "size": "iPhone 17 Pro Max",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/33996_1792740059.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33996"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33996/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33996/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33996/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33995,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 17 Pro)",
+    "size": "iPhone 17 Pro",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/33995_1792740070.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33995"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33995/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33995/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33995/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33993,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 17)",
+    "size": "iPhone 17",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/33993_1757655316.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33993"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33993/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33993/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33993/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 7910,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone 7/8)",
+    "size": "iPhone 7/8",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/7910_1582202405.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/7910"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/7910/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/7910/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/7910/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 11452,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone SE)",
+    "size": "iPhone SE",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/11452_1663745124.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/11452"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/11452/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/11452/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/11452/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 8933,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone X/XS)",
+    "size": "iPhone X/XS",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/8933_1582202521.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/8933"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/8933/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/8933/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/8933/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 9621,
+    "catalog_product_id": 181,
+    "name": "Clear Case for iPhone® (iPhone XR)",
+    "size": "iPhone XR",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/181/9621_1582202542.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/9621"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/181"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/9621/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/9621/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/9621/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 31,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/181/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/181"
+   }
+  }
+ }
+}

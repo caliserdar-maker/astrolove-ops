@@ -1,0 +1,128 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/262",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 262,
+    "main_category_id": 49,
+    "type": "CUT-SEW",
+    "description": "Combine your love for vibrant prints and a sporty style with a cool drawstring bag. It's a must-have gym essential that can be worn as a backpack with drawstring closure at top, and narrow, contrasting shoulder straps. \n\n• 100% polyester\n• One size: 15″ × 17″ (38.1 cm × 43.2 cm)\n• Fabric weight (may vary by 5%): 6.64 oz/yd² (225 g/m²)\"\n• Maximum weight limit: 33 lbs (15 kg)\n• Twin cotton handles\n• Drawstring closure\n• Blank product components sourced from Israel",
+    "type_name": "All-Over Print Drawstring Bag",
+    "title": "All-Over Print Drawstring Bag",
+    "brand": null,
+    "model": "All-Over Print Drawstring Bag",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/0f/0f04d73474287ef01d6f5541c3a63de2_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "stitch_color",
+      "title": "Stitch color",
+      "type": "radio",
+      "values": {
+       "black": "Black",
+       "clear": "Clear"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 8894,
+     "product_id": 262,
+     "name": "All-Over Drawstring Bag (15″×17″)",
+     "size": "15″×17″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/262/8894_1556096073.jpg",
+     "price": "15.56",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

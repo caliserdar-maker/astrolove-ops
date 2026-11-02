@@ -1,0 +1,99 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/885",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 885,
+    "main_category_id": 21,
+    "type": "SUBLIMATION",
+    "description": "Lightweight, durable, and made to stand out. This pennant brings bold design to your walls in a clean, modern shape that’s easy to hang anywhere. A quick way to add edge, color, or character to your space.\n\n• 100% polyester twill\n• Size: 18″ × 21″ (45.7 cm × 53.3 cm)\n• One-sided print\n• Laser-cut edges to prevent fraying\n• Comes with a wooden dowel and twine frame for easy hanging\n• Blank product sourced from China",
+    "type_name": "Pennant",
+    "title": "Pennant",
+    "brand": null,
+    "model": "Pennant",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/ef/ef97ed58e9a3572c83d873f3b4ae7e48_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 22791,
+     "product_id": 885,
+     "name": "Pennant (White / 18″×21″)",
+     "size": "18″×21″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/885/22791_1753162727.jpg",
+     "price": "14.62",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

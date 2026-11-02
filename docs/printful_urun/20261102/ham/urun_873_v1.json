@@ -1,0 +1,209 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/873",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 873,
+    "main_category_id": 252,
+    "type": "DECOR",
+    "description": "The outside should be just as exciting as what’s inside. Dress your gifts in style with chic wrapping paper.\n• 100% paper\n• Scratch-resistant surface\n• Printed on one side: white reverse\n• Printed using GreenGuard UL Certified water-based inks\n• Blank product sourced from the US",
+    "type_name": "Paper | Gift Wrap",
+    "title": "Gift Wrap Papers",
+    "brand": null,
+    "model": "Paper | Gift Wrap",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/d5/d51e125788a6942468a4e43c30ef9362_l",
+    "variant_count": 6,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 44150,
+     "product_id": 873,
+     "name": "Gift Wrap Papers (Matte / 29″×144″)",
+     "size": "29″×144″",
+     "color": "Matte",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/873/44150_1764684121.jpg",
+     "price": "25.79",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44152,
+     "product_id": 873,
+     "name": "Gift Wrap Papers (Matte / 29″×20″)",
+     "size": "29″×20″",
+     "color": "Matte",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/873/44152_1764684073.jpg",
+     "price": "5.50",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44148,
+     "product_id": 873,
+     "name": "Gift Wrap Papers (Matte / 29″×72″)",
+     "size": "29″×72″",
+     "color": "Matte",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/873/44148_1764684097.jpg",
+     "price": "12.89",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44151,
+     "product_id": 873,
+     "name": "Gift Wrap Papers (Satin / 29″×144″)",
+     "size": "29″×144″",
+     "color": "Satin",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/873/44151_1764684120.jpg",
+     "price": "30.06",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44153,
+     "product_id": 873,
+     "name": "Gift Wrap Papers (Satin / 29″×20″)",
+     "size": "29″×20″",
+     "color": "Satin",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/873/44153_1764684073.jpg",
+     "price": "5.92",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44149,
+     "product_id": 873,
+     "name": "Gift Wrap Papers (Satin / 29″×72″)",
+     "size": "29″×72″",
+     "color": "Satin",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/873/44149_1764684097.jpg",
+     "price": "15.02",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

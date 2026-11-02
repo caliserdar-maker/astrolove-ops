@@ -1,0 +1,254 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1470/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 46082,
+    "catalog_product_id": 1470,
+    "name": "Generic brand  (Black Base/Clock Hand Black / 10″)",
+    "size": "10″",
+    "color": "Black Base/Clock Hand Black",
+    "color_code": "#141414",
+    "color_code2": "#141414",
+    "image": "https://files.cdn.printful.com/products/1470/46082_1782730002.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46082"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1470"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1470/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46082/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46082/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46082/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 46083,
+    "catalog_product_id": 1470,
+    "name": "Generic brand  (Black Base/Clock Hand White / 10″)",
+    "size": "10″",
+    "color": "Black Base/Clock Hand White",
+    "color_code": "#141414",
+    "color_code2": "#ffffff",
+    "image": "https://files.cdn.printful.com/products/1470/46083_1782730002.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46083"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1470"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1470/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46083/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46083/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46083/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 46084,
+    "catalog_product_id": 1470,
+    "name": "Generic brand  (White Base/Clock Hand Black / 10″)",
+    "size": "10″",
+    "color": "White Base/Clock Hand Black",
+    "color_code": "#ffffff",
+    "color_code2": "#141414",
+    "image": "https://files.cdn.printful.com/products/1470/46084_1782730002.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46084"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1470"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1470/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46084/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46084/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46084/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 46085,
+    "catalog_product_id": 1470,
+    "name": "Generic brand  (White Base/Clock Hand White / 10″)",
+    "size": "10″",
+    "color": "White Base/Clock Hand White",
+    "color_code": "#ffffff",
+    "color_code2": "#ffffff",
+    "image": "https://files.cdn.printful.com/products/1470/46085_1782730003.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46085"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1470"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1470/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46085/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46085/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46085/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 46086,
+    "catalog_product_id": 1470,
+    "name": "Generic brand  (Wooden Base/Clock Hand Black / 10″)",
+    "size": "10″",
+    "color": "Wooden Base/Clock Hand Black",
+    "color_code": "#e7c79d",
+    "color_code2": "#141414",
+    "image": "https://files.cdn.printful.com/products/1470/46086_1782730012.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46086"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1470"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1470/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46086/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46086/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46086/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 46087,
+    "catalog_product_id": 1470,
+    "name": "Generic brand  (Wooden Base/Clock Hand White / 10″)",
+    "size": "10″",
+    "color": "Wooden Base/Clock Hand White",
+    "color_code": "#e7c79d",
+    "color_code2": "#ffffff",
+    "image": "https://files.cdn.printful.com/products/1470/46087_1782730012.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46087"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1470"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1470/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46087/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46087/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46087/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 6,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1470/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1470"
+   }
+  }
+ }
+}

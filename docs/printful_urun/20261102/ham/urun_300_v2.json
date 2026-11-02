@@ -1,0 +1,108 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/300?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 300,
+   "type": "MUG",
+   "main_category_id": 195,
+   "name": "Black Glossy Mug",
+   "brand": null,
+   "model": "Black Glossy Mug",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/2e/2e374a575d31ab64fa9cb7f1af7db269_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "This cupboard essential is sturdy, sleek, and perfect for your morning java or afternoon tea. \n\n• Ceramic\n• 11 oz mug dimensions: height 3.85\" (9.8 cm), diameter 3.35\" (8.5 cm)\n• 15 oz mug dimensions: height 4.7\" (12 cm), diameter 3.35\" (8.5 cm)\n• Lead and BPA-free material\n• Glossy finish\n• Dishwasher and microwave safe",
+   "sizes": [
+    "11 oz",
+    "15 oz"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#000000"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/300"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/300/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/300/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/300/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/300/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/300/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/300/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

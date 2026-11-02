@@ -1,0 +1,117 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1399",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1399,
+    "main_category_id": 251,
+    "type": "SUBLIMATION",
+    "description": "Upgrade your desk setup with this sleek round mouse pad. Its compact design makes it perfect for smaller workspaces, while the smooth top surface ensures easy, precise mouse movements. With durable edges and a non-slip rubber base, it’s built to stay put and look sharp.\n\n• Neoprene material with rubber backing\n• Diameter: 8″ (20.3 cm)\n• Smooth surface for accurate mouse control\n• Non-slip bottom for stability\n• Blank product sourced from China",
+    "type_name": "Mouse Pad | Round",
+    "title": "Round Mouse Pad",
+    "brand": null,
+    "model": "Mouse Pad | Round",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/1d/1dd9070667e683e9e16106ae19438910_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 25786,
+     "product_id": 1399,
+     "name": "Round Mouse Pad (White)",
+     "size": null,
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1399/25786_1758198335.jpg",
+     "price": "9.31",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,162 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/660?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 660,
+   "type": "STICKER",
+   "main_category_id": 268,
+   "name": "Set of Pin Buttons",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/10/101733006241d5b615735542f3b7888d_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Express yourself in a meaningful way with top-quality pin buttons. They’re lightweight, sturdy, and easy to put on. With a scratch and UV-resistant coating and a glossy finish, these pin buttons are made to last. Show off the things you care about and add a pop of personality to your clothing or accessories with vibrant pin buttons.  \n\n• They come in a set of 5 \n• Made of tinplate\n• Scratch and UV-resistant mylar coating\n• Glossy finish\n• Easy to put on",
+   "sizes": [
+    "1.25″",
+    "2.25″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "first",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "second",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "third",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "fourth",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/660"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/660/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/660/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/660/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/660/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/660/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/660/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

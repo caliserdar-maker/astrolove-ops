@@ -1,0 +1,71 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/641",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 641,
+   "available_placements": {
+    "front": "Front print",
+    "back": "Back print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 57,
+     "width": 1500,
+     "height": 1500,
+     "dpi": 150,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 16287,
+     "placements": {
+      "front": 57,
+      "back": 57
+     }
+    },
+    {
+     "variant_id": 16288,
+     "placements": {
+      "front": 57,
+      "back": 57
+     }
+    },
+    {
+     "variant_id": 16289,
+     "placements": {
+      "front": 57,
+      "back": 57
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Men's",
+    "On Hanger",
+    "Product details",
+    "Women's"
+   ],
+   "options": [
+    "Back",
+    "Back 2",
+    "Back 3",
+    "Back 4",
+    "Front",
+    "Front 2",
+    "Front 3",
+    "Front 4",
+    "Product details"
+   ]
+  },
+  "extra": []
+ }
+}

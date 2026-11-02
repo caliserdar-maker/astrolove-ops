@@ -1,0 +1,111 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/585?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 585,
+   "type": "DRINKWARE",
+   "main_category_id": 238,
+   "name": "Stainless Steel Tumbler",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/cf/cf742bc2278471fa6e9a74aeb76192d9_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Enjoy hot or cold drinks on the go with this stylish stainless steel tumbler! This reusable tumbler with a metal straw is a perfect combo for hot or cold drinks at any time of the day.\n\n• High-grade stainless steel tumbler\n• 20 oz (600 ml)\n• Tumbler size: 3.11″ × 8.42″ (7.9 cm × 21.4 cm)\n• Straw and lid included with the tumbler\n• A cylindrical shape (top to bottom)\n\nDisclaimer: Not dishwasher or microwave safe. Hand-wash only.",
+   "sizes": [
+    "20 oz"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#121214"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/585"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/585/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/585/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/585/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/585/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/585/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/585/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

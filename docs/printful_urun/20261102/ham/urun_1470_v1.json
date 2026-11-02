@@ -1,0 +1,209 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1470",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1470,
+    "main_category_id": 252,
+    "type": "PHONE-CASE",
+    "description": "Timekeeping meets wall art. This sleek wall clock adds a clean, modern touch to any room while keeping things quiet thanks to its silent mechanism. It’s a simple way to refresh your space—perfect for living rooms, bedrooms, offices, or creative studios.\n\n• Wood frame with a plexiglass cover\n• Metal clock mechanism\n• 10″ × 10″ (25.4 × 25.4 cm) square shape\n• Lightweight at 18 oz. (510 g)\n• Silent movement—no ticking sound\n• Requires 1 AA battery (not included)\n• Pre-installed hook for easy hanging\n• Design featured on the front face\n• Available with black, white, or wooden base options and black or white clock hands\n• Blank product sourced from China",
+    "type_name": "Wall Clock",
+    "title": "Wall Clock",
+    "brand": null,
+    "model": "Wall Clock",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/52/522eb9c33929e75ac456945e48701828_l",
+    "variant_count": 6,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 46082,
+     "product_id": 1470,
+     "name": "Generic brand  (Black Base/Clock Hand Black / 10″)",
+     "size": "10″",
+     "color": "Black Base/Clock Hand Black",
+     "color_code": "#141414",
+     "color_code2": "#141414",
+     "image": "https://files.cdn.printful.com/products/1470/46082_1782730002.jpg",
+     "price": "29.57",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 46083,
+     "product_id": 1470,
+     "name": "Generic brand  (Black Base/Clock Hand White / 10″)",
+     "size": "10″",
+     "color": "Black Base/Clock Hand White",
+     "color_code": "#141414",
+     "color_code2": "#ffffff",
+     "image": "https://files.cdn.printful.com/products/1470/46083_1782730002.jpg",
+     "price": "29.57",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 46084,
+     "product_id": 1470,
+     "name": "Generic brand  (White Base/Clock Hand Black / 10″)",
+     "size": "10″",
+     "color": "White Base/Clock Hand Black",
+     "color_code": "#ffffff",
+     "color_code2": "#141414",
+     "image": "https://files.cdn.printful.com/products/1470/46084_1782730002.jpg",
+     "price": "29.57",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 46085,
+     "product_id": 1470,
+     "name": "Generic brand  (White Base/Clock Hand White / 10″)",
+     "size": "10″",
+     "color": "White Base/Clock Hand White",
+     "color_code": "#ffffff",
+     "color_code2": "#ffffff",
+     "image": "https://files.cdn.printful.com/products/1470/46085_1782730003.jpg",
+     "price": "29.57",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 46086,
+     "product_id": 1470,
+     "name": "Generic brand  (Wooden Base/Clock Hand Black / 10″)",
+     "size": "10″",
+     "color": "Wooden Base/Clock Hand Black",
+     "color_code": "#e7c79d",
+     "color_code2": "#141414",
+     "image": "https://files.cdn.printful.com/products/1470/46086_1782730012.jpg",
+     "price": "29.57",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 46087,
+     "product_id": 1470,
+     "name": "Generic brand  (Wooden Base/Clock Hand White / 10″)",
+     "size": "10″",
+     "color": "Wooden Base/Clock Hand White",
+     "color_code": "#e7c79d",
+     "color_code2": "#ffffff",
+     "image": "https://files.cdn.printful.com/products/1470/46087_1782730012.jpg",
+     "price": "29.57",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,143 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1426",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1426,
+    "main_category_id": 255,
+    "type": "SUBLIMATION",
+    "description": "Wrap yourself in softness with this cozy fleece blanket. Its smooth texture and vibrant colors make it a go-to accent for the couch, bedroom, or on-the-road comfort. Choose from three sizes to find the perfect fit for your space or routine.\n\n• Soft 100% polyester fleece\n• Fabric weight: 9.29 oz./yd² (315 g/m²)\n• Thickness: 0.1″ (0.2 cm)\n• Three size options for home or travel\n• Artwork appears on one side\n• White reverse side\n• Blank product sourced from the United Kingdom",
+    "type_name": "Lightweight Summer Blanket",
+    "title": "Lightweight Summer Blanket",
+    "brand": null,
+    "model": "Lightweight Summer Blanket",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/c7/c7715f40a705ff6bec5d912333da5180_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "United Kingdom"
+   },
+   "variants": [
+    {
+     "id": 44155,
+     "product_id": 1426,
+     "name": "Generic brand (30'' × 40'')",
+     "size": "30″×40″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1426/44155_1762869968.jpg",
+     "price": "23.31",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44156,
+     "product_id": 1426,
+     "name": "Generic brand (50\" × 60\")",
+     "size": "50″×60″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1426/44156_1762869978.jpg",
+     "price": "27.80",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44157,
+     "product_id": 1426,
+     "name": "Generic brand (60\" × 80\")",
+     "size": "60″×80″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1426/44157_1762947153.jpg",
+     "price": "37.64",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

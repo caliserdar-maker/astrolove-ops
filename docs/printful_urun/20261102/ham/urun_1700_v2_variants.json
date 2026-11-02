@@ -1,0 +1,1222 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1700/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 53438,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (10″×10″)",
+    "size": "10″×10″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53438_1788260137.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53438"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53438/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53438/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53438/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.06,
+      "width": 10.06,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53439,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (10″×24″)",
+    "size": "10″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53439_1788260148.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53439"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53439/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53439/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53439/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.06,
+      "width": 10.06,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 10.06,
+      "width": 24.06,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53457,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (11.69″×16.54″)",
+    "size": "11.69″×16.54″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53457_1788260148.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53457"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53457/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53457/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53457/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.54,
+      "width": 11.69,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.69,
+      "width": 16.54,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53440,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (11″×14″)",
+    "size": "11″×14″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53440_1788260148.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53440"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53440/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53440/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53440/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     }
+    ]
+   },
+   {
+    "id": 53441,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (11″×17″)",
+    "size": "11″×17″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53441_1788260158.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53441"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53441/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53441/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53441/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 17.06,
+      "width": 11.06,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.06,
+      "width": 17.06,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53442,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (12″×16″)",
+    "size": "12″×16″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53442_1788260158.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53442"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53442/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53442/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53442/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53443,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (12″×18″)",
+    "size": "12″×18″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53443_1788260158.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53443"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53443/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53443/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53443/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53445,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (14″×14″)",
+    "size": "14″×14″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53445_1788260209.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53445"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53445/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53445/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53445/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.06,
+      "width": 14.06,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53444,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (16″×16″)",
+    "size": "16″×16″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53444_1788260168.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53444"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53444/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53444/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53444/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.06,
+      "width": 16.06,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53446,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (16″×20″)",
+    "size": "16″×20″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53446_1788260168.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53446"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53446/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53446/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53446/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53447,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (16″×24″)",
+    "size": "16″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53447_1788260179.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53447"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53447/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53447/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53447/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.06,
+      "width": 16.06,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.06,
+      "width": 24.06,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53448,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (18″×18″)",
+    "size": "18″×18″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53448_1788260219.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53448"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53448/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53448/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53448/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.06,
+      "width": 18.06,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53449,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (18″×24″)",
+    "size": "18″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53449_1788260230.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53449"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53449/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53449/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53449/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53450,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (20″×20″)",
+    "size": "20″×20″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53450_1788260230.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53450"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53450/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53450/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53450/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.06,
+      "width": 20.06,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53451,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (20″×24″)",
+    "size": "20″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53451_1788260240.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53451"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53451/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53451/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53451/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.06,
+      "width": 20.06,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 20.06,
+      "width": 24.06,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53452,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (20″×28″)",
+    "size": "20″×28″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53452_1788260240.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53452"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53452/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53452/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53452/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 28.06,
+      "width": 20.06,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 20.06,
+      "width": 28.06,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53453,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (20″×30″)",
+    "size": "20″×30″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53453_1788260240.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53453"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53453/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53453/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53453/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 30.0,
+      "width": 20.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 30.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53454,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (24″×24″)",
+    "size": "24″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53454_1788260250.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53454"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53454/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53454/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53454/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.06,
+      "width": 24.06,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53455,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (24″×32″)",
+    "size": "24″×32″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53455_1788260251.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53455"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53455/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53455/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53455/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 32.06,
+      "width": 24.06,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.06,
+      "width": 32.06,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53456,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (24″×36″)",
+    "size": "24″×36″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53456_1788260261.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53456"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53456/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53456/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53456/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     }
+    ]
+   },
+   {
+    "id": 53432,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (5″×7″)",
+    "size": "5″×7″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53432_1788260261.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53432"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53432/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53432/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53432/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.0,
+      "width": 5.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 5.0,
+      "width": 7.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53433,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (6″×8″)",
+    "size": "6″×8″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53433_1788260261.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53433"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53433/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53433/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53433/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 8.06,
+      "width": 6.06,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 6.06,
+      "width": 8.06,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53434,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (8″×10″)",
+    "size": "8″×10″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53434_1788260271.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53434"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53434/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53434/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53434/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 10.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53435,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (8″×12″)",
+    "size": "8″×12″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53435_1788260271.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53435"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53435/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53435/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53435/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.06,
+      "width": 8.06,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.06,
+      "width": 12.06,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53436,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (8″×20″)",
+    "size": "8″×20″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53436_1788260281.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53436"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53436/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53436/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53436/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.06,
+      "width": 8.06,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.06,
+      "width": 20.06,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53437,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (9″×11″)",
+    "size": "9″×11″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53437_1788260281.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53437"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53437/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53437/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53437/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 11.06,
+      "width": 9.06,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 9.06,
+      "width": 11.06,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53459,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (A1 (23.3″×33.1″))",
+    "size": "A1 (23.3″×33.1″)",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53459_1788260291.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53459"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53459/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53459/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53459/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 33.11,
+      "width": 23.39,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 23.39,
+      "width": 33.11,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53458,
+    "catalog_product_id": 1700,
+    "name": "Rolled Posters (A2 (16.5″×23.3″))",
+    "size": "A2 (16.5″×23.3″)",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1700/53458_1788260291.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53458"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1700"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53458/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53458/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53458/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 23.39,
+      "width": 16.54,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.54,
+      "width": 23.39,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 28,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1700/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1700"
+   }
+  }
+ }
+}

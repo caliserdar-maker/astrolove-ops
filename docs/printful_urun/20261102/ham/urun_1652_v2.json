@@ -1,0 +1,143 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1652?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1652,
+   "type": "SUBLIMATION",
+   "main_category_id": 296,
+   "name": "Outdoor Flag with Rod Pocket",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/ae/aeaaed05832d5cf2a7ec4106380a62ae_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Designed to deliver vibrant colors on both sides through dye sublimation, it offers a stylish and versatile way to make a statement-whether you're representing a brand, celebrating a cause, or adding a personal touch to your garden, storefront, or event space.\n\n- 100% polyester\n-Lightweight fabric\n- Available in three sizes: 12″ × 18″, 24″ × 36″, 36″ × 60″\n- Decoration method: Dye sublimation\n-Print on both sides\n- Hemmed edges\n\nDisclaimers:\n- Does not include a flagpole or fastening system\n- Flag's cut-and-sew construction may cause slight variations in final dimensions",
+   "sizes": [
+    "12″×18″",
+    "24″×36″",
+    "36″×60″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1652"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1652/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1652/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1652/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1652/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1652/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1652/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

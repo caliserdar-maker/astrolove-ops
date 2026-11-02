@@ -1,0 +1,107 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/761",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 761,
+    "main_category_id": 252,
+    "type": "SUBLIMATION",
+    "description": "Upgrade your bathroom with an original shower curtain. This durable, water-resistant curtain is easy to install and maintain. Order it for yourself or as a gift for a housewarming or wedding.\n\n• 100% Polyester\n• Size: 71″ × 74″ (180 cm × 188 cm)\n• 12 eyelet holes (hooks not included)\n• Water-resistant\n• Blank product sourced from China\n\nCare guidelines: Machine-wash cold on a gentle cycle with a mild detergent. Tumble dry on low heat. Don’t iron or dry clean.",
+    "type_name": "Shower Curtain",
+    "title": "Shower Curtain",
+    "brand": null,
+    "model": "Shower Curtain",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/02/0273ce04b2289c323923f8feca1d1bfb_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 19454,
+     "product_id": 761,
+     "name": "Shower Curtain (White / 71″×74″)",
+     "size": "71″×74″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/761/19454_1713503163.jpg",
+     "price": "35.65",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/297/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 9287,
+    "catalog_product_id": 297,
+    "name": "Liberty Bags 5502 Embroidered Apron (Black)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#0f0e0e",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/297/9287_1528280550.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/9287"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/297"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/297/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/9287/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/9287/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/9287/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 9286,
+    "catalog_product_id": 297,
+    "name": "Liberty Bags 5502 Embroidered Apron (White)",
+    "size": "One size",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/297/9286_1528280538.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/9286"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/297"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/297/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/9286/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/9286/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/9286/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/297/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/297"
+   }
+  }
+ }
+}

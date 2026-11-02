@@ -1,0 +1,155 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/403",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 403,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 43,
+     "width": 2700,
+     "height": 1050,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 44,
+     "width": 2700,
+     "height": 1140,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 11051,
+     "placements": {
+      "default": 43
+     }
+    },
+    {
+     "variant_id": 17196,
+     "placements": {
+      "default": 44
+     }
+    },
+    {
+     "variant_id": 17362,
+     "placements": {
+      "default": 43
+     }
+    },
+    {
+     "variant_id": 22373,
+     "placements": {
+      "default": 44
+     }
+    },
+    {
+     "variant_id": 11049,
+     "placements": {
+      "default": 43
+     }
+    },
+    {
+     "variant_id": 17200,
+     "placements": {
+      "default": 44
+     }
+    },
+    {
+     "variant_id": 17359,
+     "placements": {
+      "default": 43
+     }
+    },
+    {
+     "variant_id": 17360,
+     "placements": {
+      "default": 44
+     }
+    },
+    {
+     "variant_id": 12579,
+     "placements": {
+      "default": 43
+     }
+    },
+    {
+     "variant_id": 11050,
+     "placements": {
+      "default": 43
+     }
+    },
+    {
+     "variant_id": 17197,
+     "placements": {
+      "default": 44
+     }
+    },
+    {
+     "variant_id": 12578,
+     "placements": {
+      "default": 43
+     }
+    },
+    {
+     "variant_id": 17199,
+     "placements": {
+      "default": 44
+     }
+    },
+    {
+     "variant_id": 17358,
+     "placements": {
+      "default": 43
+     }
+    },
+    {
+     "variant_id": 17361,
+     "placements": {
+      "default": 43
+     }
+    },
+    {
+     "variant_id": 11048,
+     "placements": {
+      "default": 43
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Holiday season",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Placeholder",
+    "Product specs",
+    "Red, white & blue",
+    "Spring/summer vibes",
+    "Template",
+    "Valentine's Day"
+   ],
+   "options": [
+    "Front",
+    "Left",
+    "Right",
+    "default"
+   ]
+  },
+  "extra": []
+ }
+}

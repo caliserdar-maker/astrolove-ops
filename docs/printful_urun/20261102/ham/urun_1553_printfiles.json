@@ -1,0 +1,124 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1553",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 1553,
+   "available_placements": {
+    "embroidery_apparel_front": "Front",
+    "embroidery_apparel_back": "Back"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 136,
+     "width": 1200,
+     "height": 1200,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 49313,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136
+     }
+    },
+    {
+     "variant_id": 49319,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136
+     }
+    },
+    {
+     "variant_id": 49315,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136
+     }
+    },
+    {
+     "variant_id": 49317,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136
+     }
+    },
+    {
+     "variant_id": 49314,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136
+     }
+    },
+    {
+     "variant_id": 49324,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136
+     }
+    },
+    {
+     "variant_id": 49318,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136
+     }
+    },
+    {
+     "variant_id": 49322,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136
+     }
+    },
+    {
+     "variant_id": 49320,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136
+     }
+    },
+    {
+     "variant_id": 49316,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136
+     }
+    },
+    {
+     "variant_id": 49321,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136
+     }
+    },
+    {
+     "variant_id": 49323,
+     "placements": {
+      "embroidery_apparel_front": 136,
+      "embroidery_apparel_back": 136
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Product details"
+   ],
+   "options": [
+    "Back",
+    "Front",
+    "Product details"
+   ]
+  },
+  "extra": []
+ }
+}

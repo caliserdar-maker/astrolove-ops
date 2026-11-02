@@ -1,0 +1,246 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1583/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 49864,
+    "catalog_product_id": 1583,
+    "name": "All-Over Print Cotton Pillow Case (14″×14″)",
+    "size": "14″×14″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1583/49864_1782466456.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49864"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1583"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1583/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49864/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49864/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49864/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 15.0,
+      "width": 15.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 15.0,
+      "width": 15.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49865,
+    "catalog_product_id": 1583,
+    "name": "All-Over Print Cotton Pillow Case (16″×16″)",
+    "size": "16″×16″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1583/49865_1782372889.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49865"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1583"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1583/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49865/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49865/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49865/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 17.0,
+      "width": 17.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 17.0,
+      "width": 17.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49866,
+    "catalog_product_id": 1583,
+    "name": "All-Over Print Cotton Pillow Case (18″×18″)",
+    "size": "18″×18″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1583/49866_1782372889.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49866"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1583"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1583/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49866/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49866/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49866/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "back",
+      "height": 19.0,
+      "width": 19.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front",
+      "height": 19.0,
+      "width": 19.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49867,
+    "catalog_product_id": 1583,
+    "name": "All-Over Print Cotton Pillow Case (22″×22″)",
+    "size": "22″×22″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1583/49867_1782372889.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49867"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1583"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1583/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49867/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49867/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49867/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 23.0,
+      "width": 23.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 23.0,
+      "width": 23.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49868,
+    "catalog_product_id": 1583,
+    "name": "All-Over Print | Cotton Pillow Case (20″×12″)",
+    "size": "20″×12″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1583/49868_1782372909.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49868"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1583"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1583/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49868/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49868/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49868/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 13.0,
+      "width": 21.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 13.0,
+      "width": 21.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 5,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1583/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1583"
+   }
+  }
+ }
+}

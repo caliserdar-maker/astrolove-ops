@@ -1,0 +1,170 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/594",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 594,
+    "main_category_id": 129,
+    "type": "CUT-SEW",
+    "description": "Ready to get your fitness on? Add some punch to pumping iron with this all-over print gym bag. Made from 100% polyester and sturdy, water-resistant fabric, this bag is fun meets function. And it’s got pockets! \n\n• 100% polyester\n• Fabric weight: 9 oz./yd.² (305 g/m²)\n• Capacity: 7.93 gallons (30 l)\n• Water-resistant and durable \n• Sturdy fabric with fusible backing to add firmness \n• T-piping for stability \n• Dual padded handles \n• Inside pocket for valuables",
+    "type_name": "All-Over Print Gym Bag",
+    "title": "All-Over Print Gym Bag",
+    "brand": null,
+    "model": "All-Over Print Gym Bag",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/ed/ed1e2bcfb0b0e2e680f14f2b50e0ea25_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "stitch_color",
+      "title": "Stitch color",
+      "type": "radio",
+      "values": {
+       "black": "Black",
+       "clear": "Clear"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "bottom",
+      "type": "bottom",
+      "title": "Bottom print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "side_right",
+      "type": "side_right",
+      "title": "Right side",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "side_left",
+      "type": "side_left",
+      "title": "Left side",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "pocket",
+      "type": "pocket",
+      "title": "Pocket",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "label_inside",
+      "type": "label_inside",
+      "title": "Inside label",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 15155,
+     "product_id": 594,
+     "name": "All-Over Print Gym Bag (White / One size)",
+     "size": "One size",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/594/15155_1652879339.jpg",
+     "price": "52.01",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

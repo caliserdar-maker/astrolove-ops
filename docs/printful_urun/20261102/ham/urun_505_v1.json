@@ -1,0 +1,136 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/505",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 505,
+    "main_category_id": 202,
+    "type": "STICKER",
+    "description": "These glossy stickers are designed just for you. Give your favorite items, like a notepad, laptop, or phone case an extra glow and personal touch. \n\n• Film type: MPI 3000 Gloss HOP (EU), Promotional Monomeric PVC (US)\n• 0.12″ (0.3 cm) white sticker border \n• Glossy finish\n• Fast and easy application\n• 2–3 year durability\n• Indoor use\n• Blank product sourced from Japan\n\nDon't forget to clean the surface before applying the stickers.",
+    "type_name": "Stickers | Kiss Cut | Sheet | White",
+    "title": "Kiss-Cut Sticker Sheet",
+    "brand": null,
+    "model": "Stickers | Kiss Cut | Sheet | White",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/76/7658fa12bc07c99e823fbc140595bc24_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "background",
+      "type": "background",
+      "title": "Background",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 12917,
+     "product_id": 505,
+     "name": "Kiss cut sticker sheet (White / 5.83″×8.27″)",
+     "size": "5.83″×8.27″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/505/12917_1629116996.jpg",
+     "price": "5.15",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "CA": "Canada",
+      "UK": "United Kingdom",
+      "JP": "Japan",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "CA",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "JP",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

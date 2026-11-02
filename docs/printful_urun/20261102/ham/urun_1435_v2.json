@@ -1,0 +1,109 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1435?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1435,
+   "type": "POSTCARD",
+   "main_category_id": 230,
+   "name": "White Coined Napkins",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/a5/a5176f1e8e2b99fe97be0723c8cbf0cb_l",
+   "variant_count": 4,
+   "is_discontinued": false,
+   "description": "Bring elegance and fun to any social gathering with White Coined Napkins. \n\n• Soft, three-ply custom white paper\n• Two sizes: luncheon (6.5″ × 6.5″) and beverage (4.8″ × 4.8″)\n• Available in packs of 50 and 100\n• Smooth texture with coined edge borders\n• Blanks sourced from the USA \n\nDisclaimer: The ink used in fulfillment may leave a faint shadow around the design's border, as well as specks on the napkin's edge.",
+   "sizes": [
+    "4.8″×4.8″",
+    "6.5″×6.5″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1435"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1435/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1435/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1435/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1435/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1435/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1435/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,205 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/804",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 804,
+    "main_category_id": 190,
+    "type": "POSTCARD",
+    "description": "Keep track of important dates in 2025 with a calendar that reflects your style and spirit! This stylish calendar not only helps you stay organized but also works as a decorative piece with unique artwork to go with each month. \n\n• Paper pages bound with a silver-color metal wire\n• Paper weight: 8 oz/yd² (271 g/m²)",
+    "type_name": "Wall Calendar | Blank",
+    "title": "Wall Calendar (blank)",
+    "brand": null,
+    "model": "Wall Calendar | Blank",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/f5/f5d63de3a3651d4828a85adb87e58e3a_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "cover",
+      "type": "cover",
+      "title": "Cover",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "january",
+      "type": "january",
+      "title": "January",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "february",
+      "type": "february",
+      "title": "February",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "march",
+      "type": "march",
+      "title": "March",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "april",
+      "type": "april",
+      "title": "April",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "may",
+      "type": "may",
+      "title": "May",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "june",
+      "type": "june",
+      "title": "June",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "july",
+      "type": "july",
+      "title": "July",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "august",
+      "type": "august",
+      "title": "August",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "september",
+      "type": "september",
+      "title": "September",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "october",
+      "type": "october",
+      "title": "October",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "november",
+      "type": "november",
+      "title": "November",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "december",
+      "type": "december",
+      "title": "December",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 20423,
+     "product_id": 804,
+     "name": "Wall Calendar (Blank) (White / 11″×17″)",
+     "size": "11″×17″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/804/20423_1725633048.jpg",
+     "price": "19.72",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20424,
+     "product_id": 804,
+     "name": "Wall Calendar (Blank) (White / 8.26″×11.69″)",
+     "size": "8.26″×11.69″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/804/20424_1725633057.jpg",
+     "price": "12.43",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

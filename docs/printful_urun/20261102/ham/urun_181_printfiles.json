@@ -1,0 +1,246 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/181",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 181,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 56,
+     "width": 879,
+     "height": 1830,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 10996,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 10995,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 10994,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 11703,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 11705,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 11808,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 11704,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 13428,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 13801,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 13800,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 13427,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 16242,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 16243,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 16241,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 16240,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 17617,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 17619,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 17618,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 17616,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 20291,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 20293,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 20292,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 20290,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 33994,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 33996,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 33995,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 33993,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 7910,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 11452,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 8933,
+     "placements": {
+      "default": 56
+     }
+    },
+    {
+     "variant_id": 9621,
+     "placements": {
+      "default": 56
+     }
+    }
+   ],
+   "option_groups": [
+    "Default",
+    "Halloween",
+    "Holiday season",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Red, white & blue",
+    "Spring/summer vibes",
+    "Valentine's Day"
+   ],
+   "options": [
+    "Case on phone",
+    "Case with phone",
+    "Christmas",
+    "Front",
+    "Front 2",
+    "Front 3",
+    "Halloween",
+    "Halloween 2",
+    "Lifestyle 1",
+    "Lifestyle 2",
+    "Lifestyle 4",
+    "Red, white & blue",
+    "Spring/Summer",
+    "Spring/Summer 2",
+    "Valentine's Day",
+    "Valentine's Day 2",
+    "default"
+   ]
+  },
+  "extra": []
+ }
+}

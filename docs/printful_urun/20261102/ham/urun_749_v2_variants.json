@@ -1,0 +1,158 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/749/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 19188,
+    "catalog_product_id": 749,
+    "name": "Pet Collar (White / L)",
+    "size": "L",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/749/19188_1709110478.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19188"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/749"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/749/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19188/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19188/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19188/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.46,
+      "width": 33.19,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 4.0,
+      "width": 7.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19187,
+    "catalog_product_id": 749,
+    "name": "Pet Collar (White / M)",
+    "size": "M",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/749/19187_1709110478.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19187"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/749"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/749/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19187/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19187/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19187/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.46,
+      "width": 33.19,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 4.0,
+      "width": 7.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19186,
+    "catalog_product_id": 749,
+    "name": "Pet Collar (White / S)",
+    "size": "S",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/749/19186_1709110487.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19186"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/749"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/749/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19186/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19186/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19186/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.46,
+      "width": 33.19,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 4.0,
+      "width": 7.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/749/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/749"
+   }
+  }
+ }
+}

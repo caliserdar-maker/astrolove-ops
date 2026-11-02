@@ -1,0 +1,216 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1632/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 51576,
+    "catalog_product_id": 1632,
+    "name": "Comfort Colors® CCSB0 (One size / Bay)",
+    "size": "One size",
+    "color": "Bay",
+    "color_code": "#C3CFC1",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1632/51576_1783005191.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/51576"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1632"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1632/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/51576/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/51576/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/51576/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 4.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 51577,
+    "catalog_product_id": 1632,
+    "name": "Comfort Colors® CCSB0 (One size / Black)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1632/51577_1783005201.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/51577"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1632"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1632/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/51577/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/51577/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/51577/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 4.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 51578,
+    "catalog_product_id": 1632,
+    "name": "Comfort Colors® CCSB0 (One size / Chambray)",
+    "size": "One size",
+    "color": "Chambray",
+    "color_code": "#D9EDF5",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1632/51578_1783005213.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/51578"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1632"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1632/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/51578/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/51578/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/51578/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 4.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 51579,
+    "catalog_product_id": 1632,
+    "name": "Comfort Colors® CCSB0 (One size / Ivory)",
+    "size": "One size",
+    "color": "Ivory",
+    "color_code": "#FFF7E7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1632/51579_1783005213.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/51579"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1632"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1632/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/51579/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/51579/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/51579/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 4.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 51580,
+    "catalog_product_id": 1632,
+    "name": "Comfort Colors® CCSB0 (One size / Rose Quartz)",
+    "size": "One size",
+    "color": "Rose Quartz",
+    "color_code": "#f4b5da",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1632/51580_1783005213.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/51580"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1632"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1632/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/51580/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/51580/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/51580/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front_dtf",
+      "height": 4.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 5,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1632/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1632"
+   }
+  }
+ }
+}

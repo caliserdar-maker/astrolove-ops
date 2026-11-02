@@ -1,0 +1,142 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/964",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 964,
+   "available_placements": {
+    "front": "Front print",
+    "back": "Back print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 1274,
+     "width": 367,
+     "height": 263,
+     "dpi": 1,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1275,
+     "width": 402,
+     "height": 294,
+     "dpi": 1,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1276,
+     "width": 480,
+     "height": 339,
+     "dpi": 1,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1277,
+     "width": 525,
+     "height": 369,
+     "dpi": 1,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1278,
+     "width": 566,
+     "height": 433,
+     "dpi": 1,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1279,
+     "width": 665,
+     "height": 512,
+     "dpi": 1,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1280,
+     "width": 784,
+     "height": 599,
+     "dpi": 1,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 24565,
+     "placements": {
+      "front": 1274,
+      "back": 1274
+     }
+    },
+    {
+     "variant_id": 24566,
+     "placements": {
+      "front": 1275,
+      "back": 1275
+     }
+    },
+    {
+     "variant_id": 24567,
+     "placements": {
+      "front": 1276,
+      "back": 1276
+     }
+    },
+    {
+     "variant_id": 24568,
+     "placements": {
+      "front": 1277,
+      "back": 1277
+     }
+    },
+    {
+     "variant_id": 24569,
+     "placements": {
+      "front": 1278,
+      "back": 1278
+     }
+    },
+    {
+     "variant_id": 24570,
+     "placements": {
+      "front": 1279,
+      "back": 1279
+     }
+    },
+    {
+     "variant_id": 24571,
+     "placements": {
+      "front": 1280,
+      "back": 1280
+     }
+    }
+   ],
+   "option_groups": [
+    "Dog's",
+    "Flat",
+    "Templates"
+   ],
+   "options": [
+    "Back",
+    "Front",
+    "Left",
+    "Left Front",
+    "Product details",
+    "Right",
+    "Right Front"
+   ]
+  },
+  "extra": []
+ }
+}

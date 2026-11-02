@@ -1,0 +1,129 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/267?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 267,
+   "type": "PHONE-CASE",
+   "main_category_id": 244,
+   "name": "Clear Case for Samsung®",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/7c/7c7a0c9bba1ab7ead3c03753adc262b6_l",
+   "variant_count": 18,
+   "is_discontinued": false,
+   "description": "This sleek Samsung® case protects your phone from scratches, dust, oil, and dirt. It has a solid back and flexible sides that make it easy to take on and off, with precisely aligned cuts and holes. \n\n• Solid polycarbonate back\n• 0.02″ (0.5 mm) raised bezel\n• See-through sides\n• Wireless charging compatible\n• Easy to take on and off\n\nImportant: This product can’t be shipped to South Korea, Hong Kong, Taiwan, Japan, or Singapore. If your shipping address is in these regions, please choose a different product.",
+   "sizes": [
+    "Samsung Galaxy S7",
+    "Samsung Galaxy S7 Edge",
+    "Samsung Galaxy S8",
+    "Samsung Galaxy S8+",
+    "Samsung Galaxy S9",
+    "Samsung Galaxy S9+",
+    "Samsung Galaxy S10",
+    "Samsung Galaxy S10e",
+    "Samsung Galaxy S10+",
+    "Samsung Galaxy S20",
+    "Samsung Galaxy S20 Plus",
+    "Samsung Galaxy S20 Ultra",
+    "Samsung Galaxy S20 FE",
+    "Samsung Galaxy S21",
+    "Samsung Galaxy S21 Ultra",
+    "Samsung Galaxy S21 Plus",
+    "Samsung Galaxy S22",
+    "Samsung Galaxy S22 Plus",
+    "Samsung Galaxy S22 Ultra",
+    "Samsung Galaxy S24",
+    "Samsung Galaxy S24 Plus",
+    "Samsung Galaxy S24 Ultra",
+    "Samsung Galaxy S23",
+    "Samsung Galaxy S23 Plus",
+    "Samsung Galaxy S23 Ultra",
+    "Samsung Galaxy S25",
+    "Samsung Galaxy S25 Plus",
+    "Samsung Galaxy S25 Ultra"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/267"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/267/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/267/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/267/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/267/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/267/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

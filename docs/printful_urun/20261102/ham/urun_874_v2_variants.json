@@ -1,0 +1,140 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/874/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 22711,
+    "catalog_product_id": 874,
+    "name": "Car Magnets (White / 10″×3″)",
+    "size": "10″×3″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/874/22711_1745825336.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22711"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/874"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/874/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22711/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22711/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22711/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.5,
+      "width": 10.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22710,
+    "catalog_product_id": 874,
+    "name": "Car Magnets (White / 5″×5″)",
+    "size": "5″×5″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/874/22710_1745825337.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22710"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/874"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/874/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22710/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22710/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22710/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 5.5,
+      "width": 5.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22712,
+    "catalog_product_id": 874,
+    "name": "Car Magnets (White / 7.5″×4.5″)",
+    "size": "7.5″×4.5″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/874/22712_1745825346.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22712"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/874"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/874/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22712/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22712/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22712/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 5.25,
+      "width": 8.25,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/874/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/874"
+   }
+  }
+ }
+}

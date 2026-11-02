@@ -1,0 +1,158 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/641/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16287,
+    "catalog_product_id": 641,
+    "name": "AS Colour 1001 | Carrie Tote (Black / One size)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#0a0a0a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/641/16287_1666349183.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16287"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/641"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/641/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16287/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16287/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16287/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16288,
+    "catalog_product_id": 641,
+    "name": "AS Colour 1001 | Carrie Tote (Camel / One size)",
+    "size": "One size",
+    "color": "Camel",
+    "color_code": "#d1924f",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/641/16288_1666349189.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16288"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/641"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/641/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16288/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16288/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16288/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16289,
+    "catalog_product_id": 641,
+    "name": "AS Colour 1001 | Carrie Tote (Cream / One size)",
+    "size": "One size",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/641/16289_1666349190.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16289"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/641"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/641/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16289/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16289/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16289/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/641/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/641"
+   }
+  }
+ }
+}

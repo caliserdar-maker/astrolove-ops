@@ -1,0 +1,136 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/681?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 681,
+   "type": "PHONE-CASE",
+   "main_category_id": 245,
+   "name": "All-Over Print Case for AirPods®",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/35/3590046c51744ee1db489e35cc117820_l",
+   "variant_count": 5,
+   "is_discontinued": false,
+   "description": "Protect your AirPods® in style! Crafted from premium impact-absorbing material, this case is the ultimate shield against scratches and drops, ensuring your earbuds stay pristine. With the added convenience of a metal carabiner, you can easily attach your AirPods® to your bag, keys, or anywhere else for easy access. \n\n• Premium polycarbonate (PC) material\n• Impact-absorbing case to protect AirPods® from bumps, drops, and scratches\n• Comes with a metal carabiner for easy carrying\n• Includes an adhesive for securely attaching the top part to the AirPods® base\n• Compatible with wireless and regular chargers\n\nThis case is compatible with the 1st, 2nd, and 3rd generation AirPods® and 1st and 2nd generation AirPods® Pro®. The product doesn’t include AirPods® or an AirPods® charger.\n\nImportant: This product cannot be shipped to South Korea, Hong Kong, Taiwan,  Japan, or Singapore. If your shipping address is in these regions, please choose a different product.\n\nAirPods® is an Apple Inc. trademark registered in the US and other countries and regions.",
+   "sizes": [
+    "AirPods Gen1",
+    "AirPods Gen2",
+    "AirPods Gen3",
+    "AirPods Pro Gen1",
+    "AirPods Pro Gen2"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/681"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/681/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/681/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/681/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/681/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/681/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/681/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

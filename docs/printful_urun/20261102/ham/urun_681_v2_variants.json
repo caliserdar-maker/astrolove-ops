@@ -1,0 +1,246 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/681/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16865,
+    "catalog_product_id": 681,
+    "name": "All-Over Print Case for AirPods® (White / AirPods Gen1)",
+    "size": "AirPods Gen1",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/681/16865_1681715466.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16865"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/681"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/681/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16865/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16865/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16865/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.45,
+      "width": 3.77,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 3.45,
+      "width": 3.77,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16866,
+    "catalog_product_id": 681,
+    "name": "All-Over Print Case for AirPods® (White / AirPods Gen2)",
+    "size": "AirPods Gen2",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/681/16866_1681715466.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16866"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/681"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/681/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16866/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16866/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16866/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.45,
+      "width": 3.77,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 3.45,
+      "width": 3.77,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16867,
+    "catalog_product_id": 681,
+    "name": "All-Over Print Case for AirPods® (White / AirPods Gen3)",
+    "size": "AirPods Gen3",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/681/16867_1681715468.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16867"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/681"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/681/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16867/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16867/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16867/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.45,
+      "width": 3.77,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 3.45,
+      "width": 3.77,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16868,
+    "catalog_product_id": 681,
+    "name": "All-Over Print Case for AirPods® (White / AirPods Pro Gen1)",
+    "size": "AirPods Pro Gen1",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/681/16868_1681715470.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16868"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/681"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/681/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16868/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16868/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16868/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.45,
+      "width": 3.77,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 3.45,
+      "width": 3.77,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16869,
+    "catalog_product_id": 681,
+    "name": "All-Over Print Case for AirPods® (White / AirPods Pro Gen2)",
+    "size": "AirPods Pro Gen2",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/681/16869_1681715479.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16869"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/681"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/681/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16869/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16869/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16869/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.45,
+      "width": 3.77,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 3.45,
+      "width": 3.77,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 5,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/681/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/681"
+   }
+  }
+ }
+}

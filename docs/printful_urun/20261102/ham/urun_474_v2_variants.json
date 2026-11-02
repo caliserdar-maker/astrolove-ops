@@ -1,0 +1,70 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/474/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 12141,
+    "catalog_product_id": 474,
+    "name": "Spiral Notebook (5.5″×8.5″)",
+    "size": "5.5″×8.5″",
+    "color": "Dotted",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/474/12141_1766061840.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/12141"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/474"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/474/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/12141/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/12141/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/12141/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 8.75,
+      "width": 5.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 8.75,
+      "width": 5.75,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/474/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/474"
+   }
+  }
+ }
+}

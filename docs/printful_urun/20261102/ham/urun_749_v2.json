@@ -1,0 +1,157 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/749?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 749,
+   "type": "CUT-SEW",
+   "main_category_id": 189,
+   "name": "Pet Collar",
+   "brand": null,
+   "model": "Pet Collar",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/16/166c2c64421774e904304ef8703241a0_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Treat your pet to a premium collar that’s made to last. It’s available in 3 sizes and has an adjustable buckle for a secure fit. It’s ideal for pet owners who want their furry friends to look and feel great on the go.\n\n• Durable 100% polyester webbing\n• 92% polyester, 8% spandex collar inside\n• Black 100% polyester sponge collar inside padding\n• 3 sizes available: S 11.8″–17.8″ (30–45 cm), M 13.5″–20.5″ (35–52 cm), L 14.8″–23.8″ (38–60 cm)\n• Adjustable collar length\n• Collar width: 1″ (2.54 cm)\n• Black plastic main buckle, adjustable buckle, and strap holder\n• Blank product sourced from China\n\nHand wash with mild detergent or machine wash on a gentle cycle in a mesh bag. Air dry.",
+   "sizes": [
+    "S",
+    "M",
+    "L"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "label_inside",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "label_inside_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": [
+      "white",
+      "clear",
+      "black"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/749"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/749/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/749/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/749/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/749/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/749/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/749/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

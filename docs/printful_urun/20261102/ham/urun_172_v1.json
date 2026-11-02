@@ -1,0 +1,1184 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/172",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 172,
+    "main_category_id": 56,
+    "type": "FRAMED-POSTER",
+    "description": "Make a statement in any room with this framed poster printed on high-quality paper, with a partly glossy, partly matte finish.\n\n• 10 mil (0.25 mm) thick paper\n• Paper weight: 260 g/m²\n• .75” (1.9 cm) thick ayous wood frame\n• Acrylite front protector\n• Hanging hardware included\n• Blank product components in the US sourced from Japan and the US\n• Blank product components in the EU sourced from Japan and Latvia\n\nHow to attach hooks on 24″ × 36″ horizontal frames:\nPlace each of the mounting hooks 1 inch (2.5 cm) from frame corners when hanging horizontally.",
+    "type_name": "Paper Poster (in) | Framed | Luster",
+    "title": "Premium Luster Photo Paper Framed Poster (in)",
+    "brand": null,
+    "model": "Paper Poster (in) | Framed | Luster",
+    "image": "https://files.cdn.printful.com/o/products/172/product_1614596957.jpg",
+    "variant_count": 36,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 6883,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Black/10″×10″)",
+     "size": "10″×10″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/6883_1527683114.jpg",
+     "price": "26.01",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 14290,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Black/11″×14″)",
+     "size": "11″×14″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/14290_1643092664.jpg",
+     "price": "32.20",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 6884,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Black/12″×12″)",
+     "size": "12″×12″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/6884_1529482493.jpg",
+     "price": "30.17",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 6886,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Black/12″×16″)",
+     "size": "12″×16″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/6886_1527683301.jpg",
+     "price": "35.89",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 6887,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Black/12″×18″)",
+     "size": "12″×18″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/6887_1527683151.jpg",
+     "price": "37.45",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 6885,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Black/14″×14″)",
+     "size": "14″×14″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/6885_1527683179.jpg",
+     "price": "35.37",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 6888,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Black/16″×16″)",
+     "size": "16″×16″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/6888_1527683196.jpg",
+     "price": "39.54",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 6889,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Black/16″×20″)",
+     "size": "16″×20″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/6889_1529482510.jpg",
+     "price": "49.94",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 6890,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Black/18″×18″)",
+     "size": "18″×18″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/6890_1527683238.jpg",
+     "price": "47.86",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 6891,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Black/18″×24″)",
+     "size": "18″×24″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/6891_1527685200.jpg",
+     "price": "56.18",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 7846,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Black/24″×36″)",
+     "size": "24″×36″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/7846_1527683265.jpg",
+     "price": "92.60",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 6882,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Black/8″×10″)",
+     "size": "8″×10″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/6882_1527683092.jpg",
+     "price": "23.93",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15007,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (in) (Red Oak / 10″×10″)",
+     "size": "10″×10″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/15007_1651047527.jpg",
+     "price": "26.01",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15008,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Red Oak / 11″×14″)",
+     "size": "11″×14″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/15008_1651047527.jpg",
+     "price": "32.20",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15009,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Red Oak / 12″×12″)",
+     "size": "12″×12″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/15009_1651047528.jpg",
+     "price": "30.17",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15010,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Red Oak / 12″×16″)",
+     "size": "12″×16″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/15010_1651047538.jpg",
+     "price": "35.89",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15011,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Red Oak / 12″×18″)",
+     "size": "12″×18″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/15011_1651047538.jpg",
+     "price": "37.45",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15012,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Red Oak / 14″×14″)",
+     "size": "14″×14″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/15012_1651047547.jpg",
+     "price": "35.37",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15013,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Red Oak / 16″×16″)",
+     "size": "16″×16″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/15013_1651047548.jpg",
+     "price": "39.54",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15014,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Red Oak / 16″×20″)",
+     "size": "16″×20″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/15014_1651047558.jpg",
+     "price": "49.94",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15015,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Red Oak / 18″×18″)",
+     "size": "18″×18″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/15015_1651047558.jpg",
+     "price": "47.86",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15017,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Red Oak / 18″×24″)",
+     "size": "18″×24″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/15017_1651047568.jpg",
+     "price": "56.18",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15018,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Red Oak / 24″×36″)",
+     "size": "24″×36″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/15018_1651047579.jpg",
+     "price": "92.60",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15006,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (Red Oak / 8″×10″)",
+     "size": "8″×10″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/15006_1651047580.jpg",
+     "price": "23.93",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10761,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (White/10″×10″)",
+     "size": "10″×10″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/10761_1565092757.jpg",
+     "price": "26.01",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 14291,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (White/11″×14″)",
+     "size": "11″×14″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/14291_1643092665.jpg",
+     "price": "32.20",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10762,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (White/12″×12″)",
+     "size": "12″×12″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/10762_1565092863.jpg",
+     "price": "30.17",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10764,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (White/12″×16″)",
+     "size": "12″×16″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/10764_1565081255.jpg",
+     "price": "35.89",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10765,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (White/12″×18″)",
+     "size": "12″×18″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/10765_1565092910.jpg",
+     "price": "37.45",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10763,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (White/14″×14″)",
+     "size": "14″×14″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/10763_1565092949.jpg",
+     "price": "35.37",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10766,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (White/16″×16″)",
+     "size": "16″×16″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/10766_1565092989.jpg",
+     "price": "39.54",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10767,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (White/16″×20″)",
+     "size": "16″×20″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/10767_1565093030.jpg",
+     "price": "49.94",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10768,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (White/18″×18″)",
+     "size": "18″×18″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/10768_1565093075.jpg",
+     "price": "47.86",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10769,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (White/18″×24″)",
+     "size": "18″×24″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/10769_1565081338.jpg",
+     "price": "56.18",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10770,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (White/24″×36″)",
+     "size": "24″×36″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/10770_1565093116.jpg",
+     "price": "92.60",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10760,
+     "product_id": 172,
+     "name": "Premium Luster Photo Paper Framed Poster (White/8″×10″)",
+     "size": "8″×10″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/172/10760_1565081295.jpg",
+     "price": "23.93",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

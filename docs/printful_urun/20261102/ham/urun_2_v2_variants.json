@@ -1,0 +1,1652 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/2/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 4652,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Black/10″×10″)",
+    "size": "10″×10″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/4652_1527683110.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4652"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4652/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4652/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4652/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 14292,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Black/11″×14″)",
+    "size": "11″×14″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/14292_1643092634.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14292"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14292/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14292/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14292/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 4653,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Black/12″×12″)",
+    "size": "12″×12″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/4653_1527683124.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4653"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4653/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4653/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4653/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 1350,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Black/12″×16″)",
+    "size": "12″×16″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/1350_1527683296.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/1350"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/1350/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/1350/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/1350/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 4398,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Black/12″×18″)",
+    "size": "12″×18″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/4398_1527683145.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4398"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4398/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4398/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4398/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 4654,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Black/14″×14″)",
+    "size": "14″×14″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/4654_1527683172.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4654"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4654/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4654/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4654/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 14.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 4655,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Black/16″×16″)",
+    "size": "16″×16″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/4655_1527683192.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4655"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4655/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4655/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4655/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 16.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 4399,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Black/16″×20″)",
+    "size": "16″×20″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/4399_1527683210.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4399"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4399/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4399/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4399/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 4656,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Black/18″×18″)",
+    "size": "18″×18″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/4656_1527683231.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4656"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4656/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4656/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4656/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 18.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 3,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Black/18″×24″)",
+    "size": "18″×24″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/3_1527685193.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/3"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/3/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/3/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/3/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 4,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Black/24″×36″)",
+    "size": "24″×36″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/4_1527683261.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 4651,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Black/8″×10″)",
+    "size": "8″×10″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/4651_1527683086.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4651"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4651/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4651/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4651/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 10.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19520,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (in) (Black / 20″×30″)",
+    "size": "20″×30″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/19520_1714721366.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19520"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19520/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19520/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19520/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 30.0,
+      "width": 20.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 30.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19521,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (in) (Red Oak / 20″×30″)",
+    "size": "20″×30″",
+    "color": "Red Oak",
+    "color_code": "#D4A489",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/19521_1714721367.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19521"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19521/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19521/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19521/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 30.0,
+      "width": 20.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 30.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19522,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (in) (White / 20″×30″)",
+    "size": "20″×30″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/19522_1714721367.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19522"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19522/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19522/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19522/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 30.0,
+      "width": 20.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 30.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15022,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Red Oak / 10″×10″)",
+    "size": "10″×10″",
+    "color": "Red Oak",
+    "color_code": "#D4A489",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/15022_1651046788.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15022"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15022/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15022/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15022/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15023,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Red Oak / 11″×14″)",
+    "size": "11″×14″",
+    "color": "Red Oak",
+    "color_code": "#D4A489",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/15023_1651046788.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15023"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15023/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15023/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15023/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15024,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Red Oak / 12″×12″)",
+    "size": "12″×12″",
+    "color": "Red Oak",
+    "color_code": "#D4A489",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/15024_1651046789.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15024"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15024/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15024/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15024/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15025,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Red Oak / 12″×16″)",
+    "size": "12″×16″",
+    "color": "Red Oak",
+    "color_code": "#D4A489",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/15025_1651046798.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15025"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15025/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15025/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15025/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15026,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Red Oak / 12″×18″)",
+    "size": "12″×18″",
+    "color": "Red Oak",
+    "color_code": "#D4A489",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/15026_1651046808.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15026"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15026/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15026/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15026/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15027,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Red Oak / 14″×14″)",
+    "size": "14″×14″",
+    "color": "Red Oak",
+    "color_code": "#D4A489",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/15027_1651046809.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15027"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15027/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15027/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15027/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 14.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15028,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Red Oak / 16″×16″)",
+    "size": "16″×16″",
+    "color": "Red Oak",
+    "color_code": "#D4A489",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/15028_1651046819.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15028"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15028/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15028/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15028/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 16.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15029,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Red Oak / 16″×20″)",
+    "size": "16″×20″",
+    "color": "Red Oak",
+    "color_code": "#D4A489",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/15029_1651046819.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15029"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15029/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15029/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15029/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15030,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Red Oak / 18″×18″)",
+    "size": "18″×18″",
+    "color": "Red Oak",
+    "color_code": "#D4A489",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/15030_1651046829.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15030"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15030/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15030/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15030/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 18.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15031,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Red Oak / 18″×24″)",
+    "size": "18″×24″",
+    "color": "Red Oak",
+    "color_code": "#D4A489",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/15031_1651047284.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15031"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15031/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15031/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15031/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15032,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Red Oak / 24″×36″)",
+    "size": "24″×36″",
+    "color": "Red Oak",
+    "color_code": "#D4A489",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/15032_1651046859.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15032"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15032/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15032/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15032/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15021,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (Red Oak / 8″×10″)",
+    "size": "8″×10″",
+    "color": "Red Oak",
+    "color_code": "#D4A489",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/15021_1651046860.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15021"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15021/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15021/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15021/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 10.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10755,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (White/10″×10″)",
+    "size": "10″×10″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/10755_1565092111.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10755"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10755/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10755/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10755/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 14293,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (White/11″×14″)",
+    "size": "11″×14″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/14293_1643092634.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14293"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14293/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14293/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14293/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10756,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (White/12″×12″)",
+    "size": "12″×12″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/10756_1565092260.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10756"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10756/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10756/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10756/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 10751,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (White/12″×16″)",
+    "size": "12″×16″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/10751_1565081244.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10751"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10751/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10751/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10751/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10752,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (White/12″×18″)",
+    "size": "12″×18″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/10752_1565092324.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10752"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10752/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10752/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10752/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10757,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (White/14″×14″)",
+    "size": "14″×14″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/10757_1565092391.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10757"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10757/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10757/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10757/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 14.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 10758,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (White/16″×16″)",
+    "size": "16″×16″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/10758_1565092454.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10758"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10758/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10758/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10758/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 16.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 10753,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (White/16″×20″)",
+    "size": "16″×20″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/10753_1565092503.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10753"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10753/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10753/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10753/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10759,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (White/18″×18″)",
+    "size": "18″×18″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/10759_1565092553.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10759"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10759/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10759/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10759/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 18.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 10749,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (White/18″×24″)",
+    "size": "18″×24″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/10749_1565081125.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10749"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10749/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10749/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10749/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10750,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (White/24″×36″)",
+    "size": "24″×36″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/10750_1565092666.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10750"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10750/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10750/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10750/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10754,
+    "catalog_product_id": 2,
+    "name": "Enhanced Matte Paper Framed Poster (White/8″×10″)",
+    "size": "8″×10″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/2/10754_1565081025.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10754"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/2"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10754/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10754/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10754/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 10.0,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 39,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/2/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/2"
+   }
+  }
+ }
+}

@@ -1,0 +1,183 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1712/prices?currency=USD&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 1712,
+    "placements": [
+     {
+      "id": "front_dtf",
+      "title": "Front print",
+      "type": "DTF printing",
+      "technique_key": "dtfilm",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 53891,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "26.69",
+       "discounted_price": "26.69"
+      }
+     ]
+    },
+    {
+     "id": 53892,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "26.69",
+       "discounted_price": "26.69"
+      }
+     ]
+    },
+    {
+     "id": 53893,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "26.69",
+       "discounted_price": "26.69"
+      }
+     ]
+    },
+    {
+     "id": 53894,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "26.69",
+       "discounted_price": "26.69"
+      }
+     ]
+    },
+    {
+     "id": 53895,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "26.69",
+       "discounted_price": "26.69"
+      }
+     ]
+    },
+    {
+     "id": 53896,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "26.69",
+       "discounted_price": "26.69"
+      }
+     ]
+    },
+    {
+     "id": 53897,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "26.69",
+       "discounted_price": "26.69"
+      }
+     ]
+    },
+    {
+     "id": 53898,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "26.69",
+       "discounted_price": "26.69"
+      }
+     ]
+    },
+    {
+     "id": 53899,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "26.69",
+       "discounted_price": "26.69"
+      }
+     ]
+    },
+    {
+     "id": 53900,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "26.69",
+       "discounted_price": "26.69"
+      }
+     ]
+    },
+    {
+     "id": 53901,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "26.69",
+       "discounted_price": "26.69"
+      }
+     ]
+    },
+    {
+     "id": 53902,
+     "techniques": [
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "26.69",
+       "discounted_price": "26.69"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 12,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1712/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1712"
+   }
+  }
+ }
+}

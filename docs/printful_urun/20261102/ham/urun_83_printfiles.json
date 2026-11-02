@@ -1,0 +1,129 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/83",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 83,
+   "available_placements": {
+    "front": "Front print",
+    "back": "Back print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 32,
+     "width": 2850,
+     "height": 2850,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 72,
+     "width": 3150,
+     "height": 1950,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 214,
+     "width": 3450,
+     "height": 3450,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1701,
+     "width": 2250,
+     "height": 2250,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1702,
+     "width": 2550,
+     "height": 2550,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 49853,
+     "placements": {
+      "front": 1701,
+      "back": 1701
+     }
+    },
+    {
+     "variant_id": 49854,
+     "placements": {
+      "front": 1702,
+      "back": 1702
+     }
+    },
+    {
+     "variant_id": 4532,
+     "placements": {
+      "front": 32,
+      "back": 32
+     }
+    },
+    {
+     "variant_id": 9513,
+     "placements": {
+      "front": 72,
+      "back": 72
+     }
+    },
+    {
+     "variant_id": 11075,
+     "placements": {
+      "front": 214,
+      "back": 214
+     }
+    }
+   ],
+   "option_groups": [
+    "Default",
+    "Flat Lifestyle",
+    "Halloween",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Person"
+   ],
+   "options": [
+    "Back",
+    "Back 2",
+    "Back Lifestyle 1",
+    "Back Lifestyle 2",
+    "Back Lifestyle 3",
+    "Back Lifestyle 4",
+    "Back Lifestyle 5",
+    "Back Lifestyle 6",
+    "Back Lifestyle 8",
+    "Front",
+    "Front 2",
+    "Front Lifestyle 1",
+    "Front Lifestyle 2",
+    "Front Lifestyle 3",
+    "Front Lifestyle 4",
+    "Front Lifestyle 5",
+    "Front Lifestyle 6",
+    "Front Lifestyle 8"
+   ]
+  },
+  "extra": []
+ }
+}

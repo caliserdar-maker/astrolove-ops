@@ -1,0 +1,122 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/678?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 678,
+   "type": "SUBLIMATION",
+   "main_category_id": 189,
+   "name": "Pet Bowl",
+   "brand": null,
+   "model": "Pet Bowl",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/30/30a71e7f6bccb49404e35c23140c4720_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Say hi to the ultimate pet bowl for your furry friend! Thanks to its stainless steel construction and its anti-slip rubber base, your pet will be safe and content during meal times. Designed with quality materials and functionality in mind, this pet bowl will serve you and your pet for years to come.\n\n• Double-wall stainless steel\n• Anti-slip rubber base\n• Food grade safe\n• Dishwasher safe when the rubber base is removed\n\nImportant: This product cannot be shipped to South Korea, Hong Kong, Taiwan, Japan, or Singapore. If your shipping address is in these regions, please choose a different product.",
+   "sizes": [
+    "18 oz",
+    "32 oz"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/678"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/678/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/678/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/678/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/678/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/678/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/678/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

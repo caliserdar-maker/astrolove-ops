@@ -1,0 +1,183 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1656",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1656,
+    "main_category_id": 252,
+    "type": "POSTCARD",
+    "description": "Brighten up your wall and stay organized throughout the year with this 2027 wall calendar. The large monthly artwork and semi-gloss finish make each page a decorative accent while keeping important dates easy to see at a glance.\n\n· One size: 10.8″ × 8.4″ (27.4 × 21.3 cm)\n· Printed on thick 270 gsm paper with a semi-gloss finish\n· Monthly date grids for easy planning\n· Large artwork featured on every page\n· 3/8″ silver wire binding for smooth page turning\n· Centered hanging hole for easy wall display\n· Holidays are not marked\n· Blank product sourced from the US",
+    "type_name": "Calendar | 2027",
+    "title": "Calendar (2027)",
+    "brand": null,
+    "model": "Calendar | 2027",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/56/563240cde74d0c80a3c06e6d86ba9d4e_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "cover",
+      "type": "cover",
+      "title": "Cover",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "january",
+      "type": "january",
+      "title": "January",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "february",
+      "type": "february",
+      "title": "February",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "march",
+      "type": "march",
+      "title": "March",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "april",
+      "type": "april",
+      "title": "April",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "may",
+      "type": "may",
+      "title": "May",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "june",
+      "type": "june",
+      "title": "June",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "july",
+      "type": "july",
+      "title": "July",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "august",
+      "type": "august",
+      "title": "August",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "september",
+      "type": "september",
+      "title": "September",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "october",
+      "type": "october",
+      "title": "October",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "november",
+      "type": "november",
+      "title": "November",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "december",
+      "type": "december",
+      "title": "December",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 52390,
+     "product_id": 1656,
+     "name": "Calendar 2027 | Generic brand (10.8\" x 8.4\" / Semi Glossy)",
+     "size": "10.8″×8.4″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1656/52390_1784886932.jpg",
+     "price": "11.67",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

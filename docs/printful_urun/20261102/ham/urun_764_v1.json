@@ -1,0 +1,136 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/764",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 764,
+    "main_category_id": 112,
+    "type": "SUBLIMATION",
+    "description": "Add a personal touch to your sipping sessions! This dual-side can cooler comes in two sizes to fit your regular and slim cans. Crafted from high-grade synthetic rubber, it keeps your drinks cool and your hands warm. \n\n• Made from neoprene \n• Waterproof\n• Dual-size customization\n• Ribbed seams\n• Regular 5″ × 4″ (12 × 10 cm), or slim 6.5″ × 3.2″ (17 × 8 cm)\n• Spot clean as needed\n• Blank product sourced from China and printed in the US\n\nThis product is made on demand. No minimums.",
+    "type_name": "Can Cooler",
+    "title": "Can Cooler",
+    "brand": null,
+    "model": "Can Cooler",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/99/99e60d3df899066d6fdbc64eba829b91_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 19461,
+     "product_id": 764,
+     "name": "Can Cooler (White / Regular 12 oz)",
+     "size": "Regular 12 oz",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/764/19461_1714133014.jpg",
+     "price": "3.49",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19462,
+     "product_id": 764,
+     "name": "Can Cooler (White / Slim 12 oz)",
+     "size": "Slim 12 oz",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/764/19462_1714133025.jpg",
+     "price": "3.49",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

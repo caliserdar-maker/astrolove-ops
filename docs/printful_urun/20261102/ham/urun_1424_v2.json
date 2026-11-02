@@ -1,0 +1,109 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1424?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1424,
+   "type": "CANDLE",
+   "main_category_id": 256,
+   "name": "Amber Jar Scented Soy Candle",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/91/91f10b534097f69fe5d1b7e36049a09e_l",
+   "variant_count": 9,
+   "is_discontinued": false,
+   "description": "Create a relaxing corner anywhere with this soy candle in an amber glass jar. Its warm glow and smooth burn make it an easy pick for unwinding after a long day, gifting a friend, or adding a finishing touch to a cozy space. Available in multiple scents so shoppers can choose the mood that suits them best.\n\n• 100% natural soy wax blend\n• 100% cotton wick\n• Amber glass jar\n• 2 size options: 4 oz (2.36″ × 2.56″) and 9 oz (2.87″ × 3.5″)\n• Available in 6 scents, including an unscented option\n• Blank product sourced from the USA",
+   "sizes": [
+    "4oz",
+    "9oz"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1424"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1424/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1424/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1424/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1424/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1424/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1424/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

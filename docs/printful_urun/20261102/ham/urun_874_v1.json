@@ -1,0 +1,143 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/874",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 874,
+    "main_category_id": 267,
+    "type": "PHONE-CASE",
+    "description": "Add your vibe to your ride with these sleek magnets. These car magnets stick strong and stay sharp—rain or shine. With a matte finish, they’re made to last and swap around as often as your mood changes.\n• 100% vinyl\n• Matte finish\n• Black magnetic backing\n• Weather-resistant\n• Blank product sourced from the US",
+    "type_name": "Magnet | Car",
+    "title": "Car Magnets",
+    "brand": null,
+    "model": "Magnet | Car",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/ed/ed0afbd732b23caca7feaf526cb189ee_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 22711,
+     "product_id": 874,
+     "name": "Car Magnets (White / 10″×3″)",
+     "size": "10″×3″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/874/22711_1745825336.jpg",
+     "price": "4.11",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22710,
+     "product_id": 874,
+     "name": "Car Magnets (White / 5″×5″)",
+     "size": "5″×5″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/874/22710_1745825337.jpg",
+     "price": "3.20",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22712,
+     "product_id": 874,
+     "name": "Car Magnets (White / 7.5″×4.5″)",
+     "size": "7.5″×4.5″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/874/22712_1745825346.jpg",
+     "price": "3.12",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

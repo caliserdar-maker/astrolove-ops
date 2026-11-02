@@ -1,0 +1,127 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/710?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 710,
+   "type": "SUBLIMATION",
+   "main_category_id": 252,
+   "name": "Table Runner",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/7f/7f30cf56c526f50dafd467c96690b08e_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Crafted from resilient fabric, this table runner is both soft and enduring. Whether for everyday elegance or holiday charm, it will make meal times with loved ones a little more special. Treat yourself to this delightful table accessory or consider it as a thoughtful gift for someone special.\n\n• 100% polyester\n• Full coverage sublimation\n• Size: 90″ × 16″ (229 cm × 41 cm)\n• The reverse side is off-white\n• Blank product sourced from China",
+   "sizes": [
+    "90″×16″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/710"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/710/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/710/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/710/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/710/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/710/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/710/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

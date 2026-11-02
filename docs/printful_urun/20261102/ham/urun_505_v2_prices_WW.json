@@ -1,0 +1,107 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/505/prices?currency=USD&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 505,
+    "placements": [
+     {
+      "id": "default",
+      "title": "Print file",
+      "type": "Digital printing",
+      "technique_key": "digital",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     },
+     {
+      "id": "background",
+      "title": "Background",
+      "type": "Digital printing",
+      "technique_key": "digital",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 12917,
+     "techniques": [
+      {
+       "technique_key": "digital",
+       "technique_display_name": "Digital printing",
+       "price": "6.25",
+       "discounted_price": "6.25"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": [
+    {
+     "quantity": 25,
+     "bulk_discount_percentage": 0.1
+    },
+    {
+     "quantity": 50,
+     "bulk_discount_percentage": 0.13
+    },
+    {
+     "quantity": 100,
+     "bulk_discount_percentage": 0.17
+    },
+    {
+     "quantity": 200,
+     "bulk_discount_percentage": 0.2
+    },
+    {
+     "quantity": 300,
+     "bulk_discount_percentage": 0.23
+    },
+    {
+     "quantity": 400,
+     "bulk_discount_percentage": 0.27
+    },
+    {
+     "quantity": 500,
+     "bulk_discount_percentage": 0.3
+    }
+   ]
+  },
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/505/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/505"
+   }
+  }
+ }
+}

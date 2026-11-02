@@ -1,0 +1,406 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/516/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 12981,
+    "catalog_product_id": 516,
+    "name": "Embroidered Patches (Black / Circular ⌀3 in)",
+    "size": "Circular ⌀3 in",
+    "color": "Black",
+    "color_code": "#0a0a0a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/516/12981_1658225999.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/12981"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/516"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/516/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/12981/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/12981/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/12981/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15569,
+    "catalog_product_id": 516,
+    "name": "Embroidered Patches (Black / Heart - 3.1″×2.8″)",
+    "size": "Heart - 3.1″×2.8″",
+    "color": "Black",
+    "color_code": "#0a0a0a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/516/15569_1658225604.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15569"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/516"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/516/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15569/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15569/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15569/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 2.8,
+      "width": 3.1,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15736,
+    "catalog_product_id": 516,
+    "name": "Embroidered Patches (Black / Oval 4″×2.6″)",
+    "size": "Oval 4″×2.6″",
+    "color": "Black",
+    "color_code": "#0a0a0a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/516/15736_1658225870.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15736"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/516"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/516/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15736/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15736/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15736/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 2.6,
+      "width": 4.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15563,
+    "catalog_product_id": 516,
+    "name": "Embroidered Patches (Black / Rectangle 3.5″×2.25″)",
+    "size": "Rectangle 3.5″×2.25″",
+    "color": "Black",
+    "color_code": "#0a0a0a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/516/15563_1658225878.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15563"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/516"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/516/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15563/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15563/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15563/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 2.25,
+      "width": 3.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15560,
+    "catalog_product_id": 516,
+    "name": "Embroidered Patches (Black / Square 3″×3″)",
+    "size": "Square 3″×3″",
+    "color": "Black",
+    "color_code": "#0a0a0a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/516/15560_1658225888.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15560"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/516"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/516/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15560/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15560/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15560/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 12983,
+    "catalog_product_id": 516,
+    "name": "Embroidered Patches (White / Circular ⌀3 in)",
+    "size": "Circular ⌀3 in",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/516/12983_1658225999.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/12983"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/516"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/516/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/12983/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/12983/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/12983/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15571,
+    "catalog_product_id": 516,
+    "name": "Embroidered Patches (White / Heart - 3.1″×2.8″)",
+    "size": "Heart - 3.1″×2.8″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/516/15571_1658225919.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15571"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/516"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/516/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15571/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15571/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15571/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 2.8,
+      "width": 3.1,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15738,
+    "catalog_product_id": 516,
+    "name": "Embroidered Patches (White / Oval 4″×2.6″)",
+    "size": "Oval 4″×2.6″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/516/15738_1658225936.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15738"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/516"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/516/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15738/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15738/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15738/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 2.6,
+      "width": 4.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15565,
+    "catalog_product_id": 516,
+    "name": "Embroidered Patches (White / Rectangle 3.5″×2.25″)",
+    "size": "Rectangle 3.5″×2.25″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/516/15565_1658225947.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15565"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/516"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/516/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15565/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15565/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15565/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 2.25,
+      "width": 3.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15562,
+    "catalog_product_id": 516,
+    "name": "Embroidered Patches (White / Square 3″×3″)",
+    "size": "Square 3″×3″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/516/15562_1658225947.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15562"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/516"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/516/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15562/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15562/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15562/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_patch_front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 10,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/516/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/516"
+   }
+  }
+ }
+}

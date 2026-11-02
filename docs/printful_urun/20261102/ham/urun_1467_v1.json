@@ -1,0 +1,121 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1467",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1467,
+    "main_category_id": 252,
+    "type": "DIRECT-TO-FABRIC",
+    "description": "Bring style and personality to any dining space with this premium cotton twill tablecloth. Designed for both everyday meals and special occasions, it features vibrant, fade-resistant printing and durable hemmed edges for a polished look that lasts.\n\n• 100% cotton twill\n• Available in 2 sizes: 58″ × 58″ and 58″ × 102″\n• Fade-resistant print\n• One-sided print\n• Hemmed edges for added durability\n• White thread color",
+    "type_name": "Tablecloths",
+    "title": "Cotton Tablecloths",
+    "brand": null,
+    "model": "Tablecloths",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/77/77043de828edcb01e783dfe924788f6c_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIRECT-TO-FABRIC",
+      "display_name": "All-over cotton",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 46023,
+     "product_id": 1467,
+     "name": "Generic brand (58'' × 102'' / Cotton Twill)",
+     "size": "58″×102″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1467/46023_1767622652.jpg",
+     "price": "77.89",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 46022,
+     "product_id": 1467,
+     "name": "Generic brand (58'' × 58'' / Cotton Twill)",
+     "size": "58″×58″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1467/46022_1767622653.jpg",
+     "price": "48.63",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

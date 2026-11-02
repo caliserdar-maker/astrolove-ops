@@ -1,0 +1,659 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/403",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 403,
+    "main_category_id": 195,
+    "type": "MUG",
+    "description": "Add a splash of color to your morning coffee or tea ritual! These ceramic mugs not only have a  beautiful design on them, but also a colorful rim, handle, and inside, so the mug is bound to spice up your mug rack.\n\n• Ceramic\n• 11 oz mug dimensions: 3.79″ (9.6 cm) in height, 3.25″ (8.3 cm) in diameter\n• 15 oz mug dimensions: 4.69″ (11.9 cm) in height, 3.35″ (8.5 cm) in diameter\n• Colored rim, inside, and handle",
+    "type_name": "Mug | Glossy | Ceramic | Color Inside & Handle",
+    "title": "White Ceramic Mug with Color Inside",
+    "brand": null,
+    "model": "White Ceramic Mug with Color Inside",
+    "image": "https://files.cdn.printful.com/o/products/403/product_1595515161.jpg",
+    "variant_count": 16,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 11051,
+     "product_id": 403,
+     "name": "Ceramic Mug with Color Inside (Black / 11 oz)",
+     "size": "11 oz",
+     "color": "Black",
+     "color_code": "#050505",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/11051_1596788464.jpg",
+     "price": "8.11",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "EU_ES": "Spain",
+      "CA": "Canada",
+      "UK": "United Kingdom",
+      "JP": "Japan",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_ES",
+       "status": "in_stock"
+      },
+      {
+       "region": "CA",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "JP",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17196,
+     "product_id": 403,
+     "name": "Ceramic Mug with Color Inside (Black / 15 oz)",
+     "size": "15 oz",
+     "color": "Black",
+     "color_code": "#050505",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/17196_1687769136.jpg",
+     "price": "9.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 11050,
+     "product_id": 403,
+     "name": "Ceramic Mug with Color Inside (Blue / 11 oz)",
+     "size": "11 oz",
+     "color": "Blue",
+     "color_code": "#1e9fcd",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/11050_1692788193.jpg",
+     "price": "8.11",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "EU_ES": "Spain",
+      "CA": "Canada",
+      "UK": "United Kingdom",
+      "JP": "Japan",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_ES",
+       "status": "in_stock"
+      },
+      {
+       "region": "CA",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "JP",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17197,
+     "product_id": 403,
+     "name": "Ceramic Mug with Color Inside (Blue / 15 oz)",
+     "size": "15 oz",
+     "color": "Blue",
+     "color_code": "#1e9fcd",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/17197_1687769135.jpg",
+     "price": "9.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22373,
+     "product_id": 403,
+     "name": "Ceramic Mug with Color Inside (Dark Blue / 15 oz)",
+     "size": "15 oz",
+     "color": "Dark Blue",
+     "color_code": "#1b1b51",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/22373_1744028163.jpg",
+     "price": "9.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 12579,
+     "product_id": 403,
+     "name": "Ceramic Mug with Color Inside (Orange / 11 oz)",
+     "size": "11 oz",
+     "color": "Orange",
+     "color_code": "#f85625",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/12579_1619156382.jpg",
+     "price": "8.11",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "EU_ES": "Spain",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_ES",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 12578,
+     "product_id": 403,
+     "name": "Ceramic Mug with Color Inside (Pink / 11 oz)",
+     "size": "11 oz",
+     "color": "Pink",
+     "color_code": "#f6a1b1",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/12578_1619156415.jpg",
+     "price": "8.11",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "EU_ES": "Spain",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_ES",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 11049,
+     "product_id": 403,
+     "name": "Ceramic Mug with Color Inside (Red / 11 oz)",
+     "size": "11 oz",
+     "color": "Red",
+     "color_code": "#e32a2d",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/11049_1596788366.jpg",
+     "price": "8.11",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "EU_ES": "Spain",
+      "CA": "Canada",
+      "UK": "United Kingdom",
+      "JP": "Japan",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_ES",
+       "status": "in_stock"
+      },
+      {
+       "region": "CA",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "JP",
+       "status": "in_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17200,
+     "product_id": 403,
+     "name": "Ceramic Mug with Color Inside (Red / 15 oz)",
+     "size": "15 oz",
+     "color": "Red",
+     "color_code": "#e32a2d",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/17200_1687769410.jpg",
+     "price": "9.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 11048,
+     "product_id": 403,
+     "name": "Ceramic Mug with Color Inside (Yellow / 11 oz)",
+     "size": "11 oz",
+     "color": "Yellow",
+     "color_code": "#ffdc3a",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/11048_1596788398.jpg",
+     "price": "8.11",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "EU_ES": "Spain",
+      "CA": "Canada",
+      "UK": "United Kingdom",
+      "JP": "Japan"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_ES",
+       "status": "in_stock"
+      },
+      {
+       "region": "CA",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "JP",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17199,
+     "product_id": 403,
+     "name": "Mug with Color Inside (Pink / 15 oz)",
+     "size": "15 oz",
+     "color": "Pink",
+     "color_code": "#f6a1b1",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/17199_1744028163.jpg",
+     "price": "9.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17362,
+     "product_id": 403,
+     "name": "White Ceramic Mug with Color Inside (Dark Blue / 11 oz)",
+     "size": "11 oz",
+     "color": "Dark Blue",
+     "color_code": "#1b1b51",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/17362_1687757255.jpg",
+     "price": "8.11",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17359,
+     "product_id": 403,
+     "name": "White Ceramic Mug with Color Inside (Dark Green / 11 oz)",
+     "size": "11 oz",
+     "color": "Dark Green",
+     "color_code": "#226653",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/17359_1687757256.jpg",
+     "price": "8.11",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17360,
+     "product_id": 403,
+     "name": "White Ceramic Mug with Color Inside (Dark Green / 15 oz)",
+     "size": "15 oz",
+     "color": "Dark Green",
+     "color_code": "#226653",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/17360_1687769603.jpg",
+     "price": "9.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17358,
+     "product_id": 403,
+     "name": "White Ceramic Mug with Color Inside (Golden Yellow / 11 oz)",
+     "size": "11 oz",
+     "color": "Golden Yellow",
+     "color_code": "#feba45",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/17358_1687757266.jpg",
+     "price": "8.11",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17361,
+     "product_id": 403,
+     "name": "White Ceramic Mug with Color Inside (Green / 11 oz)",
+     "size": "11 oz",
+     "color": "Green",
+     "color_code": "#b2d264",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/403/17361_1687757272.jpg",
+     "price": "8.11",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

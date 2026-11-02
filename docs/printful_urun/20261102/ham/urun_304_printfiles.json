@@ -1,0 +1,270 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/304",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 304,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 15,
+     "width": 4800,
+     "height": 3600,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 17,
+     "width": 5400,
+     "height": 3600,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 38,
+     "width": 7200,
+     "height": 5400,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 39,
+     "width": 10800,
+     "height": 7200,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 41,
+     "width": 6000,
+     "height": 4800,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 106,
+     "width": 3544,
+     "height": 2480,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 113,
+     "width": 8268,
+     "height": 5906,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 621,
+     "width": 9933,
+     "height": 7016,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 624,
+     "width": 7016,
+     "height": 4961,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 9356,
+     "placements": {
+      "default": 106
+     }
+    },
+    {
+     "variant_id": 9357,
+     "placements": {
+      "default": 15
+     }
+    },
+    {
+     "variant_id": 19644,
+     "placements": {
+      "default": 17
+     }
+    },
+    {
+     "variant_id": 19645,
+     "placements": {
+      "default": 41
+     }
+    },
+    {
+     "variant_id": 19646,
+     "placements": {
+      "default": 38
+     }
+    },
+    {
+     "variant_id": 9358,
+     "placements": {
+      "default": 113
+     }
+    },
+    {
+     "variant_id": 9359,
+     "placements": {
+      "default": 39
+     }
+    },
+    {
+     "variant_id": 19642,
+     "placements": {
+      "default": 621
+     }
+    },
+    {
+     "variant_id": 19643,
+     "placements": {
+      "default": 624
+     }
+    },
+    {
+     "variant_id": 11790,
+     "placements": {
+      "default": 106
+     }
+    },
+    {
+     "variant_id": 11791,
+     "placements": {
+      "default": 15
+     }
+    },
+    {
+     "variant_id": 11792,
+     "placements": {
+      "default": 113
+     }
+    },
+    {
+     "variant_id": 11793,
+     "placements": {
+      "default": 39
+     }
+    },
+    {
+     "variant_id": 19652,
+     "placements": {
+      "default": 621
+     }
+    },
+    {
+     "variant_id": 19653,
+     "placements": {
+      "default": 624
+     }
+    },
+    {
+     "variant_id": 10296,
+     "placements": {
+      "default": 106
+     }
+    },
+    {
+     "variant_id": 10297,
+     "placements": {
+      "default": 15
+     }
+    },
+    {
+     "variant_id": 19649,
+     "placements": {
+      "default": 17
+     }
+    },
+    {
+     "variant_id": 19650,
+     "placements": {
+      "default": 41
+     }
+    },
+    {
+     "variant_id": 19651,
+     "placements": {
+      "default": 38
+     }
+    },
+    {
+     "variant_id": 10298,
+     "placements": {
+      "default": 113
+     }
+    },
+    {
+     "variant_id": 10299,
+     "placements": {
+      "default": 39
+     }
+    },
+    {
+     "variant_id": 19647,
+     "placements": {
+      "default": 621
+     }
+    },
+    {
+     "variant_id": 19648,
+     "placements": {
+      "default": 624
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Halloween",
+    "Holiday season",
+    "Lifestyle",
+    "Lifestyle 10",
+    "Lifestyle 11",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Lifestyle 6",
+    "Lifestyle 7",
+    "Lifestyle 8",
+    "Lifestyle 9",
+    "Person",
+    "Product details",
+    "Transparent",
+    "template"
+   ],
+   "options": [
+    "Christmas",
+    "Front",
+    "Halloween",
+    "Lifestyle 1",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Person",
+    "Product details",
+    "Transparent"
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,107 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/788?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 788,
+   "type": "MUG",
+   "main_category_id": 191,
+   "name": "Stainless Steel Water Bottle with a Straw Lid",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/b9/b916b1b091bdd8c1fca95287a189c21c_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Stay hydrated all day with this 32 oz (950 ml) water bottle. It’s ideal for workouts or busy days, with a wide-mouth foldable straw for spill-free sipping and a rotating handle for easy carrying.\n\n• Double-walled stainless steel with vacuum insulation\n• Plastic lid and wide-mouth foldable straw\n• 32 oz. (950 ml)\n• Height: 9.92″ (25.2 cm)\n• Diameter: 3.54″ (9 cm)\n• Glossy finish\n• Rotating handle\n• Comes with an anti-slip patch\n• Blank product sourced from China\n\nDisclaimer: Not dishwasher or microwave safe. Hand-wash only.",
+   "sizes": [
+    "32 oz"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/788"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/788/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/788/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/788/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/788/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/788/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/788/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

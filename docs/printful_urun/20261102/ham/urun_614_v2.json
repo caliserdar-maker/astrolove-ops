@@ -1,0 +1,140 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/614?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 614,
+   "type": "CANVAS",
+   "main_category_id": 57,
+   "name": "Framed Canvas (in)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/6e/6ed851bb13949c3f4af7c7a266cc50d1_l",
+   "variant_count": 39,
+   "is_discontinued": false,
+   "description": "Spice up your blank walls with this head-turning framed canvas! This high-quality pine tree framed canvas comes with rubber pads on the back corners and wall mount that makes hanging the artwork hassle-free. What’s more, the frame gives the canvas a cool floating effect!\n\n• Pine tree frame\n• Frame thickness: 1.25″ (3.18 cm)\n• Canvas fabric weight: 10.15 +/- 0.74 oz/yd² (344 g/m² +/- 25g/m²)\n• Open back\n• Comes with rubber pads on the back corners\n• Hanging hardware attached\n• Blank product sourced from the US\n\nDisclaimers:\n- The framed canvases with brown and black frames have a black inside around the canvas, and the canvases with white frames have a white inside around the canvas.\n- This product isn’t intended for sanding or cutting—it creates airborne dust that might cause lung irritation.",
+   "sizes": [
+    "12″×12″",
+    "12″×16″",
+    "16″×16″",
+    "16″×20″",
+    "18″×24″",
+    "24″×36″",
+    "8″×10″",
+    "9″×12″",
+    "11″×14″",
+    "12″×18″",
+    "20″×28″",
+    "24″×32″",
+    "20″×30″",
+    "32″×48″ (V) / 48″×32″ (H)",
+    "30″×40″ (V) / 40″×30″ (H)",
+    "16″×24″ (V) / 24″×16″ (H)",
+    "40″×60″ (V) / 60″×40″ (H)",
+    "20″×60″ (V) / 60″×20″ (H)",
+    "24″×48″ (V) / 48″×24″ (H)",
+    "24″×30″ (V) / 30″×24″ (H)",
+    "16″×48″ (V) / 48″×16″ (H)",
+    "12″×36″ (V) / 36″×12″ (H)",
+    "30″×60″ (V) / 60″×30″ (H)",
+    "14″ × 14″",
+    "20″ × 20″",
+    "24″ × 24″"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#000000"
+    },
+    {
+     "name": "Brown",
+     "value": "#3b2d22"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/614"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/614/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/614/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/614/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/614/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/614/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

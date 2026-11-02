@@ -1,0 +1,522 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1553",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1553,
+    "main_category_id": 48,
+    "type": "DTFILM",
+    "description": "Made from lightweight yet durable fabric, this versatile tote bag is perfect for everyday use—whether you're heading to the shops, carrying books. \n\n• 100% cotton\n• Fabric weight: 140 g/m²\n• One size: 15″ × 16.5″ (38 cm × 42 cm)\n• Medium-length carrying handles (67 cm)\n• Capacity: 10 litres\n• One large main compartment\n• Blank product sourced from Pakistan",
+    "type_name": "BagBase W101 | Bag of Life - Long Handles",
+    "title": "Cotton Color Tote Bag | Westford Mill W101",
+    "brand": "BagBase",
+    "model": "W101",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/1f/1f48ca2ef9e7088273e16de23fd15ade_l",
+    "variant_count": 12,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "thread_colors_apparel",
+      "title": "Flat thread colors",
+      "type": "multi_select",
+      "values": {
+       "#FFFFFF": "1801 White",
+       "#000000": "1800 Black",
+       "#96A1A8": "1718 Grey",
+       "#A67843": "1672 Old Gold",
+       "#FFCC00": "1951 Gold",
+       "#E25C27": "1987 Orange",
+       "#CC3366": "1910 Flamingo",
+       "#CC3333": "1839 Red",
+       "#660000": "1784 Maroon",
+       "#333366": "1966 Navy",
+       "#005397": "1842 Royal",
+       "#3399FF": "1695 Aqua/Teal",
+       "#6B5294": "1832 Purple",
+       "#01784E": "1751 Kelly Green",
+       "#7BA35A": "1848 Kiwi Green"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "thread_colors_apparel_back",
+      "title": "Apparel back thread colors",
+      "type": "multi_select",
+      "values": {
+       "#FFFFFF": "1801 White",
+       "#000000": "1800 Black",
+       "#96A1A8": "1718 Grey",
+       "#A67843": "1672 Old Gold",
+       "#FFCC00": "1951 Gold",
+       "#E25C27": "1987 Orange",
+       "#CC3366": "1910 Flamingo",
+       "#CC3333": "1839 Red",
+       "#660000": "1784 Maroon",
+       "#333366": "1966 Navy",
+       "#005397": "1842 Royal",
+       "#3399FF": "1695 Aqua/Teal",
+       "#6B5294": "1832 Purple",
+       "#01784E": "1751 Kelly Green",
+       "#7BA35A": "1848 Kiwi Green"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Embroidery notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "EMBROIDERY",
+      "display_name": "Embroidery",
+      "is_default": true
+     },
+     {
+      "key": "DTFILM",
+      "display_name": "DTF printing",
+      "is_default": false
+     }
+    ],
+    "files": [
+     {
+      "id": "embroidery_apparel_front",
+      "type": "embroidery_apparel_front",
+      "title": "Front",
+      "additional_price": "2.95",
+      "options": []
+     },
+     {
+      "id": "embroidery_apparel_back",
+      "type": "embroidery_apparel_back",
+      "title": "Back",
+      "additional_price": "2.95",
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 49313,
+     "product_id": 1553,
+     "name": "BagBase W101 | Bag of Life - Long Handles (Black / One size)",
+     "size": "One size",
+     "color": "Black",
+     "color_code": "#090909",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1553/49313_1776180130.jpg",
+     "price": "10.18",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 49314,
+     "product_id": 1553,
+     "name": "BagBase W101 | Bag of Life - Long Handles (Bottle Green / One size)",
+     "size": "One size",
+     "color": "Bottle Green",
+     "color_code": "#05442f",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1553/49314_1776180140.jpg",
+     "price": "10.18",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 49315,
+     "product_id": 1553,
+     "name": "BagBase W101 | Bag of Life - Long Handles (Burgundy / One size)",
+     "size": "One size",
+     "color": "Burgundy",
+     "color_code": "#491729",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1553/49315_1776180140.jpg",
+     "price": "10.18",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 49316,
+     "product_id": 1553,
+     "name": "BagBase W101 | Bag of Life - Long Handles (Classic Pink / One size)",
+     "size": "One size",
+     "color": "Classic Pink",
+     "color_code": "#ffbfd9",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1553/49316_1776180150.jpg",
+     "price": "10.18",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 49317,
+     "product_id": 1553,
+     "name": "BagBase W101 | Bag of Life - Long Handles (Classic Red / One size)",
+     "size": "One size",
+     "color": "Classic Red",
+     "color_code": "#9f0019",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1553/49317_1776180151.jpg",
+     "price": "10.18",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 49318,
+     "product_id": 1553,
+     "name": "BagBase W101 | Bag of Life - Long Handles (Coral / One size)",
+     "size": "One size",
+     "color": "Coral",
+     "color_code": "#ff5a4e",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1553/49318_1776180151.jpg",
+     "price": "10.18",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 49319,
+     "product_id": 1553,
+     "name": "BagBase W101 | Bag of Life - Long Handles (French Navy / One size)",
+     "size": "One size",
+     "color": "French Navy",
+     "color_code": "#0d151c",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1553/49319_1776180161.jpg",
+     "price": "10.18",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 49320,
+     "product_id": 1553,
+     "name": "BagBase W101 | Bag of Life - Long Handles (Light Grey / One size)",
+     "size": "One size",
+     "color": "Light Grey",
+     "color_code": "#bfc1c2",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1553/49320_1776180172.jpg",
+     "price": "10.18",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 49321,
+     "product_id": 1553,
+     "name": "BagBase W101 | Bag of Life - Long Handles (Mint / One size)",
+     "size": "One size",
+     "color": "Mint",
+     "color_code": "#6ef9e0",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1553/49321_1776180172.jpg",
+     "price": "10.18",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 49322,
+     "product_id": 1553,
+     "name": "BagBase W101 | Bag of Life - Long Handles (Mustard / One size)",
+     "size": "One size",
+     "color": "Mustard",
+     "color_code": "#d39e22",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1553/49322_1776180172.jpg",
+     "price": "10.18",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 49323,
+     "product_id": 1553,
+     "name": "BagBase W101 | Bag of Life - Long Handles (Natural / One size)",
+     "size": "One size",
+     "color": "Natural",
+     "color_code": "#fffbf1",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1553/49323_1776180182.jpg",
+     "price": "10.18",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 49324,
+     "product_id": 1553,
+     "name": "BagBase W101 | Bag of Life - Long Handles (Orange / One size)",
+     "size": "One size",
+     "color": "Orange",
+     "color_code": "#f95200",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1553/49324_1776180202.jpg",
+     "price": "10.18",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

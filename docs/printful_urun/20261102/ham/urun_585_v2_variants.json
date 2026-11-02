@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/585/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 15004,
+    "catalog_product_id": 585,
+    "name": "Stainless Steel Tumbler (Black / 20 oz)",
+    "size": "20 oz",
+    "color": "Black",
+    "color_code": "#121214",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/585/15004_1651745397.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15004"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/585"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/585/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15004/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15004/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15004/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.91,
+      "width": 9.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15005,
+    "catalog_product_id": 585,
+    "name": "Stainless Steel Tumbler (White / 20 oz)",
+    "size": "20 oz",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/585/15005_1651745409.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15005"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/585"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/585/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15005/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15005/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15005/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.91,
+      "width": 9.25,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/585/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/585"
+   }
+  }
+ }
+}

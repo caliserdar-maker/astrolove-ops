@@ -1,0 +1,466 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1643/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 52306,
+    "catalog_product_id": 1643,
+    "name": "Wall Calendar | 2027 (Start w/ MON / 11″×17″)",
+    "size": "11″×17″",
+    "color": "Start w/ MON",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1643/52306_1784533528.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52306"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1643"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1643/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52306/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52306/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52306/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "cover",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "january",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "february",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "march",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "april",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "may",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "june",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "july",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "august",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "september",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "october",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "november",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "december",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52308,
+    "catalog_product_id": 1643,
+    "name": "Wall Calendar | 2027 (Start w/ MON / 8.26″×11.69″)",
+    "size": "8.26″×11.69″",
+    "color": "Start w/ MON",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1643/52308_1784533538.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52308"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1643"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1643/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52308/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52308/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52308/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "cover",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "january",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "february",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "march",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "april",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "may",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "june",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "july",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "august",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "september",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "october",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "november",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "december",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52307,
+    "catalog_product_id": 1643,
+    "name": "Wall Calendar | 2027 (Start w/ SUN / 11″×17″)",
+    "size": "11″×17″",
+    "color": "Start w/ SUN",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1643/52307_1784533548.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52307"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1643"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1643/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52307/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52307/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52307/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "cover",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "january",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "february",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "march",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "april",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "may",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "june",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "july",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "august",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "september",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "october",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "november",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "december",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52309,
+    "catalog_product_id": 1643,
+    "name": "Wall Calendar | 2027 (Start w/ SUN / 8.26″×11.69″)",
+    "size": "8.26″×11.69″",
+    "color": "Start w/ SUN",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1643/52309_1784533559.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52309"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1643"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1643/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52309/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52309/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52309/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "cover",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "january",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "february",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "march",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "april",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "may",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "june",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "july",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "august",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "september",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "october",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "november",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     },
+     {
+      "placement": "december",
+      "height": 17.5,
+      "width": 12.57,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1643/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1643"
+   }
+  }
+ }
+}

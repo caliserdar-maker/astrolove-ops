@@ -1,0 +1,99 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/749",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 749,
+   "available_placements": {
+    "front": "Collar",
+    "label_inside": "Inside label"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 356,
+     "width": 1050,
+     "height": 600,
+     "dpi": 150,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 526,
+     "width": 7169,
+     "height": 315,
+     "dpi": 216,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 533,
+     "width": 7169,
+     "height": 315,
+     "dpi": 216,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 534,
+     "width": 7169,
+     "height": 315,
+     "dpi": 216,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 19186,
+     "placements": {
+      "front": 526,
+      "label_inside": 356
+     }
+    },
+    {
+     "variant_id": 19187,
+     "placements": {
+      "front": 533,
+      "label_inside": 356
+     }
+    },
+    {
+     "variant_id": 19188,
+     "placements": {
+      "front": 534,
+      "label_inside": 356
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Lifestyle",
+    "Lifestyle 10",
+    "Lifestyle 11",
+    "Lifestyle 12",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Lifestyle 6",
+    "Lifestyle 7",
+    "Lifestyle 8",
+    "Lifestyle 9",
+    "Product details",
+    "Templates"
+   ],
+   "options": [
+    "Back",
+    "Branding",
+    "Collar",
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,368 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/861/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 22804,
+    "catalog_product_id": 861,
+    "name": "Scented Soy Candle, Apple Harvest",
+    "size": "9oz",
+    "color": "Apple Harvest",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/861/22804_1773222454.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22804"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/861"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/861/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22804/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22804/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22804/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22806,
+    "catalog_product_id": 861,
+    "name": "Scented Soy Candle, Christmas Warmth",
+    "size": "9oz",
+    "color": "Christmas Warmth",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/861/22806_1773222454.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22806"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/861"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/861/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22806/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22806/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22806/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22807,
+    "catalog_product_id": 861,
+    "name": "Scented Soy Candle, Cinnamon Vanilla",
+    "size": "9oz",
+    "color": "Cinnamon Vanilla",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/861/22807_1773222455.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22807"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/861"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/861/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22807/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22807/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22807/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22808,
+    "catalog_product_id": 861,
+    "name": "Scented Soy Candle, Clean Cotton",
+    "size": "9oz",
+    "color": "Clean Cotton",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/861/22808_1773222454.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22808"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/861"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/861/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22808/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22808/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22808/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22809,
+    "catalog_product_id": 861,
+    "name": "Scented Soy Candle, Coconut Cream and Cardamom",
+    "size": "9oz",
+    "color": "Coconut Cream and Cardamom",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/861/22809_1773222454.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22809"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/861"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/861/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22809/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22809/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22809/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22810,
+    "catalog_product_id": 861,
+    "name": "Scented Soy Candle, Peppered Passionfruit",
+    "size": "9oz",
+    "color": "Peppered Passionfruit",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/861/22810_1773222455.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22810"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/861"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/861/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22810/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22810/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22810/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22811,
+    "catalog_product_id": 861,
+    "name": "Scented Soy Candle, Sea Salt and Orchid",
+    "size": "9oz",
+    "color": "Sea Salt and Orchid",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/861/22811_1773222455.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22811"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/861"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/861/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22811/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22811/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22811/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22812,
+    "catalog_product_id": 861,
+    "name": "Scented Soy Candle, Unscented",
+    "size": "9oz",
+    "color": "Unscented",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/861/22812_1773222454.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22812"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/861"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/861/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22812/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22812/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22812/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22455,
+    "catalog_product_id": 861,
+    "name": "Scented Soy Candle, White Sage and Lavender",
+    "size": "9oz",
+    "color": "White Sage and Lavender",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/861/22455_1773222454.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22455"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/861"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/861/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22455/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22455/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22455/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 9,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/861/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/861"
+   }
+  }
+ }
+}

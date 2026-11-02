@@ -1,0 +1,74 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/660",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 660,
+   "available_placements": {
+    "front": "First",
+    "first": "Second",
+    "second": "Third",
+    "third": "Fourth",
+    "fourth": "Fifth"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 418,
+     "width": 787,
+     "height": 787,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 16411,
+     "placements": {
+      "front": 418,
+      "first": 418,
+      "second": 418,
+      "third": 418,
+      "fourth": 418
+     }
+    },
+    {
+     "variant_id": 16412,
+     "placements": {
+      "front": 418,
+      "first": 418,
+      "second": 418,
+      "third": 418,
+      "fourth": 418
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Flat 3",
+    "Flat 4",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Templates"
+   ],
+   "options": [
+    "Front",
+    "Front 2",
+    "Pin five",
+    "Pin four",
+    "Pin one",
+    "Pin three",
+    "Pin two"
+   ]
+  },
+  "extra": []
+ }
+}

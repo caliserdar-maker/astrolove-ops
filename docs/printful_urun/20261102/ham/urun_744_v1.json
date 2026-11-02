@@ -1,0 +1,170 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/744",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 744,
+    "main_category_id": 270,
+    "type": "CUT-SEW",
+    "description": "This bag is sturdy, stylish, and ready to go wherever you do. With adjustable straps and two spacious pockets, it’s the ultimate accessory for hiking, festivals, and everyday use.\n\n• 100% polyester\n• Fabric weight: 9 oz./yd.² (305 g/m²)\n• Bag size: 5.7″ × 7.7″ × 2″ (14.5 cm × 19.5 cm × 5 cm)\n• Capacity: 0.37 gallons (1.4 l)\n• Water-resistant and durable\n• Sturdy fabric with fusible backing to add firmness\n• Inside and outside pockets\n• Adjustable strap\n• Two-way zipper\n• Blank product components sourced from China",
+    "type_name": "All-Over Print Utility Crossbody Bag",
+    "title": "All-Over Print Utility Crossbody Bag",
+    "brand": null,
+    "model": "All-Over Print Utility Crossbody Bag",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/b9/b996a4c6e8e9b1959a997b21fe9931f7_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "stitch_color",
+      "title": "Stitch color",
+      "type": "radio",
+      "values": {
+       "black": "Black",
+       "clear": "Clear"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "pocket",
+      "type": "pocket",
+      "title": "Pocket",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "inside_pocket",
+      "type": "inside_pocket",
+      "title": "Inside pocket",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "details",
+      "type": "details",
+      "title": "Details",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "label_outside",
+      "type": "label_outside",
+      "title": "Outside label",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "label_inside",
+      "type": "label_inside",
+      "title": "Inside label",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 19256,
+     "product_id": 744,
+     "name": "All-Over Print Utility Crossbody Bag (White / One size)",
+     "size": "One size",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/744/19256_1709881225.jpg",
+     "price": "22.23",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

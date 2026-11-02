@@ -1,0 +1,146 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/663",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 663,
+    "main_category_id": 195,
+    "type": "MUG",
+    "description": "Sip in style and comfort with an elevated travel mug.  With its sleek and durable design, you’ll love taking this mug wherever you go. It fits into most car cup holders and has a spill-proof plastic lid. Commute to work or go on new adventures—this travel mug will keep your beverage safe and at just the right temperature.\n\n• Made with stainless steel\n• Hand-wash only\n• Blank product sourced from China\n\n25 oz (739 ml) size:\n\n• Height: 7.9″ (20 cm)\n• Upper diameter: 3.3″ (8.4 cm)\n• Bottom diameter: 2.7″ (7 cm)\n• Comes with a plastic press-in lid\n\n40 oz (1183 ml) size:\n\n• Height: 10.4″ (26.5 cm)\n• Upper diameter: 3.9″ (9.9 cm)\n• Bottom diameter: 2.9″ (7.4 cm)\n• Comes with a plastic straw and screw-on lid\n\nCaution! To prevent steam pressure buildup, always open the lid before placing it on a hot drink.",
+    "type_name": "Travel Mug | w/Handle | White",
+    "title": "Travel Mug with a Handle",
+    "brand": null,
+    "model": "Travel Mug | w/Handle | White",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/38/38d259e30dff715402ef6b87aac89f5c_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 16440,
+     "product_id": 663,
+     "name": "Travel Mug with a Handle (White / 25 oz)",
+     "size": "25 oz",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/663/16440_1678345370.jpg",
+     "price": "22.54",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19514,
+     "product_id": 663,
+     "name": "Travel Mug with a Handle (White / 40 oz)",
+     "size": "40 oz",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/663/19514_1717737722.jpg",
+     "price": "23.66",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

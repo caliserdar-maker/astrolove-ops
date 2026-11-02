@@ -1,0 +1,99 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/875",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 875,
+    "main_category_id": 21,
+    "type": "SUBLIMATION",
+    "description": "Add serious flair to your ride or room with this vanity plate. Glossy, lightweight, and made to shine, just mount it and let your plate do the talking.\n• 100% aluminum\n• Size: 12″ × 6″ (30.5 × 15.2 cm)\n• Glossy front\n• Silver-colored backing\n• Pre-drilled holes\n• Blank product sourced from the US",
+    "type_name": "License Plate | Vanity",
+    "title": "Vanity Plate",
+    "brand": null,
+    "model": "License Plate | Vanity",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/4e/4ea1d8104f27c2881eeff566323a7b1f_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 22713,
+     "product_id": 875,
+     "name": "Vanity Plate (White Glossy / 12″×6″)",
+     "size": "12″×6″",
+     "color": "White Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/875/22713_1747046397.jpg",
+     "price": "9.69",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

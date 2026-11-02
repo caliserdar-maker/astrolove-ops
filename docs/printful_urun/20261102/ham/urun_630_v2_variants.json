@@ -1,0 +1,158 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/630/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16033,
+    "catalog_product_id": 630,
+    "name": "All-Over Print Bandana (White / L)",
+    "size": "L",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/630/16033_1660914152.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16033"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/630"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/630/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16033/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16033/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16033/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 27.5,
+      "width": 27.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 1.0,
+      "width": 2.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16032,
+    "catalog_product_id": 630,
+    "name": "All-Over Print Bandana (White / M)",
+    "size": "M",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/630/16032_1660914152.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16032"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/630"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/630/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16032/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16032/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16032/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 27.5,
+      "width": 27.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 1.0,
+      "width": 2.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16031,
+    "catalog_product_id": 630,
+    "name": "All-Over Print Bandana (White / S)",
+    "size": "S",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/630/16031_1660914153.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16031"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/630"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/630/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16031/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16031/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16031/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 27.5,
+      "width": 27.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 1.0,
+      "width": 2.5,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/630/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/630"
+   }
+  }
+ }
+}

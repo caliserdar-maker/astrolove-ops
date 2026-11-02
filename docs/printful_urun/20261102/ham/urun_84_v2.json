@@ -1,0 +1,141 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/84?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 84,
+   "type": "CUT-SEW",
+   "main_category_id": 48,
+   "name": "All-Over Print Tote Bag",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/18/188a606268f59e0c026a2ed0e41b20a3_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "A spacious and trendy tote bag to help you carry around everything that matters.\n\n• 100% polyester\n• Bag size: 15″ × 15″ (39 × 39 cm)\n• Capacity: 2.6 US gal (10 l)\n• Maximum weight limit: 44lbs (20 kg)\n• Dual handles made from 100% natural cotton bull denim\n• Handle length: 26″ (67 cm), width 1″ (2.5 cm)\n• The handles can slightly differ depending on the fulfillment location",
+   "sizes": [
+    "15″×15″"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#000000"
+    },
+    {
+     "name": "Red",
+     "value": "#c5262a"
+    },
+    {
+     "name": "Yellow",
+     "value": "#de9219"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "black": "Black",
+      "clear": "Clear"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/84"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/84/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/84/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/84/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/84/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/84/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/84/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,163 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/389?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 389,
+   "type": "CUT-SEW",
+   "main_category_id": 81,
+   "name": "All-Over Print Minimalist Backpack",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/7a/7a042b22c29c6a2449672eec62ec2619_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "If you feel like you're carrying half of your belongings with you at all times, this backpack is for you! It has a spacious inside compartment (with a pocket for your laptop), and a hidden back pocket for safekeeping your most valuable items.\n\n• Made from 100% polyester\n• Fabric weight: 9 oz./yd.² (305 g/m²)\n• Dimensions: 16.1″ (41 cm) in height, 12.2″ (31 cm) in width, and 5.5″ (14 cm) in diameter\n• Capacity: 5.3 gallons (20 l)\n• Max weight: 44 lbs (20 kg)\n• Water-resistant material\n• Large inside pocket with a separate pocket for a 15” laptop, a hidden pocket with zipper on the back of the bag\n• Top zipper has 2 sliders, and there are zipper pullers attached to each slider\n• Silky lining, piped inside hems, and a soft mesh back\n• Padded ergonomic bag straps from polyester with plastic strap regulators\n• Blank product components sourced from China",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "top",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "bottom",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "black": "Black",
+      "clear": "Clear"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/389"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/389/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/389/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/389/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/389/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/389/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/389/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

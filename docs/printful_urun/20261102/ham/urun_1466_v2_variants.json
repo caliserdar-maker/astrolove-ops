@@ -1,0 +1,330 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1466/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 46020,
+    "catalog_product_id": 1466,
+    "name": "Paper Gift Bag (Kraft / 10″×13″)",
+    "size": "10″×13″",
+    "color": "Kraft",
+    "color_code": "#e1c8a8",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1466/46020_1779347586.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46020"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1466"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1466/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46020/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46020/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46020/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 12.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 46014,
+    "catalog_product_id": 1466,
+    "name": "Paper Gift Bag (Kraft / 5.5″×8.375″)",
+    "size": "5.5″×8.375″",
+    "color": "Kraft",
+    "color_code": "#e1c8a8",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1466/46014_1779347623.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46014"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1466"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1466/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46014/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46014/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46014/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 7.38,
+      "width": 4.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 46016,
+    "catalog_product_id": 1466,
+    "name": "Paper Gift Bag (Kraft / 6.25″×12.5″)",
+    "size": "6.25″×12.5″",
+    "color": "Kraft",
+    "color_code": "#e1c8a8",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1466/46016_1779347664.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46016"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1466"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1466/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46016/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46016/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46016/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 7.0,
+      "width": 5.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 46018,
+    "catalog_product_id": 1466,
+    "name": "Paper Gift Bag (Kraft / 8″×10.25″)",
+    "size": "8″×10.25″",
+    "color": "Kraft",
+    "color_code": "#e1c8a8",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1466/46018_1779347690.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46018"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1466"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1466/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46018/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46018/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46018/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.25,
+      "width": 7.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 46021,
+    "catalog_product_id": 1466,
+    "name": "Paper Gift Bag (White / 10″×13″)",
+    "size": "10″×13″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1466/46021_1779347586.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46021"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1466"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1466/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46021/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46021/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46021/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 12.0,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 46015,
+    "catalog_product_id": 1466,
+    "name": "Paper Gift Bag (White / 5.5″×8.375″)",
+    "size": "5.5″×8.375″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1466/46015_1779347622.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46015"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1466"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1466/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46015/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46015/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46015/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 7.38,
+      "width": 4.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 46017,
+    "catalog_product_id": 1466,
+    "name": "Paper Gift Bag (White / 6.25″×12.5″)",
+    "size": "6.25″×12.5″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1466/46017_1779347664.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46017"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1466"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1466/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46017/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46017/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46017/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 7.0,
+      "width": 5.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 46019,
+    "catalog_product_id": 1466,
+    "name": "Paper Gift Bag (White / 8″×10.25″)",
+    "size": "8″×10.25″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1466/46019_1779347690.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/46019"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1466"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1466/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/46019/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/46019/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/46019/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 9.25,
+      "width": 7.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 8,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1466/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1466"
+   }
+  }
+ }
+}

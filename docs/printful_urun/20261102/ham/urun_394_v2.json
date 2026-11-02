@@ -1,0 +1,117 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/394?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 394,
+   "type": "SUBLIMATION",
+   "main_category_id": 250,
+   "name": "Laptop Sleeve",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/02/022e7ef918b642b66d60b3ce3cb5e5ee_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Protect your laptop in style—get this snug, lightweight laptop sleeve! To prevent any scratch marks, it contains an internal padded zipper and its interior is fully lined with faux fur. What’s more, it’s made from a material that’s resistant to water, oil, and heat, making sure your laptop sleeve looks as sharp as you any day of the week!\r\n\r\n• 100% neoprene\r\n• 13″ sleeve weight: 6.49 oz (220 g)\r\n• 15″ sleeve weight: 8.8 oz (250 g)\r\n• Lightweight and resistant to water, oil, and heat\r\n• Snug fit\r\n• Faux fur interior lining\r\n• Top-loading zippered enclosure with two sliders\r\n• Padded zipper binding\r\n• Blank product sourced from China",
+   "sizes": [
+    "13″",
+    "15″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/394"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/394/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/394/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/394/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/394/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/394/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/394/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

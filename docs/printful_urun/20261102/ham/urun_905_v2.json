@@ -1,0 +1,125 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/905?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 905,
+   "type": "SUBLIMATION",
+   "main_category_id": 255,
+   "name": "Comforter",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/ea/ea16951eea78fe750a82f6e57cdf2d31_l",
+   "variant_count": 4,
+   "is_discontinued": false,
+   "description": "Wrap yourself in warmth with this ultra-soft, lightweight comforter—perfect for lazy mornings or chilly nights in. One side is available for vibrant designs, with fluffy 0.75” batting and a bright white back.\n\n• Made from 100% polyester microfiber\n• Twin size: 68″ × 88″ (172.7 cm × 223.5 cm)\n• Twin XL size: 68″ × 92″ (172.7 cm × 233.7 cm)\n• Queen size: 88″ × 88″ (223.5 cm × 223.5 cm)\n• King size: 104″ × 88″ (264.1 cm × 223.5 cm)\n• One-sided design, white back\n• Filled with 0.75\" (1.95 cm) batting for warmth and softness\n• Quilted in a double square pattern to keep the filling evenly in place\n• Blank product sourced from China\n\nDisclaimers:\n• Comforter sizes may differ by ±3″ (7.6 cm).\n• Machine wash in cold water (max. 90°F / 30°C). Not suitable for ironing or dry cleaning. Tumble dry on low; non-chlorine bleach may be used when needed.",
+   "sizes": [
+    "King",
+    "Twin",
+    "Twin XL",
+    "Queen"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/905"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/905/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/905/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/905/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/905/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/905/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/905/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

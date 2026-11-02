@@ -1,0 +1,263 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/215",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 215,
+    "main_category_id": 258,
+    "type": "CUT-SEW",
+    "description": "Want to add a splash of color to your home? This premium feel pillow case is just what you're looking for! This product is only the pillowcase - pillow filling not included.\n\n• 100% polyester\n• Fabric weight: 8.1 oz/yd² (275 g/m²)\n• Fabric with a linen feel\n• Hidden zipper\n• Machine-washable\n• Blank product components in Mexico sourced from China\n• Blank product components in the EU sourced from China and Poland",
+    "type_name": "All-Over Print | Premium Pillow Case",
+    "title": "All-Over Print Premium Pillow Case",
+    "brand": null,
+    "model": "All-Over Print | Premium Pillow Case",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/f9/f98461dce472b53e50588ee0d17e7134_l",
+    "variant_count": 5,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "stitch_color",
+      "title": "Zipper & Stitch color",
+      "type": "radio",
+      "values": {
+       "white": "White",
+       "black": "Black"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 49857,
+     "product_id": 215,
+     "name": "All-Over Print Premium Pillow Case 14″×14″",
+     "size": "14″×14″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/215/49857_1787221232.jpg",
+     "price": "13.57",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 49858,
+     "product_id": 215,
+     "name": "All-Over Print Premium Pillow Case 16″×16″",
+     "size": "16″×16″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/215/49858_1787221232.jpg",
+     "price": "14.59",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 9516,
+     "product_id": 215,
+     "name": "All-Over Print Premium Pillow Case 18″×18″",
+     "size": "18″×18″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/215/9516_1787221242.jpg",
+     "price": "16.60",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 7908,
+     "product_id": 215,
+     "name": "All-Over Print Premium Pillow Case 20″×12″",
+     "size": "20″×12″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/215/7908_1787221242.jpg",
+     "price": "15.56",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 11078,
+     "product_id": 215,
+     "name": "All-Over Print Premium Pillow Case 22″×22″",
+     "size": "22″×22″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/215/11078_1787221242.jpg",
+     "price": "17.64",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

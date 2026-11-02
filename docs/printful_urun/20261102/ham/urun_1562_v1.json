@@ -1,0 +1,185 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1562",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1562,
+    "main_category_id": 101,
+    "type": "DTFILM",
+    "description": "Looking for a compact and travel-friendly crossbody bag? The Urban Crossbody Bag | QD815 is a practical choice for both men and women, designed with life on the go in mind. Its sleek, functional design makes it ideal for travel, commuting, or everyday use. The adjustable shoulder strap ensures comfortable wear, while the secure zip closure keeps your essentials safe. Despite its compact size, it offers enough space to neatly organize your daily necessities while maintaining a clean, modern look.\n\n• 100% recycled polyester\n• One size: 9″ x 6.30″ x 2.56″ (23 cm x 16 cm x 6.5 cm)\n• Two-way zippered opening for easy access\n• Zippered internal mesh pocket\n• Premium finish internal lining\n• Outer zippered front pocket with rain flap and internal slip pockets\n• Adjustable cross-body strap\n• Blank product sourced from China",
+    "type_name": "BagBase Quadra QD815 | Airside Cross Body Bag",
+    "title": "Urban Crossbody Bag | QD815",
+    "brand": "BagBase",
+    "model": "QD815",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/0a/0aa27ca88f30c042a4d6788e02bf8918_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "thread_colors_apparel",
+      "title": "Flat thread colors",
+      "type": "multi_select",
+      "values": {
+       "#FFFFFF": "1801 White",
+       "#000000": "1800 Black",
+       "#96A1A8": "1718 Grey",
+       "#A67843": "1672 Old Gold",
+       "#FFCC00": "1951 Gold",
+       "#E25C27": "1987 Orange",
+       "#CC3366": "1910 Flamingo",
+       "#CC3333": "1839 Red",
+       "#660000": "1784 Maroon",
+       "#333366": "1966 Navy",
+       "#005397": "1842 Royal",
+       "#3399FF": "1695 Aqua/Teal",
+       "#6B5294": "1832 Purple",
+       "#01784E": "1751 Kelly Green",
+       "#7BA35A": "1848 Kiwi Green"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Embroidery notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "EMBROIDERY",
+      "display_name": "Embroidery",
+      "is_default": true
+     },
+     {
+      "key": "DTFILM",
+      "display_name": "DTF printing",
+      "is_default": false
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "embroidery_apparel_front",
+      "title": "Front",
+      "additional_price": "2.95",
+      "options": []
+     },
+     {
+      "id": "front_dtf_backpack",
+      "type": "front_dtf_backpack",
+      "title": "Front print",
+      "additional_price": "5.95",
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 49344,
+     "product_id": 1562,
+     "name": "BagBase Quadra QD815 | Airside Cross Body Bag (Black / One size)",
+     "size": "One size",
+     "color": "Black",
+     "color_code": "#171717",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1562/49344_1777374634.jpg",
+     "price": "27.48",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 49345,
+     "product_id": 1562,
+     "name": "BagBase Quadra QD815 | Airside Cross Body Bag (Natural Stone / One size)",
+     "size": "One size",
+     "color": "Natural Stone",
+     "color_code": "#d6d1c6",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1562/49345_1777374645.jpg",
+     "price": "27.48",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,99 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/837",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 837,
+    "main_category_id": 195,
+    "type": "MUG",
+    "description": "Hear that? That’s the sound of your quiet, stress-free morning. Kick off your morning coffee ritual or cozy up with a late-night tea with this mug. It’s dishwasher safe—so that’s one less thing for you to worry about. It’s also suitable for microwaves, so feel free to try those mug cake recipes!\n\n• 100% white ceramic\n• Height: 4″ (10.16 cm)\n• Diameter: 3.6″ (9.14 cm)\n• Volume: 12oz\n• Made free of BPA and lead\n• Dishwasher and microwave-safe\n• Classic cone shape\n• Glossy ceramic finish\n• Product sourced from China, decorated in the US",
+    "type_name": "Mug | Latte | 12oz | White",
+    "title": "Latte Mug",
+    "brand": null,
+    "model": "Mug | Latte | 12oz | White",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/5d/5d6c0345378792bf216f8b31b85b10b3_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 21352,
+     "product_id": 837,
+     "name": "Latte Mug (White / 12 oz)",
+     "size": "12 oz",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/837/21352_1735896974.jpg",
+     "price": "8.46",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,110 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1664?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1664,
+   "type": "DECOR",
+   "main_category_id": 254,
+   "name": "Glass Ornaments",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/d3/d33096f41d60f7f8db1dbefbf149227b_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "These classic glass ornaments are made for showcasing your artwork and adding a personalized touch to any decoration. Customize them with your design and create beautiful ornaments for gifts, seasonal decorating, or your online store. Each ornament features beveled edges, a one-sided print, and a gold ribbon for hanging.\n\n• 100% glass\n• Size: 3.5″ (88.9 mm\n• Available as a single ornament or in bundles of 5\n• One design for the whole bundle\n• Beveled edges\n• One-sided print\n• Gold ribbon for hanging",
+   "sizes": [
+    "Single Piece",
+    "5 Pieces",
+    "1 Piece"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1664"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1664/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1664/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1664/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1664/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1664/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1664/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

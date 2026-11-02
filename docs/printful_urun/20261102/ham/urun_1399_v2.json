@@ -1,0 +1,119 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1399?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1399,
+   "type": "SUBLIMATION",
+   "main_category_id": 251,
+   "name": "Round Mouse Pad",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/1d/1dd9070667e683e9e16106ae19438910_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Upgrade your desk setup with this sleek round mouse pad. Its compact design makes it perfect for smaller workspaces, while the smooth top surface ensures easy, precise mouse movements. With durable edges and a non-slip rubber base, it’s built to stay put and look sharp.\n\n• Neoprene material with rubber backing\n• Diameter: 8″ (20.3 cm)\n• Smooth surface for accurate mouse control\n• Non-slip bottom for stability\n• Blank product sourced from China",
+   "sizes": [],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1399"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1399/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1399/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1399/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1399/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1399/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1399/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

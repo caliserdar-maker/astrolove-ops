@@ -1,0 +1,113 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/867?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 867,
+   "type": "POSTCARD",
+   "main_category_id": 198,
+   "name": "Hardcover Journal Matte",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/74/748c0511a2d90ae39f7840ec77cfc203_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Smooth, stylish, and totally you—this matte hardcover journal is ready for your daily thoughts, sketches, or wild plans. 150 lined pages, tearable sheets, and a bold cover that pops.\n• Matte laminated front and back cover\n• 150 pages (75 sheets): lined, white-colored, uncoated\n• Cover weight: 80 lb (118 g/m²)\n• Page weight: 70 lb (104 g/m²)\n• Dimensions: 5.75″ × 8″ (14.6 cm × 20.3 cm)\n• Perforated pages for easy tear-out\n• Casewrap binding with a flexible sewn spine\n• Blank product sourced and fulfilled in the US",
+   "sizes": [
+    "8″×5.75″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/867"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/867/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/867/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/867/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/867/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/867/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/867/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

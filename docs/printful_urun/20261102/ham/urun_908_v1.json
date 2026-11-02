@@ -1,0 +1,121 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/908",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 908,
+    "main_category_id": 230,
+    "type": "SUBLIMATION",
+    "description": "Show off your style with a printed cutting board for slicing, serving, or decorating. Featuring a vibrant design, this board refreshes your kitchen game. It’s scratch-resistant, stable, and available in two sizes.\n\n• Tempered glass with a whorled-texture surface\n• Two sizes: 8″ × 11″ (20.3 cm × 27.9 cm), and 11″ × 15″ (27.9 cm × 38.1 cm)\n• Four rubber dots for additional stability\n• Scratch and cut-resistant\n• Hand wash only\n• Blank product sourced from China\n\nDisclaimer: Glass surface may dull knives over time.",
+    "type_name": "Cutting Board | Glass",
+    "title": "Glass Cutting Board",
+    "brand": null,
+    "model": "Cutting Board | Glass",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/83/834ac8d26af7c249bbe154386d7413da_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 23468,
+     "product_id": 908,
+     "name": "Glass Cutting Board (Rectangle / 11″×15″)",
+     "size": "11″×15″",
+     "color": "Rectangle",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/908/23468_1749105631.jpg",
+     "price": "21.26",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23469,
+     "product_id": 908,
+     "name": "Glass Cutting Board (Rectangle / 8″×11″)",
+     "size": "8″×11″",
+     "color": "Rectangle",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/908/23469_1749105640.jpg",
+     "price": "15.23",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

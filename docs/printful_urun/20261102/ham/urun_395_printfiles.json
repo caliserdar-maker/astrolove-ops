@@ -1,0 +1,89 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/395",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 395,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 208,
+     "width": 9450,
+     "height": 7950,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 271,
+     "width": 12451,
+     "height": 9376,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 1034,
+     "width": 6450,
+     "height": 4950,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": true
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 13222,
+     "placements": {
+      "default": 271
+     }
+    },
+    {
+     "variant_id": 22609,
+     "placements": {
+      "default": 1034
+     }
+    },
+    {
+     "variant_id": 10986,
+     "placements": {
+      "default": 208
+     }
+    }
+   ],
+   "option_groups": [
+    "Boy's",
+    "Default",
+    "Flat",
+    "Flat 2",
+    "Flat 3",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Lifestyle 6",
+    "On Hanger",
+    "Product details"
+   ],
+   "options": [
+    "Front",
+    "Left Front",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Product details",
+    "Template",
+    "horizontal 60×80",
+    "vertical 60×80"
+   ]
+  },
+  "extra": []
+ }
+}

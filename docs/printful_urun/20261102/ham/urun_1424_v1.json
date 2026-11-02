@@ -1,0 +1,275 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1424",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1424,
+    "main_category_id": 256,
+    "type": "CANDLE",
+    "description": "Create a relaxing corner anywhere with this soy candle in an amber glass jar. Its warm glow and smooth burn make it an easy pick for unwinding after a long day, gifting a friend, or adding a finishing touch to a cozy space. Available in multiple scents so shoppers can choose the mood that suits them best.\n\n• 100% natural soy wax blend\n• 100% cotton wick\n• Amber glass jar\n• 2 size options: 4 oz (2.36″ × 2.56″) and 9 oz (2.87″ × 3.5″)\n• Available in 6 scents, including an unscented option\n• Blank product sourced from the USA",
+    "type_name": "Candle | Soy | Scented | Amber",
+    "title": "Amber Jar Scented Soy Candle",
+    "brand": null,
+    "model": "Candle | Soy | Scented | Amber",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/91/91f10b534097f69fe5d1b7e36049a09e_l",
+    "variant_count": 9,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "USA"
+   },
+   "variants": [
+    {
+     "id": 44139,
+     "product_id": 1424,
+     "name": "Lumient  (Christmas Warmth / 4oz)",
+     "size": "4oz",
+     "color": "Christmas Warmth",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1424/44139_1762849512.jpg",
+     "price": "9.85",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44143,
+     "product_id": 1424,
+     "name": "Lumient  (Christmas Warmth / 9oz)",
+     "size": "9oz",
+     "color": "Christmas Warmth",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1424/44143_1762849534.jpg",
+     "price": "12.73",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44144,
+     "product_id": 1424,
+     "name": "Lumient  (Cinnamon Vanilla / 9oz)",
+     "size": "9oz",
+     "color": "Cinnamon Vanilla",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1424/44144_1762849534.jpg",
+     "price": "12.73",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44145,
+     "product_id": 1424,
+     "name": "Lumient  (Coconut Cream + Cardamom / 9oz)",
+     "size": "9oz",
+     "color": "Coconut Cream + Cardamom",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1424/44145_1762849534.jpg",
+     "price": "12.73",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44140,
+     "product_id": 1424,
+     "name": "Lumient  (Peppered Passionfruit / 4oz)",
+     "size": "4oz",
+     "color": "Peppered Passionfruit",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1424/44140_1762849513.jpg",
+     "price": "9.85",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44141,
+     "product_id": 1424,
+     "name": "Lumient  (Unscented / 4oz)",
+     "size": "4oz",
+     "color": "Unscented",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1424/44141_1762849513.jpg",
+     "price": "9.85",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44146,
+     "product_id": 1424,
+     "name": "Lumient  (Unscented / 9oz)",
+     "size": "9oz",
+     "color": "Unscented",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1424/44146_1762849534.jpg",
+     "price": "12.73",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44142,
+     "product_id": 1424,
+     "name": "Lumient  (White Sage + Lavender / 4oz)",
+     "size": "4oz",
+     "color": "White Sage + Lavender",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1424/44142_1762849512.jpg",
+     "price": "9.85",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 44147,
+     "product_id": 1424,
+     "name": "Lumient  (White Sage + Lavender / 9oz)",
+     "size": "9oz",
+     "color": "White Sage + Lavender",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1424/44147_1762849534.jpg",
+     "price": "12.73",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

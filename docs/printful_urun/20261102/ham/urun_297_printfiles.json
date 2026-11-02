@@ -1,0 +1,60 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/297",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 297,
+   "available_placements": {
+    "embroidery_apparel_front": "Front"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 136,
+     "width": 1200,
+     "height": 1200,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 9287,
+     "placements": {
+      "embroidery_apparel_front": 136
+     }
+    },
+    {
+     "variant_id": 9286,
+     "placements": {
+      "embroidery_apparel_front": 136
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat Lifestyle",
+    "Flat Lifestyle 2",
+    "Folded",
+    "Halloween",
+    "Holiday season",
+    "Men's",
+    "Women's",
+    "Women's 2"
+   ],
+   "options": [
+    "Back",
+    "Front",
+    "Front 2",
+    "Zoomed-in",
+    "Zoomed-in 2"
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,170 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/465",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 465,
+    "main_category_id": 81,
+    "type": "CUT-SEW",
+    "description": "This duffle bag is the perfect companion for every occasion—take it with you when traveling, running daily errands, or going to the gym. The bag is spacious and will keep all your stuff neat and organized with its multiple pockets, including one with a zipper for your most valuable possessions. Adjust the padded shoulder strap when the bag’s helping you carry heavier things, and continue your daily run without a worry!\n\n• 100% polyester with black interlining\n• Fabric weight: 9 oz./yd.² (305 g/m²)\n• One size: 22″ × 11.5″ × 11.5″ \n• T-piping for stability\n• Adjustable and removable padded shoulder strap\n• Dual padded handles with hook & loop fasteners for easy carrying\n• Mesh side pocket\n• Multiple inside pockets\n• Blank product components sourced from China",
+    "type_name": "All-Over Print Duffle Bag",
+    "title": "All-Over Print Duffle Bag",
+    "brand": null,
+    "model": "All-Over Print Duffle Bag",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/0c/0c1a5f944c18301aa3b8db21bc5a8bf7_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "stitch_color",
+      "title": "Stitch color",
+      "type": "radio",
+      "values": {
+       "black": "Black",
+       "clear": "Clear"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "sides",
+      "type": "sides",
+      "title": "Sides",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "top",
+      "type": "top",
+      "title": "Top print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "bottom",
+      "type": "bottom",
+      "title": "Bottom print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "pocket",
+      "type": "pocket",
+      "title": "Pocket",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "label_inside",
+      "type": "label_inside",
+      "title": "Inside label",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 12021,
+     "product_id": 465,
+     "name": "All-Over Print Duffle Bag (White / One size)",
+     "size": "One size",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/465/12021_1610632090.jpg",
+     "price": "66.29",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

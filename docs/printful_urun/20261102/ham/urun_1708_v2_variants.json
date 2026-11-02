@@ -1,0 +1,4106 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1708/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 53552,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Forest Green / 11″×14″)",
+    "size": "11″×14″",
+    "color": "Forest Green",
+    "color_code": "#297d37",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53552_1788159549.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53552"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53552/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53552/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53552/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53633,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Forest Green / 12″×12″)",
+    "size": "12″×12″",
+    "color": "Forest Green",
+    "color_code": "#297d37",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53633_1788159592.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53633"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53633/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53633/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53633/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53584,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Forest Green / 12″×16″)",
+    "size": "12″×16″",
+    "color": "Forest Green",
+    "color_code": "#297d37",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53584_1788159634.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53584"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53584/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53584/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53584/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53560,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Forest Green / 12″×18″)",
+    "size": "12″×18″",
+    "color": "Forest Green",
+    "color_code": "#297d37",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53560_1788159673.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53560"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53560/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53560/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53560/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53641,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Forest Green / 16″×16″)",
+    "size": "16″×16″",
+    "color": "Forest Green",
+    "color_code": "#297d37",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53641_1788159705.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53641"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53641/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53641/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53641/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 16.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53536,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Forest Green / 16″×20″)",
+    "size": "16″×20″",
+    "color": "Forest Green",
+    "color_code": "#297d37",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53536_1788159742.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53536"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53536/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53536/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53536/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53600,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Forest Green / 16″×24″)",
+    "size": "16″×24″",
+    "color": "Forest Green",
+    "color_code": "#297d37",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53600_1788159780.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53600"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53600/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53600/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53600/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53528,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Forest Green / 18″×24″)",
+    "size": "18″×24″",
+    "color": "Forest Green",
+    "color_code": "#297d37",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53528_1788159824.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53528"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53528/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53528/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53528/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53649,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Forest Green / 20″×20″)",
+    "size": "20″×20″",
+    "color": "Forest Green",
+    "color_code": "#297d37",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53649_1788159862.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53649"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53649/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53649/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53649/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 20.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53520,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Forest Green / 24″×36″)",
+    "size": "24″×36″",
+    "color": "Forest Green",
+    "color_code": "#297d37",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53520_1788159902.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53520"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53520/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53520/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53520/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53544,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Forest Green / 8″×10″)",
+    "size": "8″×10″",
+    "color": "Forest Green",
+    "color_code": "#297d37",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53544_1788159455.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53544"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53544/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53544/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53544/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 10.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53625,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Forest Green / 8″×12″)",
+    "size": "8″×12″",
+    "color": "Forest Green",
+    "color_code": "#297d37",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53625_1788159503.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53625"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53625/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53625/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53625/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 12.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53553,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Lilac / 11″×14″)",
+    "size": "11″×14″",
+    "color": "Lilac",
+    "color_code": "#a17bb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53553_1788159549.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53553"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53553/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53553/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53553/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53634,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Lilac / 12″×12″)",
+    "size": "12″×12″",
+    "color": "Lilac",
+    "color_code": "#a17bb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53634_1788159592.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53634"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53634/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53634/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53634/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53585,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Lilac / 12″×16″)",
+    "size": "12″×16″",
+    "color": "Lilac",
+    "color_code": "#a17bb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53585_1788159634.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53585"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53585/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53585/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53585/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53561,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Lilac / 12″×18″)",
+    "size": "12″×18″",
+    "color": "Lilac",
+    "color_code": "#a17bb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53561_1788159673.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53561"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53561/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53561/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53561/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53642,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Lilac / 16″×16″)",
+    "size": "16″×16″",
+    "color": "Lilac",
+    "color_code": "#a17bb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53642_1788159705.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53642"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53642/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53642/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53642/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 16.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53537,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Lilac / 16″×20″)",
+    "size": "16″×20″",
+    "color": "Lilac",
+    "color_code": "#a17bb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53537_1788159743.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53537"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53537/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53537/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53537/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53601,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Lilac / 16″×24″)",
+    "size": "16″×24″",
+    "color": "Lilac",
+    "color_code": "#a17bb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53601_1788159780.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53601"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53601/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53601/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53601/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53529,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Lilac / 18″×24″)",
+    "size": "18″×24″",
+    "color": "Lilac",
+    "color_code": "#a17bb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53529_1788159823.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53529"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53529/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53529/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53529/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53650,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Lilac / 20″×20″)",
+    "size": "20″×20″",
+    "color": "Lilac",
+    "color_code": "#a17bb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53650_1788159862.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53650"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53650/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53650/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53650/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 20.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53521,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Lilac / 24″×36″)",
+    "size": "24″×36″",
+    "color": "Lilac",
+    "color_code": "#a17bb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53521_1788159904.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53521"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53521/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53521/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53521/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53545,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Lilac / 8″×10″)",
+    "size": "8″×10″",
+    "color": "Lilac",
+    "color_code": "#a17bb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53545_1788159455.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53545"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53545/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53545/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53545/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 10.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53626,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Lilac / 8″×12″)",
+    "size": "8″×12″",
+    "color": "Lilac",
+    "color_code": "#a17bb7",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53626_1788159503.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53626"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53626/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53626/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53626/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 12.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53554,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Mint Green / 11″×14″)",
+    "size": "11″×14″",
+    "color": "Mint Green",
+    "color_code": "#9fd6be",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53554_1788159549.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53554"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53554/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53554/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53554/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53635,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Mint Green / 12″×12″)",
+    "size": "12″×12″",
+    "color": "Mint Green",
+    "color_code": "#9fd6be",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53635_1788159592.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53635"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53635/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53635/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53635/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53586,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Mint Green / 12″×16″)",
+    "size": "12″×16″",
+    "color": "Mint Green",
+    "color_code": "#9fd6be",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53586_1788159634.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53586"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53586/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53586/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53586/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53562,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Mint Green / 12″×18″)",
+    "size": "12″×18″",
+    "color": "Mint Green",
+    "color_code": "#9fd6be",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53562_1788159673.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53562"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53562/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53562/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53562/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53643,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Mint Green / 16″×16″)",
+    "size": "16″×16″",
+    "color": "Mint Green",
+    "color_code": "#9fd6be",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53643_1788159705.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53643"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53643/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53643/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53643/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 16.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53538,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Mint Green / 16″×20″)",
+    "size": "16″×20″",
+    "color": "Mint Green",
+    "color_code": "#9fd6be",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53538_1788159743.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53538"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53538/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53538/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53538/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53602,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Mint Green / 16″×24″)",
+    "size": "16″×24″",
+    "color": "Mint Green",
+    "color_code": "#9fd6be",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53602_1788159780.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53602"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53602/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53602/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53602/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53530,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Mint Green / 18″×24″)",
+    "size": "18″×24″",
+    "color": "Mint Green",
+    "color_code": "#9fd6be",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53530_1788159823.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53530"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53530/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53530/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53530/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53651,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Mint Green / 20″×20″)",
+    "size": "20″×20″",
+    "color": "Mint Green",
+    "color_code": "#9fd6be",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53651_1788159862.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53651"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53651/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53651/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53651/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 20.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53522,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Mint Green / 24″×36″)",
+    "size": "24″×36″",
+    "color": "Mint Green",
+    "color_code": "#9fd6be",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53522_1788159904.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53522"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53522/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53522/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53522/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53546,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Mint Green / 8″×10″)",
+    "size": "8″×10″",
+    "color": "Mint Green",
+    "color_code": "#9fd6be",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53546_1788159455.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53546"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53546/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53546/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53546/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 10.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53627,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Mint Green / 8″×12″)",
+    "size": "8″×12″",
+    "color": "Mint Green",
+    "color_code": "#9fd6be",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53627_1788159503.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53627"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53627/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53627/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53627/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 12.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53555,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Ocean Blue / 11″×14″)",
+    "size": "11″×14″",
+    "color": "Ocean Blue",
+    "color_code": "#2146a9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53555_1788159549.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53555"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53555/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53555/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53555/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53636,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Ocean Blue / 12″×12″)",
+    "size": "12″×12″",
+    "color": "Ocean Blue",
+    "color_code": "#2146a9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53636_1788159592.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53636"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53636/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53636/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53636/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53587,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Ocean Blue / 12″×16″)",
+    "size": "12″×16″",
+    "color": "Ocean Blue",
+    "color_code": "#2146a9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53587_1788159634.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53587"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53587/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53587/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53587/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53563,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Ocean Blue / 12″×18″)",
+    "size": "12″×18″",
+    "color": "Ocean Blue",
+    "color_code": "#2146a9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53563_1788159673.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53563"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53563/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53563/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53563/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53644,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Ocean Blue / 16″×16″)",
+    "size": "16″×16″",
+    "color": "Ocean Blue",
+    "color_code": "#2146a9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53644_1788159706.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53644"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53644/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53644/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53644/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 16.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53539,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Ocean Blue / 16″×20″)",
+    "size": "16″×20″",
+    "color": "Ocean Blue",
+    "color_code": "#2146a9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53539_1788159743.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53539"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53539/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53539/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53539/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53603,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Ocean Blue / 16″×24″)",
+    "size": "16″×24″",
+    "color": "Ocean Blue",
+    "color_code": "#2146a9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53603_1788159781.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53603"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53603/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53603/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53603/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53531,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Ocean Blue / 18″×24″)",
+    "size": "18″×24″",
+    "color": "Ocean Blue",
+    "color_code": "#2146a9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53531_1788159823.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53531"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53531/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53531/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53531/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53652,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Ocean Blue / 20″×20″)",
+    "size": "20″×20″",
+    "color": "Ocean Blue",
+    "color_code": "#2146a9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53652_1788159862.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53652"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53652/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53652/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53652/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 20.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53523,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Ocean Blue / 24″×36″)",
+    "size": "24″×36″",
+    "color": "Ocean Blue",
+    "color_code": "#2146a9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53523_1788159904.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53523"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53523/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53523/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53523/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53547,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Ocean Blue / 8″×10″)",
+    "size": "8″×10″",
+    "color": "Ocean Blue",
+    "color_code": "#2146a9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53547_1788159455.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53547"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53547/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53547/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53547/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 10.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53628,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Ocean Blue / 8″×12″)",
+    "size": "8″×12″",
+    "color": "Ocean Blue",
+    "color_code": "#2146a9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53628_1788159503.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53628"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53628/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53628/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53628/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 12.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53556,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Orange / 11″×14″)",
+    "size": "11″×14″",
+    "color": "Orange",
+    "color_code": "#f47237",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53556_1788159549.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53556"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53556/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53556/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53556/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53637,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Orange / 12″×12″)",
+    "size": "12″×12″",
+    "color": "Orange",
+    "color_code": "#f47237",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53637_1788159592.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53637"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53637/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53637/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53637/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53588,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Orange / 12″×16″)",
+    "size": "12″×16″",
+    "color": "Orange",
+    "color_code": "#f47237",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53588_1788159634.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53588"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53588/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53588/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53588/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53564,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Orange / 12″×18″)",
+    "size": "12″×18″",
+    "color": "Orange",
+    "color_code": "#f47237",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53564_1788159673.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53564"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53564/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53564/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53564/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53645,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Orange / 16″×16″)",
+    "size": "16″×16″",
+    "color": "Orange",
+    "color_code": "#f47237",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53645_1788159706.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53645"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53645/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53645/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53645/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 16.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53540,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Orange / 16″×20″)",
+    "size": "16″×20″",
+    "color": "Orange",
+    "color_code": "#f47237",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53540_1788159744.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53540"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53540/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53540/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53540/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53604,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Orange / 16″×24″)",
+    "size": "16″×24″",
+    "color": "Orange",
+    "color_code": "#f47237",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53604_1788159780.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53604"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53604/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53604/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53604/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53532,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Orange / 18″×24″)",
+    "size": "18″×24″",
+    "color": "Orange",
+    "color_code": "#f47237",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53532_1788159823.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53532"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53532/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53532/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53532/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53653,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Orange / 20″×20″)",
+    "size": "20″×20″",
+    "color": "Orange",
+    "color_code": "#f47237",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53653_1788159863.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53653"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53653/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53653/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53653/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 20.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53524,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Orange / 24″×36″)",
+    "size": "24″×36″",
+    "color": "Orange",
+    "color_code": "#f47237",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53524_1788159904.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53524"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53524/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53524/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53524/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53548,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Orange / 8″×10″)",
+    "size": "8″×10″",
+    "color": "Orange",
+    "color_code": "#f47237",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53548_1788159455.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53548"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53548/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53548/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53548/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 10.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53629,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Orange / 8″×12″)",
+    "size": "8″×12″",
+    "color": "Orange",
+    "color_code": "#f47237",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53629_1788159503.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53629"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53629/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53629/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53629/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 12.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53557,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Pink / 11″×14″)",
+    "size": "11″×14″",
+    "color": "Pink",
+    "color_code": "#fbc4cb",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53557_1788159549.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53557"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53557/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53557/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53557/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53638,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Pink / 12″×12″)",
+    "size": "12″×12″",
+    "color": "Pink",
+    "color_code": "#fbc4cb",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53638_1788159592.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53638"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53638/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53638/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53638/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53589,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Pink / 12″×16″)",
+    "size": "12″×16″",
+    "color": "Pink",
+    "color_code": "#fbc4cb",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53589_1788159634.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53589"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53589/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53589/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53589/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53565,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Pink / 12″×18″)",
+    "size": "12″×18″",
+    "color": "Pink",
+    "color_code": "#fbc4cb",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53565_1788159673.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53565"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53565/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53565/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53565/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53646,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Pink / 16″×16″)",
+    "size": "16″×16″",
+    "color": "Pink",
+    "color_code": "#fbc4cb",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53646_1788159706.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53646"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53646/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53646/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53646/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 16.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53541,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Pink / 16″×20″)",
+    "size": "16″×20″",
+    "color": "Pink",
+    "color_code": "#fbc4cb",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53541_1788159744.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53541"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53541/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53541/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53541/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53605,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Pink / 16″×24″)",
+    "size": "16″×24″",
+    "color": "Pink",
+    "color_code": "#fbc4cb",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53605_1788159781.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53605"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53605/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53605/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53605/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53533,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Pink / 18″×24″)",
+    "size": "18″×24″",
+    "color": "Pink",
+    "color_code": "#fbc4cb",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53533_1788159824.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53533"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53533/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53533/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53533/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53654,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Pink / 20″×20″)",
+    "size": "20″×20″",
+    "color": "Pink",
+    "color_code": "#fbc4cb",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53654_1788159862.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53654"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53654/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53654/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53654/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 20.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53525,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Pink / 24″×36″)",
+    "size": "24″×36″",
+    "color": "Pink",
+    "color_code": "#fbc4cb",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53525_1788159904.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53525"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53525/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53525/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53525/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53549,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Pink / 8″×10″)",
+    "size": "8″×10″",
+    "color": "Pink",
+    "color_code": "#fbc4cb",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53549_1788159456.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53549"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53549/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53549/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53549/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 10.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53630,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Pink / 8″×12″)",
+    "size": "8″×12″",
+    "color": "Pink",
+    "color_code": "#fbc4cb",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53630_1788159503.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53630"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53630/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53630/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53630/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 12.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53558,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Red / 11″×14″)",
+    "size": "11″×14″",
+    "color": "Red",
+    "color_code": "#a53d38",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53558_1788159549.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53558"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53558/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53558/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53558/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53639,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Red / 12″×12″)",
+    "size": "12″×12″",
+    "color": "Red",
+    "color_code": "#a53d38",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53639_1788159592.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53639"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53639/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53639/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53639/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53590,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Red / 12″×16″)",
+    "size": "12″×16″",
+    "color": "Red",
+    "color_code": "#a53d38",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53590_1788159633.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53590"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53590/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53590/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53590/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53566,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Red / 12″×18″)",
+    "size": "12″×18″",
+    "color": "Red",
+    "color_code": "#a53d38",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53566_1788159673.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53566"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53566/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53566/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53566/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53647,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Red / 16″×16″)",
+    "size": "16″×16″",
+    "color": "Red",
+    "color_code": "#a53d38",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53647_1788159706.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53647"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53647/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53647/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53647/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 16.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53542,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Red / 16″×20″)",
+    "size": "16″×20″",
+    "color": "Red",
+    "color_code": "#a53d38",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53542_1788159744.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53542"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53542/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53542/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53542/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53606,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Red / 16″×24″)",
+    "size": "16″×24″",
+    "color": "Red",
+    "color_code": "#a53d38",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53606_1788159781.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53606"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53606/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53606/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53606/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53534,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Red / 18″×24″)",
+    "size": "18″×24″",
+    "color": "Red",
+    "color_code": "#a53d38",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53534_1788159823.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53534"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53534/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53534/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53534/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53655,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Red / 20″×20″)",
+    "size": "20″×20″",
+    "color": "Red",
+    "color_code": "#a53d38",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53655_1788159863.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53655"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53655/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53655/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53655/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 20.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53526,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Red / 24″×36″)",
+    "size": "24″×36″",
+    "color": "Red",
+    "color_code": "#a53d38",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53526_1788159904.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53526"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53526/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53526/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53526/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53550,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Red / 8″×10″)",
+    "size": "8″×10″",
+    "color": "Red",
+    "color_code": "#a53d38",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53550_1788159456.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53550"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53550/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53550/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53550/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 10.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53631,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Red / 8″×12″)",
+    "size": "8″×12″",
+    "color": "Red",
+    "color_code": "#a53d38",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53631_1788159503.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53631"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53631/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53631/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53631/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 12.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53559,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Yellow / 11″×14″)",
+    "size": "11″×14″",
+    "color": "Yellow",
+    "color_code": "#fcd951",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53559_1788159549.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53559"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53559/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53559/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53559/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53640,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Yellow / 12″×12″)",
+    "size": "12″×12″",
+    "color": "Yellow",
+    "color_code": "#fcd951",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53640_1788159592.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53640"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53640/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53640/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53640/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53591,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Yellow / 12″×16″)",
+    "size": "12″×16″",
+    "color": "Yellow",
+    "color_code": "#fcd951",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53591_1788159633.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53591"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53591/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53591/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53591/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53567,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Yellow / 12″×18″)",
+    "size": "12″×18″",
+    "color": "Yellow",
+    "color_code": "#fcd951",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53567_1788159673.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53567"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53567/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53567/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53567/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53648,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Yellow / 16″×16″)",
+    "size": "16″×16″",
+    "color": "Yellow",
+    "color_code": "#fcd951",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53648_1788159706.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53648"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53648/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53648/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53648/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 16.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53543,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Yellow / 16″×20″)",
+    "size": "16″×20″",
+    "color": "Yellow",
+    "color_code": "#fcd951",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53543_1788159744.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53543"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53543/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53543/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53543/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53607,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Yellow / 16″×24″)",
+    "size": "16″×24″",
+    "color": "Yellow",
+    "color_code": "#fcd951",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53607_1788159781.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53607"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53607/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53607/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53607/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53535,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Yellow / 18″×24″)",
+    "size": "18″×24″",
+    "color": "Yellow",
+    "color_code": "#fcd951",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53535_1788159824.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53535"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53535/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53535/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53535/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53656,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Yellow / 20″×20″)",
+    "size": "20″×20″",
+    "color": "Yellow",
+    "color_code": "#fcd951",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53656_1788159862.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53656"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53656/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53656/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53656/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 20.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 53527,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Yellow / 24″×36″)",
+    "size": "24″×36″",
+    "color": "Yellow",
+    "color_code": "#fcd951",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53527_1788159904.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53527"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53527/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53527/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53527/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53551,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Yellow / 8″×10″)",
+    "size": "8″×10″",
+    "color": "Yellow",
+    "color_code": "#fcd951",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53551_1788159455.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53551"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53551/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53551/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53551/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 10.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 53632,
+    "catalog_product_id": 1708,
+    "name": "Matte Colored Frame Posters (Yellow / 8″×12″)",
+    "size": "8″×12″",
+    "color": "Yellow",
+    "color_code": "#fcd951",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1708/53632_1788159503.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/53632"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1708"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/53632/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/53632/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/53632/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 12.0,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 96,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1708/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1708"
+   }
+  }
+ }
+}

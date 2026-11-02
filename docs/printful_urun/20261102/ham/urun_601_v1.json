@@ -1,0 +1,2223 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/601",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 601,
+    "main_category_id": 244,
+    "type": "PHONE-CASE",
+    "description": "Protect your phone with style using a durable, dual-layered case. The outer shell is made of impact-resistant polycarbonate, while the inner lining sports TPU lining for maximum impact absorption. Keep your phone fashionable and safe all year round! \n\n• Polycarbonate outer shell\n• Thermoplastic Polyurethane TPU inner liner\n• Dual-layer protection\n• Precisely aligned port openings\n• Induction charging compatible\n• Blank product sourced from Korea\n\nImportant: This product cannot be shipped to South Korea, Hong Kong, Taiwan, Japan or Singapore. If your shipping address is in these regions, please choose a different product.",
+    "type_name": "iPhone | Cell Phone Case | Tough | Clear",
+    "title": "Tough Case for iPhone®",
+    "brand": null,
+    "model": "iPhone | Cell Phone Case | Tough | Clear",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/e8/e8137cb9510f23d9b446cfce126c2f58_l",
+    "variant_count": 58,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "Korea"
+   },
+   "variants": [
+    {
+     "id": 15383,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 11 Pro Max)",
+     "size": "iPhone 11 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15383_1654239967.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15382,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 11 Pro)",
+     "size": "iPhone 11 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15382_1654239978.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15381,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 11)",
+     "size": "iPhone 11",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15381_1654239978.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15385,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 12 mini)",
+     "size": "iPhone 12 mini",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15385_1654239988.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15387,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 12 Pro Max)",
+     "size": "iPhone 12 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15387_1654239988.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15386,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 12 Pro)",
+     "size": "iPhone 12 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15386_1654239998.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15384,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 12)",
+     "size": "iPhone 12",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15384_1654240008.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15389,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 13 mini)",
+     "size": "iPhone 13 mini",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15389_1654240008.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15391,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 13 Pro Max)",
+     "size": "iPhone 13 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15391_1654240019.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15390,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 13 Pro)",
+     "size": "iPhone 13 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15390_1654240019.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15388,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 13)",
+     "size": "iPhone 13",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15388_1654240110.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16128,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 14 Plus)",
+     "size": "iPhone 14 Plus",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/16128_1663581873.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16130,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 14 Pro Max)",
+     "size": "iPhone 14 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/16130_1663581877.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16126,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 14 Pro)",
+     "size": "iPhone 14 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/16126_1663581883.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16124,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 14)",
+     "size": "iPhone 14",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/16124_1663581883.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17716,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 15 Plus)",
+     "size": "iPhone 15 Plus",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/17716_1694436350.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17720,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 15 Pro Max)",
+     "size": "iPhone 15 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/17720_1694436351.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17718,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 15 Pro)",
+     "size": "iPhone 15 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/17718_1694436354.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17714,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 15)",
+     "size": "iPhone 15",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/17714_1694436355.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20303,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 16 Plus)",
+     "size": "iPhone 16 Plus",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/20303_1724312365.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20305,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 16 Pro Max)",
+     "size": "iPhone 16 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/20305_1724312365.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20304,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 16 Pro)",
+     "size": "iPhone 16 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/20304_1724312375.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20302,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 16)",
+     "size": "iPhone 16",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/20302_1724312375.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 33986,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 17 Air)",
+     "size": "iPhone 17 Air",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/33986_1757579411.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 33988,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 17 Pro Max)",
+     "size": "iPhone 17 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/33988_1757579450.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 33987,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 17 Pro)",
+     "size": "iPhone 17 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/33987_1757579432.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 33985,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 17)",
+     "size": "iPhone 17",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/33985_1757579388.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 52386,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 18 Pro Max)",
+     "size": "iPhone 18 Pro Max",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/52386_1788522251.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 52384,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Glossy / iPhone 18 Pro)",
+     "size": "iPhone 18 Pro",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/52384_1788522241.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15394,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 11 Pro Max)",
+     "size": "iPhone 11 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15394_1654240029.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15393,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 11 Pro)",
+     "size": "iPhone 11 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15393_1654240709.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15392,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 11)",
+     "size": "iPhone 11",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15392_1654240710.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15396,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 12 mini)",
+     "size": "iPhone 12 mini",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15396_1654240710.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15398,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 12 Pro Max)",
+     "size": "iPhone 12 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15398_1654240720.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15397,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 12 Pro)",
+     "size": "iPhone 12 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15397_1654240730.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15395,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 12)",
+     "size": "iPhone 12",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15395_1654240740.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15400,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 13 mini)",
+     "size": "iPhone 13 mini",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15400_1654240740.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15402,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 13 Pro Max)",
+     "size": "iPhone 13 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15402_1654240750.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15401,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 13 Pro)",
+     "size": "iPhone 13 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15401_1654240751.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15399,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 13)",
+     "size": "iPhone 13",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/15399_1654240761.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16129,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 14 Plus)",
+     "size": "iPhone 14 Plus",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/16129_1663581905.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16131,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 14 Pro Max)",
+     "size": "iPhone 14 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/16131_1663581905.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16127,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 14 Pro)",
+     "size": "iPhone 14 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/16127_1663581915.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16125,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 14)",
+     "size": "iPhone 14",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/16125_1663581915.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17717,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 15 Plus)",
+     "size": "iPhone 15 Plus",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/17717_1694436361.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17721,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 15 Pro Max)",
+     "size": "iPhone 15 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/17721_1694436371.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17719,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 15 Pro)",
+     "size": "iPhone 15 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/17719_1694436372.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17715,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 15)",
+     "size": "iPhone 15",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/17715_1694436372.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20307,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 16 Plus)",
+     "size": "iPhone 16 Plus",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/20307_1724312385.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20309,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 16 Pro Max)",
+     "size": "iPhone 16 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/20309_1724312385.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20308,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 16 Pro)",
+     "size": "iPhone 16 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/20308_1724312385.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20306,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 16)",
+     "size": "iPhone 16",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/20306_1724312387.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 33990,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 17 Air)",
+     "size": "iPhone 17 Air",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/33990_1757579410.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 33992,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 17 Pro Max)",
+     "size": "iPhone 17 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/33992_1757579450.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 33991,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 17 Pro)",
+     "size": "iPhone 17 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/33991_1757579431.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 33989,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 17)",
+     "size": "iPhone 17",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/33989_1757579388.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 52387,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 18 Pro Max)",
+     "size": "iPhone 18 Pro Max",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/52387_1788522220.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 52385,
+     "product_id": 601,
+     "name": "Tough iPhone Case (Matte / iPhone 18 Pro)",
+     "size": "iPhone 18 Pro",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/601/52385_1788522210.jpg",
+     "price": "14.23",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

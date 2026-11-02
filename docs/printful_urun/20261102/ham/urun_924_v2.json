@@ -1,0 +1,113 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/924?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 924,
+   "type": "DECOR",
+   "main_category_id": 230,
+   "name": "Area Rug",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/ff/ffb57c4bdb5235917d3ad7cae6594de5_l",
+   "variant_count": 6,
+   "is_discontinued": false,
+   "description": "Available in 6 sizes, this soft yet durable area rug adds style and comfort to any room. Its coated backing keeps it in place, and the customizable surface lets you add color, pattern, or graphics to suit any home.\n\n• 100% Polyester Chenille \n•  Hemmed edges \n•  Grey underside \n•  3 sizes: 24″×36″″; 36″×60″; 48″×72″ \n•  One-sided print \n•  Blank product sourced from China \n\nDisclaimer: This is a pre-constructed item. Sizes may vary slightly: 24\" × 36\" ± 2\", 36\" × 60\" ± 3\", 48\" × 72\" ± 3.5\".",
+   "sizes": [
+    "24″×36″",
+    "36″×60″",
+    "48″×72″",
+    "36″×24″",
+    "60″×36″",
+    "72″×48″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/924"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/924/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/924/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/924/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/924/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/924/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/924/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

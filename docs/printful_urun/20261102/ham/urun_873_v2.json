@@ -1,0 +1,113 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/873?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 873,
+   "type": "DECOR",
+   "main_category_id": 252,
+   "name": "Gift Wrap Papers",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/d5/d51e125788a6942468a4e43c30ef9362_l",
+   "variant_count": 6,
+   "is_discontinued": false,
+   "description": "The outside should be just as exciting as what’s inside. Dress your gifts in style with chic wrapping paper.\n• 100% paper\n• Scratch-resistant surface\n• Printed on one side: white reverse\n• Printed using GreenGuard UL Certified water-based inks\n• Blank product sourced from the US",
+   "sizes": [
+    "30″×72″",
+    "30″×20″",
+    "30″×144″",
+    "29″×72″",
+    "29″×144″",
+    "29″×20″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/873"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/873/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/873/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/873/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/873/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/873/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/873/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

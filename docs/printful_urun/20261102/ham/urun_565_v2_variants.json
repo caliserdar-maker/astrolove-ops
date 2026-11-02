@@ -1,0 +1,226 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/565/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 14453,
+    "catalog_product_id": 565,
+    "name": "SOL's 03569 (Black / One size)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#1f1f1f",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/565/14453_1644502703.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14453"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/565"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/565/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14453/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14453/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14453/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_chest_center",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_large_center",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 14454,
+    "catalog_product_id": 565,
+    "name": "SOL's 03569 (Navy / One size)",
+    "size": "One size",
+    "color": "Navy",
+    "color_code": "#373b45",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/565/14454_1644502713.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14454"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/565"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/565/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14454/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14454/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14454/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_chest_center",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_large_center",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 14455,
+    "catalog_product_id": 565,
+    "name": "SOL's 03569 (Red / One size)",
+    "size": "One size",
+    "color": "Red",
+    "color_code": "#ff2448",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/565/14455_1644502713.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14455"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/565"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/565/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14455/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14455/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14455/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_chest_center",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_large_center",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 14456,
+    "catalog_product_id": 565,
+    "name": "SOL's 03569 (Rope / One size)",
+    "size": "One size",
+    "color": "Rope",
+    "color_code": "#ffead1",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/565/14456_1644502714.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14456"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/565"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/565/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14456/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14456/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14456/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_chest_center",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_large_center",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/565/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/565"
+   }
+  }
+ }
+}

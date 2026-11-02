@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/779?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 779,
+   "type": "DRINKWARE",
+   "main_category_id": 264,
+   "name": "Rocks Glass",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/64/64a02fd448440b783d964b0d9f42e22f_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Keep it classy with this elegant rocks glass. Ideal for whiskey and cocktail lovers, it features a classic style and is made from sturdy, quality glass. \n\n• Glass material\n• Volume: 10.5 oz. (311 ml)\n• Height: 3.4″ (8.64 cm)\n• Diameter: 3.2″ (8.13 cm)\n• Blank product sourced from the United States\n\nDisclaimer: Not dishwasher or microwave safe. Hand-wash only.",
+   "sizes": [
+    "10.5 oz"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/779"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/779/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/779/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/779/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/779/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/779/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/779/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

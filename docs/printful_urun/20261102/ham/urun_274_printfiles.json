@@ -1,0 +1,75 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/274",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 274,
+   "available_placements": {
+    "default": "Print file",
+    "pocket": "Inside Pocket"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 120,
+     "width": 3150,
+     "height": 5550,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 122,
+     "width": 1500,
+     "height": 2625,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 9039,
+     "placements": {
+      "default": 120,
+      "pocket": 122
+     }
+    },
+    {
+     "variant_id": 9040,
+     "placements": {
+      "default": 120,
+      "pocket": 122
+     }
+    },
+    {
+     "variant_id": 9041,
+     "placements": {
+      "default": 120,
+      "pocket": 122
+     }
+    }
+   ],
+   "option_groups": [
+    "Default",
+    "In Hand",
+    "On Hanger",
+    "Product details",
+    "Standing"
+   ],
+   "options": [
+    "Back",
+    "Front",
+    "Inside Pocket",
+    "Pocket",
+    "Product details",
+    "Template"
+   ]
+  },
+  "extra": []
+ }
+}

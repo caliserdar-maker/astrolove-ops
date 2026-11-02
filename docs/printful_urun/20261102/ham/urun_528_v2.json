@@ -1,0 +1,199 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/528?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 528,
+   "type": "T-SHIRT",
+   "main_category_id": 48,
+   "name": "Organic Denim Tote Bag | Mantis M196",
+   "brand": "Mantis",
+   "model": "M196",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/e3/e3482be25d0105f695ff27830072287b_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "With its 30 lbs maximum carrying weight, the spacious organic denim tote bag will easily hold your books, groceries, or even gym gear. The long handles will provide extra comfort while the inside pocket will hold and hide your smaller valuables. Order it today and get carried away!\n\n• 100% organic cotton\n• Fabric weight: 9.0 oz/yd² (305 g/m²)\n• 19.6″ × 18.1″ ( 50 cm × 46 cm)\n• Handle length 23.6″ (60 cm), width 1.5″ (4 cm) \n• Maximum weight limit: 30 lbs (13.6 kg)\n• Double-stitched top seam\n• Cross stitching on handles for more stability\n• Small inside pocket",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "Denim Blue",
+     "value": "#2f435c"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "dtg",
+     "display_name": "DTG printing",
+     "is_default": true
+    },
+    {
+     "key": "embroidery",
+     "display_name": "Embroidery",
+     "is_default": false
+    },
+    {
+     "key": "dtfilm",
+     "display_name": "DTF printing",
+     "is_default": false
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "dtg",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "embroidery_apparel_front",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": [
+        {
+         "name": "thread_colors",
+         "techniques": [
+          "embroidery"
+         ],
+         "type": "array",
+         "values": {
+          "#FFFFFF": "1801 White",
+          "#000000": "1800 Black",
+          "#96A1A8": "1718 Grey",
+          "#A67843": "1672 Old Gold",
+          "#FFCC00": "1951 Gold",
+          "#E25C27": "1987 Orange",
+          "#CC3366": "1910 Flamingo",
+          "#CC3333": "1839 Red",
+          "#660000": "1784 Maroon",
+          "#333366": "1966 Navy",
+          "#005397": "1842 Royal",
+          "#3399FF": "1695 Aqua/Teal",
+          "#6B5294": "1832 Purple",
+          "#01784E": "1751 Kelly Green",
+          "#7BA35A": "1848 Kiwi Green"
+         }
+        }
+       ]
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "embroidery_neckline"
+     ]
+    },
+    {
+     "placement": "front_dtf_tote",
+     "technique": "dtfilm",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "dtg",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "lifelike",
+     "techniques": [
+      "dtg"
+     ],
+     "type": "bool",
+     "values": [
+      true,
+      false
+     ]
+    },
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/528"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/528/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/528/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/528/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/528/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/528/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/528/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

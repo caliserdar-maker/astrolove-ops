@@ -1,0 +1,106 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/19?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 19,
+   "type": "MUG",
+   "main_category_id": 195,
+   "name": "White Glossy Mug",
+   "brand": null,
+   "model": "White Glossy Mug",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/8c/8c4ac4a450b8485bc8a6e041a5a23666_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Whether you're drinking your morning coffee, evening tea, or something in between—this mug's for you! It's sturdy and glossy with a vivid print that'll withstand the microwave and dishwasher.\n\n• Ceramic\n• 11 oz mug dimensions: 3.8″ (9.6 cm) in height, 3.2″ (8.2 cm) in diameter\n• 15 oz mug dimensions: 4.7″ (11.9 cm) in height, 3.3″ (8.5 cm) in diameter\n• 20 oz mug dimensions: 4.3″ (10.9 cm) in height, 3.7″ (9.3 cm) in diameter\n• Dishwasher and microwave safe\n• Blank product sourced from China",
+   "sizes": [
+    "11 oz",
+    "15 oz",
+    "20 oz",
+    "11 oz Full Bleed",
+    "15 oz Full Bleed"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/19"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/19/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/19/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/19/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/19/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/19/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/19/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

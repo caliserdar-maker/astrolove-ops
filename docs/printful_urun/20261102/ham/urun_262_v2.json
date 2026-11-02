@@ -1,0 +1,133 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/262?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 262,
+   "type": "CUT-SEW",
+   "main_category_id": 49,
+   "name": "All-Over Print Drawstring Bag",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/0f/0f04d73474287ef01d6f5541c3a63de2_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Combine your love for vibrant prints and a sporty style with a cool drawstring bag. It's a must-have gym essential that can be worn as a backpack with drawstring closure at top, and narrow, contrasting shoulder straps. \n\n• 100% polyester\n• One size: 15″ × 17″ (38.1 cm × 43.2 cm)\n• Fabric weight (may vary by 5%): 6.64 oz/yd² (225 g/m²)\"\n• Maximum weight limit: 33 lbs (15 kg)\n• Twin cotton handles\n• Drawstring closure\n• Blank product components sourced from Israel",
+   "sizes": [
+    "15″×17″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "black": "Black",
+      "clear": "Clear"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/262"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/262/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/262/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/262/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/262/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/262/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/262/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

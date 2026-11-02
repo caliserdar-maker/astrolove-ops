@@ -1,0 +1,138 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/724/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 18555,
+    "catalog_product_id": 724,
+    "name": "Set of Business Cards (White / 100 pieces)",
+    "size": "100 pieces",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/724/18555_1695908011.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18555"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/724"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/724/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18555/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18555/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18555/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 4.0,
+      "width": 2.5,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "front",
+      "height": 2.5,
+      "width": 4.0,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "back",
+      "height": 2.5,
+      "width": 4.0,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "back",
+      "height": 4.0,
+      "width": 2.5,
+      "orientation": "vertical"
+     }
+    ]
+   },
+   {
+    "id": 18554,
+    "catalog_product_id": 724,
+    "name": "Set of Business Cards (White / 50 pieces)",
+    "size": "50 pieces",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/724/18554_1695908011.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18554"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/724"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/724/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18554/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18554/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18554/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 4.0,
+      "width": 2.5,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "front",
+      "height": 2.5,
+      "width": 4.0,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "back",
+      "height": 2.5,
+      "width": 4.0,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "back",
+      "height": 4.0,
+      "width": 2.5,
+      "orientation": "vertical"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/724/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/724"
+   }
+  }
+ }
+}

@@ -1,0 +1,134 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/886?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 886,
+   "type": "SUBLIMATION",
+   "main_category_id": 255,
+   "name": "Microfiber Duvet Cover",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/fa/fae89a76782c272f4851cc5f78157b7b_l",
+   "variant_count": 8,
+   "is_discontinued": false,
+   "description": "Your bed, but make it art. This super-soft duvet cover adds a personal touch to your space while keeping things cozy.\n\n• Lightweight polyester microfiber\n• Linen reverse in antique white\n• Invisible zipper closure\n• No pillow cases or inserts included\n• Blank product sourced from China\n\nDisclaimers: \n• Duvet cover sizes may vary by ±3″ (7.6 cm)\n• Machine wash in cold water (max. 90°F / 30°C)\n• Not suitable for bleaching, ironing, dry cleaning, or tumble drying with heat",
+   "sizes": [
+    "Twin",
+    "Twin XL",
+    "Queen",
+    "King"
+   ],
+   "colors": [
+    {
+     "name": "Cream",
+     "value": "#fffae6"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/886"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/886/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/886/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/886/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/886/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/886/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/886/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

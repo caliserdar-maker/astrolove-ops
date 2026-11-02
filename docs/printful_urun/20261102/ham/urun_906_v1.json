@@ -1,0 +1,209 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/906",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 906,
+    "main_category_id": 292,
+    "type": "SUBLIMATION",
+    "description": "A glossy, vibrant jigsaw puzzle packed in a stylish tin box—perfect for winding down or challenging your brain. Pick your challenge with 6 size options, from breezy to brain-bending. Ideal for birthdays, holidays, or just because.\n\n• Pre-die-cut chipboard with non-edge pieces\n• White metal tin box with the finished image on the lid\n• Available in 6 sizes: 30 pcs (10″ × 8″), 110 pcs (10″ × 8″), 252 pcs (14″ × 11″), 500 pcs (21″ × 15.5″), 1000 pcs (30″ × 20″), 2000 pcs (40″ × 28″)\n• Glossy finish enhances colors and makes pieces easier to clean\n• Ideal for gifting or framing once complete\n• Blank product sourced from China",
+    "type_name": "Puzzle | Jigsaw | w/Tin",
+    "title": "Jigsaw Puzzle with Tin",
+    "brand": null,
+    "model": "Puzzle | Jigsaw | w/Tin",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/7e/7e72c953bdc4225008dfbd8eb7317451_l",
+    "variant_count": 6,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 23245,
+     "product_id": 906,
+     "name": "Jigsaw Puzzle with Tin (White (glossy) / 10″×8″ (110 pcs))",
+     "size": "10″×8″ (110 pcs)",
+     "color": "White (glossy)",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/906/23245_1753187088.jpg",
+     "price": "18.00",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23246,
+     "product_id": 906,
+     "name": "Jigsaw Puzzle with Tin (White (glossy) / 10″×8″ (30 pcs))",
+     "size": "10″×8″ (30 pcs)",
+     "color": "White (glossy)",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/906/23246_1753187088.jpg",
+     "price": "18.00",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23247,
+     "product_id": 906,
+     "name": "Jigsaw Puzzle with Tin (White (glossy) / 14″×11″ (252 pcs))",
+     "size": "14″×11″ (252 pcs)",
+     "color": "White (glossy)",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/906/23247_1753187098.jpg",
+     "price": "20.94",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23248,
+     "product_id": 906,
+     "name": "Jigsaw Puzzle with Tin (White (glossy) / 21″×15.5″ (500 pcs))",
+     "size": "21″×15.5″ (500 pcs)",
+     "color": "White (glossy)",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/906/23248_1753187098.jpg",
+     "price": "25.97",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23249,
+     "product_id": 906,
+     "name": "Jigsaw Puzzle with Tin (White (glossy) / 30″×20″ (1000 pcs))",
+     "size": "30″×20″ (1000 pcs)",
+     "color": "White (glossy)",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/906/23249_1753187098.jpg",
+     "price": "29.25",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23250,
+     "product_id": 906,
+     "name": "Jigsaw Puzzle with Tin (White (glossy) / 40″×28″ (2000 pcs))",
+     "size": "40″×28″ (2000 pcs)",
+     "color": "White (glossy)",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/906/23250_1753187099.jpg",
+     "price": "40.98",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

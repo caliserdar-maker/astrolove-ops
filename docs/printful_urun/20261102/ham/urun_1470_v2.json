@@ -1,0 +1,133 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1470?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1470,
+   "type": "PHONE-CASE",
+   "main_category_id": 252,
+   "name": "Wall Clock",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/52/522eb9c33929e75ac456945e48701828_l",
+   "variant_count": 6,
+   "is_discontinued": false,
+   "description": "Timekeeping meets wall art. This sleek wall clock adds a clean, modern touch to any room while keeping things quiet thanks to its silent mechanism. It’s a simple way to refresh your space—perfect for living rooms, bedrooms, offices, or creative studios.\n\n• Wood frame with a plexiglass cover\n• Metal clock mechanism\n• 10″ × 10″ (25.4 × 25.4 cm) square shape\n• Lightweight at 18 oz. (510 g)\n• Silent movement—no ticking sound\n• Requires 1 AA battery (not included)\n• Pre-installed hook for easy hanging\n• Design featured on the front face\n• Available with black, white, or wooden base options and black or white clock hands\n• Blank product sourced from China",
+   "sizes": [
+    "10″"
+   ],
+   "colors": [
+    {
+     "name": "Black Base/Clock Hand Black",
+     "value": "#141414"
+    },
+    {
+     "name": "Black Base/Clock Hand White",
+     "value": "#141414"
+    },
+    {
+     "name": "White Base/Clock Hand Black",
+     "value": "#ffffff"
+    },
+    {
+     "name": "White Base/Clock Hand White",
+     "value": "#ffffff"
+    },
+    {
+     "name": "Wooden Base/Clock Hand Black",
+     "value": "#e7c79d"
+    },
+    {
+     "name": "Wooden Base/Clock Hand White",
+     "value": "#e7c79d"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1470"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1470/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1470/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1470/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1470/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1470/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1470/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

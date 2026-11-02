@@ -1,0 +1,176 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/274/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 9039,
+    "catalog_product_id": 274,
+    "name": "All-Over Print Large Tote Bag w/ Pocket (Black)",
+    "size": "16″×20″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/274/9039_1530789433.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/9039"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/274"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/274/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/9039/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/9039/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/9039/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 37.0,
+      "width": 21.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "pocket",
+      "height": 17.5,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "default",
+      "height": 18.5,
+      "width": 21.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 9040,
+    "catalog_product_id": 274,
+    "name": "All-Over Print Large Tote Bag w/ Pocket (Red)",
+    "size": "16″×20″",
+    "color": "Red",
+    "color_code": "#c5262a",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/274/9040_1530789448.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/9040"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/274"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/274/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/9040/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/9040/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/9040/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 37.0,
+      "width": 21.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "pocket",
+      "height": 17.5,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "default",
+      "height": 18.5,
+      "width": 21.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 9041,
+    "catalog_product_id": 274,
+    "name": "All-Over Print Large Tote Bag w/ Pocket (Yellow)",
+    "size": "16″×20″",
+    "color": "Yellow",
+    "color_code": "#de9219",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/274/9041_1530789461.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/9041"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/274"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/274/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/9041/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/9041/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/9041/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 37.0,
+      "width": 21.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "pocket",
+      "height": 17.5,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "default",
+      "height": 18.5,
+      "width": 21.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/274/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/274"
+   }
+  }
+ }
+}

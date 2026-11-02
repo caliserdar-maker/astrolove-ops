@@ -1,0 +1,122 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1423?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1423,
+   "type": "SUBLIMATION",
+   "main_category_id": 22,
+   "name": "Golf Towel",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/c1/c19e718a50e66cbac9e9f9ea35f2fe3f_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Step up your golf game with this stylish, absorbent towel designed for everyday use. The soft microfiber fabric keeps your clubs spotless and your hands dry while adding a touch of class to your gear. It’s lightweight, easy to carry, and versatile enough for workouts, travel, or outdoor adventures.\n\n• 80% polyester, 20% polyamide microfiber blend\n• One size: 16″ × 24″ (40.6 cm × 61 cm)\n• Soft, absorbent, and quick-drying fabric\n• Gold grommet and hanging ring\n• Design appears on one side\n• Blank product sourced from China\n\nDisclaimer: Machine wash in cold water (max. 90°F / 30°C).",
+   "sizes": [
+    "16″×24″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1423"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1423/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1423/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1423/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1423/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1423/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1423/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

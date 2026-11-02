@@ -1,0 +1,159 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/678",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 678,
+    "main_category_id": 189,
+    "type": "SUBLIMATION",
+    "description": "Say hi to the ultimate pet bowl for your furry friend! Thanks to its stainless steel construction and its anti-slip rubber base, your pet will be safe and content during meal times. Designed with quality materials and functionality in mind, this pet bowl will serve you and your pet for years to come.\n\n• Double-wall stainless steel\n• Anti-slip rubber base\n• Food grade safe\n• Dishwasher safe when the rubber base is removed\n\nImportant: This product cannot be shipped to South Korea, Hong Kong, Taiwan, Japan, or Singapore. If your shipping address is in these regions, please choose a different product.",
+    "type_name": "Pet Bowl",
+    "title": "Pet Bowl",
+    "brand": null,
+    "model": "Pet Bowl",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/30/30a71e7f6bccb49404e35c23140c4720_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 16785,
+     "product_id": 678,
+     "name": "Pet Bowl (White / 18 oz)",
+     "size": "18 oz",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/678/16785_1680768114.jpg",
+     "price": "21.92",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16786,
+     "product_id": 678,
+     "name": "Pet Bowl (White / 32 oz)",
+     "size": "32 oz",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/678/16786_1680768114.jpg",
+     "price": "24.98",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

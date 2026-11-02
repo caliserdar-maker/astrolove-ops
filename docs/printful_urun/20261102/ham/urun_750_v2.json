@@ -1,0 +1,187 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/750?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 750,
+   "type": "CUT-SEW",
+   "main_category_id": 189,
+   "name": "Pet Collar & Leash",
+   "brand": null,
+   "model": "Pet Collar & Leash Set",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/0d/0dff5fcfbf5ce4ef23351a9468751de4_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Style your pet with a premium collar and leash set. The adjustable collar comes in three sizes to ensure a perfect fit, paired with a durable leash that features a padded handle for comfortable walks. It’s ideal for pet owners who value functionality and fashion.\n\n• Durable 100% polyester webbing\n• 92% polyester, 8% spandex collar and leash handle inside\n• Black 100% polyester sponge collar and handle padding\n• Metal snap hook and D-ring for the leash\n• Black plastic main buckle, adjustable buckle, and strap holder for the collar\n• Leash length: 6 ft. (1.83 m)\n• Leash and collar width: 1″ (2.54 cm)\n• 3 collar sizes available: S 11.8″–17.8″ (30–45 cm), M 13.5″–20.5″ (35–52 cm), L 14.8″–23.8″ (38–60 cm)\n• Adjustable collar length\n• Blank product sourced from China\n\nHand wash with mild detergent or machine wash on a gentle cycle in a mesh bag. Air dry.",
+   "sizes": [
+    "S",
+    "M",
+    "L"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "default",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "label_inside",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "label_inside_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": [
+      "white",
+      "clear",
+      "black"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/750"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/750/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/750/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/750/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/750/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/750/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/750/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

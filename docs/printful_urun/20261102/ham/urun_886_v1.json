@@ -1,0 +1,253 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/886",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 886,
+    "main_category_id": 255,
+    "type": "SUBLIMATION",
+    "description": "Your bed, but make it art. This super-soft duvet cover adds a personal touch to your space while keeping things cozy.\n\n• Lightweight polyester microfiber\n• Linen reverse in antique white\n• Invisible zipper closure\n• No pillow cases or inserts included\n• Blank product sourced from China\n\nDisclaimers: \n• Duvet cover sizes may vary by ±3″ (7.6 cm)\n• Machine wash in cold water (max. 90°F / 30°C)\n• Not suitable for bleaching, ironing, dry cleaning, or tumble drying with heat",
+    "type_name": "Duvet Cover | Microfiber",
+    "title": "Microfiber Duvet Cover",
+    "brand": null,
+    "model": "Duvet Cover | Microfiber",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/fa/fae89a76782c272f4851cc5f78157b7b_l",
+    "variant_count": 8,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 22799,
+     "product_id": 886,
+     "name": "Microfiber Duvet Cover (Cream / King)",
+     "size": "King",
+     "color": "Cream",
+     "color_code": "#fffae6",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/886/22799_1747640240.jpg",
+     "price": "94.95",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22797,
+     "product_id": 886,
+     "name": "Microfiber Duvet Cover (Cream / Queen)",
+     "size": "Queen",
+     "color": "Cream",
+     "color_code": "#fffae6",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/886/22797_1747640214.jpg",
+     "price": "80.87",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22795,
+     "product_id": 886,
+     "name": "Microfiber Duvet Cover (Cream / Twin XL)",
+     "size": "Twin XL",
+     "color": "Cream",
+     "color_code": "#fffae6",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/886/22795_1747640193.jpg",
+     "price": "67.95",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22793,
+     "product_id": 886,
+     "name": "Microfiber Duvet Cover (Cream / Twin)",
+     "size": "Twin",
+     "color": "Cream",
+     "color_code": "#fffae6",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/886/22793_1747640169.jpg",
+     "price": "67.69",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22800,
+     "product_id": 886,
+     "name": "Microfiber Duvet Cover (White / King)",
+     "size": "King",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/886/22800_1747640239.jpg",
+     "price": "94.95",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22798,
+     "product_id": 886,
+     "name": "Microfiber Duvet Cover (White / Queen)",
+     "size": "Queen",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/886/22798_1747640214.jpg",
+     "price": "80.87",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22796,
+     "product_id": 886,
+     "name": "Microfiber Duvet Cover (White / Twin XL)",
+     "size": "Twin XL",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/886/22796_1747640193.jpg",
+     "price": "67.95",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22794,
+     "product_id": 886,
+     "name": "Microfiber Duvet Cover (White / Twin)",
+     "size": "Twin",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/886/22794_1747640168.jpg",
+     "price": "67.69",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

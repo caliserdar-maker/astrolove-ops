@@ -1,0 +1,194 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/750/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 19191,
+    "catalog_product_id": 750,
+    "name": "Pet Collar & Leash (White / L)",
+    "size": "L",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/750/19191_1709130691.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19191"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/750"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/750/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19191/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19191/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19191/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 1.46,
+      "width": 33.19,
+      "orientation": "any"
+     },
+     {
+      "placement": "front",
+      "height": 1.46,
+      "width": 82.59,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 1.46,
+      "width": 82.59,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 4.0,
+      "width": 7.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19190,
+    "catalog_product_id": 750,
+    "name": "Pet Collar & Leash (White / M)",
+    "size": "M",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/750/19190_1709130691.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19190"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/750"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/750/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19190/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19190/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19190/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 1.46,
+      "width": 33.19,
+      "orientation": "any"
+     },
+     {
+      "placement": "front",
+      "height": 1.46,
+      "width": 82.59,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 1.46,
+      "width": 82.59,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 4.0,
+      "width": 7.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 19189,
+    "catalog_product_id": 750,
+    "name": "Pet Collar & Leash (White / S)",
+    "size": "S",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/750/19189_1709130696.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19189"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/750"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/750/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19189/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19189/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19189/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 1.46,
+      "width": 33.19,
+      "orientation": "any"
+     },
+     {
+      "placement": "front",
+      "height": 1.46,
+      "width": 82.59,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 1.46,
+      "width": 82.59,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 4.0,
+      "width": 7.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/750/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/750"
+   }
+  }
+ }
+}

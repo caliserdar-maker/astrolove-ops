@@ -1,0 +1,109 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/789?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 789,
+   "type": "PHONE-CASE",
+   "main_category_id": 296,
+   "name": "Yard Sign",
+   "brand": null,
+   "model": "Yard Sign",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/05/05be6f94427dbfabd16a5a911589fd0d_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Make a statement with a yard sign. Featuring a matte finish and a sturdy h-stake stand, it’s ready for display and fully recyclable. Order yours now!\n\n• Fluted polypropylene\n• Thickness: 0.16″ (4mm)\n• Size: 18″ × 24″ (45.7 × 60.9 cm)\n• Matte finish\n• Aluminum h-stake stand with ribbed side wires\n• Blank product sourced from the USA\n\nImportant: This product is shipped only to the US and US territories.",
+   "sizes": [
+    "One-sided",
+    "Double-sided"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/789"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/789/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/789/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/789/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/789/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/789/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/789/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

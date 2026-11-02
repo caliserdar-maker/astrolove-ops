@@ -1,0 +1,149 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/279",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 279,
+    "main_category_id": 16,
+    "type": "CUT-SEW",
+    "description": "This medium size backpack is just what you need for daily use or sports activities! The pockets (including one for your laptop) give plenty of room for all your necessities, while the water-resistant material will protect them from the weather. \n\n• Made from 100% polyester\n• Dimensions: H 16⅛\" (41cm), W 12¼\" (31cm), D 3⅞\" (10cm)\n• Fabric weight: 9 oz./yd.² (305 g/m²)\n• Maximum weight limit: 44lbs (20kg)\n• Water-resistant material\n• Large inside pocket with a separate compartment for a 15” laptop, front pocket with a zipper, and a hidden pocket with zipper on the back of the bag\n• Top zipper has 2 sliders with zipper pullers\n• Silky lining, piped inside hems, and a soft mesh back\n• Padded ergonomic bag straps from polyester with plastic strap regulators\n• Blank product components sourced from China",
+    "type_name": "All-Over Print Backpack",
+    "title": "All-Over Print Backpack",
+    "brand": null,
+    "model": "All-Over Print Backpack",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/1c/1cb4394b298d1d9e5d622976d8b89213_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "stitch_color",
+      "title": "Stitch color",
+      "type": "radio",
+      "values": {
+       "black": "Black",
+       "clear": "Clear"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front & Pocket",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "top",
+      "type": "top",
+      "title": "Top panel",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "bottom",
+      "type": "bottom",
+      "title": "Bottom panel",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "pocket",
+      "type": "pocket",
+      "title": "Inside Pocket",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 9063,
+     "product_id": 279,
+     "name": "All-Over Print Backpack",
+     "size": "One size",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/279/9063_1534847488.jpg",
+     "price": "37.57",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

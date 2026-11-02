@@ -1,0 +1,82 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/433/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 11513,
+    "catalog_product_id": 433,
+    "name": "Standard Postcards (4″×6″)",
+    "size": "4″×6″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/433/11513_1592384192.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/11513"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/433"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/433/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/11513/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/11513/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/11513/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.13,
+      "width": 6.14,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "default",
+      "height": 6.14,
+      "width": 4.13,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "back",
+      "height": 6.14,
+      "width": 4.13,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "back",
+      "height": 4.13,
+      "width": 6.14,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/433/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/433"
+   }
+  }
+ }
+}

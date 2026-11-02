@@ -1,0 +1,16 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1729",
+  "govde": null
+ },
+ "http": 404,
+ "yanit": {
+  "code": 404,
+  "result": "Not Found",
+  "error": {
+   "reason": "NotFound",
+   "message": "Not Found"
+  }
+ }
+}

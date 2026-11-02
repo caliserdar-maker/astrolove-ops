@@ -1,0 +1,112 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/297/prices?currency=USD&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 297,
+    "placements": [
+     {
+      "id": "embroidery_apparel_front",
+      "title": "Front",
+      "type": "Embroidery",
+      "technique_key": "embroidery",
+      "placement_options": [
+       {
+        "name": "unlimited_color",
+        "type": "bool",
+        "values": [
+         true,
+         false
+        ],
+        "description": "Unlimited color",
+        "price": {
+         "false": "0.00",
+         "true": "3.50"
+        }
+       }
+      ],
+      "price": "6.95",
+      "discounted_price": "6.95",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 9286,
+     "techniques": [
+      {
+       "technique_key": "embroidery",
+       "technique_display_name": "Embroidery",
+       "price": "20.50",
+       "discounted_price": "20.50"
+      }
+     ]
+    },
+    {
+     "id": 9287,
+     "techniques": [
+      {
+       "technique_key": "embroidery",
+       "technique_display_name": "Embroidery",
+       "price": "20.50",
+       "discounted_price": "20.50"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": [
+    {
+     "quantity": 25,
+     "bulk_discount_percentage": 0.04
+    },
+    {
+     "quantity": 50,
+     "bulk_discount_percentage": 0.05
+    },
+    {
+     "quantity": 100,
+     "bulk_discount_percentage": 0.06
+    },
+    {
+     "quantity": 200,
+     "bulk_discount_percentage": 0.07
+    },
+    {
+     "quantity": 300,
+     "bulk_discount_percentage": 0.08
+    },
+    {
+     "quantity": 500,
+     "bulk_discount_percentage": 0.09
+    }
+   ]
+  },
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/297/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/297"
+   }
+  }
+ }
+}

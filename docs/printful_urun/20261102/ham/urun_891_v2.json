@@ -1,0 +1,129 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/891?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 891,
+   "type": "SUBLIMATION",
+   "main_category_id": 16,
+   "name": "Suitcase",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/a0/a0f72ff13a26229db743e1e10b6d701f_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Travel just got an upgrade. This suitcase glides like a dream with 360° wheels, keeps your essentials safe with a built-in lock, and offers plenty of room, plus a little extra in the large size. With bold design, a durable build, and smart inner pockets, it’s your new favorite travel mate.\n\n• 100% polycarbonate front \n• Black ABS back hard-shell\n• Sizes: Small (22″ × 14″ × 9″), Medium (26″ × 18″ × 10″), Large (30″ × 20″ × 11″) with optional extended storage\n• 4 double-wheels with 360° swivel\n• 2 inner pockets\n• Built-in safety lock\n• Blank product sourced from China",
+   "sizes": [
+    "Small",
+    "Medium",
+    "Large"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#000000"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/891"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/891/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/891/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/891/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/891/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/891/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/891/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

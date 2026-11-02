@@ -1,0 +1,101 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/744",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 744,
+   "available_placements": {
+    "pocket": "Pocket",
+    "front": "Front print",
+    "back": "Back print",
+    "inside_pocket": "Inside pocket",
+    "details": "Details",
+    "label_outside": "Outside label",
+    "label_inside": "Inside label"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 64,
+     "width": 375,
+     "height": 150,
+     "dpi": 150,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 531,
+     "width": 2250,
+     "height": 1500,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 532,
+     "width": 300,
+     "height": 300,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 19256,
+     "placements": {
+      "pocket": 531,
+      "front": 531,
+      "back": 531,
+      "inside_pocket": 531,
+      "details": 531,
+      "label_outside": 532,
+      "label_inside": 64
+     }
+    }
+   ],
+   "option_groups": [
+    "Boy's",
+    "Flat",
+    "Ghost",
+    "Girl's",
+    "Men's",
+    "Men's Lifestyle",
+    "Men's Lifestyle 2",
+    "Product details",
+    "Product specs",
+    "Templates",
+    "Women's",
+    "Women's Lifestyle"
+   ],
+   "options": [
+    "Back",
+    "Details",
+    "English",
+    "French",
+    "Front",
+    "Front 2",
+    "Front 3",
+    "Front Pocket",
+    "German",
+    "Inside Pocket",
+    "Inside label",
+    "Italian",
+    "Japanese",
+    "Left",
+    "Outside label",
+    "Product Details",
+    "Product Details 2",
+    "Product Details 3",
+    "Product Details 4",
+    "Right",
+    "Spanish"
+   ]
+  },
+  "extra": []
+ }
+}

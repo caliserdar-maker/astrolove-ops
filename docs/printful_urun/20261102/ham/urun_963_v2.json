@@ -1,0 +1,183 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/963?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 963,
+   "type": "CUT-SEW",
+   "main_category_id": 81,
+   "name": "All-Over Print Utility Backpack",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/c2/c2cc2e1877dc2d3313b69bfcb852d690_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Express your style with a backpack that’s equal parts trendy and practical. It provides spacious compartments, a secure laptop pocket, and a comfy fit to keep you ready for work, weekend trips, and last-minute adventures.\n\n• 100% polyester\n• Fabric weight: 9.73 oz./yd.² (330 g/m²)\n• Capacity: 4.3 gallons (16.1 l)\n• Maximum weight limit: 11.02 lbs (5 kg)\n• Spacious main compartment with multiple pockets\n• 2 front pockets\n• Mesh pockets on both sides\n• Hidden back pocket\n• Zippered laptop pocket\n• Adjustable straps\n• Blank product sourced from China",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#000000"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "top",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "bottom",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "label_inside",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "label_inside_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": [
+      "white",
+      "clear",
+      "black"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/963"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/963/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/963/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/963/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/963/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/963/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/963/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

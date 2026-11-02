@@ -1,0 +1,114 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/973/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 24970,
+    "catalog_product_id": 973,
+    "name": "Indoor Wall Tapestry (26″×36″)",
+    "size": "26″×36″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/973/24970_1758281165.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24970"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/973"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/973/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24970/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24970/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24970/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 39.0,
+      "width": 29.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 29.0,
+      "width": 39.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 24969,
+    "catalog_product_id": 973,
+    "name": "Indoor Wall Tapestry (50″×60″)",
+    "size": "50″×60″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/973/24969_1758281176.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24969"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/973"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/973/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24969/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24969/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24969/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 63.5,
+      "width": 54.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 54.0,
+      "width": 63.5,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/973/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/973"
+   }
+  }
+ }
+}

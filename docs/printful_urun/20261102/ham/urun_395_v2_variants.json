@@ -1,0 +1,164 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/395/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 13222,
+    "catalog_product_id": 395,
+    "name": "Throw blanket (60″×80″)",
+    "size": "60″×80″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/395/13222_1652098418.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/13222"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/395"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/395/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/13222/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/13222/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/13222/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 83.01,
+      "width": 62.51,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 62.51,
+      "width": 83.01,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 22609,
+    "catalog_product_id": 395,
+    "name": "Throw blanket 30″×40″",
+    "size": "30″×40″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/395/22609_1742286060.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22609"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/395"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/395/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22609/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22609/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22609/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 43.0,
+      "width": 33.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "default",
+      "height": 43.0,
+      "width": 33.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 33.0,
+      "width": 43.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 10986,
+    "catalog_product_id": 395,
+    "name": "Throw blanket 50″×60″",
+    "size": "50″×60″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/395/10986_1652098428.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10986"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/395"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/395/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10986/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10986/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10986/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 53.0,
+      "width": 63.0,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "default",
+      "height": 63.0,
+      "width": 53.0,
+      "orientation": "vertical"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/395/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/395"
+   }
+  }
+ }
+}

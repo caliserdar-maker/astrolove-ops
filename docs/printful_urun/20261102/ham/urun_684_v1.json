@@ -1,0 +1,1779 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/684",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 684,
+    "main_category_id": 244,
+    "type": "PHONE-CASE",
+    "description": "With this snap case, you'll never have to compromise style for safety. Its slim and lightweight design is perfect for a busy lifestyle, adding minimal weight to your device while still keeping it protected. \n• Made of polycarbonate (PC) material\n• Wireless charging compatible\n• Precisely aligned port openings\n• Blank product sourced from the Republic of Korea\n\nDisclaimer: Keep away from liquids containing high alcohol levels, as designs on the phone case may rub off. Keep away from direct sunlight to prevent yellowing.\n\nImportant: This product cannot be shipped to South Korea, Hong Kong, Taiwan, Japan, or Singapore. If your shipping address is in these regions, please choose a different product.",
+    "type_name": "Samsung | Cell Phone Case | Snap | Clear",
+    "title": "Snap Case for Samsung",
+    "brand": null,
+    "model": "Samsung | Cell Phone Case | Snap | Clear",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/f6/f6466ce0d2b7660d6dbe3b8b49b3391b_l",
+    "variant_count": 46,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 16920,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S10 Plus)",
+     "size": "Samsung Galaxy S10 Plus",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16920_1682428914.jpg",
+     "price": "13.07",
+     "in_stock": false,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "US",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "UK",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "EU",
+       "status": "supplier_out_of_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16918,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S10)",
+     "size": "Samsung Galaxy S10",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16918_1682428923.jpg",
+     "price": "13.07",
+     "in_stock": false,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "US",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "UK",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "EU",
+       "status": "supplier_out_of_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16922,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S10e)",
+     "size": "Samsung Galaxy S10e",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16922_1682428923.jpg",
+     "price": "13.07",
+     "in_stock": false,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "US",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "UK",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "EU",
+       "status": "supplier_out_of_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16930,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S20 FE)",
+     "size": "Samsung Galaxy S20 FE",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16930_1682428934.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16926,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S20 Plus)",
+     "size": "Samsung Galaxy S20 Plus",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16926_1682428944.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16928,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S20 Ultra)",
+     "size": "Samsung Galaxy S20 Ultra",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16928_1682428944.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16924,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S20)",
+     "size": "Samsung Galaxy S20",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16924_1682428947.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16932,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S21 FE)",
+     "size": "Samsung Galaxy S21 FE",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16932_1682428954.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16936,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S21 Plus)",
+     "size": "Samsung Galaxy S21 Plus",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16936_1682428960.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16938,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S21 Ultra)",
+     "size": "Samsung Galaxy S21 Ultra",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16938_1682428960.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16934,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S21)",
+     "size": "Samsung Galaxy S21",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16934_1682428965.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16942,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S22 Plus)",
+     "size": "Samsung Galaxy S22 Plus",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16942_1682428971.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16944,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S22 Ultra)",
+     "size": "Samsung Galaxy S22 Ultra",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16944_1682428981.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16940,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S22)",
+     "size": "Samsung Galaxy S22",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16940_1682428981.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16948,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S23 Plus)",
+     "size": "Samsung Galaxy S23 Plus",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16948_1682428984.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16950,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S23 Ultra)",
+     "size": "Samsung Galaxy S23 Ultra",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16950_1682428994.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16946,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S23)",
+     "size": "Samsung Galaxy S23",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16946_1682428994.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 18738,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S24 Plus)",
+     "size": "Samsung Galaxy S24 Plus",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/18738_1705299131.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 18739,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S24 Ultra)",
+     "size": "Samsung Galaxy S24 Ultra",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/18739_1705299136.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 18737,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S24)",
+     "size": "Samsung Galaxy S24",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/18737_1705299137.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 21477,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S25 Plus)",
+     "size": "Samsung Galaxy S25 Plus",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/21477_1738586472.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 21479,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S25 Ultra)",
+     "size": "Samsung Galaxy S25 Ultra",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/21479_1738586472.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 21475,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Glossy / Samsung Galaxy S25)",
+     "size": "Samsung Galaxy S25",
+     "color": "Glossy",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/21475_1738586472.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16921,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S10 Plus)",
+     "size": "Samsung Galaxy S10 Plus",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16921_1682428994.jpg",
+     "price": "13.07",
+     "in_stock": false,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "US",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "UK",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "EU",
+       "status": "supplier_out_of_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16919,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S10)",
+     "size": "Samsung Galaxy S10",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16919_1682429004.jpg",
+     "price": "13.07",
+     "in_stock": false,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "US",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "UK",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "EU",
+       "status": "supplier_out_of_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16923,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S10e)",
+     "size": "Samsung Galaxy S10e",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16923_1682429005.jpg",
+     "price": "13.07",
+     "in_stock": false,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "US",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "UK",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "EU",
+       "status": "supplier_out_of_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16931,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S20 FE)",
+     "size": "Samsung Galaxy S20 FE",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16931_1682429015.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16927,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S20 Plus)",
+     "size": "Samsung Galaxy S20 Plus",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16927_1682429015.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16929,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S20 Ultra)",
+     "size": "Samsung Galaxy S20 Ultra",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16929_1682429025.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16925,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S20)",
+     "size": "Samsung Galaxy S20",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16925_1682429025.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16933,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S21 FE)",
+     "size": "Samsung Galaxy S21 FE",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16933_1682429036.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16937,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S21 Plus)",
+     "size": "Samsung Galaxy S21 Plus",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16937_1682429036.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16939,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S21 Ultra)",
+     "size": "Samsung Galaxy S21 Ultra",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16939_1682429045.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16935,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S21)",
+     "size": "Samsung Galaxy S21",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16935_1682429046.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16943,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S22 Plus)",
+     "size": "Samsung Galaxy S22 Plus",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16943_1682429046.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16945,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S22 Ultra)",
+     "size": "Samsung Galaxy S22 Ultra",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16945_1682429056.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16941,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S22)",
+     "size": "Samsung Galaxy S22",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16941_1682429066.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16949,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S23 Plus)",
+     "size": "Samsung Galaxy S23 Plus",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16949_1682429066.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16951,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S23 Ultra)",
+     "size": "Samsung Galaxy S23 Ultra",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16951_1682429066.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16947,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S23)",
+     "size": "Samsung Galaxy S23",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/16947_1682429076.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 18741,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S24 Plus)",
+     "size": "Samsung Galaxy S24 Plus",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/18741_1705299147.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 18742,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S24 Ultra)",
+     "size": "Samsung Galaxy S24 Ultra",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/18742_1705299151.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 18740,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S24)",
+     "size": "Samsung Galaxy S24",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/18740_1705299151.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 21478,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S25 Plus)",
+     "size": "Samsung Galaxy S25 Plus",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/21478_1738586483.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 21480,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S25 Ultra)",
+     "size": "Samsung Galaxy S25 Ultra",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/21480_1738586483.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 21476,
+     "product_id": 684,
+     "name": "Snap Case for Samsung® (Matte / Samsung Galaxy S25)",
+     "size": "Samsung Galaxy S25",
+     "color": "Matte",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/684/21476_1738586483.jpg",
+     "price": "13.07",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

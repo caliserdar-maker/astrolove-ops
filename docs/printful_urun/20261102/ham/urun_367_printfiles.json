@@ -1,0 +1,60 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/367",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 367,
+   "available_placements": {
+    "front": "Front print",
+    "back": "Back print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 5,
+     "width": 1500,
+     "height": 1500,
+     "dpi": 150,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 10457,
+     "placements": {
+      "front": 5,
+      "back": 5
+     }
+    },
+    {
+     "variant_id": 10458,
+     "placements": {
+      "front": 5,
+      "back": 5
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat Lifestyle",
+    "Halloween",
+    "Hanger",
+    "Product details",
+    "Women's"
+   ],
+   "options": [
+    "Back",
+    "Back 2",
+    "Front",
+    "Front 2",
+    "Product details"
+   ]
+  },
+  "extra": []
+ }
+}

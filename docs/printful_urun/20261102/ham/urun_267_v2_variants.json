@@ -1,0 +1,710 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/267/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 11348,
+    "catalog_product_id": 267,
+    "name": "Clear Case for Samsung® (Samsung Galaxy S20 Plus)",
+    "size": "Samsung Galaxy S20 Plus",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/11348_1584528498.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/11348"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/11348/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/11348/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/11348/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 11349,
+    "catalog_product_id": 267,
+    "name": "Clear Case for Samsung® (Samsung Galaxy S20 Ultra)",
+    "size": "Samsung Galaxy S20 Ultra",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/11349_1584528399.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/11349"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/11349/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/11349/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/11349/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 11347,
+    "catalog_product_id": 267,
+    "name": "Clear Case for Samsung® (Samsung Galaxy S20)",
+    "size": "Samsung Galaxy S20",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/11347_1584528512.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/11347"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/11347/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/11347/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/11347/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 12027,
+    "catalog_product_id": 267,
+    "name": "Clear Case for Samsung® (Samsung Galaxy S21 Plus)",
+    "size": "Samsung Galaxy S21 Plus",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/12027_1615296293.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/12027"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/12027/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/12027/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/12027/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 12026,
+    "catalog_product_id": 267,
+    "name": "Clear Case for Samsung® (Samsung Galaxy S21 Ultra)",
+    "size": "Samsung Galaxy S21 Ultra",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/12026_1615296332.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/12026"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/12026/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/12026/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/12026/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 12025,
+    "catalog_product_id": 267,
+    "name": "Clear Case for Samsung® (Samsung Galaxy S21)",
+    "size": "Samsung Galaxy S21",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/12025_1615296198.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/12025"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/12025/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/12025/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/12025/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 14634,
+    "catalog_product_id": 267,
+    "name": "Clear Case for Samsung® (Samsung Galaxy S22 Plus)",
+    "size": "Samsung Galaxy S22 Plus",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/14634_1645797547.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14634"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14634/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14634/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14634/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 14635,
+    "catalog_product_id": 267,
+    "name": "Clear Case for Samsung® (Samsung Galaxy S22 Ultra)",
+    "size": "Samsung Galaxy S22 Ultra",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/14635_1645797548.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14635"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14635/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14635/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14635/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 14633,
+    "catalog_product_id": 267,
+    "name": "Clear Case for Samsung® (Samsung Galaxy S22)",
+    "size": "Samsung Galaxy S22",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/14633_1645797555.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14633"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14633/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14633/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14633/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21482,
+    "catalog_product_id": 267,
+    "name": "Clear Case for Samsung® (Samsung Galaxy S25 Plus)",
+    "size": "Samsung Galaxy S25 Plus",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/21482_1738053259.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21482"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21482/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21482/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21482/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21483,
+    "catalog_product_id": 267,
+    "name": "Clear Case for Samsung® (Samsung Galaxy S25 Ultra)",
+    "size": "Samsung Galaxy S25 Ultra",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/21483_1738053270.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21483"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21483/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21483/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21483/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 21481,
+    "catalog_product_id": 267,
+    "name": "Clear Case for Samsung® (Samsung Galaxy S25)",
+    "size": "Samsung Galaxy S25",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/21481_1738053422.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21481"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21481/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21481/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21481/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18750,
+    "catalog_product_id": 267,
+    "name": "Samsung Case (Samsung Galaxy S23 Plus)",
+    "size": "Samsung Galaxy S23 Plus",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/18750_1707912851.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18750"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18750/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18750/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18750/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18751,
+    "catalog_product_id": 267,
+    "name": "Samsung Case (Samsung Galaxy S23 Ultra)",
+    "size": "Samsung Galaxy S23 Ultra",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/18751_1707912854.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18751"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18751/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18751/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18751/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18749,
+    "catalog_product_id": 267,
+    "name": "Samsung Case (Samsung Galaxy S23)",
+    "size": "Samsung Galaxy S23",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/18749_1707912854.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18749"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18749/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18749/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18749/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18735,
+    "catalog_product_id": 267,
+    "name": "Samsung Case (Samsung Galaxy S24 Plus)",
+    "size": "Samsung Galaxy S24 Plus",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/18735_1705299929.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18735"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18735/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18735/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18735/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18736,
+    "catalog_product_id": 267,
+    "name": "Samsung Case (Samsung Galaxy S24 Ultra)",
+    "size": "Samsung Galaxy S24 Ultra",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/18736_1705299934.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18736"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18736/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18736/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18736/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 18734,
+    "catalog_product_id": 267,
+    "name": "Samsung Case (Samsung Galaxy S24)",
+    "size": "Samsung Galaxy S24",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/267/18734_1705299937.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/18734"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/267"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/18734/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/18734/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/18734/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.5,
+      "width": 3.12,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 18,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/267/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/267"
+   }
+  }
+ }
+}

@@ -1,0 +1,124 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1556/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 49335,
+    "catalog_product_id": 1556,
+    "name": "Generic brand  (White / 6″×6″)",
+    "size": "6″×6″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1556/49335_1792568691.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49335"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1556"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1556/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49335/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49335/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49335/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "cover",
+      "height": 6.25,
+      "width": 12.88,
+      "orientation": "any"
+     },
+     {
+      "placement": "spread_1",
+      "height": 6.25,
+      "width": 12.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "spread_2",
+      "height": 6.25,
+      "width": 12.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "spread_3",
+      "height": 6.25,
+      "width": 12.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "spread_4",
+      "height": 6.25,
+      "width": 12.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "spread_5",
+      "height": 6.25,
+      "width": 12.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "spread_6",
+      "height": 6.25,
+      "width": 12.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "spread_7",
+      "height": 6.25,
+      "width": 12.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "spread_8",
+      "height": 6.25,
+      "width": 12.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "spread_9",
+      "height": 6.25,
+      "width": 12.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "spread_10",
+      "height": 6.25,
+      "width": 12.25,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1556/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1556"
+   }
+  }
+ }
+}

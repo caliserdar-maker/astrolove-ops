@@ -1,0 +1,120 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1466?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1466,
+   "type": "POSTCARD",
+   "main_category_id": 16,
+   "name": "Paper Gift Bag",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/cc/ccad959953fa28ff10f9b78d0215913f_l",
+   "variant_count": 8,
+   "is_discontinued": false,
+   "description": "Make packaging part of the experience with these custom paper gift bags. \n\n• Durable paper with a full-color print surface\n• Twisted paper handles on select sizes\n• Flat bottom for easy loading and stability\n• Available sizes: 6.25″ × 12.5″; 10″ × 13″; 8″ × 10.25″; 5.5″ × 8.375″",
+   "sizes": [
+    "5.5″×8.375″",
+    "6.25″×12.5″",
+    "8″×10.25″",
+    "10″×13″"
+   ],
+   "colors": [
+    {
+     "name": "Kraft",
+     "value": "#e1c8a8"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1466"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1466/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1466/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1466/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1466/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1466/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1466/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,84 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/847/prices?currency=USD&selling_region_name=north_america",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 847,
+    "placements": [
+     {
+      "id": "embroidery_apparel_front",
+      "title": "Front",
+      "type": "Embroidery",
+      "technique_key": "embroidery",
+      "placement_options": [],
+      "price": "6.95",
+      "discounted_price": "6.95",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 22232,
+     "techniques": [
+      {
+       "technique_key": "embroidery",
+       "technique_display_name": "Embroidery",
+       "price": "62.37",
+       "discounted_price": "62.37"
+      }
+     ]
+    },
+    {
+     "id": 22233,
+     "techniques": [
+      {
+       "technique_key": "embroidery",
+       "technique_display_name": "Embroidery",
+       "price": "62.37",
+       "discounted_price": "62.37"
+      }
+     ]
+    },
+    {
+     "id": 22234,
+     "techniques": [
+      {
+       "technique_key": "embroidery",
+       "technique_display_name": "Embroidery",
+       "price": "62.37",
+       "discounted_price": "62.37"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/847/prices?currency=USD&selling_region_name=north_america&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/847"
+   }
+  }
+ }
+}

@@ -1,0 +1,178 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/881/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 22782,
+    "catalog_product_id": 881,
+    "name": "Ceramic Ornament (Circle)",
+    "size": "Circle",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/881/22782_1747141509.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22782"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/881"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/881/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22782/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22782/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22782/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.18,
+      "width": 3.18,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22783,
+    "catalog_product_id": 881,
+    "name": "Ceramic Ornament (Heart)",
+    "size": "Heart",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/881/22783_1747141509.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22783"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/881"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/881/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22783/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22783/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22783/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.24,
+      "width": 3.26,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22785,
+    "catalog_product_id": 881,
+    "name": "Ceramic Ornament (Snowflake)",
+    "size": "Snowflake",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/881/22785_1747141510.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22785"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/881"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/881/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22785/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22785/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22785/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.2,
+      "width": 2.88,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22784,
+    "catalog_product_id": 881,
+    "name": "Ceramic Ornament (Star)",
+    "size": "Star",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/881/22784_1747141520.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22784"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/881"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/881/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22784/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22784/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22784/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.32,
+      "width": 3.48,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/881/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/881"
+   }
+  }
+ }
+}

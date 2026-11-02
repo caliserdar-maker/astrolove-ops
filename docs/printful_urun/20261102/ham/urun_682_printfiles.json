@@ -1,0 +1,101 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/682",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 682,
+   "available_placements": {
+    "front": "Front print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 444,
+     "width": 900,
+     "height": 1500,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 16952,
+     "placements": {
+      "front": 444
+     }
+    },
+    {
+     "variant_id": 16955,
+     "placements": {
+      "front": 444
+     }
+    },
+    {
+     "variant_id": 16956,
+     "placements": {
+      "front": 444
+     }
+    },
+    {
+     "variant_id": 16953,
+     "placements": {
+      "front": 444
+     }
+    },
+    {
+     "variant_id": 18658,
+     "placements": {
+      "front": 444
+     }
+    },
+    {
+     "variant_id": 18659,
+     "placements": {
+      "front": 444
+     }
+    },
+    {
+     "variant_id": 16957,
+     "placements": {
+      "front": 444
+     }
+    },
+    {
+     "variant_id": 16954,
+     "placements": {
+      "front": 444
+     }
+    },
+    {
+     "variant_id": 16958,
+     "placements": {
+      "front": 444
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Flat 3",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Product details",
+    "Templates"
+   ],
+   "options": [
+    "Front",
+    "Product details",
+    "Product details 2",
+    "Product details 3"
+   ]
+  },
+  "extra": []
+ }
+}

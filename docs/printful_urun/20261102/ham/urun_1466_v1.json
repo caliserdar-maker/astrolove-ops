@@ -1,0 +1,253 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1466",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1466,
+    "main_category_id": 16,
+    "type": "POSTCARD",
+    "description": "Make packaging part of the experience with these custom paper gift bags. \n\n• Durable paper with a full-color print surface\n• Twisted paper handles on select sizes\n• Flat bottom for easy loading and stability\n• Available sizes: 6.25″ × 12.5″; 10″ × 13″; 8″ × 10.25″; 5.5″ × 8.375″",
+    "type_name": "Paper Gift Bag",
+    "title": "Paper Gift Bag",
+    "brand": null,
+    "model": "Paper Gift Bag",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/cc/ccad959953fa28ff10f9b78d0215913f_l",
+    "variant_count": 8,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 46020,
+     "product_id": 1466,
+     "name": "Paper Gift Bag (Kraft / 10″×13″)",
+     "size": "10″×13″",
+     "color": "Kraft",
+     "color_code": "#e1c8a8",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1466/46020_1779347586.jpg",
+     "price": "5.88",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 46014,
+     "product_id": 1466,
+     "name": "Paper Gift Bag (Kraft / 5.5″×8.375″)",
+     "size": "5.5″×8.375″",
+     "color": "Kraft",
+     "color_code": "#e1c8a8",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1466/46014_1779347623.jpg",
+     "price": "5.38",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 46016,
+     "product_id": 1466,
+     "name": "Paper Gift Bag (Kraft / 6.25″×12.5″)",
+     "size": "6.25″×12.5″",
+     "color": "Kraft",
+     "color_code": "#e1c8a8",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1466/46016_1779347664.jpg",
+     "price": "6.09",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 46018,
+     "product_id": 1466,
+     "name": "Paper Gift Bag (Kraft / 8″×10.25″)",
+     "size": "8″×10.25″",
+     "color": "Kraft",
+     "color_code": "#e1c8a8",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1466/46018_1779347690.jpg",
+     "price": "5.59",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 46021,
+     "product_id": 1466,
+     "name": "Paper Gift Bag (White / 10″×13″)",
+     "size": "10″×13″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1466/46021_1779347586.jpg",
+     "price": "5.88",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 46015,
+     "product_id": 1466,
+     "name": "Paper Gift Bag (White / 5.5″×8.375″)",
+     "size": "5.5″×8.375″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1466/46015_1779347622.jpg",
+     "price": "5.38",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 46017,
+     "product_id": 1466,
+     "name": "Paper Gift Bag (White / 6.25″×12.5″)",
+     "size": "6.25″×12.5″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1466/46017_1779347664.jpg",
+     "price": "6.09",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 46019,
+     "product_id": 1466,
+     "name": "Paper Gift Bag (White / 8″×10.25″)",
+     "size": "8″×10.25″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1466/46019_1779347690.jpg",
+     "price": "5.59",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

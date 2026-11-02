@@ -1,0 +1,49 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/262",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 262,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 117,
+     "width": 2400,
+     "height": 2850,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 8894,
+     "placements": {
+      "default": 117
+     }
+    }
+   ],
+   "option_groups": [
+    "Default",
+    "Men's",
+    "Women's",
+    "Women's Lifestyle"
+   ],
+   "options": [
+    "Back",
+    "Front",
+    "Front 2",
+    "Mockup",
+    "Print File"
+   ]
+  },
+  "extra": []
+ }
+}

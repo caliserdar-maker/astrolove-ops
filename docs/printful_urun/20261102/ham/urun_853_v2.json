@@ -1,0 +1,123 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/853?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 853,
+   "type": "SUBLIMATION",
+   "main_category_id": 251,
+   "name": "Desk Mat",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/8b/8b44bab674807711bfb96ef6effe3ab3_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Keep your desk looking sharp with a smooth, anti-slip mat designed for gaming or work. Whether you’re gaming, working, or just trying to keep your coffee mug from sliding around, this desk mat has you covered. The anti-slip backing keeps your setup steady, and the hemmed edges ensure durability.\n\n• 100% polyester top\n• Anti-slip natural rubber base\n• Thickness: 0.12″ (3 mm)\n• Hemmed edges\n• Blank product sourced from China",
+   "sizes": [
+    "12″×18″",
+    "12″×22″",
+    "16″×32″"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#050505"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/853"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/853/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/853/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/853/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/853/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/853/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/853/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

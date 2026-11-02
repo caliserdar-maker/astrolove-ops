@@ -1,0 +1,116 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/474",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 474,
+    "main_category_id": 198,
+    "type": "POSTCARD",
+    "description": "A good notebook can help you with motivation to take more notes, write down ideas, or list future dreams. This custom wire-bound notebook will be a great daily companion whenever you need to put your thoughts down on paper!\n\n• Covers with soft-touch coating\n• Cover weight: 10.38 oz/yd² (352 g/m²)\n• Page weight: 2.62 oz/yd² (89 g/m²)\n• Metal wire-o binding\n• 140 dotted pages\n• US fulfilled notebooks measure 5.5″ × 8.5″ (13 × 21 cm)\n• EU fulfilled notebooks measure 5.7″ × 8.5″ (14.5 × 21 cm)\n• Blank product sourced from the US and Sweden",
+    "type_name": "Spiral Notebook | White w/Black Spiral",
+    "title": "Spiral Notebook",
+    "brand": null,
+    "model": "Spiral Notebook | White w/Black Spiral",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/95/959982bbc26d6ac2c831edbe3207cc6c_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 12141,
+     "product_id": 474,
+     "name": "Spiral Notebook (5.5″×8.5″)",
+     "size": "5.5″×8.5″",
+     "color": "Dotted",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/474/12141_1766061840.jpg",
+     "price": "12.43",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

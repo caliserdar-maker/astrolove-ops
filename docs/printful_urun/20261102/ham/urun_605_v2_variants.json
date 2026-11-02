@@ -1,0 +1,818 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/605/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 15533,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Black / AirPods Pro)",
+    "size": "AirPods Pro",
+    "color": "Black",
+    "color_code": "#3b3b3b",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15533_1657777015.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15533"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15533/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15533/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15533/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15524,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Black / AirPods)",
+    "size": "AirPods",
+    "color": "Black",
+    "color_code": "#3b3b3b",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15524_1657533238.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15524"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15524/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15524/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15524/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.06,
+      "width": 1.06,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.86,
+      "width": 0.98,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15534,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Blue / AirPods Pro)",
+    "size": "AirPods Pro",
+    "color": "Blue",
+    "color_code": "#00ccff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15534_1657777026.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15534"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15534/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15534/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15534/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15525,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Blue / AirPods)",
+    "size": "AirPods",
+    "color": "Blue",
+    "color_code": "#00ccff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15525_1657533243.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15525"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15525/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15525/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15525/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.06,
+      "width": 1.06,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.86,
+      "width": 0.98,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15535,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Grey / AirPods Pro)",
+    "size": "AirPods Pro",
+    "color": "Grey",
+    "color_code": "#b1b4b4",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15535_1657777036.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15535"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15535/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15535/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15535/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15526,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Grey / AirPods)",
+    "size": "AirPods",
+    "color": "Grey",
+    "color_code": "#b1b4b4",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15526_1657533243.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15526"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15526/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15526/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15526/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.06,
+      "width": 1.06,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.86,
+      "width": 0.98,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15536,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Mint / AirPods Pro)",
+    "size": "AirPods Pro",
+    "color": "Mint",
+    "color_code": "#b5ffe9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15536_1657777046.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15536"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15536/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15536/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15536/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15527,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Mint / AirPods)",
+    "size": "AirPods",
+    "color": "Mint",
+    "color_code": "#b5ffe9",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15527_1657533248.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15527"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15527/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15527/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15527/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.06,
+      "width": 1.06,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.86,
+      "width": 0.98,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15537,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Navy / AirPods Pro)",
+    "size": "AirPods Pro",
+    "color": "Navy",
+    "color_code": "#1b4982",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15537_1657777046.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15537"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15537/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15537/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15537/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15528,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Navy / AirPods)",
+    "size": "AirPods",
+    "color": "Navy",
+    "color_code": "#1b4982",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15528_1657533256.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15528"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15528/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15528/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15528/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.06,
+      "width": 1.06,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.86,
+      "width": 0.98,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15538,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Pink / AirPods Pro)",
+    "size": "AirPods Pro",
+    "color": "Pink",
+    "color_code": "#ffc1cd",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15538_1657777056.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15538"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15538/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15538/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15538/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15529,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Pink / AirPods)",
+    "size": "AirPods",
+    "color": "Pink",
+    "color_code": "#ffc1cd",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15529_1657533256.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15529"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15529/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15529/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15529/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.06,
+      "width": 1.06,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.86,
+      "width": 0.98,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15539,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Red / AirPods Pro)",
+    "size": "AirPods Pro",
+    "color": "Red",
+    "color_code": "#f52f2f",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15539_1657777056.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15539"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15539/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15539/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15539/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15530,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Red / AirPods)",
+    "size": "AirPods",
+    "color": "Red",
+    "color_code": "#f52f2f",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15530_1657533258.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15530"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15530/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15530/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15530/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.06,
+      "width": 1.06,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.86,
+      "width": 0.98,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15540,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (White / AirPods Pro)",
+    "size": "AirPods Pro",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15540_1657777056.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15540"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15540/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15540/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15540/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15531,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (White / AirPods)",
+    "size": "AirPods",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15531_1657533269.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15531"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15531/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15531/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15531/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.06,
+      "width": 1.06,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.86,
+      "width": 0.98,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15541,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Yellow / AirPods Pro)",
+    "size": "AirPods Pro",
+    "color": "Yellow",
+    "color_code": "#ffcc00",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15541_1657777107.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15541"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15541/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15541/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15541/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.78,
+      "width": 1.41,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15532,
+    "catalog_product_id": 605,
+    "name": "AirPods Cases (Yellow / AirPods)",
+    "size": "AirPods",
+    "color": "Yellow",
+    "color_code": "#ffcc00",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/605/15532_1657533270.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15532"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/605"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15532/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15532/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15532/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 1.06,
+      "width": 1.06,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 0.86,
+      "width": 0.98,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 18,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/605/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/605"
+   }
+  }
+ }
+}

@@ -1,0 +1,99 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/691",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 691,
+    "main_category_id": 264,
+    "type": "DRINKWARE",
+    "description": "From bachelor and bachelorette parties to weddings, baby showers, and intimate dinner parties, this glass effortlessly elevates any occasion. Indulge in the perfect balance of style and functionality, raise a glass to unforgettable moments and celebrate life’s moments.\n\n• Glass material\n• Simple and sleek design\n• Volume: 15 oz (443 ml)\n• Not dishwasher or microwave safe\n• Blank product sourced from the US",
+    "type_name": "Wine Glass | Stemless | 15oz | Clear",
+    "title": "Stemless Wine Glass (15 oz)",
+    "brand": null,
+    "model": "Wine Glass | Stemless | 15oz | Clear",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/06/065551c12680307a55f80f781666ec68_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 17353,
+     "product_id": 691,
+     "name": "Stemless Wine Glass (15 oz)",
+     "size": "15 oz",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/691/17353_1686298402.jpg",
+     "price": "8.84",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

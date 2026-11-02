@@ -1,0 +1,114 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/366?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 366,
+   "type": "FRAMED-POSTER",
+   "main_category_id": 56,
+   "name": "Matte Paper Framed Poster With Mat (cm)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/products/366/product_1614597008.jpg",
+   "variant_count": 8,
+   "is_discontinued": false,
+   "description": "Make any room look more sophisticated by displaying this framed poster with a smooth, white mat board. It’s printed on a quality matte paper and framed with a semi-hardwood alder frame.\n\n• Paper thickness: 10.3 mil\n• Paper weight: 189 g/m²\n• Ayous wood frame\n• Acrylite front protector\n• White mat board\n• Hanging hardware included\n• 21×30cm posters are size A4",
+   "sizes": [
+    "21×30 cm",
+    "30×40 cm",
+    "50×70 cm",
+    "61×91 cm"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#000000"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/366"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/366/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/366/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/366/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/366/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/366/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/366/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

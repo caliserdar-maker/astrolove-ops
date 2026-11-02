@@ -1,0 +1,129 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/583",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 583,
+    "main_category_id": 251,
+    "type": "SUBLIMATION",
+    "description": "With its large size and quality edge stitching, this gaming mouse pad turns your gaming setup into a professional gaming station ready for Dota, CSGO, and more. Don’t worry about jerky mouse movements ever again, as the under layer features a reliable non-slip surface that keeps the entire mat firmly rooted to your table.\n\n• 100% polyester\n• Rubber non-slip base\n• Sizes: 36″ × 18″ (91.4 cm × 45.7 cm), 18″ × 16″ (45.8 cm × 40.7 cm)\n• Vibrant prints, long lasting\n• High-quality edge stitching that doesn’t peel\n• Non-slip surface\n• Rounded edges\n• Blank product sourced from China\n\nDisclaimer: Not machine washable. Spot clean gently to preserve quality and appearance.",
+    "type_name": "Mouse Pad | Rectangle | Gaming | White",
+    "title": "Gaming Mouse Pad",
+    "brand": null,
+    "model": "Mouse Pad | Rectangle | Gaming | White",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/17/1753cc3ed8f6b1f796c1f86bc140ee37_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 14943,
+     "product_id": 583,
+     "name": "Gaming Mouse Pad (White / 18″×16″)",
+     "size": "18″×16″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/583/14943_1649422095.jpg",
+     "price": "11.95",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 14942,
+     "product_id": 583,
+     "name": "Gaming Mouse Pad (White / 36″×18″)",
+     "size": "36″×18″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/583/14942_1649422105.jpg",
+     "price": "19.72",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

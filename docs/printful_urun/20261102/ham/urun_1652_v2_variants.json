@@ -1,0 +1,158 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1652/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 52332,
+    "catalog_product_id": 1652,
+    "name": "Generic brand (12'' x 18'')",
+    "size": "12″×18″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1652/52332_1784012363.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52332"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1652"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1652/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52332/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52332/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52332/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 19.25,
+      "width": 14.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 19.25,
+      "width": 14.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52333,
+    "catalog_product_id": 1652,
+    "name": "Generic brand (24'' x 36'')",
+    "size": "24″×36″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1652/52333_1784012416.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52333"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1652"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1652/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52333/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52333/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52333/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 37.87,
+      "width": 26.72,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 37.87,
+      "width": 26.72,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52334,
+    "catalog_product_id": 1652,
+    "name": "Generic brand (36'' x 60'')",
+    "size": "36″×60″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1652/52334_1784012416.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52334"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1652"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1652/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52334/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52334/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52334/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 62.11,
+      "width": 39.23,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 62.11,
+      "width": 39.23,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1652/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1652"
+   }
+  }
+ }
+}

@@ -1,0 +1,238 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/367/prices?currency=USD&selling_region_name=north_america",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 367,
+    "placements": [
+     {
+      "id": "front",
+      "title": "Front print",
+      "type": "DTG printing",
+      "technique_key": "dtg",
+      "placement_options": [],
+      "price": "5.95",
+      "discounted_price": "5.95",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     },
+     {
+      "id": "back",
+      "title": "Back print",
+      "type": "DTG printing",
+      "technique_key": "dtg",
+      "placement_options": [],
+      "price": "5.95",
+      "discounted_price": "5.95",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     },
+     {
+      "id": "embroidery_apparel_front",
+      "title": "Front",
+      "type": "Embroidery",
+      "technique_key": "embroidery",
+      "placement_options": [
+       {
+        "name": "unlimited_color",
+        "type": "bool",
+        "values": [
+         true,
+         false
+        ],
+        "description": "Unlimited color",
+        "price": {
+         "false": "0.00",
+         "true": "3.50"
+        }
+       }
+      ],
+      "price": "6.95",
+      "discounted_price": "6.95",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     },
+     {
+      "id": "front_dtf_tote",
+      "title": "Front",
+      "type": "DTF printing",
+      "technique_key": "dtfilm",
+      "placement_options": [],
+      "price": "5.95",
+      "discounted_price": "5.95",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     },
+     {
+      "id": "back_dtf_tote",
+      "title": "Back",
+      "type": "DTF printing",
+      "technique_key": "dtfilm",
+      "placement_options": [],
+      "price": "5.95",
+      "discounted_price": "5.95",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 10457,
+     "techniques": [
+      {
+       "technique_key": "dtg",
+       "technique_display_name": "DTG printing",
+       "price": "15.87",
+       "discounted_price": "15.87"
+      },
+      {
+       "technique_key": "embroidery",
+       "technique_display_name": "Embroidery",
+       "price": "17.95",
+       "discounted_price": "17.95"
+      },
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "17.19",
+       "discounted_price": "17.19"
+      }
+     ]
+    },
+    {
+     "id": 10458,
+     "techniques": [
+      {
+       "technique_key": "dtg",
+       "technique_display_name": "DTG printing",
+       "price": "15.87",
+       "discounted_price": "15.87"
+      },
+      {
+       "technique_key": "embroidery",
+       "technique_display_name": "Embroidery",
+       "price": "17.95",
+       "discounted_price": "17.95"
+      },
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "17.19",
+       "discounted_price": "17.19"
+      }
+     ]
+    },
+    {
+     "id": 51603,
+     "techniques": [
+      {
+       "technique_key": "dtg",
+       "technique_display_name": "DTG printing",
+       "price": "14.75",
+       "discounted_price": "14.75"
+      },
+      {
+       "technique_key": "embroidery",
+       "technique_display_name": "Embroidery",
+       "price": "17.25",
+       "discounted_price": "17.25"
+      },
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "16.50",
+       "discounted_price": "16.50"
+      }
+     ]
+    },
+    {
+     "id": 51604,
+     "techniques": [
+      {
+       "technique_key": "dtg",
+       "technique_display_name": "DTG printing",
+       "price": "14.75",
+       "discounted_price": "14.75"
+      },
+      {
+       "technique_key": "embroidery",
+       "technique_display_name": "Embroidery",
+       "price": "17.25",
+       "discounted_price": "17.25"
+      },
+      {
+       "technique_key": "dtfilm",
+       "technique_display_name": "DTF printing",
+       "price": "16.50",
+       "discounted_price": "16.50"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": [
+    {
+     "quantity": 25,
+     "bulk_discount_percentage": 0.03
+    },
+    {
+     "quantity": 50,
+     "bulk_discount_percentage": 0.04
+    },
+    {
+     "quantity": 100,
+     "bulk_discount_percentage": 0.05
+    },
+    {
+     "quantity": 300,
+     "bulk_discount_percentage": 0.06
+    }
+   ]
+  },
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/367/prices?currency=USD&selling_region_name=north_america&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/367"
+   }
+  }
+ }
+}

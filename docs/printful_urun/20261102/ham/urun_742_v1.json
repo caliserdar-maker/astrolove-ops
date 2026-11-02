@@ -1,0 +1,187 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/742",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 742,
+    "main_category_id": 238,
+    "type": "DRINKWARE",
+    "description": "Upgrade your drinkware game and add a splash of color to your day with this insulated tumbler. Cheers to style and functionality in every sip!\n\n• High-grade stainless steel tumbler\n• 20 oz. (600 ml)\n• Tumbler size: 4″ × 7.2″ (10.1 cm × 18.2 cm)\n• Includes straw and lid\n• Blank product sourced from China and printed in the US\n\nDisclaimer: \n• Not dishwasher or microwave safe. Hand-wash only.\n• Not leak-proof. To prevent potential leaks, we recommend keeping the tumbler upright at all times.",
+    "type_name": "Tumbler | Insulated | w/Straw | 20oz",
+    "title": "Insulated Tumbler with a Straw",
+    "brand": null,
+    "model": "Tumbler | Insulated | w/Straw | 20oz",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/a4/a4bcec2c594defdaf96c4c940ba8c905_l",
+    "variant_count": 5,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 19107,
+     "product_id": 742,
+     "name": "Insulated Tumbler with a Straw (Black / 20 oz)",
+     "size": "20 oz",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/742/19107_1709285872.jpg",
+     "price": "20.76",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19108,
+     "product_id": 742,
+     "name": "Insulated Tumbler with a Straw (Mint / 20 oz)",
+     "size": "20 oz",
+     "color": "Mint",
+     "color_code": "#cee5bd",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/742/19108_1709285879.jpg",
+     "price": "20.76",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19109,
+     "product_id": 742,
+     "name": "Insulated Tumbler with a Straw (Navy / 20 oz)",
+     "size": "20 oz",
+     "color": "Navy",
+     "color_code": "#213c51",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/742/19109_1709285879.jpg",
+     "price": "20.76",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19110,
+     "product_id": 742,
+     "name": "Insulated Tumbler with a Straw (Pink / 20 oz)",
+     "size": "20 oz",
+     "color": "Pink",
+     "color_code": "#ffa7b1",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/742/19110_1709285879.jpg",
+     "price": "20.76",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19111,
+     "product_id": 742,
+     "name": "Insulated Tumbler with a Straw (White / 20 oz)",
+     "size": "20 oz",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/742/19111_1709285880.jpg",
+     "price": "20.76",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

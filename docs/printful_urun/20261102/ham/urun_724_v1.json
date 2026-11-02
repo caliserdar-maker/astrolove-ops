@@ -1,0 +1,148 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/724",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 724,
+    "main_category_id": 190,
+    "type": "POSTCARD",
+    "description": "Leave a lasting impression with this finely crafted set of business cards. Double-sided printing ensures maximum messaging potential, and the uncoated paper adds an elegant touch.\n\n• Paper in the US: Mohawk uncoated cover paper\n• Paper in EU: Munken Lynx, 300 g/m²\n• Size: 3.5″× 2″ (9 × 5 cm)\n• Single-sided or double-sided print \n• Set of 50 or 100 business cards\n• Blank product sourced from the United States or Latvia",
+    "type_name": "Business Cards | Set",
+    "title": "Set of Business Cards",
+    "brand": null,
+    "model": "Business Cards | Set",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/60/6009b4c36801c6751747c730a3a1cd34_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 18555,
+     "product_id": 724,
+     "name": "Set of Business Cards (White / 100 pieces)",
+     "size": "100 pieces",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/724/18555_1695908011.jpg",
+     "price": "18.68",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 18554,
+     "product_id": 724,
+     "name": "Set of Business Cards (White / 50 pieces)",
+     "size": "50 pieces",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/724/18554_1695908011.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

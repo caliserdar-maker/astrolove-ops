@@ -1,0 +1,259 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/798",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 798,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 331,
+     "width": 1392,
+     "height": 2220,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 20687,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20688,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20691,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20692,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20689,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20690,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20693,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20694,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20319,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20318,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20323,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20322,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20321,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20320,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20325,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20324,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20327,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20326,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20333,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20332,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20329,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20328,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20331,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 20330,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 34001,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 34002,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 34003,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 34004,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 34005,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 34006,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 34007,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 34008,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 53188,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 53189,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 53190,
+     "placements": {
+      "default": 331
+     }
+    },
+    {
+     "variant_id": 53191,
+     "placements": {
+      "default": 331
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Templates"
+   ],
+   "options": [
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,155 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/274?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 274,
+   "type": "CUT-SEW",
+   "main_category_id": 48,
+   "name": "All-Over Print Large Tote Bag w/ Pocket",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/dc/dc9e348381cbeb3db14ae61f926968e9_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "A trendy beach bag, where you can put everything that matters when hitting those warm beaches.\n\n• 100% polyester\n• Maximum weight limit – 44lbs (20kg)\n• Large inside pocket\n• Comfortable cotton webbing handles\n• Vibrant colors that won't fade\n• Available in one size",
+   "sizes": [
+    "16″×20″"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#000000"
+    },
+    {
+     "name": "Red",
+     "value": "#c5262a"
+    },
+    {
+     "name": "Yellow",
+     "value": "#de9219"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "pocket",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "pocket_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "black": "Black",
+      "clear": "Clear"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/274"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/274/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/274/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/274/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/274/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/274/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/274/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

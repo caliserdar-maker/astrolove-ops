@@ -1,0 +1,334 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/964/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 24571,
+    "catalog_product_id": 964,
+    "name": "Knitted Pet Sweater (Custom / 2XL)",
+    "size": "2XL",
+    "color": "Custom",
+    "color_code": "#dedede",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/964/24571_1759903657.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24571"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/964"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/964/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24571/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24571/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24571/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 599.0,
+      "width": 784.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 599.0,
+      "width": 784.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 24565,
+    "catalog_product_id": 964,
+    "name": "Knitted Pet Sweater (Custom / 2XS)",
+    "size": "2XS",
+    "color": "Custom",
+    "color_code": "#dedede",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/964/24565_1759903656.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24565"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/964"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/964/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24565/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24565/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24565/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 263.0,
+      "width": 367.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 263.0,
+      "width": 367.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 24569,
+    "catalog_product_id": 964,
+    "name": "Knitted Pet Sweater (Custom / L)",
+    "size": "L",
+    "color": "Custom",
+    "color_code": "#dedede",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/964/24569_1759903657.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24569"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/964"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/964/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24569/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24569/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24569/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 433.0,
+      "width": 566.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 433.0,
+      "width": 566.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 24568,
+    "catalog_product_id": 964,
+    "name": "Knitted Pet Sweater (Custom / M)",
+    "size": "M",
+    "color": "Custom",
+    "color_code": "#dedede",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/964/24568_1759903658.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24568"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/964"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/964/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24568/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24568/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24568/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 369.0,
+      "width": 525.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 369.0,
+      "width": 525.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 24567,
+    "catalog_product_id": 964,
+    "name": "Knitted Pet Sweater (Custom / S)",
+    "size": "S",
+    "color": "Custom",
+    "color_code": "#dedede",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/964/24567_1759903656.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24567"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/964"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/964/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24567/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24567/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24567/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "back",
+      "height": 339.0,
+      "width": 480.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front",
+      "height": 339.0,
+      "width": 480.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 24570,
+    "catalog_product_id": 964,
+    "name": "Knitted Pet Sweater (Custom / XL)",
+    "size": "XL",
+    "color": "Custom",
+    "color_code": "#dedede",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/964/24570_1759903657.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24570"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/964"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/964/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24570/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24570/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24570/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 512.0,
+      "width": 665.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 512.0,
+      "width": 665.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 24566,
+    "catalog_product_id": 964,
+    "name": "Knitted Pet Sweater (Custom / XS)",
+    "size": "XS",
+    "color": "Custom",
+    "color_code": "#dedede",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/964/24566_1759903658.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24566"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/964"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/964/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24566/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24566/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24566/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 294.0,
+      "width": 402.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 294.0,
+      "width": 402.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 7,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/964/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/964"
+   }
+  }
+ }
+}

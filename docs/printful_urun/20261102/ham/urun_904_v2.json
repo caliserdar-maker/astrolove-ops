@@ -1,0 +1,122 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/904?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 904,
+   "type": "SUBLIMATION",
+   "main_category_id": 239,
+   "name": "Metal License Plate Frame",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/6e/6e1171d437eb77a8d7ec9916cc4f6fbb_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Give your ride an upgrade with this metal license plate frame. Built from durable aluminum with a glossy finish, it stands out on the road while holding up to the elements. Designed for hassle-free installation with pre-drilled holes and a clean, high-visibility design.\n\n• 100% aluminum\n• Size: 12.3″ × 6.5″ (31.1 cm × 16.5 cm)\n• Weight: 85 g (3 oz)\n• Pre-drilled holes for easy mounting (no screws included)\n• Glossy finish\n• Silver-colored backing\n• Blank product sourced from the US\n\nDisclaimer: Check local regulations regarding license plate frame size and shape.",
+   "sizes": [
+    "12.25″×6.5″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/904"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/904/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/904/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/904/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/904/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/904/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/904/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

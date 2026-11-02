@@ -1,0 +1,143 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/786",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 786,
+    "main_category_id": 198,
+    "type": "PUZZLE",
+    "description": "Jot down ideas, plan your week, or make grocery lists with this handy notepad. A stationery classic—one can never have too many! Perfect for the office or on your fridge.\n\n• 3 sizes: 8.5″ × 11″, 5.5″ × 6″, 4.25″ × 9″ (14 cm × 15 cm, 21.6 cm × 27.9 cm, 10.8 cm × 22.9 cm)\n• 40 or 50 single-sided tear-away pages\n• Hard cardboard or magnetic backing\n• All pages feature the same design as the front\n\nImportant: This product is available in the US only. If your shipping address is outside this region, please choose a different product.",
+    "type_name": "Notepad | Rectangle | White",
+    "title": "Notepad",
+    "brand": null,
+    "model": "Notepad | Rectangle | White",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/11/1109da8c0fd15c91f12fddf2e557ab11_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "United States"
+   },
+   "variants": [
+    {
+     "id": 19902,
+     "product_id": 786,
+     "name": "Notepad (White / 11″×8.5″)",
+     "size": "11″×8.5″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/786/19902_1719551667.jpg",
+     "price": "11.71",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19900,
+     "product_id": 786,
+     "name": "Notepad (White / 4.25″×9″ Magnetic)",
+     "size": "4.25″×9″ Magnetic",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/786/19900_1719551697.jpg",
+     "price": "9.63",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 19901,
+     "product_id": 786,
+     "name": "Notepad (White / 5.5″×6″)",
+     "size": "5.5″×6″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/786/19901_1719551708.jpg",
+     "price": "6.76",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

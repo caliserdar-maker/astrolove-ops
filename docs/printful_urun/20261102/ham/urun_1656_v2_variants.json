@@ -1,0 +1,208 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1656/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 52390,
+    "catalog_product_id": 1656,
+    "name": "Calendar 2027 | Generic brand (10.8\" x 8.4\" / Semi Glossy)",
+    "size": "10.8″×8.4″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1656/52390_1784886932.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52390"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1656"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1656/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52390/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52390/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52390/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "august",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "april",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "december",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "february",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "january",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "july",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "june",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "march",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "may",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "november",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "october",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "september",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "cover",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "april_grid",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "august_grid",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "december_grid",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "february_grid",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "january_grid",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "september_grid",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "october_grid",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "november_grid",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "may_grid",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "march_grid",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "june_grid",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     },
+     {
+      "placement": "july_grid",
+      "height": 9.08,
+      "width": 11.51,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1656/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1656"
+   }
+  }
+ }
+}

@@ -1,0 +1,202 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1552/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 49308,
+    "catalog_product_id": 1552,
+    "name": "BagBase Quadra QS309 | Studio Crossbody Bag (Black / One size)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1552/49308_1776245281.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49308"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1552"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1552/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49308/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49308/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49308/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_backpack",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49309,
+    "catalog_product_id": 1552,
+    "name": "BagBase Quadra QS309 | Studio Crossbody Bag (Fresh Green / One size)",
+    "size": "One size",
+    "color": "Fresh Green",
+    "color_code": "#e5f0e2",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1552/49309_1776245324.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49309"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1552"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1552/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49309/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49309/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49309/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_backpack",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49310,
+    "catalog_product_id": 1552,
+    "name": "BagBase Quadra QS309 | Studio Crossbody Bag (Fresh Pink / One size)",
+    "size": "One size",
+    "color": "Fresh Pink",
+    "color_code": "#ffeae4",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1552/49310_1776245312.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49310"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1552"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1552/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49310/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49310/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49310/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_backpack",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49311,
+    "catalog_product_id": 1552,
+    "name": "BagBase Quadra QS309 | Studio Crossbody Bag (Natural Stone / One size)",
+    "size": "One size",
+    "color": "Natural Stone",
+    "color_code": "#f2eee4",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1552/49311_1776245302.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49311"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1552"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1552/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49311/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49311/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49311/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_backpack",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1552/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1552"
+   }
+  }
+ }
+}

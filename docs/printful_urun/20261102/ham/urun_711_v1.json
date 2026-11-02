@@ -1,0 +1,171 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/711",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 711,
+    "main_category_id": 255,
+    "type": "SUBLIMATION",
+    "description": "This exquisite sherpa blanket combines a plushie feel with exceptional softness, making it the ultimate comfort companion. Perfect for daily use while lounging on the couch, snuggling up on chilly evenings, or styling your room—this blanket offers unmatched coziness and warmth.\n\n• Integral composition: 100% polyester fibers\n• Fabric: 100% polyester (51.5% surface fabric, 48.5% sherpa fabric)\n• Smooth side fabric: 6.49 oz/yd² (220g/m²), sherpa fabric: 7.08 oz/yd² (240g/m²)\n• Blank product components sourced from China",
+    "type_name": "Greentex | Sublimated Sherpa Blanket",
+    "title": "Sublimated Sherpa Blanket",
+    "brand": null,
+    "model": "Sublimated Sherpa Blanket",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/e2/e289ece99c6c7971336034b3597d6509_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 17483,
+     "product_id": 711,
+     "name": "Sublimated Sherpa Blanket (Tan / 37″×57″)",
+     "size": "37″×57″",
+     "color": "Tan",
+     "color_code": "#f0d8bc",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/711/17483_1691154680.jpg",
+     "price": "29.88",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17482,
+     "product_id": 711,
+     "name": "Sublimated Sherpa Blanket (Tan / 50″×60″)",
+     "size": "50″×60″",
+     "color": "Tan",
+     "color_code": "#f0d8bc",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/711/17482_1691154685.jpg",
+     "price": "35.76",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 17449,
+     "product_id": 711,
+     "name": "Sublimated Sherpa Blanket (Tan / 60″×80″)",
+     "size": "60″×80″",
+     "color": "Tan",
+     "color_code": "#f0d8bc",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/711/17449_1691153819.jpg",
+     "price": "47.81",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

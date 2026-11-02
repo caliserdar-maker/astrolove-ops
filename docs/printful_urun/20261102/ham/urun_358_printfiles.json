@@ -1,0 +1,113 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/358",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 358,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 183,
+     "width": 900,
+     "height": 900,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 184,
+     "width": 1200,
+     "height": 1200,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 185,
+     "width": 1650,
+     "height": 1650,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 423,
+     "width": 4500,
+     "height": 1125,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 10163,
+     "placements": {
+      "default": 183
+     }
+    },
+    {
+     "variant_id": 10164,
+     "placements": {
+      "default": 184
+     }
+    },
+    {
+     "variant_id": 10165,
+     "placements": {
+      "default": 185
+     }
+    },
+    {
+     "variant_id": 16362,
+     "placements": {
+      "default": 423
+     }
+    }
+   ],
+   "option_groups": [
+    "Default",
+    "Halloween",
+    "Holiday season",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Lifestyle 6",
+    "Lifestyle 7",
+    "Lifestyle 8",
+    "Placeholder",
+    "Red, white & blue",
+    "Spring/summer vibes",
+    "Template",
+    "Valentine's Day"
+   ],
+   "options": [
+    "Christmas",
+    "Christmas 2",
+    "Default",
+    "Front",
+    "Halloween",
+    "Halloween 2",
+    "Lifestyle 1",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Red, white & blue",
+    "Spring/Summer",
+    "Spring/Summer 2",
+    "Template",
+    "Valentine's Day",
+    "Valentine's Day 2"
+   ]
+  },
+  "extra": []
+ }
+}

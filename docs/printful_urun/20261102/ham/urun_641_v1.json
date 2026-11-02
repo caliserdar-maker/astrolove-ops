@@ -1,0 +1,221 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/641",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 641,
+    "main_category_id": 48,
+    "type": "T-SHIRT",
+    "description": "Turn heads in the shops or at the beach with your new cotton tote. Made of sturdy, heavyweight material and sporting reinforced shoulder straps, this roomy bag will fit groceries, books, beachwear, and much more.\n\n• 100% cotton\n• Fabric weight: 9.44 oz/yd² (320 g/m²)\n• One size: 16.5″ × 16.5″ (42 cm × 42 cm)\n• Reinforced shoulder straps\n• One large main compartment\n• Blank product sourced from China",
+    "type_name": "AS Colour 1001 | Carrie Tote",
+    "title": "Cotton Tote Bag | AS Colour 1001",
+    "brand": "AS Colour",
+    "model": "1001",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/fa/fa37e474f7c3d027440f63ab51ad7692_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "lifelike",
+      "title": "Lifelike",
+      "type": "bool",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DTG",
+      "display_name": "DTG printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": "5.95",
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 16287,
+     "product_id": 641,
+     "name": "AS Colour 1001 | Carrie Tote (Black / One size)",
+     "size": "One size",
+     "color": "Black",
+     "color_code": "#0a0a0a",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/641/16287_1666349183.jpg",
+     "price": "17.50",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "EU",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "UK",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16288,
+     "product_id": 641,
+     "name": "AS Colour 1001 | Carrie Tote (Camel / One size)",
+     "size": "One size",
+     "color": "Camel",
+     "color_code": "#d1924f",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/641/16288_1666349189.jpg",
+     "price": "17.50",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "EU",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "UK",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16289,
+     "product_id": 641,
+     "name": "AS Colour 1001 | Carrie Tote (Cream / One size)",
+     "size": "One size",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/641/16289_1666349190.jpg",
+     "price": "17.50",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "AU": "Australia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "EU",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "supplier_out_of_stock"
+      },
+      {
+       "region": "AU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

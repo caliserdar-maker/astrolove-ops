@@ -1,0 +1,121 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/761?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 761,
+   "type": "SUBLIMATION",
+   "main_category_id": 252,
+   "name": "Shower Curtain",
+   "brand": null,
+   "model": "Shower Curtain",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/02/0273ce04b2289c323923f8feca1d1bfb_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Upgrade your bathroom with an original shower curtain. This durable, water-resistant curtain is easy to install and maintain. Order it for yourself or as a gift for a housewarming or wedding.\n\n• 100% Polyester\n• Size: 71″ × 74″ (180 cm × 188 cm)\n• 12 eyelet holes (hooks not included)\n• Water-resistant\n• Blank product sourced from China\n\nCare guidelines: Machine-wash cold on a gentle cycle with a mild detergent. Tumble dry on low heat. Don’t iron or dry clean.",
+   "sizes": [
+    "71″×74″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/761"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/761/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/761/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/761/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/761/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/761/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/761/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

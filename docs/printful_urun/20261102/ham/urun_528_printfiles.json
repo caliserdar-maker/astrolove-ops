@@ -1,0 +1,53 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/528",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 528,
+   "available_placements": {
+    "front": "Front print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 57,
+     "width": 1500,
+     "height": 1500,
+     "dpi": 150,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 13313,
+     "placements": {
+      "front": 57
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "On Hanger",
+    "Product details",
+    "Women's"
+   ],
+   "options": [
+    "Back",
+    "Front",
+    "Front 2",
+    "Product details",
+    "Product details 2",
+    "Product details 3",
+    "Product details 4",
+    "Right Front",
+    "Right Front 2"
+   ]
+  },
+  "extra": []
+ }
+}

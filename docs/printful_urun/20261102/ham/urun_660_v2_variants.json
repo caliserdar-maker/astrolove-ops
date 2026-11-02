@@ -1,0 +1,150 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/660/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16411,
+    "catalog_product_id": 660,
+    "name": "Set of Pin Buttons (White / 1.25″)",
+    "size": "1.25″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/660/16411_1676018939.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16411"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/660"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/660/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16411/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16411/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16411/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.62,
+      "width": 2.62,
+      "orientation": "any"
+     },
+     {
+      "placement": "first",
+      "height": 2.62,
+      "width": 2.62,
+      "orientation": "any"
+     },
+     {
+      "placement": "second",
+      "height": 2.62,
+      "width": 2.62,
+      "orientation": "any"
+     },
+     {
+      "placement": "third",
+      "height": 2.62,
+      "width": 2.62,
+      "orientation": "any"
+     },
+     {
+      "placement": "fourth",
+      "height": 2.62,
+      "width": 2.62,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16412,
+    "catalog_product_id": 660,
+    "name": "Set of Pin Buttons (White / 2.25″)",
+    "size": "2.25″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/660/16412_1676018939.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16412"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/660"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/660/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16412/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16412/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16412/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.62,
+      "width": 2.62,
+      "orientation": "any"
+     },
+     {
+      "placement": "first",
+      "height": 2.62,
+      "width": 2.62,
+      "orientation": "any"
+     },
+     {
+      "placement": "second",
+      "height": 2.62,
+      "width": 2.62,
+      "orientation": "any"
+     },
+     {
+      "placement": "third",
+      "height": 2.62,
+      "width": 2.62,
+      "orientation": "any"
+     },
+     {
+      "placement": "fourth",
+      "height": 2.62,
+      "width": 2.62,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/660/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/660"
+   }
+  }
+ }
+}

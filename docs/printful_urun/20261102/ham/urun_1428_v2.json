@@ -1,0 +1,131 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1428?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1428,
+   "type": "SUBLIMATION",
+   "main_category_id": 254,
+   "name": "Rustic Christmas Stocking",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/4e/4ee684cba39291ab95682b342fa1116e_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Add a classic touch to holiday decorating with this rustic Christmas stocking. The plaid cuff and soft texture make it a cozy addition to fireplaces, stair rails, and gift displays. It’s a simple way for shoppers to bring warmth and personality into their seasonal decor.\n\n• 100% recycled polyester boot and plaid cuff\n• Size: 10.25″ × 16″ (26 cm × 40.6 cm)\n• One-sided design\n• Cream-colored back\n• Hanging loop for easy display\n• Two cuff color options: red/black and white/black\n• Blank product sourced from China",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "Red and Black/Natural",
+     "value": "#feedda"
+    },
+    {
+     "name": "White and Black/Natural",
+     "value": "#feedda"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1428"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1428/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1428/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1428/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1428/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1428/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1428/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

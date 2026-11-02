@@ -1,0 +1,102 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/908/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 23468,
+    "catalog_product_id": 908,
+    "name": "Glass Cutting Board (Rectangle / 11″×15″)",
+    "size": "11″×15″",
+    "color": "Rectangle",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/908/23468_1749105631.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23468"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/908"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/908/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23468/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23468/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23468/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 11.75,
+      "width": 15.75,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23469,
+    "catalog_product_id": 908,
+    "name": "Glass Cutting Board (Rectangle / 8″×11″)",
+    "size": "8″×11″",
+    "color": "Rectangle",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/908/23469_1749105640.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23469"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/908"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/908/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23469/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23469/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23469/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/908/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/908"
+   }
+  }
+ }
+}

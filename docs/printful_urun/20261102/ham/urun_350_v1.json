@@ -1,0 +1,188 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/350",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 350,
+    "main_category_id": 101,
+    "type": "CUT-SEW",
+    "description": "Fanny pack is the ultimate accessory for people on the go. And this waist bag has everything—the right size, a small inside pocket, and adjustable straps—to become your favorite fashion item if you're going to a festival, getting ready for a vacation, or just like to keep your hands free.\n\n• 100% polyester\n• Fabric weight: 9 oz./yd.² (305 g/m²)\n• Dimensions: 6.5″ (16 cm) in height, 13″ (33 cm) in width, and 2¾″ (7 cm) in diameter\n• Capacity: 0.37 gallons (1.4 l)\n• Water-resistant material\n• Top zipper with 2 sliders\n• Small, customizable inner pocket without zipper\n• Silky lining, piped inside hems\n• 1¼″ (2.54 cm) wide adjustable straps with plastic strap regulators\n• Blank product components sourced from China",
+    "type_name": "All-Over Print Fanny Pack",
+    "title": "All-Over Print Fanny Pack",
+    "brand": null,
+    "model": "All-Over Print Fanny Pack",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/a5/a5b065fbef259cc4554b04bcad64f006_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "stitch_color",
+      "title": "Stitch color",
+      "type": "radio",
+      "values": {
+       "black": "Black",
+       "clear": "Clear"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "top",
+      "type": "top",
+      "title": "Top print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "pocket",
+      "type": "pocket",
+      "title": "Inside Pocket",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "label_inside",
+      "type": "label_inside",
+      "title": "Inside label",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 9987,
+     "product_id": 350,
+     "name": "All-Over Print Fanny Pack (M/L)",
+     "size": "M/L",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/350/9987_1550755443.jpg",
+     "price": "24.11",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 9986,
+     "product_id": 350,
+     "name": "All-Over Print Fanny Pack (S/M)",
+     "size": "S/M",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/350/9986_1550755447.jpg",
+     "price": "24.11",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

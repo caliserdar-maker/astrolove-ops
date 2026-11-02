@@ -1,0 +1,710 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/799/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 20342,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 14 Plus)",
+    "size": "iPhone 14 Plus",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/20342_1727865958.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20342"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20342/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20342/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20342/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20343,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 14 Pro Max)",
+    "size": "iPhone 14 Pro Max",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/20343_1727865958.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20343"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20343/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20343/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20343/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20341,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 14 Pro)",
+    "size": "iPhone 14 Pro",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/20341_1727865968.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20341"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20341/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20341/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20341/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20340,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 14)",
+    "size": "iPhone 14",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/20340_1728025952.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20340"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20340/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20340/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20340/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20346,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 15 Plus)",
+    "size": "iPhone 15 Plus",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/20346_1727682063.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20346"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20346/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20346/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20346/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20347,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 15 Pro Max)",
+    "size": "iPhone 15 Pro Max",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/20347_1727682064.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20347"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20347/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20347/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20347/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20345,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 15 Pro)",
+    "size": "iPhone 15 Pro",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/20345_1727682064.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20345"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20345/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20345/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20345/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20344,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 15)",
+    "size": "iPhone 15",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/20344_1727682074.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20344"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20344/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20344/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20344/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20350,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 16 Plus)",
+    "size": "iPhone 16 Plus",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/20350_1727682074.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20350"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20350/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20350/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20350/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20351,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 16 Pro Max)",
+    "size": "iPhone 16 Pro Max",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/20351_1727682076.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20351"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20351/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20351/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20351/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20349,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 16 Pro)",
+    "size": "iPhone 16 Pro",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/20349_1727682085.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20349"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20349/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20349/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20349/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20348,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 16)",
+    "size": "iPhone 16",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/20348_1727682085.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20348"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20348/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20348/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20348/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33998,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 17 Air)",
+    "size": "iPhone 17 Air",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/33998_1757663571.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33998"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33998/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33998/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33998/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 34000,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 17 Pro Max)",
+    "size": "iPhone 17 Pro Max",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/34000_1757663573.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/34000"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/34000/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/34000/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/34000/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33999,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 17 Pro)",
+    "size": "iPhone 17 Pro",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/33999_1757663576.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33999"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33999/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33999/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33999/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33997,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 17)",
+    "size": "iPhone 17",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/33997_1757663578.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33997"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33997/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33997/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33997/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52392,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 18 Pro Max)",
+    "size": "iPhone 18 Pro Max",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/52392_1788948387.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52392"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52392/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52392/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52392/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52391,
+    "catalog_product_id": 799,
+    "name": "MagSafe® Clear Case for iPhone® (iPhone 18 Pro)",
+    "size": "iPhone 18 Pro",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/799/52391_1788948479.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52391"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/799"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52391/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52391/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52391/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 6.1,
+      "width": 2.93,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 18,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/799/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/799"
+   }
+  }
+ }
+}

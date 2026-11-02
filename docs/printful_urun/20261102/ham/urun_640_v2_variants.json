@@ -1,0 +1,634 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/640/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16228,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (Oak / 10″×10″)",
+    "size": "10″×10″",
+    "color": "Oak",
+    "color_code": "#e5c9ae",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16228_1663669683.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16228"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16228/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16228/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16228/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.24,
+      "width": 10.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16230,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (Oak / 12″×12″)",
+    "size": "12″×12″",
+    "color": "Oak",
+    "color_code": "#e5c9ae",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16230_1663669693.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16230"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16230/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16230/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16230/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.24,
+      "width": 12.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16231,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (Oak / 12″×16″)",
+    "size": "12″×16″",
+    "color": "Oak",
+    "color_code": "#e5c9ae",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16231_1663669693.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16231"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16231/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16231/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16231/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.24,
+      "width": 12.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16233,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (Oak / 14″×14″)",
+    "size": "14″×14″",
+    "color": "Oak",
+    "color_code": "#e5c9ae",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16233_1663669704.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16233"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16233/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16233/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16233/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.24,
+      "width": 14.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16234,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (Oak / 16″×16″)",
+    "size": "16″×16″",
+    "color": "Oak",
+    "color_code": "#e5c9ae",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16234_1663669714.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16234"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16234/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16234/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16234/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.24,
+      "width": 16.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16235,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (Oak / 16″×20″)",
+    "size": "16″×20″",
+    "color": "Oak",
+    "color_code": "#e5c9ae",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16235_1663669714.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16235"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16235/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16235/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16235/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.24,
+      "width": 16.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16236,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (Oak / 18″×18″)",
+    "size": "18″×18″",
+    "color": "Oak",
+    "color_code": "#e5c9ae",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16236_1663669724.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16236"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16236/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16236/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16236/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.24,
+      "width": 18.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16238,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (Oak / 24″×36″)",
+    "size": "24″×36″",
+    "color": "Oak",
+    "color_code": "#e5c9ae",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16238_1663669736.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16238"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16238/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16238/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16238/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.24,
+      "width": 24.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16216,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (White / 10″×10″)",
+    "size": "10″×10″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16216_1663669759.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16216"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16216/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16216/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16216/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.24,
+      "width": 10.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16218,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (White / 12″×12″)",
+    "size": "12″×12″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16218_1663669770.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16218"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16218/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16218/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16218/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.24,
+      "width": 12.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16219,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (White / 12″×16″)",
+    "size": "12″×16″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16219_1663669776.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16219"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16219/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16219/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16219/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.24,
+      "width": 12.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16221,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (White / 14″×14″)",
+    "size": "14″×14″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16221_1663669787.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16221"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16221/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16221/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16221/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.24,
+      "width": 14.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16222,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (White / 16″×16″)",
+    "size": "16″×16″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16222_1663669798.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16222"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16222/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16222/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16222/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.24,
+      "width": 16.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16223,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (White / 16″×20″)",
+    "size": "16″×20″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16223_1663669807.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16223"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16223/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16223/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16223/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.24,
+      "width": 16.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16224,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (White / 18″×18″)",
+    "size": "18″×18″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16224_1663669808.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16224"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16224/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16224/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16224/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.24,
+      "width": 18.24,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16226,
+    "catalog_product_id": 640,
+    "name": "Enhanced Matte Paper Poster With Hanger (White / 24″×36″)",
+    "size": "24″×36″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/640/16226_1663669837.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16226"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/640"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16226/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16226/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16226/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.24,
+      "width": 24.24,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 16,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/640/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/640"
+   }
+  }
+ }
+}

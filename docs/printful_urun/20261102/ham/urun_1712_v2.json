@@ -1,0 +1,157 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1712?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1712,
+   "type": "DTFILM",
+   "main_category_id": 88,
+   "name": "Signature Heavy Twill Bib Apron | Port Authority A900",
+   "brand": "Port Authority",
+   "model": "A900",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/9b/9b614fa3b0b6ba5006a7bd71fa23a464_l",
+   "variant_count": 12,
+   "is_discontinued": false,
+   "description": "This durable cotton twill apron is designed for food service, hospitality, events, and everyday tasks. Made from 9.4-ounce, 100% cotton twill, it provides comfortable coverage while maintaining a clean and professional look. The large divided front pocket keeps essentials within easy reach, while the adjustable neck strap and waist ties provide a secure fit.\n\n• 9.4-ounce, 100% cotton twill\n• Self-fabric neck strap with antique brass grommet\n• Large divided front pocket\n• Dyed-to-match herringbone tape waist ties\n• 13″ width × 32″ length\n\nDisclaimer: Clean with a dry cloth. Do not wash, bleach, tumble dry, iron, or dry clean.",
+   "sizes": [
+    "OSFA"
+   ],
+   "colors": [
+    {
+     "name": "Brown",
+     "value": "#4c341f"
+    },
+    {
+     "name": "Burgundy",
+     "value": "#500314"
+    },
+    {
+     "name": "Dark Green",
+     "value": "#01331a"
+    },
+    {
+     "name": "Deep Black",
+     "value": "#0f0f0f"
+    },
+    {
+     "name": "Duck Brown",
+     "value": "#7c4612"
+    },
+    {
+     "name": "Parcel Blue",
+     "value": "#027db0"
+    },
+    {
+     "name": "Rich Red",
+     "value": "#8f0111"
+    },
+    {
+     "name": "Sahara",
+     "value": "#c5bca9"
+    },
+    {
+     "name": "Storm Grey",
+     "value": "#3f4243"
+    },
+    {
+     "name": "True Navy",
+     "value": "#101d3c"
+    },
+    {
+     "name": "True Royal",
+     "value": "#0c3b9a"
+    },
+    {
+     "name": "White",
+     "value": "#FFFFFF"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "dtfilm",
+     "display_name": "DTF printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front_dtf",
+     "technique": "dtfilm",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front",
+      "front_dtfabric",
+      "front_large",
+      "front_large_dtf",
+      "chest_left_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "dtfilm",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1712"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1712/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1712/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1712/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1712/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1712/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1712/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

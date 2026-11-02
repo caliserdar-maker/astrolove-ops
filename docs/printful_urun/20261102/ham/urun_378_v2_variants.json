@@ -1,0 +1,162 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/378/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 10732,
+    "catalog_product_id": 378,
+    "name": "Econscious EC8001 Organic Cotton Large Tote (Black / One size)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#222222",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/378/10732_1582200984.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10732"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/378"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/378/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10732/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10732/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10732/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_large_center",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 10733,
+    "catalog_product_id": 378,
+    "name": "Econscious EC8001 Organic Cotton Large Tote (Oyster / One size)",
+    "size": "One size",
+    "color": "Oyster",
+    "color_code": "#edcea5",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/378/10733_1642499390.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10733"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/378"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/378/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10733/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10733/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10733/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_large_center",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/378/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/378"
+   }
+  }
+ }
+}

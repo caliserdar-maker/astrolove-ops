@@ -1,0 +1,85 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/887",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 887,
+   "available_placements": {
+    "front": "Front print",
+    "back": "Back print",
+    "details": "Details",
+    "label_inside": "Branding"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 356,
+     "width": 1050,
+     "height": 600,
+     "dpi": 150,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 860,
+     "width": 3600,
+     "height": 4200,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1043,
+     "width": 8400,
+     "height": 4200,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 22801,
+     "placements": {
+      "front": 860,
+      "back": 860,
+      "details": 1043,
+      "label_inside": 356
+     }
+    },
+    {
+     "variant_id": 22802,
+     "placements": {
+      "front": 860,
+      "back": 860,
+      "details": 1043,
+      "label_inside": 356
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Folded",
+    "Lifestyle",
+    "Product details",
+    "Templates"
+   ],
+   "options": [
+    "Back",
+    "Branding",
+    "Details",
+    "Front",
+    "Left Front",
+    "Product details",
+    "Product details 2",
+    "Right Front"
+   ]
+  },
+  "extra": []
+ }
+}

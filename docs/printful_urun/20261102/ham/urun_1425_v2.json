@@ -1,0 +1,108 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1425?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1425,
+   "type": "POSTCARD",
+   "main_category_id": 292,
+   "name": "Poker Playing Cards",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/b3/b3f876da0af6ebcbcd3171857dc21298_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Bring a fun, personal touch to game night with these smooth, premium-feel poker cards. They’re great for family games, special events, and unique gifts. Each deck comes ready to play and easy to carry.\n\n• Smooth 305 gsm cardstock\n• Standard 2.5″ × 3.5″ (6.4 cm × 8.9 cm) size\n• 52 cards + 2 Jokers\n• Includes a clear acrylic box\n• Blank product sourced from the USA",
+   "sizes": [
+    "2.5″×3.5″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1425"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1425/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1425/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1425/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1425/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1425/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1425/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

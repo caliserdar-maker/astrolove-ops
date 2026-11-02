@@ -1,0 +1,123 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/908?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 908,
+   "type": "SUBLIMATION",
+   "main_category_id": 230,
+   "name": "Glass Cutting Board",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/83/834ac8d26af7c249bbe154386d7413da_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Show off your style with a printed cutting board for slicing, serving, or decorating. Featuring a vibrant design, this board refreshes your kitchen game. It’s scratch-resistant, stable, and available in two sizes.\n\n• Tempered glass with a whorled-texture surface\n• Two sizes: 8″ × 11″ (20.3 cm × 27.9 cm), and 11″ × 15″ (27.9 cm × 38.1 cm)\n• Four rubber dots for additional stability\n• Scratch and cut-resistant\n• Hand wash only\n• Blank product sourced from China\n\nDisclaimer: Glass surface may dull knives over time.",
+   "sizes": [
+    "11″×15″",
+    "8″×11″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/908"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/908/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/908/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/908/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/908/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/908/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/908/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

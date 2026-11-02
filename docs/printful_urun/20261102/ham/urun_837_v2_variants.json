@@ -1,0 +1,64 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/837/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 21352,
+    "catalog_product_id": 837,
+    "name": "Latte Mug (White / 12 oz)",
+    "size": "12 oz",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/837/21352_1735896974.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/21352"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/837"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/837/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/21352/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/21352/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/21352/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 3.99,
+      "width": 6.63,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/837/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/837"
+   }
+  }
+ }
+}

@@ -1,0 +1,269 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/681",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 681,
+    "main_category_id": 245,
+    "type": "PHONE-CASE",
+    "description": "Protect your AirPods® in style! Crafted from premium impact-absorbing material, this case is the ultimate shield against scratches and drops, ensuring your earbuds stay pristine. With the added convenience of a metal carabiner, you can easily attach your AirPods® to your bag, keys, or anywhere else for easy access. \n\n• Premium polycarbonate (PC) material\n• Impact-absorbing case to protect AirPods® from bumps, drops, and scratches\n• Comes with a metal carabiner for easy carrying\n• Includes an adhesive for securely attaching the top part to the AirPods® base\n• Compatible with wireless and regular chargers\n\nThis case is compatible with the 1st, 2nd, and 3rd generation AirPods® and 1st and 2nd generation AirPods® Pro®. The product doesn’t include AirPods® or an AirPods® charger.\n\nImportant: This product cannot be shipped to South Korea, Hong Kong, Taiwan,  Japan, or Singapore. If your shipping address is in these regions, please choose a different product.\n\nAirPods® is an Apple Inc. trademark registered in the US and other countries and regions.",
+    "type_name": "All-Over Print Case for AirPods®",
+    "title": "All-Over Print Case for AirPods®",
+    "brand": null,
+    "model": "All-Over Print Case for AirPods®",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/35/3590046c51744ee1db489e35cc117820_l",
+    "variant_count": 5,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "Korea"
+   },
+   "variants": [
+    {
+     "id": 16865,
+     "product_id": 681,
+     "name": "All-Over Print Case for AirPods® (White / AirPods Gen1)",
+     "size": "AirPods Gen1",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/681/16865_1681715466.jpg",
+     "price": "15.61",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16866,
+     "product_id": 681,
+     "name": "All-Over Print Case for AirPods® (White / AirPods Gen2)",
+     "size": "AirPods Gen2",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/681/16866_1681715466.jpg",
+     "price": "15.61",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16867,
+     "product_id": 681,
+     "name": "All-Over Print Case for AirPods® (White / AirPods Gen3)",
+     "size": "AirPods Gen3",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/681/16867_1681715468.jpg",
+     "price": "15.61",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16868,
+     "product_id": 681,
+     "name": "All-Over Print Case for AirPods® (White / AirPods Pro Gen1)",
+     "size": "AirPods Pro Gen1",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/681/16868_1681715470.jpg",
+     "price": "15.61",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16869,
+     "product_id": 681,
+     "name": "All-Over Print Case for AirPods® (White / AirPods Pro Gen2)",
+     "size": "AirPods Pro Gen2",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/681/16869_1681715479.jpg",
+     "price": "15.61",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

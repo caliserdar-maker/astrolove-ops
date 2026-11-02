@@ -1,0 +1,82 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/528/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 13313,
+    "catalog_product_id": 528,
+    "name": "Mantis M196 Organic Denim tote bag (Denim Blue / One size)",
+    "size": "One size",
+    "color": "Denim Blue",
+    "color_code": "#2f435c",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/528/13313_1631094521.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/13313"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/528"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/528/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/13313/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/13313/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/13313/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_large_center",
+      "height": 6.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/528/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/528"
+   }
+  }
+ }
+}

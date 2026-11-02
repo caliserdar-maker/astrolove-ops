@@ -1,0 +1,96 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/938?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 938,
+   "type": "DECOR",
+   "main_category_id": 229,
+   "name": "Luggage Tag",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/04/04f318b62ba2242360baeb2fcc89fe2c_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Keep your luggage stylish and secure with these lightweight 100% acrylic tags. Featuring a rear business card slot and a durable, adjustable leather strap, they make travel organized and personal.\n\n•  100% acrylic\n•  Comes with an adjustable leather strap\n•  Rear opening with business card for personal information\n•  Blank product sourced from USA\n\nCare instructions: Wipe with a damp cloth, air dry or use a soft, non-abrasive cloth.",
+   "sizes": [
+    "2.4″×4″"
+   ],
+   "colors": [],
+   "techniques": [],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/938"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/938/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/938/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/938/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/938/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/938/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/938/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

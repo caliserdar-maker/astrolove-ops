@@ -1,0 +1,292 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/926/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 23721,
+    "catalog_product_id": 926,
+    "name": "Post-it® (10\" x 3\" / White)",
+    "size": "10″×3″",
+    "color": "White",
+    "color_code": "#FFFFFF",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/926/23721_1755255077.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23721"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/926"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/926/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23721/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23721/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23721/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.13,
+      "width": 10.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23722,
+    "catalog_product_id": 926,
+    "name": "Post-it® (10\" x 6\" / White)",
+    "size": "10″×6″",
+    "color": "White",
+    "color_code": "#FFFFFF",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/926/23722_1755255097.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23722"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/926"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/926/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23722/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23722/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23722/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.07,
+      "width": 10.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23716,
+    "catalog_product_id": 926,
+    "name": "Post-it® (3\" x 3\" / White)",
+    "size": "3″×3″",
+    "color": "White",
+    "color_code": "#FFFFFF",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/926/23716_1755255148.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23716"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/926"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/926/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23716/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23716/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23716/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.19,
+      "width": 3.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23717,
+    "catalog_product_id": 926,
+    "name": "Post-it® (4\" x 3\" / White)",
+    "size": "4″×3″",
+    "color": "White",
+    "color_code": "#FFFFFF",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/926/23717_1755255183.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23717"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/926"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/926/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23717/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23717/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23717/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.13,
+      "width": 4.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23718,
+    "catalog_product_id": 926,
+    "name": "Post-it® (4\" x 4\" / White)",
+    "size": "4″×4″",
+    "color": "White",
+    "color_code": "#FFFFFF",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/926/23718_1755255214.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23718"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/926"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/926/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23718/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23718/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23718/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 4.19,
+      "width": 4.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23719,
+    "catalog_product_id": 926,
+    "name": "Post-it® (4\" x 6\" / White)",
+    "size": "4″×6″",
+    "color": "White",
+    "color_code": "#FFFFFF",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/926/23719_1755255236.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23719"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/926"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/926/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23719/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23719/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23719/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.06,
+      "width": 4.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23720,
+    "catalog_product_id": 926,
+    "name": "Post-it® (8\" x 6\" / White)",
+    "size": "8″×6″",
+    "color": "White",
+    "color_code": "#FFFFFF",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/926/23720_1755255260.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23720"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/926"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/926/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23720/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23720/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23720/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.07,
+      "width": 8.25,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 7,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/926/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/926"
+   }
+  }
+ }
+}

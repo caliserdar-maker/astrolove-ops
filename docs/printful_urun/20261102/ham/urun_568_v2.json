@@ -1,0 +1,153 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/568?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 568,
+   "type": "POSTCARD",
+   "main_category_id": 232,
+   "name": "Greeting Card",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/0d/0dad96768105cdc5580e5c7961908fe4_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Expressing your sentiments or planning an event can be hard. Take some of the weight off of your shoulders by getting yourself an authentic greeting card! \n\n• Material: 14.77 oz/yd² (350 g/m²) paperboard\n• Sizes: Small: 4″ × 6″ (101 × 152 mm)\nMedium: 5″ × 7″ (127 × 178 mm)\nLarge: 5.83″ × 8.27″ (148 × 210 mm)\n• Product weight: Small: 0.39 oz (11 g)\nMedium: 0.6 oz (17 g)\nLarge: 0.85 oz (24 g)\n• Toner-based printing\n• Vibrant colors\n• Comes with a complimentary envelope ",
+   "sizes": [
+    "4″×6″",
+    "5″×7″",
+    "5.83″×8.27″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "inside1",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "inside2",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "back",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/568"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/568/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/568/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/568/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/568/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/568/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/568/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

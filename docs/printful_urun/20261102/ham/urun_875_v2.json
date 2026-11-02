@@ -1,0 +1,127 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/875?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 875,
+   "type": "SUBLIMATION",
+   "main_category_id": 21,
+   "name": "Vanity Plate",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/4e/4ea1d8104f27c2881eeff566323a7b1f_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Add serious flair to your ride or room with this vanity plate. Glossy, lightweight, and made to shine, just mount it and let your plate do the talking.\n• 100% aluminum\n• Size: 12″ × 6″ (30.5 × 15.2 cm)\n• Glossy front\n• Silver-colored backing\n• Pre-drilled holes\n• Blank product sourced from the US",
+   "sizes": [
+    "12″×6″"
+   ],
+   "colors": [
+    {
+     "name": "White Glossy",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/875"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/875/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/875/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/875/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/875/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/875/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/875/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,158 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1426/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 44155,
+    "catalog_product_id": 1426,
+    "name": "Generic brand (30'' × 40'')",
+    "size": "30″×40″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1426/44155_1762869968.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44155"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1426"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1426/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44155/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44155/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44155/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 43.5,
+      "width": 33.5,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "front",
+      "height": 33.5,
+      "width": 43.5,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 44156,
+    "catalog_product_id": 1426,
+    "name": "Generic brand (50\" × 60\")",
+    "size": "50″×60″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1426/44156_1762869978.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44156"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1426"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1426/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44156/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44156/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44156/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 63.5,
+      "width": 53.5,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "front",
+      "height": 53.5,
+      "width": 63.5,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 44157,
+    "catalog_product_id": 1426,
+    "name": "Generic brand (60\" × 80\")",
+    "size": "60″×80″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1426/44157_1762947153.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/44157"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1426"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1426/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/44157/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/44157/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/44157/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 84.66,
+      "width": 63.74,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "front",
+      "height": 63.74,
+      "width": 84.66,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1426/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1426"
+   }
+  }
+ }
+}

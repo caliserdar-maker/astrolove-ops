@@ -1,0 +1,146 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1011",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 1011,
+   "available_placements": {
+    "cover": "Cover",
+    "january": "January",
+    "february": "February",
+    "march": "March",
+    "april": "April",
+    "may": "May",
+    "june": "June",
+    "july": "July",
+    "august": "August",
+    "september": "September",
+    "october": "October",
+    "november": "November",
+    "december": "December"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 471,
+     "width": 3772,
+     "height": 5250,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 25053,
+     "placements": {
+      "cover": 471,
+      "january": 471,
+      "february": 471,
+      "march": 471,
+      "april": 471,
+      "may": 471,
+      "june": 471,
+      "july": 471,
+      "august": 471,
+      "september": 471,
+      "october": 471,
+      "november": 471,
+      "december": 471
+     }
+    },
+    {
+     "variant_id": 25054,
+     "placements": {
+      "cover": 471,
+      "january": 471,
+      "february": 471,
+      "march": 471,
+      "april": 471,
+      "may": 471,
+      "june": 471,
+      "july": 471,
+      "august": 471,
+      "september": 471,
+      "october": 471,
+      "november": 471,
+      "december": 471
+     }
+    },
+    {
+     "variant_id": 25051,
+     "placements": {
+      "cover": 471,
+      "january": 471,
+      "february": 471,
+      "march": 471,
+      "april": 471,
+      "may": 471,
+      "june": 471,
+      "july": 471,
+      "august": 471,
+      "september": 471,
+      "october": 471,
+      "november": 471,
+      "december": 471
+     }
+    },
+    {
+     "variant_id": 25052,
+     "placements": {
+      "cover": 471,
+      "january": 471,
+      "february": 471,
+      "march": 471,
+      "april": 471,
+      "may": 471,
+      "june": 471,
+      "july": 471,
+      "august": 471,
+      "september": 471,
+      "october": 471,
+      "november": 471,
+      "december": 471
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Flat Lifestyle",
+    "Flat Lifestyle 2",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Product details",
+    "Templates"
+   ],
+   "options": [
+    "April",
+    "August",
+    "Cover",
+    "December",
+    "February",
+    "Front",
+    "Front 2",
+    "Front 3",
+    "Front 4",
+    "January",
+    "July",
+    "June",
+    "March",
+    "May",
+    "November",
+    "October",
+    "Product details",
+    "September"
+   ]
+  },
+  "extra": []
+ }
+}

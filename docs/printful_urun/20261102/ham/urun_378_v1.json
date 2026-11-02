@@ -1,0 +1,256 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/378",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 378,
+    "main_category_id": 48,
+    "type": "T-SHIRT",
+    "description": "Get rid of all the plastic and pack your goodies in this spacious organic cotton tote bag. Fill it up with groceries, books, and travel essentials—there’s room for everything!\n\n• 100% certified organic cotton 3/1 twill\n• Fabric weight: 8 oz/yd² (272 g/m²)\n• Dimensions: 20″ × 14″ × 5″ (50.8 × 35.6 × 12.7 cm)\n• Capacity: 6 gallons (23 l)\n• Weight limit: 30 lbs (13.6 kg)\n• 1″ × 25″ (2.5 × 63.5 cm) long self-fabric dual straps\n• Open main compartment, flat bottom\n• Blank product sourced from China or India\n\nDisclaimer: The care instructions on the tearaway label may wash off after cleaning.",
+    "type_name": "Econscious EC8001 | Large Twill Tote",
+    "title": "Large Eco Tote | Econscious EC8001",
+    "brand": "Econscious",
+    "model": "EC8001",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/65/65d87f00b10ba55f54dc0f11de5b29a2_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "thread_colors_apparel",
+      "title": "Flat thread colors",
+      "type": "multi_select",
+      "values": {
+       "#FFFFFF": "1801 White",
+       "#000000": "1800 Black",
+       "#96A1A8": "1718 Grey",
+       "#A67843": "1672 Old Gold",
+       "#FFCC00": "1951 Gold",
+       "#E25C27": "1987 Orange",
+       "#CC3366": "1910 Flamingo",
+       "#CC3333": "1839 Red",
+       "#660000": "1784 Maroon",
+       "#333366": "1966 Navy",
+       "#005397": "1842 Royal",
+       "#3399FF": "1695 Aqua/Teal",
+       "#6B5294": "1832 Purple",
+       "#01784E": "1751 Kelly Green",
+       "#7BA35A": "1848 Kiwi Green"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Embroidery notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "lifelike",
+      "title": "Lifelike",
+      "type": "bool",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DTG",
+      "display_name": "DTG printing",
+      "is_default": true
+     },
+     {
+      "key": "EMBROIDERY",
+      "display_name": "Embroidery",
+      "is_default": false
+     },
+     {
+      "key": "DTFILM",
+      "display_name": "DTF printing",
+      "is_default": false
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": "5.95",
+      "options": []
+     },
+     {
+      "id": "embroidery_apparel_front",
+      "type": "embroidery_apparel_front",
+      "title": "Front",
+      "additional_price": "6.95",
+      "options": [
+       {
+        "id": "full_color",
+        "type": "bool",
+        "title": "Unlimited color",
+        "additional_price": 3.5
+       }
+      ]
+     },
+     {
+      "id": "front_dtf_tote",
+      "type": "front_dtf_tote",
+      "title": "Front",
+      "additional_price": "5.95",
+      "options": []
+     },
+     {
+      "id": "back_dtf_tote",
+      "type": "back_dtf_tote",
+      "title": "Back",
+      "additional_price": "5.95",
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 10732,
+     "product_id": 378,
+     "name": "Econscious EC8001 Organic Cotton Large Tote (Black / One size)",
+     "size": "One size",
+     "color": "Black",
+     "color_code": "#222222",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/378/10732_1582200984.jpg",
+     "price": "18.68",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "EU_ES": "Spain",
+      "CA": "Canada",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_ES",
+       "status": "in_stock"
+      },
+      {
+       "region": "CA",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 10733,
+     "product_id": 378,
+     "name": "Econscious EC8001 Organic Cotton Large Tote (Oyster / One size)",
+     "size": "One size",
+     "color": "Oyster",
+     "color_code": "#edcea5",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/378/10733_1642499390.jpg",
+     "price": "18.68",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "EU_ES": "Spain",
+      "CA": "Canada",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_ES",
+       "status": "in_stock"
+      },
+      {
+       "region": "CA",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

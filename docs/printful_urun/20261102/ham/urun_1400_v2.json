@@ -1,0 +1,121 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1400?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1400,
+   "type": "DIRECT-TO-FABRIC",
+   "main_category_id": 274,
+   "name": "Cotton Placemat, 1pc",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/11/11821774ad1b511e6e9c10cc7d288b3c_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Add a personalized touch to every meal with these durable cotton twill placemats. Featuring vibrant printing on one side, a natural cotton backing, and a sturdy double-layer construction, they're designed to elevate everyday dining and special occasions alike while standing up to regular use.\n\n• 100% cotton twill\n• Durable double-layer fabric\n• One-sided print with natural backing\n• Fade-resistant design\n• Hemmed edges for added durability\n• Vintage-inspired look and feel\n• Easy to clean and maintain",
+   "sizes": [
+    "18″×14″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "direct-to-fabric",
+     "display_name": "All-over cotton",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "direct-to-fabric",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "direct-to-fabric",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": [
+      "white",
+      "clear",
+      "black"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1400"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1400/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1400/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1400/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1400/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1400/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1400/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

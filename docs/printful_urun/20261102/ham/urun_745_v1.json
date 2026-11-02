@@ -1,0 +1,121 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/745",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 745,
+    "main_category_id": 189,
+    "type": "CUT-SEW",
+    "description": "Style up your pet with a premium-quality leash—a must-have accessory for any fashionable pet wardrobe. It’s made to last and features a padded handle for comfort during walks.\n\n• Durable 100% polyester webbing\n• 92% polyester, 8% spandex handle inside\n• Black 100% polyester sponge handle padding\n• Metal snap hook and D-ring\n• Leash length: 6 ft. (1.83 m)\n• Leash width: 1″ (2.54 cm)\n• Blank product sourced from China\n\nHand wash with mild detergent or machine wash on a gentle cycle in a mesh bag. Air dry.",
+    "type_name": "Pet | Leash",
+    "title": "Pet Leash",
+    "brand": null,
+    "model": "Pet Leash",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/1a/1a1ff074f5d9972cf4ad79f73f5881f8_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Leash front",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Leash back",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "label_inside",
+      "type": "label_inside",
+      "title": "Inside label",
+      "additional_price": "2.95",
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 19126,
+     "product_id": 745,
+     "name": "Pet Leash (White / 6 ft.)",
+     "size": "6 ft.",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/745/19126_1709038896.jpg",
+     "price": "20.17",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

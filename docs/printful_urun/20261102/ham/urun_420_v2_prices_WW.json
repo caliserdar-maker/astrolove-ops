@@ -1,0 +1,79 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/420/prices?currency=USD&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 420,
+    "placements": [
+     {
+      "id": "default",
+      "title": "Print file",
+      "type": "All-over synthetic",
+      "technique_key": "cut-sew",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 11414,
+     "techniques": [
+      {
+       "technique_key": "cut-sew",
+       "technique_display_name": "All-over synthetic",
+       "price": "11.75",
+       "discounted_price": "11.75"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": [
+    {
+     "quantity": 25,
+     "bulk_discount_percentage": 0.08
+    },
+    {
+     "quantity": 50,
+     "bulk_discount_percentage": 0.12
+    },
+    {
+     "quantity": 75,
+     "bulk_discount_percentage": 0.16
+    },
+    {
+     "quantity": 100,
+     "bulk_discount_percentage": 0.2
+    }
+   ]
+  },
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/420/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/420"
+   }
+  }
+ }
+}

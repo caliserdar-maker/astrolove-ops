@@ -1,0 +1,94 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/706/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 17373,
+    "catalog_product_id": 706,
+    "name": "Wrapping Paper Sheets (White Matte / 28.75″×19.75″)",
+    "size": "28.75″×19.75″",
+    "color": "White Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/706/17373_1687435633.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17373"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/706"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/706/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17373/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17373/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17373/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "first",
+      "height": 20.25,
+      "width": 29.25,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "first",
+      "height": 29.25,
+      "width": 20.25,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "second",
+      "height": 20.25,
+      "width": 29.25,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "second",
+      "height": 29.25,
+      "width": 20.25,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "third",
+      "height": 20.25,
+      "width": 29.25,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "third",
+      "height": 29.25,
+      "width": 20.25,
+      "orientation": "vertical"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/706/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/706"
+   }
+  }
+ }
+}

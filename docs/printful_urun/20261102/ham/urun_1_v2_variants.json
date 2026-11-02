@@ -1,0 +1,1430 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 48504,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster (A3) 11.69″×16.54″",
+    "size": "11.69″×16.54″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48504_1777277660.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48504"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48504/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48504/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48504/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.54,
+      "width": 11.69,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.69,
+      "width": 16.54,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48505,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster (A4) 8.27″×11.69″",
+    "size": "8.27″×11.69″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48505_1777277660.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48505"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48505/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48505/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48505/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 11.69,
+      "width": 8.27,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.27,
+      "width": 11.69,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19527,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster (in) (A1 (23.3″×33.1″))",
+    "size": "A1 (23.3″×33.1″)",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/19527_1714721626.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19527"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19527/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19527/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19527/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 33.11,
+      "width": 23.39,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 23.39,
+      "width": 33.11,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19528,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster (in) (A2 (16.5″×23.3″))",
+    "size": "A2 (16.5″×23.3″)",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/19528_1714721630.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19528"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19528/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19528/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19528/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.54,
+      "width": 23.39,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "default",
+      "height": 23.39,
+      "width": 16.54,
+      "orientation": "vertical"
+     }
+    ]
+   },
+   {
+    "id": 6239,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 10″×10″",
+    "size": "10″×10″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/6239_1527678729.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/6239"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/6239/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/6239/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/6239/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 48493,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 10″×24″",
+    "size": "10″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48493_1777277670.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48493"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48493/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48493/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48493/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 10.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 14125,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 11″×14″",
+    "size": "11″×14″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/14125_1643009909.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14125"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14125/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14125/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14125/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48494,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 11″×17″",
+    "size": "11″×17″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48494_1777277671.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48494"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48494/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48494/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48494/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 17.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 17.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 4464,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 12″×12″",
+    "size": "12″×12″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/4464_1527678770.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4464"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4464/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4464/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4464/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 1349,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 12″×16″",
+    "size": "12″×16″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/1349_1527679043.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/1349"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/1349/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/1349/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/1349/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 3876,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 12″×18″",
+    "size": "12″×18″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/3876_1527678813.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/3876"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/3876/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/3876/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/3876/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 6240,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 14″×14″",
+    "size": "14″×14″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/6240_1527678837.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/6240"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/6240/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/6240/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/6240/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 14.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 4465,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 16″×16″",
+    "size": "16″×16″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/4465_1527678875.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4465"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4465/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4465/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4465/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 16.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 3877,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 16″×20″",
+    "size": "16″×20″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/3877_1527678896.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/3877"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/3877/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/3877/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/3877/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48495,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 16″×24″",
+    "size": "16″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48495_1777277681.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48495"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48495/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48495/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48495/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 6242,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 18″×18″",
+    "size": "18″×18″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/6242_1527678943.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/6242"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/6242/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/6242/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/6242/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 18.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 1,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 18″×24″",
+    "size": "18″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/1_1527683474.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/1"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/1/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/1/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/1/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48496,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 20″×20″",
+    "size": "20″×20″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48496_1777277691.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48496"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48496/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48496/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48496/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 20.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 48497,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 20″×24″",
+    "size": "20″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48497_1777277691.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48497"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48497/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48497/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48497/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 20.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48498,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 20″×28″",
+    "size": "20″×28″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48498_1777277692.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48498"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48498/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48498/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48498/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 28.0,
+      "width": 20.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 28.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 16365,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 20″×30″",
+    "size": "20″×30″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/16365_1672744007.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16365"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16365/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16365/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16365/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 30.0,
+      "width": 20.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 30.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48499,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 24″×24″",
+    "size": "24″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48499_1777277701.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48499"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48499/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48499/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48499/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 24.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 48500,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 24″×32″",
+    "size": "24″×32″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48500_1777277702.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48500"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48500/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48500/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48500/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 32.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 32.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 2,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 24″×36″",
+    "size": "24″×36″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/2_1527678974.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/2"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/2/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/2/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/2/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48502,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 28″×28″",
+    "size": "28″×28″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48502_1777277713.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48502"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48502/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48502/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48502/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 28.0,
+      "width": 28.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 48501,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 28″×40″",
+    "size": "28″×40″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48501_1777277723.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48501"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48501/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48501/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48501/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 40.0,
+      "width": 28.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 28.0,
+      "width": 40.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48503,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 30″×40″",
+    "size": "30″×40″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48503_1777277734.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48503"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48503/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48503/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48503/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 40.0,
+      "width": 30.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 30.0,
+      "width": 40.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 16364,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 5″×7″",
+    "size": "5″×7″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/16364_1672744007.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16364"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16364/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16364/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16364/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.0,
+      "width": 5.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 5.0,
+      "width": 7.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48489,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 6″×8″",
+    "size": "6″×8″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48489_1777277734.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48489"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48489/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48489/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48489/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 6.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 6.0,
+      "width": 8.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 4463,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 8″×10″",
+    "size": "8″×10″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/4463_1527678642.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4463"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4463/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4463/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4463/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 10.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48490,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 8″×12″",
+    "size": "8″×12″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48490_1777277744.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48490"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48490/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48490/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48490/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 12.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48491,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 8″×20″",
+    "size": "8″×20″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48491_1777277744.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48491"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48491/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48491/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48491/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48492,
+    "catalog_product_id": 1,
+    "name": "Enhanced Matte Paper Poster 9″×11″",
+    "size": "9″×11″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1/48492_1777277744.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48492"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48492/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48492/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48492/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 9.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 9.0,
+      "width": 11.0,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 33,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1"
+   }
+  }
+ }
+}

@@ -1,0 +1,112 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/957?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 957,
+   "type": "STICKER",
+   "main_category_id": 202,
+   "name": "Die-Cut Stickers",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/6a/6ac009e08af2f2e0a0d16cc0230e4817_l",
+   "variant_count": 5,
+   "is_discontinued": false,
+   "description": "These die-cut stickers are made to stick — and stay. Crafted from premium vinyl with a matte finish, they resist scratches, water, and sunlight, making them perfect for decorating laptops, bottles, or outdoor gear. Easy to peel and apply, they’ll add a touch of personality to any surface.\n\n• Vinyl with matte finish\n• Sizes: 2″ × 2″ (5.1 × 5.1 cm), 3″ × 3″ (7.6 × 7.6 cm), 4″ × 4″ (10.2 × 10.2 cm), 5″ × 5″ (12.7 × 12.7 cm), 6″ × 6″ (15.2 × 15.2 cm)\n• Water and weather resistant, rated to last over 5 years\n• Easy-peel backing\n• Blank product sourced from the US",
+   "sizes": [
+    "2″×2″",
+    "3″×3″",
+    "4″×4″",
+    "5″×5″",
+    "6″×6″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/957"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/957/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/957/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/957/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/957/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/957/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/957/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

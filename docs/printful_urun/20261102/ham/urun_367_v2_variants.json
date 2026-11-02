@@ -1,0 +1,150 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/367/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 10457,
+    "catalog_product_id": 367,
+    "name": "Econscious EC8000 Organic Cotton Tote Bag (Black / One size)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#101010",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/367/10457_1582200790.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10457"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/367"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/367/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10457/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10457/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10457/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 10458,
+    "catalog_product_id": 367,
+    "name": "Econscious EC8000 Organic Cotton Tote Bag (Oyster / One size)",
+    "size": "One size",
+    "color": "Oyster",
+    "color_code": "#edcea5",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/367/10458_1642499411.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/10458"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/367"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/367/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/10458/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/10458/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/10458/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "embroidery_apparel_front",
+      "height": 4.0,
+      "width": 4.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front_dtf_tote",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back_dtf_tote",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/367/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/367"
+   }
+  }
+ }
+}

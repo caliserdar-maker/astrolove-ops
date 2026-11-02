@@ -1,0 +1,216 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/927/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 23725,
+    "catalog_product_id": 927,
+    "name": "Generic brand (One size / Beige)",
+    "size": "One size",
+    "color": "Beige",
+    "color_code": "#E6CAB4",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/927/23725_1762439407.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23725"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/927"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/927/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23725/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23725/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23725/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 33.07,
+      "width": 27.17,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23723,
+    "catalog_product_id": 927,
+    "name": "Generic brand (One size / Black)",
+    "size": "One size",
+    "color": "Black",
+    "color_code": "#070709",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/927/23723_1762439408.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23723"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/927"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/927/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23723/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23723/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23723/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 33.07,
+      "width": 27.17,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23726,
+    "catalog_product_id": 927,
+    "name": "Generic brand (One size / Blue)",
+    "size": "One size",
+    "color": "Blue",
+    "color_code": "#7ECCEE",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/927/23726_1762439408.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23726"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/927"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/927/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23726/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23726/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23726/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 33.07,
+      "width": 27.17,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23727,
+    "catalog_product_id": 927,
+    "name": "Generic brand (One size / Pink)",
+    "size": "One size",
+    "color": "Pink",
+    "color_code": "#F3D6E5",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/927/23727_1762439408.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23727"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/927"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/927/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23727/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23727/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23727/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 33.07,
+      "width": 27.17,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23724,
+    "catalog_product_id": 927,
+    "name": "Generic brand (One size / White)",
+    "size": "One size",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/927/23724_1762439408.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23724"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/927"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/927/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23724/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23724/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23724/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 33.07,
+      "width": 27.17,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 5,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/927/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/927"
+   }
+  }
+ }
+}

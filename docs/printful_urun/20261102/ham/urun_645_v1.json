@@ -1,0 +1,99 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/645",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 645,
+    "main_category_id": 256,
+    "type": "CANDLE",
+    "description": "With its sleek glass jar, this candle functions as stylish home decor. Light it up and watch how its soft glow brings the room to life!\n\n• Soy wax\n• Cotton wick\n• 3.76″ × 3.13″  (95 × 79 mm) glass vessel\n• Product weight: 1.2 lbs (570 g)\n• Unscented, has a pleasant natural aroma\n• Blank product sourced from Latvia",
+    "type_name": "Candle | Soy | Glass Jar",
+    "title": "Glass Jar Soy Wax Candle",
+    "brand": null,
+    "model": "Candle | Soy | Glass Jar",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/0a/0a996b0eb6387b9d936fbf6170d67f8c_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 16270,
+     "product_id": 645,
+     "name": "Glass Jar Soy Wax Candle (Unscented)",
+     "size": "Unscented",
+     "color": "White",
+     "color_code": "#fffaf1",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/645/16270_1664258408.jpg",
+     "price": "13.47",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

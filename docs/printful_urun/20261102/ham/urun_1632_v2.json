@@ -1,0 +1,129 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1632?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1632,
+   "type": "DTFILM",
+   "main_category_id": 101,
+   "name": "Sling Bag | Comfort Colors CCSB0",
+   "brand": "Comfort Colors",
+   "model": "CCSB0",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/55/55c6b523e75cc4b8e4126944ed0aa1c2_l",
+   "variant_count": 5,
+   "is_discontinued": false,
+   "description": "Looking for a practical sling bag with a laid-back, adventure-ready style? This bag is a great choice for everyday carry, travel, and life on the go. Designed with a clean, versatile look, it pairs easily with casual outfits while keeping your essentials organized and within reach. The adjustable strap allows for comfortable crossbody or shoulder wear, and multiple zippered compartments provide convenient storage for your daily necessities.\n\n•100% nylon taslan\n•One size: 8\" x 5\" (20.32 cm x 12.7 cm)\n•Durable and lightweight construction\n•Interior pocket\n•Adjustable waist strap for a customized fit\n•Can be worn as a crossbody or over one shoulder\n•Dyed-to-match metal zipper pulls and molded zipper\n•Blank product sourced from Kazakhstan.",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "Bay",
+     "value": "#C3CFC1"
+    },
+    {
+     "name": "Black",
+     "value": "#000000"
+    },
+    {
+     "name": "Chambray",
+     "value": "#D9EDF5"
+    },
+    {
+     "name": "Ivory",
+     "value": "#FFF7E7"
+    },
+    {
+     "name": "Rose Quartz",
+     "value": "#f4b5da"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "dtfilm",
+     "display_name": "DTF printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front_dtf",
+     "technique": "dtfilm",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front",
+      "front_dtfabric",
+      "front_large",
+      "front_large_dtf",
+      "chest_left_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "dtfilm",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1632"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1632/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1632/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1632/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1632/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1632/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1632/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

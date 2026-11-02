@@ -1,0 +1,123 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/711?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 711,
+   "type": "SUBLIMATION",
+   "main_category_id": 255,
+   "name": "Sublimated Sherpa Blanket",
+   "brand": null,
+   "model": "Sublimated Sherpa Blanket",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/e2/e289ece99c6c7971336034b3597d6509_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "This exquisite sherpa blanket combines a plushie feel with exceptional softness, making it the ultimate comfort companion. Perfect for daily use while lounging on the couch, snuggling up on chilly evenings, or styling your room—this blanket offers unmatched coziness and warmth.\n\n• Integral composition: 100% polyester fibers\n• Fabric: 100% polyester (51.5% surface fabric, 48.5% sherpa fabric)\n• Smooth side fabric: 6.49 oz/yd² (220g/m²), sherpa fabric: 7.08 oz/yd² (240g/m²)\n• Blank product components sourced from China",
+   "sizes": [
+    "60″×80″",
+    "50″×60″",
+    "37″×57″"
+   ],
+   "colors": [
+    {
+     "name": "Tan",
+     "value": "#f0d8bc"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/711"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/711/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/711/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/711/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/711/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/711/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/711/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

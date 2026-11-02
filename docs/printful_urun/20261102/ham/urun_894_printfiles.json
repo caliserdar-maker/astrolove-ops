@@ -1,0 +1,50 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/894",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 894,
+   "available_placements": {
+    "front": "Front print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 859,
+     "width": 4350,
+     "height": 4783,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 22903,
+     "placements": {
+      "front": 859
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Men's",
+    "Product details",
+    "Templates",
+    "Women's"
+   ],
+   "options": [
+    "Back",
+    "Front",
+    "Front 2",
+    "Front 3",
+    "Product details"
+   ]
+  },
+  "extra": []
+ }
+}

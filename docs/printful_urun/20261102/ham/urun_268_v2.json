@@ -1,0 +1,115 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/268?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 268,
+   "type": "POSTER",
+   "main_category_id": 55,
+   "name": "Enhanced Matte Paper Poster (cm)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/products/268/product_1613463288.jpg",
+   "variant_count": 7,
+   "is_discontinued": false,
+   "description": "Museum-quality posters made on thick matte paper. Add a wonderful accent to your room and office with these posters that are sure to brighten any environment.\n\n• Paper thickness: 0.26 mm (10.3 mil)\n• Paper weight: 189 g/m²\n• Opacity: 94%\n• ISO brightness: 104%\n• 21 × 30 cm posters are size A4\n• Paper sourced from Japan",
+   "sizes": [
+    "21×30 cm",
+    "30×40 cm",
+    "40×50 cm",
+    "40×60 cm",
+    "50×50 cm",
+    "50×70 cm",
+    "61×91 cm",
+    "70×100 cm",
+    "A1 (59.4×84.1 cm)",
+    "A2 (42×59.4 cm)",
+    "A0 (84.1×118.9 cm)",
+    "68.68×101.6 cm",
+    "76.2×111.76 cm",
+    "91.44×121.92 cm"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/268"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/268/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/268/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/268/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/268/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/268/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/268/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

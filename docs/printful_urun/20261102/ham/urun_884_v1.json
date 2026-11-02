@@ -1,0 +1,121 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/884",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 884,
+    "main_category_id": 230,
+    "type": "SUBLIMATION",
+    "description": "Soft where it counts. This memory foam bath mat adds everyday comfort and a clean look to any bathroom, with a non-slip back that helps keep things steady. A small upgrade that makes a noticeable difference.\n\n• 100% memory foam microfiber face\n• Anti-slip polyester backing\n• Blank product sourced from China\n\nDisclaimer: Bath mat sizes may vary by ±0.75″ (1.9 cm) for the small mat and ±1″ (2.5 cm) for the large mat.",
+    "type_name": "Mat | Bath",
+    "title": "Bath Mat",
+    "brand": null,
+    "model": "Mat | Bath",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/48/482aba86e1c88a3282efaf031317d66e_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 22789,
+     "product_id": 884,
+     "name": "Bath Mat (White / 24″×17″)",
+     "size": "24″×17″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/884/22789_1747822453.jpg",
+     "price": "17.55",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22790,
+     "product_id": 884,
+     "name": "Bath Mat (White / 34″×21″)",
+     "size": "34″×21″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/884/22790_1747822475.jpg",
+     "price": "27.71",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

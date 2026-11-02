@@ -1,0 +1,107 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/632?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 632,
+   "type": "DRINKWARE",
+   "main_category_id": 238,
+   "name": "Wine Tumbler",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/b0/b0158a5b9729e31b0f0a9f64d787081a_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "What’s an outdoor party without a wine tumbler to keep a drink fresh and at just the right temperature? Forget breakable glasses—give this uniquely shaped wine tumbler a chance and have fun with friends without worry.\n\n• 12 oz (355 ml)\n• Tumbler size: 4.7″ × 3.5″  (12 cm × 9 cm)\n• High grade stainless steel \n• Double-wall vacuum seal\n• Curved, unique shape\n\nDisclaimers:\n• Not dishwasher or microwave safe. Hand-wash only.\n• The Wine Tumbler lid is designed to minimize spills but is not fully leak-proof. Some liquid may escape through the sip opening or edges if tipped.",
+   "sizes": [
+    "12 oz"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/632"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/632/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/632/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/632/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/632/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/632/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/632/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

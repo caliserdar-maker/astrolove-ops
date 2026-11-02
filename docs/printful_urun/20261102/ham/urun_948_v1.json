@@ -1,0 +1,106 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/948",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 948,
+    "main_category_id": 198,
+    "type": "POSTCARD",
+    "description": "Keep your thoughts organized in this compact spiral-bound journal. With 150 lined pages, there’s plenty of space for writing, planning, or capturing ideas on the go, and the laminated cover provides durability for daily use at home, school, or work.\n\n• Paper weight: 90 g/m²\n• Weight: 10.6 oz. (300 g)\n• Size: 5.12″ × 6.97″ × 0.39″ (13 × 17.7 × 1 cm)\n• 150 lined pages\n• Glossy laminated cover\n• Metal spiral\n• Blank product sourced from the USA",
+    "type_name": "Journal | Spiral Bound",
+    "title": "Spiral Bound Journal",
+    "brand": null,
+    "model": "Journal | Spiral Bound",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/fe/fefea40a6c787762fccf279f6717f506_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "inside1",
+      "type": "inside1",
+      "title": "Inside 1",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 24307,
+     "product_id": 948,
+     "name": "Generic brand (One Size)",
+     "size": "One size",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/948/24307_1753168279.jpg",
+     "price": "11.74",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

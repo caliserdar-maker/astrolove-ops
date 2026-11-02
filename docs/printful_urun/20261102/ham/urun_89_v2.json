@@ -1,0 +1,156 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/89?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 89,
+   "type": "CUT-SEW",
+   "main_category_id": 258,
+   "name": "All-Over Print Basic Pillow Case",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/products/89/product_1573737407.jpg",
+   "variant_count": 5,
+   "is_discontinued": false,
+   "description": "A strategically placed accent can bring the whole room to life, and this soft, comfy pillow case is just what you need to do that. This product is only the pillowcase - pillow filling not included. \n\n• 100% polyester\n• Fabric weight: 7.37 oz./yd.² (250 g/m²)\n• Hidden zipper\n• Machine-washable case\n• Blank product components in the US sourced from China and the US\n• Blank product components in the EU sourced from China and Poland",
+   "sizes": [
+    "18″×18″",
+    "20″×12″",
+    "22″×22″",
+    "14″×14″",
+    "16″×16″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "white": "White",
+      "black": "Black"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/89"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/89/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/89/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/89/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/89/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/89/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/89/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,326 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/684",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 684,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 439,
+     "width": 1348,
+     "height": 2269,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 16918,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16919,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16922,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16923,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16920,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16921,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16924,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16925,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16930,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16931,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16926,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16927,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16928,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16929,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16934,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16935,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16936,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16937,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16938,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16939,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16932,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16933,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16940,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16941,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16942,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16943,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16944,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16945,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16946,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16947,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16948,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16949,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16950,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 16951,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 18737,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 18740,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 18738,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 18741,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 18739,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 18742,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 21475,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 21476,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 21477,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 21478,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 21479,
+     "placements": {
+      "default": 439
+     }
+    },
+    {
+     "variant_id": 21480,
+     "placements": {
+      "default": 439
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Lifestyle",
+    "Lifestyle 10",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Lifestyle 6",
+    "Lifestyle 7",
+    "Lifestyle 8",
+    "Lifestyle 9",
+    "Templates"
+   ],
+   "options": [
+    "Front",
+    "Front 2",
+    "Front 3"
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,178 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/905/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 23235,
+    "catalog_product_id": 905,
+    "name": "Comforter (White / King)",
+    "size": "King",
+    "color": "White",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/905/23235_1757329857.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23235"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/905"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/905/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23235/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23235/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23235/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 90.0,
+      "width": 106.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23238,
+    "catalog_product_id": 905,
+    "name": "Comforter (White / Queen)",
+    "size": "Queen",
+    "color": "White",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/905/23238_1757329856.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23238"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/905"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/905/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23238/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23238/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23238/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 90.0,
+      "width": 90.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23237,
+    "catalog_product_id": 905,
+    "name": "Comforter (White / Twin XL)",
+    "size": "Twin XL",
+    "color": "White",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/905/23237_1757329846.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23237"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/905"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/905/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23237/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23237/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23237/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 94.49,
+      "width": 70.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23236,
+    "catalog_product_id": 905,
+    "name": "Comforter (White / Twin)",
+    "size": "Twin",
+    "color": "White",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/905/23236_1757329836.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23236"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/905"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/905/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23236/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23236/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23236/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 90.0,
+      "width": 70.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/905/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/905"
+   }
+  }
+ }
+}

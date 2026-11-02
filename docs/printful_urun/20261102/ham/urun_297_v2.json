@@ -1,0 +1,164 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/297?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 297,
+   "type": "EMBROIDERY",
+   "main_category_id": 88,
+   "name": "Embroidered Apron | Liberty Bags 5502",
+   "brand": "Liberty Bags",
+   "model": "5502",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/b1/b1504be1bd986f72acdf3c427e0cce4a_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Thanks to this embroidered apron you don't have to worry about keeping your clothes clean when cooking! The neck loop and long ties, two front pockets, and intricate embroidery in front all come together in an eye-catching and comfy accessory that'll make you long for more time in the kitchen.\r\n\r\n• 70% polyester, 30% cotton\r\n• Fabric weight: 9 oz/yd² (305 g/m²)\r\n• Size: 20″ × 30″ (50.8 cm × 76.2 cm)\r\n• Adjustable neck loop and long ties\r\n• Two front pockets\r\n• Blank product sourced from China",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#0f0e0e"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "embroidery",
+     "display_name": "Embroidery",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "embroidery_apparel_front",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": [
+        {
+         "name": "thread_colors",
+         "techniques": [
+          "embroidery"
+         ],
+         "type": "array",
+         "values": {
+          "#FFFFFF": "1801 White",
+          "#000000": "1800 Black",
+          "#96A1A8": "1718 Grey",
+          "#A67843": "1672 Old Gold",
+          "#FFCC00": "1951 Gold",
+          "#E25C27": "1987 Orange",
+          "#CC3366": "1910 Flamingo",
+          "#CC3333": "1839 Red",
+          "#660000": "1784 Maroon",
+          "#333366": "1966 Navy",
+          "#005397": "1842 Royal",
+          "#3399FF": "1695 Aqua/Teal",
+          "#6B5294": "1832 Purple",
+          "#01784E": "1751 Kelly Green",
+          "#7BA35A": "1848 Kiwi Green"
+         }
+        }
+       ]
+      }
+     ],
+     "placement_options": [
+      {
+       "name": "unlimited_color",
+       "techniques": [
+        "embroidery"
+       ],
+       "type": "bool",
+       "values": [
+        true,
+        false
+       ]
+      }
+     ],
+     "conflicting_placements": [
+      "embroidery_neckline"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "embroidery",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/297"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/297/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/297/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/297/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/297/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/297/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/297/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

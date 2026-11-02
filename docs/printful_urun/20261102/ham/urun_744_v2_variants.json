@@ -1,0 +1,100 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/744/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 19256,
+    "catalog_product_id": 744,
+    "name": "All-Over Print Utility Crossbody Bag (White / One size)",
+    "size": "One size",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/744/19256_1709881225.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19256"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/744"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/744/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19256/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19256/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19256/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "back",
+      "height": 10.0,
+      "width": 15.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "front",
+      "height": 10.0,
+      "width": 15.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "details",
+      "height": 10.0,
+      "width": 15.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "inside_pocket",
+      "height": 10.0,
+      "width": 15.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "pocket",
+      "height": 10.0,
+      "width": 15.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 1.0,
+      "width": 2.5,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_outside",
+      "height": 2.0,
+      "width": 2.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/744/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/744"
+   }
+  }
+ }
+}

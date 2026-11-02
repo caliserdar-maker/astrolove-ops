@@ -1,0 +1,2230 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/601/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 15383,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 11 Pro Max)",
+    "size": "iPhone 11 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15383_1654239967.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15383"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15383/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15383/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15383/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15382,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 11 Pro)",
+    "size": "iPhone 11 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15382_1654239978.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15382"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15382/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15382/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15382/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15381,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 11)",
+    "size": "iPhone 11",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15381_1654239978.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15381"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15381/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15381/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15381/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15385,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 12 mini)",
+    "size": "iPhone 12 mini",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15385_1654239988.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15385"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15385/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15385/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15385/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15387,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 12 Pro Max)",
+    "size": "iPhone 12 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15387_1654239988.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15387"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15387/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15387/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15387/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15386,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 12 Pro)",
+    "size": "iPhone 12 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15386_1654239998.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15386"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15386/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15386/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15386/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15384,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 12)",
+    "size": "iPhone 12",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15384_1654240008.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15384"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15384/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15384/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15384/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15389,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 13 mini)",
+    "size": "iPhone 13 mini",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15389_1654240008.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15389"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15389/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15389/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15389/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15391,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 13 Pro Max)",
+    "size": "iPhone 13 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15391_1654240019.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15391"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15391/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15391/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15391/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15390,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 13 Pro)",
+    "size": "iPhone 13 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15390_1654240019.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15390"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15390/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15390/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15390/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15388,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 13)",
+    "size": "iPhone 13",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15388_1654240110.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15388"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15388/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15388/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15388/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16128,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 14 Plus)",
+    "size": "iPhone 14 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/16128_1663581873.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16128"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16128/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16128/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16128/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16130,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 14 Pro Max)",
+    "size": "iPhone 14 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/16130_1663581877.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16130"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16130/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16130/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16130/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16126,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 14 Pro)",
+    "size": "iPhone 14 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/16126_1663581883.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16126"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16126/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16126/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16126/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16124,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 14)",
+    "size": "iPhone 14",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/16124_1663581883.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16124"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16124/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16124/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16124/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17716,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 15 Plus)",
+    "size": "iPhone 15 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/17716_1694436350.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17716"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17716/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17716/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17716/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17720,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 15 Pro Max)",
+    "size": "iPhone 15 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/17720_1694436351.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17720"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17720/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17720/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17720/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17718,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 15 Pro)",
+    "size": "iPhone 15 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/17718_1694436354.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17718"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17718/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17718/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17718/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17714,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 15)",
+    "size": "iPhone 15",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/17714_1694436355.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17714"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17714/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17714/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17714/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20303,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 16 Plus)",
+    "size": "iPhone 16 Plus",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/20303_1724312365.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20303"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20303/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20303/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20303/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20305,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 16 Pro Max)",
+    "size": "iPhone 16 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/20305_1724312365.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20305"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20305/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20305/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20305/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20304,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 16 Pro)",
+    "size": "iPhone 16 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/20304_1724312375.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20304"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20304/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20304/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20304/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20302,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 16)",
+    "size": "iPhone 16",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/20302_1724312375.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20302"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20302/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20302/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20302/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33986,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 17 Air)",
+    "size": "iPhone 17 Air",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/33986_1757579411.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33986"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33986/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33986/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33986/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33988,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 17 Pro Max)",
+    "size": "iPhone 17 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/33988_1757579450.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33988"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33988/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33988/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33988/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33987,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 17 Pro)",
+    "size": "iPhone 17 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/33987_1757579432.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33987"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33987/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33987/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33987/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33985,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 17)",
+    "size": "iPhone 17",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/33985_1757579388.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33985"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33985/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33985/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33985/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52386,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 18 Pro Max)",
+    "size": "iPhone 18 Pro Max",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/52386_1788522251.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52386"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52386/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52386/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52386/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52384,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Glossy / iPhone 18 Pro)",
+    "size": "iPhone 18 Pro",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/52384_1788522241.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52384"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52384/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52384/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52384/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15394,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 11 Pro Max)",
+    "size": "iPhone 11 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15394_1654240029.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15394"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15394/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15394/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15394/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15393,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 11 Pro)",
+    "size": "iPhone 11 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15393_1654240709.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15393"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15393/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15393/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15393/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15392,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 11)",
+    "size": "iPhone 11",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15392_1654240710.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15392"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15392/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15392/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15392/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15396,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 12 mini)",
+    "size": "iPhone 12 mini",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15396_1654240710.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15396"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15396/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15396/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15396/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15398,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 12 Pro Max)",
+    "size": "iPhone 12 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15398_1654240720.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15398"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15398/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15398/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15398/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15397,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 12 Pro)",
+    "size": "iPhone 12 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15397_1654240730.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15397"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15397/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15397/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15397/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15395,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 12)",
+    "size": "iPhone 12",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15395_1654240740.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15395"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15395/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15395/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15395/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15400,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 13 mini)",
+    "size": "iPhone 13 mini",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15400_1654240740.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15400"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15400/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15400/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15400/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15402,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 13 Pro Max)",
+    "size": "iPhone 13 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15402_1654240750.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15402"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15402/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15402/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15402/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15401,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 13 Pro)",
+    "size": "iPhone 13 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15401_1654240751.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15401"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15401/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15401/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15401/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15399,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 13)",
+    "size": "iPhone 13",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/15399_1654240761.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15399"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15399/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15399/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15399/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16129,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 14 Plus)",
+    "size": "iPhone 14 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/16129_1663581905.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16129"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16129/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16129/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16129/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16131,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 14 Pro Max)",
+    "size": "iPhone 14 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/16131_1663581905.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16131"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16131/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16131/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16131/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16127,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 14 Pro)",
+    "size": "iPhone 14 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/16127_1663581915.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16127"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16127/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16127/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16127/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16125,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 14)",
+    "size": "iPhone 14",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/16125_1663581915.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16125"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16125/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16125/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16125/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17717,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 15 Plus)",
+    "size": "iPhone 15 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/17717_1694436361.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17717"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17717/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17717/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17717/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17721,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 15 Pro Max)",
+    "size": "iPhone 15 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/17721_1694436371.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17721"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17721/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17721/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17721/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17719,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 15 Pro)",
+    "size": "iPhone 15 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/17719_1694436372.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17719"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17719/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17719/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17719/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 17715,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 15)",
+    "size": "iPhone 15",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/17715_1694436372.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17715"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17715/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17715/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17715/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20307,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 16 Plus)",
+    "size": "iPhone 16 Plus",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/20307_1724312385.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20307"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20307/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20307/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20307/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20309,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 16 Pro Max)",
+    "size": "iPhone 16 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/20309_1724312385.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20309"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20309/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20309/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20309/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20308,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 16 Pro)",
+    "size": "iPhone 16 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/20308_1724312385.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20308"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20308/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20308/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20308/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20306,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 16)",
+    "size": "iPhone 16",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/20306_1724312387.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20306"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20306/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20306/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20306/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33990,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 17 Air)",
+    "size": "iPhone 17 Air",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/33990_1757579410.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33990"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33990/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33990/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33990/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33992,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 17 Pro Max)",
+    "size": "iPhone 17 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/33992_1757579450.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33992"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33992/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33992/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33992/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33991,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 17 Pro)",
+    "size": "iPhone 17 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/33991_1757579431.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33991"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33991/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33991/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33991/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 33989,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 17)",
+    "size": "iPhone 17",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/33989_1757579388.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/33989"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/33989/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/33989/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/33989/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52387,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 18 Pro Max)",
+    "size": "iPhone 18 Pro Max",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/52387_1788522220.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52387"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52387/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52387/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52387/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 52385,
+    "catalog_product_id": 601,
+    "name": "Tough iPhone Case (Matte / iPhone 18 Pro)",
+    "size": "iPhone 18 Pro",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/601/52385_1788522210.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/52385"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/601"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/52385/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/52385/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/52385/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.4,
+      "width": 4.64,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 58,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/601/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/601"
+   }
+  }
+ }
+}

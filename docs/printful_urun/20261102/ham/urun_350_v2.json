@@ -1,0 +1,199 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/350?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 350,
+   "type": "CUT-SEW",
+   "main_category_id": 101,
+   "name": "All-Over Print Fanny Pack",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/a5/a5b065fbef259cc4554b04bcad64f006_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Fanny pack is the ultimate accessory for people on the go. And this waist bag has everything—the right size, a small inside pocket, and adjustable straps—to become your favorite fashion item if you're going to a festival, getting ready for a vacation, or just like to keep your hands free.\n\n• 100% polyester\n• Fabric weight: 9 oz./yd.² (305 g/m²)\n• Dimensions: 6.5″ (16 cm) in height, 13″ (33 cm) in width, and 2¾″ (7 cm) in diameter\n• Capacity: 0.37 gallons (1.4 l)\n• Water-resistant material\n• Top zipper with 2 sliders\n• Small, customizable inner pocket without zipper\n• Silky lining, piped inside hems\n• 1¼″ (2.54 cm) wide adjustable straps with plastic strap regulators\n• Blank product components sourced from China",
+   "sizes": [
+    "S/M",
+    "M/L"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "cut-sew",
+     "display_name": "All-over synthetic",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "top",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "back",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "pocket",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "pocket_dtfabric"
+     ]
+    },
+    {
+     "placement": "label_inside",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside_dtf",
+      "label_inside_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "cut-sew",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "stitch_color",
+     "techniques": [
+      "cut-sew",
+      "direct-to-fabric"
+     ],
+     "type": "string",
+     "values": {
+      "black": "Black",
+      "clear": "Clear"
+     }
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/350"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/350/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/350/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/350/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/350/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/350/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/350/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

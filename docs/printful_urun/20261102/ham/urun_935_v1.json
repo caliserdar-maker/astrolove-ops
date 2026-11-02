@@ -1,0 +1,253 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/935",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 935,
+    "main_category_id": 191,
+    "type": "DRINKWARE",
+    "description": "Stay refreshed on the go with our copper vacuum-insulated bottle, designed to keep your drinks at the perfect temperature while preventing condensation. Its durable stainless steel construction with a powder-coat finish is scratch and fade-resistant, while the spill-proof design and wide opening make it practical for everyday use. Lightweight and easy to carry, this bottle is perfect for work, travel, or outdoor activities - design your own or start selling it today!\n\n• Stainless steel with copper insulation\n• 22 oz. (650 ml)\n• Dimensions: 10.60″ × 2.90″ (26.92 × 7.37 cm)\n• Weight: 363 g\n• Spill-proof design\n• Scratch and fade-resistant\n• Powder-coat finish\n• BPA-free\n• Blank product sourced from China\n\nThis product is made on demand. No minimums.",
+    "type_name": "Insulated Bottle | Vacuum Insulated | Copper | 22oz",
+    "title": "Copper Vacuum Insulated Bottle (22oz)",
+    "brand": null,
+    "model": "Insulated Bottle | Vacuum Insulated | Copper | 22oz",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/3d/3dc12af1265d20692953cbb3344cc0e2_l",
+    "variant_count": 8,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 23880,
+     "product_id": 935,
+     "name": "Generic brand (Black / 22oz)",
+     "size": "22oz",
+     "color": "Black",
+     "color_code": "#0b0b0b",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/935/23880_1764676493.jpg",
+     "price": "26.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23883,
+     "product_id": 935,
+     "name": "Generic brand (Grey / 22oz)",
+     "size": "22oz",
+     "color": "Grey",
+     "color_code": "#5d5d5d",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/935/23883_1764676493.jpg",
+     "price": "26.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23884,
+     "product_id": 935,
+     "name": "Generic brand (Mint Green / 22oz)",
+     "size": "22oz",
+     "color": "Mint Green",
+     "color_code": "#3ec5cd",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/935/23884_1764676493.jpg",
+     "price": "26.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23881,
+     "product_id": 935,
+     "name": "Generic brand (Navy / 22oz)",
+     "size": "22oz",
+     "color": "Navy",
+     "color_code": "#343e63",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/935/23881_1764676493.jpg",
+     "price": "26.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23885,
+     "product_id": 935,
+     "name": "Generic brand (Orange / 22oz)",
+     "size": "22oz",
+     "color": "Orange",
+     "color_code": "#f2681d",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/935/23885_1764676493.jpg",
+     "price": "26.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23886,
+     "product_id": 935,
+     "name": "Generic brand (Pebble Blue / 22oz)",
+     "size": "22oz",
+     "color": "Pebble Blue",
+     "color_code": "#0accf7",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/935/23886_1764676493.jpg",
+     "price": "26.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23887,
+     "product_id": 935,
+     "name": "Generic brand (Red / 22oz)",
+     "size": "22oz",
+     "color": "Red",
+     "color_code": "#d61a13",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/935/23887_1764676493.jpg",
+     "price": "26.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23882,
+     "product_id": 935,
+     "name": "Generic brand (White / 22oz)",
+     "size": "22oz",
+     "color": "White",
+     "color_code": "#FFFFFF",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/935/23882_1764676493.jpg",
+     "price": "26.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

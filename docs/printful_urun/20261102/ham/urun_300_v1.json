@@ -1,0 +1,151 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/300",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 300,
+    "main_category_id": 195,
+    "type": "MUG",
+    "description": "This cupboard essential is sturdy, sleek, and perfect for your morning java or afternoon tea. \n\n• Ceramic\n• 11 oz mug dimensions: height 3.85\" (9.8 cm), diameter 3.35\" (8.5 cm)\n• 15 oz mug dimensions: height 4.7\" (12 cm), diameter 3.35\" (8.5 cm)\n• Lead and BPA-free material\n• Glossy finish\n• Dishwasher and microwave safe",
+    "type_name": "Mug | Glossy | Ceramic | Black",
+    "title": "Black Glossy Mug",
+    "brand": null,
+    "model": "Black Glossy Mug",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/2e/2e374a575d31ab64fa9cb7f1af7db269_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 9323,
+     "product_id": 300,
+     "name": "Black Glossy Mug (11 oz)",
+     "size": "11 oz",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/300/9323_1531741162.jpg",
+     "price": "8.11",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 9324,
+     "product_id": 300,
+     "name": "Black Glossy Mug (15 oz)",
+     "size": "15 oz",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/300/9324_1531741191.jpg",
+     "price": "9.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

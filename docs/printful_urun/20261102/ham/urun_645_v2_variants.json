@@ -1,0 +1,64 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/645/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16270,
+    "catalog_product_id": 645,
+    "name": "Glass Jar Soy Wax Candle (Unscented)",
+    "size": "Unscented",
+    "color": "White",
+    "color_code": "#fffaf1",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/645/16270_1664258408.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16270"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/645"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/645/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16270/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16270/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16270/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 2.4,
+      "width": 3.98,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/645/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/645"
+   }
+  }
+ }
+}

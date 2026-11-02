@@ -1,0 +1,165 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/905",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 905,
+    "main_category_id": 255,
+    "type": "SUBLIMATION",
+    "description": "Wrap yourself in warmth with this ultra-soft, lightweight comforter—perfect for lazy mornings or chilly nights in. One side is available for vibrant designs, with fluffy 0.75” batting and a bright white back.\n\n• Made from 100% polyester microfiber\n• Twin size: 68″ × 88″ (172.7 cm × 223.5 cm)\n• Twin XL size: 68″ × 92″ (172.7 cm × 233.7 cm)\n• Queen size: 88″ × 88″ (223.5 cm × 223.5 cm)\n• King size: 104″ × 88″ (264.1 cm × 223.5 cm)\n• One-sided design, white back\n• Filled with 0.75\" (1.95 cm) batting for warmth and softness\n• Quilted in a double square pattern to keep the filling evenly in place\n• Blank product sourced from China\n\nDisclaimers:\n• Comforter sizes may differ by ±3″ (7.6 cm).\n• Machine wash in cold water (max. 90°F / 30°C). Not suitable for ironing or dry cleaning. Tumble dry on low; non-chlorine bleach may be used when needed.",
+    "type_name": "Comforter | White",
+    "title": "Comforter",
+    "brand": null,
+    "model": "Comforter | White",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/ea/ea16951eea78fe750a82f6e57cdf2d31_l",
+    "variant_count": 4,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 23235,
+     "product_id": 905,
+     "name": "Comforter (White / King)",
+     "size": "King",
+     "color": "White",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/905/23235_1757329857.jpg",
+     "price": "102.92",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23238,
+     "product_id": 905,
+     "name": "Comforter (White / Queen)",
+     "size": "Queen",
+     "color": "White",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/905/23238_1757329856.jpg",
+     "price": "91.94",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23237,
+     "product_id": 905,
+     "name": "Comforter (White / Twin XL)",
+     "size": "Twin XL",
+     "color": "White",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/905/23237_1757329846.jpg",
+     "price": "83.24",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23236,
+     "product_id": 905,
+     "name": "Comforter (White / Twin)",
+     "size": "Twin",
+     "color": "White",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/905/23236_1757329836.jpg",
+     "price": "78.64",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

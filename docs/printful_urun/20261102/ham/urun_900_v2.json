@@ -1,0 +1,111 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/900?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 900,
+   "type": "DECOR",
+   "main_category_id": 254,
+   "name": "Ceramic Ornaments, 2-Side Print",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/f3/f359f82e8ed7045d3d53c943e0f82488_l",
+   "variant_count": 4,
+   "is_discontinued": false,
+   "description": "Shiny from all angles, these two-sided ornaments bring double the cheer. Great for personal gifting or maxing your seasonal decor, they come in four festive shapes with a high-gloss finish. Available solo or in three, five, or ten-unit packs.\n\n• 100% ceramic\n• Circle-shaped diameter: 2.99″ (7.6 cm)\n• Heart-shaped size: 2.91″ × 2.68″ (7.4 cm × 6.8 cm)\n• Star-shaped size: 3.35″ × 2.68″ (8.5 cm × 6.8 cm)\n• Snowflake-shaped size: 2.17″ × 2.99″ (5.5 cm × 7.6 cm)\n• Ornament thickness: 0.1″ (2.5 mm)\n• Glossy finish\n• Two-sided print with the same design\n• Gold-colored string included\n• Available individually or in bundles of 3, 5, or 10\n• Blank product sourced from China",
+   "sizes": [
+    "Circle",
+    "Heart",
+    "Star",
+    "Snowflake"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/900"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/900/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/900/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/900/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/900/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/900/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/900/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

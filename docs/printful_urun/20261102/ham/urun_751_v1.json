@@ -1,0 +1,109 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/751",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 751,
+    "main_category_id": 238,
+    "type": "DRINKWARE",
+    "description": "Enjoy cool drinks all summer with this insulated, reusable tumbler. Ideal for any refreshment, it comes with a lid and straw for easy sipping on the move. Embrace reusability over single-use plastics without sacrificing style.\n\n• Material: Clear acrylic plastic\n• Capacity: 16 oz. (590 ml)\n• Height: 6.3″ (16 cm)\n• Lid diameter: 3.9″ (10 cm)\n• Bottom diameter: 2.6″ (6.7 cm)\n• Double wall-insulated\n• Comes with a plastic straw and screw-on lid\n• Blank product sourced from China\n\nDisclaimers: \n• Not dishwasher or microwave safe. Hand-wash only.\n• Do not use with hot liquids.",
+    "type_name": "Tumbler | Double Wall | Plastic | 16oz | Clear",
+    "title": "Double Wall Clear Plastic Tumbler (16 oz)",
+    "brand": null,
+    "model": "Tumbler | Double Wall | Plastic | 16oz | Clear",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/a5/a5fa1f44989e132468d7f85ea884d574_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 19192,
+     "product_id": 751,
+     "name": "Double Wall Clear Plastic Tumbler (16 oz)",
+     "size": "16 oz",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/751/19192_1711608136.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

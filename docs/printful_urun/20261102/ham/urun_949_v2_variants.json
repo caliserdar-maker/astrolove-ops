@@ -1,0 +1,136 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/949/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 24308,
+    "catalog_product_id": 949,
+    "name": "Generic brand (10\" x 5\" / Satin)",
+    "size": "10″×5″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/949/24308_1754043737.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/24308"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/949"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/949/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/24308/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/24308/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/24308/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "january",
+      "height": 5.24,
+      "width": 10.24,
+      "orientation": "any"
+     },
+     {
+      "placement": "february",
+      "height": 5.24,
+      "width": 10.24,
+      "orientation": "any"
+     },
+     {
+      "placement": "march",
+      "height": 5.24,
+      "width": 10.24,
+      "orientation": "any"
+     },
+     {
+      "placement": "april",
+      "height": 5.24,
+      "width": 10.24,
+      "orientation": "any"
+     },
+     {
+      "placement": "may",
+      "height": 5.24,
+      "width": 10.24,
+      "orientation": "any"
+     },
+     {
+      "placement": "june",
+      "height": 5.24,
+      "width": 10.24,
+      "orientation": "any"
+     },
+     {
+      "placement": "july",
+      "height": 5.24,
+      "width": 10.24,
+      "orientation": "any"
+     },
+     {
+      "placement": "august",
+      "height": 5.24,
+      "width": 10.24,
+      "orientation": "any"
+     },
+     {
+      "placement": "september",
+      "height": 5.24,
+      "width": 10.24,
+      "orientation": "any"
+     },
+     {
+      "placement": "october",
+      "height": 5.24,
+      "width": 10.24,
+      "orientation": "any"
+     },
+     {
+      "placement": "november",
+      "height": 5.24,
+      "width": 10.24,
+      "orientation": "any"
+     },
+     {
+      "placement": "december",
+      "height": 5.24,
+      "width": 10.24,
+      "orientation": "any"
+     },
+     {
+      "placement": "cover",
+      "height": 5.24,
+      "width": 10.24,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/949/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/949"
+   }
+  }
+ }
+}

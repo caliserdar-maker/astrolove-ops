@@ -1,0 +1,133 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/684?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 684,
+   "type": "PHONE-CASE",
+   "main_category_id": 244,
+   "name": "Snap Case for Samsung",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/f6/f6466ce0d2b7660d6dbe3b8b49b3391b_l",
+   "variant_count": 46,
+   "is_discontinued": false,
+   "description": "With this snap case, you'll never have to compromise style for safety. Its slim and lightweight design is perfect for a busy lifestyle, adding minimal weight to your device while still keeping it protected. \n• Made of polycarbonate (PC) material\n• Wireless charging compatible\n• Precisely aligned port openings\n• Blank product sourced from the Republic of Korea\n\nDisclaimer: Keep away from liquids containing high alcohol levels, as designs on the phone case may rub off. Keep away from direct sunlight to prevent yellowing.\n\nImportant: This product cannot be shipped to South Korea, Hong Kong, Taiwan, Japan, or Singapore. If your shipping address is in these regions, please choose a different product.",
+   "sizes": [
+    "Samsung Galaxy S10",
+    "Samsung Galaxy S10 Plus",
+    "Samsung Galaxy S10e",
+    "Samsung Galaxy S20",
+    "Samsung Galaxy S20 Plus",
+    "Samsung Galaxy S20 Ultra",
+    "Samsung Galaxy S20 FE",
+    "Samsung Galaxy S21 FE",
+    "Samsung Galaxy S21",
+    "Samsung Galaxy S21 Plus",
+    "Samsung Galaxy S21 Ultra",
+    "Samsung Galaxy S22",
+    "Samsung Galaxy S22 Plus",
+    "Samsung Galaxy S22 Ultra",
+    "Samsung Galaxy S23",
+    "Samsung Galaxy S23 Plus",
+    "Samsung Galaxy S23 Ultra",
+    "Samsung Galaxy S24",
+    "Samsung Galaxy S24 Plus",
+    "Samsung Galaxy S24 Ultra",
+    "Samsung Galaxy S25",
+    "Samsung Galaxy S25 Plus",
+    "Samsung Galaxy S25 Ultra"
+   ],
+   "colors": [
+    {
+     "name": "Glossy",
+     "value": "#ffffff"
+    },
+    {
+     "name": "Matte",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/684"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/684/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/684/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/684/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/684/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/684/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/684/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,109 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/788",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 788,
+    "main_category_id": 191,
+    "type": "MUG",
+    "description": "Stay hydrated all day with this 32 oz (950 ml) water bottle. It’s ideal for workouts or busy days, with a wide-mouth foldable straw for spill-free sipping and a rotating handle for easy carrying.\n\n• Double-walled stainless steel with vacuum insulation\n• Plastic lid and wide-mouth foldable straw\n• 32 oz. (950 ml)\n• Height: 9.92″ (25.2 cm)\n• Diameter: 3.54″ (9 cm)\n• Glossy finish\n• Rotating handle\n• Comes with an anti-slip patch\n• Blank product sourced from China\n\nDisclaimer: Not dishwasher or microwave safe. Hand-wash only.",
+    "type_name": "Water Bottle | w/Straw Lid | Stainless Steel | 32oz",
+    "title": "Stainless Steel Water Bottle with a Straw Lid",
+    "brand": null,
+    "model": "Water Bottle | w/Straw Lid | Stainless Steel | 32oz",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/b9/b916b1b091bdd8c1fca95287a189c21c_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 20175,
+     "product_id": 788,
+     "name": "Stainless Steel Water Bottle with a Straw Lid (White / 32 oz)",
+     "size": "32 oz",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/788/20175_1721889457.jpg",
+     "price": "21.80",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

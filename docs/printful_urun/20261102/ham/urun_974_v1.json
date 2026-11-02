@@ -1,0 +1,185 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/974",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 974,
+    "main_category_id": 202,
+    "type": "STICKER",
+    "description": "Add a touch of personality to your belongings with kiss-cut vinyl decals. The satin finish gives them a sleek look, while the bubble-free design makes them easy to apply. They’re durable, dishwasher-safe, and removable without leaving residue — perfect for decorating laptops, bottles, or notebooks.\n\n• Vinyl with satin finish\n• Sizes: 3″ × 4″ (7.6 × 10.2 cm), 4″ × 6″ (10.2 × 15.2 cm), 6″ × 8″ (15.2 × 20.3 cm), 8″ × 10″ (20.3 × 25.4 cm)\n• Removable adhesive\n• Bubble-free application\n• Water, scratch, and UV resistant\n• Dishwasher-safe\n• Perfect for indoor and outdoor use\n• Blank product sourced from the US",
+    "type_name": "Decal | Vinyl | Kiss Cut",
+    "title": "Kiss-Cut Vinyl Decals",
+    "brand": null,
+    "model": "Decal | Vinyl | Kiss Cut",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/11/115cae7c9624af70b84e73cbfe27b6d4_l",
+    "variant_count": 4,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "USA"
+   },
+   "variants": [
+    {
+     "id": 24971,
+     "product_id": 974,
+     "name": "Generic brand  (Satin / 3″×4″)",
+     "size": "3″×4″",
+     "color": "Satin",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/974/24971_1756100793.jpg",
+     "price": "1.23",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": [
+      {
+       "name": "Vinyl",
+       "percentage": 100.0
+      }
+     ]
+    },
+    {
+     "id": 24972,
+     "product_id": 974,
+     "name": "Generic brand  (Satin / 4″×6″)",
+     "size": "4″×6″",
+     "color": "Satin",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/974/24972_1756100793.jpg",
+     "price": "2.21",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": [
+      {
+       "name": "Vinyl",
+       "percentage": 100.0
+      }
+     ]
+    },
+    {
+     "id": 24973,
+     "product_id": 974,
+     "name": "Generic brand  (Satin / 6″×8″)",
+     "size": "6″×8″",
+     "color": "Satin",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/974/24973_1756100795.jpg",
+     "price": "4.36",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": [
+      {
+       "name": "Vinyl",
+       "percentage": 100.0
+      }
+     ]
+    },
+    {
+     "id": 24974,
+     "product_id": 974,
+     "name": "Generic brand  (Satin / 8″×10″)",
+     "size": "8″×10″",
+     "color": "Satin",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/974/24974_1756100796.jpg",
+     "price": "7.80",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": [
+      {
+       "name": "Vinyl",
+       "percentage": 100.0
+      }
+     ]
+    }
+   ]
+  },
+  "extra": []
+ }
+}

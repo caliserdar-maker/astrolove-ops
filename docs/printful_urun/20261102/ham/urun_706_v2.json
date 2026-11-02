@@ -1,0 +1,131 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/706?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 706,
+   "type": "DECOR",
+   "main_category_id": 254,
+   "name": "Wrapping Paper Sheets (3)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/2f/2f96e969b6c8c36eb338d71aeff576f0_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Wrap your gifts in style with these premium wrapping paper sheets! Get three high-quality, matte-finished sheets and add a touch of elegance to birthdays, anniversaries, and other celebrations.\n\n• Size: 28.75″ × 19.75″ (73 × 50.2 cm)\n• Thickness: 70# uncoated text\n• Printing on one side\n• White reverse side\n• A set of 3 sheets\n• Matte finish\n• Blank product sourced from the United States",
+   "sizes": [
+    "28.75″×19.75″"
+   ],
+   "colors": [
+    {
+     "name": "White Matte",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "first",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "second",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "third",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/706"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/706/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/706/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/706/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/706/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/706/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/706/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

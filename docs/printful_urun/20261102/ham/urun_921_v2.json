@@ -1,0 +1,142 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/921?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 921,
+   "type": "SUBLIMATION",
+   "main_category_id": 189,
+   "name": "Pet Hoodie",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/ae/ae97e0b1bebd15bc5ed02722bf291e36_l",
+   "variant_count": 0,
+   "is_discontinued": false,
+   "description": "Wrap your furry friend in cozy style with this custom pet hoodie—perfect for walks, snuggles, and everyday adventures. Warm, cute, and full of personality, it’s a must-have for pet parents.\n\n• Made with 100% soft polyester, strong, durable, and quick-drying\n• Available in 7 sizes\n• Black or white rib color option\n• ½ inch folded edge\n• One-sided print\n• Blank product sourced in Thailand",
+   "sizes": [
+    "XXS",
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL",
+    "2XL"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "hood",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "hood_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/921"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/921/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/921/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/921/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/921/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/921/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/921/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

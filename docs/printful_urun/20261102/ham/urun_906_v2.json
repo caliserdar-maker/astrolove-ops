@@ -1,0 +1,132 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/906?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 906,
+   "type": "SUBLIMATION",
+   "main_category_id": 292,
+   "name": "Jigsaw Puzzle with Tin",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/7e/7e72c953bdc4225008dfbd8eb7317451_l",
+   "variant_count": 6,
+   "is_discontinued": false,
+   "description": "A glossy, vibrant jigsaw puzzle packed in a stylish tin box—perfect for winding down or challenging your brain. Pick your challenge with 6 size options, from breezy to brain-bending. Ideal for birthdays, holidays, or just because.\n\n• Pre-die-cut chipboard with non-edge pieces\n• White metal tin box with the finished image on the lid\n• Available in 6 sizes: 30 pcs (10″ × 8″), 110 pcs (10″ × 8″), 252 pcs (14″ × 11″), 500 pcs (21″ × 15.5″), 1000 pcs (30″ × 20″), 2000 pcs (40″ × 28″)\n• Glossy finish enhances colors and makes pieces easier to clean\n• Ideal for gifting or framing once complete\n• Blank product sourced from China",
+   "sizes": [
+    "10″×8″ (110 pcs)",
+    "10″×8″ (30 pcs)",
+    "14″×11″ (252 pcs)",
+    "21″×15.5″ (500 pcs)",
+    "30″×20″ (1000 pcs)",
+    "40″×28″ (2000 pcs)"
+   ],
+   "colors": [
+    {
+     "name": "White (glossy)",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/906"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/906/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/906/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/906/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/906/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/906/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/906/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

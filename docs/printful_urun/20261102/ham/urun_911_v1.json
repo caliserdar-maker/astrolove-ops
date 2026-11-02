@@ -1,0 +1,209 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/911",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 911,
+    "main_category_id": 254,
+    "type": "DECOR",
+    "description": "Wrap it your way—this premium paper comes in matte or glossy finish with edge-to-edge prints. Choose from 3 sizes and give every gift a personal touch. One-sided print, 90 gsm quality, and ready to stand out.\n• 90 gsm fine art paper\n• Edge-to-edge design on one side, white reverse\n• 3 sizes: 30″ × 36″ (76.2 cm × 91.4 cm), 30″ × 72″ (76.2 cm × 182.9 cm) and 30″ × 180″ (76.2 cm × 457.2 cm)\n• Blank product sourced from the US\n\nDisclaimer: The product includes a small QR code and white edges at the top and bottom to protect the design from being ripped when removing the tape.",
+    "type_name": "Paper | Wrapping",
+    "title": "Wrapping Papers",
+    "brand": null,
+    "model": "Paper | Wrapping",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/af/af76eb6f72c8492f384480e87314d3e6_l",
+    "variant_count": 6,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 23505,
+     "product_id": 911,
+     "name": "Wrapping Papers (White Glossy / 30″×180″)",
+     "size": "30″×180″",
+     "color": "White Glossy",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/911/23505_1750164799.jpg",
+     "price": "20.53",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23503,
+     "product_id": 911,
+     "name": "Wrapping Papers (White Glossy / 30″×36″)",
+     "size": "30″×36″",
+     "color": "White Glossy",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/911/23503_1750164937.jpg",
+     "price": "8.37",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23501,
+     "product_id": 911,
+     "name": "Wrapping Papers (White Glossy / 30″×72″)",
+     "size": "30″×72″",
+     "color": "White Glossy",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/911/23501_1750164840.jpg",
+     "price": "10.68",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23506,
+     "product_id": 911,
+     "name": "Wrapping Papers (White Matte / 30″×180″)",
+     "size": "30″×180″",
+     "color": "White Matte",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/911/23506_1750164794.jpg",
+     "price": "20.53",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23504,
+     "product_id": 911,
+     "name": "Wrapping Papers (White Matte / 30″×36″)",
+     "size": "30″×36″",
+     "color": "White Matte",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/911/23504_1750164938.jpg",
+     "price": "8.37",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23502,
+     "product_id": 911,
+     "name": "Wrapping Papers (White Matte / 30″×72″)",
+     "size": "30″×72″",
+     "color": "White Matte",
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/911/23502_1750164840.jpg",
+     "price": "10.68",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

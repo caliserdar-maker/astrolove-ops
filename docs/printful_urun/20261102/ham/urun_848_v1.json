@@ -1,0 +1,143 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/848",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 848,
+    "main_category_id": 191,
+    "type": "DRINKWARE",
+    "description": "Stay hydrated in style with this flip straw water bottle, made from 50% recycled plastic. Resistant to stains, shattering, and odors, it keeps your drinks fresh, while the leak-proof cover and bite valve prevent spills. This extra-large bottle is ideal for extended gym, work, or study sessions!\n\n• BPA-free Tritan® Renew 50% recycled material \n• 25 oz. (739 ml) \n• Dimensions: 10″ × 3″ (25.4 × 7.62 cm)\n• Stain, shatter, and odor-resistant\n• Leak-proof mouthpiece cover and spill-proof bite valve\n• Pivoting carry handle\n• Blank product sourced from China",
+    "type_name": "CamelBak | Thrive | Water Bottle | Flip Straw",
+    "title": "Flip Straw Water Bottle | CamelBak Thrive",
+    "brand": "CamelBak",
+    "model": "Thrive",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/1b/1bae8a320c861d651627d1c74a62af57_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 22016,
+     "product_id": 848,
+     "name": "Flip Straw Water Bottle | CamelBak Thrive (Charcoal / 25 oz)",
+     "size": "25 oz",
+     "color": "Charcoal",
+     "color_code": "#7d7d7d",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/848/22016_1739791342.jpg",
+     "price": "27.37",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22017,
+     "product_id": 848,
+     "name": "Flip Straw Water Bottle | CamelBak Thrive (Clear / 25 oz)",
+     "size": "25 oz",
+     "color": "Clear",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/848/22017_1739791346.jpg",
+     "price": "27.37",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22020,
+     "product_id": 848,
+     "name": "Flip Straw Water Bottle | CamelBak Thrive (Oxford Blue / 25 oz)",
+     "size": "25 oz",
+     "color": "Oxford Blue",
+     "color_code": "#3282c9",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/848/22020_1739791353.jpg",
+     "price": "27.37",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

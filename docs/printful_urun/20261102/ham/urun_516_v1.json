@@ -1,0 +1,483 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/516",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 516,
+    "main_category_id": 215,
+    "type": "EMBROIDERY-PATCH",
+    "description": "Spice up your outfit by adding an eye-catching embroidered patch. Thanks to its durable twill fabric, the patch is resilient to heat. Order it today and get ready to start embellishing!\n\n• 26% cotton, 74% polyester\n• 3″ (7.6 cm) in diameter\n• Attachment options: iron-on, sew-on, or safety pin\n• Blank product sourced from China",
+    "type_name": "Gunold | Embroidered Patches",
+    "title": "Embroidered Patches",
+    "brand": "Gunold",
+    "model": "003",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/52/52dda392a73af8e9d253005b3698d571_l",
+    "variant_count": 10,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "thread_colors_patch_front",
+      "title": "Patch front thread colors",
+      "type": "multi_select",
+      "values": {
+       "#FFFFFF": "1801 White",
+       "#000000": "1800 Black",
+       "#96A1A8": "1718 Grey",
+       "#A67843": "1672 Old Gold",
+       "#FFCC00": "1951 Gold",
+       "#E25C27": "1987 Orange",
+       "#CC3366": "1910 Flamingo",
+       "#CC3333": "1839 Red",
+       "#660000": "1784 Maroon",
+       "#333366": "1966 Navy",
+       "#005397": "1842 Royal",
+       "#3399FF": "1695 Aqua/Teal",
+       "#6B5294": "1832 Purple",
+       "#01784E": "1751 Kelly Green",
+       "#7BA35A": "1848 Kiwi Green"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Embroidery notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "thread_colors_outline",
+      "title": "Outline color",
+      "type": "multi_select",
+      "values": {
+       "#FFFFFF": "1801 White",
+       "#000000": "1800 Black",
+       "#96A1A8": "1718 Grey",
+       "#A67843": "1672 Old Gold",
+       "#FFCC00": "1951 Gold",
+       "#E25C27": "1987 Orange",
+       "#CC3366": "1910 Flamingo",
+       "#CC3333": "1839 Red",
+       "#660000": "1784 Maroon",
+       "#333366": "1966 Navy",
+       "#005397": "1842 Royal",
+       "#3399FF": "1695 Aqua/Teal",
+       "#6B5294": "1832 Purple",
+       "#01784E": "1751 Kelly Green",
+       "#7BA35A": "1848 Kiwi Green"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "EMBROIDERY",
+      "display_name": "Embroidery",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "embroidery_patch_front",
+      "type": "embroidery_patch_front",
+      "title": "Patch",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 12981,
+     "product_id": 516,
+     "name": "Embroidered Patches (Black / Circular ⌀3 in)",
+     "size": "Circular ⌀3 in",
+     "color": "Black",
+     "color_code": "#0a0a0a",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/516/12981_1658225999.jpg",
+     "price": "9.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15569,
+     "product_id": 516,
+     "name": "Embroidered Patches (Black / Heart - 3.1″×2.8″)",
+     "size": "Heart - 3.1″×2.8″",
+     "color": "Black",
+     "color_code": "#0a0a0a",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/516/15569_1658225604.jpg",
+     "price": "9.31",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15736,
+     "product_id": 516,
+     "name": "Embroidered Patches (Black / Oval 4″×2.6″)",
+     "size": "Oval 4″×2.6″",
+     "color": "Black",
+     "color_code": "#0a0a0a",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/516/15736_1658225870.jpg",
+     "price": "9.31",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15563,
+     "product_id": 516,
+     "name": "Embroidered Patches (Black / Rectangle 3.5″×2.25″)",
+     "size": "Rectangle 3.5″×2.25″",
+     "color": "Black",
+     "color_code": "#0a0a0a",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/516/15563_1658225878.jpg",
+     "price": "9.31",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15560,
+     "product_id": 516,
+     "name": "Embroidered Patches (Black / Square 3″×3″)",
+     "size": "Square 3″×3″",
+     "color": "Black",
+     "color_code": "#0a0a0a",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/516/15560_1658225888.jpg",
+     "price": "9.31",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 12983,
+     "product_id": 516,
+     "name": "Embroidered Patches (White / Circular ⌀3 in)",
+     "size": "Circular ⌀3 in",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/516/12983_1658225999.jpg",
+     "price": "9.13",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15571,
+     "product_id": 516,
+     "name": "Embroidered Patches (White / Heart - 3.1″×2.8″)",
+     "size": "Heart - 3.1″×2.8″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/516/15571_1658225919.jpg",
+     "price": "9.31",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15738,
+     "product_id": 516,
+     "name": "Embroidered Patches (White / Oval 4″×2.6″)",
+     "size": "Oval 4″×2.6″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/516/15738_1658225936.jpg",
+     "price": "9.31",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15565,
+     "product_id": 516,
+     "name": "Embroidered Patches (White / Rectangle 3.5″×2.25″)",
+     "size": "Rectangle 3.5″×2.25″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/516/15565_1658225947.jpg",
+     "price": "9.31",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15562,
+     "product_id": 516,
+     "name": "Embroidered Patches (White / Square 3″×3″)",
+     "size": "Square 3″×3″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/516/15562_1658225947.jpg",
+     "price": "9.31",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States",
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "UK": "United Kingdom"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

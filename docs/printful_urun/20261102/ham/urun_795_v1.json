@@ -1,0 +1,447 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/795",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 795,
+    "main_category_id": 56,
+    "type": "FRAMED-POSTER",
+    "description": "Make a statement in any room with this framed poster, printed on thick matte paper.\n\n• Ayous wood .75″ (1.9 cm) thick frame from renewable forests\n• Paper thickness: 10.3 mil (0.26 mm)\n• Paper weight: 189 g/m²\n• Lightweight\n• Acrylite front protector\n• Hanging hardware included\n• Blank product components sourced from Japan and the US\n\nHow to attach hooks on 24″ × 36″ horizontal frames:\nPlace each of the mounting hooks 1 inch (2.5 cm) from frame corners when hanging horizontally.",
+    "type_name": "Paper Poster | Framed | Mat (in)",
+    "title": "Matte Paper Framed Poster With Mat (in)",
+    "brand": null,
+    "model": "Paper Poster | Framed | Mat (in)",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/9d/9dfc8ba1d5270d681856bcd552e7bdc8_l",
+    "variant_count": 15,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 20256,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (Black / 12″×16″)",
+     "size": "12″×16″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20256_1722419854.jpg",
+     "price": "36.41",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20259,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (Black / 12″×18″)",
+     "size": "12″×18″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20259_1722419854.jpg",
+     "price": "38.44",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20262,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (Black / 16″×20″)",
+     "size": "16″×20″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20262_1722419861.jpg",
+     "price": "45.73",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20265,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (Black / 18″×24″)",
+     "size": "18″×24″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20265_1722419865.jpg",
+     "price": "50.93",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20268,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (Black / 24″×36″)",
+     "size": "24″×36″",
+     "color": "Black",
+     "color_code": "#000000",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20268_1722419872.jpg",
+     "price": "81.67",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20257,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (Red Oak / 12″×16″)",
+     "size": "12″×16″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20257_1722419975.jpg",
+     "price": "36.41",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20260,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (Red Oak / 12″×18″)",
+     "size": "12″×18″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20260_1722419978.jpg",
+     "price": "38.44",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20263,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (Red Oak / 16″×20″)",
+     "size": "16″×20″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20263_1722419985.jpg",
+     "price": "45.73",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20266,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (Red Oak / 18″×24″)",
+     "size": "18″×24″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20266_1722419985.jpg",
+     "price": "50.93",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20269,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (Red Oak / 24″×36″)",
+     "size": "24″×36″",
+     "color": "Red Oak",
+     "color_code": "#D4A489",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20269_1722419988.jpg",
+     "price": "81.67",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20258,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (White / 12″×16″)",
+     "size": "12″×16″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20258_1722419996.jpg",
+     "price": "36.41",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20261,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (White / 12″×18″)",
+     "size": "12″×18″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20261_1722419996.jpg",
+     "price": "38.44",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20264,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (White / 16″×20″)",
+     "size": "16″×20″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20264_1722419997.jpg",
+     "price": "45.73",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20267,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (White / 18″×24″)",
+     "size": "18″×24″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20267_1722420007.jpg",
+     "price": "50.93",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 20270,
+     "product_id": 795,
+     "name": "Matte Paper Framed Poster With Mat (in) (White / 24″×36″)",
+     "size": "24″×36″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/795/20270_1722420007.jpg",
+     "price": "81.67",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

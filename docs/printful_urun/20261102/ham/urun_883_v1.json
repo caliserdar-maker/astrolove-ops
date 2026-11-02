@@ -1,0 +1,99 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/883",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 883,
+    "main_category_id": 230,
+    "type": "SUBLIMATION",
+    "description": "Add a stylish touch to your bathroom with this soft and absorbent hand towel. Vibrant finish on the front, cozy cotton on the back—because details matter.\n\n• 52% polyester, 48% cotton\n• Soft polyester front and absorbent white cotton back\n• Fabric weight: 14.1 oz./yd.² (400 g/m²)\n• Size: 16″ × 28″ (40.6cm × 71.1 cm)\n• Blank product sourced from China\n\nDisclaimer: Machine wash in cold water (max. 90°F / 30°C). Not suitable for bleaching, ironing, dry cleaning, or tumble drying with heat.",
+    "type_name": "Towel | Hand",
+    "title": "Hand Towel",
+    "brand": null,
+    "model": "Generic",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/8d/8de2e4f34ac87cfcb72dcea526c572fe_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 22792,
+     "product_id": 883,
+     "name": "Hand Towel (White / 28″ × 16″)",
+     "size": "28″ × 16″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/883/22792_1747810045.jpg",
+     "price": "9.85",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

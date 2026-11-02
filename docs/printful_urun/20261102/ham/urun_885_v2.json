@@ -1,0 +1,127 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/885?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 885,
+   "type": "SUBLIMATION",
+   "main_category_id": 21,
+   "name": "Pennant",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/ef/ef97ed58e9a3572c83d873f3b4ae7e48_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Lightweight, durable, and made to stand out. This pennant brings bold design to your walls in a clean, modern shape that’s easy to hang anywhere. A quick way to add edge, color, or character to your space.\n\n• 100% polyester twill\n• Size: 18″ × 21″ (45.7 cm × 53.3 cm)\n• One-sided print\n• Laser-cut edges to prevent fraying\n• Comes with a wooden dowel and twine frame for easy hanging\n• Blank product sourced from China",
+   "sizes": [
+    "18″×21″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/885"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/885/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/885/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/885/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/885/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/885/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/885/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

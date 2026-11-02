@@ -1,0 +1,1706 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/614/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 16034,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (Black / 12″×12″)",
+    "size": "12″×12″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/16034_1660216836.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16034"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16034/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16034/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16034/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 15.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16035,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (Black / 12″×16″)",
+    "size": "12″×16″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/16035_1660216838.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16035"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16035/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16035/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16035/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 19.0,
+      "width": 15.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 19.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 16036,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (Black / 16″×16″)",
+    "size": "16″×16″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/16036_1660216846.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16036"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16036/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16036/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16036/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 19.0,
+      "width": 19.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16037,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (Black / 16″×20″)",
+    "size": "16″×20″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/16037_1660216857.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16037"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16037/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16037/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16037/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 19.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 19.0,
+      "width": 23.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 16038,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (Black / 18″×24″)",
+    "size": "18″×24″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/16038_1660216858.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16038"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16038/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16038/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16038/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 21.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 21.0,
+      "width": 27.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 16039,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (Black / 24″×36″)",
+    "size": "24″×36″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/16039_1660216958.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16039"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16039/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16039/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16039/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 39.0,
+      "width": 27.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 39.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 16040,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (Brown / 12″×12″)",
+    "size": "12″×12″",
+    "color": "Brown",
+    "color_code": "#3b2d22",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/16040_1730194266.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16040"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16040/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16040/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16040/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 15.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16041,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (Brown / 12″×16″)",
+    "size": "12″×16″",
+    "color": "Brown",
+    "color_code": "#3b2d22",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/16041_1730194267.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16041"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16041/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16041/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16041/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 19.0,
+      "width": 15.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 19.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 16042,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (Brown / 16″×16″)",
+    "size": "16″×16″",
+    "color": "Brown",
+    "color_code": "#3b2d22",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/16042_1730194269.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16042"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16042/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16042/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16042/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 19.0,
+      "width": 19.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16043,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (Brown / 16″×20″)",
+    "size": "16″×20″",
+    "color": "Brown",
+    "color_code": "#3b2d22",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/16043_1730194277.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16043"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16043/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16043/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16043/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 19.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 19.0,
+      "width": 23.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 16044,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (Brown / 18″×24″)",
+    "size": "18″×24″",
+    "color": "Brown",
+    "color_code": "#3b2d22",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/16044_1730194278.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16044"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16044/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16044/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16044/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 21.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 21.0,
+      "width": 27.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 16045,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (Brown / 24″×36″)",
+    "size": "24″×36″",
+    "color": "Brown",
+    "color_code": "#3b2d22",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/16045_1730194278.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16045"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16045/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16045/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16045/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 39.0,
+      "width": 27.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 39.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17629,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (Black / 11″×14″)",
+    "size": "11″×14″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17629_1692798984.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17629"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17629/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17629/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17629/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 17.0,
+      "width": 14.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 17.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17630,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (Black / 12″×18″)",
+    "size": "12″×18″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17630_1692798983.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17630"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17630/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17630/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17630/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 21.0,
+      "width": 15.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 21.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17631,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (Black / 20″×28″)",
+    "size": "20″×28″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17631_1692798994.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17631"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17631/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17631/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17631/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 31.0,
+      "width": 23.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 31.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17633,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (Black / 20″×30″)",
+    "size": "20″×30″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17633_1692798994.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17633"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17633/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17633/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17633/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 33.0,
+      "width": 23.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 33.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17632,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (Black / 24″×32″)",
+    "size": "24″×32″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17632_1692799004.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17632"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17632/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17632/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17632/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 35.0,
+      "width": 27.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 35.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17627,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (Black / 8″×10″)",
+    "size": "8″×10″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17627_1692799004.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17627"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17627/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17627/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17627/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 13.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 13.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17628,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (Black / 9″×12″)",
+    "size": "9″×12″",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17628_1692799005.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17628"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17628/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17628/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17628/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 15.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17636,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (Brown / 11″×14″)",
+    "size": "11″×14″",
+    "color": "Brown",
+    "color_code": "#3b2d22",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17636_1730194290.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17636"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17636/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17636/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17636/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 17.0,
+      "width": 14.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 17.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17637,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (Brown / 12″×18″)",
+    "size": "12″×18″",
+    "color": "Brown",
+    "color_code": "#3b2d22",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17637_1730194299.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17637"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17637/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17637/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17637/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 21.0,
+      "width": 15.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 21.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17638,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (Brown / 20″×28″)",
+    "size": "20″×28″",
+    "color": "Brown",
+    "color_code": "#3b2d22",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17638_1730194301.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17638"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17638/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17638/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17638/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 31.0,
+      "width": 23.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 31.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17640,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (Brown / 20″×30″)",
+    "size": "20″×30″",
+    "color": "Brown",
+    "color_code": "#3b2d22",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17640_1730194311.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17640"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17640/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17640/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17640/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 33.0,
+      "width": 23.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 33.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17639,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (Brown / 24″×32″)",
+    "size": "24″×32″",
+    "color": "Brown",
+    "color_code": "#3b2d22",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17639_1730194311.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17639"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17639/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17639/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17639/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 35.0,
+      "width": 27.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 35.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17634,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (Brown / 8″×10″)",
+    "size": "8″×10″",
+    "color": "Brown",
+    "color_code": "#3b2d22",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17634_1730194311.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17634"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17634/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17634/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17634/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 13.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 13.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17635,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (Brown / 9″×12″)",
+    "size": "9″×12″",
+    "color": "Brown",
+    "color_code": "#3b2d22",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17635_1730194321.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17635"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17635/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17635/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17635/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 15.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17643,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (White / 11″×14″)",
+    "size": "11″×14″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17643_1692799046.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17643"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17643/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17643/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17643/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 17.0,
+      "width": 14.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 17.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17644,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (White / 12″×18″)",
+    "size": "12″×18″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17644_1692799056.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17644"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17644/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17644/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17644/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 21.0,
+      "width": 15.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 21.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17645,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (White / 20″×28″)",
+    "size": "20″×28″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17645_1692799056.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17645"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17645/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17645/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17645/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 31.0,
+      "width": 23.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 31.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17647,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (White / 20″×30″)",
+    "size": "20″×30″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17647_1692799056.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17647"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17647/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17647/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17647/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 33.0,
+      "width": 23.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 33.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17646,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (White / 24″×32″)",
+    "size": "24″×32″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17646_1692799066.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17646"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17646/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17646/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17646/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 35.0,
+      "width": 27.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 35.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17641,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (White / 8″×10″)",
+    "size": "8″×10″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17641_1692799067.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17641"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17641/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17641/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17641/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 13.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 13.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 17642,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (in) (White / 9″×12″)",
+    "size": "9″×12″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/17642_1692799067.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/17642"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/17642/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/17642/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/17642/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 15.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15695,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (White / 12″×12″)",
+    "size": "12″×12″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/15695_1660216996.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15695"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15695/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15695/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15695/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 15.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15696,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (White / 12″×16″)",
+    "size": "12″×16″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/15696_1660217017.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15696"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15696/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15696/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15696/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 19.0,
+      "width": 15.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 15.0,
+      "width": 19.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15697,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (White / 16″×16″)",
+    "size": "16″×16″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/15697_1660217018.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15697"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15697/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15697/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15697/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 19.0,
+      "width": 19.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 15698,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (White / 16″×20″)",
+    "size": "16″×20″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/15698_1660217199.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15698"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15698/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15698/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15698/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 23.0,
+      "width": 19.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 19.0,
+      "width": 23.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15699,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (White / 18″×24″)",
+    "size": "18″×24″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/15699_1660217200.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15699"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15699/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15699/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15699/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 21.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 21.0,
+      "width": 27.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 15700,
+    "catalog_product_id": 614,
+    "name": "Framed Canvas (White / 24″×36″)",
+    "size": "24″×36″",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/614/15700_1660217220.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/15700"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/614"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/15700/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/15700/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/15700/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 39.0,
+      "width": 27.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 27.0,
+      "width": 39.0,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 39,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/614/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/614"
+   }
+  }
+ }
+}

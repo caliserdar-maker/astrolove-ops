@@ -1,0 +1,127 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/922?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 922,
+   "type": "SUBLIMATION",
+   "main_category_id": 230,
+   "name": "Outdoor Rug",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/a0/a07dda8beaf65deccc36d05d86f22486_l",
+   "variant_count": 4,
+   "is_discontinued": false,
+   "description": "Available in multiple sizes, this outdoor rug brings comfort and style to patios, porches, and other outdoor spaces. Made from durable, breathable polyester chenille, it dries quickly and features a no-skid polyester backing for added stability. With vibrant, crisp printing, it’s an easy way to add your favorite colors, patterns, or graphics to your outdoor space.\n\n•100% polyester chenille\n• Multiple sizes\n• Hemmed edges\n• No-skid polyester backing\n• One-sided print",
+   "sizes": [
+    "24″×36″",
+    "36″×60″",
+    "48″×72″",
+    "108″×144″",
+    "96″×120″",
+    "60″×84″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/922"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/922/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/922/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/922/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/922/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/922/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/922/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

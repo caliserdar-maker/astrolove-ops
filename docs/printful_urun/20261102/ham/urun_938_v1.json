@@ -1,0 +1,93 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/938",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 938,
+    "main_category_id": 229,
+    "type": "DECOR",
+    "description": "Keep your luggage stylish and secure with these lightweight 100% acrylic tags. Featuring a rear business card slot and a durable, adjustable leather strap, they make travel organized and personal.\n\n•  100% acrylic\n•  Comes with an adjustable leather strap\n•  Rear opening with business card for personal information\n•  Blank product sourced from USA\n\nCare instructions: Wipe with a damp cloth, air dry or use a soft, non-abrasive cloth.",
+    "type_name": "Tag | Luggage",
+    "title": "Luggage Tag",
+    "brand": null,
+    "model": "Tag | Luggage",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/04/04f318b62ba2242360baeb2fcc89fe2c_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Print file",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 23889,
+     "product_id": 938,
+     "name": "2.4'' × 4''",
+     "size": "2.4″×4″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/938/23889_1763733826.jpg",
+     "price": "0.00",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

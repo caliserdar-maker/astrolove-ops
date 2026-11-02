@@ -1,0 +1,140 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/19/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 1320,
+    "catalog_product_id": 19,
+    "name": "White Glossy Mug 11 oz",
+    "size": "11 oz",
+    "color": "White",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/19/1320_1663762583.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/1320"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/19"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/19/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/1320/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/1320/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/1320/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 3.5,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 4830,
+    "catalog_product_id": 19,
+    "name": "White Glossy Mug 15 oz",
+    "size": "15 oz",
+    "color": "White",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/19/4830_1519394046.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/4830"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/19"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/19/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/4830/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/4830/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/4830/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 3.8,
+      "width": 9.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 16586,
+    "catalog_product_id": 19,
+    "name": "White Glossy Mug 20 oz",
+    "size": "20 oz",
+    "color": "White",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/19/16586_1680616351.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/16586"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/19"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/19/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/16586/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/16586/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/16586/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 4.02,
+      "width": 10.24,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/19/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/19"
+   }
+  }
+ }
+}

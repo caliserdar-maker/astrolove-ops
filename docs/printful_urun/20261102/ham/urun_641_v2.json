@@ -1,0 +1,164 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/641?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 641,
+   "type": "T-SHIRT",
+   "main_category_id": 48,
+   "name": "Cotton Tote Bag | AS Colour 1001",
+   "brand": "AS Colour",
+   "model": "1001",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/fa/fa37e474f7c3d027440f63ab51ad7692_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Turn heads in the shops or at the beach with your new cotton tote. Made of sturdy, heavyweight material and sporting reinforced shoulder straps, this roomy bag will fit groceries, books, beachwear, and much more.\n\n• 100% cotton\n• Fabric weight: 9.44 oz/yd² (320 g/m²)\n• One size: 16.5″ × 16.5″ (42 cm × 42 cm)\n• Reinforced shoulder straps\n• One large main compartment\n• Blank product sourced from China",
+   "sizes": [
+    "One size"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#0a0a0a"
+    },
+    {
+     "name": "Camel",
+     "value": "#d1924f"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "dtg",
+     "display_name": "DTG printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "dtg",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "dtg",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "dtg",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "lifelike",
+     "techniques": [
+      "dtg"
+     ],
+     "type": "bool",
+     "values": [
+      true,
+      false
+     ]
+    },
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/641"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/641/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/641/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/641/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/641/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/641/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/641/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,754 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1564/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 49373,
+    "catalog_product_id": 1564,
+    "name": "Hardcover Photo Book (Glossy / 11″×8.5″)",
+    "size": "11″×8.5″",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1564/49373_1781805716.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49373"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1564"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1564/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49373/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49373/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49373/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "cover",
+      "height": 10.0,
+      "width": 24.94,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_1",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_2",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_3",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_4",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_5",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_6",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_7",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_8",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_9",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_10",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_11",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_12",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_13",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_14",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_15",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_16",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_17",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_18",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_19",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_20",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_21",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_22",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_23",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_24",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49375,
+    "catalog_product_id": 1564,
+    "name": "Hardcover Photo Book (Glossy / 8″×8″)",
+    "size": "8″×8″",
+    "color": "Glossy",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1564/49375_1781805691.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49375"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1564"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1564/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49375/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49375/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49375/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "cover",
+      "height": 9.5,
+      "width": 17.9,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_1",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_2",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_3",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_4",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_5",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_6",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_7",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_8",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_9",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_10",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_11",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_12",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_13",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_14",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_15",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_16",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_17",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_18",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_19",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_20",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_21",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_22",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_23",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_24",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49374,
+    "catalog_product_id": 1564,
+    "name": "Hardcover Photo Book (Matte / 11″×8.5″)",
+    "size": "11″×8.5″",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1564/49374_1781805714.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49374"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1564"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1564/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49374/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49374/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49374/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "cover",
+      "height": 10.0,
+      "width": 24.94,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_1",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_2",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_3",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_4",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_5",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_6",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_7",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_8",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_9",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_10",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_11",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_12",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_13",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_14",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_15",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_16",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_17",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_18",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_19",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_20",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_21",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_22",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_23",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_24",
+      "height": 8.25,
+      "width": 11.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 49376,
+    "catalog_product_id": 1564,
+    "name": "Hardcover Photo Book (Matte / 8″×8″)",
+    "size": "8″×8″",
+    "color": "Matte",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1564/49376_1781805692.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/49376"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1564"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1564/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/49376/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/49376/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/49376/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "cover",
+      "height": 9.5,
+      "width": 17.9,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_1",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_2",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_3",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_4",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_5",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_6",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_7",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_8",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_9",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_10",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_11",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_12",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_13",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_14",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_15",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_16",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_17",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_18",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_19",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_20",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_21",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_22",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_23",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "page_24",
+      "height": 7.75,
+      "width": 7.75,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1564/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1564"
+   }
+  }
+ }
+}

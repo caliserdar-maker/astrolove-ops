@@ -1,0 +1,61 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/678",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 678,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 429,
+     "width": 6496,
+     "height": 803,
+     "dpi": 300,
+     "fill_mode": "fit",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 16785,
+     "placements": {
+      "default": 429
+     }
+    },
+    {
+     "variant_id": 16786,
+     "placements": {
+      "default": 429
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Flat 3",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Lifestyle 6",
+    "Templates"
+   ],
+   "options": [
+    "Back",
+    "Front",
+    "Front 2",
+    "Left",
+    "Right"
+   ]
+  },
+  "extra": []
+ }
+}

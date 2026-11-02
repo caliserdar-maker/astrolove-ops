@@ -1,0 +1,200 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/630",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 630,
+    "main_category_id": 217,
+    "type": "CUT-SEW",
+    "description": "Get ready to make a statement with this all-over print bandana. Mix up your outfits by using this as a headband, necktie, or armband. In fact, why not get a second bandana to match your pet? Grab a few and hit the streets in style!\n\n• Fabric composition in the EU: 65% recycled polyester, 35% polyester\n• Fabric composition in the US: 100% recycled polyester\n• Fabric weight in the EU: 2.95 oz./yd.² (100 g/m²)\n• Fabric weight in the US: 3.24 oz./yd.² (110 g/m²)\n• Fabric specifications in the EU: Breathable; moisture-wicking material with UPF50+ protection\n• Lightweight and soft to the touch\n• Double-folded edges\n• Single-sided print\n• Multifunctional \n• The fabric is OEKO-TEX 100 standard certified\n• The recycled content of this product is certified under GRS (Global Recycled Standard)\n• Blank product components sourced from China/Mexico\n\nImportant sizing information: the smallest bandana size is made for small pets and won’t fit a grown-up. Please choose the medium or large size if you’re ordering for a grown-up.",
+    "type_name": "All-Over Print Bandana",
+    "title": "All-Over Print Bandana",
+    "brand": null,
+    "model": "All-Over Print Bandana",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/3d/3d2c903719c4ade552b062343c7f902e_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "stitch_color",
+      "title": "Stitch color",
+      "type": "radio",
+      "values": {
+       "white": "White",
+       "black": "Black",
+       "clear": "Clear"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "label_inside",
+      "type": "label_inside",
+      "title": "Branding",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 16033,
+     "product_id": 630,
+     "name": "All-Over Print Bandana (White / L)",
+     "size": "L",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/630/16033_1660914152.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16032,
+     "product_id": 630,
+     "name": "All-Over Print Bandana (White / M)",
+     "size": "M",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/630/16032_1660914152.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16031,
+     "product_id": 630,
+     "name": "All-Over Print Bandana (White / S)",
+     "size": "S",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/630/16031_1660914153.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

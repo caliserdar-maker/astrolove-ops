@@ -1,0 +1,167 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/545",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 545,
+    "main_category_id": 217,
+    "type": "CUT-SEW",
+    "description": "This soft, stretchy headband adds that extra bit of comfort for your workouts, while also being stylish enough to rock with a Friday-night look. Don’t miss out on getting your own!\n\n• 78% polyester, 22% elastane for fulfillment in the US\n• 84% polyester, 16% elastane for fulfillment in EU\n• Fabric weight: 8.56 oz./yd.² (290 g/m²) in the US\n• Fabric weight: 6.78 oz./yd.² (230 g/m²) in EU\n• Moisture-wicking\n• Blank product components sourced from Mexico and China",
+    "type_name": "All-Over Print Headband",
+    "title": "All-Over Print Headband",
+    "brand": null,
+    "model": "All-Over Print Headband",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/e2/e27e7c277d9e21d1c66bca5be286bada_l",
+    "variant_count": 2,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "stitch_color",
+      "title": "Stitch color",
+      "type": "radio",
+      "values": {
+       "white": "White",
+       "black": "Black"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Base",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "label_inside",
+      "type": "label_inside",
+      "title": "Inside label",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 13802,
+     "product_id": 545,
+     "name": "All-Over Print Headband (White / L)",
+     "size": "L",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/545/13802_1637746837.jpg",
+     "price": "7.23",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 16363,
+     "product_id": 545,
+     "name": "All-Over Print Headband (White / M)",
+     "size": "M",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/545/16363_1671190237.jpg",
+     "price": "7.23",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

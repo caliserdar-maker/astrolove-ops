@@ -1,0 +1,111 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/656?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 656,
+   "type": "STICKER",
+   "main_category_id": 267,
+   "name": "Die-Cut Magnets",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/24/24b767af95768718c7a62fcb817d01a4_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Showcase adventures and inspiration, or simply keep your space organized with our premium magnets. They feature a modern matte finish on top and a strong magnetic material on the back, so they’ll hold up well and look great for years to come. These magnets are a practical and stylish solution for holding up photos, notes, or other small items.\n\n• Made from 0.5 mm flexible vinyl\n• Premium matte finish\n• Magnetic black backing",
+   "sizes": [
+    "3″×3″",
+    "4″×4″",
+    "6″×6″",
+    "2″×2″",
+    "5″×5″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/656"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/656/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/656/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/656/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/656/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/656/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/656/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

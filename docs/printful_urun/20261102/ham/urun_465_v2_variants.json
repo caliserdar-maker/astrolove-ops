@@ -1,0 +1,100 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/465/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 12021,
+    "catalog_product_id": 465,
+    "name": "All-Over Print Duffle Bag (White / One size)",
+    "size": "One size",
+    "color": "White",
+    "color_code": "#ffffff",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/465/12021_1610632090.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/12021"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/465"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/465/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/12021/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/12021/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/12021/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 18.0,
+      "width": 27.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 18.0,
+      "width": 27.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "sides",
+      "height": 18.0,
+      "width": 27.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "bottom",
+      "height": 18.0,
+      "width": 27.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "pocket",
+      "height": 18.0,
+      "width": 27.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "top",
+      "height": 18.0,
+      "width": 27.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "label_inside",
+      "height": 1.0,
+      "width": 2.5,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 1,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/465/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/465"
+   }
+  }
+ }
+}

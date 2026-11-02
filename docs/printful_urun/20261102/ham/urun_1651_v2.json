@@ -1,0 +1,118 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1651?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 1651,
+   "type": "POSTCARD",
+   "main_category_id": 274,
+   "name": "Uncoined Napkins set of 50",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/ee/eeff4a1f1275d46986b0035df140798d_l",
+   "variant_count": 4,
+   "is_discontinued": false,
+   "description": "Crafted from soft, white three-ply tissue, these custom full-color napkins bring bright, photo-quality color and a touch of elegance to any table. Featuring a smooth, uncoined edge for a clean, modern look, they offer a stylish and versatile way to elevate your event—whether you're hosting a party, catering a special gathering, or simply adding a personalized touch to your dining setup.\n\nMaterial: Soft 3-ply tissue\nAvailable in two sizes: Luncheon (6.5″ × 6.5″) and Beverage (4.75″ × 4.75″)\nAvailable in packs of 50\nFull-color printing\nUncoined edge for a clean finish",
+   "sizes": [
+    "4.75″×4.75″",
+    "6.5″×6.5″"
+   ],
+   "colors": [
+    {
+     "name": "Ecru",
+     "value": "#f5efd5"
+    },
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/1651"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/1651/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/1651/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/1651/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/1651/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/1651/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/1651/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,20 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/921",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 921,
+   "available_placements": {},
+   "printfiles": [],
+   "variant_printfiles": [],
+   "option_groups": [],
+   "options": []
+  },
+  "extra": []
+ }
+}

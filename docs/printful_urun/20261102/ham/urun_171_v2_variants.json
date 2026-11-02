@@ -1,0 +1,1304 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/171/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 19524,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster (in) (20″×30″)",
+    "size": "20″×30″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/19524_1714721570.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19524"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19524/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19524/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19524/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 30.0,
+      "width": 20.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 30.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19523,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster (in) (5″×7″)",
+    "size": "5″×7″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/19523_1777277568.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19523"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19523/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19523/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19523/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 7.0,
+      "width": 5.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 5.0,
+      "width": 7.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19525,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster (in) (A1 (23.3″×33.1″))",
+    "size": "A1 (23.3″×33.1″)",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/19525_1714721580.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19525"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19525/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19525/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19525/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 33.11,
+      "width": 23.39,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 23.39,
+      "width": 33.11,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 19526,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster (in) (A2 (16.5″×23.3″))",
+    "size": "A2 (16.5″×23.3″)",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/19526_1714721590.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/19526"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/19526/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/19526/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/19526/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 23.39,
+      "width": 16.54,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.54,
+      "width": 23.39,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 6872,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 10″×10″",
+    "size": "10″×10″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/6872_1527678721.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/6872"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/6872/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/6872/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/6872/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 10.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 48858,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 10″×24″",
+    "size": "10″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/48858_1777277568.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48858"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48858/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48858/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48858/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 10.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48869,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 11.69″×16.54″ (A3)",
+    "size": "11.69″×16.54″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/48869_1777277579.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48869"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48869/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48869/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48869/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 11.69,
+      "width": 16.54,
+      "orientation": "horizontal"
+     },
+     {
+      "placement": "default",
+      "height": 16.54,
+      "width": 11.69,
+      "orientation": "vertical"
+     }
+    ]
+   },
+   {
+    "id": 14028,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 11″×14″",
+    "size": "11″×14″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/14028_1643091633.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/14028"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/14028/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/14028/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/14028/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 14.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48859,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 11″×17″",
+    "size": "11″×17″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/48859_1777277579.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48859"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48859/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48859/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48859/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 17.0,
+      "width": 11.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 17.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 6873,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 12″×12″",
+    "size": "12″×12″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/6873_1527678788.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/6873"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/6873/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/6873/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/6873/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 12.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 6875,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 12″×16″",
+    "size": "12″×16″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/6875_1527679033.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/6875"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/6875/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/6875/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/6875/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 16.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 6876,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 12″×18″",
+    "size": "12″×18″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/6876_1527678805.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/6876"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/6876/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/6876/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/6876/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 12.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 18.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 6874,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 14″×14″",
+    "size": "14″×14″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/6874_1527678850.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/6874"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/6874/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/6874/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/6874/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 14.0,
+      "width": 14.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 6877,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 16″×16″",
+    "size": "16″×16″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/6877_1527678867.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/6877"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/6877/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/6877/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/6877/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 16.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 6878,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 16″×20″",
+    "size": "16″×20″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/6878_1527678915.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/6878"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/6878/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/6878/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/6878/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48860,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 16″×24″",
+    "size": "16″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/48860_1777277579.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48860"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48860/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48860/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48860/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 16.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 16.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 6879,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 18″×18″",
+    "size": "18″×18″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/6879_1527678934.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/6879"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/6879/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/6879/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/6879/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 18.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 6880,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 18″×24″",
+    "size": "18″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/6880_1527683490.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/6880"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/6880/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/6880/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/6880/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 18.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 18.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48861,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 20″×20″",
+    "size": "20″×20″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/48861_1777277589.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48861"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48861/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48861/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48861/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 20.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 48862,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 20″×24″",
+    "size": "20″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/48862_1777277589.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48862"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48862/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48862/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48862/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 20.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 24.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48863,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 20″×28″",
+    "size": "20″×28″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/48863_1777277599.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48863"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48863/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48863/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48863/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 28.0,
+      "width": 20.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 28.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48864,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 24″×24″",
+    "size": "24″×24″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/48864_1777277599.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48864"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48864/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48864/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48864/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 24.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 48865,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 24″×32″",
+    "size": "24″×32″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/48865_1777277609.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48865"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48865/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48865/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48865/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 32.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 32.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 7845,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 24″×36″",
+    "size": "24″×36″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/7845_1527679000.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/7845"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/7845/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/7845/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/7845/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 36.0,
+      "width": 24.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 24.0,
+      "width": 36.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48854,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 6″×8″",
+    "size": "6″×8″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/48854_1777277629.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48854"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48854/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48854/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48854/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 6.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 6.0,
+      "width": 8.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48870,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 8.27″×11.69″ (A4)",
+    "size": "8.27″×11.69″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/48870_1777277632.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48870"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48870/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48870/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48870/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 11.69,
+      "width": 8.27,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.27,
+      "width": 11.69,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 6871,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 8″×10″",
+    "size": "8″×10″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/6871_1527678675.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/6871"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/6871/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/6871/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/6871/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 10.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 10.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48855,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 8″×12″",
+    "size": "8″×12″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/48855_1777277640.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48855"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48855/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48855/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48855/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 12.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 12.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48856,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 8″×20″",
+    "size": "8″×20″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/48856_1777277640.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48856"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48856/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48856/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48856/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 20.0,
+      "width": 8.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 8.0,
+      "width": 20.0,
+      "orientation": "horizontal"
+     }
+    ]
+   },
+   {
+    "id": 48857,
+    "catalog_product_id": 171,
+    "name": "Premium Luster Photo Paper Poster 9″×11″",
+    "size": "9″×11″",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/171/48857_1777277640.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/48857"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/171"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/48857/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/48857/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/48857/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "default",
+      "height": 11.0,
+      "width": 9.0,
+      "orientation": "vertical"
+     },
+     {
+      "placement": "default",
+      "height": 9.0,
+      "width": 11.0,
+      "orientation": "horizontal"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 30,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/171/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/171"
+   }
+  }
+ }
+}

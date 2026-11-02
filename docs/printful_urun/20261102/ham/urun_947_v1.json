@@ -1,0 +1,183 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/947",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 947,
+    "main_category_id": 190,
+    "type": "POSTCARD",
+    "description": "Keep your schedule in sight with this sturdy desktop calendar. Its sleek design makes it perfect for work desks, study tables, or home offices, helping you stay on track every day.\n\n• Paper weight: 7.96 oz./yd² (270 g/m²)\n• Product weight: 5.6 oz (159 g)\n• Size: 10″ x 5″ (25 cm x 12.5 cm)\n• Black spiral binding\n• Table-top tent card for freestanding display\n• Blank product sourced from the US",
+    "type_name": "Calendar | Desktop",
+    "title": "Desktop Calendar",
+    "brand": null,
+    "model": "Calendar | Desktop",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/34/34cb21d4a564df8a4679224736e80816_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "cover",
+      "type": "cover",
+      "title": "Cover",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "january",
+      "type": "january",
+      "title": "January",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "february",
+      "type": "february",
+      "title": "February",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "march",
+      "type": "march",
+      "title": "March",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "april",
+      "type": "april",
+      "title": "April",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "may",
+      "type": "may",
+      "title": "May",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "june",
+      "type": "june",
+      "title": "June",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "july",
+      "type": "july",
+      "title": "July",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "august",
+      "type": "august",
+      "title": "August",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "september",
+      "type": "september",
+      "title": "September",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "october",
+      "type": "october",
+      "title": "October",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "november",
+      "type": "november",
+      "title": "November",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "december",
+      "type": "december",
+      "title": "December",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "USA"
+   },
+   "variants": [
+    {
+     "id": 24306,
+     "product_id": 947,
+     "name": "Generic brand (10\" x 5\")",
+     "size": "10″×5″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/947/24306_1753971892.jpg",
+     "price": "6.56",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

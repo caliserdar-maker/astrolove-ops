@@ -1,0 +1,750 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/605",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 605,
+    "main_category_id": 245,
+    "type": "PHONE-CASE",
+    "description": "Get a two-in-one deal with these Rubber Case for AirPods®: an impact-absorbing protector for your earbuds and a stylish accessory you can attach to your clothes and bags with a metal carabiner. This case is made from a durable TPU material and works with both wireless and regular AirPod® chargers. \n\n• Thermoplastic polyurethane (TPU) material\n• Impact-absorbing\n• Protects AirPods® from bumps, drops, and scratches\n• Comes with a metal carabiner for easy carrying\n• Compatible with both wireless and a regular charger\n• Available for AirPods® and AirPods® Pro\n• Blank product sourced from Korea\n\nThe AirPods® Case is compatible with the 1st and 2nd generation AirPods®. AirPods® Pro Case is compatible with AirPods® Pro.\n\nDisclaimer: The product doesn’t include AirPods® or AirPods® charger.\n\nImportant: This product can’t be shipped to South Korea, Hong Kong, Taiwan,  Japan, or Singapore. If your shipping address is in these regions, please choose a different product.",
+    "type_name": "Airpod Case | Plastic",
+    "title": "Rubber Case for AirPods®",
+    "brand": null,
+    "model": "Airpod Case | Plastic",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/ef/ef181b7a0c99f895af52b60c017d6d03_l",
+    "variant_count": 18,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 15533,
+     "product_id": 605,
+     "name": "AirPods Cases (Black / AirPods Pro)",
+     "size": "AirPods Pro",
+     "color": "Black",
+     "color_code": "#3b3b3b",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15533_1657777015.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15524,
+     "product_id": 605,
+     "name": "AirPods Cases (Black / AirPods)",
+     "size": "AirPods",
+     "color": "Black",
+     "color_code": "#3b3b3b",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15524_1657533238.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15534,
+     "product_id": 605,
+     "name": "AirPods Cases (Blue / AirPods Pro)",
+     "size": "AirPods Pro",
+     "color": "Blue",
+     "color_code": "#00ccff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15534_1657777026.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15525,
+     "product_id": 605,
+     "name": "AirPods Cases (Blue / AirPods)",
+     "size": "AirPods",
+     "color": "Blue",
+     "color_code": "#00ccff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15525_1657533243.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15535,
+     "product_id": 605,
+     "name": "AirPods Cases (Grey / AirPods Pro)",
+     "size": "AirPods Pro",
+     "color": "Grey",
+     "color_code": "#b1b4b4",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15535_1657777036.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15526,
+     "product_id": 605,
+     "name": "AirPods Cases (Grey / AirPods)",
+     "size": "AirPods",
+     "color": "Grey",
+     "color_code": "#b1b4b4",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15526_1657533243.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15536,
+     "product_id": 605,
+     "name": "AirPods Cases (Mint / AirPods Pro)",
+     "size": "AirPods Pro",
+     "color": "Mint",
+     "color_code": "#b5ffe9",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15536_1657777046.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15527,
+     "product_id": 605,
+     "name": "AirPods Cases (Mint / AirPods)",
+     "size": "AirPods",
+     "color": "Mint",
+     "color_code": "#b5ffe9",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15527_1657533248.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15537,
+     "product_id": 605,
+     "name": "AirPods Cases (Navy / AirPods Pro)",
+     "size": "AirPods Pro",
+     "color": "Navy",
+     "color_code": "#1b4982",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15537_1657777046.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15528,
+     "product_id": 605,
+     "name": "AirPods Cases (Navy / AirPods)",
+     "size": "AirPods",
+     "color": "Navy",
+     "color_code": "#1b4982",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15528_1657533256.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15538,
+     "product_id": 605,
+     "name": "AirPods Cases (Pink / AirPods Pro)",
+     "size": "AirPods Pro",
+     "color": "Pink",
+     "color_code": "#ffc1cd",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15538_1657777056.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15529,
+     "product_id": 605,
+     "name": "AirPods Cases (Pink / AirPods)",
+     "size": "AirPods",
+     "color": "Pink",
+     "color_code": "#ffc1cd",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15529_1657533256.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15539,
+     "product_id": 605,
+     "name": "AirPods Cases (Red / AirPods Pro)",
+     "size": "AirPods Pro",
+     "color": "Red",
+     "color_code": "#f52f2f",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15539_1657777056.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15530,
+     "product_id": 605,
+     "name": "AirPods Cases (Red / AirPods)",
+     "size": "AirPods",
+     "color": "Red",
+     "color_code": "#f52f2f",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15530_1657533258.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15540,
+     "product_id": 605,
+     "name": "AirPods Cases (White / AirPods Pro)",
+     "size": "AirPods Pro",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15540_1657777056.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15531,
+     "product_id": 605,
+     "name": "AirPods Cases (White / AirPods)",
+     "size": "AirPods",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15531_1657533269.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15541,
+     "product_id": 605,
+     "name": "AirPods Cases (Yellow / AirPods Pro)",
+     "size": "AirPods Pro",
+     "color": "Yellow",
+     "color_code": "#ffcc00",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15541_1657777107.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 15532,
+     "product_id": 605,
+     "name": "AirPods Cases (Yellow / AirPods)",
+     "size": "AirPods",
+     "color": "Yellow",
+     "color_code": "#ffcc00",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/605/15532_1657533270.jpg",
+     "price": "10.35",
+     "in_stock": true,
+     "availability_regions": {
+      "AU": "Australia",
+      "US": "United States",
+      "UK": "United Kingdom",
+      "EU": "Europe"
+     },
+     "availability_status": [
+      {
+       "region": "AU",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      },
+      {
+       "region": "UK",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

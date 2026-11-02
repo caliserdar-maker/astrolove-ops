@@ -1,0 +1,169 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1556",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1556,
+    "main_category_id": 198,
+    "type": "POSTCARD",
+    "description": "Beautifully made and ready to be loved. Thick pages and a soft matte finish make it a keepsake you'll reach for again and again.\n\n• Durable 1/16″ thick white chipboard pages\n• 20 sturdy pages\n• Matte laminated finish\n• Rounded corners\n• 6″ × 6″ (15.24 × 15.24 cm)",
+    "type_name": "Board Book",
+    "title": "Board Book",
+    "brand": null,
+    "model": "Board Book",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/18/18c7afede42108470d74fb6dd1236070_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "cover",
+      "type": "cover",
+      "title": "Cover",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "spread_1",
+      "type": "spread_1",
+      "title": "Spread 1",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "spread_2",
+      "type": "spread_2",
+      "title": "Spread 2",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "spread_3",
+      "type": "spread_3",
+      "title": "Spread 3",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "spread_4",
+      "type": "spread_4",
+      "title": "Spread 4",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "spread_5",
+      "type": "spread_5",
+      "title": "Spread 5",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "spread_6",
+      "type": "spread_6",
+      "title": "Spread 6",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "spread_7",
+      "type": "spread_7",
+      "title": "Spread 7",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "spread_8",
+      "type": "spread_8",
+      "title": "Spread 8",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "spread_9",
+      "type": "spread_9",
+      "title": "Spread 9",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "spread_10",
+      "type": "spread_10",
+      "title": "Spread 10",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 49335,
+     "product_id": 1556,
+     "name": "Generic brand  (White / 6″×6″)",
+     "size": "6″×6″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1556/49335_1792568691.jpg",
+     "price": "16.83",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

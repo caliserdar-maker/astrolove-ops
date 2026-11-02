@@ -1,0 +1,134 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/926",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 926,
+   "available_placements": {
+    "front": "Front print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 1267,
+     "width": 976,
+     "height": 957,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1268,
+     "width": 1276,
+     "height": 939,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1269,
+     "width": 1276,
+     "height": 1257,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1270,
+     "width": 1276,
+     "height": 1819,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1271,
+     "width": 2476,
+     "height": 1820,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1272,
+     "width": 3076,
+     "height": 939,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 1273,
+     "width": 3076,
+     "height": 1820,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 23717,
+     "placements": {
+      "front": 1268
+     }
+    },
+    {
+     "variant_id": 23716,
+     "placements": {
+      "front": 1267
+     }
+    },
+    {
+     "variant_id": 23718,
+     "placements": {
+      "front": 1269
+     }
+    },
+    {
+     "variant_id": 23719,
+     "placements": {
+      "front": 1270
+     }
+    },
+    {
+     "variant_id": 23720,
+     "placements": {
+      "front": 1271
+     }
+    },
+    {
+     "variant_id": 23721,
+     "placements": {
+      "front": 1272
+     }
+    },
+    {
+     "variant_id": 23722,
+     "placements": {
+      "front": 1273
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Flat 3",
+    "Flat 4",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Templates"
+   ],
+   "options": [
+    "Back",
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

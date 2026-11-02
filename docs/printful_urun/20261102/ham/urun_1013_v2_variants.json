@@ -1,0 +1,186 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1013/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 31976,
+    "catalog_product_id": 1013,
+    "name": "Generic brand  (5.75″×8″ / 100 pages (50 sheets))",
+    "size": "100 pages (50 sheets)",
+    "color": "5.75″×8″",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1013/31976_1755758967.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/31976"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1013"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1013/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/31976/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/31976/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/31976/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "outside_cover",
+      "height": 8.25,
+      "width": 12.38,
+      "orientation": "any"
+     },
+     {
+      "placement": "inside_cover",
+      "height": 8.25,
+      "width": 12.38,
+      "orientation": "any"
+     },
+     {
+      "placement": "page1_front",
+      "height": 8.25,
+      "width": 6.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "page1_back",
+      "height": 8.25,
+      "width": 6.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "page2_front",
+      "height": 8.25,
+      "width": 6.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "page2_back",
+      "height": 8.25,
+      "width": 6.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "page3_front",
+      "height": 8.25,
+      "width": 6.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "page3_back",
+      "height": 8.25,
+      "width": 6.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 31977,
+    "catalog_product_id": 1013,
+    "name": "Generic brand  (5.75″×8″ / 200 pages (100 sheets))",
+    "size": "200 pages (100 sheets)",
+    "color": "5.75″×8″",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1013/31977_1755758977.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/31977"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1013"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1013/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/31977/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/31977/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/31977/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "outside_cover",
+      "height": 8.25,
+      "width": 12.38,
+      "orientation": "any"
+     },
+     {
+      "placement": "inside_cover",
+      "height": 8.25,
+      "width": 12.38,
+      "orientation": "any"
+     },
+     {
+      "placement": "page1_front",
+      "height": 8.25,
+      "width": 6.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "page1_back",
+      "height": 8.25,
+      "width": 6.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "page2_front",
+      "height": 8.25,
+      "width": 6.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "page2_back",
+      "height": 8.25,
+      "width": 6.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "page3_front",
+      "height": 8.25,
+      "width": 6.0,
+      "orientation": "any"
+     },
+     {
+      "placement": "page3_back",
+      "height": 8.25,
+      "width": 6.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1013/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1013"
+   }
+  }
+ }
+}

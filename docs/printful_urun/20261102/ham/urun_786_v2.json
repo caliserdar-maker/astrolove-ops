@@ -1,0 +1,109 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/786?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 786,
+   "type": "PUZZLE",
+   "main_category_id": 198,
+   "name": "Notepad",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/11/1109da8c0fd15c91f12fddf2e557ab11_l",
+   "variant_count": 3,
+   "is_discontinued": false,
+   "description": "Jot down ideas, plan your week, or make grocery lists with this handy notepad. A stationery classic—one can never have too many! Perfect for the office or on your fridge.\n\n• 3 sizes: 8.5″ × 11″, 5.5″ × 6″, 4.25″ × 9″ (14 cm × 15 cm, 21.6 cm × 27.9 cm, 10.8 cm × 22.9 cm)\n• 40 or 50 single-sided tear-away pages\n• Hard cardboard or magnetic backing\n• All pages feature the same design as the front\n\nImportant: This product is available in the US only. If your shipping address is outside this region, please choose a different product.",
+   "sizes": [
+    "4.25″×9″ Magnetic",
+    "5.5″×6″",
+    "11″×8.5″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/786"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/786/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/786/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/786/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/786/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/786/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/786/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

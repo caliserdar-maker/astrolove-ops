@@ -1,0 +1,135 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/935?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 935,
+   "type": "DRINKWARE",
+   "main_category_id": 191,
+   "name": "Copper Vacuum Insulated Bottle (22oz)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/3d/3dc12af1265d20692953cbb3344cc0e2_l",
+   "variant_count": 8,
+   "is_discontinued": false,
+   "description": "Stay refreshed on the go with our copper vacuum-insulated bottle, designed to keep your drinks at the perfect temperature while preventing condensation. Its durable stainless steel construction with a powder-coat finish is scratch and fade-resistant, while the spill-proof design and wide opening make it practical for everyday use. Lightweight and easy to carry, this bottle is perfect for work, travel, or outdoor activities - design your own or start selling it today!\n\n• Stainless steel with copper insulation\n• 22 oz. (650 ml)\n• Dimensions: 10.60″ × 2.90″ (26.92 × 7.37 cm)\n• Weight: 363 g\n• Spill-proof design\n• Scratch and fade-resistant\n• Powder-coat finish\n• BPA-free\n• Blank product sourced from China\n\nThis product is made on demand. No minimums.",
+   "sizes": [
+    "22oz"
+   ],
+   "colors": [
+    {
+     "name": "Black",
+     "value": "#0b0b0b"
+    },
+    {
+     "name": "Grey",
+     "value": "#5d5d5d"
+    },
+    {
+     "name": "Mint Green",
+     "value": "#3ec5cd"
+    },
+    {
+     "name": "Navy",
+     "value": "#343e63"
+    },
+    {
+     "name": "Orange",
+     "value": "#f2681d"
+    },
+    {
+     "name": "Pebble Blue",
+     "value": "#0accf7"
+    },
+    {
+     "name": "Red",
+     "value": "#d61a13"
+    },
+    {
+     "name": "White",
+     "value": "#FFFFFF"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/935"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/935/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/935/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/935/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/935/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/935/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/935/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

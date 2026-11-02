@@ -1,0 +1,150 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1683",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1683,
+    "main_category_id": 48,
+    "type": "DTFILM",
+    "description": "Looking for a versatile tote bag with a clean, modern style? This bag is a practical choice for everyday errands, travel, work, and life on the go. Made from durable fabric with a smooth matte finish, it combines a sleek look with dependable functionality. The spacious zippered main compartment helps keep your belongings secure, while sturdy webbing handles make it easy to carry wherever the day takes you.\n\n•100% nylon taslon\n•One size: 17 3/4\" x 18 7/8\" (45.08 cm x 47.9 cm)\n•Durable construction with a smooth matte finish\n•Zippered main compartment for secure storage\n•Dyed-to-match zip closure and handles\n•Durable pinched webbing handles for comfortable carrying\n•Signature twill label on the front bottom webbing\n•Blank product sourced from Cambodia",
+    "type_name": "Comfort Colors CCNT0 | Carry-All Tote",
+    "title": "Carry-All Tote | Comfort Colors® CCNT0",
+    "brand": "Comfort Colors",
+    "model": "CCNT0",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/95/95a76c0ef08ad07594390223ddb8a972_l",
+    "variant_count": 3,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DTFILM",
+      "display_name": "DTF printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 53101,
+     "product_id": 1683,
+     "name": "Comfort Colors CCNT0 | Carry-All Tote (Bay / One Size)",
+     "size": "One size",
+     "color": "Bay",
+     "color_code": "#C3CFC1",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1683/53101_1786609460.jpg",
+     "price": "55.43",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 53100,
+     "product_id": 1683,
+     "name": "Comfort Colors CCNT0 | Carry-All Tote (Black / One Size)",
+     "size": "One size",
+     "color": "Black",
+     "color_code": "#202020",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1683/53100_1786609460.jpg",
+     "price": "55.43",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 53102,
+     "product_id": 1683,
+     "name": "Comfort Colors CCNT0 | Carry-All Tote (Ivory / One Size)",
+     "size": "One size",
+     "color": "Ivory",
+     "color_code": "#fcf0d6",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1683/53102_1786609460.jpg",
+     "price": "55.43",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

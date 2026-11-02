@@ -1,0 +1,267 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/1558",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 1558,
+    "main_category_id": 198,
+    "type": "POSTCARD",
+    "description": "Expand your catalog with the Custom Soft Cover Coloring Book—perfect for unique gifts, classroom projects, family keepsakes, and branded promotional items. \n\n• 8.5″ × 11″ (21.59 x 27.94 cm)\n• 24 premium white sheets\n• Vibrant glossy finish with uncoated inner pages\n• Flexible and lightweight soft cover for easy handling",
+    "type_name": "Coloring Book",
+    "title": "Coloring Book",
+    "brand": null,
+    "model": "Coloring Book",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/76/7628291e5f7ef60ed0cc86d7a6f40410_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "cover",
+      "type": "cover",
+      "title": "Cover",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_1",
+      "type": "page_1",
+      "title": "Page 1",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_2",
+      "type": "page_2",
+      "title": "Page 2",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_3",
+      "type": "page_3",
+      "title": "Page 3",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_4",
+      "type": "page_4",
+      "title": "Page 4",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_5",
+      "type": "page_5",
+      "title": "Page 5",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_6",
+      "type": "page_6",
+      "title": "Page 6",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_7",
+      "type": "page_7",
+      "title": "Page 7",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_8",
+      "type": "page_8",
+      "title": "Page 8",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_9",
+      "type": "page_9",
+      "title": "Page 9",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_10",
+      "type": "page_10",
+      "title": "Page 10",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_11",
+      "type": "page_11",
+      "title": "Page 11",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_12",
+      "type": "page_12",
+      "title": "Page 12",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_13",
+      "type": "page_13",
+      "title": "Page 13",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_14",
+      "type": "page_14",
+      "title": "Page 14",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_15",
+      "type": "page_15",
+      "title": "Page 15",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_16",
+      "type": "page_16",
+      "title": "Page 16",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_17",
+      "type": "page_17",
+      "title": "Page 17",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_18",
+      "type": "page_18",
+      "title": "Page 18",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_19",
+      "type": "page_19",
+      "title": "Page 19",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_20",
+      "type": "page_20",
+      "title": "Page 20",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_21",
+      "type": "page_21",
+      "title": "Page 21",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_22",
+      "type": "page_22",
+      "title": "Page 22",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_23",
+      "type": "page_23",
+      "title": "Page 23",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "page_24",
+      "type": "page_24",
+      "title": "Page 24",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 49337,
+     "product_id": 1558,
+     "name": "Generic brand  (White / 8.5''x11'')",
+     "size": "8.5″×11″",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/1558/49337_1777375331.jpg",
+     "price": "8.16",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,80 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/947",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 947,
+   "available_placements": {
+    "cover": "Cover",
+    "january": "January",
+    "february": "February",
+    "march": "March",
+    "april": "April",
+    "may": "May",
+    "june": "June",
+    "july": "July",
+    "august": "August",
+    "september": "September",
+    "october": "October",
+    "november": "November",
+    "december": "December"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 1258,
+     "width": 3075,
+     "height": 1575,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 24306,
+     "placements": {
+      "cover": 1258,
+      "january": 1258,
+      "february": 1258,
+      "march": 1258,
+      "april": 1258,
+      "may": 1258,
+      "june": 1258,
+      "july": 1258,
+      "august": 1258,
+      "september": 1258,
+      "october": 1258,
+      "november": 1258,
+      "december": 1258
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Templates"
+   ],
+   "options": [
+    "April",
+    "August",
+    "Cover",
+    "December",
+    "February",
+    "Front",
+    "January",
+    "July",
+    "June",
+    "March",
+    "May",
+    "November",
+    "October",
+    "September"
+   ]
+  },
+  "extra": []
+ }
+}

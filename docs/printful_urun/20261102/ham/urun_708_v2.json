@@ -1,0 +1,157 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/708?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 708,
+   "type": "SUBLIMATION",
+   "main_category_id": 252,
+   "name": "Cloth Napkin Set (4)",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/e9/e963979e998e97d0aa4208d7d83a3553_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "Revamp your dining experience with our custom cloth napkin set. Every pack comes with 4 soft, lightweight, and pliable napkins, each with a unique design for that personal touch. Great for special dinners or everyday use, these napkins add a dash of design and comfort to any mealtime. \n\n• 100% polyester \n• Soft-to-the-touch broadcloth fabric\n• 20″ x 20″ (50.8 cm x 50.8 cm) \n• Printed top with non-printed white bottom \n• Hemmed on all sides",
+   "sizes": [
+    "20″×20″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#ffffff"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "first",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "second",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "third",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "fourth",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/708"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/708/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/708/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/708/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/708/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/708/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/708/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

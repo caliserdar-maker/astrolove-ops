@@ -1,0 +1,231 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/926",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 926,
+    "main_category_id": 190,
+    "type": "POSTCARD",
+    "description": "Make reminders worth looking at. Each note pad sheet features a printed design, so even your grocery list feels a bit more fun. It comes with 50 sticky pages and an adhesive strip that peels off cleanly.\n\n• White uncoated paper\n• Paper weight: 75.2 g/m²\n• Available in 7 sizes\n• Same design on all sheets\n• Repositionable adhesive\n• Branded Post-it® backing\n• Each note pad includes 50 sheets\n• Blank product materials sourced from the US\n\nDisclaimer: Each notepad includes a removable slip sheet on top used for production sorting. It’s not part of the design.",
+    "type_name": "Note Pads | Post-It",
+    "title": "Post-it® Note Pads",
+    "brand": "Post-it",
+    "model": "Note Pads | Post-It",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/3d/3d2e069c1d0744d41a000ed8fc5091b9_l",
+    "variant_count": 7,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 23721,
+     "product_id": 926,
+     "name": "Post-it® (10\" x 3\" / White)",
+     "size": "10″×3″",
+     "color": "White",
+     "color_code": "#FFFFFF",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/926/23721_1755255077.jpg",
+     "price": "7.64",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23722,
+     "product_id": 926,
+     "name": "Post-it® (10\" x 6\" / White)",
+     "size": "10″×6″",
+     "color": "White",
+     "color_code": "#FFFFFF",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/926/23722_1755255097.jpg",
+     "price": "12.00",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23716,
+     "product_id": 926,
+     "name": "Post-it® (3\" x 3\" / White)",
+     "size": "3″×3″",
+     "color": "White",
+     "color_code": "#FFFFFF",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/926/23716_1755255148.jpg",
+     "price": "6.22",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23717,
+     "product_id": 926,
+     "name": "Post-it® (4\" x 3\" / White)",
+     "size": "4″×3″",
+     "color": "White",
+     "color_code": "#FFFFFF",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/926/23717_1755255183.jpg",
+     "price": "6.39",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23718,
+     "product_id": 926,
+     "name": "Post-it® (4\" x 4\" / White)",
+     "size": "4″×4″",
+     "color": "White",
+     "color_code": "#FFFFFF",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/926/23718_1755255214.jpg",
+     "price": "7.02",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23719,
+     "product_id": 926,
+     "name": "Post-it® (4\" x 6\" / White)",
+     "size": "4″×6″",
+     "color": "White",
+     "color_code": "#FFFFFF",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/926/23719_1755255236.jpg",
+     "price": "7.02",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 23720,
+     "product_id": 926,
+     "name": "Post-it® (8\" x 6\" / White)",
+     "size": "8″×6″",
+     "color": "White",
+     "color_code": "#FFFFFF",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/926/23720_1755255260.jpg",
+     "price": "12.00",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

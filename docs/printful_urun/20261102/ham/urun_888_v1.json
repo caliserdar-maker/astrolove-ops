@@ -1,0 +1,113 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/888",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 888,
+    "main_category_id": 16,
+    "type": "DECOR",
+    "description": "Clear, chic, and stadium-ready. This tote is made for everyday hauling—from concerts to beach days—with a sleek, transparent look and sturdy build.\n\n• TPU (rubber-like clear material)\n• 0.02″ (0.5 mm) thick\n• Bag size: 12″ × 6″ × 12″ (30.5 cm × 15.3 cm × 30.5 cm)\n• Open main compartment\n• Blank product sourced from China\n\nDisclaimer: Due to the transparent material and this product’s handcrafted process, touch marks and fingerprints may appear on the surface. These do not affect its quality or durability.",
+    "type_name": "Bag | Tote | Clear",
+    "title": "Clear Tote Bag",
+    "brand": null,
+    "model": "Bag | Tote | Clear",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/9b/9bc36f5a5490cc29329e71716d3e56ff_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "UV",
+      "display_name": "UV printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "back",
+      "type": "back",
+      "title": "Back print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "label_inside",
+      "type": "label_inside",
+      "title": "Branding",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 23231,
+     "product_id": 888,
+     "name": "Clear Tote Bag (One size)",
+     "size": "One size",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/888/23231_1750140420.jpg",
+     "price": "18.62",
+     "in_stock": true,
+     "availability_regions": {
+      "CN": "China"
+     },
+     "availability_status": [
+      {
+       "region": "CN",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

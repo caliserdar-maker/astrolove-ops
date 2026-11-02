@@ -1,0 +1,99 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/946",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 946,
+    "main_category_id": 198,
+    "type": "POSTCARD",
+    "description": "A great notebook makes it easier to capture ideas, stay organised, and plan what’s next. This spiral-bound, ruled notebook is a reliable everyday companion—perfect for notes, lists, and moments of inspiration.\n\n• 118 ruled line pages (59 sheets)\n• Front cover print\n• Dark grey back cover\n• Metal spiral binding\n• One size: 6\" x 8\" (15.2 x 20.3 cm)",
+    "type_name": "Notebook | Spiral | Ruled Line",
+    "title": "Ruled Line Spiral Notebook",
+    "brand": null,
+    "model": "Notebook | Spiral | Ruled Line",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/da/da814bd953e12363d5b957473d9b5998_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "DIGITAL",
+      "display_name": "Digital printing",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 24305,
+     "product_id": 946,
+     "name": "Generic brand (One Size)",
+     "size": "One size",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/946/24305_1753276820.jpg",
+     "price": "8.46",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,128 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/709",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 709,
+    "main_category_id": 252,
+    "type": "SUBLIMATION",
+    "description": "Show off your taste and dine in style! Every set comes with 4 high-quality, water-resistant placemats, all with a unique pattern for that special touch. Whether for daily dining or festive feasts, these placemats will add a dash of personal charm to your every get-together. \n\n• 100% polyester fabric broadcloth\n• Comes as a set of four\n• Size: 18″ × 14″ (45.7 cm × 35.5 cm)\n• Customizable front\n• Water-resistant\n• Hemmed on all sides\n• Sewn two-ply for a high-quality look\n• Blank product sourced from China",
+    "type_name": "Placemat | Set of 4",
+    "title": "Placemat Set (4)",
+    "brand": null,
+    "model": "Placemat | Set of 4",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/97/9788fffc304521918bc6a02e845979d3_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "first",
+      "type": "first",
+      "title": "First",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "second",
+      "type": "second",
+      "title": "Second",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "third",
+      "type": "third",
+      "title": "Third",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "fourth",
+      "type": "fourth",
+      "title": "Fourth",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 17484,
+     "product_id": 709,
+     "name": "Placemat Set (4) (White / 18″ × 14″)",
+     "size": "18″ × 14″",
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/709/17484_1689333353.jpg",
+     "price": "33.86",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

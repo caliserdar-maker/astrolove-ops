@@ -1,0 +1,135 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/530",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 530,
+    "main_category_id": 217,
+    "type": "CUT-SEW",
+    "description": "Keep your hair in check with this scrunchie! The trendy, stylish scrunchie will add the final touch to your outfit. Get yours now!\n\n• 91% recycled polyester, 9% spandex\n• Four-way stretch microfiber fabric\n• Breathable and fast-drying material\n• Smooth and stretchy fabric outside, elastic inside\n• Made of leftover materials from the manufacturing of other products\n• Fabric weight: 5.13 oz. /yd. ² (174 g/m²)\n• One size\n• Removable bow detail\n• Blank product components sourced from China",
+    "type_name": "All-Over Print Recycled Scrunchie",
+    "title": "All-Over Print Recycled Scrunchie",
+    "brand": null,
+    "model": "All-Over Print Recycled Scrunchie",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/69/69fd9744e329b24e8a556511b925fcb5_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "stitch_color",
+      "title": "Stitch color",
+      "type": "radio",
+      "values": {
+       "white": "White",
+       "black": "Black"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "CUT-SEW",
+      "display_name": "All-over synthetic",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "default",
+      "title": "Base",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "details",
+      "type": "details",
+      "title": "Bow",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 13350,
+     "product_id": 530,
+     "name": "All-Over Print Recycled Scrunchie (One size)",
+     "size": "One size",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/530/13350_1631783200.jpg",
+     "price": "8.86",
+     "in_stock": true,
+     "availability_regions": {
+      "EU": "Europe",
+      "EU_LV": "Latvia",
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "EU",
+       "status": "in_stock"
+      },
+      {
+       "region": "EU_LV",
+       "status": "in_stock"
+      },
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

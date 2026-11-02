@@ -1,0 +1,178 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/902/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 23140,
+    "catalog_product_id": 902,
+    "name": "Pet Bandana Collar (Black / L)",
+    "size": "L",
+    "color": "Black",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/902/23140_1748927735.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23140"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/902"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/902/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23140/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23140/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23140/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 8.25,
+      "width": 15.5,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23141,
+    "catalog_product_id": 902,
+    "name": "Pet Bandana Collar (Black / M)",
+    "size": "M",
+    "color": "Black",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/902/23141_1748927741.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23141"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/902"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/902/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23141/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23141/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23141/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.25,
+      "width": 10.2,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23142,
+    "catalog_product_id": 902,
+    "name": "Pet Bandana Collar (Black / S)",
+    "size": "S",
+    "color": "Black",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/902/23142_1748927742.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23142"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/902"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/902/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23142/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23142/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23142/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 6.25,
+      "width": 10.2,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23143,
+    "catalog_product_id": 902,
+    "name": "Pet Bandana Collar (Black / XL)",
+    "size": "XL",
+    "color": "Black",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/902/23143_1748927742.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23143"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/902"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/902/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23143/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23143/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23143/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 8.25,
+      "width": 15.5,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/902/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/902"
+   }
+  }
+ }
+}

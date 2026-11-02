@@ -1,0 +1,111 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/881?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 881,
+   "type": "DECOR",
+   "main_category_id": 254,
+   "name": "Ceramic Ornament",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/22/22e707f181c416e8430a3ac9d8751779_l",
+   "variant_count": 4,
+   "is_discontinued": false,
+   "description": "Bring charm to your home with a glossy ceramic ornament available in heart, star, snowflake, or circle shapes. With a smooth finish and elegant gold-toned string, it stands out in any festive setting.\n\n• 100% ceramic\n• Circle-shaped diameter: 2.76″ (7 cm)\n• Heart-shaped size: 3.11″ × 2.9″ (7.9 cm × 7.37 cm)\n• Star-shaped size: 3.19″ × 2.68″ (8.1 cm × 6.8 cm)\n• Snowflake-shape size: 2.17″ × 3″ (5.5 cm × 7.62 cm)\n• Ornament thickness: 0.125″ (3 mm)\n• Glossy finish\n• White backing\n• Gold-colored string included\n• Blank product sourced from China",
+   "sizes": [
+    "Circle",
+    "Heart",
+    "Star",
+    "Snowflake"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/881"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/881/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/881/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/881/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/881/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/881/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/881/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

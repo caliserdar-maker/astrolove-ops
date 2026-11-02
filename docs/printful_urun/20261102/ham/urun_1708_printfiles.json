@@ -1,0 +1,701 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/1708",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 1708,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 2164,
+     "width": 3000,
+     "height": 2400,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 2166,
+     "width": 3600,
+     "height": 2400,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 2168,
+     "width": 4200,
+     "height": 3300,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 2169,
+     "width": 3600,
+     "height": 3600,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 2171,
+     "width": 4800,
+     "height": 3600,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 2173,
+     "width": 5400,
+     "height": 3600,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 2174,
+     "width": 4800,
+     "height": 4800,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 2176,
+     "width": 6000,
+     "height": 4800,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 2178,
+     "width": 7200,
+     "height": 4800,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 2180,
+     "width": 7200,
+     "height": 5400,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 2181,
+     "width": 6000,
+     "height": 6000,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 2183,
+     "width": 10800,
+     "height": 7200,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 53547,
+     "placements": {
+      "default": 2164
+     }
+    },
+    {
+     "variant_id": 53628,
+     "placements": {
+      "default": 2166
+     }
+    },
+    {
+     "variant_id": 53555,
+     "placements": {
+      "default": 2168
+     }
+    },
+    {
+     "variant_id": 53636,
+     "placements": {
+      "default": 2169
+     }
+    },
+    {
+     "variant_id": 53587,
+     "placements": {
+      "default": 2171
+     }
+    },
+    {
+     "variant_id": 53563,
+     "placements": {
+      "default": 2173
+     }
+    },
+    {
+     "variant_id": 53644,
+     "placements": {
+      "default": 2174
+     }
+    },
+    {
+     "variant_id": 53539,
+     "placements": {
+      "default": 2176
+     }
+    },
+    {
+     "variant_id": 53603,
+     "placements": {
+      "default": 2178
+     }
+    },
+    {
+     "variant_id": 53531,
+     "placements": {
+      "default": 2180
+     }
+    },
+    {
+     "variant_id": 53652,
+     "placements": {
+      "default": 2181
+     }
+    },
+    {
+     "variant_id": 53523,
+     "placements": {
+      "default": 2183
+     }
+    },
+    {
+     "variant_id": 53550,
+     "placements": {
+      "default": 2164
+     }
+    },
+    {
+     "variant_id": 53631,
+     "placements": {
+      "default": 2166
+     }
+    },
+    {
+     "variant_id": 53558,
+     "placements": {
+      "default": 2168
+     }
+    },
+    {
+     "variant_id": 53639,
+     "placements": {
+      "default": 2169
+     }
+    },
+    {
+     "variant_id": 53590,
+     "placements": {
+      "default": 2171
+     }
+    },
+    {
+     "variant_id": 53566,
+     "placements": {
+      "default": 2173
+     }
+    },
+    {
+     "variant_id": 53647,
+     "placements": {
+      "default": 2174
+     }
+    },
+    {
+     "variant_id": 53542,
+     "placements": {
+      "default": 2176
+     }
+    },
+    {
+     "variant_id": 53606,
+     "placements": {
+      "default": 2178
+     }
+    },
+    {
+     "variant_id": 53534,
+     "placements": {
+      "default": 2180
+     }
+    },
+    {
+     "variant_id": 53655,
+     "placements": {
+      "default": 2181
+     }
+    },
+    {
+     "variant_id": 53526,
+     "placements": {
+      "default": 2183
+     }
+    },
+    {
+     "variant_id": 53544,
+     "placements": {
+      "default": 2164
+     }
+    },
+    {
+     "variant_id": 53625,
+     "placements": {
+      "default": 2166
+     }
+    },
+    {
+     "variant_id": 53552,
+     "placements": {
+      "default": 2168
+     }
+    },
+    {
+     "variant_id": 53633,
+     "placements": {
+      "default": 2169
+     }
+    },
+    {
+     "variant_id": 53584,
+     "placements": {
+      "default": 2171
+     }
+    },
+    {
+     "variant_id": 53560,
+     "placements": {
+      "default": 2173
+     }
+    },
+    {
+     "variant_id": 53641,
+     "placements": {
+      "default": 2174
+     }
+    },
+    {
+     "variant_id": 53536,
+     "placements": {
+      "default": 2176
+     }
+    },
+    {
+     "variant_id": 53600,
+     "placements": {
+      "default": 2178
+     }
+    },
+    {
+     "variant_id": 53528,
+     "placements": {
+      "default": 2180
+     }
+    },
+    {
+     "variant_id": 53649,
+     "placements": {
+      "default": 2181
+     }
+    },
+    {
+     "variant_id": 53520,
+     "placements": {
+      "default": 2183
+     }
+    },
+    {
+     "variant_id": 53545,
+     "placements": {
+      "default": 2164
+     }
+    },
+    {
+     "variant_id": 53626,
+     "placements": {
+      "default": 2166
+     }
+    },
+    {
+     "variant_id": 53553,
+     "placements": {
+      "default": 2168
+     }
+    },
+    {
+     "variant_id": 53634,
+     "placements": {
+      "default": 2169
+     }
+    },
+    {
+     "variant_id": 53585,
+     "placements": {
+      "default": 2171
+     }
+    },
+    {
+     "variant_id": 53561,
+     "placements": {
+      "default": 2173
+     }
+    },
+    {
+     "variant_id": 53642,
+     "placements": {
+      "default": 2174
+     }
+    },
+    {
+     "variant_id": 53537,
+     "placements": {
+      "default": 2176
+     }
+    },
+    {
+     "variant_id": 53601,
+     "placements": {
+      "default": 2178
+     }
+    },
+    {
+     "variant_id": 53529,
+     "placements": {
+      "default": 2180
+     }
+    },
+    {
+     "variant_id": 53650,
+     "placements": {
+      "default": 2181
+     }
+    },
+    {
+     "variant_id": 53521,
+     "placements": {
+      "default": 2183
+     }
+    },
+    {
+     "variant_id": 53548,
+     "placements": {
+      "default": 2164
+     }
+    },
+    {
+     "variant_id": 53629,
+     "placements": {
+      "default": 2166
+     }
+    },
+    {
+     "variant_id": 53556,
+     "placements": {
+      "default": 2168
+     }
+    },
+    {
+     "variant_id": 53637,
+     "placements": {
+      "default": 2169
+     }
+    },
+    {
+     "variant_id": 53588,
+     "placements": {
+      "default": 2171
+     }
+    },
+    {
+     "variant_id": 53564,
+     "placements": {
+      "default": 2173
+     }
+    },
+    {
+     "variant_id": 53645,
+     "placements": {
+      "default": 2174
+     }
+    },
+    {
+     "variant_id": 53540,
+     "placements": {
+      "default": 2176
+     }
+    },
+    {
+     "variant_id": 53604,
+     "placements": {
+      "default": 2178
+     }
+    },
+    {
+     "variant_id": 53532,
+     "placements": {
+      "default": 2180
+     }
+    },
+    {
+     "variant_id": 53653,
+     "placements": {
+      "default": 2181
+     }
+    },
+    {
+     "variant_id": 53524,
+     "placements": {
+      "default": 2183
+     }
+    },
+    {
+     "variant_id": 53546,
+     "placements": {
+      "default": 2164
+     }
+    },
+    {
+     "variant_id": 53627,
+     "placements": {
+      "default": 2166
+     }
+    },
+    {
+     "variant_id": 53554,
+     "placements": {
+      "default": 2168
+     }
+    },
+    {
+     "variant_id": 53635,
+     "placements": {
+      "default": 2169
+     }
+    },
+    {
+     "variant_id": 53586,
+     "placements": {
+      "default": 2171
+     }
+    },
+    {
+     "variant_id": 53562,
+     "placements": {
+      "default": 2173
+     }
+    },
+    {
+     "variant_id": 53643,
+     "placements": {
+      "default": 2174
+     }
+    },
+    {
+     "variant_id": 53538,
+     "placements": {
+      "default": 2176
+     }
+    },
+    {
+     "variant_id": 53602,
+     "placements": {
+      "default": 2178
+     }
+    },
+    {
+     "variant_id": 53530,
+     "placements": {
+      "default": 2180
+     }
+    },
+    {
+     "variant_id": 53651,
+     "placements": {
+      "default": 2181
+     }
+    },
+    {
+     "variant_id": 53522,
+     "placements": {
+      "default": 2183
+     }
+    },
+    {
+     "variant_id": 53549,
+     "placements": {
+      "default": 2164
+     }
+    },
+    {
+     "variant_id": 53630,
+     "placements": {
+      "default": 2166
+     }
+    },
+    {
+     "variant_id": 53557,
+     "placements": {
+      "default": 2168
+     }
+    },
+    {
+     "variant_id": 53638,
+     "placements": {
+      "default": 2169
+     }
+    },
+    {
+     "variant_id": 53589,
+     "placements": {
+      "default": 2171
+     }
+    },
+    {
+     "variant_id": 53565,
+     "placements": {
+      "default": 2173
+     }
+    },
+    {
+     "variant_id": 53646,
+     "placements": {
+      "default": 2174
+     }
+    },
+    {
+     "variant_id": 53541,
+     "placements": {
+      "default": 2176
+     }
+    },
+    {
+     "variant_id": 53605,
+     "placements": {
+      "default": 2178
+     }
+    },
+    {
+     "variant_id": 53533,
+     "placements": {
+      "default": 2180
+     }
+    },
+    {
+     "variant_id": 53654,
+     "placements": {
+      "default": 2181
+     }
+    },
+    {
+     "variant_id": 53525,
+     "placements": {
+      "default": 2183
+     }
+    },
+    {
+     "variant_id": 53551,
+     "placements": {
+      "default": 2164
+     }
+    },
+    {
+     "variant_id": 53632,
+     "placements": {
+      "default": 2166
+     }
+    },
+    {
+     "variant_id": 53559,
+     "placements": {
+      "default": 2168
+     }
+    },
+    {
+     "variant_id": 53640,
+     "placements": {
+      "default": 2169
+     }
+    },
+    {
+     "variant_id": 53591,
+     "placements": {
+      "default": 2171
+     }
+    },
+    {
+     "variant_id": 53567,
+     "placements": {
+      "default": 2173
+     }
+    },
+    {
+     "variant_id": 53648,
+     "placements": {
+      "default": 2174
+     }
+    },
+    {
+     "variant_id": 53543,
+     "placements": {
+      "default": 2176
+     }
+    },
+    {
+     "variant_id": 53607,
+     "placements": {
+      "default": 2178
+     }
+    },
+    {
+     "variant_id": 53535,
+     "placements": {
+      "default": 2180
+     }
+    },
+    {
+     "variant_id": 53656,
+     "placements": {
+      "default": 2181
+     }
+    },
+    {
+     "variant_id": 53527,
+     "placements": {
+      "default": 2183
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Templates"
+   ],
+   "options": [
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

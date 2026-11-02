@@ -1,0 +1,73 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1467/prices?currency=USD&selling_region_name=north_america",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 1467,
+    "placements": [
+     {
+      "id": "front",
+      "title": "Front print",
+      "type": "All-over cotton",
+      "technique_key": "direct-to-fabric",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 46022,
+     "techniques": [
+      {
+       "technique_key": "direct-to-fabric",
+       "technique_display_name": "All-over cotton",
+       "price": "48.63",
+       "discounted_price": "48.63"
+      }
+     ]
+    },
+    {
+     "id": 46023,
+     "techniques": [
+      {
+       "technique_key": "direct-to-fabric",
+       "technique_display_name": "All-over cotton",
+       "price": "77.89",
+       "discounted_price": "77.89"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1467/prices?currency=USD&selling_region_name=north_america&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1467"
+   }
+  }
+ }
+}

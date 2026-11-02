@@ -1,0 +1,280 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/686/prices?currency=USD&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "USD",
+   "product": {
+    "id": 686,
+    "placements": [
+     {
+      "id": "default",
+      "title": "Print file",
+      "type": "Sublimation",
+      "technique_key": "sublimation",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 16975,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16976,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16977,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16978,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16979,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16980,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16981,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16982,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16983,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16984,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16985,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16986,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16987,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16988,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16989,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16990,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16991,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16992,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16993,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    },
+    {
+     "id": 16994,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "18.25",
+       "discounted_price": "18.25"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 46,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/686/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "next": {
+    "href": "https://api.printful.com/v2/catalog-products/686/prices?currency=USD&selling_region_name=worldwide&limit=20&offset=20"
+   },
+   "first": {
+    "href": "https://api.printful.com/v2/catalog-products/686/prices?currency=USD&selling_region_name=worldwide&limit=20"
+   },
+   "last": {
+    "href": "https://api.printful.com/v2/catalog-products/686/prices?currency=USD&selling_region_name=worldwide&limit=20&offset=40"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/686"
+   }
+  }
+ }
+}

@@ -1,0 +1,123 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/588",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 588,
+   "available_placements": {
+    "default": "Print file"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 317,
+     "width": 3075,
+     "height": 2475,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 318,
+     "width": 3675,
+     "height": 3675,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 320,
+     "width": 4350,
+     "height": 3450,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 322,
+     "width": 6038,
+     "height": 4838,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 324,
+     "width": 9075,
+     "height": 6075,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    },
+    {
+     "printfile_id": 326,
+     "width": 10875,
+     "height": 7275,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": true
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 15134,
+     "placements": {
+      "default": 317
+     }
+    },
+    {
+     "variant_id": 15136,
+     "placements": {
+      "default": 320
+     }
+    },
+    {
+     "variant_id": 15135,
+     "placements": {
+      "default": 318
+     }
+    },
+    {
+     "variant_id": 15137,
+     "placements": {
+      "default": 322
+     }
+    },
+    {
+     "variant_id": 15138,
+     "placements": {
+      "default": 324
+     }
+    },
+    {
+     "variant_id": 15139,
+     "placements": {
+      "default": 326
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Product details",
+    "Template",
+    "Women's"
+   ],
+   "options": [
+    "Front",
+    "Product details",
+    "Product details 2"
+   ]
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,119 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/926?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 926,
+   "type": "POSTCARD",
+   "main_category_id": 190,
+   "name": "Post-it® Note Pads",
+   "brand": "Post-it",
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/3d/3d2e069c1d0744d41a000ed8fc5091b9_l",
+   "variant_count": 7,
+   "is_discontinued": false,
+   "description": "Make reminders worth looking at. Each note pad sheet features a printed design, so even your grocery list feels a bit more fun. It comes with 50 sticky pages and an adhesive strip that peels off cleanly.\n\n• White uncoated paper\n• Paper weight: 75.2 g/m²\n• Available in 7 sizes\n• Same design on all sheets\n• Repositionable adhesive\n• Branded Post-it® backing\n• Each note pad includes 50 sheets\n• Blank product materials sourced from the US\n\nDisclaimer: Each notepad includes a removable slip sheet on top used for production sorting. It’s not part of the design.",
+   "sizes": [
+    "3″×3″",
+    "4″×3″",
+    "4″×4″",
+    "4″×6″",
+    "8″×6″",
+    "10″×3″",
+    "10″×6″"
+   ],
+   "colors": [
+    {
+     "name": "White",
+     "value": "#FFFFFF"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "digital",
+     "display_name": "Digital printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "digital",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/926"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/926/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/926/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/926/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/926/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/926/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/926/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,125 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/902?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 902,
+   "type": "SUBLIMATION",
+   "main_category_id": 189,
+   "name": "Pet Bandana Collar",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/9c/9c74adba0beaa01bf15330ab4bf4c86b_l",
+   "variant_count": 4,
+   "is_discontinued": false,
+   "description": "Give your pet’s look a playful twist with this bandana collar. Made from durable polyester fabric, it’s built to last through playtime and washes. The adjustable black collar ensures a secure fit and comes in 4 sizes to suit most pets.\n\n• 100% polyester\n• Adjustable black collar with plastic buckle\n• 4 sizes: S, M, L, XL\n• Collar circumference: S: 10″–16.75″ (25.4 cm–42.5 cm); M: 12″–20.25″ (30.5 cm–51.4 cm); L: 14.25″–23″ (36.2 cm–58.4 cm); XL: 15.5″–23.5″ (39.4 cm–59.7 cm)\n• Durable construction, machine washable (max 90ºF (30ºC))\n• White reverse\n• Blank product sourced from China\n\nDisclaimer: Product size may vary by ±1″ (2.5 cm).",
+   "sizes": [
+    "L",
+    "M",
+    "S",
+    "XL"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/902"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/902/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/902/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/902/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/902/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/902/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/902/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

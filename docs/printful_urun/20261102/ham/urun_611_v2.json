@@ -1,0 +1,116 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/611?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 611,
+   "type": "SUBLIMATION",
+   "main_category_id": 249,
+   "name": "Cork-Back Coaster",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/d4/d41d6e69b8c865b6a4546ce030775f2f_l",
+   "variant_count": 1,
+   "is_discontinued": false,
+   "description": "This cork-back coaster is a perfect match for your favorite mug! Create a homey feel while protecting your coffee table or nightstand from mug stains and moisture. The coaster is waterproof and heat-resistant, designed to last a long time. Buy it for yourself or as a lovely gift for your friends and family.\n\n• Hardboard MDF 0.12″ (3 mm)\n• Cork 0.04″ (1 mm)\n• High-gloss coating on top\n• Size: 3.74″ × 3.74″ × 0.16″ (95 × 95 × 4 mm)\n• Rounded corners\n• Water-repellent, heat-resistant, and non-slip\n• Easy to clean\n\nThe displayed price is for a single item.",
+   "sizes": [
+    "3.74″×3.74″"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "notes",
+     "techniques": [
+      "dtg",
+      "embroidery",
+      "sublimation",
+      "cut-sew",
+      "fabric"
+     ],
+     "type": "string",
+     "values": [
+      "A simple note"
+     ]
+    },
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/611"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/611/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/611/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/611/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/611/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/611/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/611/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

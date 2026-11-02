@@ -1,0 +1,71 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/708",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 708,
+   "available_placements": {
+    "first": "First",
+    "second": "Second",
+    "third": "Third",
+    "fourth": "Fourth"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 473,
+     "width": 6450,
+     "height": 6450,
+     "dpi": 300,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 17399,
+     "placements": {
+      "first": 473,
+      "second": 473,
+      "third": 473,
+      "fourth": 473
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Flat 3",
+    "Flat 4",
+    "Lifestyle",
+    "Lifestyle 10",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Lifestyle 6",
+    "Lifestyle 7",
+    "Lifestyle 8",
+    "Lifestyle 9",
+    "Product details",
+    "Template"
+   ],
+   "options": [
+    "Front",
+    "Front 2",
+    "Front 3",
+    "Front 4",
+    "Napkin 1",
+    "Napkin 2",
+    "Napkin 3",
+    "Napkin 4",
+    "Product details"
+   ]
+  },
+  "extra": []
+ }
+}

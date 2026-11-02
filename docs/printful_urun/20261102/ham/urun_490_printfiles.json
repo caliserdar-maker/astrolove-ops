@@ -1,0 +1,70 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/490",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 490,
+   "available_placements": {
+    "front": "Front print",
+    "label_inside": "Inside label"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 64,
+     "width": 375,
+     "height": 150,
+     "dpi": 150,
+     "fill_mode": "fit",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 245,
+     "width": 9150,
+     "height": 5700,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": true
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 12584,
+     "placements": {
+      "front": 245,
+      "label_inside": 64
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Lifestyle",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Lifestyle 6",
+    "Lifestyle 7",
+    "Men's Lifestyle",
+    "Multi-product",
+    "Product details",
+    "Product specs",
+    "Women's Lifestyle",
+    "Wrinkled",
+    "template"
+   ],
+   "options": [
+    "Front",
+    "Inside label",
+    "Product details",
+    "Product details 2"
+   ]
+  },
+  "extra": []
+ }
+}

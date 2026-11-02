@@ -1,0 +1,99 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/889",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 889,
+    "main_category_id": 271,
+    "type": "SUBLIMATION",
+    "description": "Game on! This pickleball set comes with 2 sturdy wooden paddles and 2 bright yellow balls, so you’re ready to rally in style. It includes a see-through bag made for beach trips, park days, or spontaneous matches—just grab it and go play!\n\n• 100% wood paddles with black edges\n• Soft poly-cotton handle grips for comfort\n• Set includes 2 paddles, 2 plastic balls, and a carry bag\n• Same design on both sides of each paddle\n• Blank product sourced from China",
+    "type_name": "Paddle | Pickleball | Set of 2",
+    "title": "Pickleball Paddle (Set)",
+    "brand": null,
+    "model": "Paddle | Pickleball | Set of 2",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/10/106728a0c7cb1053c0fc4f3698009ce8_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 22813,
+     "product_id": 889,
+     "name": "Pickle Ball paddle (Wood / 7.5″ × 15.5″)",
+     "size": "7.5″ × 15.5″",
+     "color": "Wood",
+     "color_code": "#f8ddb7",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/889/22813_1748333233.jpg",
+     "price": "45.99",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

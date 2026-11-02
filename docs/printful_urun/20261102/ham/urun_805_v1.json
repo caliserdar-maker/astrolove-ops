@@ -1,0 +1,107 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/805",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 805,
+    "main_category_id": 292,
+    "type": "SUBLIMATION",
+    "description": "Meet our cute teddy bear wearing a cool t-shirt. Made from the finest and softest materials, it’s the perfect cuddling buddy for people of all ages. \n\nTeddy:\n• Made from polyester fiber\n• Filled with PE/PVC pellets\n• Weight: 9.21 oz. (0.26 kg)\n• Measures 9.5″ (24.13 cm) sitting down\n• One-size\n\nT-shirt:\n• 100% polyester\n\nBlank product sourced from China, printed in the US.\n\nDisclaimer: This product is not suitable for children under 3 years of age.\n\nImportant: This product is available in the US only. If your shipping address is outside this region, please choose a different product.",
+    "type_name": "Teddy Bear | w/T-Shirt",
+    "title": "Teddy Bear with a T-shirt",
+    "brand": null,
+    "model": "Teddy Bear | w/T-Shirt",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/71/71e6c54060020d9bf2c372bc65d0cce1_l",
+    "variant_count": 1,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "notes",
+      "title": "Printing notes",
+      "type": "text",
+      "values": null,
+      "additional_price": null,
+      "additional_price_breakdown": []
+     },
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": null
+   },
+   "variants": [
+    {
+     "id": 20425,
+     "product_id": 805,
+     "name": "Teddy Bear with a T-shirt (White)",
+     "size": null,
+     "color": "White",
+     "color_code": "#ffffff",
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/805/20425_1724935501.jpg",
+     "price": "26.53",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

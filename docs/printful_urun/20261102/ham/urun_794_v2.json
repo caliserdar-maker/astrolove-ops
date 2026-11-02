@@ -1,0 +1,130 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/794?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 794,
+   "type": "DECOR",
+   "main_category_id": 254,
+   "name": "Metal Ornaments",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/ae/aeae32812182f83a8b6c81f13267e88b_l",
+   "variant_count": 4,
+   "is_discontinued": false,
+   "description": "Personalize your festive tree or home with these high-quality metal ornaments. Choose your favorite from 4 charming shapes (Rectangle, Scalloped, Pet Paw, and Tag) or get all of them for creative variety. Includes a red ribbon for easy hanging.\n\n• Material: metal aluminum\n• Sizes: Rectangle and Scalloped 3″ × 4″ (7.62 × 10.16 cm), Pet Paw 3.5″ x 3.75″ (8.89 × 9.53 cm), Tag 3″ x 5″ (7.62 × 12.7 cm)\n• Ornament thickness 0.04″ (1 mm)\n• Comes with a red ribbon and a hole to thread it through\n• Blank product sourced from China\n\nDisclaimer: This product is available in the US only. If your shipping address is outside this region, please choose a different product.",
+   "sizes": [
+    "Scalloped",
+    "Pet Paw",
+    "Tag",
+    "Rectangle"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/794"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/794/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/794/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/794/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/794/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/794/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/794/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

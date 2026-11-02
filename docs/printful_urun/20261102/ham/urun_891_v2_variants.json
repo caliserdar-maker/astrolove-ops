@@ -1,0 +1,140 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/891/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 22817,
+    "catalog_product_id": 891,
+    "name": "Suitcase (Black / Large)",
+    "size": "Large",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/891/22817_1748241386.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22817"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/891"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/891/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22817/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22817/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22817/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 31.87,
+      "width": 24.06,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22816,
+    "catalog_product_id": 891,
+    "name": "Suitcase (Black / Medium)",
+    "size": "Medium",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/891/22816_1748241396.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22816"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/891"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/891/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22816/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22816/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22816/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 28.35,
+      "width": 20.87,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 22815,
+    "catalog_product_id": 891,
+    "name": "Suitcase (Black / Small)",
+    "size": "Small",
+    "color": "Black",
+    "color_code": "#000000",
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/891/22815_1748339905.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/22815"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/891"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/891/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/22815/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/22815/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/22815/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 24.41,
+      "width": 18.11,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 3,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/891/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/891"
+   }
+  }
+ }
+}
