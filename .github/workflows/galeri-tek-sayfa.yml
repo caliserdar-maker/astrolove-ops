@@ -1,4 +1,4 @@
-name: galeri-tek-sayfa (GECICI: claude/sag-sag-y03 dalinda drive-dala-al kopyasi; main disabled drive-dala-al yerine; Etsy YOK)
+name: galeri-tek-sayfa-gecici-drive-dala-al
 
 # Drive dosyalarini (ASTROLOVE altinda) bir claude/* dalina commit eder; .zip istenirse acilir.
 # Claude'un sandbox'i Drive'dan buyuk dosya indiremez; bu yuzden runner -> dal -> git pull.
