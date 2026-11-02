@@ -42,18 +42,19 @@ BRONZ_CARPAN = (1.0, 0.92, 0.85, 0.78, 0.70, 0.62, 0.55, 0.48)
 ALTIN_KAZANC = (1.0, 1.04, 1.08, 1.12, 1.16, 1.20, 1.28, 1.36)
 ACIK_GOLGE = dict(kayma=1.5, sigma=1.2, opak=0.55, koyu=0.45)
 ISIM = ('isim1', 'isim2', 'sonsuz')
+LEKE_KAPI_OGE = ('sembol', 'kucuk_sol', 'kucuk_sag', 'halka')   # kaynak goruntulu ogeler + halka; yazi / logo vektor (bilgi, raporda)
 KAPAT_HEDEF = True
 HEDEF_KAPATILAN = {}
 KUCUK = ('kucuk_sol', 'kucuk_sag')
 
 
 # ----------------------------------------------------------------------------------------------- kaynak alfa delikleri (madde 6)
-def delik_kapat(rgba, k=9):
+def delik_kapat(rgba, k=9, ice=5):
     """alfa > 0.5 maskesi kapanis (k x k elips), 1 px ice; icinde alfa 1, renk inpaint. Doner (rgba, kapatilan piksel)."""
     a = rgba[..., 3]
     m = (a > 0.5).astype(np.uint8)
     c = cv2.morphologyEx(m, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
-    ic = cv2.erode(c, np.ones((3, 3), np.uint8)) > 0
+    ic = cv2.erode(c, np.ones((3, 3), np.uint8), iterations=ice) > 0     # kapanisin kose dolgusu (<= k/2 px) degismez (inceleme V5 bulgu 5)
     hedef = ic & (a < 0.999)
     out = rgba.copy()
     if hedef.any():
@@ -75,25 +76,33 @@ def delik_say(a, k=9):
 
 def hedef_kapat(rgb, a):
     """hedef boyda (olceklenmis) ayni kapanis: alfa > 0.5 maskesi 3x3 kapanis, 1 px ice; icinde alfa 1, alfa < 0.9 olan yerde renk inpaint."""
-    rgba = np.dstack([rgb, a]).astype(np.float32)
-    m = (a > 0.5).astype(np.uint8)
-    c = cv2.morphologyEx(m, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)))
-    ic = cv2.erode(c, np.ones((3, 3), np.uint8)) > 0
+    ic = leke_ic(a)                                                   # kapi ile ayni tanim: kenar (2 px) degismez
     maske = (ic & (a < 0.9)).astype(np.uint8)
     if maske.any():
         rgbi = cv2.inpaint(np.clip(rgb, 0, 255).astype(np.uint8), maske, 3, cv2.INPAINT_TELEA).astype(np.float32)
         rgb = np.where(maske[..., None] > 0, rgbi, rgb)
-    return rgb.astype(np.float32), np.where(ic, 1.0, a).astype(np.float32), int(maske.sum())
+    a2 = np.where(ic, 1.0, a).astype(np.float32)
+    return rgb.astype(np.float32), a2, dict(alfa_lt_09=int(maske.sum()), degisen_alfa_gt_002=int((np.abs(a2 - a) > 0.02).sum()),
+                                           degisen_alfa_gt_03=int((np.abs(a2 - a) > 0.3).sum()))
+
+
+LEKE_ICE = 2                                  # kenar yumusatmasi icin maske 2 px iceri daraltilir (Merkez: 1-2 px)
+
+
+def leke_ic(m):
+    """alfa > 0.5 maskesi 3x3 elips kapanis, sonra LEKE_ICE px iceri (3x3 asindirma). Ic bukey kose dolgusu (kapanisin 1 px'i) disarida kalir;
+    ince catlak / delik (kapanisla dolan, kenardan > 2 px icerde) sayilir (inceleme V5 bulgu 2)."""
+    b = (m > 0.5).astype(np.uint8)
+    c = cv2.morphologyEx(b, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)))
+    return cv2.erode(c, np.ones((3, 3), np.uint8), iterations=LEKE_ICE) > 0
 
 
 def leke_kapisi(M, rgb, bronz_acik_L=None):
-    """oge basina: kapanisli (3x3) alfa > 0.5 maskesi 1 px ice; (a) alfa < 0.9, (b) luma > bronz acik ucu + 2."""
+    """oge basina: (a) kapanisli maske icinde (2 px ice) alfa < 0.9 (alfa siniri yok), (b) alfa >= 0.9 murekkepte luma > bronz acik ucu + 2."""
     L = lum(rgb.astype(np.float32))
     r = {}
     for k, m in M.items():
-        b = (m > 0.5).astype(np.uint8)
-        c = cv2.morphologyEx(b, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)))
-        ic = cv2.erode(c, np.ones((3, 3), np.uint8)) > 0
+        ic = leke_ic(m)
         r[k] = dict(alfa_lt_09=int((ic & (m < 0.9)).sum()), ic_piksel=int(ic.sum()),
                     acik_piksel=int((ic & (m >= 0.9) & (L > bronz_acik_L + 2)).sum()) if bronz_acik_L is not None else None,
                     acik_piksel_kenar_dahil=int((ic & (L > bronz_acik_L + 2)).sum()) if bronz_acik_L is not None else None)
@@ -102,7 +111,9 @@ def leke_kapisi(M, rgb, bronz_acik_L=None):
 
 # ----------------------------------------------------------------------------------------------- bronz (madde 5)
 def bronz_fonk(carpan):
-    k, a_, c = BRONZ['koyu'] * carpan, BRONZ['ana'] * carpan, BRONZ['acik'] * carpan
+    """yalniz ANA ton carpanla koyulasir (gorev madde 5); koyu ve acik uc sabit (koyu uc ana tondan acik olamaz)."""
+    a_ = BRONZ['ana'] * carpan
+    k, c = np.minimum(BRONZ['koyu'], a_ * 0.6), BRONZ['acik']
 
     def f(cc, model):
         L = lum(cc)
@@ -243,6 +254,16 @@ def blok(T, kucuk, alt, G):
     return E
 
 
+def yazi_yerlestir(T, kucuk, halka_a, G):
+    """yazi blogu (kucuk burclar, isim satiri, tarih; bosluklar G) halka ile birlikte kapidan gecen en asagi konum. Doner (alt, E) ya da None."""
+    for alt in np.arange(N - 40, 500, -1.0):
+        E = blok(T, kucuk, alt, G)
+        E['halka'] = (None, halka_a, 0, 0)
+        if o4.kapi(E)[3]:
+            return alt, E
+    return None
+
+
 def yerlesim_V5(pp, ana, T, kucuk, halka_a, hb, G):
     """yazi blogu: bosluklar G, en asagi gecerli konum (halka dahil kapi). Sembol: V4 boyu (halka 341 orani), merkez V4 formulu;
     bosluk G icin gerekiyorsa yalniz yukari. Doner Y ya da hata (gereken kucultme)."""
@@ -254,13 +275,7 @@ def yerlesim_V5(pp, ana, T, kucuk, halka_a, hb, G):
         rgb_, a_, n_ = hedef_kapat(sem4[0], sem4[1])
         sem4 = (rgb_, a_, sem4[2], sem4[3])
         HEDEF_KAPATILAN['sembol'] = n_
-    secilen = None
-    for alt in np.arange(N - 40, 500, -1.0):
-        E = blok(T, kucuk, alt, G)
-        E['halka'] = (None, halka_a, 0, 0)
-        M, yb, cak, ok = o4.kapi(E)
-        if ok:
-            secilen = (alt, E); break
+    secilen = yazi_yerlestir(T, kucuk, halka_a, G)
     if secilen is None:
         return None, dict(hata='yazi blogu halka ile sigmiyor')
     alt, E = secilen
@@ -286,9 +301,10 @@ def yerlesim_V5(pp, ana, T, kucuk, halka_a, hb, G):
 
 
 # ----------------------------------------------------------------------------------------------- olcum
-def okunurluk5(rgb, m):
-    ce = cv2.erode((m > 0.9).astype(np.uint8), np.ones((2, 2), np.uint8)) > 0
-    yt = np.median(rgb[m > 0.5], 0) if (m > 0.5).any() else np.median(rgb[ce], 0)
+def okunurluk5(rgb, m, m_esik=0.5):
+    if not (m > m_esik).any():
+        return dict(ortanca=None, acik5=None, koyu5=None, yazi_rgb=None, not_='murekkep yok')
+    yt = np.median(rgb[m > m_esik], 0)
     ink = (m > 0.02).astype(np.uint8)
     arka = (cv2.dilate(ink, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (25, 25))) > 0) & \
            (cv2.dilate(ink, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))) == 0)
@@ -307,7 +323,9 @@ def uc_maske(pp, s0):
     ang = (np.degrees(np.arctan2(yy + 0.5 - HALKA_CY, xx + 0.5 - CX)) + 360) % 360
     r = (pp['el']['a'] + pp['el']['b']) / 2
     s = np.minimum(np.radians((pp['t1'] - ang) % 360), np.radians((ang - pp['t2']) % 360)) * r / pp['L']
-    return (s < s0) & ~((ang > pp['t1']) & (ang < pp['t2']))
+    bolge = (s < s0) & ~((ang > pp['t1']) & (ang < pp['t2']))
+    w = genislik_T(pp, ang, s0)
+    return bolge & (w >= 2.0), bolge & (w < 2.0) & (w > 0)
 
 
 def isim_guvenli(E):
@@ -321,9 +339,9 @@ def isim_guvenli(E):
     return round(d, 1)
 
 
-def boya_sec(Y, model, z, tur, td, pp, s0):
+def boya_sec(Y, model, z, tur, td, pp, s0, sabit=None):
     """koyu: altin kazanci; acik: bronz carpani. Kontrast: isim1, isim2, tarih (kati: ortanca / acik %5; bronzda + koyu %5) ve halka uclari."""
-    adaylar = ALTIN_KAZANC if tur == 'koyu' else BRONZ_CARPAN
+    adaylar = (sabit,) if sabit is not None else (ALTIN_KAZANC if tur == 'koyu' else BRONZ_CARPAN)
     um = uc_maske(pp, s0) if 'halka' in Y['M'] else None
     for c in adaylar:
         Lc = ayarla(tur, c)
@@ -332,9 +350,9 @@ def boya_sec(Y, model, z, tur, td, pp, s0):
         rgb = o4.boya(Y, model, z, kaz, td, dg)
         ok = {k: okunurluk5(rgb, Y['M'][k]) for k in ('isim1', 'isim2', 'tarih')}
         if um is not None:
-            ok['halka_uclari'] = okunurluk5(rgb, Y['M']['halka'] * um)
-        anahtar = ('ortanca', 'acik5') if tur == 'koyu' else ('ortanca', 'acik5', 'koyu5')
-        en = min(v[k] for v in ok.values() for k in anahtar)
+            ok['halka_uclari'] = okunurluk5(rgb, Y['M']['halka'] * um[0])            # incelme bolgesinde genislik >= 2 px
+            ok['halka_uclari_2px_alti'] = okunurluk5(rgb, Y['M']['halka'] * um[1], m_esik=0.15)   # bilgi: 2 px alti (kapi disi)
+        en = min(v[k] for kk, v in ok.items() if kk != 'halka_uclari_2px_alti' and v[k] is not None for k in ('ortanca', 'acik5'))   # gorev olcutu; koyu %5 bilgi
         if en >= o4.HEDEF:
             break
     return dict(deger=c, rgb=rgb, ok=ok, en=en, dg=dg, Lc=Lc, kazanc=kaz)
@@ -358,14 +376,12 @@ def main():
     pp = o4.poster_profil(K / 'HALKA_BLUE_16x20.png')
     ana0 = np.asarray(Image.open(K / 'CANCER_LIBRA_ana.png').convert('RGBA'), np.float32)
     ana0[..., 3] /= 255.0
-    k_tam = int(round(9 * ana0.shape[1] / 1600)) | 1                  # kapanis cekirdegi gorsel boyuyla olceklenir (1600 px'te 9)
-    kanit = {'kaynak_tam_boy_onarimsiz': delik_say(ana0[..., 3], k_tam), 'kaynak_tam_boy_px': [int(ana0.shape[1]), int(ana0.shape[0])],
-             'kaynak_tam_boy_cekirdek': k_tam}
+
     ana0 = o1.kirp(ana0, ana0[..., 3], pad=2)
     if ana0.shape[1] > 1600:
         r_, a_ = o1.rgba_olcek(ana0, 1600 / ana0.shape[1]); ana0 = np.dstack([r_, a_])
     ana5, ana_kapatilan = delik_kapat(ana0)
-    kanit.update(kaynak_1600_onarimsiz=delik_say(ana0[..., 3]), kaynak_1600_onarimli=delik_say(ana5[..., 3]))
+
     lsrc = o4.logo_kaynak(K / 'LOGO_1.png')
     kapatilan = {'ana_1600px': ana_kapatilan}
 
@@ -415,11 +431,22 @@ def main():
         secenek['A-' + ad] = (Y, s0)
     R['yerlesim'] = yer
     sonuc, rgbler = {}, {}
+    TON_A = {}
     for zad, (z, tur) in zem.items():
+        # A-T1 ve A-T2 ayni ton (inceleme V5 bulgu 3: sutunlar renkte kiyaslanabilir): ikisinin de gecen en hafif tonu
+        ortak = []
+        for sad, (Y, s0) in secenek.items():
+            if sad == 'V4':
+                continue
+            sx = Y['E']['sembol']
+            model = o1.Model(td, sx[0], sx[1], 4800 * (o1.bbox(sx[1], 0.5)[2] - o1.bbox(sx[1], 0.5)[0]) / 2084)
+            ortak.append(boya_sec(Y, model, z, tur, td, pp, s0)['deger'])
+        ton_A = max(ortak) if tur == 'koyu' else min(ortak)
+        TON_A[zad] = ton_A
         for sad, (Y, s0) in secenek.items():
             sx = Y['E']['sembol']
             model = o1.Model(td, sx[0], sx[1], 4800 * (o1.bbox(sx[1], 0.5)[2] - o1.bbox(sx[1], 0.5)[0]) / 2084)
-            b = boya_sec(Y, model, z, tur, td, pp, s0 if s0 is not None else 0.20)
+            b = boya_sec(Y, model, z, tur, td, pp, s0 if s0 is not None else 0.20, sabit=None if sad == 'V4' else ton_A)
             rgb = b['rgb']
             ayarla(tur, b['deger'])
             rgb0 = o4.boya(Y, model, z, b['kazanc'], td, 0.0, doku_kapali=True)
@@ -428,6 +455,8 @@ def main():
             gy, gb = o4.goruntu_yasak(rgb, z, Y['M'].get('halka'))
             r = dict(tur=tur, ton=('altin kazanci ' if tur == 'koyu' else 'bronz carpani ') + str(b['deger']),
                      bronz_ana_rgb=[round(float(v), 1) for v in BRONZ['ana'] * b['deger']] if tur == 'acik' else None,
+                     kontrast_olcutu='kapi: ortanca ve zeminin acik %5 (gorev, V4 kati olcut); koyu %5 yalniz bilgi; halka uclari: incelme bolgesinde '
+                                     'genislik >= 2 px kismi (kapi), 2 px alti kismi alfa > 0.15 ile ayri (bilgi)',
                      en_kotu_kontrast=round(b['en'], 2), hedef_tuttu=b['en'] >= o4.HEDEF,
                      kontrast={k: {kk: (round(vv, 2) if isinstance(vv, float) else vv) for kk, vv in v.items()} for k, v in b['ok'].items()},
                      bosluk_px=bosluklar(Y['E']), sembol_kutu=list(kutu(Y['E'], 'sembol')),
@@ -447,7 +476,7 @@ def main():
                 o1.kaydet(rgb, O / f'{zad}_{sad}_954.png')
             lk = r['leke']
             print(zad, sad, r['ton'], 'kontrast', r['en_kotu_kontrast'], 'bosluk', r['bosluk_px'], 'sembol', r['sembol_kutu'],
-                  'yasak', sum(gy.values()), 'cak', r['cakisma'], 'leke a', sum(v['alfa_lt_09'] for k_, v in lk.items() if k_ in ('sembol',) + KUCUK),
+                  'yasak', sum(gy.values()), 'cak', r['cakisma'], 'leke a', {k_: v['alfa_lt_09'] for k_, v in lk.items() if v['alfa_lt_09']},
                   'leke b', sum((v['acik_piksel'] or 0) for v in lk.values()), 'doku', min(r['doku_oge'].values()), max(r['doku_oge'].values()),
                   'uc2px_mm', (r.get('halka_uc') or {}).get('sag', {}).get('ince_2px_mm'), flush=True)
     R['sonuc'] = sonuc
@@ -457,11 +486,15 @@ def main():
     for zad, _, _ in ZEMINLER:
         im = o4.onizleme([rgbler[(zad, s)] for s in secenek], ara=24)
         tile = (im.width - 48) // 3
-        b = Image.new('RGB', (im.width, im.height + 100), 'white'); b.paste(im, (0, 0)); d = ImageDraw.Draw(b)
+        b = Image.new('RGB', (im.width, im.height + 120), 'white'); b.paste(im, (0, 0)); d = ImageDraw.Draw(b)
         for i, s in enumerate(secenek):
             r = sonuc[zad][s]
-            t = (f'{zad} {s}: bosluk {r["bosluk_px"][0]}/{r["bosluk_px"][1]}/{r["bosluk_px"][2]} px, sembol ust y {r["sembol_kutu"][1]}\n'
-                 f'{r["ton"]}, kontrast {r["en_kotu_kontrast"]}, uc <2px {(r.get("halka_uc") or {}).get("sag", {}).get("ince_2px_mm")} mm')
+            hu = r.get('halka_uc') or {}
+            la = sum(v['alfa_lt_09'] for k_, v in r['leke'].items() if k_ in LEKE_KAPI_OGE)
+            lb = sum((v['acik_piksel'] or 0) for v in r['leke'].values())
+            t = (f'{zad} {s}: bosluk {r["bosluk_px"][0]}/{r["bosluk_px"][1]}/{r["bosluk_px"][2]} px, sembol ust y {r["sembol_kutu"][1]}, isim-guvenli {r["isim_guvenli_daireye_px"]} px\n'
+                 f'{r["ton"]}, kontrast {r["en_kotu_kontrast"]} {"PASS" if r["hedef_tuttu"] else "FAIL"}, leke a {la} b {lb}\n'
+                 f'uc < 2 px sag / sol {hu.get("sag", {}).get("ince_2px_mm")} / {hu.get("sol", {}).get("ince_2px_mm")} mm')
             for j, line in enumerate(t.split('\n')):
                 d.text((i * (tile + 24) + 6, im.height + 8 + j * 34), line, fill=(20, 20, 20), font=font)
         satirlar.append(b)
@@ -470,21 +503,30 @@ def main():
     for s in satirlar:
         o.paste(s, (0, y)); y += s.height + 24
     o.save(O / 'ONIZLEME_76mm_SECENEK.png', dpi=(300, 300))
-    # uc yakin cekim (sag uc, 2x): RUBY ve BEIGE x V4 / T1 / T2
-    t1 = math.radians(pp['t1'])
-    hb = Y4['halka']
-    ux = int(CX + hb['ax'] * math.cos(t1)); uy = int(hb['cy'] + hb['by'] * math.sin(t1))
-    # sag uc: halkanin 0 derece noktasindan (x en buyuk) uca kadar olan yay (incelmenin tamami T2 %40'a kadar degil, son ~%25)
-    sag_x = int(CX + hb['ax']) + 12
-    kirp = (max(0, ux - 70), max(0, int(hb['cy']) - 40), min(N, sag_x), min(N, uy + 24))
+    # uc yakin cekim (sag uc, 2x): RUBY ve BEIGE x V4 / T1 / T2; uctan yayin %45'ine kadar (T1 %30, T2 %40 baslangic isaretli)
+    r_p = (pp['el']['a'] + pp['el']['b']) / 2
+    def aci(sf):                                                       # sag uctan yay orani sf -> aci (derece)
+        return pp['t1'] - math.degrees(sf * pp['L'] / r_p)
+    by_ = HALKA_AX / pp['el']['oran']
+    def nokta(t, ek=0.0):
+        tr = math.radians(t)
+        return CX + (HALKA_AX + ek) * math.cos(tr), HALKA_CY + (by_ + ek) * math.sin(tr)
+    pts = [nokta(t) for t in np.linspace(aci(0.45), pp['t1'], 60)]
+    xs_, ys_ = [q[0] for q in pts], [q[1] for q in pts]
+    kirp = (max(0, int(min(xs_)) - 30), max(0, int(min(ys_)) - 14), min(N, int(max(xs_)) + 30), min(N, int(max(ys_)) + 14))
     parcalar = []
     for zad in ('RUBY', 'BEIGE'):
         sat = []
-        for s in secenek:
-            im = Image.fromarray(rgbler[(zad, s)]).crop(kirp)
+        for s_ in secenek:
+            im = Image.fromarray(rgbler[(zad, s_)]).crop(kirp)
             im = im.resize((im.width * 2, im.height * 2), Image.NEAREST)
+            dd = ImageDraw.Draw(im)
+            for sf, et in ((0.30, '%30'), (0.40, '%40')):
+                x1_, y1_ = nokta(aci(sf), 10); x2_, y2_ = nokta(aci(sf), 26)
+                dd.line([((x1_ - kirp[0]) * 2, (y1_ - kirp[1]) * 2), ((x2_ - kirp[0]) * 2, (y2_ - kirp[1]) * 2)], fill=(0, 190, 255), width=3)
+                dd.text(((x2_ - kirp[0]) * 2 - 40, (y2_ - kirp[1]) * 2 - 34), et, fill=(0, 190, 255), font=font)
             c = Image.new('RGB', (im.width, im.height + 44), 'white'); c.paste(im, (0, 0))
-            ImageDraw.Draw(c).text((6, im.height + 6), f'{zad} {s}', fill=(20, 20, 20), font=font)
+            ImageDraw.Draw(c).text((6, im.height + 6), f'{zad} {s_}', fill=(20, 20, 20), font=font)
             sat.append(c)
         parcalar.append(sat)
     W = sum(c.width for c in parcalar[0]) + 24 * 2
@@ -509,20 +551,32 @@ def main():
         tasma[isim] = dict(genislik_px=bb[2] - bb[0], ust_buyuk_harf_ustu_px=int(round((t_ - cap) - bb[1])), alt_taban_alti_px=int(round(bb[3] - t_)),
                            not_='ust > 0: aksan (Ğ breve, Ü nokta) buyuk harf ustune tasar; alt > 0: Ç cengeli taban altina iner')
     YU, bu = yerlesim_V5(pp, ana5, TU, kc5, ha, hb1, G)
-    uz = dict(isimler=['ÇAĞLAYANGÜL', 'MAXIMILIAN'], olcek_1_sigar=YU is not None, bilgi=bu, aksan=tasma)
+    uz = dict(isimler=['ÇAĞLAYANGÜL', 'MAXIMILIAN'], olcek_1_sigar=YU is not None, bilgi=bu, aksan=tasma,
+              not_='yalniz bilgi; ana onizlemelerde (EMILY / JAMES) yazi olcegi 1.0. Karar Serdar.')
+    YU_tam = None
     if YU is None:
-        gerek, lo, hi = None, 0.30, 1.0                                  # ikili arama (0.01 duyarlik)
-        while hi - lo > 0.01:
-            sc = (lo + hi) / 2
-            Ys, _ = yerlesim_V5(pp, ana5, metinler(cap, 'ÇAĞLAYANGÜL', 'MAXIMILIAN', isim_olcek=sc), kc5, ha, hb1, G)
-            if Ys is not None:
-                lo = sc; gerek = round(sc, 3)
-            else:
-                hi = sc
-        uz['arama'] = 'isim olcegi 0.30-1.00 ikili arama; logo, bosluk ve tarih boyu degismez'
-        uz['gereken_isim_olcegi'] = gerek
-        uz['gereken_isim_buyuk_harf_mm'] = round(cap * gerek * MM, 2) if gerek else None
-        # gorsel: olcek 1 (tasma gorunur), kapisiz yerlesim
+        def ara(sigar):                                                 # ikili arama (0.01 duyarlik): sigan en buyuk isim olcegi
+            lo, hi, en = 0.30, 1.0, None
+            while hi - lo > 0.01:
+                sc = (lo + hi) / 2
+                if sigar(sc):
+                    lo, en = sc, sc
+                else:
+                    hi = sc
+            return round(en, 3) if en else None
+        Ts = lambda sc: metinler(cap, 'ÇAĞLAYANGÜL', 'MAXIMILIAN', isim_olcek=sc)
+        s_yazi = ara(lambda sc: yazi_yerlestir(Ts(sc), kc5, ha, G) is not None)
+        s_tam = ara(lambda sc: yerlesim_V5(pp, ana5, Ts(sc), kc5, ha, hb1, G)[0] is not None)
+        b_yazi = yerlesim_V5(pp, ana5, Ts(s_yazi), kc5, ha, hb1, G)[1] if s_yazi else None
+        uz.update(arama='isim olcegi 0.30-1.00 ikili arama; logo, bosluk, kucuk burc, tarih ve sembol boyu degismez',
+                  yazi_blogu_sigan_olcek=s_yazi, yazi_blogu_buyuk_harf_mm=round(cap * s_yazi * MM, 2) if s_yazi else None,
+                  yazi_sigan_olcekte_sembol=b_yazi,
+                  tam_sigan_olcek=s_tam, tam_buyuk_harf_mm=round(cap * s_tam * MM, 2) if s_tam else None,
+                  sinirlayan='yazi_blogu_sigan_olcek: yalniz yazi blogu (guvenli daire, halka, cakisma); tam_sigan_olcek: sembol de kucultulmeden sigar')
+        if s_tam:
+            YU_tam, _ = yerlesim_V5(pp, ana5, Ts(s_tam), kc5, ha, hb1, G)
+            uz['tam_olcekte_bosluk_px'] = bosluklar(YU_tam['E'])
+        # gorsel 1: olcek 1 (kapisiz; tasma gorunur)
         E = blok(TU, kc5, float(yer['T1']['alt']), G)
         E['halka'] = (None, ha, 0, 0)
         E['sembol'] = secenek['A-T1'][0]['E']['sembol']
@@ -533,45 +587,66 @@ def main():
     else:
         uz['bosluk_px'] = bosluklar(YU['E'])
         uz['isim_guvenli_daireye_px'] = isim_guvenli(YU['E'])
-    sx = YU['E']['sembol']
-    model = o1.Model(td, sx[0], sx[1], 4800 * (o1.bbox(sx[1], 0.5)[2] - o1.bbox(sx[1], 0.5)[0]) / 2084)
     ayarla('koyu')
-    rgbu = o4.boya(YU, model, z, 1.08, td, 0.2)
+    gorseller = []
+    for Yx in (YU, YU_tam):
+        if Yx is None:
+            continue
+        sx = Yx['E']['sembol']
+        model = o1.Model(td, sx[0], sx[1], 4800 * (o1.bbox(sx[1], 0.5)[2] - o1.bbox(sx[1], 0.5)[0]) / 2084)
+        gorseller.append(o4.boya(Yx, model, z, TON_A['RUBY'], td, o4.doku_ayarla(Yx, model, z, TON_A['RUBY'], td)))
     R['uzun_isim'] = uz
-    im = o4.onizleme([rgbu], ara=0)
-    b = Image.new('RGB', (im.width, im.height + 120), 'white'); b.paste(im, (0, 0)); d = ImageDraw.Draw(b)
-    satirlar_ = [f'RUBY A-T1, isim olcegi 1.0: {"mevcut boyda sigar" if uz["olcek_1_sigar"] else "mevcut boyda sigmiyor (karar Serdar)"}']
+    im = o4.onizleme(gorseller, ara=24)
+    satirlar_ = [f'sol: isim olcegi 1.0 (kapisiz) - {"mevcut boyda sigar" if uz["olcek_1_sigar"] else "mevcut boyda SIGMIYOR"}' +
+                 (f'; sag: tam sigan olcek {uz.get("tam_sigan_olcek")}' if YU_tam is not None else '')]
     if not uz['olcek_1_sigar']:
-        satirlar_.append(f'gereken olcek {uz.get("gereken_isim_olcegi")}, buyuk harf {uz.get("gereken_isim_buyuk_harf_mm")} mm')
+        satirlar_.append(f'yalniz yazi blogu {uz.get("yazi_blogu_sigan_olcek")} ({uz.get("yazi_blogu_buyuk_harf_mm")} mm) sigar, sembol kucultulmezse '
+                         f'{uz.get("tam_sigan_olcek")} ({uz.get("tam_buyuk_harf_mm")} mm). Karar Serdar.')
     satirlar_ += [f'{k}: aksan ust {v["ust_buyuk_harf_ustu_px"]} px, alt {v["alt_taban_alti_px"]} px' for k, v in tasma.items()]
     b = Image.new('RGB', (im.width, im.height + 40 * len(satirlar_) + 12), 'white'); b.paste(im, (0, 0)); d = ImageDraw.Draw(b)
     for j, line in enumerate(satirlar_):
         d.text((8, im.height + 8 + 40 * j), line, fill=(20, 20, 20), font=font)
     b.save(O / 'UZUN_ISIM.png', dpi=(300, 300))
-    print('UZUN', json.dumps(uz, ensure_ascii=False, default=str)[:600], flush=True)
+    print('UZUN', json.dumps(uz, ensure_ascii=False, default=str)[:900], flush=True)
     # kapilar (A secenekleri)
     A = [sonuc[z_][s] for z_ in sonuc for s in sonuc[z_] if s != 'V4']
     g = dict(yasak_0=all(sum(r['yasak_piksel'].values()) == 0 for r in A), cakisma_0=all(not r['cakisma'] for r in A),
              goruntu_yasak_0=all(sum(r['goruntu_yasak'].values()) == 0 for r in A), kontrast=all(r['hedef_tuttu'] for r in A),
              bosluk_ge_hedef=all(min(r['bosluk_px']) >= BOSLUK_ORAN * cap for r in A),
-             leke_a_0=all(sum(v['alfa_lt_09'] for k_, v in r['leke'].items() if k_ in ('sembol',) + KUCUK) == 0 for r in A),
+             leke_a_0=all(sum(v['alfa_lt_09'] for k_, v in r['leke'].items() if k_ in LEKE_KAPI_OGE) == 0 for r in A),
              leke_b_0=all(sum((v['acik_piksel'] or 0) for v in r['leke'].values()) == 0 for r in A),   # alfa >= 0.9 murekkepte
              doku_4_6=all(4.0 <= min(r['doku_oge'].values()) and max(r['doku_oge'].values()) <= 6.0 for r in A),
-             isik_4_10_koyu=all(4 <= r['isik']['p95_px'] and r['isik']['uzanim_px'] <= 10 for r in A if r['tur'] == 'koyu'),
-             halka_kilit=abs(R['sabit']['halka']['tepe_y'] - o4.DELIK[1]) < 0.6)
+             isik_4_10_koyu=all(4 <= r['isik']['p95_px'] and r['isik']['uzanim_px'] <= 10 for r in A if r['tur'] == 'koyu'))
     g = {k: bool(v) for k, v in g.items()}
     R['kapi'] = g
+    # leke kapisi kaniti: (1) onarimsiz V4 sutunu (hedef boy), (2) A-T1 sembolune yapay 30 delik (1 x 2 px, alfa 0.1), (3) onarimli A
     lv4 = sonuc['RUBY']['V4']['leke']
-    kanit.update(hedef_V4_onarimsiz={k_: lv4[k_]['alfa_lt_09'] for k_ in ('sembol',) + KUCUK},
-                 hedef_A_onarimli={k_: sonuc['RUBY']['A-T1']['leke'][k_]['alfa_lt_09'] for k_ in ('sembol',) + KUCUK},
-                 yontem='alfa > 0.5 maskesi kapanis (kaynak 9x9, hedef 3x3 elips), sonra 1 px iceri daraltma (3x3 asindirma; kenar yumusatmasi '
-                        'disarida kalsin); icinde alfa < 0.9 piksel sayisi. alfa >= 0.9 siniri YOK (yalniz (b) olcumunde).')
-    kanit['kapi_yakaliyor'] = bool(kanit['kaynak_tam_boy_onarimsiz'] > 0 and kanit['kaynak_1600_onarimli'] == 0 and
-                                   sum(kanit['hedef_A_onarimli'].values()) == 0)
+    sa = secenek['A-T1'][0]['E']['sembol'][1].copy()
+    rng = np.random.default_rng(1)
+    ys_, xs_ = np.nonzero(cv2.erode((sa > 0.95).astype(np.uint8), np.ones((5, 5), np.uint8)) > 0)
+    for i in rng.choice(len(ys_), 30, replace=False):
+        sa[ys_[i]:ys_[i] + 2, xs_[i]:xs_[i] + 1] = 0.1
+    yapay = int((leke_ic(sa) & (sa < 0.9)).sum())
+    kanit = dict(hedef_V4_onarimsiz={k_: lv4[k_]['alfa_lt_09'] for k_ in LEKE_KAPI_OGE},
+                 hedef_A_onarimli={k_: sonuc['RUBY']['A-T1']['leke'][k_]['alfa_lt_09'] for k_ in LEKE_KAPI_OGE},
+                 yapay_30_delik_sayim=yapay,
+                 yazi_logo_bilgi={k_: v['alfa_lt_09'] for k_, v in sonuc['RUBY']['A-T1']['leke'].items() if k_ not in LEKE_KAPI_OGE},
+                 yontem=f'alfa > 0.5 maskesi 3x3 elips kapanis, sonra {LEKE_ICE} px iceri daraltma (kenar yumusatmasi ve ic bukey kose dolgusu disarida); '
+                        'icinde alfa < 0.9 piksel sayisi. alfa >= 0.9 siniri YOK (yalniz (b) olcumunde). Kaynakta onarim 9x9 kapanis + 5 px ice (kenar degismez).')
+    kanit['kapi_yakaliyor'] = bool(yapay > 0 and sum(kanit['hedef_A_onarimli'].values()) == 0)
     R['leke_kapi_kaniti'] = kanit
     g['leke_kapi_yakaliyor'] = kanit['kapi_yakaliyor']
-    print('LEKE KANIT', json.dumps(kanit), flush=True)
-    R['kapi_not'] = 'leke (a) kapisi kaynak goruntulu ogelerde (sembol, kucuk burclar); yazi / logo / halka vektor kenar yumusatmasi raporda (OLCUM leke)'
+    # halka kilidi goruntuden: x = 476 sutununda alfa agirlikli tepe y, y = cy satirinda sol / sag dis kenar
+    hm = secenek['A-T1'][0]['M']['halka']
+    col = hm[130:200, int(CX)]
+    tepe = float((np.arange(130, 200) * col).sum() / max(col.sum(), 1e-6)) + 0.5
+    satir_ = np.nonzero(hm[int(round(HALKA_CY))] > 0.5)[0]
+    R['halka_kilit_olcum'] = dict(tepe_y=round(tepe, 2), sol_x=int(satir_.min()), sag_x=int(satir_.max()),
+                                  ax_yaklasik=round((satir_.max() - satir_.min() + 1) / 2 - 2.2, 1))
+    g['halka_kilit'] = bool(abs(tepe - o4.DELIK[1]) < 0.6)
+    print('LEKE KANIT', json.dumps(kanit), 'HALKA', json.dumps(R['halka_kilit_olcum']), flush=True)
+    R['kapi_not'] = ('leke (a) kapisi sembol, kucuk burclar ve halkada; yazi ve logo vektor cizim (kaynakta delik olamaz), sayimlari bilgi '
+                     '(OLCUM leke_kapi_kaniti.yazi_logo_bilgi: dar acili harf birlesimleri ve logonun 2 px alti cizgileri)')
     (O / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=float))
     print('KAPI', json.dumps(g), 'PASS' if all(g.values()) else 'FAIL', flush=True)
     return 0 if all(g.values()) else 1
