@@ -13996,5 +13996,2797 @@
    ],
    "extra": []
   }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52913,
+  "ulke": "US",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "US",
+     "state_code": "NY",
+     "city": "New York",
+     "zip": "10001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52913,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 200,
+  "yanit": {
+   "data": [
+    {
+     "shipping": "STANDARD",
+     "shipping_method_name": "Flat Rate (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "5.89",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 52913,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    },
+    {
+     "shipping": "STANDARD_CARBON_OFFSET",
+     "shipping_method_name": "Standard rate with CO2 offsetting (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "5.98",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 52913,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    }
+   ],
+   "extra": []
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52913,
+  "ulke": "CA",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "CA",
+     "state_code": "ON",
+     "city": "Toronto",
+     "zip": "M5V 2T6"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52913,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52913,
+  "ulke": "GB",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "GB",
+     "city": "London",
+     "zip": "SW1A 1AA"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52913,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52913,
+  "ulke": "DE",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "DE",
+     "city": "Berlin",
+     "zip": "10115"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52913,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52913,
+  "ulke": "FR",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "FR",
+     "city": "Paris",
+     "zip": "75001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52913,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52913,
+  "ulke": "IT",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "IT",
+     "city": "Rome",
+     "zip": "00184"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52913,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52913,
+  "ulke": "ES",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "ES",
+     "city": "Madrid",
+     "zip": "28001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52913,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52913,
+  "ulke": "NL",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "NL",
+     "city": "Amsterdam",
+     "zip": "1012 JS"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52913,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52913,
+  "ulke": "AU",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "AU",
+     "state_code": "NSW",
+     "city": "Sydney",
+     "zip": "2000"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52913,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52816,
+  "ulke": "US",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "US",
+     "state_code": "NY",
+     "city": "New York",
+     "zip": "10001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52816,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 200,
+  "yanit": {
+   "data": [
+    {
+     "shipping": "STANDARD",
+     "shipping_method_name": "Flat Rate (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "7.29",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 52816,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    },
+    {
+     "shipping": "STANDARD_CARBON_OFFSET",
+     "shipping_method_name": "Standard rate with CO2 offsetting (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "7.38",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 52816,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    }
+   ],
+   "extra": []
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52816,
+  "ulke": "CA",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "CA",
+     "state_code": "ON",
+     "city": "Toronto",
+     "zip": "M5V 2T6"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52816,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52816,
+  "ulke": "GB",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "GB",
+     "city": "London",
+     "zip": "SW1A 1AA"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52816,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52816,
+  "ulke": "DE",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "DE",
+     "city": "Berlin",
+     "zip": "10115"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52816,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52816,
+  "ulke": "FR",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "FR",
+     "city": "Paris",
+     "zip": "75001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52816,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52816,
+  "ulke": "IT",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "IT",
+     "city": "Rome",
+     "zip": "00184"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52816,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52816,
+  "ulke": "ES",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "ES",
+     "city": "Madrid",
+     "zip": "28001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52816,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52816,
+  "ulke": "NL",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "NL",
+     "city": "Amsterdam",
+     "zip": "1012 JS"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52816,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1664",
+  "varyant": 52816,
+  "ulke": "AU",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "AU",
+     "state_code": "NSW",
+     "city": "Sydney",
+     "zip": "2000"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 52816,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54341,
+  "ulke": "US",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "US",
+     "state_code": "NY",
+     "city": "New York",
+     "zip": "10001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54341,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 200,
+  "yanit": {
+   "data": [
+    {
+     "shipping": "STANDARD",
+     "shipping_method_name": "Flat Rate (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "5.89",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 54341,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    },
+    {
+     "shipping": "STANDARD_CARBON_OFFSET",
+     "shipping_method_name": "Standard rate with CO2 offsetting (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "5.98",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 54341,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    }
+   ],
+   "extra": []
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54341,
+  "ulke": "CA",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "CA",
+     "state_code": "ON",
+     "city": "Toronto",
+     "zip": "M5V 2T6"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54341,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54341,
+  "ulke": "GB",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "GB",
+     "city": "London",
+     "zip": "SW1A 1AA"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54341,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54341,
+  "ulke": "DE",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "DE",
+     "city": "Berlin",
+     "zip": "10115"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54341,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54341,
+  "ulke": "FR",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "FR",
+     "city": "Paris",
+     "zip": "75001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54341,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54341,
+  "ulke": "IT",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "IT",
+     "city": "Rome",
+     "zip": "00184"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54341,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54341,
+  "ulke": "ES",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "ES",
+     "city": "Madrid",
+     "zip": "28001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54341,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54341,
+  "ulke": "NL",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "NL",
+     "city": "Amsterdam",
+     "zip": "1012 JS"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54341,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54341,
+  "ulke": "AU",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "AU",
+     "state_code": "NSW",
+     "city": "Sydney",
+     "zip": "2000"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54341,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54339,
+  "ulke": "US",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "US",
+     "state_code": "NY",
+     "city": "New York",
+     "zip": "10001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54339,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 200,
+  "yanit": {
+   "data": [
+    {
+     "shipping": "STANDARD",
+     "shipping_method_name": "Flat Rate (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "5.89",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 54339,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    },
+    {
+     "shipping": "STANDARD_CARBON_OFFSET",
+     "shipping_method_name": "Standard rate with CO2 offsetting (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "5.98",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 54339,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    }
+   ],
+   "extra": []
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54339,
+  "ulke": "CA",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "CA",
+     "state_code": "ON",
+     "city": "Toronto",
+     "zip": "M5V 2T6"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54339,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54339,
+  "ulke": "GB",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "GB",
+     "city": "London",
+     "zip": "SW1A 1AA"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54339,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54339,
+  "ulke": "DE",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "DE",
+     "city": "Berlin",
+     "zip": "10115"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54339,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54339,
+  "ulke": "FR",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "FR",
+     "city": "Paris",
+     "zip": "75001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54339,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54339,
+  "ulke": "IT",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "IT",
+     "city": "Rome",
+     "zip": "00184"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54339,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54339,
+  "ulke": "ES",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "ES",
+     "city": "Madrid",
+     "zip": "28001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54339,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54339,
+  "ulke": "NL",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "NL",
+     "city": "Amsterdam",
+     "zip": "1012 JS"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54339,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54339,
+  "ulke": "AU",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "AU",
+     "state_code": "NSW",
+     "city": "Sydney",
+     "zip": "2000"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54339,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54337,
+  "ulke": "US",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "US",
+     "state_code": "NY",
+     "city": "New York",
+     "zip": "10001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54337,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 200,
+  "yanit": {
+   "data": [
+    {
+     "shipping": "STANDARD",
+     "shipping_method_name": "Flat Rate (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "5.89",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 54337,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    },
+    {
+     "shipping": "STANDARD_CARBON_OFFSET",
+     "shipping_method_name": "Standard rate with CO2 offsetting (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "5.98",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 54337,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    }
+   ],
+   "extra": []
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54337,
+  "ulke": "CA",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "CA",
+     "state_code": "ON",
+     "city": "Toronto",
+     "zip": "M5V 2T6"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54337,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54337,
+  "ulke": "GB",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "GB",
+     "city": "London",
+     "zip": "SW1A 1AA"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54337,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54337,
+  "ulke": "DE",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "DE",
+     "city": "Berlin",
+     "zip": "10115"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54337,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54337,
+  "ulke": "FR",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "FR",
+     "city": "Paris",
+     "zip": "75001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54337,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54337,
+  "ulke": "IT",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "IT",
+     "city": "Rome",
+     "zip": "00184"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54337,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54337,
+  "ulke": "ES",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "ES",
+     "city": "Madrid",
+     "zip": "28001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54337,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54337,
+  "ulke": "NL",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "NL",
+     "city": "Amsterdam",
+     "zip": "1012 JS"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54337,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54337,
+  "ulke": "AU",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "AU",
+     "state_code": "NSW",
+     "city": "Sydney",
+     "zip": "2000"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54337,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54342,
+  "ulke": "US",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "US",
+     "state_code": "NY",
+     "city": "New York",
+     "zip": "10001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54342,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 200,
+  "yanit": {
+   "data": [
+    {
+     "shipping": "STANDARD",
+     "shipping_method_name": "Flat Rate (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "5.89",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 54342,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    },
+    {
+     "shipping": "STANDARD_CARBON_OFFSET",
+     "shipping_method_name": "Standard rate with CO2 offsetting (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "5.98",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 54342,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    }
+   ],
+   "extra": []
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54342,
+  "ulke": "CA",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "CA",
+     "state_code": "ON",
+     "city": "Toronto",
+     "zip": "M5V 2T6"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54342,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54342,
+  "ulke": "GB",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "GB",
+     "city": "London",
+     "zip": "SW1A 1AA"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54342,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54342,
+  "ulke": "DE",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "DE",
+     "city": "Berlin",
+     "zip": "10115"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54342,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54342,
+  "ulke": "FR",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "FR",
+     "city": "Paris",
+     "zip": "75001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54342,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54342,
+  "ulke": "IT",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "IT",
+     "city": "Rome",
+     "zip": "00184"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54342,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54342,
+  "ulke": "ES",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "ES",
+     "city": "Madrid",
+     "zip": "28001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54342,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54342,
+  "ulke": "NL",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "NL",
+     "city": "Amsterdam",
+     "zip": "1012 JS"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54342,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54342,
+  "ulke": "AU",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "AU",
+     "state_code": "NSW",
+     "city": "Sydney",
+     "zip": "2000"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54342,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54340,
+  "ulke": "US",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "US",
+     "state_code": "NY",
+     "city": "New York",
+     "zip": "10001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54340,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 200,
+  "yanit": {
+   "data": [
+    {
+     "shipping": "STANDARD",
+     "shipping_method_name": "Flat Rate (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "5.89",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 54340,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    },
+    {
+     "shipping": "STANDARD_CARBON_OFFSET",
+     "shipping_method_name": "Standard rate with CO2 offsetting (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "5.98",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 54340,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    }
+   ],
+   "extra": []
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54340,
+  "ulke": "CA",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "CA",
+     "state_code": "ON",
+     "city": "Toronto",
+     "zip": "M5V 2T6"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54340,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54340,
+  "ulke": "GB",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "GB",
+     "city": "London",
+     "zip": "SW1A 1AA"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54340,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54340,
+  "ulke": "DE",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "DE",
+     "city": "Berlin",
+     "zip": "10115"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54340,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54340,
+  "ulke": "FR",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "FR",
+     "city": "Paris",
+     "zip": "75001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54340,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54340,
+  "ulke": "IT",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "IT",
+     "city": "Rome",
+     "zip": "00184"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54340,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54340,
+  "ulke": "ES",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "ES",
+     "city": "Madrid",
+     "zip": "28001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54340,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54340,
+  "ulke": "NL",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "NL",
+     "city": "Amsterdam",
+     "zip": "1012 JS"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54340,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54340,
+  "ulke": "AU",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "AU",
+     "state_code": "NSW",
+     "city": "Sydney",
+     "zip": "2000"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54340,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54338,
+  "ulke": "US",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "US",
+     "state_code": "NY",
+     "city": "New York",
+     "zip": "10001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54338,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 200,
+  "yanit": {
+   "data": [
+    {
+     "shipping": "STANDARD",
+     "shipping_method_name": "Flat Rate (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "5.89",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 54338,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    },
+    {
+     "shipping": "STANDARD_CARBON_OFFSET",
+     "shipping_method_name": "Standard rate with CO2 offsetting (Estimated delivery: Nov 9⁠–11) ",
+     "rate": "5.98",
+     "currency": "USD",
+     "min_delivery_days": 4,
+     "max_delivery_days": 6,
+     "min_delivery_date": "2026-11-09",
+     "max_delivery_date": "2026-11-11",
+     "shipments": [
+      {
+       "departure_country": "LV",
+       "shipment_items": [
+        {
+         "catalog_variant_id": 54338,
+         "quantity": 1
+        }
+       ],
+       "customs_fees_possible": false
+      }
+     ]
+    }
+   ],
+   "extra": []
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54338,
+  "ulke": "CA",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "CA",
+     "state_code": "ON",
+     "city": "Toronto",
+     "zip": "M5V 2T6"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54338,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54338,
+  "ulke": "GB",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "GB",
+     "city": "London",
+     "zip": "SW1A 1AA"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54338,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54338,
+  "ulke": "DE",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "DE",
+     "city": "Berlin",
+     "zip": "10115"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54338,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54338,
+  "ulke": "FR",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "FR",
+     "city": "Paris",
+     "zip": "75001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54338,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54338,
+  "ulke": "IT",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "IT",
+     "city": "Rome",
+     "zip": "00184"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54338,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54338,
+  "ulke": "ES",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "ES",
+     "city": "Madrid",
+     "zip": "28001"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54338,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54338,
+  "ulke": "NL",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "NL",
+     "city": "Amsterdam",
+     "zip": "1012 JS"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54338,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
+ },
+ {
+  "urun": "1729",
+  "varyant": 54338,
+  "ulke": "AU",
+  "istek": {
+   "yontem": "POST",
+   "yol": "/v2/shipping-rates",
+   "govde": {
+    "recipient": {
+     "country_code": "AU",
+     "state_code": "NSW",
+     "city": "Sydney",
+     "zip": "2000"
+    },
+    "order_items": [
+     {
+      "source": "catalog",
+      "catalog_variant_id": 54338,
+      "quantity": 1
+     }
+    ],
+    "currency": "USD"
+   }
+  },
+  "http": 400,
+  "yanit": {
+   "data": "Unavailable variant id used",
+   "error": {
+    "reason": "BadRequest",
+    "message": "Unavailable variant id used",
+    "api_error_code": "OR-9",
+    "error_url": "https://developers.printful.com/docs/#section/API-Errors/Orders-API"
+   }
+  }
  }
 ]

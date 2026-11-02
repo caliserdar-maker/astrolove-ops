@@ -1,0 +1,15 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1664/availability?limit=100&selling_region_name=uk",
+  "govde": null
+ },
+ "http": 404,
+ "yanit": {
+  "data": "Not Found",
+  "error": {
+   "reason": "NotFound",
+   "message": "Not Found"
+  }
+ }
+}

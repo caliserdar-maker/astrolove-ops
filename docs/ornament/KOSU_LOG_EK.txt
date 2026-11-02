@@ -1,0 +1,21 @@
+EK hedef ['1664', '1729'] | atlanan (aday degil ya da kargosu var) []
+  GET /v2/catalog-products/1664/availability?limit=100&selling_region_name=north_america -> 200
+  GET /v2/catalog-products/1664/availability?limit=100&selling_region_name=canada -> 404
+  GET /v2/catalog-products/1664/availability?limit=100&selling_region_name=europe -> 404
+  GET /v2/catalog-products/1664/availability?limit=100&selling_region_name=uk -> 404
+  GET /v2/catalog-products/1664/availability?limit=100&selling_region_name=australia -> 404
+  GET /v2/catalog-products/1729/availability?limit=100&selling_region_name=north_america -> 200
+  GET /v2/catalog-products/1729/availability?limit=100&selling_region_name=canada -> 404
+  GET /v2/catalog-products/1729/availability?limit=100&selling_region_name=europe -> 404
+  GET /v2/catalog-products/1729/availability?limit=100&selling_region_name=uk -> 404
+  GET /v2/catalog-products/1729/availability?limit=100&selling_region_name=australia -> 404
+KARGO plani (yalniz v2): 72 varyant x ulke
+[kargo 9/72 %12] gecen 9s kalan ~67s | son: 1664/52913/AU HTTP 400
+[kargo 18/72 %25] gecen 19s kalan ~57s | son: 1664/52816/AU HTTP 400
+[kargo 27/72 %37] gecen 29s kalan ~48s | son: 1729/54341/AU HTTP 400
+[kargo 36/72 %50] gecen 38s kalan ~38s | son: 1729/54339/AU HTTP 400
+[kargo 45/72 %62] gecen 47s kalan ~28s | son: 1729/54337/AU HTTP 400
+[kargo 54/72 %75] gecen 56s kalan ~18s | son: 1729/54342/AU HTTP 400
+[kargo 63/72 %87] gecen 65s kalan ~9s | son: 1729/54340/AU HTTP 400
+[kargo 72/72 %100] gecen 74s kalan ~0s | son: 1729/54338/AU HTTP 400
+EK ISTEK toplam 82 | GET 10 | POST 72 (yollar: ['/v2/shipping-rates']) | sure 80s

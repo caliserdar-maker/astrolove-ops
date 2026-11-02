@@ -3358,5 +3358,497 @@
   "yol": "/v2/shipping-rates",
   "http": 200,
   "zaman": "2026-11-02T08:53:46Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1664/availability?limit=100&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T09:47:28Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1664/availability?limit=100&selling_region_name=canada",
+  "http": 404,
+  "zaman": "2026-11-02T09:47:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1664/availability?limit=100&selling_region_name=europe",
+  "http": 404,
+  "zaman": "2026-11-02T09:47:29Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1664/availability?limit=100&selling_region_name=uk",
+  "http": 404,
+  "zaman": "2026-11-02T09:47:30Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1664/availability?limit=100&selling_region_name=australia",
+  "http": 404,
+  "zaman": "2026-11-02T09:47:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1729/availability?limit=100&selling_region_name=north_america",
+  "http": 200,
+  "zaman": "2026-11-02T09:47:31Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1729/availability?limit=100&selling_region_name=canada",
+  "http": 404,
+  "zaman": "2026-11-02T09:47:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1729/availability?limit=100&selling_region_name=europe",
+  "http": 404,
+  "zaman": "2026-11-02T09:47:32Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1729/availability?limit=100&selling_region_name=uk",
+  "http": 404,
+  "zaman": "2026-11-02T09:47:33Z"
+ },
+ {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1729/availability?limit=100&selling_region_name=australia",
+  "http": 404,
+  "zaman": "2026-11-02T09:47:34Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T09:47:35Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:36Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:37Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:38Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:39Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:40Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:41Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:42Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:43Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T09:47:45Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:46Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:47Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:48Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:49Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:50Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:51Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:52Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:53Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T09:47:54Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:55Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:56Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:57Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:58Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:47:59Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:01Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:02Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:03Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T09:48:04Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:05Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:06Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:07Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:08Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:09Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:10Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:11Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:12Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T09:48:13Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:14Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:15Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:16Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:17Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:18Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:19Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:20Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:21Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T09:48:22Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:23Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:24Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:25Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:26Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:27Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:28Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:29Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:30Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T09:48:31Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:32Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:33Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:34Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:35Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:36Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:37Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:38Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:39Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 200,
+  "zaman": "2026-11-02T09:48:40Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:41Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:42Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:43Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:44Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:45Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:46Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:47Z"
+ },
+ {
+  "yontem": "POST",
+  "yol": "/v2/shipping-rates",
+  "http": 400,
+  "zaman": "2026-11-02T09:48:48Z"
  }
 ]

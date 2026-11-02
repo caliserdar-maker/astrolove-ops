@@ -48,3 +48,4 @@ KARGO plani: 216 varyant x ulke (x2: v1 + v2)
 [kargo 216/216 %100] gecen 429s kalan ~0s | son: 901/23137/AU v1 200 v2 200
 ISTEK toplam 560 | GET 128 | POST 432 (yollar: ['/shipping/rates', '/v2/shipping-rates']) | sure 520s
 RAPOR urun 8 | varyant satiri 24 | kargo satiri 216
+RAPOR urun 8 | varyant satiri 32 | kargo satiri 288

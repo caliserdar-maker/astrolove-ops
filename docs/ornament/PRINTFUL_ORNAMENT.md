@@ -1,6 +1,6 @@
 # Printful ornament urunleri (salt okuma)
 
-Kaynak: Printful API v1 + v2, ham yanitlar `ham/`. Son istek 2026-11-02T08:53:46Z. Istek 560: GET 128, POST 432 (yalniz /shipping/rates, /v2/shipping-rates).
+Kaynak: Printful API v1 + v2, ham yanitlar `ham/`. Son istek 2026-11-02T09:48:48Z. Istek 642: GET 138, POST 504 (yalniz /shipping/rates, /v2/shipping-rates).
 
 Notlar:
 - Fiyat USD (kargo haric): WW = v2 `prices?currency=USD&selling_region_name=worldwide`; NA = north_america. v1 `price` NA ile ayni (CSV `fiyat_usd_v1`). EUR CSV'de (`fiyat_eur_v2`, `fiyat_eur_v2_europe`). Arka yuz ek ucreti ayri yazildi.
@@ -10,6 +10,7 @@ Notlar:
 - Satilabildigi bolge = 9 ulke kargo sorgusunda ucret donen ulkeler; donmeyende API hata mesaji. Gumruk = v2 `customs_fees_possible: true` (alici gumruk/vergi odeyebilir).
 - Kargo: 1 adet, ornek adres (merkez posta kodu), USD, en ucuz secenek (hep STANDARD 'Flat Rate'; diger secenek CO2 offset, daha pahali). Takip: yanitlarda takip alani yok -> API vermedi.
 - Gun = API `minDeliveryDays`-`maxDeliveryDays`; is/takvim gunu oldugunu API belirtmiyor. Tarihler KARGO.csv'de.
+- 1664 ve 1729 v1'de yok: kargolari yalniz v2 /v2/shipping-rates ile sorgulandi (ek kosu); KARGO.csv `kargo_kaynagi=v2`, `http_v1=sorgulanmadi`. Gun = v2 `min_delivery_days`-`max_delivery_days`.
 
 ## 1. Urunler
 
@@ -21,8 +22,8 @@ Notlar:
 | 881 Ceramic Ornament | Circle: Circle-shaped diameter: 2.76″ (7 cm)<br>Heart: Heart-shaped size: 3.11″ × 2.9″ (7.9 cm × 7.37 cm)<br>Snowflake: Snowflake-shape size: 2.17″ × 3″ (5.5 cm × 7.62 cm)<br>Star: Star-shaped size: 3.19″ × 2.68″ (8.1 cm × 6.8 cm) | tek yuz | WW 6.15-6.34 (Circle 6.34; Heart 6.15; Snowflake 6.15; Star 6.15) / NA 6.15-6.34 (Circle 6.34; Heart 6.15; Snowflake 6.15; Star 6.15) | LV (hedef US, CA, GB, DE, FR, IT, ES, NL, AU) | US, CA, GB, DE, FR, IT, ES, NL, AU; gumruk olasi: CA, GB, DE, FR, IT, ES, NL | front=954x954 (300 dpi) / front=3.18x3.18<br>front=978x972 (300 dpi) / front=3.26x3.24<br>front=865x960 (300 dpi) / front=2.88x3.2<br>front=1043x996 (300 dpi) / front=3.48x3.32 |
 | 900 Ceramic Ornaments, 2-Side Print | Circle: Circle-shaped diameter: 2.99″ (7.6 cm)<br>Heart: Heart-shaped size: 2.91″ × 2.68″ (7.4 cm × 6.8 cm)<br>Snowflake: Snowflake-shaped size: 2.17″ × 2.99″ (5.5 cm × 7.6 cm)<br>Star: Star-shaped size: 3.35″ × 2.68″ (8.5 cm × 6.8 cm) | cift yuz: ayni tasarim, tek dosya | WW 7.73 / NA 7.73 | LV (hedef US, CA, GB, DE, FR, IT, ES, NL, AU) | US, CA, GB, DE, FR, IT, ES, NL, AU; gumruk olasi: CA, GB, DE, FR, IT, ES, NL | front=954x954 (300 dpi) / front=3.18x3.18<br>front=978x972 (300 dpi) / front=3.26x3.24<br>front=865x960 (300 dpi) / front=2.88x3.2<br>front=1043x996 (300 dpi) / front=3.48x3.32 |
 | 901 Metal Christmas Ornament | Bell: Bell-shaped size: 3.31″ × 3.31″ (84 mm × 84 mm)<br>Oval: Oval-shaped size: 2.36″ × 2.99″ (60 mm × 76 mm)<br>Round: Round-shaped diameter: 3.5″ (89 mm)<br>Tree: Tree-shaped size: 3.39″ × 3.94″ (86 mm × 100 mm) | cift yuz: on + arka ayri baski alani | WW 4.61-4.74 (Bell 4.74; Oval 4.61; Round 4.61; Tree 4.61) / NA 4.61-4.74 (Bell 4.74; Oval 4.61; Round 4.61; Tree 4.61); arka yuz ek: WW 0.00 / NA 0.00 | LV (hedef US, CA, GB, DE, FR, IT, ES, NL, AU) | US, CA, GB, DE, FR, IT, ES, NL, AU; gumruk olasi: CA, GB, DE, FR, IT, ES, NL | front=716x722; back=716x722 (200 dpi) / back=3.58x3.61; front=3.58x3.61<br>front=525x650; back=525x650 (200 dpi) / front=2.63x3.25; back=2.63x3.25<br>front=750x750; back=750x750 (200 dpi) / front=3.75x3.75; back=3.75x3.75<br>front=725x839; back=725x839 (200 dpi) / front=3.63x4.2; back=3.63x4.2 |
-| 1664 Glass Ornaments | 1 Piece: Size: 3.5″ (88.9 mm<br>5 Pieces: Size: 3.5″ (88.9 mm | tek yuz | WW 19.00-82.98 (1 Piece 19.00; 5 Pieces 82.98) / NA 19.00-82.98 (1 Piece 19.00; 5 Pieces 82.98) | sorgulanmadi | KARGO SORGULANMADI (betik kargo planini v1 varyantlarindan kurdu; urun v1'de yok, HTTP 404). v2 uygunluk: worldwide:not fulfillable | front=1125x1125 (300 dpi) / front=3.75x3.75 |
-| 1729 Crystal Glass Ornament | Circle + Gold Gift Packaging: Size: 3.5″ (88.9 mm)<br>Circle + White Gift Packaging: Size: 3.5″ (88.9 mm)<br>Circle: Size: 3.5″ (88.9 mm)<br>Heart + Gold Gift Packaging: Size: 3.5″ (88.9 mm)<br>Heart + White Gift Packaging: Size: 3.5″ (88.9 mm)<br>Heart: Size: 3.5″ (88.9 mm) | tek yuz | WW 5.59-7.73 (Circle + Gold Gift Packaging 7.73; Circle + White Gift Packaging 7.73; Circle 5.59; Heart + Gold Gift Packaging 7.73; Heart + White Gift Packaging 7.73; Heart 5.59) / NA 5.59-7.73 (Circle + Gold Gift Packaging 7.73; Circle + White Gift Packaging 7.73; Circle 5.59; Heart + Gold Gift Packaging 7.73; Heart + White Gift Packaging 7.73; Heart 5.59) | sorgulanmadi | KARGO SORGULANMADI (betik kargo planini v1 varyantlarindan kurdu; urun v1'de yok, HTTP 404). v2 uygunluk: worldwide:not fulfillable | front=900x900 (300 dpi) / front=3.0x3.0 |
+| 1664 Glass Ornaments | 1 Piece: Size: 3.5″ (88.9 mm<br>5 Pieces: Size: 3.5″ (88.9 mm | tek yuz | WW 19.00-82.98 (1 Piece 19.00; 5 Pieces 82.98) / NA 19.00-82.98 (1 Piece 19.00; 5 Pieces 82.98) | LV (hedef US) | US (eksik ulke: tablo 2); v2 bolge uygunlugu: australia: HTTP 404 Not Found, canada: HTTP 404 Not Found, europe: HTTP 404 Not Found, north_america:not fulfillable, uk: HTTP 404 Not Found | front=1125x1125 (300 dpi) / front=3.75x3.75 |
+| 1729 Crystal Glass Ornament | Circle + Gold Gift Packaging: Size: 3.5″ (88.9 mm)<br>Circle + White Gift Packaging: Size: 3.5″ (88.9 mm)<br>Circle: Size: 3.5″ (88.9 mm)<br>Heart + Gold Gift Packaging: Size: 3.5″ (88.9 mm)<br>Heart + White Gift Packaging: Size: 3.5″ (88.9 mm)<br>Heart: Size: 3.5″ (88.9 mm) | tek yuz | WW 5.59-7.73 (Circle + Gold Gift Packaging 7.73; Circle + White Gift Packaging 7.73; Circle 5.59; Heart + Gold Gift Packaging 7.73; Heart + White Gift Packaging 7.73; Heart 5.59) / NA 5.59-7.73 (Circle + Gold Gift Packaging 7.73; Circle + White Gift Packaging 7.73; Circle 5.59; Heart + Gold Gift Packaging 7.73; Heart + White Gift Packaging 7.73; Heart 5.59) | LV (hedef US) | US (eksik ulke: tablo 2); v2 bolge uygunlugu: australia: HTTP 404 Not Found, canada: HTTP 404 Not Found, europe: HTTP 404 Not Found, north_america:not fulfillable, uk: HTTP 404 Not Found | front=900x900 (300 dpi) / front=3.0x3.0 |
 
 ## 2. Kargo ucreti (USD, 1 adet, en ucuz yontem). Hucre: ucret (yontem id, min-max gun). † = v2 customs_fees_possible true (alici gumruk/vergi odeyebilir)
 
@@ -34,12 +35,21 @@ Notlar:
 | 881 Ceramic Ornament | 5.49 (STANDARD, 4-6 g) | 9.89 (STANDARD, 12-18 g) † | 9.89 (STANDARD, 4-12 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 12-18 g) |
 | 900 Ceramic Ornaments, 2-Side Print | 5.89 (STANDARD, 4-6 g) | 9.89 (STANDARD, 12-18 g) † | 9.89 (STANDARD, 4-12 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 12-18 g) |
 | 901 Metal Christmas Ornament | 5.89 (STANDARD, 4-6 g) | 9.89 (STANDARD, 12-18 g) † | 9.89 (STANDARD, 4-12 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 6-15 g) † | 9.89 (STANDARD, 12-18 g) |
-| 1664 Glass Ornaments | sorgulanmadi | sorgulanmadi | sorgulanmadi | sorgulanmadi | sorgulanmadi | sorgulanmadi | sorgulanmadi | sorgulanmadi | sorgulanmadi |
-| 1729 Crystal Glass Ornament | sorgulanmadi | sorgulanmadi | sorgulanmadi | sorgulanmadi | sorgulanmadi | sorgulanmadi | sorgulanmadi | sorgulanmadi | sorgulanmadi |
+| 1664 Glass Ornaments | 5.89-7.29 (STANDARD, 4-6 g) | GONDERILMEZ (API: Unavailable variant id used) | GONDERILMEZ (API: Unavailable variant id used) | GONDERILMEZ (API: Unavailable variant id used) | GONDERILMEZ (API: Unavailable variant id used) | GONDERILMEZ (API: Unavailable variant id used) | GONDERILMEZ (API: Unavailable variant id used) | GONDERILMEZ (API: Unavailable variant id used) | GONDERILMEZ (API: Unavailable variant id used) |
+| 1729 Crystal Glass Ornament | 5.89 (STANDARD, 4-6 g) | GONDERILMEZ (API: Unavailable variant id used) | GONDERILMEZ (API: Unavailable variant id used) | GONDERILMEZ (API: Unavailable variant id used) | GONDERILMEZ (API: Unavailable variant id used) | GONDERILMEZ (API: Unavailable variant id used) | GONDERILMEZ (API: Unavailable variant id used) | GONDERILMEZ (API: Unavailable variant id used) | GONDERILMEZ (API: Unavailable variant id used) |
 
 Yontem adlari (v1 `name`, tahmini teslim tarihi kismi atildi): STANDARD = Flat Rate
 
-## 2b. Aciklama metni ile API verisi arasindaki celiskiler (bagimsiz inceleme, ham dosyaya dayali)
+## 2b. Gumruk isareti (customs_fees_possible) neden LV cikisli AB gonderimlerinde acik?
+
+Bilinmiyor. Printful resmi dokumaninda bu alanin ne zaman `true` oldugunu aciklayan bir metin bulunamadi (developers.printful.com ve support.printful.com bu oturumun ag izninde degildi; web aramasinda resmi aciklama cikmadi).
+Bulunan resmi metinler alanin mantigini aciklamiyor, yalniz genel kural veriyor:
+- Printful Help Center, 'Who pays the customs duties & taxes?': gumruk ucretini son alici oder, Printful tahsil etmez. https://help.printful.com/hc/en-us/articles/360014066159-Who-pays-the-customs-duties-taxes
+- printful.com/shipping: siparis teslim bolgesinden farkli bolgedeki tesisten cikarsa teslimde gumruk/islem ucreti olabilir. https://www.printful.com/shipping
+- Printful 2017 basin bulteni (Riga tesisi acilisi): AB uye ulkesine giden siparislere gumruk vergisi alinmaz. https://www.printful.com/news/printful-invests-1-million-to-open-its-first-fulfillment-center-in-europe (eski metin; API'nin 2026 isaretiyle celisiyor).
+Ham veride gorulen: LV cikisli 881/900/901 icin CA, GB, DE, FR, IT, ES, NL `true`, US ve AU `false`; IT cikisli 634 icin AB ulkeleri `false`, US cikisli 634 -> CA `true`. Ayni AB icinde cikis ulkesine gore fark var; nedeni API'de yok. Kesin yanit icin Printful destegine sorulmali.
+
+## 2c. Aciklama metni ile API verisi arasindaki celiskiler (bagimsiz inceleme, ham dosyaya dayali)
 
 - 634: v1 `price` 8.37 ve v1 back `additional_price` 1.49 = v2 north_america fiyati; v2 worldwide 10.25 ve back 1.50 (urun_634_v2_prices_USD*.json). Diger urunlerde v1 = v2 worldwide.
 - 634: aciklamada hem 'Magnetic back' hem 'Two-sided print' var; API'de back placement var (urun_634_v2.json).
@@ -50,7 +60,7 @@ Yontem adlari (v1 `name`, tahmini teslim tarihi kismi atildi): STANDARD = Flat R
 - 900: aciklama 'bundles of 3, 5, or 10', 901: '3, 5, or 10-unit packs'; API'de ikisinde de yalniz 4 sekil varyanti var, paket varyanti yok (urun_900/901_v2_variants.json).
 - 1664: '5 Pieces' varyanti 5'li paket (tek tasarim): 82.98 USD worldwide; tekli 19.00. Baski alani 3.75x3.75 in, urun 3.5″.
 - 1729: aciklama 'Gift packaging included'; paketsiz varyantlar (Circle, Heart) 5.59, paketliler 7.73 USD. Printfile 900 px = 3.0 in, urun 3.5″.
-- 1664 ve 1729: v2 availability worldwide 'not fulfillable' (793/794 yalniz ABD urunleriyle ayni deger; 881/900/901 'in stock'). Bolge bazli availability sorgulanmadi; hangi bolgede uretilebildigi bilinmiyor.
+- 1664 ve 1729: v2 availability worldwide 'not fulfillable' (793/794 yalniz ABD urunleriyle ayni deger; 881/900/901 'in stock'). Bolge bazli availability ve kargo sonucu tablo 1 ve 2'de (ek kosu, yalniz v2).
 
 ## 3. Urun ayrintilari
 
@@ -64,6 +74,7 @@ Yontem adlari (v1 `name`, tahmini teslim tarihi kismi atildi): STANDARD = Flat R
 - kurdele/paket: Comes with a red paper ribbon and a hole to thread it through / Magnetic back
 - mense: Product sourced from Korea | v1 origin_country: API vermedi
 - kisit (aciklama): Important: This product cannot be shipped to South Korea, Hong Kong, Taiwan, Japan, or Singapore. If your shipping address is in these regions, please choose a different product.
+- v2 bolgesel uygunluk (ek kosu): sorgulanmadi
 - tasma payi: API vermedi
 
 | varyant | ad | USD v1 | USD v2 WW | USD v2 NA | EUR v2 WW | EUR v2 europe | v1 bolge | v2 uygunluk | printfile | px | dpi | fill | alan inch |
@@ -104,6 +115,7 @@ Important: This product cannot be shipped to South Korea, Hong Kong, Taiwan, Jap
 - kurdele/paket: Make special occasions even more joyful with lovely acrylic ornaments. Choose from 4 shapes (Rectangle, Scalloped, Circle, and Heart), and get a beautiful ornament with a glossy finish and red ribbon for hanging. / Comes with a red ribbon for hanging
 - mense: Blank product sourced from China | v1 origin_country: USA
 - kisit (aciklama): This product is available in the US only. If your shipping address is outside this region, please choose a different product.
+- v2 bolgesel uygunluk (ek kosu): sorgulanmadi
 - tasma payi: API vermedi
 
 | varyant | ad | USD v1 | USD v2 WW | USD v2 NA | EUR v2 WW | EUR v2 europe | v1 bolge | v2 uygunluk | printfile | px | dpi | fill | alan inch |
@@ -137,6 +149,7 @@ Disclaimers:
 - kurdele/paket: Personalize your festive tree or home with these high-quality metal ornaments. Choose your favorite from 4 charming shapes (Rectangle, Scalloped, Pet Paw, and Tag) or get all of them for creative variety. Includes a red ribbon for easy hanging. / Comes with a red ribbon and a hole to thread it through
 - mense: Blank product sourced from China | v1 origin_country: USA
 - kisit (aciklama): Disclaimer: This product is available in the US only. If your shipping address is outside this region, please choose a different product.
+- v2 bolgesel uygunluk (ek kosu): sorgulanmadi
 - tasma payi: API vermedi
 
 | varyant | ad | USD v1 | USD v2 WW | USD v2 NA | EUR v2 WW | EUR v2 europe | v1 bolge | v2 uygunluk | printfile | px | dpi | fill | alan inch |
@@ -170,6 +183,7 @@ Disclaimer: This product is available in the US only. If your shipping address i
 - kurdele/paket: Bring charm to your home with a glossy ceramic ornament available in heart, star, snowflake, or circle shapes. With a smooth finish and elegant gold-toned string, it stands out in any festive setting. / Gold-colored string included
 - mense: Blank product sourced from China | v1 origin_country: China
 - kisit (aciklama): API vermedi
+- v2 bolgesel uygunluk (ek kosu): sorgulanmadi
 - tasma payi: API vermedi
 
 | varyant | ad | USD v1 | USD v2 WW | USD v2 NA | EUR v2 WW | EUR v2 europe | v1 bolge | v2 uygunluk | printfile | px | dpi | fill | alan inch |
@@ -206,6 +220,7 @@ Bring charm to your home with a glossy ceramic ornament available in heart, star
 - kurdele/paket: Shiny from all angles, these two-sided ornaments bring double the cheer. Great for personal gifting or maxing your seasonal decor, they come in four festive shapes with a high-gloss finish. Available solo or in three, five, or ten-unit packs. / Gold-colored string included / Available individually or in bundles of 3, 5, or 10
 - mense: Blank product sourced from China | v1 origin_country: China
 - kisit (aciklama): API vermedi
+- v2 bolgesel uygunluk (ek kosu): sorgulanmadi
 - tasma payi: API vermedi
 
 | varyant | ad | USD v1 | USD v2 WW | USD v2 NA | EUR v2 WW | EUR v2 europe | v1 bolge | v2 uygunluk | printfile | px | dpi | fill | alan inch |
@@ -243,6 +258,7 @@ Shiny from all angles, these two-sided ornaments bring double the cheer. Great f
 - kurdele/paket: Shiny from all angles—these two-sided ornaments bring double the cheer. Great for personal gifting or maxing your seasonal decor, they come in 4 festive shapes with a high-gloss finish. Available solo or in 3, 5, or 10-unit packs. / Red ribbon included
 - mense: Blank product sourced from China | v1 origin_country: USA
 - kisit (aciklama): API vermedi
+- v2 bolgesel uygunluk (ek kosu): sorgulanmadi
 - tasma payi: API vermedi
 
 | varyant | ad | USD v1 | USD v2 WW | USD v2 NA | EUR v2 WW | EUR v2 europe | v1 bolge | v2 uygunluk | printfile | px | dpi | fill | alan inch |
@@ -280,6 +296,7 @@ Disclaimer: The displayed price is for a single item.
 - kurdele/paket: These classic glass ornaments are made for showcasing your artwork and adding a personalized touch to any decoration. Customize them with your design and create beautiful ornaments for gifts, seasonal decorating, or your online store. Each ornament features beveled edges, a one-sided print, and a gold ribbon for hanging. / Available as a single ornament or in bundles of 5 / One design for the whole bundle / Gold ribbon for hanging
 - mense: API vermedi | v1 origin_country: API vermedi
 - kisit (aciklama): API vermedi
+- v2 bolgesel uygunluk (ek kosu): north_america:not fulfillable; australia: HTTP 404 Not Found; canada: HTTP 404 Not Found; europe: HTTP 404 Not Found; uk: HTTP 404 Not Found
 - tasma payi: API vermedi
 
 | varyant | ad | USD v1 | USD v2 WW | USD v2 NA | EUR v2 WW | EUR v2 europe | v1 bolge | v2 uygunluk | printfile | px | dpi | fill | alan inch |
@@ -311,6 +328,7 @@ These classic glass ornaments are made for showcasing your artwork and adding a 
 - kurdele/paket: These classic crystal glass ornaments are made for showcasing your artwork and adding a personalized touch to any decoration. Customize them with your design and create beautiful ornaments for gifts, seasonal decorating, or your online store. Each ornament features beveled edges, a one-sided print, a red ribbon for hanging, and comes in gift-ready packaging. / Available as a single ornament or in bundles of 5 / One design for the whole bundle / Red ribbon for hanging / Gift packaging included
 - mense: API vermedi | v1 origin_country: API vermedi
 - kisit (aciklama): API vermedi
+- v2 bolgesel uygunluk (ek kosu): north_america:not fulfillable; australia: HTTP 404 Not Found; canada: HTTP 404 Not Found; europe: HTTP 404 Not Found; uk: HTTP 404 Not Found
 - tasma payi: API vermedi
 
 | varyant | ad | USD v1 | USD v2 WW | USD v2 NA | EUR v2 WW | EUR v2 europe | v1 bolge | v2 uygunluk | printfile | px | dpi | fill | alan inch |
