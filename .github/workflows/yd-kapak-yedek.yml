@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Girdi kapisi
         env: {EN: "${{ inputs.envanter }}"}
-        run: '[[ "$EN" =~ ^YD_ENVANTER_[0-9]{8}(_[0-9]{6})?$ ]] || { echo "::error::girdi"; exit 1; }'
+        run: '[[ "$EN" =~ ^YD_ENVANTER_[A-Za-z0-9_]+$ ]] || { echo "::error::girdi"; exit 1; }'
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
