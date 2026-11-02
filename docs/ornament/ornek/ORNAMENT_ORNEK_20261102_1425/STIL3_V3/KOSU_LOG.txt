@@ -1,0 +1,6 @@
+HALKALI {"yazi_olcek": 1.0, "sembol_px": [398, 377], "sembol_V2_kazanc_yuzde": 5.3, "yasak_piksel": {"guvenli_disi": 0, "delik": 0, "centik": 0, "ust_cizgi": 0, "tuval_disi": 0}, "cakisma": [], "guvenli_daireye_pay": 3.4}
+HALKA {"yatay_yari": 319.0, "dikey_yari": 323.3, "oran": 0.9868, "dis_genislik_px": 642, "dis_yukseklik_px": 546, "dis_genislik_V2_kazanc_yuzde": 5.6, "govde_min": 4.04, "govde_max": 9.57, "uc": {"sag": [[2.8, 0.36], [8.4, 0.77], [14.0, 1.38], [19.6, 1.98], [25.2, 2.56], [30.8, 3.16], [36.4, 3.61], [42.0, 4.2], [47.6, 4.48], [53.2, 4.43], [58.9, 4.71]], "sol": [[2.8, 0.36], [8.4, 0.77], [14.0, 1.38], [19.6, 1.98], [25.2, 2.56], [30.8, 3.16], [36.4, 3.61], [42.0, 4.2], [47.6, 4.48], [53.2, 4.43], [58.9, 4.71]]}}
+HALKALI stil {"RUBY_GOLD": [1.0, 4.51], "SAPPHIRE_GOLD": [1.0, 5.03], "EMERALD_GOLD": [1.0, 4.55]}
+HALKASIZ {"yazi_olcek": 1.0, "sembol_px": [461, 438], "sembol_V2_kazanc_yuzde": 22.0, "yasak_piksel": {"guvenli_disi": 0, "delik": 0, "centik": 0, "ust_cizgi": 0, "tuval_disi": 0}, "cakisma": [], "guvenli_daireye_pay": 3.4}
+HALKASIZ stil {"RUBY_GOLD": [1.0, 4.74], "SAPPHIRE_GOLD": [1.0, 5.34], "EMERALD_GOLD": [1.0, 4.78]}
+KAPI {"yasak_0": true, "cakisma_0": true, "kontrast": true, "sonsuz": true, "halka_govde": true, "uc": true, "sembol_B_15": true} PASS
