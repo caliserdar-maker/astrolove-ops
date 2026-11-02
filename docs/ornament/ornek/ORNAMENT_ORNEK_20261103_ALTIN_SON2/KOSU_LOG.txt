@@ -1,0 +1,9 @@
+TABLO {"tb": 32, "ab": 16, "yalniz_t": false, "aci_etkisi_luma_std": 37.17, "kutu_ici_gurultu_luma_std": 9.27, "oran": 4.011, "bos_kutu": 16, "kaynak_piksel": 374527}
+RUBY ortanca 4.51 kati 2.55 artis 1.03 yasak 0 leke 0 dhue 0.13 B>=R 0.0 duzgunluk oran max 1.0 {'tarih': 0.569, 'isim1': 0.55, 'isim2': 0.557, 'sonsuz': 0.732, 'kucuk_sol': 0.722, 'kucuk_sag': 0.694, 'halka': 0.763, 'sembol': 1.0} halka 0.796
+SAPPHIRE ortanca 4.89 kati 2.88 artis 1.0 yasak 0 leke 0 dhue 0.12 B>=R 0.0 duzgunluk oran max 1.0 {'tarih': 0.553, 'isim1': 0.536, 'isim2': 0.544, 'sonsuz': 0.713, 'kucuk_sol': 0.704, 'kucuk_sag': 0.672, 'halka': 0.769, 'sembol': 1.0} halka 0.795
+EMERALD ortanca 4.54 kati 2.48 artis 1.0 yasak 0 leke 0 dhue 0.12 B>=R 0.0 duzgunluk oran max 1.0 {'tarih': 0.553, 'isim1': 0.535, 'isim2': 0.543, 'sonsuz': 0.712, 'kucuk_sol': 0.703, 'kucuk_sag': 0.671, 'halka': 0.767, 'sembol': 1.0} halka 0.796
+KAPI {"kontrast_ortanca": true, "goruntu_yasak_0": true, "leke_a_0": true, "leke_a_kaynak_0": true, "renk_sadakati": true, "ton_lab_kaynak_araliginda": true, "yerlesim_ayni": true, "duzgunluk": true, "halka_sureklilik": true, "artis_yalniz_ruby": true} PASS
+
+real	0m35.054s
+user	0m24.827s
+sys	0m11.402s
