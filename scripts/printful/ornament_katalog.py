@@ -96,20 +96,25 @@ def oku(ham):
     print(f"GET /categories -> {k}", flush=True)
     sayfalar, off = [], 0
     while off < 5000:
-        yol = f"/v2/catalog-products?limit=100&offset={off}"
+        yol = f"/v2/catalog-products?limit=100&offset={off}&selling_region_name=worldwide"
         k, j = istek(yol, token)
         sayfalar.append(sar("GET", yol, None, k, j))
-        data = (j.get("data") if isinstance(j, dict) else None) or []
+        data = j.get("data") if isinstance(j, dict) else None
+        data = data if isinstance(data, list) else []
         if k != 200 or not data:
             break
         off += len(data)
-        top = ((j.get("paging") or {}).get("total")) if isinstance(j, dict) else None
+        top = (j.get("paging") or {}).get("total") if isinstance(j.get("paging"), dict) else None
         if top is None or off >= int(top):
             break
     yaz(ham / "v2_catalog_products.json", {"sayfalar": sayfalar})
     print(f"GET /v2/catalog-products: {len(sayfalar)} sayfa, {off} urun", flush=True)
 
-    aday = adaylar(ham)
+    try:
+        aday = adaylar(ham)
+    except Exception as e:  # ayristirma hatasi ham toplamayi durdurmaz
+        print(f"UYARI aday ayristirma hatasi {type(e).__name__}: {e}; yalniz gorev listesi", flush=True)
+        aday = {str(z): {"neden": ["gorev_listesi"], "kargo": True} for z in ZORUNLU}
     yaz(ham / "_adaylar.json", aday)
     print("ADAY " + json.dumps({k_: v["neden"] for k_, v in aday.items()}, ensure_ascii=False), flush=True)
 
@@ -117,13 +122,22 @@ def oku(ham):
         for ad, yol in (("v1", f"/products/{pid}"), ("v1_sizes", f"/products/{pid}/sizes?unit=inches,cm"),
                         ("printfiles", f"/mockup-generator/printfiles/{pid}"), ("v2", f"/v2/catalog-products/{pid}"),
                         ("v2_variants", f"/v2/catalog-products/{pid}/catalog-variants?limit=100"),
-                        ("v2_prices_USD", f"/v2/catalog-products/{pid}/prices?currency=USD"),
-                        ("v2_prices_EUR", f"/v2/catalog-products/{pid}/prices?currency=EUR"),
+                        ("v2_prices_USD", f"/v2/catalog-products/{pid}/prices?currency=USD&selling_region_name=worldwide"),
+                        ("v2_prices_EUR", f"/v2/catalog-products/{pid}/prices?currency=EUR&selling_region_name=worldwide"),
+                        ("v2_prices_EUR_europe", f"/v2/catalog-products/{pid}/prices?currency=EUR&selling_region_name=europe"),
+                        ("v2_prices_USD_north_america",
+                         f"/v2/catalog-products/{pid}/prices?currency=USD&selling_region_name=north_america"),
                         ("v2_availability", f"/v2/catalog-products/{pid}/availability?limit=100"),
                         ("v2_sizes", f"/v2/catalog-products/{pid}/sizes"),
                         ("v2_mockup_templates", f"/v2/catalog-products/{pid}/mockup-templates?limit=100")):
             k, j = istek(yol, token)
+            if k == 400 and "selling region" in json.dumps(j).lower() and "selling_region_name" not in yol:
+                yaz(ham / f"urun_{pid}_{ad}_bolgesiz.json", sar("GET", yol, None, k, j))
+                yol += ("&" if "?" in yol else "?") + "selling_region_name=worldwide"
+                k, j = istek(yol, token)
             yaz(ham / f"urun_{pid}_{ad}.json", sar("GET", yol, None, k, j))
+            if k != 200:
+                print(f"  {yol} -> HTTP {k} {json.dumps(j, ensure_ascii=False)[:200]}", flush=True)
         print(f"[urun {i}/{len(aday)}] {pid} detay okundu | gecen {int(time.time() - t0)}s", flush=True)
 
     # kargo plani: aciklama-disi eslesen urunlerin tum varyantlari
@@ -132,9 +146,11 @@ def oku(ham):
         if not aday[pid]["kargo"]:
             continue
         v1 = json.loads((ham / f"urun_{pid}_v1.json").read_text(encoding="utf-8"))
-        for v in ((v1.get("yanit") or {}).get("result") or {}).get("variants") or []:
-            for ulke in ULKELER:
-                plan.append((pid, v.get("id"), ulke))
+        r1 = (v1.get("yanit") or {}).get("result")
+        for v in (r1.get("variants") or []) if isinstance(r1, dict) else []:
+            if isinstance(v, dict) and v.get("id") is not None:
+                for ulke in ULKELER:
+                    plan.append((pid, v.get("id"), ulke))
     print(f"KARGO plani: {len(plan)} varyant x ulke (x2: v1 + v2)", flush=True)
     k1, k2, t1 = [], [], time.time()
     for n, (pid, vid, ulke) in enumerate(plan, 1):
@@ -159,14 +175,23 @@ def oku(ham):
     return 0 if (ham / "v1_products.json").exists() else 1
 
 
+def liste(x):
+    return [e for e in x if isinstance(e, dict)] if isinstance(x, list) else []
+
+
+def sozluk(x):
+    return x if isinstance(x, dict) else {}
+
+
 def adaylar(ham):
     def oku_j(ad):
         p = ham / ad
         return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
-    v1 = ((oku_j("v1_products.json").get("yanit") or {}).get("result")) or []
-    kat = (((oku_j("v1_categories.json").get("yanit") or {}).get("result")) or {}).get("categories") or []
+    v1 = liste((oku_j("v1_products.json").get("yanit") or {}).get("result"))
+    kat = (oku_j("v1_categories.json").get("yanit") or {}).get("result")
+    kat = liste(kat.get("categories") if isinstance(kat, dict) else None)
     katid = {c.get("id") for c in kat if ANAHTAR.search(str(c.get("title") or ""))}
-    v2 = [p for s in oku_j("v2_catalog_products.json").get("sayfalar") or [] for p in ((s.get("yanit") or {}).get("data") or [])]
+    v2 = [p for s in oku_j("v2_catalog_products.json").get("sayfalar") or [] for p in liste((s.get("yanit") or {}).get("data"))]
     a = {}
 
     def ekle(pid, neden):
@@ -175,9 +200,9 @@ def adaylar(ham):
             a[str(pid)]["neden"].append(neden)
         if not neden.endswith("description"):
             a[str(pid)]["kargo"] = True
-    for kaynak, liste, alanlar in (("v1", v1, ("title", "type_name", "model", "type", "description")),
-                                   ("v2", v2, ("name", "type", "model", "description"))):
-        for p in liste:
+    for kaynak, urun_liste, alanlar in (("v1", v1, ("title", "type_name", "model", "type", "description")),
+                                        ("v2", v2, ("name", "type", "model", "description"))):
+        for p in urun_liste:
             for al in alanlar:
                 if ANAHTAR.search(str(p.get(al) or "")):
                     ekle(p.get("id"), f"{kaynak}.{al}")
@@ -197,7 +222,8 @@ def jy(ham, ad):
 
 
 def yanit(w):
-    return (w or {}).get("yanit") or {}
+    y = (w or {}).get("yanit")
+    return y if isinstance(y, dict) else {}
 
 
 def http(w):
@@ -243,45 +269,45 @@ def en_ucuz(secenekler):
 def urun_veri(ham, pid):
     U = {ad: jy(ham, f"urun_{pid}_{ad}.json") for ad in ("v1", "v1_sizes", "printfiles", "v2", "v2_variants", "v2_prices_USD",
                                                          "v2_prices_EUR", "v2_availability", "v2_sizes", "v2_mockup_templates")}
-    r1 = yanit(U["v1"]).get("result") or {}
-    U["p"] = r1.get("product") or {}
-    U["vs"] = r1.get("variants") or []
-    U["p2"] = yanit(U["v2"]).get("data") or {}
-    pf = yanit(U["printfiles"]).get("result") or {}
-    U["pf_id"] = {x.get("printfile_id"): x for x in pf.get("printfiles") or []}
-    U["pf_var"] = {x.get("variant_id"): x.get("placements") or {} for x in pf.get("variant_printfiles") or []}
-    U["pf_yer"] = pf.get("available_placements") or {}
+    r1 = sozluk(yanit(U["v1"]).get("result"))
+    U["p"] = sozluk(r1.get("product"))
+    U["vs"] = liste(r1.get("variants"))
+    U["p2"] = sozluk(yanit(U["v2"]).get("data"))
+    pf = sozluk(yanit(U["printfiles"]).get("result"))
+    U["pf_id"] = {x.get("printfile_id"): x for x in liste(pf.get("printfiles"))}
+    U["pf_var"] = {x.get("variant_id"): sozluk(x.get("placements")) for x in liste(pf.get("variant_printfiles"))}
+    U["pf_yer"] = sozluk(pf.get("available_placements"))
     # v2 fiyat: variants[].techniques[].price ; urun placements[].price
     U["fiyat2"] = {}
     U["yer_fiyat2"] = {}
-    for cur in ("USD", "EUR"):
-        d = yanit(U[f"v2_prices_{cur}"]).get("data") or {}
-        for v in d.get("variants") or []:
-            for t in v.get("techniques") or []:
+    for cur in ("USD", "EUR", "EUR_europe", "USD_north_america"):
+        d = sozluk(yanit(jy(ham, f"urun_{pid}_v2_prices_{cur}.json")).get("data"))
+        for v in liste(d.get("variants")):
+            for t in liste(v.get("techniques")):
                 U["fiyat2"].setdefault((v.get("id"), cur), []).append((t.get("technique_key") or t.get("technique_display_name"),
                                                                      t.get("price"), t.get("discounted_price")))
-        for pl in (d.get("product") or {}).get("placements") or []:
+        for pl in liste(sozluk(d.get("product")).get("placements")):
             U["yer_fiyat2"].setdefault(cur, []).append(pl)
         U[f"para2_{cur}"] = d.get("currency")
     U["uyg2"] = {}
-    for v in yanit(U["v2_availability"]).get("data") or []:
-        for t in v.get("techniques") or []:
-            for sr in t.get("selling_regions") or []:
+    for v in liste(yanit(U["v2_availability"]).get("data")):
+        for t in liste(v.get("techniques")):
+            for sr in liste(t.get("selling_regions")):
                 U["uyg2"].setdefault(v.get("catalog_variant_id"), {})[f"{sr.get('name')}"] = sr.get("availability")
     return U
 
 
 def bolgeler_v1(v):
-    durum = v.get("availability_status") or []
+    durum = liste(v.get("availability_status"))
     tum = [f"{x.get('region')}:{x.get('status')}" for x in durum]
     sat = sorted({x.get("region") for x in durum if x.get("status") in ("in_stock", "stocked_on_demand")})
     return tum, sat
 
 
 def yuz_bilgi(U):
-    yer = list(U["pf_yer"].keys()) or [p.get("placement") for p in U["p2"].get("placements") or []]
+    yer = list(U["pf_yer"].keys()) or [p.get("placement") for p in liste(U["p2"].get("placements"))]
     yer = [y for y in yer if y]
-    ek = [f"{f.get('id') or f.get('type')}:{f.get('additional_price')}" for f in U["p"].get("files") or []
+    ek = [f"{f.get('id') or f.get('type')}:{f.get('additional_price')}" for f in liste(U["p"].get("files"))
           if f.get("type") not in ("preview", "mockup")]
     if not yer:
         return YOK, ek
@@ -313,8 +339,8 @@ def rapor(cikti):
         yuz, ek = yuz_bilgi(U)
         ac = p.get("description") or U["p2"].get("description") or ""
         tasma = aciklama_satir(ac, r"bleed")
-        tek = [t.get("display_name") or t.get("key") for t in p.get("techniques") or []]
-        tek2 = [t.get("display_name") or t.get("key") for t in U["p2"].get("techniques") or []]
+        tek = [t.get("display_name") or t.get("key") for t in liste(p.get("techniques"))]
+        tek2 = [t.get("display_name") or t.get("key") for t in liste(U["p2"].get("techniques"))]
         uru = {"id": pid, "ad": p.get("title") or U["p2"].get("name") or YOK, "neden": aday[pid]["neden"],
                "http_v1": http(U["v1"]), "http_v2": http(U["v2"]), "tur": p.get("type_name") or YOK,
                "model": p.get("model") or YOK, "marka": p.get("brand") or YOK, "durdu": p.get("is_discontinued"),
@@ -323,11 +349,11 @@ def rapor(cikti):
                "varyant": [], "kargo": {}, "cikis": {}, "U": U, "kargo_var": aday[pid]["kargo"]}
         for ad in ("v1_sizes", "v2_sizes"):
             r = yanit(U[ad]).get("result") or yanit(U[ad]).get("data") or {}
-            tabs = r.get("size_tables") if isinstance(r, dict) else [t for x in r for t in (x.get("size_tables") or [])]
-            for t in tabs or []:
-                for m in t.get("measurements") or []:
+            tabs = liste(r.get("size_tables")) if isinstance(r, dict) else [t for x in liste(r) for t in liste(x.get("size_tables"))]
+            for t in tabs:
+                for m in liste(t.get("measurements")):
                     deg = "; ".join(f"{x.get('size')}: {x.get('value') if x.get('value') is not None else str(x.get('min_value')) + '-' + str(x.get('max_value'))}"
-                                    for x in m.get("values") or [])
+                                    for x in liste(m.get("values")))
                     uru["olcu_tablo"].append(f"{ad} {t.get('type')} | {m.get('type_label')} ({m.get('unit') or t.get('unit')}): {deg}")
         for v in vs:
             vid = v.get("id")
@@ -351,6 +377,9 @@ def rapor(cikti):
                 "fiyat_usd_v1": v.get("price") if v.get("price") is not None else YOK,
                 "fiyat_usd_v2": "; ".join(f"{t}:{pr}" for t, pr, _ in f2u) if f2u else YOK,
                 "fiyat_eur_v2": "; ".join(f"{t}:{pr}" for t, pr, _ in f2e) if f2e else YOK,
+                "fiyat_eur_v2_europe": "; ".join(f"{t}:{pr}" for t, pr, _ in U["fiyat2"].get((vid, "EUR_europe")) or []) or YOK,
+                "fiyat_usd_v2_north_america": "; ".join(
+                    f"{t}:{pr}" for t, pr, _ in U["fiyat2"].get((vid, "USD_north_america")) or []) or YOK,
                 "stok_v1": v.get("in_stock", YOK), "bolge_durum_v1": "; ".join(tum) or YOK,
                 "satilabilir_bolgeler_v1": ", ".join(sat) or YOK,
                 "yalniz_abd": "EVET" if sat == ["US"] else ("hayir" if sat else YOK),
@@ -370,15 +399,15 @@ def rapor(cikti):
                 if x1 is None:
                     sat_[f"kargo_{ulke}_usd"] = "sorgulanmadi" if not uru["kargo_var"] else YOK
                     continue
-                s1 = yanit(x1).get("result") if isinstance(yanit(x1).get("result"), list) else []
-                s2 = yanit(x2).get("data") if isinstance(yanit(x2).get("data"), list) else []
+                s1 = liste(yanit(x1).get("result"))
+                s2 = liste(yanit(x2).get("data"))
                 e = en_ucuz(s1)
                 m2 = None
                 if e:
                     m2 = next((y for y in s2 if y.get("shipping") == e.get("id")), None)
                 m2 = m2 or en_ucuz(s2)
-                dep = sorted({sh.get("departure_country") for sh in (m2 or {}).get("shipments") or [] if sh.get("departure_country")})
-                gum = sorted({str(sh.get("customs_fees_possible")) for sh in (m2 or {}).get("shipments") or []
+                dep = sorted({sh.get("departure_country") for sh in liste((m2 or {}).get("shipments")) if sh.get("departure_country")})
+                gum = sorted({str(sh.get("customs_fees_possible")) for sh in liste((m2 or {}).get("shipments"))
                               if "customs_fees_possible" in sh})
                 takip = anahtar_bul(e, "track") if e else {}
                 takip.update(anahtar_bul(m2, "track") if m2 else {})
@@ -491,6 +520,8 @@ def md(urunler, kargo, ham):
                                                        for pl in U["yer_fiyat2"].get("USD", [])) or YOK),
               f"- v2 placement fiyatlari EUR: " + ("; ".join(f"{pl.get('id') or pl.get('placement')}:{pl.get('price')}"
                                                        for pl in U["yer_fiyat2"].get("EUR", [])) or YOK),
+              f"- v2 bolge fiyati (EUR europe / USD north_america), varyant sirasiyla: "
+              + " | ".join(f"{v['varyant_id']}: {v['fiyat_eur_v2_europe']} / {v['fiyat_usd_v2_north_america']}" for v in u["varyant"]),
               f"- ort. uretim suresi (v1 avg_fulfillment_time): {u['ort_sure'] if u['ort_sure'] is not None else YOK}"
               f" | origin_country (v1): {u['origin'] or YOK}",
               f"- tasma payi: {' / '.join(u['tasma']) or YOK}", ""]

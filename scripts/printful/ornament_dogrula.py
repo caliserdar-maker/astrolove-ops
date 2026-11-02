@@ -12,6 +12,14 @@ from pathlib import Path
 IZINLI_POST = {"/shipping/rates", "/v2/shipping-rates"}
 
 
+def L(x):
+    return [e for e in x if isinstance(e, dict)] if isinstance(x, list) else []
+
+
+def D(x):
+    return x if isinstance(x, dict) else {}
+
+
 def j(p):
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
 
@@ -37,8 +45,7 @@ def main(c):
     K2 = {(str(x["urun"]), str(x["varyant"]), x["ulke"]): x for x in k2}
 
     def ucuz(x):
-        res = ((x or {}).get("yanit") or {}).get("result")
-        res = [r for r in res or [] if r.get("rate") not in (None, "")]
+        res = [r for r in L(D((x or {}).get("yanit")).get("result")) if r.get("rate") not in (None, "")]
         return min(res, key=lambda r: float(r["rate"])) if res else None
 
     rows = list(csv.DictReader(open(c / "PRINTFUL_ORNAMENT.csv", encoding="utf-8")))
@@ -60,13 +67,14 @@ def main(c):
         esit(f"{pid}/{vid} bolgeler", r["satilabilir_bolgeler_v1"], ", ".join(sat) or "API vermedi")
         esit(f"{pid}/{vid} yalniz_abd", r["yalniz_abd"] == "EVET", sat == ["US"])
         # v2 fiyat
-        for cur, kol in (("USD", "fiyat_usd_v2"), ("EUR", "fiyat_eur_v2")):
-            d = ((j(ham / f"urun_{pid}_v2_prices_{cur}.json") or {}).get("yanit") or {}).get("data") or {}
-            vv = next((x for x in d.get("variants") or [] if str(x.get("id")) == vid), None)
+        for cur, kol in (("USD", "fiyat_usd_v2"), ("EUR", "fiyat_eur_v2"), ("EUR_europe", "fiyat_eur_v2_europe"),
+                         ("USD_north_america", "fiyat_usd_v2_north_america")):
+            d = D(D(D(j(ham / f"urun_{pid}_v2_prices_{cur}.json")).get("yanit")).get("data"))
+            vv = next((x for x in L(d.get("variants")) if str(x.get("id")) == vid), None)
             beklenen = "; ".join(f"{t.get('technique_key') or t.get('technique_display_name')}:{t.get('price')}"
-                                 for t in (vv or {}).get("techniques") or []) or "API vermedi"
+                                 for t in L((vv or {}).get("techniques"))) or "API vermedi"
             esit(f"{pid}/{vid} {kol}", r[kol], beklenen)
-            if cur == "EUR" and vv and d.get("currency") not in (None, "EUR"):
+            if cur.startswith("EUR") and vv and d.get("currency") not in (None, "EUR"):
                 hata.append(f"{pid}/{vid}: EUR istegi currency={d.get('currency')}")
         # printfile
         pf = ((j(ham / f"urun_{pid}_printfiles.json") or {}).get("yanit") or {}).get("result") or {}
@@ -103,11 +111,11 @@ def main(c):
                         ("min_gun", "minDeliveryDays"), ("max_gun", "maxDeliveryDays")):
             esit(f"kargo {key} {kol}", r[kol], e.get(al) if e.get(al) is not None else "API vermedi")
         esit(f"kargo {key} para USD", r["para"], "USD")
-        d2 = ((K2.get(key) or {}).get("yanit") or {}).get("data") or []
+        d2 = L(D((K2.get(key) or {}).get("yanit")).get("data"))
         m2 = next((y for y in d2 if y.get("shipping") == e.get("id")), None)
         if m2 is None and d2:
             m2 = min((y for y in d2 if y.get("rate") not in (None, "")), key=lambda y: float(y["rate"]), default=None)
-        dep = sorted({s.get("departure_country") for s in (m2 or {}).get("shipments") or [] if s.get("departure_country")})
+        dep = sorted({s.get("departure_country") for s in L((m2 or {}).get("shipments")) if s.get("departure_country")})
         esit(f"kargo {key} cikis", r["cikis_ulkesi_v2"], ", ".join(dep) or "API vermedi")
         if m2 and r["ucret_v2"] != "API vermedi" and abs(float(r["ucret_v2"]) - float(r["ucret"])) > 0.005:
             hata.append(f"BILGI kargo {key}: v1 {r['ucret']} != v2 {r['ucret_v2']} (ayni yontem)")
