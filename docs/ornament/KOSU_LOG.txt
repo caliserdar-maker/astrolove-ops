@@ -1,0 +1,15 @@
+GET /products -> 200
+GET /categories -> 200
+GET /v2/catalog-products: 1 sayfa, 0 urun
+Traceback (most recent call last):
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/printful/ornament_katalog.py", line 514, in <module>
+    sys.exit(oku(Path(sys.argv[2])) if sys.argv[1] == "oku" else rapor(Path(sys.argv[2])))
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/printful/ornament_katalog.py", line 112, in oku
+    aday = adaylar(ham)
+           ^^^^^^^^^^^^
+  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/printful/ornament_katalog.py", line 182, in adaylar
+    if ANAHTAR.search(str(p.get(al) or "")):
+                          ^^^^^
+AttributeError: 'str' object has no attribute 'get'
+RAPOR urun 0 | varyant satiri 0 | kargo satiri 0

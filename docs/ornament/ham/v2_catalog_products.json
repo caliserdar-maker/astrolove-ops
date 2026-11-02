@@ -1,0 +1,19 @@
+{
+ "sayfalar": [
+  {
+   "istek": {
+    "yontem": "GET",
+    "yol": "/v2/catalog-products?limit=100&offset=0",
+    "govde": null
+   },
+   "http": 400,
+   "yanit": {
+    "data": "Selling region not found",
+    "error": {
+     "reason": "BadRequest",
+     "message": "Selling region not found"
+    }
+   }
+  }
+ ]
+}
