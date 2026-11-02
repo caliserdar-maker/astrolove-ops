@@ -1,0 +1,165 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/881",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product": {
+    "id": 881,
+    "main_category_id": 254,
+    "type": "DECOR",
+    "description": "Bring charm to your home with a glossy ceramic ornament available in heart, star, snowflake, or circle shapes. With a smooth finish and elegant gold-toned string, it stands out in any festive setting.\n\n• 100% ceramic\n• Circle-shaped diameter: 2.76″ (7 cm)\n• Heart-shaped size: 3.11″ × 2.9″ (7.9 cm × 7.37 cm)\n• Star-shaped size: 3.19″ × 2.68″ (8.1 cm × 6.8 cm)\n• Snowflake-shape size: 2.17″ × 3″ (5.5 cm × 7.62 cm)\n• Ornament thickness: 0.125″ (3 mm)\n• Glossy finish\n• White backing\n• Gold-colored string included\n• Blank product sourced from China",
+    "type_name": "Ornament | Ceramic",
+    "title": "Ceramic Ornament",
+    "brand": null,
+    "model": "Ornament | Ceramic",
+    "image": "https://files.cdn.printful.com/o/upload/product-catalog-img/22/22e707f181c416e8430a3ac9d8751779_l",
+    "variant_count": 4,
+    "currency": "USD",
+    "options": [
+     {
+      "id": "license_type",
+      "title": "License type",
+      "type": "multi_select",
+      "values": {
+       "CLC": "Collegiate Licensing Company",
+       "AFFINITY": "Affinity",
+       "BR": "BR",
+       "EX": "EX",
+       "NCAA": "NCAA",
+       "FAN": "Fan",
+       "BCOMPLY": "BrandComply",
+       "TAG": "Tag",
+       "DLH": "DLH",
+       "CORE81": "Core81"
+      },
+      "additional_price": null,
+      "additional_price_breakdown": []
+     }
+    ],
+    "dimensions": null,
+    "is_discontinued": false,
+    "avg_fulfillment_time": null,
+    "techniques": [
+     {
+      "key": "SUBLIMATION",
+      "display_name": "Sublimation",
+      "is_default": true
+     }
+    ],
+    "files": [
+     {
+      "id": "default",
+      "type": "front",
+      "title": "Front print",
+      "additional_price": null,
+      "options": []
+     },
+     {
+      "id": "preview",
+      "type": "mockup",
+      "title": "Mockup",
+      "additional_price": null,
+      "options": []
+     }
+    ],
+    "origin_country": "China"
+   },
+   "variants": [
+    {
+     "id": 22782,
+     "product_id": 881,
+     "name": "Ceramic Ornament (Circle)",
+     "size": "Circle",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/881/22782_1747141509.jpg",
+     "price": "6.34",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22783,
+     "product_id": 881,
+     "name": "Ceramic Ornament (Heart)",
+     "size": "Heart",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/881/22783_1747141509.jpg",
+     "price": "6.15",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22785,
+     "product_id": 881,
+     "name": "Ceramic Ornament (Snowflake)",
+     "size": "Snowflake",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/881/22785_1747141510.jpg",
+     "price": "6.15",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    },
+    {
+     "id": 22784,
+     "product_id": 881,
+     "name": "Ceramic Ornament (Star)",
+     "size": "Star",
+     "color": null,
+     "color_code": null,
+     "color_code2": null,
+     "image": "https://files.cdn.printful.com/products/881/22784_1747141520.jpg",
+     "price": "6.15",
+     "in_stock": true,
+     "availability_regions": {
+      "US": "United States"
+     },
+     "availability_status": [
+      {
+       "region": "US",
+       "status": "in_stock"
+      }
+     ],
+     "material": []
+    }
+   ]
+  },
+  "extra": []
+ }
+}

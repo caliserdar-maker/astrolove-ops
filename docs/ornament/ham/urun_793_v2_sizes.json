@@ -1,0 +1,15 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/793/sizes",
+  "govde": null
+ },
+ "http": 400,
+ "yanit": {
+  "data": "No size guides for product with id: 793",
+  "error": {
+   "reason": "BadRequest",
+   "message": "No size guides for product with id: 793"
+  }
+ }
+}

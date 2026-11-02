@@ -1,0 +1,105 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/793?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 793,
+   "type": "DECOR",
+   "main_category_id": 254,
+   "name": "Acrylic Ornaments",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/16/16b5a6d56334457bb291cc2e4e4eed09_l",
+   "variant_count": 2,
+   "is_discontinued": false,
+   "description": "Make special occasions even more joyful with lovely acrylic ornaments. Choose from 4 shapes (Rectangle, Scalloped, Circle, and Heart), and get a beautiful ornament with a glossy finish and red ribbon for hanging.\n\n• Material: Optically clear digital-grade acrylic\n• Sizes: Rectangle 3″ × 4″ (7.62 × 10.16 cm) , Scalloped 3″ × 4.25″ (7.62 × 10.8 cm), • Circle diameter 3″ (7.8 cm), Heart 3.3″ × 3.2″ (8.4 × 8.1 cm)\n• Ornament thickness: 0.25″ (6.35 mm)\n• Comes with a red ribbon for hanging\n• Blank product sourced from China\n\nDisclaimers:\n• This product is available in the US only. If your shipping address is outside this region, please choose a different product.\n• The product includes a small QR code on the back which may be slightly visible through the material. This is intended only for the production team's use.",
+   "sizes": [
+    "Rectangle",
+    "Scalloped",
+    "Circle",
+    "Heart"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "default",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/793"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/793/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/793/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/793/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/793/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/793/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/793/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

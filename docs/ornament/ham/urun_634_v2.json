@@ -1,0 +1,137 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/634?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 634,
+   "type": "DECOR",
+   "main_category_id": 254,
+   "name": "Wooden Ornaments",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/ef/ef50d0c418f9f4879bc3e81edc092891_l",
+   "variant_count": 6,
+   "is_discontinued": false,
+   "description": "Add a cozy vibe to your home with these double-sided wooden ornaments. Made from Hinoki wood, they’re durable yet lightweight and soft to the touch.\n\n• Material: solid, natural Hinoki wood\n• Ornament thickness 0.37″ (9 mm)\n• Comes with a red paper ribbon and a hole to thread it through\n• Magnetic back\n• Two-sided print \n• Product sourced from Korea\n\nDisclaimers: \n• This product is made from natural wood, so darker-colored wooden knots and other slight imperfections may appear anywhere on the ornament.\n• Due to the characteristics of Hinoki wood, it’s expected to have naturally occurring resin on these wooden ornaments.\n\nImportant: This product cannot be shipped to South Korea, Hong Kong, Taiwan, Japan, or Singapore. If your shipping address is in these regions, please choose a different product.",
+   "sizes": [
+    "Heart",
+    "Star",
+    "Tree",
+    "Oval",
+    "Bell",
+    "Stocking"
+   ],
+   "colors": [
+    {
+     "name": "Wood",
+     "value": "#f8ddb7"
+    }
+   ],
+   "techniques": [
+    {
+     "key": "uv",
+     "display_name": "UV printing",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "uv",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/634"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/634/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/634/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/634/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/634/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/634/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/634/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

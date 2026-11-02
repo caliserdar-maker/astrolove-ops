@@ -1,0 +1,117 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1729/prices?currency=EUR&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "EUR",
+   "product": {
+    "id": 1729,
+    "placements": [
+     {
+      "id": "front",
+      "title": "Front print",
+      "type": "UV printing",
+      "technique_key": "uv",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 54337,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "5.25",
+       "discounted_price": "5.25"
+      }
+     ]
+    },
+    {
+     "id": 54338,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "5.25",
+       "discounted_price": "5.25"
+      }
+     ]
+    },
+    {
+     "id": 54339,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "6.95",
+       "discounted_price": "6.95"
+      }
+     ]
+    },
+    {
+     "id": 54340,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "6.95",
+       "discounted_price": "6.95"
+      }
+     ]
+    },
+    {
+     "id": 54341,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "6.95",
+       "discounted_price": "6.95"
+      }
+     ]
+    },
+    {
+     "id": 54342,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "6.95",
+       "discounted_price": "6.95"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 6,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1729/prices?currency=EUR&selling_region_name=worldwide&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1729"
+   }
+  }
+ }
+}

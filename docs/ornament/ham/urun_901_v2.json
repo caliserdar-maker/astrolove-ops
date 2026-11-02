@@ -1,0 +1,130 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/901?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "id": 901,
+   "type": "DECOR",
+   "main_category_id": 254,
+   "name": "Metal Christmas Ornament",
+   "brand": null,
+   "model": "",
+   "image": "https://files.cdn.printful.com/upload/product-catalog-img/6e/6e6e9f0b75ecc1ba810719df62d1d7da_l",
+   "variant_count": 4,
+   "is_discontinued": false,
+   "description": "Shiny from all angles—these two-sided ornaments bring double the cheer. Great for personal gifting or maxing your seasonal decor, they come in 4 festive shapes with a high-gloss finish. Available solo or in 3, 5, or 10-unit packs.\n\n• White aluminum base\n• Round-shaped diameter: 3.5″ (89 mm)\n• Bell-shaped size: 3.31″ × 3.31″ (84 mm × 84 mm)\n• Oval-shaped size: 2.36″ × 2.99″ (60 mm × 76 mm)\n• Tree-shaped size: 3.39″ × 3.94″ (86 mm × 100 mm)\n• Ornament thickness: 0.025″ (0.6 mm)\n• Glossy finish\n• Red ribbon included\n• Blank product sourced from China\n\nDisclaimer: The displayed price is for a single item.",
+   "sizes": [
+    "Oval",
+    "Round",
+    "Tree",
+    "Bell"
+   ],
+   "colors": [],
+   "techniques": [
+    {
+     "key": "sublimation",
+     "display_name": "Sublimation",
+     "is_default": true
+    }
+   ],
+   "placements": [
+    {
+     "placement": "front",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "front_large",
+      "front_dtf",
+      "front_dtfabric",
+      "chest_left_dtf",
+      "front_large_dtf"
+     ]
+    },
+    {
+     "placement": "back",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": [
+      "label_outside",
+      "label_outside_dtf",
+      "back_dtf",
+      "back_large",
+      "back_large_dtf",
+      "back_dtfabric"
+     ]
+    },
+    {
+     "placement": "mockup",
+     "technique": "sublimation",
+     "layers": [
+      {
+       "type": "file",
+       "layer_options": []
+      }
+     ],
+     "placement_options": [],
+     "conflicting_placements": []
+    }
+   ],
+   "product_options": [
+    {
+     "name": "license_type",
+     "techniques": [],
+     "type": "array",
+     "values": {
+      "CLC": "Collegiate Licensing Company",
+      "AFFINITY": "Affinity",
+      "BR": "BR",
+      "EX": "EX",
+      "NCAA": "NCAA",
+      "FAN": "Fan",
+      "BCOMPLY": "BrandComply",
+      "TAG": "Tag",
+      "DLH": "DLH",
+      "CORE81": "Core81"
+     }
+    }
+   ],
+   "_links": {
+    "self": {
+     "href": "https://api.printful.com/v2/catalog-products/901"
+    },
+    "variants": {
+     "href": "https://api.printful.com/v2/catalog-products/901/catalog-variants"
+    },
+    "categories": {
+     "href": "https://api.printful.com/v2/catalog-products/901/catalog-categories"
+    },
+    "product_prices": {
+     "href": "https://api.printful.com/v2/catalog-products/901/prices"
+    },
+    "product_sizes": {
+     "href": "https://api.printful.com/v2/catalog-products/901/sizes"
+    },
+    "product_images": {
+     "href": "https://api.printful.com/v2/catalog-products/901/images"
+    },
+    "product_availability": {
+     "href": "https://api.printful.com/v2/catalog-products/901/availability"
+    }
+   }
+  },
+  "extra": []
+ }
+}

@@ -1,0 +1,73 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1664/prices?currency=EUR&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "EUR",
+   "product": {
+    "id": 1664,
+    "placements": [
+     {
+      "id": "front",
+      "title": "Front print",
+      "type": "UV printing",
+      "technique_key": "uv",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 52816,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "74.75",
+       "discounted_price": "74.75"
+      }
+     ]
+    },
+    {
+     "id": 52913,
+     "techniques": [
+      {
+       "technique_key": "uv",
+       "technique_display_name": "UV printing",
+       "price": "17.25",
+       "discounted_price": "17.25"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1664/prices?currency=EUR&selling_region_name=worldwide&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1664"
+   }
+  }
+ }
+}

@@ -1,0 +1,202 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/901/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 23138,
+    "catalog_product_id": 901,
+    "name": "Metal Christmas Ornament (White aluminum / Bell)",
+    "size": "Bell",
+    "color": "White aluminum",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/901/23138_1748884814.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23138"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/901"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/901/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23138/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23138/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23138/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "back",
+      "height": 3.61,
+      "width": 3.58,
+      "orientation": "any"
+     },
+     {
+      "placement": "front",
+      "height": 3.61,
+      "width": 3.58,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23135,
+    "catalog_product_id": 901,
+    "name": "Metal Christmas Ornament (White aluminum / Oval)",
+    "size": "Oval",
+    "color": "White aluminum",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/901/23135_1748884818.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23135"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/901"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/901/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23135/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23135/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23135/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.25,
+      "width": 2.63,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 3.25,
+      "width": 2.63,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23136,
+    "catalog_product_id": 901,
+    "name": "Metal Christmas Ornament (White aluminum / Round)",
+    "size": "Round",
+    "color": "White aluminum",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/901/23136_1748884823.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23136"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/901"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/901/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23136/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23136/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23136/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.75,
+      "width": 3.75,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 3.75,
+      "width": 3.75,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 23137,
+    "catalog_product_id": 901,
+    "name": "Metal Christmas Ornament (White aluminum / Tree)",
+    "size": "Tree",
+    "color": "White aluminum",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/901/23137_1748884824.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/23137"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/901"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/901/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/23137/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/23137/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/23137/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 4.2,
+      "width": 3.63,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 4.2,
+      "width": 3.63,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/901/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/901"
+   }
+  }
+ }
+}

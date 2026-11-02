@@ -1,0 +1,132 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/mockup-generator/printfiles/634",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "product_id": 634,
+   "available_placements": {
+    "front": "Front print",
+    "back": "Back print"
+   },
+   "printfiles": [
+    {
+     "printfile_id": 381,
+     "width": 585,
+     "height": 945,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 403,
+     "width": 585,
+     "height": 945,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 404,
+     "width": 585,
+     "height": 945,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 405,
+     "width": 585,
+     "height": 945,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 406,
+     "width": 585,
+     "height": 945,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    },
+    {
+     "printfile_id": 407,
+     "width": 585,
+     "height": 945,
+     "dpi": 150,
+     "fill_mode": "cover",
+     "can_rotate": false
+    }
+   ],
+   "variant_printfiles": [
+    {
+     "variant_id": 16092,
+     "placements": {
+      "front": 381,
+      "back": 381
+     }
+    },
+    {
+     "variant_id": 16088,
+     "placements": {
+      "front": 403,
+      "back": 403
+     }
+    },
+    {
+     "variant_id": 16091,
+     "placements": {
+      "front": 404,
+      "back": 404
+     }
+    },
+    {
+     "variant_id": 16089,
+     "placements": {
+      "front": 405,
+      "back": 405
+     }
+    },
+    {
+     "variant_id": 16093,
+     "placements": {
+      "front": 406,
+      "back": 406
+     }
+    },
+    {
+     "variant_id": 16090,
+     "placements": {
+      "front": 407,
+      "back": 407
+     }
+    }
+   ],
+   "option_groups": [
+    "Flat",
+    "Flat 2",
+    "Lifestyle",
+    "Lifestyle 10",
+    "Lifestyle 2",
+    "Lifestyle 3",
+    "Lifestyle 4",
+    "Lifestyle 5",
+    "Lifestyle 6",
+    "Lifestyle 7",
+    "Lifestyle 8",
+    "Lifestyle 9",
+    "Templates"
+   ],
+   "options": [
+    "Back",
+    "Front"
+   ]
+  },
+  "extra": []
+ }
+}

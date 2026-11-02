@@ -1,0 +1,65 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1664/mockup-templates?limit=100",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "catalog_variant_ids": [
+     52913
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/Glass_Ornament/medium/templates/mockup_gen_overlay.png?v=1786012599",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 2111,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2554.0,
+    "print_area_height": 2554.0,
+    "print_area_top": 226.0,
+    "print_area_left": 226.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     52816
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/Glass_Ornament/medium/templates/mockup_gen_overlay.png?v=1786012599",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 2111,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2554.0,
+    "print_area_height": 2554.0,
+    "print_area_top": 226.0,
+    "print_area_left": 226.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 2,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1664/mockup-templates?limit=100"
+   }
+  }
+ }
+}

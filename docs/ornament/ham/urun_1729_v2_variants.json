@@ -1,0 +1,254 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1729/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 54341,
+    "catalog_product_id": 1729,
+    "name": "Crystal Glass Ornament (Circle + Gold Gift Packaging)",
+    "size": "Circle + Gold Gift Packaging",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1729/54341_1790765309.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/54341"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1729"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1729/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/54341/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/54341/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/54341/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 54339,
+    "catalog_product_id": 1729,
+    "name": "Crystal Glass Ornament (Circle + White Gift Packaging)",
+    "size": "Circle + White Gift Packaging",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1729/54339_1790765310.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/54339"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1729"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1729/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/54339/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/54339/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/54339/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 54337,
+    "catalog_product_id": 1729,
+    "name": "Crystal Glass Ornament (Circle)",
+    "size": "Circle",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1729/54337_1790765310.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/54337"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1729"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1729/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/54337/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/54337/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/54337/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 54342,
+    "catalog_product_id": 1729,
+    "name": "Crystal Glass Ornament (Heart + Gold Gift Packaging)",
+    "size": "Heart + Gold Gift Packaging",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1729/54342_1790765319.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/54342"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1729"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1729/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/54342/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/54342/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/54342/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 54340,
+    "catalog_product_id": 1729,
+    "name": "Crystal Glass Ornament (Heart + White Gift Packaging)",
+    "size": "Heart + White Gift Packaging",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1729/54340_1790765319.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/54340"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1729"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1729/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/54340/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/54340/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/54340/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 54338,
+    "catalog_product_id": 1729,
+    "name": "Crystal Glass Ornament (Heart)",
+    "size": "Heart",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/1729/54338_1790765319.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/54338"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/1729"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/1729/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/54338/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/54338/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/54338/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.0,
+      "width": 3.0,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 6,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1729/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/1729"
+   }
+  }
+ }
+}

@@ -1,0 +1,191 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/794/mockup-templates?limit=100",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "catalog_variant_ids": [
+     20252
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/metalic_ornaments/medium/templates/scalloped.png?v=1722860920",
+    "background_url": null,
+    "background_color": "#ffffff",
+    "printfile_id": 687,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2464.0,
+    "print_area_height": 1774.0,
+    "print_area_top": 613.0,
+    "print_area_left": 268.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     20252
+    ],
+    "placement": "back",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/metalic_ornaments/medium/templates/scalloped.png?v=1722860920",
+    "background_url": null,
+    "background_color": "#ffffff",
+    "printfile_id": 687,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2464.0,
+    "print_area_height": 1774.0,
+    "print_area_top": 613.0,
+    "print_area_left": 268.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     20253
+    ],
+    "placement": "back",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/metalic_ornaments/medium/templates/paw.png?v=1722860920",
+    "background_url": null,
+    "background_color": "#ffffff",
+    "printfile_id": 685,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2468.0,
+    "print_area_height": 2390.0,
+    "print_area_top": 305.0,
+    "print_area_left": 266.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     20253
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/metalic_ornaments/medium/templates/paw.png?v=1722860920",
+    "background_url": null,
+    "background_color": "#ffffff",
+    "printfile_id": 685,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2468.0,
+    "print_area_height": 2390.0,
+    "print_area_top": 305.0,
+    "print_area_left": 266.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     20255
+    ],
+    "placement": "back",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/metalic_ornaments/medium/templates/rectangle.png?v=1722860920",
+    "background_url": null,
+    "background_color": "#ffffff",
+    "printfile_id": 686,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2468.0,
+    "print_area_height": 1888.0,
+    "print_area_top": 556.0,
+    "print_area_left": 266.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     20255
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/metalic_ornaments/medium/templates/rectangle.png?v=1722860920",
+    "background_url": null,
+    "background_color": "#ffffff",
+    "printfile_id": 686,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2468.0,
+    "print_area_height": 1888.0,
+    "print_area_top": 556.0,
+    "print_area_left": 266.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     20254
+    ],
+    "placement": "back",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/metalic_ornaments/medium/templates/tag.png?v=1722860920",
+    "background_url": null,
+    "background_color": "#ffffff",
+    "printfile_id": 688,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1536.0,
+    "print_area_height": 2480.0,
+    "print_area_top": 260.0,
+    "print_area_left": 732.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     20254
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/metalic_ornaments/medium/templates/tag.png?v=1722860920",
+    "background_url": null,
+    "background_color": "#ffffff",
+    "printfile_id": 688,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1536.0,
+    "print_area_height": 2480.0,
+    "print_area_top": 260.0,
+    "print_area_left": 732.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 8,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/794/mockup-templates?limit=100"
+   }
+  }
+ }
+}

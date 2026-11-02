@@ -1,0 +1,217 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/634/sizes?unit=inches,cm",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": {
+   "catalog_product_id": 634,
+   "available_sizes": [
+    "Bell",
+    "Heart",
+    "Oval",
+    "Star",
+    "Stocking",
+    "Tree"
+   ],
+   "size_tables": [
+    {
+     "type": "product_measure",
+     "unit": "inches",
+     "description": "<p>Actual product measurements may vary by up to 1/2\".</p>",
+     "image_url": "https://files.cdn.printful.com/upload/product-measure/36/36a6dc20e9c8a7b7b3e33d5e12644344_l?v=1662963791",
+     "image_description": "<p>A&nbsp;Length</p>\n<p>B&nbsp;Width</p>\n<p>C&nbsp;Height</p>",
+     "measurements": [
+      {
+       "type_label": "Length",
+       "values": [
+        {
+         "size": "Bell",
+         "value": "4.09"
+        },
+        {
+         "size": "Heart",
+         "value": "4.72"
+        },
+        {
+         "size": "Oval",
+         "value": "5.00"
+        },
+        {
+         "size": "Star",
+         "value": "4.06"
+        },
+        {
+         "size": "Stocking",
+         "value": "5.12"
+        },
+        {
+         "size": "Tree",
+         "value": "5.20"
+        }
+       ]
+      },
+      {
+       "type_label": "Width",
+       "values": [
+        {
+         "size": "Bell",
+         "value": "3.43"
+        },
+        {
+         "size": "Heart",
+         "value": "3.46"
+        },
+        {
+         "size": "Oval",
+         "value": "3.39"
+        },
+        {
+         "size": "Star",
+         "value": "3.43"
+        },
+        {
+         "size": "Stocking",
+         "value": "3.94"
+        },
+        {
+         "size": "Tree",
+         "value": "3.54"
+        }
+       ]
+      },
+      {
+       "type_label": "Height",
+       "values": [
+        {
+         "size": "Bell",
+         "value": "0.35"
+        },
+        {
+         "size": "Heart",
+         "value": "0.35"
+        },
+        {
+         "size": "Oval",
+         "value": "0.35"
+        },
+        {
+         "size": "Star",
+         "value": "0.35"
+        },
+        {
+         "size": "Stocking",
+         "value": "0.35"
+        },
+        {
+         "size": "Tree",
+         "value": "0.35"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "product_measure",
+     "unit": "cm",
+     "description": "<p>Actual product measurements may vary by up to 1/2\".</p>",
+     "image_url": "https://files.cdn.printful.com/upload/product-measure/36/36a6dc20e9c8a7b7b3e33d5e12644344_l?v=1662963791",
+     "image_description": "<p>A&nbsp;Length</p>\n<p>B&nbsp;Width</p>\n<p>C&nbsp;Height</p>",
+     "measurements": [
+      {
+       "type_label": "Length",
+       "values": [
+        {
+         "size": "Bell",
+         "value": "10.4"
+        },
+        {
+         "size": "Heart",
+         "value": "12"
+        },
+        {
+         "size": "Oval",
+         "value": "12.7"
+        },
+        {
+         "size": "Star",
+         "value": "10.3"
+        },
+        {
+         "size": "Stocking",
+         "value": "13"
+        },
+        {
+         "size": "Tree",
+         "value": "13.2"
+        }
+       ]
+      },
+      {
+       "type_label": "Width",
+       "values": [
+        {
+         "size": "Bell",
+         "value": "8.7"
+        },
+        {
+         "size": "Heart",
+         "value": "8.8"
+        },
+        {
+         "size": "Oval",
+         "value": "8.6"
+        },
+        {
+         "size": "Star",
+         "value": "8.7"
+        },
+        {
+         "size": "Stocking",
+         "value": "10"
+        },
+        {
+         "size": "Tree",
+         "value": "9"
+        }
+       ]
+      },
+      {
+       "type_label": "Height",
+       "values": [
+        {
+         "size": "Bell",
+         "value": "0.9"
+        },
+        {
+         "size": "Heart",
+         "value": "0.9"
+        },
+        {
+         "size": "Oval",
+         "value": "0.9"
+        },
+        {
+         "size": "Star",
+         "value": "0.9"
+        },
+        {
+         "size": "Stocking",
+         "value": "0.9"
+        },
+        {
+         "size": "Tree",
+         "value": "0.9"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "extra": []
+ }
+}

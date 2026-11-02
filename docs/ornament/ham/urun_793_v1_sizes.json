@@ -1,0 +1,13 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/products/793/sizes?unit=inches,cm",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "code": 200,
+  "result": null,
+  "extra": []
+ }
+}

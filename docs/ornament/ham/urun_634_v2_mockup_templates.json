@@ -1,0 +1,527 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/634/mockup-templates?limit=100",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "catalog_variant_ids": [
+     16092
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/bell/front/02_bell_base_transparent_whitebg.png?v=1707479669",
+    "background_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/bell/front/02_bell_base.png?v=1707479669",
+    "background_color": null,
+    "printfile_id": 381,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1542.0,
+    "print_area_height": 2491.0,
+    "print_area_top": 800.0,
+    "print_area_left": 727.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     16092
+    ],
+    "placement": "back",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/bell/back/02_bell_base_transparent_whitebg.png?v=1707479669",
+    "background_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/bell/back/02_bell_base.png?v=1707479669",
+    "background_color": null,
+    "printfile_id": 381,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1542.0,
+    "print_area_height": 2491.0,
+    "print_area_top": 800.0,
+    "print_area_left": 732.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     16088
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/heart/front/02_heart_base_transparent_whitebg.png?v=1707479669",
+    "background_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/heart/front/02_heart_base.png?v=1707479669",
+    "background_color": null,
+    "printfile_id": 403,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1542.0,
+    "print_area_height": 2491.0,
+    "print_area_top": 645.0,
+    "print_area_left": 727.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     16088
+    ],
+    "placement": "back",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/heart/back/02_heart_base_transparent_whitebg.png?v=1707479669",
+    "background_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/heart/back/02_heart_base.png?v=1707479669",
+    "background_color": null,
+    "printfile_id": 403,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1542.0,
+    "print_area_height": 2491.0,
+    "print_area_top": 647.0,
+    "print_area_left": 732.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     16089
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/star/front/02_star_base_transparent_whitebg.png?v=1707479669",
+    "background_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/star/front/02_star_base.png?v=1707479669",
+    "background_color": null,
+    "printfile_id": 405,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1542.0,
+    "print_area_height": 2491.0,
+    "print_area_top": 751.0,
+    "print_area_left": 725.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     16089
+    ],
+    "placement": "back",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/star/back/02_star_base_transparent_whitebg.png?v=1707479669",
+    "background_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/star/back/02_star_base.png?v=1707479669",
+    "background_color": null,
+    "printfile_id": 405,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1542.0,
+    "print_area_height": 2491.0,
+    "print_area_top": 750.0,
+    "print_area_left": 729.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     16090
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/tree/front/02_tree_base_transparent_whitebg.png?v=1707479669",
+    "background_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/tree/front/02_tree_base.png?v=1707479669",
+    "background_color": null,
+    "printfile_id": 407,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1346.0,
+    "print_area_height": 2176.0,
+    "print_area_top": 861.0,
+    "print_area_left": 825.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     16090
+    ],
+    "placement": "back",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/tree/back/02_tree_base_transparent_whitebg.png?v=1707479669",
+    "background_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/tree/back/02_tree_base.png?v=1707479669",
+    "background_color": null,
+    "printfile_id": 407,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1347.0,
+    "print_area_height": 2176.0,
+    "print_area_top": 860.0,
+    "print_area_left": 818.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     16091
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/oval/front/02_oval_base_transparent_whitebg.png?v=1707479669",
+    "background_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/oval/front/02_oval_base.png?v=1707479669",
+    "background_color": null,
+    "printfile_id": 404,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1346.0,
+    "print_area_height": 2176.0,
+    "print_area_top": 870.0,
+    "print_area_left": 827.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     16091
+    ],
+    "placement": "back",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/oval/back/02_oval_base_transparent_whitebg.png?v=1707479669",
+    "background_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/oval/back/02_oval_base.png?v=1707479669",
+    "background_color": null,
+    "printfile_id": 404,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1347.0,
+    "print_area_height": 2176.0,
+    "print_area_top": 869.0,
+    "print_area_left": 830.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     16093
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/sock/front/02_sock_base_transparent_whitebg.png?v=1707479669",
+    "background_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/sock/front/02_sock_base.png?v=1707479669",
+    "background_color": null,
+    "printfile_id": 406,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1227.0,
+    "print_area_height": 1983.0,
+    "print_area_top": 939.0,
+    "print_area_left": 815.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     16093
+    ],
+    "placement": "back",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/sock/back/02_sock_base_transparent_whitebg.png?v=1707479669",
+    "background_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/flat/sock/back/02_sock_base.png?v=1707479669",
+    "background_color": null,
+    "printfile_id": 406,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1227.0,
+    "print_area_height": 1983.0,
+    "print_area_top": 941.0,
+    "print_area_left": 940.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "primary"
+   },
+   {
+    "catalog_variant_ids": [
+     16088
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/template/heart_front.png?v=1707479669",
+    "background_url": null,
+    "background_color": "#f8ddb7",
+    "printfile_id": 403,
+    "template_width": 728.0,
+    "template_height": 728.0,
+    "print_area_width": 450.0,
+    "print_area_height": 728.0,
+    "print_area_top": 0.0,
+    "print_area_left": 139.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     16089
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/template/star_front.png?v=1707479669",
+    "background_url": null,
+    "background_color": "#f8ddb7",
+    "printfile_id": 405,
+    "template_width": 728.0,
+    "template_height": 728.0,
+    "print_area_width": 450.0,
+    "print_area_height": 728.0,
+    "print_area_top": 0.0,
+    "print_area_left": 139.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     16090
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/template/tree_front.png?v=1707479669",
+    "background_url": null,
+    "background_color": "#f8ddb7",
+    "printfile_id": 407,
+    "template_width": 728.0,
+    "template_height": 728.0,
+    "print_area_width": 450.0,
+    "print_area_height": 728.0,
+    "print_area_top": 0.0,
+    "print_area_left": 139.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     16091
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/template/ovel_front.png?v=1707479669",
+    "background_url": null,
+    "background_color": "#f8ddb7",
+    "printfile_id": 404,
+    "template_width": 728.0,
+    "template_height": 728.0,
+    "print_area_width": 450.0,
+    "print_area_height": 728.0,
+    "print_area_top": 0.0,
+    "print_area_left": 139.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     16092
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/template/bell_front.png?v=1707479669",
+    "background_url": null,
+    "background_color": "#f8ddb7",
+    "printfile_id": 381,
+    "template_width": 728.0,
+    "template_height": 728.0,
+    "print_area_width": 450.0,
+    "print_area_height": 728.0,
+    "print_area_top": 0.0,
+    "print_area_left": 139.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     16093
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/template/sock_front.png?v=1707479669",
+    "background_url": null,
+    "background_color": "#f8ddb7",
+    "printfile_id": 406,
+    "template_width": 728.0,
+    "template_height": 728.0,
+    "print_area_width": 450.0,
+    "print_area_height": 728.0,
+    "print_area_top": 0.0,
+    "print_area_left": 139.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     16088
+    ],
+    "placement": "back",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/template/heart_back.png?v=1707479669",
+    "background_url": null,
+    "background_color": "#f8ddb7",
+    "printfile_id": 403,
+    "template_width": 728.0,
+    "template_height": 728.0,
+    "print_area_width": 450.0,
+    "print_area_height": 728.0,
+    "print_area_top": 0.0,
+    "print_area_left": 139.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     16089
+    ],
+    "placement": "back",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/template/star_back.png?v=1707479669",
+    "background_url": null,
+    "background_color": "#f8ddb7",
+    "printfile_id": 405,
+    "template_width": 728.0,
+    "template_height": 728.0,
+    "print_area_width": 450.0,
+    "print_area_height": 728.0,
+    "print_area_top": 0.0,
+    "print_area_left": 139.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     16090
+    ],
+    "placement": "back",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/template/tree_back.png?v=1707479669",
+    "background_url": null,
+    "background_color": "#f8ddb7",
+    "printfile_id": 407,
+    "template_width": 728.0,
+    "template_height": 728.0,
+    "print_area_width": 450.0,
+    "print_area_height": 728.0,
+    "print_area_top": 0.0,
+    "print_area_left": 139.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     16091
+    ],
+    "placement": "back",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/template/ovel_back.png?v=1707479669",
+    "background_url": null,
+    "background_color": "#f8ddb7",
+    "printfile_id": 404,
+    "template_width": 728.0,
+    "template_height": 728.0,
+    "print_area_width": 450.0,
+    "print_area_height": 728.0,
+    "print_area_top": 0.0,
+    "print_area_left": 139.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     16092
+    ],
+    "placement": "back",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/template/bell_back.png?v=1707479669",
+    "background_url": null,
+    "background_color": "#f8ddb7",
+    "printfile_id": 381,
+    "template_width": 728.0,
+    "template_height": 728.0,
+    "print_area_width": 450.0,
+    "print_area_height": 728.0,
+    "print_area_top": 0.0,
+    "print_area_left": 139.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     16093
+    ],
+    "placement": "back",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/wooden_ornaments/medium/template/sock_back.png?v=1707479669",
+    "background_url": null,
+    "background_color": "#f8ddb7",
+    "printfile_id": 406,
+    "template_width": 728.0,
+    "template_height": 728.0,
+    "print_area_width": 450.0,
+    "print_area_height": 728.0,
+    "print_area_top": 0.0,
+    "print_area_left": 139.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 24,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/634/mockup-templates?limit=100"
+   }
+  }
+ }
+}

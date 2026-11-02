@@ -1,0 +1,202 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/794/catalog-variants?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "id": 20253,
+    "catalog_product_id": 794,
+    "name": "Metal Ornaments (Pet Paw)",
+    "size": "Pet Paw",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/794/20253_1722605579.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20253"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/794"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/794/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20253/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20253/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20253/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 4.0,
+      "width": 4.13,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 4.0,
+      "width": 4.13,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20255,
+    "catalog_product_id": 794,
+    "name": "Metal Ornaments (Rectangle)",
+    "size": "Rectangle",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/794/20255_1722605586.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20255"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/794"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/794/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20255/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20255/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20255/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 3.25,
+      "width": 4.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 3.25,
+      "width": 4.25,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20252,
+    "catalog_product_id": 794,
+    "name": "Metal Ornaments (Scalloped)",
+    "size": "Scalloped",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/794/20252_1722605589.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20252"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/794"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/794/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20252/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20252/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20252/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "back",
+      "height": 3.06,
+      "width": 4.26,
+      "orientation": "any"
+     },
+     {
+      "placement": "front",
+      "height": 3.06,
+      "width": 4.26,
+      "orientation": "any"
+     }
+    ]
+   },
+   {
+    "id": 20254,
+    "catalog_product_id": 794,
+    "name": "Metal Ornaments (Tag)",
+    "size": "Tag",
+    "color": "",
+    "color_code": null,
+    "color_code2": null,
+    "image": "https://files.cdn.printful.com/products/794/20254_1722605596.jpg",
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/catalog-variants/20254"
+     },
+     "product_details": {
+      "href": "https://api.printful.com/v2/catalog-products/794"
+     },
+     "product_variants": {
+      "href": "https://api.printful.com/v2/catalog-products/794/catalog-variants"
+     },
+     "variant_prices": {
+      "href": "https://api.printful.com/v2/catalog-variants/20254/prices"
+     },
+     "variant_images": {
+      "href": "https://api.printful.com/v2/catalog-variants/20254/images"
+     },
+     "variant_availability": {
+      "href": "https://api.printful.com/v2/catalog-variants/20254/availability"
+     }
+    },
+    "placement_dimensions": [
+     {
+      "placement": "front",
+      "height": 5.25,
+      "width": 3.25,
+      "orientation": "any"
+     },
+     {
+      "placement": "back",
+      "height": 5.25,
+      "width": 3.25,
+      "orientation": "any"
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/794/catalog-variants?limit=100&selling_region_name=worldwide"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/794"
+   }
+  }
+ }
+}

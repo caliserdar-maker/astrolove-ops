@@ -1,0 +1,149 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1729/mockup-templates?limit=100",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "catalog_variant_ids": [
+     54337
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/crystal_glass_ornament/medium/templates/circle_mockup_gen.png?v=1790922539",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 2353,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2648.0,
+    "print_area_height": 2648.0,
+    "print_area_top": 183.0,
+    "print_area_left": 176.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     54338
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/crystal_glass_ornament/medium/templates/heart_mockup_gen.png?v=1790922539",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 2353,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2796.0,
+    "print_area_height": 2796.0,
+    "print_area_top": 102.0,
+    "print_area_left": 102.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     54339
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/crystal_glass_ornament/medium/templates/circle_mockup_gen.png?v=1790922539",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 2353,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2648.0,
+    "print_area_height": 2648.0,
+    "print_area_top": 183.0,
+    "print_area_left": 176.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     54341
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/crystal_glass_ornament/medium/templates/circle_mockup_gen.png?v=1790922539",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 2353,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2648.0,
+    "print_area_height": 2648.0,
+    "print_area_top": 183.0,
+    "print_area_left": 176.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     54340
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/crystal_glass_ornament/medium/templates/heart_mockup_gen.png?v=1790922539",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 2353,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2796.0,
+    "print_area_height": 2796.0,
+    "print_area_top": 102.0,
+    "print_area_left": 102.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     54342
+    ],
+    "placement": "front",
+    "technique": "uv",
+    "image_url": "https://files.cdn.printful.com/m/crystal_glass_ornament/medium/templates/heart_mockup_gen.png?v=1790922539",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 2353,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2796.0,
+    "print_area_height": 2796.0,
+    "print_area_top": 102.0,
+    "print_area_left": 102.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 6,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1729/mockup-templates?limit=100"
+   }
+  }
+ }
+}

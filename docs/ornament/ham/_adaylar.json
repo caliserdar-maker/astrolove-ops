@@ -1,0 +1,85 @@
+{
+ "793": {
+  "neden": [
+   "v1.title",
+   "v1.type_name",
+   "v1.model",
+   "v1.description",
+   "v2.name",
+   "v2.description"
+  ],
+  "kargo": true
+ },
+ "881": {
+  "neden": [
+   "v1.title",
+   "v1.type_name",
+   "v1.model",
+   "v1.description",
+   "v2.name",
+   "v2.description",
+   "gorev_listesi"
+  ],
+  "kargo": true
+ },
+ "900": {
+  "neden": [
+   "v1.title",
+   "v1.type_name",
+   "v1.model",
+   "v1.description",
+   "v2.name",
+   "v2.description",
+   "gorev_listesi"
+  ],
+  "kargo": true
+ },
+ "901": {
+  "neden": [
+   "v1.title",
+   "v1.type_name",
+   "v1.model",
+   "v1.description",
+   "v2.name",
+   "v2.description"
+  ],
+  "kargo": true
+ },
+ "794": {
+  "neden": [
+   "v1.title",
+   "v1.type_name",
+   "v1.model",
+   "v1.description",
+   "v2.name",
+   "v2.description"
+  ],
+  "kargo": true
+ },
+ "634": {
+  "neden": [
+   "v1.title",
+   "v1.type_name",
+   "v1.model",
+   "v1.description",
+   "v2.name",
+   "v2.description",
+   "gorev_listesi"
+  ],
+  "kargo": true
+ },
+ "1729": {
+  "neden": [
+   "v2.name",
+   "v2.description"
+  ],
+  "kargo": true
+ },
+ "1664": {
+  "neden": [
+   "v2.name",
+   "v2.description"
+  ],
+  "kargo": true
+ }
+}

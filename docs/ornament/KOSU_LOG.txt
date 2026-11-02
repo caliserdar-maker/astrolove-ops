@@ -1,15 +1,50 @@
 GET /products -> 200
 GET /categories -> 200
-GET /v2/catalog-products: 1 sayfa, 0 urun
-Traceback (most recent call last):
-  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/printful/ornament_katalog.py", line 514, in <module>
-    sys.exit(oku(Path(sys.argv[2])) if sys.argv[1] == "oku" else rapor(Path(sys.argv[2])))
-             ^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/printful/ornament_katalog.py", line 112, in oku
-    aday = adaylar(ham)
-           ^^^^^^^^^^^^
-  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/printful/ornament_katalog.py", line 182, in adaylar
-    if ANAHTAR.search(str(p.get(al) or "")):
-                          ^^^^^
-AttributeError: 'str' object has no attribute 'get'
-RAPOR urun 0 | varyant satiri 0 | kargo satiri 0
+GET /v2/catalog-products: 6 sayfa, 574 urun
+ADAY {"793": ["v1.title", "v1.type_name", "v1.model", "v1.description", "v2.name", "v2.description"], "881": ["v1.title", "v1.type_name", "v1.model", "v1.description", "v2.name", "v2.description", "gorev_listesi"], "900": ["v1.title", "v1.type_name", "v1.model", "v1.description", "v2.name", "v2.description", "gorev_listesi"], "901": ["v1.title", "v1.type_name", "v1.model", "v1.description", "v2.name", "v2.description"], "794": ["v1.title", "v1.type_name", "v1.model", "v1.description", "v2.name", "v2.description"], "634": ["v1.title", "v1.type_name", "v1.model", "v1.description", "v2.name", "v2.description", "gorev_listesi"], "1729": ["v2.name", "v2.description"], "1664": ["v2.name", "v2.description"]}
+[urun 1/8] 634 detay okundu | gecen 23s
+  /v2/catalog-products/793/sizes -> HTTP 400 {"data": "No size guides for product with id: 793", "error": {"reason": "BadRequest", "message": "No size guides for product with id: 793"}}
+[urun 2/8] 793 detay okundu | gecen 32s
+  /v2/catalog-products/794/sizes -> HTTP 400 {"data": "No size guides for product with id: 794", "error": {"reason": "BadRequest", "message": "No size guides for product with id: 794"}}
+[urun 3/8] 794 detay okundu | gecen 43s
+  /v2/catalog-products/881/sizes -> HTTP 400 {"data": "No size guides for product with id: 881", "error": {"reason": "BadRequest", "message": "No size guides for product with id: 881"}}
+[urun 4/8] 881 detay okundu | gecen 53s
+  /v2/catalog-products/900/sizes -> HTTP 400 {"data": "No size guides for product with id: 900", "error": {"reason": "BadRequest", "message": "No size guides for product with id: 900"}}
+[urun 5/8] 900 detay okundu | gecen 62s
+  /v2/catalog-products/901/sizes -> HTTP 400 {"data": "No size guides for product with id: 901", "error": {"reason": "BadRequest", "message": "No size guides for product with id: 901"}}
+[urun 6/8] 901 detay okundu | gecen 72s
+  /products/1664 -> HTTP 404 {"code": 404, "result": "Not Found", "error": {"reason": "NotFound", "message": "Not Found"}}
+  /products/1664/sizes?unit=inches,cm -> HTTP 404 {"code": 404, "result": "Not Found", "error": {"reason": "NotFound", "message": "Not Found"}}
+  /v2/catalog-products/1664/sizes -> HTTP 400 {"data": "No size guides for product with id: 1664", "error": {"reason": "BadRequest", "message": "No size guides for product with id: 1664"}}
+[urun 7/8] 1664 detay okundu | gecen 81s
+  /products/1729 -> HTTP 404 {"code": 404, "result": "Not Found", "error": {"reason": "NotFound", "message": "Not Found"}}
+  /products/1729/sizes?unit=inches,cm -> HTTP 404 {"code": 404, "result": "Not Found", "error": {"reason": "NotFound", "message": "Not Found"}}
+  /v2/catalog-products/1729/sizes -> HTTP 400 {"data": "No size guides for product with id: 1729", "error": {"reason": "BadRequest", "message": "No size guides for product with id: 1729"}}
+[urun 8/8] 1729 detay okundu | gecen 91s
+KARGO plani: 216 varyant x ulke (x2: v1 + v2)
+[kargo 9/216 %4] gecen 18s kalan ~433s | son: 634/16092/AU v1 200 v2 200
+[kargo 18/216 %8] gecen 36s kalan ~402s | son: 634/16088/AU v1 200 v2 200
+[kargo 27/216 %12] gecen 54s kalan ~380s | son: 634/16091/AU v1 200 v2 200
+[kargo 36/216 %16] gecen 73s kalan ~365s | son: 634/16089/AU v1 200 v2 200
+[kargo 45/216 %20] gecen 91s kalan ~347s | son: 634/16093/AU v1 200 v2 200
+[kargo 54/216 %25] gecen 108s kalan ~325s | son: 634/16090/AU v1 200 v2 200
+[kargo 63/216 %29] gecen 126s kalan ~306s | son: 793/20250/AU v1 400 v2 400
+[kargo 72/216 %33] gecen 142s kalan ~285s | son: 793/20248/AU v1 400 v2 400
+[kargo 81/216 %37] gecen 161s kalan ~269s | son: 794/20253/AU v1 400 v2 400
+[kargo 90/216 %41] gecen 179s kalan ~251s | son: 794/20255/AU v1 400 v2 400
+[kargo 99/216 %45] gecen 197s kalan ~233s | son: 794/20252/AU v1 400 v2 400
+[kargo 108/216 %50] gecen 215s kalan ~215s | son: 794/20254/AU v1 400 v2 400
+[kargo 117/216 %54] gecen 232s kalan ~197s | son: 881/22782/AU v1 200 v2 200
+[kargo 126/216 %58] gecen 250s kalan ~178s | son: 881/22783/AU v1 200 v2 200
+[kargo 135/216 %62] gecen 269s kalan ~161s | son: 881/22785/AU v1 200 v2 200
+[kargo 144/216 %66] gecen 286s kalan ~143s | son: 881/22784/AU v1 200 v2 200
+[kargo 153/216 %70] gecen 304s kalan ~125s | son: 900/23133/AU v1 200 v2 200
+[kargo 162/216 %75] gecen 322s kalan ~107s | son: 900/23144/AU v1 200 v2 200
+[kargo 171/216 %79] gecen 340s kalan ~89s | son: 900/23155/AU v1 200 v2 200
+[kargo 180/216 %83] gecen 358s kalan ~71s | son: 900/23151/AU v1 200 v2 200
+[kargo 189/216 %87] gecen 376s kalan ~53s | son: 901/23138/AU v1 200 v2 200
+[kargo 198/216 %91] gecen 393s kalan ~35s | son: 901/23135/AU v1 200 v2 200
+[kargo 207/216 %95] gecen 411s kalan ~17s | son: 901/23136/AU v1 200 v2 200
+[kargo 216/216 %100] gecen 429s kalan ~0s | son: 901/23137/AU v1 200 v2 200
+ISTEK toplam 560 | GET 128 | POST 432 (yollar: ['/shipping/rates', '/v2/shipping-rates']) | sure 520s
+RAPOR urun 8 | varyant satiri 24 | kargo satiri 216

@@ -1,0 +1,191 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/901/mockup-templates?limit=100",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "catalog_variant_ids": [
+     23138
+    ],
+    "placement": "back",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/Metal_christmas_ornaments/medium/templates/MetalOrnaments_MockupGenerator_Bell.png?v=1749146862",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 869,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2148.0,
+    "print_area_height": 2166.0,
+    "print_area_top": 417.0,
+    "print_area_left": 426.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     23136
+    ],
+    "placement": "back",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/Metal_christmas_ornaments/medium/templates/MetalOrnaments_MockupGenerator_Circle.png?v=1749146904",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 868,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2160.0,
+    "print_area_height": 2160.0,
+    "print_area_top": 420.0,
+    "print_area_left": 420.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     23138
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/Metal_christmas_ornaments/medium/templates/MetalOrnaments_MockupGenerator_Bell.png?v=1749146934",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 869,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2148.0,
+    "print_area_height": 2166.0,
+    "print_area_top": 417.0,
+    "print_area_left": 426.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     23135
+    ],
+    "placement": "back",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/Metal_christmas_ornaments/medium/templates/MetalOrnaments_MockupGenerator_Oval.png?v=1749146947",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 866,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1772.0,
+    "print_area_height": 2194.0,
+    "print_area_top": 403.0,
+    "print_area_left": 614.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     23137
+    ],
+    "placement": "back",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/Metal_christmas_ornaments/medium/templates/MetalOrnaments_MockupGenerator_Tree.png?v=1749146960",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 867,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1848.0,
+    "print_area_height": 2138.0,
+    "print_area_top": 431.0,
+    "print_area_left": 576.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     23136
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/Metal_christmas_ornaments/medium/templates/MetalOrnaments_MockupGenerator_Circle.png?v=1749146971",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 868,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 2160.0,
+    "print_area_height": 2160.0,
+    "print_area_top": 420.0,
+    "print_area_left": 420.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     23135
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/Metal_christmas_ornaments/medium/templates/MetalOrnaments_MockupGenerator_Oval.png?v=1749146981",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 866,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1772.0,
+    "print_area_height": 2194.0,
+    "print_area_top": 403.0,
+    "print_area_left": 614.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   },
+   {
+    "catalog_variant_ids": [
+     23137
+    ],
+    "placement": "front",
+    "technique": "sublimation",
+    "image_url": "https://files.cdn.printful.com/m/Metal_christmas_ornaments/medium/templates/MetalOrnaments_MockupGenerator_Tree.png?v=1749146991",
+    "background_url": null,
+    "background_color": null,
+    "printfile_id": 867,
+    "template_width": 3000.0,
+    "template_height": 3000.0,
+    "print_area_width": 1848.0,
+    "print_area_height": 2138.0,
+    "print_area_top": 431.0,
+    "print_area_left": 576.0,
+    "template_positioning": "overlay",
+    "orientation": "any",
+    "template_type": null,
+    "role": "template"
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 8,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/901/mockup-templates?limit=100"
+   }
+  }
+ }
+}

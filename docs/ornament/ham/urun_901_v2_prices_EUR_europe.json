@@ -1,0 +1,111 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/901/prices?currency=EUR&selling_region_name=europe",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": {
+   "currency": "EUR",
+   "product": {
+    "id": 901,
+    "placements": [
+     {
+      "id": "front",
+      "title": "Front print",
+      "type": "Sublimation",
+      "technique_key": "sublimation",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     },
+     {
+      "id": "back",
+      "title": "Back print",
+      "type": "Sublimation",
+      "technique_key": "sublimation",
+      "placement_options": [],
+      "price": "0.00",
+      "discounted_price": "0.00",
+      "layers": [
+       {
+        "type": "file",
+        "additional_price": "0.00",
+        "layer_options": []
+       }
+      ]
+     }
+    ]
+   },
+   "variants": [
+    {
+     "id": 23135,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "4.25",
+       "discounted_price": "4.25"
+      }
+     ]
+    },
+    {
+     "id": 23136,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "4.25",
+       "discounted_price": "4.25"
+      }
+     ]
+    },
+    {
+     "id": 23137,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "4.25",
+       "discounted_price": "4.25"
+      }
+     ]
+    },
+    {
+     "id": 23138,
+     "techniques": [
+      {
+       "technique_key": "sublimation",
+       "technique_display_name": "Sublimation",
+       "price": "4.50",
+       "discounted_price": "4.50"
+      }
+     ]
+    }
+   ],
+   "discount_tiers": []
+  },
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 20,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/901/prices?currency=EUR&selling_region_name=europe&limit=20"
+   },
+   "product_details": {
+    "href": "https://api.printful.com/v2/catalog-products/901"
+   }
+  }
+ }
+}

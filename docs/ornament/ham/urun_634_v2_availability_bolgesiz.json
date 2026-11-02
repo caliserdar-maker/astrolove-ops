@@ -1,0 +1,15 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/634/availability?limit=100",
+  "govde": null
+ },
+ "http": 400,
+ "yanit": {
+  "data": "Selling region not found",
+  "error": {
+   "reason": "BadRequest",
+   "message": "Selling region not found"
+  }
+ }
+}

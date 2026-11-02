@@ -1,0 +1,120 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/881/availability?limit=100&selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "catalog_variant_id": 22782,
+    "techniques": [
+     {
+      "technique": "sublimation",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/22782"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 22783,
+    "techniques": [
+     {
+      "technique": "sublimation",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/22783"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 22785,
+    "techniques": [
+     {
+      "technique": "sublimation",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/22785"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 22784,
+    "techniques": [
+     {
+      "technique": "sublimation",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/22784"
+     }
+    }
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/881/availability?limit=100&selling_region_name=worldwide"
+   },
+   "product": {
+    "href": "https://api.printful.com/v2/catalog-products/881"
+   }
+  },
+  "filter_settings": [
+   {
+    "name": "id",
+    "value": "881"
+   },
+   {
+    "name": "limit",
+    "value": "100"
+   },
+   {
+    "name": "selling_region_name",
+    "value": "worldwide"
+   }
+  ]
+ }
+}
