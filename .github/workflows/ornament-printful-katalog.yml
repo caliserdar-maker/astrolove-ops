@@ -16,6 +16,7 @@ name: ornament-printful-katalog
 # mod=urun1 / urun2 (Merkez 2 Kas, Serdar): Printful urun taramasi, YALNIZ OKUMA (scripts/printful/urun_katalog.py). alt = damga.
 #   urun1: katalog + urun basina GET, TUM_LISTE.csv. urun2: veri = virgullu urun id; kargo (POST /v2/shipping-rates) + SECILEN25.csv.
 #   Cikti Drive TEMP/PRINTFUL_URUN_<alt>/ + dal docs/printful_urun/<alt>/.
+# mod=urun_drive: API yok; daldaki docs/printful_urun/<alt>/ RAPOR.md + TUM_LISTE.csv + SECILEN25.csv'yi Drive'a yazar.
 # mod=ornek3 (Merkez STIL3_V3, Serdar 2 Kas): halkali + halkasiz x 3 zemin (zemin3/V2), scripts/printful/ornament_ornek3.py; cikti STIL3_V3/.
 on:
   workflow_dispatch:
@@ -52,7 +53,7 @@ jobs:
           python-version: "3.13"
       - name: Girdi
         run: |
-          case "$MOD" in tam|ek|rapor|zemin3|ornek|ornek2|ornek3|urun1|urun2) ;; *) echo "::error::bilinmeyen mod ($MOD)"; exit 1;; esac
+          case "$MOD" in tam|ek|rapor|zemin3|ornek|ornek2|ornek3|urun1|urun2|urun_drive) ;; *) echo "::error::bilinmeyen mod ($MOD)"; exit 1;; esac
           if [ "$MOD" != tam ] && [ ! -f s/docs/ornament/ham/_adaylar.json ]; then echo "::error::dalda ham yok"; exit 1; fi
           echo "ref ${GITHUB_REF_NAME} | betik $(git -C main rev-parse --short HEAD) | dal $(git -C s rev-parse --short HEAD)"
       - name: rclone kur
@@ -240,6 +241,21 @@ jobs:
           [ -z "$DIS" ] || { echo "::error::izinli klasor disi: $DIS"; exit 1; }
           git commit -qm "printful urun taramasi $MOD (kosu ${GITHUB_RUN_ID}, $ALT)" && git push -q origin "HEAD:${DAL}"
           exit $k
+      - name: Printful urun taramasi Drive esitleme (urun_drive; API YOK, token yok)
+        if: env.MOD == 'urun_drive'
+        env:
+          ALT: ${{ inputs.alt }}
+        run: |
+          set -euo pipefail
+          [ -n "$ALT" ] || { echo "::error::alt (damga) bos"; exit 1; }
+          U="s/docs/printful_urun/$ALT"
+          for f in RAPOR.md TUM_LISTE.csv SECILEN25.csv; do
+            [ -s "$U/$f" ] || { echo "::error::$f yok"; exit 1; }
+            rclone copyto "$U/$f" "gdrive:ASTROLOVE/TEMP/PRINTFUL_URUN_$ALT/$f" -q
+            echo "$f $(wc -c < "$U/$f") bayt $(sha256sum "$U/$f" | cut -c1-12)"
+          done
+          rclone lsl "gdrive:ASTROLOVE/TEMP/PRINTFUL_URUN_$ALT" --max-depth 1
+          echo "::notice::Drive TEMP/PRINTFUL_URUN_$ALT esitlendi (dal $(git -C s rev-parse --short HEAD))"
       - name: Printful oku (GET + kargo ucreti)
         if: env.MOD == 'tam'
         run: |
