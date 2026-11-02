@@ -1118,7 +1118,8 @@ def starlit_aile(zem, bp, S, st):
 
 
 YILDIZ_ESIK = 30.0     # F7 it. 2 (kosu 41427850720: esik 20'de yazi cevresinde ~1400-1550 bilesen = doku tanesi + yazinin altin isiltisi;
-YILDIZ_ALAN = (3, 400) # temizlik sonrasi 21-41 kalan). Yildiz = yerel medyandan (31 px) >= 30 lum parlak, 3-400 px, YAZIYA BAGLI DEGIL
+YILDIZ_ALAN = (3, 1500)  # temizlik sonrasi 21-41 kalan). Yildiz = yerel medyandan (31 px) >= 30 lum parlak, 3-1500 px, YAZIYA BAGLI DEGIL
+# Tani kosusu 41430890403 (12x18, 41407910940 ciktisi): Merkez noktasi tepe d = 220 lum (zemin koyu), bilesen 289-302 px (esik 20-25).
 YILDIZ_PAY = 0.5       # (oge maskesi 9x9 cekirdegine degmeyen) bilesen. Pay = yazi satiri yuksekligi x 0,5 (Merkez). Esikler ONERI.
 YILDIZ_PROBE = (1652, 3736)   # Merkez 2 Kas: 12x18'de EMMA sonrasi "nokta" (bilgi: o noktadaki parlaklik farki raporlanir)
 
