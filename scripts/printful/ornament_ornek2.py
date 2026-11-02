@@ -249,10 +249,11 @@ def okunurluk(rgb, zemin, maske, ad):
     m = maske[ad]
     ce = cv2.erode((m > 0.9).astype(np.uint8), np.ones((2, 2), np.uint8)) > 0
     ce = ce if ce.sum() > 10 else m > 0.7
-    x0, y0, x1, y1 = o1.bbox(m, 0.02)
-    kutu = np.zeros((N, N), bool)
-    kutu[max(0, y0 - 6):y1 + 6, max(0, x0 - 6):x1 + 6] = True
-    arka = kutu & (cv2.dilate((m > 0.02).astype(np.uint8), np.ones((3, 3), np.uint8)) == 0)
+    # yazinin arkasi = murekkebin 3-6 px cevresindeki bant (deneme 1: kutu + 6 px, J inisi yuzunden harflerden 25-30 px uzak zemini de
+    # kapsiyordu; okunurlugu belirleyen harf cevresidir). Once / sonra ayni yontemle olculur.
+    ink = (m > 0.02).astype(np.uint8)
+    arka = (cv2.dilate(ink, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (13, 13))) > 0) & \
+           (cv2.dilate(ink, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))) == 0)
     yc = np.median(rgb[ce], 0)
     za = zemin[arka]
     zc = np.median(za, 0)
@@ -266,18 +267,17 @@ def boya_bindir(Y, model, zemin, hale_s, kazanc, ht):
     yazi = ('isim1', 'isim2', 'sonsuz', 'tarih')
     if hale_s > 0:
         tm = np.maximum.reduce([Y['maske'][a] for a in yazi])
-        g = cv2.GaussianBlur(cv2.dilate((tm > 0.02).astype(np.float32), np.ones((5, 5), np.uint8)), (0, 0), 3.0)
+        # deneme 1 (kosu 41435681741): 5 px + sigma 3 hale olcum bolgesinin (yazi kutusu + 6 px) disini koyulastirmiyordu, EMERALD 3.31
+        g = cv2.GaussianBlur(cv2.dilate((tm > 0.02).astype(np.float32), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))), (0, 0), 2.5)
         g = g / max(float(g.max()), 1e-6)
         out = out * (1 - hale_s * g[..., None])
     zemin_hale = out.copy()
-    prof = np.asarray(model.m['doku']['profil'], np.float32)
     for ad, (rgb, a, x, y) in Y['E'].items():
         if ad == 'sembol':
             col = rgb
         elif ad == 'halka':
-            l = np.interp(ht * 10 - 0.5, np.arange(10), prof)                        # boru profili, aci boyunca tek duze
-            kk = model.Lmed / max(float(np.median(l[a > 0.9])), 1.0)
-            col = model.td.renk(l * kk, model.egri)
+            # tek renk (tek doku modelinin Lmed rengi): deneme 1'de boru profili ince bolgelerde tepe uretmiyor, govde parlakligi 151-184
+            col = np.broadcast_to(model.td.renk(np.full((1, 1), model.Lmed, np.float32), model.egri), (N, N, 3)).astype(np.float32)
         elif ad.startswith('kucuk'):
             col, _ = model.boya(lum(rgb), a)
         else:
@@ -309,7 +309,7 @@ def halka_olc(rgb, a, cy):
         r = np.hypot(xx[m] + 0.5 - C, yy[m] + 0.5 - cy)
         yay = np.radians(2) * float(np.median(r))
         gen = float(a[m].sum() / max(yay, 1e-6))
-        tam = m & (a > 0.9)
+        tam = m & (a > 0.99)
         sat.append(dict(aci=b0 + 1, genislik_px=round(gen, 2), parlaklik=round(float(L[tam].max()), 1) if tam.any() else None,
                         renk_ort_kapsamli=round(float((L[m] * a[m]).sum() / a[m].sum()), 1)))
     return sat
