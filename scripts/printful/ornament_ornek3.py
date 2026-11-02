@@ -32,11 +32,11 @@ _s = importlib.util.spec_from_file_location('ornek1', _d / 'ornament_ornek.py');
 _s = importlib.util.spec_from_file_location('ornek2', _d / 'ornament_ornek2.py'); o2 = importlib.util.module_from_spec(_s); _s.loader.exec_module(o2)
 N, C, MM, LUMA, RV, P = o1.N, o1.C, o1.MM, o1.LUMA, o1.RV, o1.P
 GUV_R = 760.6 / 2
-PAY = 3                                   # guvenli daireye en az pay (px)
+PAY = 5                                   # guvenli daireye en az pay (px); deneme 1: golge dahil gercek pay 1.3 px
 DELIK = (476.7, 163.9, 56.6 / 2)
 CENTIK = (422.7, 535.0, 216.9)            # x0, x1, alt y (EK_OLCUM.json sablon; genislik yaklasik 110 px)
 UST_MIN = 222.0                           # icerik ust siniri (centik alti 216.9 + 5)
-CAP0 = 28.07                              # isim buyuk harf (v1 / V2)
+CAP0 = 28.2                               # isim buyuk harf 2.388 mm (deneme 1: 28.07 = 2.377 mm < 2.38)
 GOVDE = 4.5                               # halka govde tabani (px; istek >= 4)
 TEPE = 9.0                                # poster profili tepe genisligi
 UC_L = 45.0                               # uc sonum uzunlugu (px yay)
@@ -44,6 +44,7 @@ SONSUZ_MIN = 4.0
 HEDEF = 4.5
 GOLGE_KAYMA, GOLGE_SIGMA, GOLGE_OPAK, GOLGE_KOYU = 1.5, 1.2, 0.55, 0.45
 DOKU_GUC, TINT_GUC = 0.08, 0.18
+DOKU_GENLIK = 64.0                        # doku katmani: 128 + 64 x (yuksek gecirgen / std), overlay
 STILLER = (('RUBY_GOLD', 'RUBY_1264.png'), ('SAPPHIRE_GOLD', 'SAPPHIRE_1264.png'), ('EMERALD_GOLD', 'EMERALD_1264.png'))
 V2_SEMBOL_W = 378
 
@@ -63,7 +64,14 @@ def elips_olc(f):
     F = 1 + A * x0 ** 2 + B * y0 ** 2
     ax, by = float(np.sqrt(F / A)), float(np.sqrt(F / B))
     hp = o2.halka_profili(f)
-    return dict(cx=float(x0), cy=float(y0), a=ax, b=by, oran=ax / by, hp=hp, uc=hp['bos'])
+    rho = np.sqrt(((X - x0) / ax) ** 2 + ((Y - y0) / by) ** 2)
+    art_e = (rho - 1) * (ax + by) / 2
+    rr = np.hypot(X - x0, Y - y0)
+    art_d = rr - rr.mean()
+    artik = dict(elips_rms=round(float(np.sqrt((art_e ** 2).mean())), 2), elips_p99=round(float(np.percentile(np.abs(art_e), 99)), 2),
+                 daire_rms=round(float(np.sqrt((art_d ** 2).mean())), 2), daire_p99=round(float(np.percentile(np.abs(art_d), 99)), 2),
+                 not_='alfa > 0.5 bant pikselleri; bant kalinligi (yaklasik 10-20 px) artiga dahildir')
+    return dict(cx=float(x0), cy=float(y0), a=ax, b=by, oran=ax / by, hp=hp, uc=hp['bos'], artik=artik)
 
 
 def halka_alfa(el, cy, ax, ss=4):
@@ -97,32 +105,40 @@ def halka_alfa(el, cy, ax, ss=4):
 
 
 def halka_olc(a, cy, ax, by, th_e, r_ort):
-    """aci basina radyal kapsama genisligi (alfa toplami / yay) ve uca yay uzakligina gore genislik."""
-    yy, xx = np.mgrid[0:N, 0:N]
-    dx, dy = xx + 0.5 - C, yy + 0.5 - cy
-    ang = (np.degrees(np.arctan2(dy, dx)) + 360) % 360
+    """elips merkez cizgisi boyunca 0.25 derece adimla, normal dogrultusunda +-12 px, 0.1 px adim bilineer ornekleme:
+    genislik = alfa integrali. Uca yay uzakligi s (px) ile uc profili."""
     sat = []
-    for b0 in np.arange(0, 360, 1.0):
-        m = (ang >= b0) & (ang < b0 + 1) & (a > 0.01)
-        if not m.any():
-            continue
-        r = float(np.median(np.hypot(dx[m], dy[m])))
-        sat.append((b0 + 0.5, float(a[m].sum() / (np.radians(1) * r))))
-    W = {round(t, 1): w for t, w in sat}
-    govde = [w for t, w in sat if (t < th_e[0] - (UC_L / r_ort) * 57.3 - 1) or (t > th_e[1] + (UC_L / r_ort) * 57.3 + 1)]
-    # uc profili: uca yay uzakligi s (px) -> genislik
-    uc = {}
+    for t in np.arange(0, 360, 0.25):
+        tr = math.radians(t)
+        # aci t'deki elips noktasi (merkez acisi): rho = 1
+        cx_, cy_ = math.cos(tr), math.sin(tr)
+        rr = 1.0 / math.sqrt((cx_ / ax) ** 2 + (cy_ / by) ** 2)
+        px, py = C + rr * cx_, cy + rr * cy_
+        nx, ny = (px - C) / ax ** 2, (py - cy) / by ** 2
+        nn = math.hypot(nx, ny); nx, ny = nx / nn, ny / nn
+        u = np.arange(-12, 12.0001, 0.1)
+        xs = (px + u * nx - 0.5).astype(np.float32); ys = (py + u * ny - 0.5).astype(np.float32)
+        v = cv2.remap(a, xs[None], ys[None], cv2.INTER_LINEAR, borderValue=0)[0]
+        sat.append((t, float(v.sum() * 0.1)))
+    def uca(t):
+        return min(math.radians((th_e[0] - t) % 360) * r_ort, math.radians((t - th_e[1]) % 360) * r_ort)
+    govde = [(t, w) for t, w in sat if uca(t) > UC_L + 2 and not (th_e[0] < t < th_e[1])]
+    tmin = min(govde, key=lambda x: x[1])
+    uc = {'sag': [], 'sol': []}
     for t, w in sat:
-        s1 = math.radians((th_e[0] - t) % 360) * r_ort
-        s2 = math.radians((t - th_e[1]) % 360) * r_ort
+        s1 = math.radians((th_e[0] - t) % 360) * r_ort; s2 = math.radians((t - th_e[1]) % 360) * r_ort
         if s1 <= 60:
-            uc.setdefault('sag', []).append((round(s1, 1), round(w, 2)))
+            uc['sag'].append((round(s1, 1), round(w, 2)))
         if s2 <= 60:
-            uc.setdefault('sol', []).append((round(s2, 1), round(w, 2)))
+            uc['sol'].append((round(s2, 1), round(w, 2)))
     for k in uc:
         uc[k] = sorted(uc[k])
-    return dict(govde_min=round(min(govde), 2), govde_max=round(max(govde), 2), uc=uc,
-                aci_genislik={str(t): round(w, 2) for t, w in sat if int(t) % 10 == 0 or abs(t - th_e[0]) < 12 or abs(t - th_e[1]) < 12})
+    def w_at(k, s0):
+        return min(uc[k], key=lambda x: abs(x[0] - s0))[1]
+    return dict(yontem='elips normali, 0.25 derece, 0.1 px bilineer', govde_min=round(tmin[1], 2), govde_min_aci=tmin[0],
+                govde_max=round(max(w for _, w in govde), 2),
+                uc_20px={k: w_at(k, 20.0) for k in uc}, uc_ozet={k: [x for x in v if abs(x[0] % 5) < 0.4 or x[0] < 4] for k, v in uc.items()},
+                aci_genislik={str(t): round(w, 2) for t, w in sat if t % 10 == 0})
 
 
 # ----------------------------------------------------------------------------------------------- sonsuz (>= 4 px)
@@ -283,10 +299,10 @@ def yerlesim_A(el, ana, T, kucuk):
         if ok:
             sonuc = dict(E=E, M=M, yasak=yb, cak=cak, halka=hb, alt=alt)
             break
-        if len(red) < 6:
-            red.append(dict(ax=float(ax), yasak={k_: v for k_, v in yb.items() if v}, cak=cak[:4]))
+        red.append(dict(ax=float(ax), yasak={k_: v for k_, v in yb.items() if v}, cak=cak[:4]))
     if sonuc:
-        sonuc['red_ilk'] = red
+        sonuc['red_ilk'] = red[:3]
+        sonuc['red_son'] = red[-3:]
     return sonuc
 
 
@@ -322,14 +338,20 @@ def softlight(a, b):
     return r * 255.0
 
 
-def boya(Y, model, zemin, kazanc, td):
+def overlay(a, b):
+    a, b = a / 255.0, b / 255.0
+    return np.where(a <= 0.5, 2 * a * b, 1 - 2 * (1 - a) * (1 - b)) * 255.0
+
+
+def boya(Y, model, zemin, kazanc, td, doku_kapali=False):
     E, M = Y['E'], Y['M']
     out = zemin.astype(np.float32).copy()
     # zemin ortalama rengi ve doku
     zort = zemin.reshape(-1, 3).mean(0)
     zL = lum(zemin)
     doku = zL - cv2.GaussianBlur(zL, (0, 0), 6.0)
-    doku_b = np.clip(128 + doku * 2.0, 0, 255)                       # soft light karisim katmani (gri 128 = etkisiz)
+    # deneme 1: 128 + 2 x doku katmani neredeyse notr gri, %8 soft light gorunmuyordu (inceleme). Doku kendi std'sine normalize, overlay.
+    doku_b = np.full_like(zL, 128.0) if doku_kapali else np.clip(128 + DOKU_GENLIK * doku / max(float(doku.std()), 1e-3), 0, 255)
     tum = np.maximum.reduce([M[k] for k in M])
     # 1 golge: zeminin koyu tonu, sag alt
     gm = cv2.GaussianBlur(tum, (0, 0), GOLGE_SIGMA)
@@ -361,10 +383,22 @@ def boya(Y, model, zemin, kazanc, td):
         w = np.clip((model.Lmed - L) / max(model.Lmed, 1), 0, 1)[..., None] * TINT_GUC
         tint = zort / max(float(lum(zort[None])[0]), 1.0) * L[..., None]
         cc = cc * (1 - w) + tint * w
-        cc = cc * (1 - DOKU_GUC) + softlight(np.clip(cc, 0, 255), doku_b[..., None]) * DOKU_GUC
+        cc = cc * (1 - DOKU_GUC) + overlay(np.clip(cc, 0, 255), doku_b[..., None]) * DOKU_GUC
         m = M[ad][..., None]
         out = out * (1 - m) + np.clip(cc, 0, 255) * m
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+def goruntu_yasak(rgb, zemin):
+    """son goruntuden (golge dahil): |goruntu - zemin| > 1 olan pikseller yasak bolgede mi; gercek pay."""
+    fark = np.abs(rgb.astype(np.float32) - zemin.astype(np.float32)).max(2) > 1.0
+    yy, xx = np.nonzero(fark)
+    r = np.hypot(xx + 0.5 - C, yy + 0.5 - C)
+    yb = dict(guvenli_daire_disi=int((r > GUV_R).sum()),
+              delik=int((np.hypot(xx + 0.5 - DELIK[0], yy + 0.5 - DELIK[1]) <= DELIK[2]).sum()),
+              centik=int(((xx >= CENTIK[0]) & (xx <= CENTIK[1]) & (yy <= CENTIK[2])).sum()), y_217_ustu=int((yy < 217).sum()))
+    return yb, dict(gercek_pay=round(float(GUV_R - r.max()), 1), ust_y=int(yy.min()),
+                    delige_uzaklik=round(float(np.hypot(xx + 0.5 - DELIK[0], yy + 0.5 - DELIK[1]).min() - DELIK[2]), 1))
 
 
 def okunurluk(rgb, zemin, m):
@@ -372,14 +406,17 @@ def okunurluk(rgb, zemin, m):
     ce = ce if ce.sum() > 10 else m > 0.7
     ink = (m > 0.02).astype(np.uint8)
     yc = np.median(rgb[ce], 0)
+    yt = np.median(rgb[m > 0.5], 0)                                  # kati: tum murekkep (alfa > 0.5) ortancasi (inceleme 2 Kas)
     r = {}
     for ad, (i, o) in (('bant_1_12', (3, 25)), ('bant_3_6', (7, 13))):
         arka = (cv2.dilate(ink, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (o, o))) > 0) & \
                (cv2.dilate(ink, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (i, i))) == 0)
         za = rgb[arka].astype(np.float32)                                # sonuc goruntusunde (golge dahil) yazinin arkasi
         z95 = np.median(za[lum(za) >= np.percentile(lum(za), 95)], 0)
-        r[ad] = dict(ortanca=o1.kontrast(yc, np.median(za, 0)), acik5=o1.kontrast(yc, z95))
+        r[ad] = dict(ortanca=o1.kontrast(yc, np.median(za, 0)), acik5=o1.kontrast(yc, z95),
+                     kati_ortanca=o1.kontrast(yt, np.median(za, 0)), kati_acik5=o1.kontrast(yt, z95))
     r['yazi_rgb'] = [int(v) for v in yc]
+    r['yazi_rgb_kati'] = [int(v) for v in yt]
     return r
 
 
@@ -403,7 +440,7 @@ def main():
                        golge=dict(kayma=GOLGE_KAYMA, sigma=GOLGE_SIGMA, opak=GOLGE_OPAK, koyu=GOLGE_KOYU), doku=DOKU_GUC, tint=TINT_GUC)}
     el = elips_olc(K / 'HALKA_BLUE_16x20.png')
     R['poster_elips'] = dict(merkez=[round(el['cx'], 1), round(el['cy'], 1)], yatay_yari=round(el['a'], 1), dikey_yari=round(el['b'], 1),
-                             oran_yatay_dikey=round(el['oran'], 4), acik_aci=el['uc'])
+                             oran_yatay_dikey=round(el['oran'], 4), acik_aci=el['uc'], artik=el['artik'])
     ana = np.asarray(Image.open(K / 'CANCER_LIBRA_ana.png').convert('RGBA'), np.float32)
     ana[..., 3] /= 255.0
     ana = o1.kirp(ana, ana[..., 3], pad=2)
@@ -439,7 +476,7 @@ def main():
                 for kazanc in (1.0, 1.04, 1.08, 1.12, 1.16, 1.20):
                     rgb = boya(Y, model, z, kazanc, td)
                     ok = {k: okunurluk(rgb, z, Y['M'][k]) for k in ('isim1', 'isim2', 'tarih')}
-                    en = min(min(v['bant_1_12']['ortanca'], v['bant_1_12']['acik5']) for v in ok.values())
+                    en = min(min(v['bant_1_12']['kati_ortanca'], v['bant_1_12']['kati_acik5']) for v in ok.values())
                     if en >= HEDEF:
                         sec = (kazanc, rgb, ok, en); break
                 if sec is None:
@@ -463,7 +500,7 @@ def main():
                  sembol_px=[sb[2] - sb[0], sb[3] - sb[1]], sembol_mm=[round((sb[2] - sb[0]) * MM, 2), round((sb[3] - sb[1]) * MM, 2)],
                  sembol_V2_kazanc_yuzde=round(((sb[2] - sb[0]) / V2_SEMBOL_W - 1) * 100, 1),
                  yasak_piksel=Y['yasak'], cakisma=Y['cak'], guvenli_daireye_pay=round(GUV_R - rmax, 1), delige_uzaklik=round(dl, 1),
-                 ust_y=int(yy.min()), sonsuz=secim['T']['sonsuz_bilgi'], red_ilk=Y.get('red_ilk'))
+                 ust_y=int(yy.min()), sonsuz=secim['T']['sonsuz_bilgi'], red_ilk=Y.get('red_ilk'), red_son=Y.get('red_son'))
         for ad in Y['M']:
             b = o1.bbox(Y['M'][ad], 0.5)
             r.setdefault('oge', {})[ad] = dict(kutu=list(b), w_mm=round((b[2] - b[0]) * MM, 2), h_mm=round((b[3] - b[1]) * MM, 2))
@@ -478,7 +515,16 @@ def main():
             r['bos_dikey'] = Y.get('bos_dikey')
         for ad, (kazanc, rgb, ok, en) in secim['stil'].items():
             o1.kaydet(rgb, O / f'{ad}_{yer}_954.png')
-            r.setdefault('stil', {})[ad] = dict(altin_kazanc=kazanc, en_kotu_1_12=en, hedef_tuttu=en >= HEDEF, okunurluk=ok)
+            gy, gb = goruntu_yasak(rgb, zeminler[ad])
+            # gorunen doku etkisi: dokulu ve dokusuz boyama farki, altin pikselleri (alfa > 0.9) luma
+            rgb0 = boya(secim['Y'], secim['model'], zeminler[ad], kazanc, td, doku_kapali=True)
+            tumm = np.maximum.reduce([secim['Y']['M'][k] for k in secim['Y']['M']]) > 0.9
+            dL = lum(rgb.astype(np.float32))[tumm] - lum(rgb0.astype(np.float32))[tumm]
+            Lg = lum(rgb0.astype(np.float32))[tumm]
+            r.setdefault('stil', {})[ad] = dict(altin_kazanc=kazanc, en_kotu_kati_1_12=en, hedef_tuttu=en >= HEDEF, okunurluk=ok,
+                                                goruntu_yasak=gy, goruntu=gb,
+                                                doku_gorunen=dict(luma_fark_std=round(float(dL.std()), 2), p1_p99=[round(float(np.percentile(dL, 1)), 2), round(float(np.percentile(dL, 99)), 2)],
+                                                                  goreli_std_yuzde=round(float(dL.std() / max(Lg.mean(), 1) * 100), 2)))
         r['tek_doku'] = dict(Lmed=round(secim['model'].Lmed, 1), doku=secim['model'].m['doku'],
                              isik_not='kabartma a: dh/dy, b: dh/dx katsayisi (ana sembolden); a > 0 ve b > 0 = ust ve sol kenar parlak = isik sol ust')
         R[yer] = r
@@ -486,7 +532,7 @@ def main():
                                                   'guvenli_daireye_pay')}), flush=True)
         if yer == 'HALKALI':
             print('HALKA', json.dumps({k: v for k, v in r['halka'].items() if k not in ('aci_genislik',)})[:900], flush=True)
-        print(yer, 'stil', json.dumps({k: (v['altin_kazanc'], v['en_kotu_1_12']) for k, v in r['stil'].items()}), flush=True)
+        print(yer, 'stil', json.dumps({k: (v['altin_kazanc'], v['en_kotu_kati_1_12'], v['goruntu']['gercek_pay'], v['doku_gorunen']['goreli_std_yuzde']) for k, v in r['stil'].items()}), flush=True)
     # onizleme: ust satir halkali, alt satir halkasiz
     s1 = o2.onizleme([sonuc['HALKALI']['stil'][a][1] for a, _ in STILLER])
     s2 = o2.onizleme([sonuc['HALKASIZ']['stil'][a][1] for a, _ in STILLER])
@@ -498,9 +544,10 @@ def main():
     g = dict(yasak_0=all(sum(R[y]['yasak_piksel'].values()) == 0 for y in ('HALKALI', 'HALKASIZ')),
              cakisma_0=all(not R[y]['cakisma'] for y in ('HALKALI', 'HALKASIZ')),
              kontrast=all(v['hedef_tuttu'] for y in ('HALKALI', 'HALKASIZ') for v in R[y]['stil'].values()),
+             goruntu_yasak_0=all(sum(v['goruntu_yasak'].values()) == 0 for y in ('HALKALI', 'HALKASIZ') for v in R[y]['stil'].values()),
              sonsuz=all(R[y]['sonsuz']['en_ince_px'] >= SONSUZ_MIN and R[y]['sonsuz']['gecti'] for y in ('HALKALI', 'HALKASIZ')),
              halka_govde=h['govde_min'] >= 4.0,
-             uc=all(any(s_ >= 19 and s_ <= 21 and w >= 1.5 for s_, w in v) for v in h['uc'].values()),
+             uc=all(w >= 1.5 for w in h['uc_20px'].values()),
              sembol_B_15=R['HALKASIZ']['sembol_V2_kazanc_yuzde'] >= 15)
     R['kapi'] = g
     (O / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=float))
