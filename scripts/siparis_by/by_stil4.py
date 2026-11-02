@@ -65,7 +65,8 @@ DIKIS_DE, DIKIS_GRAD = 3.0, 1.5   # ONERI (Serdar onayi yok): dikis renk basamag
 UZAT = round(5400 - 3000 * K)   # 900: kemer uzatma bandi (12x18 px) = tuval - eski 8x10 x1,5; tuval tam dolar (eklenen yeni doku bandi yok)
 UZAT_Y8 = 1250         # kesim satiri (eski 8x10): kemerin DUZ bolumu ic kemer cy 1037 ile on duzlemin en ust noktasi 1463 (sol kenar) arasi
 #                        (olcum 2 Kas kemer_geo); 1060-1440 satirlarinda kemer sutun medyani satirdan satira en cok 8-12 seviye (doku), ic kemer 5
-UZAT_KAYNAK = 300      # F7 it. 2: ayna doseme kaynagi, kesim satirinin ustunde 300 satir (12x18; kemer duz bolumu 1555-2194, ys 1875)
+SPEKTRUM_TOHUM = 20261102   # Layers bant spektral sentez tohumu (tekrarlanabilirlik)
+UZAT_KAYNAK = 300      # F7: bant doku olcegi kaynak seridi (it. 1'de ayna kaynagiydi), kesim satirinin ustunde 300 satir (12x18; kemer duz bolumu 1555-2194, ys 1875)
 UZAT_ORT = 45          # uzatma bandi sutun rengi: kesim satirinin +-45 satiri (12x18) sutun medyani (ONERI)
 UZAT_GECIS = 180       # bant <-> eski piksel gecisi (12x18 satir, smoothstep; ONERI). F6 it. 1 (yerel) 60: eski kemer dokusu (burusuk) ile
 #                        sentez dokusu (yeni kagit) arasi sinir yakin planda seciliyordu (kapilar PASS); it. 2: 180 (~0,6 inc) yumusak gecis
@@ -1179,7 +1180,7 @@ SERIT_GRAD = 0.20         # ONERI: (dikey / yatay gradyan) orani uzatilan bolged
 
 
 def serit_doku(B, mask, ys, D):
-    """Layers kemer seritleri (sol x < 1800, sag x >= 1800; kemer ici, oge disi): UZATILAN bolge [ys, ys + D) ile KAYNAK [ys - D', ys)
+    """Layers kemer seritleri (sol x < 1800, sag x >= 1800; kemer ici, oge disi): UZATILAN bolge (gecisler dahil) [ys - 180, ys + D + 180) ile KAYNAK [ys - D', ys)
     (D' = min(D, 300)) arasinda yuksek frekans std (lum - Gauss 6) ve ortalama |dy| / ortalama |dx| oranlari. D = 0 ise uzatma yok."""
     if D <= 0:
         return dict(uzatma=0, pass_=True)
@@ -1188,7 +1189,7 @@ def serit_doku(B, mask, ys, D):
     Dk = min(D, 300); r = {}; ok = True
     for yan, sl in (("sol", slice(0, 1800)), ("sag", slice(1800, 3600))):
         olc = {}
-        for ad, (a0, a1) in (("kaynak", (ys - Dk, ys)), ("uzatilan", (ys, ys + D))):
+        for ad, (a0, a1) in (("kaynak", (ys - Dk, ys)), ("uzatilan", (ys - UZAT_GECIS, ys + D + UZAT_GECIS))):
             m = mask[a0:a1, sl]
             if m.sum() < 1000:
                 olc[ad] = None; continue
@@ -1216,24 +1217,42 @@ def layers_aile(e, zemB, bp, S, s8, f8, out, etiket, yakin):
     ust = np.full((HT, 3600, 3), np.nan, np.float32)
     ust[:ys] = ust0[:ys]; ust[ys + D:] = ust0[ys:]
     if D > 0:
-        # F7 it. 2 (Merkez incelemesi 2 Kas, KRITIK): F6 bandi (sutun medyani + yeni doku yuksek frekansi) kemer seritlerinde dokuyu
-        # silip dikey cizgiye ceviriyordu (doku sapmasi 2,5 -> 0,8; dikey / yatay gradyan 1,0 -> 0,5). Yeni: bant, kesim satirinin
-        # hemen ustundeki ESKI kemer satirlarindan (UZAT_KAYNAK satir, kemerin duz bolumu) AYNA doseme ile dolar (Serdar onayi:
-        # "gercek dokudan dose ya da yansit"); ust birlesim aynada kesintisiz, alt birlesim UZAT_GECIS satir smoothstep.
-        Lk = UZAT_KAYNAK
-        kay_ = ust0[ys - Lk:ys]
-        n_ = D + UZAT_GECIS
-        i_ = np.arange(n_) % (2 * Lk)
-        sira = np.where(i_ < Lk, Lk - 1 - i_, i_ - Lk)
-        sent = kay_[sira]
-        s0, s1 = ys, ys + n_
-        tt = np.ones(n_, np.float32)
+        # F7 Layers it. 2 (bagimsiz inceleme 2 Kas, KRITIK): it. 1'deki AYNA doseme gorunur simetri motifi birakti (eksen korelasyonu
+        # 0,92-0,99, ayni leke 5 kez). Kopya / ayna YOK: bant = sutun medyani (kemerin dikey golge yapisi; F6 ile ayni) + YENI zemin
+        # dokusunun yuksek frekansi (sigma 6), SUTUN BASINA kaynak seridin (kesim satiri ustu 300 satir, dikey yapi cikarilmis) yuksek
+        # frekans std'sine olceklenmis. F6 sorunu (Merkez: doku sapmasi 2,5 -> 0,8) olceksiz zayif dokuydu. Ust ve alt birlesim UZAT_GECIS.
+        # it. 2 yerel deneme: yeni zemin dokusu olceklenince std tuttu ama dikey / yatay gradyan 0,26-0,29 (kaynak 0,49-0,50; farkli
+        # spektrum). Bu yuzden doku KAYNAK seridin kendi guc spektrumundan RASTGELE FAZLA uretilir (spektral sentez: ayni std ve gradyan
+        # istatistigi, kopya / tekrar / ayna yok). Her 300 satirlik parca bagimsiz uretim; parcalar 60 satir guc korumali (cos / sin) gecis.
+        prof = np.median(ust0[ys - UZAT_ORT:ys + UZAT_ORT], 0)
+        s0, s1 = ys - UZAT_GECIS, ys + D + UZAT_GECIS
+        Lk_ = lum(ust0[ys - UZAT_KAYNAK:ys]); hk = Lk_ - cv2.GaussianBlur(Lk_, (0, 0), 6)
+        hk = (hk - hk.mean(0, keepdims=True)).astype(np.float64)              # dikey yapi (sutun golgesi) cikar: yalniz doku
+        amp = np.abs(np.fft.rfft2(hk)); rng = np.random.default_rng(SPEKTRUM_TOHUM)
+        amp[:, :hk.shape[1] // CIZGI_PEN + 1] = 0      # yatayda CIZGI_PEN (240 px) ustu dalga = yatay cizgi bileseni (yerel: satir 2708'de 1,326)
+        n_, P_, O_ = s1 - s0, hk.shape[0], 60
+        doku_ = np.zeros((n_ + P_, hk.shape[1])); y_ = 0; onceki = None
+        while y_ < n_:
+            par = np.fft.irfft2(amp * np.exp(1j * np.angle(np.fft.rfft2(rng.standard_normal(hk.shape)))), s=hk.shape)
+            if onceki is None:
+                doku_[y_:y_ + P_] = par
+            else:
+                t = (np.arange(O_) + 0.5) / O_ * np.pi / 2
+                doku_[y_:y_ + O_] = doku_[y_:y_ + O_] * np.cos(t)[:, None] + par[:O_] * np.sin(t)[:, None]
+                doku_[y_ + O_:y_ + P_] = par[O_:]
+            onceki = par; y_ += P_ - O_
+        doku_ = doku_[:n_]
+        g_ = np.clip(hk.std(0) / np.maximum(doku_.std(0), 1e-6), 0.5, 2.0)    # sutun basina std esitleme (seritler farkli)
+        doku_ = doku_ * g_[None]
+        sent = prof[None] + doku_.astype(np.float32)[:, :, None]
+        tt = np.ones(s1 - s0, np.float32)
         r_ = np.arange(UZAT_GECIS, dtype=np.float32) / UZAT_GECIS; sm = r_ * r_ * (3 - 2 * r_)
-        tt[-UZAT_GECIS:] = sm[::-1]
+        tt[:UZAT_GECIS] = sm; tt[-UZAT_GECIS:] = sm[::-1]
         eskiler = np.where(np.isnan(ust[s0:s1]), sent, ust[s0:s1])
         ust[s0:s1] = eskiler * (1 - tt[:, None, None]) + sent * tt[:, None, None]
+        olcek_bilgi = dict(yontem='spektral sentez (kaynak serit, rastgele faz)', tohum=SPEKTRUM_TOHUM, sutun_olcek_medyan=round(float(np.median(g_)), 3))
     else:
-        s0 = s1 = ys
+        s0 = s1 = ys; olcek_bilgi = None
     nan_px = int(np.isnan(ust).any(2).sum())
     ust = np.nan_to_num(ust)
     g = kemer_geo(e)
@@ -1333,7 +1352,7 @@ def layers_aile(e, zemB, bp, S, s8, f8, out, etiket, yakin):
              kemer_ici_cizgi=dict(max=round(k_max, 3), satir=k_y, esik=round(k_esik, 3), taban_eski_kemer=round(k0_max, 3), taban_satir=k0_y),
              dikis_yerel=dk, kenar_gradyan_orani_p99=round(g_or, 3) if g_or else None,
              bosluk=dict(eski_8x10=bo8, yeni=bo, tolerans=BOSLUK_TOL, oran_bagil=round(bo["oran"] / bo8["oran"], 4) if bo["oran"] else None, pass_=bo_ok),
-             oge_kemer_kesisim_px=oge_kemer, sift_ust=su, sift_alt=sa, serit_doku=sd)
+             oge_kemer_kesisim_px=oge_kemer, sift_ust=su, sift_alt=sa, serit_doku=sd, bant_doku_olcek=olcek_bilgi)
     r["pass_"] = bool(kes == 0 and nan_px == 0 and kayip == 0 and float(cek_fark.max()) <= 1.0 and oge_kemer == 0
                       and su.get("pass_", False) and sa.get("pass_", False) and c_max <= CIZGI_ESIK and k_max <= k_esik + 1e-6
                       and dk["max"] is not None and dk["max"] <= DIKIS_YEREL_ESIK and g_or is not None and g_or <= DIKIS_GRAD
