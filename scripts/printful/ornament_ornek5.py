@@ -201,9 +201,11 @@ def ayarla(tur, carpan=None):
         L_ana = float(lum((BRONZ['ana'] * carpan)[None])[0])
 
         def son(ad, cc0, cc):
-            if ad not in YAZI:
+            if ad not in YAZI + KUCUK:
                 return cc
-            out = cc0 if pv == 'P2' else np.minimum(cc, cc0)
+            # kucuk burclar (gercek kaynakla olcum): parlak kabartma bronz acik ucuna ciktigi icin kati kontrast tutmuyordu
+            # (AGED_PAPYRUS kucuk_sag 3.94); yazi gibi: doku yalniz koyulastirir, acik uc ana ton (P2'de de kabartma korunur)
+            out = cc0 if (pv == 'P2' and ad in YAZI) else np.minimum(cc, cc0)
             L = lum(out)
             return out * np.where(L > L_ana, L_ana / np.maximum(L, 1e-3), 1.0)[..., None]
         o4.OGE_SON = son
