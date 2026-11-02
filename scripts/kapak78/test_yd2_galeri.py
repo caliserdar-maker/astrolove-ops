@@ -163,7 +163,7 @@ def main():
         fi = Itici(h); o4 = t0 / "o4"; o4.mkdir()
         rc, R4 = kos(T10.Coklu({LID: fi}), hz, o4, kuru=False, plan=t0 / "PLAN.json", damga=R["plan_damga"])
         kontrol(f"yazim yd2: ilk yukleme kapagi iterse ilk yuklemeden sonra DUR (yukleme {fi.n_yukle}, silme {len(fi.silinenler)}, rc {rc})",
-                rc != 0 and fi.n_yukle == 1 and len(fi.silinenler) == 2 and not any(y[0] == "bag" for y in fi.yaz)   # 2 = on silme (22 > 20)
+                rc != 0 and fi.n_yukle == 1 and not fi.silinenler and not any(y[0] == "bag" for y in fi.yaz)   # inceleme K1: silme kontrolden SONRA
                 and "rank 1" in json.dumps(R4, ensure_ascii=False))
         h5 = ham2(); h5["images"][0]["listing_image_id"] = 99000002
         o5 = t0 / "o5"; o5.mkdir()

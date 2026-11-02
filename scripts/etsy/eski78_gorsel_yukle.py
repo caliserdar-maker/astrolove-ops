@@ -127,12 +127,14 @@ def yalin_plan(cikar, yukle, hedef_n=HEDEF_N, koru=(), eksik_bag=False, bagli=No
     if bagli is not None and toplam > G.IMG_LIMIT:
         on = [c for c in cikar if c not in set(bagli)][:toplam - G.IMG_LIMIT]
     adim = [("bag_deneme",)] if eksik_bag else []
-    adim += [("sil", c) for c in on]
     yk_adim = [("yukle", r["hedef_gorsel"]) for r in yk]
     dok = any(r["islem"] == "DOKUNMA" for r in koru)
-    if dok and yk_adim:   # Merkez GOREV YD2-YUKLE (2 Kas): ILK yuklemeden sonra tek galeri okumasi; kapak itildiyse DUR (8 yukleme daha yok)
-        yk_adim.insert(1, ("dokunma_kontrol",))
-    adim += yk_adim
+    if dok and yk_adim and (len(cikar) + len(koru) + 1) <= G.IMG_LIMIT:
+        # Merkez GOREV YD2-YUKLE (2 Kas) + inceleme K1: ILK yukleme -> tek galeri okumasi (kapak itildiyse DUR) -> SONRA on silme ve
+        # kalan yuklemeler. Kapak itilirse geri donussuz silme yapilmamis olur. Ara galeri: canli + 1 (<= 20), sonra on silme ile <= 20.
+        adim += [yk_adim[0], ("dokunma_kontrol",)] + [("sil", c) for c in on] + yk_adim[1:]
+    else:
+        adim += [("sil", c) for c in on] + yk_adim
     adim += [("dokunma_kontrol",)] if dok else []
     adim += [("bag",)] + [("sil", c) for c in cikar if c not in on] + [("sira_kontrol",)]
     return adim, toplam - len(on)

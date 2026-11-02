@@ -146,8 +146,8 @@ def ilan_isle(api, shop, lid, ham_dir, out, mod):
         govde = {"description": yeni}
         if yt != t0:
             govde["title"] = yt
+        R["yazildi"] = sorted(govde)   # inceleme O2: PATCH'ten ONCE (5xx / zaman asimi: Etsy uygulamis olabilir -> geri alma denenir)
         api.patch(f"/shops/{shop}/listings/{lid}", govde)
-        R["yazildi"] = sorted(govde)
         L1 = api.get(f"/listings/{lid}") or {}
         if L1.get("state") != "active":
             raise Fail(f"yazim sonrasi state {L1.get('state')}")
@@ -181,6 +181,9 @@ def calis(api, shop, a, out):
     if set(ids) - set(yd78):
         raise SystemExit(f"DUR: YD listesinde olmayan ilan {sorted(set(ids) - set(yd78))}")
     sec = [x for x in (ids or yd78) if x not in haric]
+    if a.mod == "geri-al" and not ids:   # inceleme O4: yalniz YEDEK_METIN dosyasi olan ilanlar
+        var = {p.stem.split("_")[-1] for p in pathlib.Path(a.yedek_dir).glob("YEDEK_METIN_*.json")}
+        sec = [x for x in sec if x in var]
     sonuc, t0, fail_seri = [], time.time(), 0
     for i, lid in enumerate(sec, 1):
         r = ilan_isle(api, shop, lid, a.ham_dir if a.mod != "geri-al" else a.yedek_dir, out, a.mod)
@@ -189,7 +192,8 @@ def calis(api, shop, a, out):
         print(f"[{i}/{len(sec)}] %{100 * i // len(sec)} {lid} {r['sonuc']} {r.get('neden', '')} | istek {api.calls} kota {api.remaining} | "
               f"gecen {gec:.0f} sn kalan ~{gec / i * (len(sec) - i):.0f} sn", flush=True)
         fail_seri = fail_seri + 1 if r["sonuc"] in ("FAIL", "BLOK", "KAYMA") else 0
-        if r["sonuc"] in ("KOTA",) or (r["sonuc"] == "FAIL" and r.get("geri_alma") != "TAMAM" and r.get("yazildi")) or fail_seri >= 3:
+        # inceleme O1: yazan modda her FAIL'de kosu durur (otomatik geri alma TAMAM olsa da); O3: kontrol modu 78'in hepsini tarar
+        if r["sonuc"] == "KOTA" or (a.mod != "kontrol" and (r["sonuc"] == "FAIL" or fail_seri >= 3)):
             break
     say = {}
     for r in sonuc:

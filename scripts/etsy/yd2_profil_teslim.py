@@ -93,9 +93,16 @@ def calis(api, shop, a):
         return R
 
 
+def _n(x):
+    """karsilastirma normali (inceleme D): Etsy bos alanlari None / '' arasinda degistirebilir."""
+    return {k: (None if v in ("", None) else v) for k, v in x.items()}
+
+
 def dogrula(once, sonra, hedef_gun, hedef_ad):
-    """AU hedef gunlerde, ad hedefte; diger her sey once ile ayni."""
+    """AU hedef gunlerde, ad hedefte; diger her sey (bos alan normaliyle) once ile ayni; upgrades de ayni."""
     neden = []
+    if (once.get("shipping_profile_upgrades") or []) != (sonra.get("shipping_profile_upgrades") or []):
+        neden.append("upgrades degisti")
     if sonra.get("title") != hedef_ad:
         neden.append(f"ad {sonra.get('title')}")
     h0 = {x["shipping_profile_destination_id"]: x for x in once.get("shipping_profile_destinations") or []}
@@ -109,10 +116,10 @@ def dogrula(once, sonra, hedef_gun, hedef_ad):
                 neden.append(f"AU {gun(y)}")
             x = {k: v for k, v in x.items() if k not in ("min_delivery_days", "max_delivery_days")}
             y = {k: v for k, v in y.items() if k not in ("min_delivery_days", "max_delivery_days")}
-        if x != y:
+        if _n(x) != _n(y):
             neden.append(f"hedef {i} degisti")
     yan = lambda p: {k: v for k, v in p.items() if k not in ("title", "shipping_profile_destinations", "shipping_profile_upgrades")}  # noqa: E731
-    if yan(once) != yan(sonra):
+    if _n(yan(once)) != _n(yan(sonra)):
         neden.append("profil alanlari degisti")
     return neden
 

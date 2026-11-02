@@ -90,6 +90,28 @@ class T(unittest.TestCase):
         self.assertEqual(r["sonuc"], "FAIL"); self.assertEqual(len(api.yaz), 2)
         self.assertEqual(api.yaz[1]["description"], ESKI); self.assertEqual(r["geri_alma"], "TAMAM")
 
+    def test_patch_hata_geri_alma(self):   # inceleme O2: Etsy uygulayip 5xx donerse geri alma denenir
+        api = Sahte()
+        asil = api.patch
+        def patch(path, data, _n=[0]):
+            _n[0] += 1; asil(path, data)
+            if _n[0] == 1:
+                raise SystemExit("HTTP 503")
+        api.patch = patch
+        r = M.ilan_isle(api, "S", "1", self.d, self.d, "yaz")
+        self.assertEqual((r["sonuc"], r.get("geri_alma")), ("FAIL", "TAMAM")); self.assertEqual(api.L["description"], ESKI)
+
+    def test_fail_sonrasi_kosu_durur(self):   # inceleme O1
+        import types
+        (self.d / "yd.csv").write_text("listing_id\n1\n2\n3\n", encoding="utf-8")
+        for x in ("2", "3"):
+            (self.d / f"{x}.json").write_text(json.dumps({"listing": {"description": ESKI}}), encoding="utf-8")
+        api = Sahte(bozuk_okuma=True)
+        a = types.SimpleNamespace(mod="yaz", sadece="", haric="", liste=str(self.d / "yd.csv"), ham_dir=str(self.d), yedek_dir="")
+        M.calis(api, "S", a, self.d)
+        oz = json.loads((self.d / "SONUC.json").read_text())["ozet"]
+        self.assertEqual(oz["yapilmadi"], ["2", "3"])
+
     def test_kota(self):
         api = Sahte(kalan=12); r = M.ilan_isle(api, "S", "1", self.d, self.d, "yaz")
         self.assertEqual((r["sonuc"], api.calls), ("KOTA", 0))
