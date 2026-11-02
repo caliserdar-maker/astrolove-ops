@@ -883,6 +883,7 @@ BOY_AILE7 = {"5x7": "5x7", "8x10": "4x5", "16x20": "4x5", "24x30": "4x5", "11x14
 KES_ORT = 200          # orta_kes bindirme satiri (3600 genislik; ONERI)
 KES_YUMUSAK = 8        # dikis cevresi yumusak gecis (+- satir; ONERI)
 KES_SIGMA = 25.0       # dikis dusuk frekans ayrimi Gauss sigma (px; ONERI)
+KES_ARA = 400          # F7 it. 2: kesim yeri arama araligi (+- satir, ht/2 cevresi; ONERI). Ust / alt 600 satir (kenar bantlari) dokunulmaz
 KENAR_PAY = 0.04       # Serdar 2 Kas: tum ogeler kenardan en az %4 iceride (ust / alt yukseklige, sol / sag genislige gore)
 LAYERS_SINIR = (463, 1660, 2134)   # Layers oge gruplari (eski 8x10 satir): YEAR ONE | sembol | isaret + isim | baslik + tarih.
 #   Olcum 2 Kas, 78 cift by_poster olcek 1: YEAR ONE 297-379, sembol 547-1626, isaret+isim 1695-2096, baslik+tarih 2173-2834 (en genis
@@ -899,7 +900,7 @@ def tuval(ht):
     HT, OY = int(ht), (int(ht) - 4500) // 2
 
 
-def orta_kes(z, ht):
+def orta_kes(z, ht, c=None):
     """3600x5400 zemini ortadan ht satira kisaltir. Ust parca [0, c + O/2), alt parca [c - O/2 + R, H) (R = H - ht); O satirlik
     bindirmede iki parcanin RGB kare farkinin soldan saga en kucuk toplamli yolu (komsu sutunda +-1 satir) secilir; yolun ustu ust parca,
     alti alt parca, +-KES_YUMUSAK satir smoothstep. Donus: (zemin, bilgi)."""
@@ -907,7 +908,7 @@ def orta_kes(z, ht):
     if ht == H:
         return z, dict(kesim=0)
     R, O = H - ht, KES_ORT
-    c = ht // 2
+    c = ht // 2 if c is None else int(c)
     a0 = c - O // 2
     A = z[a0:a0 + O].astype(np.float32); B_ = z[a0 + R:a0 + R + O].astype(np.float32)
     E = ((A - B_) ** 2).sum(2)
@@ -930,8 +931,28 @@ def orta_kes(z, ht):
     out = np.concatenate([z[:a0], np.clip(np.round(orta), 0, 255).astype(np.uint8), z[a0 + R + O:]], 0)
     assert out.shape[0] == ht
     yol_fark = np.sqrt(E[y, np.arange(W)] / 3)
-    return out, dict(kesim=R, bindirme=[int(a0), int(a0 + O)], dikis_satir=[int(a0 + y.min()), int(a0 + y.max())],
+    return out, dict(kesim=R, kesim_merkez=int(c), bindirme=[int(a0), int(a0 + O)], dikis_satir=[int(a0 + y.min()), int(a0 + y.max())],
                      dikis_rgb_fark_ort=round(float(yol_fark.mean()), 2), dikis_rgb_fark_p99=round(float(np.percentile(yol_fark, 99)), 2))
+
+
+def orta_kes_sec(z, ht):
+    """F7 it. 2 (kosu 41418784010: Botanical 3:4 dikis 1,008 > esik 1,0): kesim merkezi ht/2 + k x 100 (k = -4..4; ust / alt 600 satir
+    kenar bandi dokunulmaz) adaylarindan dikis kapisinin PAYI (esik - olcum) en buyuk olan secilir. Kapi ve esik degismez."""
+    if ht == z.shape[0]:
+        zem, b = orta_kes(z, ht)
+        return zem, b, kesim_kapi(z, zem, b)
+    R, O = z.shape[0] - ht, KES_ORT
+    en = None; aday = []
+    for k in range(-KES_ARA // 100, KES_ARA // 100 + 1):
+        c = ht // 2 + 100 * k
+        if c - O // 2 < 600 or c + O // 2 + R > z.shape[0] - 600:
+            continue
+        zem, b = orta_kes(z, ht, c); kk = kesim_kapi(z, zem, b)
+        pay = kk["esik"] - kk["dikis_cizgi_max"]; aday.append([c, round(pay, 3)])
+        if en is None or pay > en[0]:
+            en = (pay, zem, b, kk)
+    en[3]["aday_kesim_pay"] = aday
+    return en[1], en[2], en[3]
 
 
 def kesim_kapi(zem5400, zem, bilgi):
@@ -1023,14 +1044,35 @@ def timeless_aile(e, zem, bp, S, p):
     return son, fark, r
 
 
+CICEK_KAYMA_MAX = 150   # F7 it. 2 (kosu 41418784010: Botanical 4:5 kesisim 463 px, A 55 px): cicek ogeye degmeyene kadar DISARI kayar
+CICEK_KAYMA_ADIM = 6    # (sag ust yukari, sol alt asagi), en cok 150 px (12x18 olcegi, 0,5 inc; ONERI). Kayma rapora yazilir.
+
+
 def botanical_aile(e, zem, bp, S, p, km_e, kk_e):
     km_n, kk_n = kagit(zem)
+    _, fark0 = ogeli_tum(bp, "botanical", zem, S)                      # oge konumlari zeminden bagimsiz (yalniz kaydirma olcumu)
+    yasak = cv2.dilate(fark0.astype(np.uint8), np.ones((17, 17), np.uint8)) > 0   # kapidaki iki 9x9 genisletmenin birlesimi
+    kayma = {}
+
+    def degiyor(m, kt, X, Y):
+        x0, y0, x1, y1 = kt
+        w, h = round((x1 - x0) * K), round((y1 - y0) * K)
+        mm = cv2.resize(m[y0:y1, x0:x1].astype(np.uint8), (w, h), interpolation=cv2.INTER_NEAREST) > 0
+        H_, W_ = yasak.shape
+        a0, b0 = max(0, -X), max(0, -Y); a1, b1 = min(w, W_ - X), min(h, H_ - Y)
+        return int((mm[b0:b1, a0:a1] & yasak[Y + b0:Y + b1, X + a0:X + a1]).sum())
 
     def yerle(ad, kt):
         x0, y0 = kt[0], kt[1]
         if ad == "cicek_sag_ust":
-            return round(kk_n[2] - (kk_e[2] - x0) * K), round(kk_n[1] + (y0 - kk_e[1]) * K)
-        return round(kk_n[0] + (x0 - kk_e[0]) * K), round(kk_n[3] - (kk_e[3] - y0) * K)
+            X, Y, yon = round(kk_n[2] - (kk_e[2] - x0) * K), round(kk_n[1] + (y0 - kk_e[1]) * K), -1
+        else:
+            X, Y, yon = round(kk_n[0] + (x0 - kk_e[0]) * K), round(kk_n[3] - (kk_e[3] - y0) * K), 1
+        d, n0 = 0, degiyor(p[ad], kt, X, Y)
+        while d < CICEK_KAYMA_MAX and degiyor(p[ad], kt, X, Y + yon * d):
+            d += CICEK_KAYMA_ADIM
+        kayma[ad] = dict(kayma_px=yon * d, ilk_kesisim_px=n0, son_kesisim_px=degiyor(p[ad], kt, X, Y + yon * d))
+        return X, Y + yon * d
     out, yer, tum_yeni, kesilen = susleme_tasi(e, zem, p, yerle, lambda tum, m: (tum & ~m) | ~km_e)
     son, fark = ogeli_tum(bp, "botanical", np.clip(out, 0, 255).astype(np.uint8), S)
     har = cv2.dilate(fark.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
@@ -1039,7 +1081,8 @@ def botanical_aile(e, zem, bp, S, p, km_e, kk_e):
     kap = {ad: susleme_kapi(e, son, p[ad], y["kutu_eski"], y["X"], y["Y"], har_o, ki_e) for ad, y in yer.items()}
     kes = int((cv2.dilate(tum_yeni.astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool) & har).sum())
     kd = int((fark & ~km_n).sum())                       # F7 KAPI: oge pikseli kagit disinda (adacayi ustunde) = 0
-    r = dict(yerlesim=yer, kagit_yeni=kk_n, kapi=kap, susleme_oge_kesisim_px=kes, oge_kagit_disi_px=kd, susleme_tuval_disi_px_bilgi=kesilen)
+    r = dict(yerlesim=yer, kagit_yeni=kk_n, kapi=kap, susleme_oge_kesisim_px=kes, oge_kagit_disi_px=kd, susleme_tuval_disi_px_bilgi=kesilen,
+             cicek_kayma=kayma)
     r["pass_"] = bool(all(v["pass_"] for v in kap.values()) and kes == 0 and kd == 0 and set(yer) == {"cicek_sag_ust", "cicek_sol_alt"})
     return son, fark, r
 
@@ -1289,8 +1332,8 @@ def main(argv=None):
         karolar = []
         for aile in aileler:
             tuval(AILE7[aile])
-            zem, kb = orta_kes(zem5400, HT)
-            RA = dict(H=HT, OY=OY, zemin_kesim=kesim_kapi(zem5400, zem, kb))
+            zem, kb, kk_ = orta_kes_sec(zem5400, HT)
+            RA = dict(H=HT, OY=OY, zemin_kesim=kk_)
             if kb.get("kesim"):
                 a0_ = kb["bindirme"][0]
                 yakin.append((f"{stil} {aile} dikis sol", zem[a0_ - 200:a0_ + 400, 0:600]))
