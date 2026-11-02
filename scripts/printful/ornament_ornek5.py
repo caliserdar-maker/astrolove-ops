@@ -38,8 +38,8 @@ ZEMINLER = (('RUBY', 'RUBY_1264.png', 'koyu'), ('BEIGE', 'BEIGE_1264.png', 'acik
 ZEMIN_SHA = {'BEIGE_1264.png': 'a55e7703f65ca3bdaeba6ff5055517f0d4f2ecb2920ee3e5b04d021bbf58d29b',
              'AGED_PAPYRUS_1264.png': '0dfe2f2db5c1996bae7268c77d463b311d85c2b0f7f24d03dc4b2d13b2dd3988'}
 BRONZ = dict(koyu=np.array([40, 24, 6], np.float32), ana=np.array([84, 54, 14], np.float32), acik=np.array([140, 98, 40], np.float32))
-BRONZ_CARPAN = (1.0, 0.92, 0.85, 0.78, 0.70, 0.62)
-ALTIN_KAZANC = (1.0, 1.04, 1.08, 1.12, 1.16, 1.20)
+BRONZ_CARPAN = (1.0, 0.92, 0.85, 0.78, 0.70, 0.62, 0.55, 0.48)
+ALTIN_KAZANC = (1.0, 1.04, 1.08, 1.12, 1.16, 1.20, 1.28, 1.36)
 ACIK_GOLGE = dict(kayma=1.5, sigma=1.2, opak=0.55, koyu=0.45)
 ISIM = ('isim1', 'isim2', 'sonsuz')
 KAPAT_HEDEF = True
@@ -358,7 +358,9 @@ def main():
     pp = o4.poster_profil(K / 'HALKA_BLUE_16x20.png')
     ana0 = np.asarray(Image.open(K / 'CANCER_LIBRA_ana.png').convert('RGBA'), np.float32)
     ana0[..., 3] /= 255.0
-    kanit = {'kaynak_tam_boy_onarimsiz': delik_say(ana0[..., 3]), 'kaynak_tam_boy_px': [int(ana0.shape[1]), int(ana0.shape[0])]}
+    k_tam = int(round(9 * ana0.shape[1] / 1600)) | 1                  # kapanis cekirdegi gorsel boyuyla olceklenir (1600 px'te 9)
+    kanit = {'kaynak_tam_boy_onarimsiz': delik_say(ana0[..., 3], k_tam), 'kaynak_tam_boy_px': [int(ana0.shape[1]), int(ana0.shape[0])],
+             'kaynak_tam_boy_cekirdek': k_tam}
     ana0 = o1.kirp(ana0, ana0[..., 3], pad=2)
     if ana0.shape[1] > 1600:
         r_, a_ = o1.rgba_olcek(ana0, 1600 / ana0.shape[1]); ana0 = np.dstack([r_, a_])
