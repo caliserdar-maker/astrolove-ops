@@ -1,0 +1,400 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/1553/availability?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "catalog_variant_id": 49313,
+    "techniques": [
+     {
+      "technique": "embroidery",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     },
+     {
+      "technique": "dtfilm",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/49313"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 49314,
+    "techniques": [
+     {
+      "technique": "embroidery",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     },
+     {
+      "technique": "dtfilm",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/49314"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 49315,
+    "techniques": [
+     {
+      "technique": "embroidery",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     },
+     {
+      "technique": "dtfilm",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/49315"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 49316,
+    "techniques": [
+     {
+      "technique": "embroidery",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     },
+     {
+      "technique": "dtfilm",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/49316"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 49317,
+    "techniques": [
+     {
+      "technique": "embroidery",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     },
+     {
+      "technique": "dtfilm",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/49317"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 49318,
+    "techniques": [
+     {
+      "technique": "embroidery",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     },
+     {
+      "technique": "dtfilm",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/49318"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 49319,
+    "techniques": [
+     {
+      "technique": "embroidery",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     },
+     {
+      "technique": "dtfilm",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/49319"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 49320,
+    "techniques": [
+     {
+      "technique": "embroidery",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     },
+     {
+      "technique": "dtfilm",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/49320"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 49321,
+    "techniques": [
+     {
+      "technique": "embroidery",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     },
+     {
+      "technique": "dtfilm",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/49321"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 49322,
+    "techniques": [
+     {
+      "technique": "embroidery",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     },
+     {
+      "technique": "dtfilm",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/49322"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 49323,
+    "techniques": [
+     {
+      "technique": "embroidery",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     },
+     {
+      "technique": "dtfilm",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/49323"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 49324,
+    "techniques": [
+     {
+      "technique": "embroidery",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     },
+     {
+      "technique": "dtfilm",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/49324"
+     }
+    }
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 12,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/1553/availability?limit=100&selling_region_name=worldwide"
+   },
+   "product": {
+    "href": "https://api.printful.com/v2/catalog-products/1553"
+   }
+  },
+  "filter_settings": [
+   {
+    "name": "id",
+    "value": "1553"
+   },
+   {
+    "name": "limit",
+    "value": "100"
+   },
+   {
+    "name": "selling_region_name",
+    "value": "worldwide"
+   }
+  ]
+ }
+}

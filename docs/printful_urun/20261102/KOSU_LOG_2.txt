@@ -1,0 +1,43 @@
+KARGO plani 990 istek
+[kargo 25/990 %2] gecen 32s kalan ~1269s
+[kargo 50/990 %5] gecen 67s kalan ~1267s
+[kargo 75/990 %7] gecen 98s kalan ~1203s
+[kargo 100/990 %10] gecen 132s kalan ~1175s
+[kargo 125/990 %12] gecen 164s kalan ~1137s
+[kargo 150/990 %15] gecen 197s kalan ~1107s
+[kargo 175/990 %17] gecen 230s kalan ~1074s
+[kargo 200/990 %20] gecen 262s kalan ~1037s
+[kargo 225/990 %22] gecen 295s kalan ~1005s
+[kargo 250/990 %25] gecen 331s kalan ~982s
+[kargo 275/990 %27] gecen 359s kalan ~933s
+[kargo 300/990 %30] gecen 385s kalan ~887s
+[kargo 325/990 %32] gecen 417s kalan ~854s
+[kargo 350/990 %35] gecen 451s kalan ~825s
+[kargo 375/990 %37] gecen 484s kalan ~794s
+[kargo 400/990 %40] gecen 517s kalan ~764s
+[kargo 425/990 %42] gecen 551s kalan ~732s
+[kargo 450/990 %45] gecen 584s kalan ~701s
+[kargo 475/990 %47] gecen 617s kalan ~669s
+[kargo 500/990 %50] gecen 654s kalan ~641s
+[kargo 525/990 %53] gecen 690s kalan ~611s
+[kargo 550/990 %55] gecen 723s kalan ~579s
+[kargo 575/990 %58] gecen 754s kalan ~544s
+[kargo 600/990 %60] gecen 783s kalan ~509s
+[kargo 625/990 %63] gecen 813s kalan ~475s
+[kargo 650/990 %65] gecen 847s kalan ~443s
+[kargo 675/990 %68] gecen 882s kalan ~412s
+[kargo 700/990 %70] gecen 919s kalan ~380s
+[kargo 725/990 %73] gecen 959s kalan ~350s
+[kargo 750/990 %75] gecen 1003s kalan ~321s
+[kargo 775/990 %78] gecen 1040s kalan ~288s
+[kargo 800/990 %80] gecen 1075s kalan ~255s
+[kargo 825/990 %83] gecen 1113s kalan ~222s
+[kargo 850/990 %85] gecen 1151s kalan ~189s
+[kargo 875/990 %88] gecen 1187s kalan ~156s
+[kargo 900/990 %90] gecen 1220s kalan ~122s
+[kargo 925/990 %93] gecen 1258s kalan ~88s
+[kargo 950/990 %95] gecen 1291s kalan ~54s
+[kargo 975/990 %98] gecen 1323s kalan ~20s
+[kargo 990/990 %100] gecen 1339s kalan ~0s
+ISTEK 1015 | POST yollar ['/v2/shipping-rates']
+SECILEN satir 205

@@ -1,0 +1,140 @@
+{
+ "istek": {
+  "yontem": "GET",
+  "yol": "/v2/catalog-products/656/availability?selling_region_name=worldwide",
+  "govde": null
+ },
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "catalog_variant_id": 25241,
+    "techniques": [
+     {
+      "technique": "digital",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/25241"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 16366,
+    "techniques": [
+     {
+      "technique": "digital",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/16366"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 16367,
+    "techniques": [
+     {
+      "technique": "digital",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/16367"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 25242,
+    "techniques": [
+     {
+      "technique": "digital",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/25242"
+     }
+    }
+   },
+   {
+    "catalog_variant_id": 16465,
+    "techniques": [
+     {
+      "technique": "digital",
+      "selling_regions": [
+       {
+        "name": "worldwide",
+        "availability": "in stock",
+        "placement_option_availability": []
+       }
+      ]
+     }
+    ],
+    "_links": {
+     "variant": {
+      "href": "https://api.printful.com/v2/catalog-variants/16465"
+     }
+    }
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 5,
+   "limit": 100,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/656/availability?limit=100&selling_region_name=worldwide"
+   },
+   "product": {
+    "href": "https://api.printful.com/v2/catalog-products/656"
+   }
+  },
+  "filter_settings": [
+   {
+    "name": "id",
+    "value": "656"
+   },
+   {
+    "name": "limit",
+    "value": "100"
+   },
+   {
+    "name": "selling_region_name",
+    "value": "worldwide"
+   }
+  ]
+ }
+}
