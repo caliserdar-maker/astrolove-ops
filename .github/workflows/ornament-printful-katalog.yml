@@ -4,11 +4,13 @@ name: ornament-printful-katalog
 # Token: Drive TEMP/PRINTFUL_TOKEN.json (printful-kupa-15oz deseni, maskeli, ciktiya yazilmaz).
 # Cikti: Drive TEMP/ORNAMENT_PRINTFUL_20261102/ (CSV, MD, ham/) + dal ornament-printful-katalog docs/ornament/ (normal commit).
 # mod=rapor: API'ye gitmez, daldaki docs/ornament/ham'dan raporu yeniden uretir.
+# mod=ek (Serdar 2 Kas onayi): yalniz v2'de olan urunler (1664, 1729) icin GET + POST /v2/shipping-rates; daldaki ham'a ekler.
+#   Bu mod dal ornament-printful-katalog'dan tetiklenir (ref=ornament-printful-katalog).
 on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "tam (API oku + rapor) / rapor (daldaki ham JSON'dan, API yok)"
+        description: "tam (API oku + rapor) / ek (1664/1729 v2 kargo + rapor) / rapor (daldaki ham JSON'dan, API yok)"
         default: "tam"
 permissions:
   contents: write
@@ -33,8 +35,9 @@ jobs:
           python-version: "3.12"
       - name: Girdi
         run: |
-          case "$MOD" in tam|rapor) ;; *) echo "::error::mod tam ya da rapor ($MOD)"; exit 1;; esac
-          if [ "$MOD" = rapor ] && [ ! -f s/docs/ornament/ham/_adaylar.json ]; then echo "::error::dalda ham yok"; exit 1; fi
+          case "$MOD" in tam|ek|rapor) ;; *) echo "::error::mod tam, ek ya da rapor ($MOD)"; exit 1;; esac
+          if [ "$MOD" != tam ] && [ ! -f s/docs/ornament/ham/_adaylar.json ]; then echo "::error::dalda ham yok"; exit 1; fi
+          echo "ref ${GITHUB_REF_NAME} | betik $(git -C main rev-parse --short HEAD) | dal $(git -C s rev-parse --short HEAD)"
       - name: rclone kur
         timeout-minutes: 5
         run: curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
@@ -49,7 +52,7 @@ jobs:
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "::add-mask::$GOOGLE_CLIENT_SECRET"
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
-          if [ "$MOD" = tam ]; then
+          if [ "$MOD" = tam ] || [ "$MOD" = ek ]; then
             T=$(rclone cat "gdrive:ASTROLOVE/TEMP/PRINTFUL_TOKEN.json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["api_token"].strip())')
             [ -n "$T" ] || { echo "HATA: PRINTFUL_TOKEN.json api_token bos"; exit 1; }
             echo "::add-mask::$T"
@@ -63,6 +66,12 @@ jobs:
           rm -rf s/docs/ornament/ham; mkdir -p s/docs/ornament
           python3 -I main/scripts/printful/ornament_katalog.py oku s/docs/ornament/ham 2>&1 | sed -u "s|${PRINTFUL_TOKEN}|***|g" | tee s/docs/ornament/KOSU_LOG.txt
           k=${PIPESTATUS[0]}; echo "::notice::oku cikis $k"; exit $k
+      - name: Printful ek (1664/1729, yalniz GET + /v2/shipping-rates)
+        if: env.MOD == 'ek'
+        run: |
+          set -o pipefail
+          python3 -I main/scripts/printful/ornament_katalog.py ek s/docs/ornament/ham 2>&1 | sed -u "s|${PRINTFUL_TOKEN}|***|g" | tee s/docs/ornament/KOSU_LOG_EK.txt
+          k=${PIPESTATUS[0]}; echo "::notice::ek cikis $k | $(grep '^EK ISTEK' s/docs/ornament/KOSU_LOG_EK.txt)"; exit $k
       - name: Rapor + dogrulama
         if: always()
         run: |
