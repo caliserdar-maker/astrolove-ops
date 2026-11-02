@@ -56,8 +56,8 @@ jobs:
           set -uo pipefail
           DAMGA=$(date -u +%Y%m%d_%H%M)
           echo "DAMGA=$DAMGA" >> "$GITHUB_ENV"
-          python scripts/etsy/ornament_pazar.py --out out
-          kod=$?
+          kod=0
+          python scripts/etsy/ornament_pazar.py --out out || kod=$?
           echo "KOD=$kod" >> "$GITHUB_ENV"
           exit 0
       - name: Drive'a yaz
