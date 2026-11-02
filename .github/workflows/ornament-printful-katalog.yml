@@ -13,6 +13,7 @@ name: ornament-printful-katalog
 #   Cikti Drive TEMP/ORNAMENT_ORNEK_<damga>/ (+ STIL3/) + dal docs/ornament/ornek/<damga>/. Etsy / Printful API istegi yok.
 # mod=ornek2 (Merkez inceleme + Serdar 2 Kas): yalniz STIL3 V2 (scripts/printful/ornament_ornek2.py). Cikti Drive
 #   TEMP/ORNAMENT_ORNEK_<damga>/STIL3_V2/ + dal docs/ornament/ornek/<damga>/STIL3_V2/.
+# mod=ornek3 (Merkez STIL3_V3, Serdar 2 Kas): halkali + halkasiz x 3 zemin (zemin3/V2), scripts/printful/ornament_ornek3.py; cikti STIL3_V3/.
 on:
   workflow_dispatch:
     inputs:
@@ -48,7 +49,7 @@ jobs:
           python-version: "3.13"
       - name: Girdi
         run: |
-          case "$MOD" in tam|ek|rapor|zemin3|ornek|ornek2) ;; *) echo "::error::mod tam, ek, rapor, zemin3, ornek ya da ornek2 ($MOD)"; exit 1;; esac
+          case "$MOD" in tam|ek|rapor|zemin3|ornek|ornek2|ornek3) ;; *) echo "::error::mod tam, ek, rapor, zemin3, ornek, ornek2 ya da ornek3 ($MOD)"; exit 1;; esac
           if [ "$MOD" != tam ] && [ ! -f s/docs/ornament/ham/_adaylar.json ]; then echo "::error::dalda ham yok"; exit 1; fi
           echo "ref ${GITHUB_REF_NAME} | betik $(git -C main rev-parse --short HEAD) | dal $(git -C s rev-parse --short HEAD)"
       - name: rclone kur
@@ -177,6 +178,36 @@ jobs:
           git commit -qm "ornament ornek V2: STIL3_V2 (kosu ${GITHUB_RUN_ID}, $D)" && git push -q origin "HEAD:${DAL}"
           echo "::notice::dal commit $(git rev-parse --short HEAD)"
           exit $k
+      - name: Ornek V3 uret (STIL3_V3) + Drive + dal
+        if: env.MOD == 'ornek3'
+        run: |
+          set -euo pipefail
+          K=/tmp/kay; O=/tmp/ornek/STIL3_V3; mkdir -p $K $O
+          rclone backend copyid gdrive: 17V0yS8Uo0nFJO3QpoUfnSaOWjv_o0x5p "$K/" 1xY_Pcr11EM4pMQYyZynLM_4zyS1GJUjS "$K/" 1FHwFRdgOcN5LGYS5PkGBghmCqJo16t7B "$K/"
+          git -C main fetch -q --depth=1 origin ornek-tek-doku:refs/remotes/origin/ornek-tek-doku siparis-gpt:refs/remotes/origin/siparis-gpt
+          for f in motor/varlik/halka/HALKA_BLUE_16x20.png motor/font/Cinzel.ttf motor/font/EBGaramond-Italic.ttf motor/tek_doku.py; do
+            git -C main show "origin/ornek-tek-doku:$f" > "$K/$(basename $f)"; done
+          git -C main show origin/siparis-gpt:motor_gpt/alfa_ogeler.npz > $K/alfa_ogeler.npz
+          git -C main show origin/siparis-gpt:motor_gpt/girdi78/ana/cancer_libra_alfa.png > $K/cancer_libra_alfa.png
+          cp s/docs/ornament/zemin3/V2/*_1264.png $K/
+          { echo "ornek-tek-doku $(git -C main rev-parse --short origin/ornek-tek-doku)"; echo "siparis-gpt $(git -C main rev-parse --short origin/siparis-gpt)";
+            echo "betik $(git -C main rev-parse --short HEAD)"; } > $O/KAYNAK_COMMIT.txt
+          ls -la $K
+          pip install -q pillow==11.0.0 numpy==2.5.4 opencv-python-headless==5.0.0.93
+          set +e
+          python3 -I main/scripts/printful/ornament_ornek3.py --kaynak $K --cikti $O 2>&1 | tee $O/KOSU_LOG.txt; k=${PIPESTATUS[0]}
+          set -e
+          D=ORNAMENT_ORNEK_$(date -u +%Y%m%d_%H%M)
+          rclone copy /tmp/ornek "gdrive:ASTROLOVE/TEMP/$D" -q
+          echo "::notice::Drive TEMP/$D/STIL3_V3 | betik cikis $k | $(grep '^KAPI' $O/KOSU_LOG.txt || true)"
+          mkdir -p s/docs/ornament/ornek/$D && cp -r /tmp/ornek/. s/docs/ornament/ornek/$D/
+          cd s && git config user.name "astrolove-bot" && git config user.email "astrolove-bot@users.noreply.github.com"
+          git add docs/ornament/ornek
+          DIS=$(git diff --cached --name-only | grep -v '^docs/ornament/ornek/' || true)
+          [ -z "$DIS" ] || { echo "::error::izinli klasor disi: $DIS"; exit 1; }
+          git commit -qm "ornament ornek V3: STIL3_V3 (kosu ${GITHUB_RUN_ID}, $D)" && git push -q origin "HEAD:${DAL}"
+          echo "::notice::dal commit $(git rev-parse --short HEAD)"
+          exit $k
       - name: Printful oku (GET + kargo ucreti)
         if: env.MOD == 'tam'
         run: |
@@ -191,7 +222,7 @@ jobs:
           python3 -I main/scripts/printful/ornament_katalog.py ek s/docs/ornament/ham 2>&1 | sed -u "s|${PRINTFUL_TOKEN}|***|g" | tee s/docs/ornament/KOSU_LOG_EK.txt
           k=${PIPESTATUS[0]}; echo "::notice::ek cikis $k | $(grep '^EK ISTEK' s/docs/ornament/KOSU_LOG_EK.txt)"; exit $k
       - name: Rapor + dogrulama
-        if: always() && env.MOD != 'zemin3' && env.MOD != 'ornek' && env.MOD != 'ornek2'
+        if: always() && env.MOD != 'zemin3' && env.MOD != 'ornek' && env.MOD != 'ornek2' && env.MOD != 'ornek3'
         run: |
           set -o pipefail
           cd s/docs/ornament
@@ -201,7 +232,7 @@ jobs:
           cat PRINTFUL_ORNAMENT.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
           [ $r = 0 ] && [ $d = 0 ]
       - name: Drive + dal (token kontrolu)
-        if: always() && env.MOD != 'zemin3' && env.MOD != 'ornek' && env.MOD != 'ornek2'
+        if: always() && env.MOD != 'zemin3' && env.MOD != 'ornek' && env.MOD != 'ornek2' && env.MOD != 'ornek3'
         run: |
           set -euo pipefail
           cd s
