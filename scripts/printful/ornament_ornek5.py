@@ -542,7 +542,8 @@ def main():
             lb = sum((v['acik_piksel'] or 0) for v in r['leke'].values())
             t = (f'{zad} {s}: bosluk {r["bosluk_px"][0]}/{r["bosluk_px"][1]}/{r["bosluk_px"][2]} px, sembol ust y {r["sembol_kutu"][1]}, isim-guvenli {r["isim_guvenli_daireye_px"]} px\n'
                  f'{r["ton"]}, kontrast {r["en_kotu_kontrast"]} {"PASS" if r["hedef_tuttu"] else "FAIL"}, leke a {la} b {lb}\n'
-                 f'uc < 2 px sag / sol {hu.get("sag", {}).get("ince_2px_mm")} / {hu.get("sol", {}).get("ince_2px_mm")} mm')
+                 f'uc < 2 px sag / sol {hu.get("sag", {}).get("ince_2px_mm")} / {hu.get("sol", {}).get("ince_2px_mm")} mm, '
+                 f'halka gomulu kenar {"%100 (V4)" if s == "V4" else "%20"}')
             for j, line in enumerate(t.split('\n')):
                 d.text((i * (tile + 24) + 6, im.height + 8 + j * 34), line, fill=(20, 20, 20), font=font)
         satirlar.append(b)
@@ -574,7 +575,7 @@ def main():
                 dd.line([((x1_ - kirp[0]) * 2, (y1_ - kirp[1]) * 2), ((x2_ - kirp[0]) * 2, (y2_ - kirp[1]) * 2)], fill=(0, 190, 255), width=3)
                 dd.text(((x2_ - kirp[0]) * 2 - 40, (y2_ - kirp[1]) * 2 - 34), et, fill=(0, 190, 255), font=font)
             c = Image.new('RGB', (im.width, im.height + 44), 'white'); c.paste(im, (0, 0))
-            ImageDraw.Draw(c).text((6, im.height + 6), f'{zad} {s_}', fill=(20, 20, 20), font=font)
+            ImageDraw.Draw(c).text((6, im.height + 6), f'{zad} {s_}, halka gomulu kenar {"%100" if s_ == "V4" else "%20"}', fill=(20, 20, 20), font=font)
             sat.append(c)
         parcalar.append(sat)
     W = sum(c.width for c in parcalar[0]) + 24 * 2
