@@ -5,14 +5,21 @@ Kosular: liste https://github.com/caliserdar-maker/astrolove-ops/actions/runs/41
 kargo https://github.com/caliserdar-maker/astrolove-ops/actions/runs/41469469402 (25 GET + 990 POST /v2/shipping-rates). Ham JSON: ham/.
 TUM_LISTE / SECILEN25 / RAPOR bu ham veriden YEREL yeniden uretildi (API yok; betik scripts/printful/urun_katalog.py tablo / secilen).
 Sinif sayilari bu yuzden KOSU_LOG_1 ("A 3, B 144, C 42", ilk kural) ile farkli: kurallar bagimsiz inceleme bulgulariyla duzeltildi.
+Ek kosu (urun3, Serdar onayi, tek seferlik): https://github.com/caliserdar-maker/astrolove-ops/actions/runs/41476618387
+(64 GET + 30 POST /v2/shipping-rates; log KOSU_LOG_3.txt).
 
-## BILINEN EKSIK (duzeltilmedi; API kosusu gerekir)
+## Ek kosu (urun3) sonucu
 
-- v2 /prices yaniti sayfali (limit 20); betik yalniz ilk sayfayi okudu. 28 urunde WW fiyat kapsami eksik (TUM_LISTE fiyat_kapsam_WW, or. 1: 16/37,
-  1708: 20/96). Bu urunlerde "en ucuz WW" ve kargo icin secilen 6 varyant yalniz okunan varyantlardan. v1 fiyati (en_ucuz_usd_v1) tum varyantlari kapsar.
-  Secilen 25 icinde etkilenen: 1, 2, 3, 358, 656.
-- 534 Jigsaw Puzzle: v1 kategorisi "Collections > New products" oldugu icin kok kategori filtresinde dustu; verisi cekilmedi.
-- Uretim / cikis ulkesi yalniz secilen 25 icin (kargo yanitindan). Kalan 164 urunde yok; v1 bolgeleri uretim ulkesi DEGIL.
+- v2 /prices kalan sayfalari okundu (50 GET). Fiyat kapsami artik tam; yalniz 938 ve 1716 fiyat yanitinda 0/1 (API fiyat vermiyor).
+  Degisen en ucuz WW: 2 21.25 -> 20.76, 172 24.25 -> 23.93, 614 32.25 -> 31.95, 1708 48.48 -> 32.95 (NA de 32.95).
+- Kargo: en ucuz 6 varyanti degisen secilen urunler 1 ve 2; yeni varyantlar icin 30 POST /v2/shipping-rates.
+- 534 Jigsaw Puzzle eklendi (v1 / v2 kategori Collections > New products): B, en ucuz 15.25 USD WW.
+- 900 Ceramic Ornament 2-Side baski sablonu: printfile 845 = 954 x 954 px, 300 dpi (80.8 mm). v2 mockup sablonu (Circle.png)
+  900 ve 881 icin bayt bayt AYNI (sha256 5fe4a06f...). Sablonda: kesikli guvenli daire r 380 px (64.4 mm), duz kenar r 475 px
+  (baski alani kenari). Urun kenari (70 ya da 76 mm) sablonda CIZILI DEGIL. Aciklama: 900 "Circle-shaped diameter 2.99 inc (7.6 cm)",
+  881 "2.76 inc (7 cm)". v1 sablon gorselleri (900: 907652, 881: 905495) farkli URL, indirilmedi (yalniz "circle" adli URL alindi).
+  v2 / v1 sizes: 900 icin olcu tablosu yok (400 / bos).
+- Uretim / cikis ulkesi yalniz secilen 25 icin (kargo yanitindan). Kalan urunlerde yok; v1 bolgeleri uretim ulkesi DEGIL.
 - Malzeme: v1 material alani cogu varyantta bos (API); malzeme_v1 sutunu dolu olanlar.
 
 ## Kapsam ve yontem
