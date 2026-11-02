@@ -1,0 +1,106 @@
+name: yd2-metin
+# YD (1st Anniversary) 2. ASAMA: kargo profili (is=profil; scripts/etsy/yd2_profil_teslim.py) ve EN baslik + aciklama (is=metin;
+# scripts/etsy/yd2_metin_yaz.py, onayli 31 Eki D1-D6 + "Paper Anniversary Card" -> "Paper Anniversary Gift"). Serdar 2 Kas "ok".
+# Betikler DALDA (ref girdisi, varsayilan yd-asama2); bu yml main'de yalniz is akisi (CLAUDE.md: workflow_dispatch main'den).
+# mod kontrol: SALT OKUMA. yaz / geri-al: ETSY'YE YAZAR, onay sozcugu zorunlu (profil: SERDAR_YD2_PROFIL / SERDAR_YD2_PROFIL_GERI_AL;
+# metin: SERDAR_YD2_METIN / SERDAR_YD2_METIN_GERI_AL). Kilit: kilit_bekle.py checkout'tan hemen sonra, token indirmeden ONCE.
+# Kaynak kapisi (metin): canli aciklama = TEMP/YD_ENVANTER_20261026/HAM/<ilan>.json aciklamasi; degilse KAYMA (yazim yok).
+# Cikti Drive TEMP/YD2_YUKLE/<is>_<mod>_<run>_<deneme>/ (SONUC.json, SONUC.csv, YENI_<ilan>.txt, YEDEK_METIN_<ilan>.json).
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      is: {description: "profil | metin", required: true, default: "metin"}
+      mod: {description: "kontrol | yaz | geri-al", required: true, default: "kontrol"}
+      onay: {description: "yazan modlar icin onay sozcugu", required: false, default: ""}
+      sadece: {description: "metin: virgullu listing_id (bos = 78)", required: false, default: ""}
+      haric: {description: "metin: virgullu listing_id, atlanir", required: false, default: ""}
+      yedek_kosu: {description: "metin geri-al: YEDEK_METIN dosyalarinin Drive klasoru (TEMP/YD2_YUKLE altinda ad)", required: false, default: ""}
+      ref: {description: "betik dali / commit", required: true, default: "yd-asama2"}
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Girdi kapisi
+        env: {IS: "${{ inputs.is }}", MOD: "${{ inputs.mod }}", S: "${{ inputs.sadece }}", H: "${{ inputs.haric }}", YK: "${{ inputs.yedek_kosu }}", REF: "${{ inputs.ref }}"}
+        run: |
+          [[ "$IS" =~ ^(profil|metin)$ && "$MOD" =~ ^(kontrol|yaz|geri-al)$ ]] || { echo "::error::is / mod"; exit 1; }
+          [[ "$S" =~ ^([0-9]+(,[0-9]+)*)?$ && "$H" =~ ^([0-9]+(,[0-9]+)*)?$ && "$YK" =~ ^([A-Za-z0-9_]+)?$ ]] || { echo "::error::sadece / haric / yedek_kosu"; exit 1; }
+          [[ "$REF" =~ ^[A-Za-z0-9._/-]{1,80}$ ]] || { echo "::error::ref"; exit 1; }
+          if [ "$IS" = metin ] && [ "$MOD" = geri-al ] && [ -z "$YK" ]; then echo "::error::metin geri-al icin yedek_kosu"; exit 1; fi
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Girdiler + token
+        env: {IS: "${{ inputs.is }}", MOD: "${{ inputs.mod }}", YK: "${{ inputs.yedek_kosu }}"}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out _in/HAM _in/YEDEK
+          if [ "$IS" = metin ]; then
+            if [ "$MOD" = geri-al ]; then
+              rclone copy "gdrive:ASTROLOVE/TEMP/YD2_YUKLE/$YK" _in/YEDEK --include "YEDEK_METIN_*.json" -q
+              echo "yedek: $(ls _in/YEDEK | wc -l)"
+            else
+              rclone copy "gdrive:ASTROLOVE/TEMP/YD_ENVANTER_20261026/HAM" _in/HAM --include "*.json" --max-depth 1 --transfers 8 -q
+              echo "HAM (26 Eki): $(ls _in/HAM | wc -l)"
+            fi
+          fi
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+      - name: Calis
+        env:
+          IS: ${{ inputs.is }}
+          MOD: ${{ inputs.mod }}
+          ONAY: ${{ inputs.onay }}
+          S: ${{ inputs.sadece }}
+          H: ${{ inputs.haric }}
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set +e -o pipefail
+          if [ "$IS" = profil ]; then
+            python3 scripts/etsy/yd2_profil_teslim.py --mod "$MOD" --onay "$ONAY" --out _out 2>&1 | tee _work/kosu.log
+          else
+            python3 scripts/etsy/yd2_metin_yaz.py --mod "$MOD" --onay "$ONAY" --ham-dir _in/HAM --yedek-dir _in/YEDEK \
+              --sadece "$S" --haric "$H" --out _out 2>&1 | tee _work/kosu.log
+          fi
+          echo "KOD=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+      - name: Token geri yaz + cikti Drive'a
+        if: ${{ always() }}
+        env: {IS: "${{ inputs.is }}", MOD: "${{ inputs.mod }}"}
+        run: |
+          TOKEN_RC=0; OUT_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
+          [ -f _work/kosu.log ] && python3 scripts/guvenlik/log_suz.py < _work/kosu.log > _out/kosu.txt
+          if ls _out/* >/dev/null 2>&1; then
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
+            D="${IS}_${MOD}_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/YD2_YUKLE/$D" --immutable -q && echo "::notice title=YD2::TEMP/YD2_YUKLE/$D/" || OUT_RC=1
+          fi
+          [ "$TOKEN_RC" = 0 ] && [ "$OUT_RC" = 0 ] && [ "${KOD:-1}" = 0 ] || exit 1
+      - if: always()
+        run: rm -rf _work _in ~/.config/rclone
