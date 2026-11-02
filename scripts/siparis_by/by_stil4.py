@@ -65,6 +65,7 @@ DIKIS_DE, DIKIS_GRAD = 3.0, 1.5   # ONERI (Serdar onayi yok): dikis renk basamag
 UZAT = round(5400 - 3000 * K)   # 900: kemer uzatma bandi (12x18 px) = tuval - eski 8x10 x1,5; tuval tam dolar (eklenen yeni doku bandi yok)
 UZAT_Y8 = 1250         # kesim satiri (eski 8x10): kemerin DUZ bolumu ic kemer cy 1037 ile on duzlemin en ust noktasi 1463 (sol kenar) arasi
 #                        (olcum 2 Kas kemer_geo); 1060-1440 satirlarinda kemer sutun medyani satirdan satira en cok 8-12 seviye (doku), ic kemer 5
+UZAT_KAYNAK = 300      # F7 it. 2: ayna doseme kaynagi, kesim satirinin ustunde 300 satir (12x18; kemer duz bolumu 1555-2194, ys 1875)
 UZAT_ORT = 45          # uzatma bandi sutun rengi: kesim satirinin +-45 satiri (12x18) sutun medyani (ONERI)
 UZAT_GECIS = 180       # bant <-> eski piksel gecisi (12x18 satir, smoothstep; ONERI). F6 it. 1 (yerel) 60: eski kemer dokusu (burusuk) ile
 #                        sentez dokusu (yeni kagit) arasi sinir yakin planda seciliyordu (kapilar PASS); it. 2: 180 (~0,6 inc) yumusak gecis
@@ -1104,7 +1105,84 @@ def starlit_aile(zem, bp, S, st):
     yay = np.zeros(fark.shape, bool)
     yay[OY:OY + 4500] = cv2.resize(st["maske"], (3600, 4500), interpolation=cv2.INTER_LINEAR) > 0.05
     kes = int((ogem & yay).sum())
-    return son, fark, dict(cerceve=rc, yay=ry, yay_oge_kesisim_px=kes, pass_=bool(kes == 0))
+    son, yz = yazi_yildiz(son, fark, yay)
+    return son, fark, dict(cerceve=rc, yay=ry, yay_oge_kesisim_px=kes, yazi_yildiz=yz, pass_=bool(kes == 0 and yz["pass_"]))
+
+
+YILDIZ_ESIK = 20.0     # F7 it. 2 (Merkez 2 Kas, Starlit 12x18 x=1652 y=3736 "nokta"): yerel medyandan (31 px) bu kadar parlak (lum) zemin
+YILDIZ_PAY = 0.5       # pikseli yildiz; yazi kutusu cevresi pay = yazi satiri yuksekligi x 0,5 (Merkez). Esik ONERI (olcumle turetilmedi).
+YAZI_KORU = 25         # yazinin kendi isiltisi korunur: oge maskesi 25x25 genisletilir, bu alana dokunulmaz
+
+
+def yazi_yildiz(img, fark, yay):
+    """yazi satirlari (oge satir gruplari, en buyuk alanli grup = sembol HARIC) cevresinde (pay = satir yuksekligi x YILDIZ_PAY) zemin
+    yildizlarini temizler (cv2.inpaint TELEA, 5 px genisletilmis maske). Kapi: temizlik sonrasi ayni olcumle yildiz bileseni 0."""
+    r8 = np.where(fark.any(1))[0]
+    if not r8.size:
+        return img, dict(pass_=False, neden="oge yok")
+    bl = np.split(r8, np.where(np.diff(r8) > 30)[0] + 1)
+    alan = [int(fark[b[0]:b[-1] + 1].sum()) for b in bl]
+    sembol = int(np.argmax(alan))
+    koru = (cv2.dilate(fark.astype(np.uint8), np.ones((YAZI_KORU, YAZI_KORU), np.uint8)) > 0) | (cv2.dilate(yay.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0)
+    bolge = np.zeros(fark.shape, bool); kutular = []
+    for i, b in enumerate(bl):
+        if i == sembol:
+            continue
+        y0, y1 = int(b[0]), int(b[-1]); c = np.where(fark[y0:y1 + 1].any(0))[0]
+        x0, x1 = int(c.min()), int(c.max()); p = int(round((y1 - y0 + 1) * YILDIZ_PAY))
+        Y0, Y1, X0, X1 = max(0, y0 - p), min(fark.shape[0], y1 + p + 1), max(0, x0 - p), min(fark.shape[1], x1 + p + 1)
+        bolge[Y0:Y1, X0:X1] = True; kutular.append([X0, Y0, X1, Y1])
+
+    def yildiz(a):
+        L = lum(a)
+        Y0, X0 = np.where(bolge.any(1))[0], np.where(bolge.any(0))[0]
+        y0, y1, x0, x1 = Y0.min(), Y0.max() + 1, X0.min(), X0.max() + 1
+        Lm = np.zeros_like(L)
+        Lm[y0:y1, x0:x1] = cv2.medianBlur(np.clip(L[y0:y1, x0:x1], 0, 255).astype(np.uint8), 31).astype(np.float32)
+        m = (L - Lm > YILDIZ_ESIK) & bolge & ~koru
+        n, _, st_, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
+        return m, n - 1
+    m, n0 = yildiz(img)
+    out = img
+    if n0:
+        mk = cv2.dilate(m.astype(np.uint8), np.ones((5, 5), np.uint8))
+        mk[koru] = 0
+        out = cv2.inpaint(np.ascontiguousarray(img), mk, 5, cv2.INPAINT_TELEA)
+    _, n1 = yildiz(out)
+    return out, dict(once_yildiz=int(n0), sonra_yildiz=int(n1), temizlenen_px=int(m.sum()), kutu=kutular, esik=YILDIZ_ESIK, pay=YILDIZ_PAY,
+                     pass_=bool(n1 == 0))
+
+
+SERIT_STD = (0.8, 1.25)   # F7 it. 2 serit doku kapisi (ONERI): uzatilan / kaynak yuksek frekans std orani
+SERIT_GRAD = 0.20         # ONERI: (dikey / yatay gradyan) orani uzatilan bolgede kaynaga gore en cok +-%20 farkli
+
+
+def serit_doku(B, mask, ys, D):
+    """Layers kemer seritleri (sol x < 1800, sag x >= 1800; kemer ici, oge disi): UZATILAN bolge [ys, ys + D) ile KAYNAK [ys - D', ys)
+    (D' = min(D, 300)) arasinda yuksek frekans std (lum - Gauss 6) ve ortalama |dy| / ortalama |dx| oranlari. D = 0 ise uzatma yok."""
+    if D <= 0:
+        return dict(uzatma=0, pass_=True)
+    Lb = lum(B); hp = Lb - cv2.GaussianBlur(Lb, (0, 0), 6)
+    gy = np.zeros_like(Lb); gy[1:] = np.abs(np.diff(Lb, axis=0)); gx = np.zeros_like(Lb); gx[:, 1:] = np.abs(np.diff(Lb, axis=1))
+    Dk = min(D, 300); r = {}; ok = True
+    for yan, sl in (("sol", slice(0, 1800)), ("sag", slice(1800, 3600))):
+        olc = {}
+        for ad, (a0, a1) in (("kaynak", (ys - Dk, ys)), ("uzatilan", (ys, ys + D))):
+            m = mask[a0:a1, sl]
+            if m.sum() < 1000:
+                olc[ad] = None; continue
+            olc[ad] = dict(px=int(m.sum()), std=round(float(hp[a0:a1, sl][m].std()), 3),
+                           grad_orani=round(float(gy[a0:a1, sl][m].mean() / max(gx[a0:a1, sl][m].mean(), 1e-6)), 3))
+        if olc["kaynak"] and olc["uzatilan"]:
+            so = olc["uzatilan"]["std"] / max(olc["kaynak"]["std"], 1e-6)
+            go = olc["uzatilan"]["grad_orani"] / max(olc["kaynak"]["grad_orani"], 1e-6)
+            p_ = SERIT_STD[0] <= so <= SERIT_STD[1] and abs(go - 1) <= SERIT_GRAD
+            olc.update(std_orani=round(so, 3), grad_orani_bagil=round(go, 3), pass_=bool(p_))
+        else:
+            olc["pass_"] = False
+        ok = ok and olc["pass_"]; r[yan] = olc
+    r.update(esik=dict(std=list(SERIT_STD), grad=SERIT_GRAD), pass_=bool(ok))
+    return r
 
 
 def layers_aile(e, zemB, bp, S, s8, f8, out, etiket, yakin):
@@ -1117,13 +1195,20 @@ def layers_aile(e, zemB, bp, S, s8, f8, out, etiket, yakin):
     ust = np.full((HT, 3600, 3), np.nan, np.float32)
     ust[:ys] = ust0[:ys]; ust[ys + D:] = ust0[ys:]
     if D > 0:
-        prof = np.median(ust0[ys - UZAT_ORT:ys + UZAT_ORT], 0)
-        Lz = lum(zemB); hp = Lz - cv2.GaussianBlur(Lz, (0, 0), 6)
-        s0, s1 = ys - UZAT_GECIS, ys + D + UZAT_GECIS
-        sent = prof[None] + hp[s0:s1, :, None]
-        tt = np.ones(s1 - s0, np.float32)
+        # F7 it. 2 (Merkez incelemesi 2 Kas, KRITIK): F6 bandi (sutun medyani + yeni doku yuksek frekansi) kemer seritlerinde dokuyu
+        # silip dikey cizgiye ceviriyordu (doku sapmasi 2,5 -> 0,8; dikey / yatay gradyan 1,0 -> 0,5). Yeni: bant, kesim satirinin
+        # hemen ustundeki ESKI kemer satirlarindan (UZAT_KAYNAK satir, kemerin duz bolumu) AYNA doseme ile dolar (Serdar onayi:
+        # "gercek dokudan dose ya da yansit"); ust birlesim aynada kesintisiz, alt birlesim UZAT_GECIS satir smoothstep.
+        Lk = UZAT_KAYNAK
+        kay_ = ust0[ys - Lk:ys]
+        n_ = D + UZAT_GECIS
+        i_ = np.arange(n_) % (2 * Lk)
+        sira = np.where(i_ < Lk, Lk - 1 - i_, i_ - Lk)
+        sent = kay_[sira]
+        s0, s1 = ys, ys + n_
+        tt = np.ones(n_, np.float32)
         r_ = np.arange(UZAT_GECIS, dtype=np.float32) / UZAT_GECIS; sm = r_ * r_ * (3 - 2 * r_)
-        tt[:UZAT_GECIS] = sm; tt[-UZAT_GECIS:] = sm[::-1]
+        tt[-UZAT_GECIS:] = sm[::-1]
         eskiler = np.where(np.isnan(ust[s0:s1]), sent, ust[s0:s1])
         ust[s0:s1] = eskiler * (1 - tt[:, None, None]) + sent * tt[:, None, None]
     else:
@@ -1175,6 +1260,13 @@ def layers_aile(e, zemB, bp, S, s8, f8, out, etiket, yakin):
         (k_max, k_y, k_x), _ = yatay_cizgi(Lb, Mi & ogesiz & kb[:, None], CIZGI_PEN)
     else:
         k_max, k_y, k_x = 0.0, -1, -1
+    # F7 it. 2: bant artik ESKI kemer satirlarinin aynasi; ayni dedektor eski kemer x1,5'te (kesim satiri +-360, F6 tabani) 1,144
+    # olcuyordu (eski dokunun kendisi). Esik = max(CIZGI_ESIK, bu taban); taban ayni kosuda olculur. KAPI DEGISIKLIGI (Merkez'e raporlanir).
+    Mg0 = kemer_geo_maske(g, 4500, 3600, K)
+    Mi0 = cv2.erode(Mg0.astype(np.uint8), np.ones((2 * KEMER_PAY + 1, 2 * KEMER_PAY + 1), np.uint8)) > 0
+    kb0 = np.zeros(4500, bool); kb0[ys - 360:ys + 360] = True
+    (k0_max, k0_y, _), _ = yatay_cizgi(lum(ust0), Mi0 & kb0[:, None], CIZGI_PEN)
+    k_esik = max(CIZGI_ESIK, k0_max)
     dk = dikis_yerel(B, uz, ogesiz, KEMER_RAMPA / 2, 20)
     Lz2 = lum(zemB)
     gB = cv2.Sobel(Lb, cv2.CV_32F, 1, 0) ** 2 + cv2.Sobel(Lb, cv2.CV_32F, 0, 1) ** 2
@@ -1205,6 +1297,7 @@ def layers_aile(e, zemB, bp, S, s8, f8, out, etiket, yakin):
         g8.append((round(rr[0] * K), round(rr[-1] * K)))
     ara = dict(yeni=[g12[i + 1][0] - g12[i][1] - 1 for i in range(3)], eski_x1_5=[g8[i + 1][0] - g8[i][1] - 1 for i in range(3)])
     oge_kemer = int((fBt & Mg).sum())
+    sd = serit_doku(B, Mi & ogesiz, ys, D)
     su = sift_afin(lum(e[:UZAT_Y8]), lum(B[:ys]))
     sa = sift_afin(lum(e[UZAT_Y8:DUZ_Y]), lum(B[ys + D:round(DUZ_Y * K) + D]))
     r = dict(D=D, uzatma=dict(kesim_satiri_12x18=ys, bant_satir=D, sentez_gecis_satir=[s0, s1]),
@@ -1215,14 +1308,15 @@ def layers_aile(e, zemB, bp, S, s8, f8, out, etiket, yakin):
              kaynaksiz_tuval_px=nan_px, oge_aktarim_kayip_px=kayip,
              kemer_kesim=dict(kemer_px_8x10=int(km.sum()), kesilen_px=kes),
              kemer_cekirdek=dict(px=int(cek.sum()), fark_max=round(float(cek_fark.max()), 3)),
-             yatay_cizgi=dict(max=round(c_max, 3), satir=c_y, esik=CIZGI_ESIK), kemer_ici_cizgi=dict(max=round(k_max, 3), satir=k_y),
+             yatay_cizgi=dict(max=round(c_max, 3), satir=c_y, esik=CIZGI_ESIK),
+             kemer_ici_cizgi=dict(max=round(k_max, 3), satir=k_y, esik=round(k_esik, 3), taban_eski_kemer=round(k0_max, 3), taban_satir=k0_y),
              dikis_yerel=dk, kenar_gradyan_orani_p99=round(g_or, 3) if g_or else None,
              bosluk=dict(eski_8x10=bo8, yeni=bo, tolerans=BOSLUK_TOL, oran_bagil=round(bo["oran"] / bo8["oran"], 4) if bo["oran"] else None, pass_=bo_ok),
-             oge_kemer_kesisim_px=oge_kemer, sift_ust=su, sift_alt=sa)
+             oge_kemer_kesisim_px=oge_kemer, sift_ust=su, sift_alt=sa, serit_doku=sd)
     r["pass_"] = bool(kes == 0 and nan_px == 0 and kayip == 0 and float(cek_fark.max()) <= 1.0 and oge_kemer == 0
-                      and su.get("pass_", False) and sa.get("pass_", False) and c_max <= CIZGI_ESIK and k_max <= CIZGI_ESIK
+                      and su.get("pass_", False) and sa.get("pass_", False) and c_max <= CIZGI_ESIK and k_max <= k_esik + 1e-6
                       and dk["max"] is not None and dk["max"] <= DIKIS_YEREL_ESIK and g_or is not None and g_or <= DIKIS_GRAD
-                      and bo_ok and bt_ok)
+                      and bo_ok and bt_ok and sd["pass_"])
     if D > 0:
         yakin.append((f"Layers_B {etiket} alt gecis (sol)", B[s1 - 400:s1 + 200, 0:600]))
     return B, fBt, r
@@ -1374,6 +1468,8 @@ def main(argv=None):
                           oran_hata=round(abs(img.shape[1] / img.shape[0] - Wt / Ht), 6))
                 RB["pass_"] = bool(RB["pass_"] and RB["boyut"] == [Wt, Ht] and RB["kenar"]["pass_"])
                 R["boy"][boy] = RB
+                if boy == "11x14":                                       # Merkez 2 Kas: tam cozunurluk dikisli bir boy
+                    Image.fromarray(img).save(out / f"F7_{stil}_11x14_{Wt}x{Ht}.jpg", quality=95, subsampling=0, dpi=(300, 300))
                 karolar.append((list(BOY_AILE7).index(boy), karo(img, f"{boy}  {Wt}x{Ht}  {'PASS' if RB['pass_'] else 'FAIL'}")))
                 del img, fb
                 bitti += 1
