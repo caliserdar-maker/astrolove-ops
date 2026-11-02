@@ -1,28 +1,28 @@
 name: kupa-eski-sil
-# Eski 7 stil CANCER_LIBRA kupa taslagi 4597843405'i SIL (Serdar onayi 19 Eki 2026). Yalniz bu tek ilan; yayin/Ads yok.
-# Kod: scripts/etsy/kupa_eski_sil.py (once oku: draft + baslik kapisi; tek deleteListing; sonra 404 + 4598525642 draft dogrulamasi).
-# Rapor: Drive TEMP/KUPA_ORCHARD_TASLAK_20261019/KUPA_ESKI_SIL.json. Etsy kilidi: kilit_bekle.py. Kota tabani 10.
+# Eski sade kupa taslagi 4607523667'yi SIL (Serdar 2 Kas onayi; Merkez 2 Kas gece madde 3). Yalniz bu tek ilan; yayin/Ads yok.
+# Kod: scripts/etsy/kupa_sade_eski_sil.py. Sira: kilit -> OKU (draft + baslik + SKU kumesi 1 Kas okumasiyla birebir; ham JSON yedek)
+# -> yedek Drive'a (--immutable) + md5 dogrulamasi -> SIL (yeniden oku, ayni kosullar, TEK deleteListing) -> 404 dogrulamasi.
+# Yedek ya da kosul tutmazsa silme YOK. Rapor + yedek: Drive TEMP/SADE_KUPA_SIL/<run_id>/. Kota tabani 10 (etsy_common.KOTA_SINIRI).
 permissions:
   actions: read
   contents: read
 on:
   workflow_dispatch:
     inputs:
-      onay: { description: "Silinecek ilan numarasini yaz (4597843405); farkliysa kosu durur", required: true, default: "" }
-env:
-  O: "gdrive:ASTROLOVE/TEMP/KUPA_ORCHARD_TASLAK_20261019"
+      onay: { description: "Silinecek ilan numarasini yaz (4607523667); farkliysa kosu durur", required: true, default: "" }
 jobs:
   sil:
     runs-on: ubuntu-latest
     timeout-minutes: 140
     steps:
+      - name: Onay kapisi
+        env: { ONAY: "${{ inputs.onay }}" }
+        run: '[ "$ONAY" = "4607523667" ] || { echo "::error::onay girdisi 4607523667 degil"; exit 1; }'
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/etsy/kilit_bekle.py
-      - name: Onay kapisi
-        run: '[ "${{ inputs.onay }}" = "4597843405" ] || { echo "::error::onay girdisi 4597843405 degil"; exit 1; }'
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - name: Kurulum
@@ -45,19 +45,41 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-      - name: Eski taslagi sil (oku -> sil -> dogrula)
+      - name: 1 Oku + kosul (silme yok)
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
           OUT: _out
-        run: python3 scripts/etsy/kupa_eski_sil.py
-      - name: Drive'a rapor
-        if: ${{ always() }}
-        run: '[ -d _out ] && rclone copy _out "$O" -q && echo "::warning::rapor Drive TEMP/KUPA_ORCHARD_TASLAK_20261019/KUPA_ESKI_SIL.json" || true'
-      - name: Token geri yaz
+        run: python3 scripts/etsy/kupa_sade_eski_sil.py --asama oku
+      - name: 2 Yedek Drive'a + dogrulama (tutmazsa silme yok)
+        run: |
+          set -euo pipefail
+          python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
+          D="gdrive:ASTROLOVE/TEMP/SADE_KUPA_SIL/${GITHUB_RUN_ID}"
+          rclone copy _out "$D" --immutable -q
+          Y=YEDEK_4607523667.json
+          L=$(md5sum "_out/$Y" | cut -d' ' -f1); U=$(rclone md5sum "$D/$Y" | cut -d' ' -f1)
+          echo "yedek md5 yerel $L drive $U"
+          [ -n "$U" ] && [ "$L" = "$U" ] || { echo "::error::Drive yedegi dogrulanamadi; silme yok"; exit 1; }
+          echo "::notice title=SIL::yedek TEMP/SADE_KUPA_SIL/${GITHUB_RUN_ID}/$Y"
+      - name: 3 Sil (yeniden oku, ayni kosullar, tek deleteListing, 404 dogrulamasi)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          OUT: _out
+        run: python3 scripts/etsy/kupa_sade_eski_sil.py --asama sil
+      - name: Rapor Drive'a + token geri yaz
         if: ${{ always() }}
         run: |
-          [ -f _work/ETSY_TOKEN.json.updated ] && rclone copyto _work/ETSY_TOKEN.json "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" && echo "token geri yazildi" || true
+          OUT_RC=0; TOKEN_RC=0
+          if ls _out/* >/dev/null 2>&1; then
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out \
+              && rclone copy _out "gdrive:ASTROLOVE/TEMP/SADE_KUPA_SIL/${GITHUB_RUN_ID}" --ignore-existing -q || OUT_RC=1
+          fi
+          bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
           rm -rf _work ~/.config/rclone
+          [ "$OUT_RC" = 0 ] && [ "$TOKEN_RC" = 0 ] || exit 1
