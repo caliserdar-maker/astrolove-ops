@@ -1,0 +1,23 @@
+KAYNAK {"CANCER_LIBRA_ana.png": "gercek", "cancer_symbol_gold.png": "VEKIL (sha 1a34fa367f20590c)", "libra_symbol_gold.png": "VEKIL (sha 83871d5fd82ebc12)"}
+RUBY V4 altin kazanci 1.12 kontrast 2.96 bosluk [10, 12, 11] sembol [262, 262, 690, 668] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 4.99 5.01 uc2px_mm 9.57
+RUBY A-T1 altin kazanci 1.12 kontrast 3.01 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 5.0 5.01 uc2px_mm 19.12
+RUBY A-T2 altin kazanci 1.12 kontrast 3.01 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 5.0 5.01 uc2px_mm 25.42
+BEIGE_P1 V4 bronz carpani 0.48 kontrast 3.94 bosluk [10, 12, 11] sembol [262, 262, 690, 668] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 4.97 5.02 uc2px_mm 9.57
+BEIGE_P1 A-T1 bronz carpani 1.0 kontrast 5.08 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 4.94 5.01 uc2px_mm 19.12
+BEIGE_P1 A-T2 bronz carpani 1.0 kontrast 5.08 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 4.94 5.01 uc2px_mm 25.42
+BEIGE_P2 V4 bronz carpani 0.48 kontrast 3.94 bosluk [10, 12, 11] sembol [262, 262, 690, 668] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 4.97 5.02 uc2px_mm 9.57
+BEIGE_P2 A-T1 bronz carpani 1.0 kontrast 5.05 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 0.0 5.01 uc2px_mm 19.12
+BEIGE_P2 A-T2 bronz carpani 1.0 kontrast 5.05 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 0.0 5.01 uc2px_mm 25.42
+AGED_PAPYRUS_P1 V4 bronz carpani 0.48 kontrast 3.11 bosluk [10, 12, 11] sembol [262, 262, 690, 668] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 4.96 5.01 uc2px_mm 9.57
+AGED_PAPYRUS_P1 A-T1 bronz carpani 0.92 kontrast 4.54 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 4.98 5.01 uc2px_mm 19.12
+AGED_PAPYRUS_P1 A-T2 bronz carpani 0.92 kontrast 4.54 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 4.98 5.01 uc2px_mm 25.42
+AGED_PAPYRUS_P2 V4 bronz carpani 0.48 kontrast 3.11 bosluk [10, 12, 11] sembol [262, 262, 690, 668] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 4.96 5.01 uc2px_mm 9.57
+AGED_PAPYRUS_P2 A-T1 bronz carpani 0.85 kontrast 4.77 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 0.0 5.01 uc2px_mm 19.12
+AGED_PAPYRUS_P2 A-T2 bronz carpani 0.85 kontrast 4.77 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a {'isim2': 1} leke b 0 doku 0.0 5.01 uc2px_mm 25.42
+UZUN {"isimler": ["ÇAĞLAYANGÜL", "MAXIMILIAN"], "olcek_1_sigar": false, "bilgi": {"hata": "yazi blogu halka ile sigmiyor"}, "aksan": {"ÇAĞLAYANGÜL": {"genislik_px": 306, "ust_buyuk_harf_ustu_px": 7, "alt_taban_alti_px": 8, "not_": "ust > 0: aksan (Ğ breve, Ü nokta) buyuk harf ustune tasar; alt > 0: Ç cengeli taban altina iner"}, "MAXIMILIAN": {"genislik_px": 255, "ust_buyuk_harf_ustu_px": 0, "alt_taban_alti_px": 1, "not_": "ust > 0: aksan (Ğ breve, Ü nokta) buyuk harf ustune tasar; alt > 0: Ç cengeli taban altina iner"}}, "not_": "yalniz bilgi; ana onizlemelerde (EMILY / JAMES) yazi olcegi 1.0. Karar Serdar.", "arama": "isim olcegi 0.30-1.00 ikili arama; logo, bosluk, kucuk burc, tarih ve sembol boyu degismez", "yazi_blogu_sigan_olcek": 0.869, "yazi_blogu_buyuk_harf_mm": 2.07, "yazi_sigan_olcekte_sembol": {"alt": 624.0, "sembol_kaldir_px": 229, "sembol_V4_ust": 261, "hata": "sembol sigmiyor",
+LEKE KANIT {"kaynak_1600_onarimli": 0, "kaynak_1600_yapay_20x20": 400, "yapay_delik_yeri": {"x": 619, "y": 435, "cizgi_yari_genislik_px": 42.2}, "kaynak_tanim": {"kapanis": 9, "ice_px": 5, "kenar_payi": 24, "kucuk_delik_alan_esigi": 2422}, "hedef_V4_onarimsiz": {"sembol": 0, "kucuk_sol": 0, "kucuk_sag": 0, "halka": 0}, "hedef_A_onarimli": {"sembol": 0, "kucuk_sol": 0, "kucuk_sag": 0, "halka": 0}, "yapay_30_delik_sayim": 154, "yazi_logo_bilgi": {"tarih": 0, "isim1": 0, "isim2": 1, "sonsuz": 0}, "yontem": "alfa > 0.5 maskesi 3x3 elips kapanis, sonra 2 px iceri daraltma (kenar yumusatmasi ve ic bukey kose dolgusu disarida); icinde alfa < 0.9 piksel sayisi. alfa >= 0.9 siniri YOK (yalniz (b) olcumunde). Kaynakta onarim 9x9 kapanis + 5 px ice (kenar degismez).", "kapi_yakaliyor": true} HALKA {"tepe_y": 163.0, "sol_x": 134, "sag_x": 817, "ax_yaklasik": 339.8}
+KAPI {"yasak_0": true, "cakisma_0": true, "goruntu_yasak_0": true, "kontrast": false, "bosluk_ge_hedef": true, "leke_a_0": true, "leke_b_0": true, "doku_4_6": true, "isik_4_10_koyu": true, "leke_kapi_yakaliyor": true, "halka_kilit": true} FAIL
+
+real	12m49.873s
+user	11m49.663s
+sys	0m55.589s
