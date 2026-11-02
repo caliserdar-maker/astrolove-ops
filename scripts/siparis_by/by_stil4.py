@@ -1355,6 +1355,20 @@ def main(argv=None):
             dr.text(((i % 3) * 620 + 10, (i // 3) * 680 + 20), ad_, fill=(0, 0, 0), font=_font(24))
         yk.save(out / "F7_YAKIN.jpg", quality=88)
     rap["sonuc"] = "PASS" if all(v["pass_"] for v in rap["stiller"].values()) else "FAIL"
+    oz = []                                                             # F7 tani: FAIL veren kapilar (LOG + F7_OZET.txt; gorsel degismez)
+
+    def fail_yol(d, yol):
+        if isinstance(d, dict):
+            if d.get("pass_") is False:
+                alt = [k for k, v in d.items() if isinstance(v, dict) and v.get("pass_") is False]
+                if not alt:
+                    oz.append(f"FAIL {yol}: " + json.dumps({k: v for k, v in d.items() if not isinstance(v, (dict, list))}, default=str)[:600])
+            for k, v in d.items():
+                if isinstance(v, dict):
+                    fail_yol(v, f"{yol}/{k}")
+    fail_yol(rap["stiller"], "")
+    (out / "F7_OZET.txt").write_text("\n".join(oz) or "FAIL yok", encoding="utf-8")
+    print("\n".join(oz[:40]), flush=True)
     (out / "F7_OLCUM.json").write_text(json.dumps(rap, indent=1, default=lambda x: x.tolist() if hasattr(x, "tolist") else str(x)), encoding="utf-8")
     print(json.dumps({k: v["pass_"] for k, v in rap["stiller"].items()}), rap["sonuc"], flush=True)
     return 0 if rap["sonuc"] == "PASS" else 3
