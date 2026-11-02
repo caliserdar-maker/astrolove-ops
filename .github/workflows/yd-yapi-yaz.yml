@@ -14,6 +14,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
+      ref: {description: "betik ref (bos = main; YD2 2 Kas: yd-asama2 commit, on_property duzeltmesi)", required: false, default: ""}
       mod: {description: "kontrol | yaz | geri-al | profil | profil-geri-al", required: true, default: "kontrol"}
       plan_damga: {description: "kuru kosu no (Drive TEMP/YD_YAPI/KURU_<no>)", required: true}
       sadece: {description: "virgullu listing_id (pilot: tek ilan; bos = plandaki tum ilanlar)", required: false, default: ""}
@@ -38,6 +39,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/etsy/kilit_bekle.py
+      - name: Betikler (ref verilirse yalniz scripts + data ref'ten; .github ve kilit kumesi main)
+        env: {REF: "${{ inputs.ref }}"}
+        run: |
+          set -euo pipefail
+          [ -z "$REF" ] && { echo "betik: main"; exit 0; }
+          [[ "$REF" =~ ^[A-Za-z0-9._/-]{1,80}$ ]] || { echo "::error::ref"; exit 1; }
+          git fetch -q --depth 1 origin "$REF"
+          git checkout -q FETCH_HEAD -- scripts data
+          echo "betik ref: $REF -> $(git rev-parse FETCH_HEAD)"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
