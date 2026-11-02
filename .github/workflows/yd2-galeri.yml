@@ -124,13 +124,14 @@ jobs:
           R = [r for r in T if (not sa or r["listing_id"] in sa) and r["listing_id"] not in ha]   # inceleme K4: haric her zaman uygulanir
           if not R:
               raise SystemExit("kapsamda ilan yok")
-          open(os.environ["GITHUB_ENV"], "a").write("SA_EFF=" + ",".join(r["listing_id"] for r in R) + "\n")
+          open("_work/sa_eff.txt", "w").write(",".join(r["listing_id"] for r in R))   # ayni adimda okunur (GITHUB_ENV sonraki adimda gorunur)
           print(f"haric: {sorted(ha)}")
           open("_work/kapak.txt", "w").writelines(["MANIFEST.csv\n", "ORTAK_Y04.jpg\n"]          # Merkez 27 Eki karar d: Y05 cifte ozel
                                                   + [f"{r['cift']}_Y{k:02d}.jpg\n" for r in R for k in (2, 3, 5, 6, 7, 8, 9, 10)])   # yd2: Y01 yuklenmez
           open("_work/ham.txt", "w").writelines(f"{r['listing_id']}.json\n" for r in R)
           print(f"kapsam: {len(R)} ilan")
           PY
+          SA_EFF=$(cat _work/sa_eff.txt); echo "SA_EFF=$SA_EFF" >> "$GITHUB_ENV"
           K="$T/YD_KAPAK_V1/$KD"
           rclone copy "$K" _in/kapak --files-from _work/kapak.txt --transfers 8 -q
           rclone backend copyid gdrive: "$QD" _work/SET_KONTROL.csv -q
