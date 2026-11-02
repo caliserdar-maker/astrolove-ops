@@ -1,0 +1,8 @@
+RUBY ortanca 5.22 kati 1.93 artis 1.0 yasak 0 leke 0 dhue 0.14 B>=R 0.0 bosluk [20, 20, 20]
+SAPPHIRE ortanca 5.99 kati 2.28 artis 1.0 yasak 0 leke 0 dhue 0.13 B>=R 0.0 bosluk [20, 20, 20]
+EMERALD ortanca 5.56 kati 1.96 artis 1.0 yasak 0 leke 0 dhue 0.13 B>=R 0.0 bosluk [20, 20, 20]
+KAPI {"kontrast_ortanca": true, "goruntu_yasak_0": true, "leke_a_0": true, "leke_a_kaynak_0": true, "renk_sadakati": true, "yerlesim_ayni": true, "artis_yalniz_ruby": true} PASS
+
+real	0m22.897s
+user	0m16.361s
+sys	0m7.130s
