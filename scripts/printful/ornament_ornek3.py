@@ -480,7 +480,7 @@ def main():
             o1.kaydet(rgb, O / f'{ad}_{yer}_954.png')
             r.setdefault('stil', {})[ad] = dict(altin_kazanc=kazanc, en_kotu_1_12=en, hedef_tuttu=en >= HEDEF, okunurluk=ok)
         r['tek_doku'] = dict(Lmed=round(secim['model'].Lmed, 1), doku=secim['model'].m['doku'],
-                             isik_not='kabartma a: dh/dy, b: dh/dx katsayisi (ana sembolden); a < 0 ve b < 0 = isik sol ust')
+                             isik_not='kabartma a: dh/dy, b: dh/dx katsayisi (ana sembolden); a > 0 ve b > 0 = ust ve sol kenar parlak = isik sol ust')
         R[yer] = r
         print(yer, json.dumps({k: r[k] for k in ('yazi_olcek', 'sembol_px', 'sembol_V2_kazanc_yuzde', 'yasak_piksel', 'cakisma',
                                                   'guvenli_daireye_pay')}), flush=True)
