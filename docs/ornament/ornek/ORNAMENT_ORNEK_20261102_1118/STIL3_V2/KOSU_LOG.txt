@@ -1,0 +1,7 @@
+SAPPHIRE_GOLD {"hale_s": 0.0, "altin_kazanc": 1.08, "en_kotu_kontrast": 5.33, "halka_parlaklik_govde": {"min": 151.4, "max": 184.2}}
+EMERALD_GOLD {"hale_s": 0.75, "altin_kazanc": 1.12, "en_kotu_kontrast": 3.31, "halka_parlaklik_govde": {"min": 151.4, "max": 184.2}}
+RUBY_GOLD {"hale_s": 0.0, "altin_kazanc": 1.12, "en_kotu_kontrast": 5.26, "halka_parlaklik_govde": {"min": 151.4, "max": 184.2}}
+SEKIL {"calisma_genisligi": 1200, "olcek": 1.0, "oteleme": [-1, 3], "ncc": 0.9565, "iou": 0.8998, "tolerans2px_ortusme": 0.9859, "ham_fazla": 0.0145, "ana_fazla": 0.0137}
+YERLESIM {"halka_merkez_y": 529.3, "halka_Rc": 303.0, "halka_dis_cap_px": 610.0, "halka_dis_cap_mm": 51.65, "halka_dis_cap_v1": 554.1, "halka_kazanc_yuzde": 10.1, "halka_ust_y": 222, "centik_alt": 216.9, "sembol_px": [378, 358], "sembol_mm": [32.0, 30.31], "sembol_kazanc_yuzde": 9.9, "en_dis_r": 364.3, "guvenli_daireye_pay": 16.0, "ust_min_y": 222, "kenar_payi_gorunen": 49.2, "ihlal": {"halka": false, "sembol": false, "isim1": false, "isim2": false, "sonsuz": false, "kucuk_sol": false, "kucuk_sag": false, "tarih": false}, "cakisma": [], "isim_buyuk_harf_mm": 2.38, "tarih_buyuk_harf_mm": 2.02}
+SONSUZ {"genisletme_hedef_px": 1.25, "acma3_kayip": 0.0, "bilesen": 1, "en_ince_tahmin_px": 3.82}
+KAPI FAIL
