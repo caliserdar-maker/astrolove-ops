@@ -1,0 +1,144 @@
+{
+ "aciklama": "yerel olcum (2 Kas, bagimsiz inceleme sonrasi), kosu 41430887909 ciktilariyla ayni girdiler; betik ornament_ornek.py cizgi_bandi / sablon_delik",
+ "sha256": {
+  "RUBY_1264.png": "c0bddf95d768bd46e9c4672835f8e3e7c5b906ea03da4778b1b155b464604742",
+  "sablon_Circle.png": "5fe4a06f68a638d751a10c78b39298e4eeceb6548e54be6d1112a6186e977ef4"
+ },
+ "sablon": {
+  "gorsel": [
+   1000,
+   1000
+  ],
+  "olcek_3000": 0.3333,
+  "cevrim": "printfile = (x - 87.33) x 1.1559",
+  "delik": {
+   "merkez_printfile": [
+    476.7,
+    163.9
+   ],
+   "ust_alt_printfile": [
+    136.0,
+    192.6
+   ],
+   "cap_printfile": 56.6,
+   "kutu_printfile": [
+    449.3,
+    136.0,
+    505.9,
+    192.6
+   ],
+   "cap_mm": 4.79
+  },
+  "centik_alt_printfile": 216.9,
+  "guvenli_daire": {
+   "sol_printfile": 96.7,
+   "sag_printfile": 857.3,
+   "cap_printfile": 760.6,
+   "cap_mm": 64.4
+  }
+ },
+ "cizgi": {
+  "RUBY": {
+   "kaynak_1264": {
+    "sol": {
+     "isaretli_ort": 0.448,
+     "isaretli_max": 0.81
+    },
+    "orta": {
+     "isaretli_ort": 0.792,
+     "isaretli_max": 1.059
+    },
+    "sag": {
+     "isaretli_ort": 0.399,
+     "isaretli_max": 0.545
+    },
+    "sol_kenara_ozgu_bant": false
+   },
+   "baski_954": {
+    "sol": {
+     "isaretli_ort": 0.152,
+     "isaretli_max": 0.495
+    },
+    "orta": {
+     "isaretli_ort": 0.242,
+     "isaretli_max": 0.603
+    },
+    "sag": {
+     "isaretli_ort": 0.135,
+     "isaretli_max": 0.307
+    },
+    "sol_kenara_ozgu_bant": false
+   },
+   "sonuc": "sol kenara ozgu dikey bant bulunmadi",
+   "gorunen_daire_sol_x_954": 63.5
+  },
+  "SAPPHIRE": {
+   "kaynak_1264": {
+    "sol": {
+     "isaretli_ort": 0.31,
+     "isaretli_max": 0.455
+    },
+    "orta": {
+     "isaretli_ort": 0.724,
+     "isaretli_max": 1.144
+    },
+    "sag": {
+     "isaretli_ort": 0.334,
+     "isaretli_max": 0.492
+    },
+    "sol_kenara_ozgu_bant": false
+   },
+   "baski_954": {
+    "sol": {
+     "isaretli_ort": 0.112,
+     "isaretli_max": 0.292
+    },
+    "orta": {
+     "isaretli_ort": 0.233,
+     "isaretli_max": 0.695
+    },
+    "sag": {
+     "isaretli_ort": 0.11,
+     "isaretli_max": 0.282
+    },
+    "sol_kenara_ozgu_bant": false
+   },
+   "sonuc": "sol kenara ozgu dikey bant bulunmadi",
+   "gorunen_daire_sol_x_954": 63.5
+  },
+  "EMERALD": {
+   "kaynak_1264": {
+    "sol": {
+     "isaretli_ort": 0.672,
+     "isaretli_max": 1.1
+    },
+    "orta": {
+     "isaretli_ort": 1.268,
+     "isaretli_max": 2.189
+    },
+    "sag": {
+     "isaretli_ort": 0.673,
+     "isaretli_max": 1.085
+    },
+    "sol_kenara_ozgu_bant": false
+   },
+   "baski_954": {
+    "sol": {
+     "isaretli_ort": 0.265,
+     "isaretli_max": 0.687
+    },
+    "orta": {
+     "isaretli_ort": 0.433,
+     "isaretli_max": 1.411
+    },
+    "sag": {
+     "isaretli_ort": 0.226,
+     "isaretli_max": 0.798
+    },
+    "sol_kenara_ozgu_bant": false
+   },
+   "sonuc": "sol kenara ozgu dikey bant bulunmadi",
+   "gorunen_daire_sol_x_954": 63.5
+  }
+ }
+}

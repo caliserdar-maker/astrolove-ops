@@ -342,59 +342,65 @@ def kaydet(rgb, f):
 
 
 def cizgi_bandi(f):
-    """RUBY sol kenar dikey cizgi bandi (954 olceginde, zemin baskiya giden haliyle): her satir 61 px yatay kutu ortalamasindan
-    cikarilir (yavas gradyan atilir), sutun ortalamasi alinir (s). Gurultu = orta sutunlarin (300-650) |s| MAD x 1.4826.
-    Bant (betimleyici) = sol kenardan, 9 sutun kayan ortalamasi -1 gurultunun altinda kaldigi sutunlar; ayrica 2 x gurultu esigi. Gorunen daire x >= 63.5."""
-    im = zemin_canva(f)
-    L = lum(im)
-    hp = L - cv2.blur(L, (61, 1))
-    s = hp.mean(0)
-    orta = s[300:650]
-    gur = float(np.median(np.abs(orta - np.median(orta))) * 1.4826)
-    rm = np.convolve(s, np.ones(9) / 9, mode='valid')                   # rm[i] = s[i..i+8] ortalamasi
-    esik = 2 * max(gur, 0.05)
-    koyu = np.nonzero(np.abs(rm[:N // 4]) > esik)[0]
-    x2 = int(koyu.max() + 9) if len(koyu) else 0                        # 2 x gurultu esigini asan bant
-    i = 0
-    while i < N // 4 and rm[i] < -gur:                                  # betimleyici: 9 sutun ortalamasi -1 gurultunun altinda kaldikca
-        i += 1
-    x = i + 4 if i else 0
-    ort = float(s[:max(x, 1)].mean())
-    z = ort / (gur / np.sqrt(max(x, 1)))
-    ic = slice(int(np.ceil(C - RV)), int(C))
-    return dict(yontem='954 olcek, satir yuksek geciren (61 px) sutun ortalamasi', gurultu_luma=round(gur, 3), esik_luma=round(esik, 3),
-                sol_bant_2x_esik_genislik_px=x2, sol_bant_genislik_px=int(x), sol_bant_x=[0, int(x)],
-                sol_bant_ortalama_sapma_luma=round(ort, 3), sol_bant_z=round(float(z), 1), sol_bant_en_buyuk_sapma=round(float(s[:max(x, 1)][np.argmax(np.abs(s[:max(x, 1)]))]), 2),
-                gorunen_daire_sol_x=round(C - RV, 1), daire_icinde=bool(x > C - RV),
-                daire_ici_sol_yari_max_sapma=round(float(np.abs(s[ic]).max()), 2), sutun_0_30=[round(float(v), 2) for v in s[:30]])
+    """Dikey cizgi deseni olcumu (bagimsiz inceleme 2 Kas sonrasi; eski yontem 61 px yatay ortalamada kenar yansitmasi ve vinyet
+    yuzunden kenarda yapay sapma uretiyordu). Kaynak (1264) ve baskiya giden 954 olcekte: ardisik sutun farki d = L[:, x+1] - L[:, x];
+    |d| ortalamasi (cizgi gucu) ve isaretli ortalama (tutarli dikey cizgi) sol 0-63, orta 300-1000 (954: 240-714), sag son 64 sutunda.
+    Kenara ozgu bant = sol bolgenin isaretli ortalamasi ortanin 3 katini asarsa. 954 olcekte gorunen daire x >= 63.5."""
+    im = np.asarray(Image.open(f).convert('RGB'), np.float32)
+    r = {}
+    for ad, a in (('kaynak_1264', im), ('baski_954', cv2.resize(im, (N, N), interpolation=cv2.INTER_AREA))):
+        L = lum(a)
+        W = L.shape[1]
+        d = L[:, 1:] - L[:, :-1]
+        ms = np.abs(d.mean(0))
+        orta = slice(int(W * 0.24), int(W * 0.76))
+        bol = {'sol': ms[:64], 'orta': ms[orta], 'sag': ms[-64:]}
+        r[ad] = {k: dict(isaretli_ort=round(float(v.mean()), 3), isaretli_max=round(float(v.max()), 3)) for k, v in bol.items()}
+        r[ad]['sol_kenara_ozgu_bant'] = bool(bol['sol'].mean() > 3 * bol['orta'].mean())
+    r['sonuc'] = ('sol kenara ozgu dikey bant bulunmadi' if not r['kaynak_1264']['sol_kenara_ozgu_bant'] else 'sol kenarda bant var')
+    r['gorunen_daire_sol_x_954'] = round(C - RV, 1)
+    return r
 
 
 def sablon_delik(K):
-    """Printful Circle sablon gorseli (Actions'ta indirilebildiyse) uzerinde delik adayi."""
+    """Printful Circle sablonu (mockup_templates role=template: 3000 olcekte print_area left/top 262, genislik 2476; gorsel W x W).
+    Baski dosyasi pikseli = (x - 262 s) x 954 / (2476 s), s = W / 3000. Olculenler: delik (merkez ust bolgede yari saydam beyaz bilesen),
+    kesikli guvenli daire (merkez satirindaki ic opak noktalar), delik centiginin alt ucu (merkez sutununda delikten sonraki ilk opak nokta)."""
     f = K / 'sablon_Circle.png'
     if not f.exists():
         return {'durum': 'sablon gorseli yok (indirilemedi)'}
-    im = Image.open(f)
-    a = np.asarray(im.convert('RGBA'), np.float32)
+    a = np.asarray(Image.open(f).convert('RGBA'), np.float32)
     H, W = a.shape[:2]
-    x0, top, pw = 262, 262, 2476                               # mockup_templates role=template print_area (3000x3000)
+    s = W / 3000.0
+    x0, pw = 262 * s, 2476 * s
     k = N / pw
-    A = a[..., 3]
-    L = lum(a[..., :3])
-    bilgi = {'boyut': [W, H], 'mod': im.mode, 'alfa_degerleri': [int(v) for v in np.unique(A)[:6]]}
-    adaylar = []
-    for ad, m in (('opak_alan', A > 128), ('koyu', (L < 100) & (A > 128))):
-        n, lab, st, cen = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
-        for i in range(1, n):
-            cx, cy = cen[i]
-            if abs(cx - 1500) < 300 and top <= cy < top + pw * 0.3 and 30 < st[i, cv2.CC_STAT_AREA] < 60000:
-                adaylar.append(dict(tur=ad, merkez_printfile=[round((cx - x0) * k, 1), round((cy - top) * k, 1)],
-                                    kutu_printfile=[round((st[i, 0] - x0) * k, 1), round((st[i, 1] - top) * k, 1),
-                                                    round((st[i, 0] + st[i, 2] - x0) * k, 1), round((st[i, 1] + st[i, 3] - top) * k, 1)],
-                                    alan_px=int(st[i, cv2.CC_STAT_AREA])))
-    bilgi['adaylar'] = adaylar[:10]
-    bilgi['not'] = 'otomatik aday; gorsel dogrulama gerekir'
-    return bilgi
+    pf = lambda v: round((v - x0) * k, 1)
+    A, Lr = a[..., 3], lum(a[..., :3])
+    cx = int(round(x0 + pw / 2))
+    # delik: yari saydam acik bilesen, merkez sutunda ust %35'te
+    m = (A > 120) & (A < 230) & (Lr > 200)
+    n, lab, st, cen = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
+    aday = [i for i in range(1, n) if abs(cen[i][0] - cx) < 0.05 * W and x0 < cen[i][1] < x0 + 0.35 * pw and st[i, cv2.CC_STAT_AREA] > 50]
+    r = {'gorsel': [W, H], 'olcek_3000': round(s, 4), 'cevrim': f'printfile = (x - {x0:.2f}) x {k:.4f}'}
+    if aday:
+        i = max(aday, key=lambda i: st[i, cv2.CC_STAT_AREA])
+        x, y, w, h, ar = st[i]
+        r['delik'] = dict(merkez_printfile=[pf(cen[i][0]), pf(cen[i][1])], ust_alt_printfile=[pf(y), pf(y + h)],
+                          cap_printfile=round(float(np.sqrt(4 * ar / np.pi)) * k, 1), kutu_printfile=[pf(x), pf(y), pf(x + w), pf(y + h)])
+        r['delik']['cap_mm'] = round(r['delik']['cap_printfile'] * MM, 2)
+        # centik alti: merkez sutununda delik altindan sonraki ilk koyu (kesikli) piksel
+        col = A[:, cx] > 120                                            # kesikli cizgi noktalari acik renkli: yalniz alfa
+        alt = [yy for yy in range(int(y + h) + 2, int(x0 + pw)) if col[yy]]
+        if alt:
+            r['centik_alt_printfile'] = pf(alt[0])
+    # kesikli guvenli daire: merkez satirinda kenar cizgisinin icindeki ilk ve son koyu nokta
+    cy = int(round(x0 + pw / 2))
+    row = A[cy] > 120
+    xs = [x for x in range(int(x0) + 6, int(x0 + pw) - 6) if row[x]]
+    if xs:
+        r['guvenli_daire'] = dict(sol_printfile=pf(xs[0]), sag_printfile=pf(xs[-1]), cap_printfile=round((xs[-1] - xs[0]) * k, 1))
+        r['guvenli_daire']['cap_mm'] = round(r['guvenli_daire']['cap_printfile'] * MM, 2)
+    return r
 
 
 def main():
