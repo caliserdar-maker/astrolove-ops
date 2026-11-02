@@ -126,12 +126,15 @@ def kucuk_delikler(c, oran=0.001):
 def leke_ic_kaynak(a):
     """kaynak olcegi (1600 px'te kapanis 9 x 9, 5 px ice; boyla olceklenir) + kapali kucuk delikler (alan < %0.1)."""
     W = a.shape[1]
+    ped = 24                                                           # goruntu kenari sinir sayilmasin (kenar satirlari sayilmaz)
+    a = np.pad(a, ped)
     k = int(round(9 * W / 1600)) | 1
     ice = max(2, int(round(5 * W / 1600)))
     m = (a > 0.5).astype(np.uint8)
     c = cv2.morphologyEx(m, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
     c = (c > 0) | kucuk_delikler(c)
-    return cv2.erode(c.astype(np.uint8), np.ones((3, 3), np.uint8), iterations=ice) > 0, dict(kapanis=k, ice_px=ice, kucuk_delik_alan_esigi=int(0.001 * a.size))
+    ic = cv2.erode(c.astype(np.uint8), np.ones((3, 3), np.uint8), iterations=ice) > 0
+    return ic[ped:-ped, ped:-ped], dict(kapanis=k, ice_px=ice, kenar_payi=ped, kucuk_delik_alan_esigi=int(0.001 * (a.shape[0] - 2 * ped) * W))
 
 
 def leke_ic(m):
