@@ -2,18 +2,19 @@
 """Ornament ornek V4 (Merkez gorevi STIL3_V4, Serdar onayi 2 Kas 2026). Etsy / Printful yazma yok; toplu uretim yok.
 Duzen V3 ile ayni (sembol ortada buyuk, kucuk burc sembolleri altta iki yanda, isim satiri ortasinda logo, en altta tarih).
 Degisenler (V3'e gore):
-  1 HALKA: tepe merkez cizgisi delik merkezinden (477, 164) gecer. y=217 / delik / centik kurali YALNIZ halka icin kalkar; halka guvenli
+  1 HALKA: tepe merkez cizgisi delik merkezinden (476, 163) gecer. y < 221 / delik r 34 kurali YALNIZ halka icin kalkar; halka guvenli
     daire icinde en buyuk boyutta (oran 0.987 korunur). Sembol halkayla ayni oranda buyur (posterdeki konum / oran).
   2 HALKA PROFILI: posterden (HALKA_BLUE_16x20.png) elips normali boyunca 0.05 derece adimla olculen genislik W(aci). Genislik =
     GOVDE_MED x W / medyan(W) (posterle ayni goreli profil: tepe kalinlasmasi ve uc incelmesi birebir). Uctan yayin %20'sinden uzak
     govdede taban GOVDE_MIN (>= 4 px). Uclar posterdeki gibi son %15-20'de incelir, kil inceliginde biter.
   3 LOGO: LOGO_1.png sag yarisi (siyah zemin uzerinde beyaz), alfa = parlaklik. YALNIZ olcek + altin renk; kalinlastirma / birlestirme /
     yeniden cizim YOK. En ince cizgi ve kaynaga IoU olculur (hedef >= 2 px tutmazsa raporda 3 oneri).
-  4 BUTUNLESME (tum altin ogeler ayni): gomulu kenar (sol ust ic kenar ince koyu, sag alt ic kenar ince acik; zeminin kendi tonunda),
-    disa sicak altin isik tasmasi (4-10 px, dusuk opaklik), zemin dokusu (gorunen %4-6), golge tonlarina zemin rengi %25-30, isik sol ust.
-    V3'teki dis golge (sag alt) kaldirildi; isik yonu gomulu kenarla verilir.
-Kapilar: son goruntude (|goruntu - zemin| > 1) guvenli daire disi 0; delik / centik / y < 217 icinde halka bolgesi disinda 0; cakisma 0;
-kontrast >= 4.5 (kati olcut); halka govde >= 4 px; gorunen doku %4-6.
+  4 BUTUNLESME: gomulu kenar (sol ust ic kenar ince koyu, sag alt ic kenar ince acik; zeminin kendi tonunda; ince cizgili ogelerde
+    (isim, tarih, logo) opaklik x GOMU_YAZI: tam opaklikta kontrast 4.5 tutmuyor, CELISKI Merkez kararinda), disa sicak altin isik tasmasi
+    (4-10 px, dusuk opaklik), zemin dokusu (oge basina gorunen %4-6), golge tonlarina (oge murekkep ortancasindan koyu tonlar) zemin rengi %28,
+    isik sol ust. V3'teki dis golge (sag alt) kaldirildi.
+Kapilar: son goruntude (|goruntu - zemin| > 1) guvenli daire (476, 477) r 380 disi 0; delik r 34 / y < 221 icinde halka bolgesi disinda 0;
+cakisma 0; kontrast >= 4.5 (kati olcut); halka govde >= 4 px; oge basina gorunen doku %4-6; isik tasmasi p95 >= 4, en fazla <= 10 px.
 Kullanim: ornament_ornek4.py --kaynak DIR --cikti DIR"""
 import argparse
 import importlib.util
@@ -30,6 +31,8 @@ _d = Path(__file__).resolve().parent
 _s = importlib.util.spec_from_file_location('ornek3', _d / 'ornament_ornek3.py'); o3 = importlib.util.module_from_spec(_s); _s.loader.exec_module(o3)
 o1, o2 = o3.o1, o3.o2
 N, C, MM, P = o1.N, o1.C, o1.MM, o1.P
+CX, CY = 476.0, 477.0                     # Printful 900 sablonu guvenli daire / kesim merkezi (inceleme 9: eski 477, 477)
+o3.C = CX                                 # yazi blogu yatay merkezi (o3.yazi_blogu)
 # Printful resmi 900 Circle sablonu (CeramicOrnaments_Template_Circle.psd, 954 x 954; Merkez olcumu 2 Kas, Serdar):
 GUV_R = 380.0                             # guvenli alan (kirmizi kesikli daire) yaricapi; eski 380.3 (v2 Circle.png olcumu)
 DELIK = (476.0, 163.0, 34.0)              # delik merkezi ve yasak yaricap (siyah halka dis r 34, ic r 25); eski (476.7, 163.9, 28.3)
@@ -50,7 +53,7 @@ GOMU_KOYU, GOMU_ACIK = 0.55, 0.40         # gomulu kenar opaklik (koyu sol ust, 
 GOMU_KAYMA, GOMU_SIGMA = 1.0, 0.6
 GOMU_YAZI = 0.20                          # ince cizgili ogelerde (isim, tarih, logo) gomulu kenar opaklik carpani (kontrast)
 YAZI_OGE = ('isim1', 'isim2', 'tarih', 'sonsuz')
-GLOW_SIGMA, GLOW_OPAK, GLOW_R = 3.0, 0.16, 10
+GLOW_SIGMA, GLOW_OPAK, GLOW_R = 3.0, 0.16, 8   # inceleme 7: gorunen uzanim ~5 px (p95), en fazla 8.4; kapi payi 10 -> 8
 GLOW_RGB = np.array([255, 196, 110], np.float32)   # sicak altin
 TINT_GUC = 0.28
 DOKU_ADAY = (0.14, 0.17, 0.20, 0.23, 0.26, 0.30)   # overlay katman opakligi; gorunen %4-6 icin secilir
@@ -113,7 +116,7 @@ def halka_alfa(pp, cy, ax, ss=4):
     out = np.zeros((N, N), np.float32)
     y0 = max(0, int(cy - by - 20)); y1 = min(N, int(cy + by + 20))
     yy, xx = np.mgrid[y0 * ss:y1 * ss, 0:N * ss].astype(np.float32)
-    dx, dy = (xx + 0.5) / ss - C, (yy + 0.5) / ss - cy
+    dx, dy = (xx + 0.5) / ss - CX, (yy + 0.5) / ss - cy
     rho = np.sqrt((dx / ax) ** 2 + (dy / by) ** 2)
     d = (rho - 1) * np.sqrt(dx ** 2 + dy ** 2) / np.maximum(rho, 1e-6)
     ang = (np.degrees(np.arctan2(dy, dx)) + 360) % 360
@@ -130,8 +133,8 @@ def halka_olc(a, hb, pp):
     for t in np.arange(0, 360, 0.25):
         tr = math.radians(t); c_, s_ = math.cos(tr), math.sin(tr)
         rr = 1.0 / math.sqrt((c_ / ax) ** 2 + (s_ / by) ** 2)
-        px, py = C + rr * c_, cy + rr * s_
-        nx, ny = (px - C) / ax ** 2, (py - cy) / by ** 2; nn = math.hypot(nx, ny); nx, ny = nx / nn, ny / nn
+        px, py = CX + rr * c_, cy + rr * s_
+        nx, ny = (px - CX) / ax ** 2, (py - cy) / by ** 2; nn = math.hypot(nx, ny); nx, ny = nx / nn, ny / nn
         v = cv2.remap(a, (px + u * nx - 0.5).astype(np.float32)[None], (py + u * ny - 0.5).astype(np.float32)[None], cv2.INTER_LINEAR, borderValue=0)[0]
         sat.append((t, float(v.sum() * 0.1)))
     T = np.array([x[0] for x in sat]); Wm = np.array([x[1] for x in sat])
@@ -215,7 +218,7 @@ def logo_oneri(src, gen):
 # ----------------------------------------------------------------------------------------------- yasak bolge
 def yasak_m():
     yy, xx = np.mgrid[0:N, 0:N]
-    r = np.hypot(xx + 0.5 - C, yy + 0.5 - C)
+    r = np.hypot(xx + 0.5 - CX, yy + 0.5 - CY)
     return dict(guvenli_disi=r > GUV_R - PAY,
                 delik=np.hypot(xx + 0.5 - DELIK[0], yy + 0.5 - DELIK[1]) <= DELIK[2] + 1,
                 ust_cizgi=yy < UST_YASAK + 1)
@@ -223,6 +226,7 @@ def yasak_m():
 
 YASAK = None
 GLOW_K = None
+TINT_OLC = None
 
 
 def kapi(E):
@@ -280,7 +284,7 @@ def yerlesim_A(pp, ana, T, kucuk):
         cy = TEPE_Y + by                                    # tepe merkez cizgisi delik merkezinden gecer
         ha, hb = halka_alfa(pp, cy, ax)
         k = ax / el['a']
-        sem = o3.sembol_yerlestir(ana, (sx1 - sx0) * k, C, cy + ((sy0 + sy1) / 2 - el['cy']) * (by / el['b']))
+        sem = o3.sembol_yerlestir(ana, (sx1 - sx0) * k, CX, cy + ((sy0 + sy1) / 2 - el['cy']) * (by / el['b']))
         E = dict(Eyazi); E['halka'] = (None, ha, 0, 0); E['sembol'] = sem
         M, yb, cak, ok = kapi(E)
         if ok:
@@ -302,7 +306,7 @@ def yerlesim_B(ana, T, kucuk):
         cy_alt = ust - g * c - h / 2
         if cy_alt < cy_ust:
             continue
-        sem = o3.sembol_yerlestir(ana, w, C, cy_ust)
+        sem = o3.sembol_yerlestir(ana, w, CX, cy_ust)
         E = dict(Eyazi); E['sembol'] = sem
         M, yb, cak, ok = kapi(E)
         if ok:
@@ -349,11 +353,21 @@ def boya(Y, model, zemin, kazanc, td, doku_guc, doku_kapali=False, butunlesme=Tr
     for ad in E:
         cc = renkler[ad] * kazanc
         L = lum(cc)
-        w = np.clip((model.Lmed - L) / max(model.Lmed, 1), 0, 1)[..., None] * TINT_GUC
+        m = M[ad]
+        # golge tonu (inceleme 1): ogenin kendi murekkep ortancasindan (Lref) en az %30 koyu tonlarda zemin rengi TINT_GUC (%28),
+        # aradaki tonlarda dogrusal. Duz renkli ogelerde (halka, isim, tarih, logo) golge tonu yoktur: w = 0 (raporda).
+        ink = m > 0.5
+        Lref = float(np.median(L[ink])) if ink.any() else 1.0
+        w = (np.clip((0.95 * Lref - L) / max(0.25 * Lref, 1), 0, 1) * TINT_GUC)[..., None]
         tint = zort / max(float(lum(zort[None])[0]), 1.0) * L[..., None]
         cc = cc * (1 - w) + tint * w
-        cc = cc * (1 - doku_guc) + o3.overlay(np.clip(cc, 0, 255), doku_b[..., None]) * doku_guc
-        m = M[ad]
+        if TINT_OLC is not None and ink.any():
+            gt = ink & (L < 0.70 * Lref)
+            TINT_OLC[ad] = dict(golge_tonu_payi_yuzde=round(float(gt.sum() / ink.sum() * 100), 1),
+                                golge_tonunda_ort_w=round(float(w[..., 0][gt].mean()), 3) if gt.any() else None,
+                                tum_murekkep_ort_w=round(float(w[..., 0][ink].mean()), 3))
+        dg = doku_guc.get(ad, 0.0) if isinstance(doku_guc, dict) else doku_guc
+        cc = cc * (1 - dg) + o3.overlay(np.clip(cc, 0, 255), doku_b[..., None]) * dg
         if butunlesme:
             # 2 gomulu kenar: oge ici, sol ust kenar koyu (sol ust komsu oge disi), sag alt kenar acik
             sh = lambda a_, d: cv2.warpAffine(a_, np.float32([[1, 0, d], [0, 1, d]]), (N, N))
@@ -369,11 +383,32 @@ def boya(Y, model, zemin, kazanc, td, doku_guc, doku_kapali=False, butunlesme=Tr
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
+def doku_oge(rgb, rgb0, M):
+    L1, L0 = lum(rgb.astype(np.float32)), lum(rgb0.astype(np.float32))
+    r = {}
+    for k, m in M.items():
+        ic = m > 0.9
+        if ic.sum() > 20:
+            r[k] = round(float((L1[ic] - L0[ic]).std() / max(float(L0[ic].mean()), 1) * 100), 2)
+    return r
+
+
+def doku_ayarla(Y, model, z, kazanc, td, taban=0.20, hedef=5.0):
+    """oge basina doku katman opakligi: gorunen %5 (inceleme 4: havuzlanmis olcu oge bazinda tutmuyordu). Overlay karisimi
+    opakliga dogrusal; taban olcum + bir duzeltme."""
+    r0 = boya(Y, model, z, kazanc, td, 0.0, doku_kapali=True)
+    dg = {k: taban for k in Y['M']}
+    for _ in range(2):
+        olc = doku_oge(boya(Y, model, z, kazanc, td, dg), r0, Y['M'])
+        dg = {k: float(np.clip(dg[k] * hedef / max(olc.get(k, hedef), 0.2), 0.03, 0.8)) for k in dg}
+    return dg
+
+
 def goruntu_yasak(rgb, zemin, halka_m):
     fark = np.abs(rgb.astype(np.float32) - zemin.astype(np.float32)).max(2) > 1.0
     hb = cv2.dilate((halka_m > 0.02).astype(np.uint8), GLOW_K) > 0 if halka_m is not None else np.zeros((N, N), bool)
     yy, xx = np.nonzero(fark)
-    r = np.hypot(xx + 0.5 - C, yy + 0.5 - C)
+    r = np.hypot(xx + 0.5 - CX, yy + 0.5 - CY)
     hl = hb[yy, xx]
     yb = dict(guvenli_daire_disi=int((r > GUV_R).sum()),
               delik_halka_disi=int(((np.hypot(xx + 0.5 - DELIK[0], yy + 0.5 - DELIK[1]) <= DELIK[2]) & ~hl).sum()),
@@ -398,11 +433,12 @@ def glow_olc(rgb, rgb0, tum):
 def onizleme(liste, ara=24):
     """76 mm kesim dairesi (r KESIM_R) disi beyaz, delik (ic r 25) beyaz; 300 dpi gercek boy."""
     yy, xx = np.mgrid[0:N, 0:N]
-    al = np.clip(KESIM_R - np.hypot(xx - C + 0.5, yy - C + 0.5) + 0.5, 0, 1)
+    al = np.clip(KESIM_R - np.hypot(xx - CX + 0.5, yy - CY + 0.5) + 0.5, 0, 1)
     al = al * np.clip(np.hypot(xx + 0.5 - DELIK[0], yy + 0.5 - DELIK[1]) - DELIK_IC + 0.5, 0, 1)
     al = al[..., None]
-    y0, y1 = max(0, int(C - KESIM_R) - 2), min(N, int(C + KESIM_R) + 3)
-    ims = [np.round(rgb * al + 255 * (1 - al)).astype(np.uint8)[y0:y1, y0:y1] for rgb in liste]
+    y0, y1 = max(0, int(CY - KESIM_R) - 2), min(N, int(CY + KESIM_R) + 3)
+    x0, x1 = max(0, int(CX - KESIM_R) - 2), min(N, int(CX + KESIM_R) + 3)
+    ims = [np.round(rgb * al + 255 * (1 - al)).astype(np.uint8)[y0:y1, x0:x1] for rgb in liste]
     o = np.full((max(i.shape[0] for i in ims), sum(i.shape[1] for i in ims) + ara * (len(ims) - 1), 3), 255, np.uint8)
     x = 0
     for i in ims:
@@ -472,30 +508,16 @@ def main():
             stil_ok, stil = True, {}
             for ad, _ in STILLER:
                 z = zeminler[ad]
-                rgb0 = boya(Y, model, z, 1.0, td, 0.0, doku_kapali=True)
                 sec = None
                 for kazanc in (1.0, 1.04, 1.08, 1.12, 1.16, 1.20):
-                    rgb = boya(Y, model, z, kazanc, td, DOKU_ADAY[0])
+                    dg_sec = doku_ayarla(Y, model, z, kazanc, td)
+                    rgb = boya(Y, model, z, kazanc, td, dg_sec)
                     ok = {k: o3.okunurluk(rgb, z, Y['M'][k]) for k in ('isim1', 'isim2', 'tarih')}
                     en = min(min(v['bant_1_12']['kati_ortanca'], v['bant_1_12']['kati_acik5']) for v in ok.values())
                     if en >= HEDEF:
                         sec = kazanc; break
                 if sec is None:
                     sec = kazanc; stil_ok = False
-                # doku: secilen kazancta gorunen %4-6 (dokulu - dokusuz goreli std); ilk tutan aday, kontrast yeniden olculur
-                r0 = boya(Y, model, z, sec, td, 0.0, doku_kapali=True)
-                Lg = lum(r0.astype(np.float32))[tumm]
-                dg_sec = DOKU_ADAY[-1]
-                for dg in DOKU_ADAY:
-                    rr = boya(Y, model, z, sec, td, dg)
-                    gs = float((lum(rr.astype(np.float32))[tumm] - Lg).std() / max(Lg.mean(), 1) * 100)
-                    if gs >= DOKU_HEDEF[0] + 0.3:
-                        dg_sec = dg; break
-                rgb = boya(Y, model, z, sec, td, dg_sec)
-                ok = {k: o3.okunurluk(rgb, z, Y['M'][k]) for k in ('isim1', 'isim2', 'tarih')}
-                en = min(min(v['bant_1_12']['kati_ortanca'], v['bant_1_12']['kati_acik5']) for v in ok.values())
-                if en < HEDEF:
-                    stil_ok = False
                 sec = (sec, rgb, ok, en, dg_sec)
                 stil[ad] = sec
             secim = dict(Y=Y, T=T, olcek=olcek, stil=stil, model=model)
@@ -521,14 +543,14 @@ def main():
             hm = Y['M']['halka']
             hx = np.nonzero(hm.max(0) > 0.5)[0]; hyy = np.nonzero(hm.max(1) > 0.5)[0]
             ys_, xs_ = np.nonzero(hm > 0.5)
-            sol, sag = xs_ < C, xs_ > C
+            sol, sag = xs_ < CX, xs_ > CX
             r['halka'] = dict(yatay_yari=round(hb['ax'], 1), dikey_yari=round(hb['by'], 1), oran=round(hb['ax'] / hb['by'], 4), merkez_y=round(hb['cy'], 1),
                               tepe_merkez_cizgisi_y=round(hb['cy'] - hb['by'], 1), delik_merkezi=[DELIK[0], DELIK[1]],
                               dis_genislik_px=int(hx.max() - hx.min() + 1), dis_yukseklik_px=int(hyy.max() - hyy.min() + 1),
                               dis_genislik_V3_kazanc_yuzde=round(((hx.max() - hx.min() + 1) / V3_HALKA_W - 1) * 100, 1),
                               simetri=dict(sol_piksel=int(sol.sum()), sag_piksel=int(sag.sum()),
                                            sol_x_min=int(xs_.min()), sag_x_max=int(xs_.max()),
-                                           sol_pay=round(float(C - xs_.min()), 1), sag_pay=round(float(xs_.max() + 1 - C), 1)),
+                                           sol_pay=round(float(CX - xs_.min()), 1), sag_pay=round(float(xs_.max() + 1 - CX), 1)),
                               **ho)
             r['sembol_V3_kazanc_yuzde'] = round(((sb[2] - sb[0]) / V3_SEMBOL_W - 1) * 100, 1)
         else:
@@ -540,23 +562,32 @@ def main():
             gy, gb = goruntu_yasak(rgb, zeminler[ad], Y['M'].get('halka'))
             rgb0 = boya(Y, secim['model'], zeminler[ad], kazanc, td, 0.0, doku_kapali=True)
             rgbb = boya(Y, secim['model'], zeminler[ad], kazanc, td, dg, butunlesme=False)
-            ic = tumm > 0.9
-            dL = lum(rgb.astype(np.float32))[ic] - lum(boya(Y, secim['model'], zeminler[ad], kazanc, td, 0.0, doku_kapali=True).astype(np.float32))[ic]
-            Lg = lum(rgb0.astype(np.float32))[ic]
-            r.setdefault('stil', {})[ad] = dict(altin_kazanc=kazanc, doku_katman=dg, en_kotu_kati_1_12=en, hedef_tuttu=en >= HEDEF, okunurluk=ok,
-                                                goruntu_yasak=gy, goruntu=gb,
-                                                doku_gorunen=dict(goreli_std_yuzde=round(float(dL.std() / max(Lg.mean(), 1) * 100), 2),
-                                                                  luma_fark_std=round(float(dL.std()), 2)),
-                                                isik_tasmasi=glow_olc(rgb, rgbb, tumm))
+            global TINT_OLC
+            TINT_OLC = {}
+            boya(Y, secim['model'], zeminler[ad], kazanc, td, dg)
+            tolc, TINT_OLC = TINT_OLC, None
+            dk = doku_oge(rgb, rgb0, Y['M'])
+            r.setdefault('stil', {})[ad] = dict(altin_kazanc=kazanc, doku_katman={k: round(v, 3) for k, v in dg.items()}, en_kotu_kati_1_12=en,
+                                                hedef_tuttu=en >= HEDEF, okunurluk=ok, goruntu_yasak=gy, goruntu=gb,
+                                                doku_gorunen=dict(oge_goreli_std_yuzde=dk, en_az=min(dk.values()), en_cok=max(dk.values()),
+                                                                  yontem='oge basina (alfa > 0.9): dokulu - dokusuz luma std / dokusuz luma ortalamasi'),
+                                                golge_tonu=tolc, isik_tasmasi=glow_olc(rgb, rgbb, tumm))
         R[yer] = r
         print(yer, json.dumps({k: r[k] for k in ('yazi_olcek', 'sembol_px', 'sembol_V3_kazanc_yuzde', 'yasak_piksel', 'cakisma')}), flush=True)
         if yer == 'HALKALI':
             print('HALKA', json.dumps({k: v for k, v in r['halka'].items() if k not in ('poster_uc_oran',)})[:1400], flush=True)
         print(yer, 'LOGO', json.dumps(r['logo']), flush=True)
-        print(yer, 'stil', json.dumps({k: (v['altin_kazanc'], v['doku_katman'], v['en_kotu_kati_1_12'], v['goruntu']['gercek_pay'],
-                                           v['doku_gorunen']['goreli_std_yuzde'], v['isik_tasmasi']['uzanim_px'], sum(v['goruntu_yasak'].values()))
+        print(yer, 'stil', json.dumps({k: (v['altin_kazanc'], v['en_kotu_kati_1_12'], v['goruntu']['gercek_pay'],
+                                           (v['doku_gorunen']['en_az'], v['doku_gorunen']['en_cok']), (v['isik_tasmasi']['p95_px'], v['isik_tasmasi']['uzanim_px']), sum(v['goruntu_yasak'].values()))
                                        for k, v in r['stil'].items()}), flush=True)
     R['logo_oneri_1'] = logo_oneri(lsrc, R['HALKALI']['logo']['hedef_px'][0])
+    lg = R['HALKALI']['logo']
+    R['logo_oneriler'] = [
+        dict(no=1, ad='kucuk boy logo (Merkez onerisi)', icerik='sekil birebir, yalniz 2 px altindaki ince cizgiler elle 2 px (0.17 mm) yapilir; '
+             'tek tip genisletme (morfoloji) uygun degil: 2 px icin kaynakta 7 px genisletme gerekir, IoU 0.53, 14 sahte ic bosluk (logo_oneri_1)'),
+        dict(no=2, ad='logo isim satirinda daha buyuk', icerik=f'2 px icin genislik p1 {lg["iki_px_icin_gereken_genislik_p1"]} px (ornament 954 px); '
+             'hicbir boyda tutmaz, yalniz kalin govde (medyan 15 px kaynak) okunur'),
+        dict(no=3, ad='sadelestirilmis isaret', icerik='logonun dis silueti dolu (ic sac cizgileri yok) ya da V3 sonsuzu; sekil degisir, Serdar onayi gerekir')]
     s1 = onizleme([sonuc['HALKALI']['stil'][a][1] for a, _ in STILLER])
     s2 = onizleme([sonuc['HALKASIZ']['stil'][a][1] for a, _ in STILLER])
     o = Image.new('RGB', (max(s1.width, s2.width), s1.height + s2.height + 24), 'white')
@@ -569,8 +600,8 @@ def main():
              goruntu_yasak_0=all(sum(v['goruntu_yasak'].values()) == 0 for y in ('HALKALI', 'HALKASIZ') for v in R[y]['stil'].values()),
              halka_tepe_delik=abs(h['tepe_merkez_cizgisi_y'] - DELIK[1]) < 0.6,
              halka_govde=h['govde_min'] >= 4.0,
-             doku_4_6=all(DOKU_HEDEF[0] <= v['doku_gorunen']['goreli_std_yuzde'] <= DOKU_HEDEF[1] for y in ('HALKALI', 'HALKASIZ') for v in R[y]['stil'].values()),
-             isik_4_10=all(4 <= v['isik_tasmasi']['uzanim_px'] <= 10 for y in ('HALKALI', 'HALKASIZ') for v in R[y]['stil'].values()))
+             doku_4_6=all(DOKU_HEDEF[0] <= v['doku_gorunen']['en_az'] and v['doku_gorunen']['en_cok'] <= DOKU_HEDEF[1] for y in ('HALKALI', 'HALKASIZ') for v in R[y]['stil'].values()),
+             isik_4_10=all(4 <= v['isik_tasmasi']['p95_px'] and v['isik_tasmasi']['uzanim_px'] <= 10 for y in ('HALKALI', 'HALKASIZ') for v in R[y]['stil'].values()))
     g = {k: bool(v) for k, v in g.items()}
     R['kapi'] = g
     R['bilgi_kapisi_degil'] = dict(logo_en_ince_2px=R['HALKALI']['logo']['hedefte_geometrik_en_ince'] >= 2.0,

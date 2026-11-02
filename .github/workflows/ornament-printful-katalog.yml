@@ -214,7 +214,7 @@ jobs:
           git commit -qm "ornament ornek V3: STIL3_V3 (kosu ${GITHUB_RUN_ID}, $D)" && git push -q origin "HEAD:${DAL}"
           echo "::notice::dal commit $(git rev-parse --short HEAD)"
           exit $k
-      - name: Ornek V3 uret (STIL3_V4) + Drive + dal
+      - name: Ornek V4 uret (STIL3_V4) + Drive + dal
         if: env.MOD == 'ornek4'
         run: |
           set -euo pipefail
@@ -242,7 +242,7 @@ jobs:
           git add docs/ornament/ornek
           DIS=$(git diff --cached --name-only | grep -v '^docs/ornament/ornek/' || true)
           [ -z "$DIS" ] || { echo "::error::izinli klasor disi: $DIS"; exit 1; }
-          git commit -qm "ornament ornek V3: STIL3_V4 (kosu ${GITHUB_RUN_ID}, $D)" && git push -q origin "HEAD:${DAL}"
+          git commit -qm "ornament ornek V4: STIL3_V4 (kosu ${GITHUB_RUN_ID}, $D)" && git push -q origin "HEAD:${DAL}"
           echo "::notice::dal commit $(git rev-parse --short HEAD)"
           exit $k
       - name: Printful urun taramasi (urun1 / urun2; yalniz GET + kargo ucreti)
