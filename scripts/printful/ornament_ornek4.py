@@ -227,6 +227,10 @@ def yasak_m():
 YASAK = None
 GLOW_K = None
 TINT_OLC = None
+# V5 kancalari (varsayilan None: V4 davranisi degismez)
+RENK_DONUSUM = None                       # f(cc, model) -> cc: altin -> bronz (acik zeminler)
+SON_KIRP = None                           # f(cc) -> cc: doku sonrasi (bronz acik ucu siniri)
+DIS_GOLGE = None                          # dict(kayma, sigma, opak, koyu): zemin tonlu dis golge (acik zeminler)
 
 
 def kapi(E):
@@ -324,7 +328,11 @@ def boya(Y, model, zemin, kazanc, td, doku_guc, doku_kapali=False, butunlesme=Tr
     doku = zL - cv2.GaussianBlur(zL, (0, 0), 6.0)
     doku_b = np.full_like(zL, 128.0) if doku_kapali else np.clip(128 + o3.DOKU_GENLIK * doku / max(float(doku.std()), 1e-3), 0, 255)
     tum = np.maximum.reduce([M[k] for k in M])
-    if butunlesme:
+    if butunlesme and DIS_GOLGE is not None:
+        gm = cv2.GaussianBlur(tum, (0, 0), DIS_GOLGE['sigma'])
+        gm = cv2.warpAffine(gm, np.float32([[1, 0, DIS_GOLGE['kayma']], [0, 1, DIS_GOLGE['kayma']]]), (N, N))
+        out = out * (1 - DIS_GOLGE['opak'] * gm[..., None] * (1 - DIS_GOLGE['koyu']))
+    if butunlesme and GLOW_OPAK > 0:
         # 1 sicak altin isik tasmasi (disa, 4-10 px): yalniz ogelerin disinda, GLOW_R icinde; screen
         g = cv2.GaussianBlur(tum, (0, 0), GLOW_SIGMA)
         bolge = cv2.dilate((tum > 0.02).astype(np.uint8), GLOW_K).astype(np.float32)
@@ -352,6 +360,8 @@ def boya(Y, model, zemin, kazanc, td, doku_guc, doku_kapali=False, butunlesme=Tr
     acik_t = np.clip(z * 1.9 + 18, 0, 255)
     for ad in E:
         cc = renkler[ad] * kazanc
+        if RENK_DONUSUM is not None:
+            cc = RENK_DONUSUM(cc, model)
         L = lum(cc)
         m = M[ad]
         # golge tonu (inceleme 1): ogenin kendi murekkep ortancasindan (Lref) en az %30 koyu tonlarda zemin rengi TINT_GUC (%28),
@@ -368,7 +378,9 @@ def boya(Y, model, zemin, kazanc, td, doku_guc, doku_kapali=False, butunlesme=Tr
                                 tum_murekkep_ort_w=round(float(w[..., 0][ink].mean()), 3))
         dg = doku_guc.get(ad, 0.0) if isinstance(doku_guc, dict) else doku_guc
         cc = cc * (1 - dg) + o3.overlay(np.clip(cc, 0, 255), doku_b[..., None]) * dg
-        if butunlesme:
+        if SON_KIRP is not None:
+            cc = SON_KIRP(cc)
+        if butunlesme and (GOMU_KOYU > 0 or GOMU_ACIK > 0):
             # 2 gomulu kenar: oge ici, sol ust kenar koyu (sol ust komsu oge disi), sag alt kenar acik
             sh = lambda a_, d: cv2.warpAffine(a_, np.float32([[1, 0, d], [0, 1, d]]), (N, N))
             ust_sol = np.clip(m - sh(m, GOMU_KAYMA), 0, 1)          # ogenin sol ust ic kenari
