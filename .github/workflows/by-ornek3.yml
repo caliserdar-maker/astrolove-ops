@@ -64,7 +64,16 @@ jobs:
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Starlit tani (yalniz stiller=TANI; ESRGAN / uretim yok)
+        if: ${{ inputs.stiller == 'TANI' }}
+        run: |
+          set -euo pipefail
+          mkdir -p _t
+          rclone copyto "gdrive:ASTROLOVE/TEMP/YD_STIL4_ORNEK/20261102_074311/F7_Starlit_2x3_3600x5400.jpg" _t/s.jpg -q
+          python3 scripts/siparis_by/yd_starlit_tani.py _t/s.jpg
+          rm -rf _t
       - name: F7 14 boy (5 stil, aile sayfalari)
+        if: ${{ inputs.stiller != 'TANI' }}
         env: {P: "${{ inputs.pair }}", A: "${{ inputs.n1 }}", B: "${{ inputs.n2 }}", ST: "${{ inputs.stiller }}"}
         run: |
           set -uo pipefail
@@ -82,7 +91,7 @@ jobs:
           echo "KOD=$RC" >> "$GITHUB_ENV"
           grep -v "^ETA" _o/LOG.txt | tail -25
       - name: Drive'a yaz
-        if: always()
+        if: ${{ always() && inputs.stiller != 'TANI' }}
         run: |
           set -euo pipefail
           if ls _o/* >/dev/null 2>&1; then

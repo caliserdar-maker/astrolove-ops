@@ -1117,21 +1117,22 @@ def starlit_aile(zem, bp, S, st):
     return son, fark, dict(cerceve=rc, yay=ry, yay_oge_kesisim_px=kes, yazi_yildiz=yz, pass_=bool(kes == 0 and yz["pass_"]))
 
 
-YILDIZ_ESIK = 20.0     # F7 it. 2 (Merkez 2 Kas, Starlit 12x18 x=1652 y=3736 "nokta"): yerel medyandan (31 px) bu kadar parlak (lum) zemin
-YILDIZ_PAY = 0.5       # pikseli yildiz; yazi kutusu cevresi pay = yazi satiri yuksekligi x 0,5 (Merkez). Esik ONERI (olcumle turetilmedi).
-YAZI_KORU = 25         # yazinin kendi isiltisi korunur: oge maskesi 25x25 genisletilir, bu alana dokunulmaz
+YILDIZ_ESIK = 30.0     # F7 it. 2 (kosu 41427850720: esik 20'de yazi cevresinde ~1400-1550 bilesen = doku tanesi + yazinin altin isiltisi;
+YILDIZ_ALAN = (3, 400) # temizlik sonrasi 21-41 kalan). Yildiz = yerel medyandan (31 px) >= 30 lum parlak, 3-400 px, YAZIYA BAGLI DEGIL
+YILDIZ_PAY = 0.5       # (oge maskesi 9x9 cekirdegine degmeyen) bilesen. Pay = yazi satiri yuksekligi x 0,5 (Merkez). Esikler ONERI.
+YILDIZ_PROBE = (1652, 3736)   # Merkez 2 Kas: 12x18'de EMMA sonrasi "nokta" (bilgi: o noktadaki parlaklik farki raporlanir)
 
 
 def yazi_yildiz(img, fark, yay):
-    """yazi satirlari (oge satir gruplari, en buyuk alanli grup = sembol HARIC) cevresinde (pay = satir yuksekligi x YILDIZ_PAY) zemin
-    yildizlarini temizler (cv2.inpaint TELEA, 5 px genisletilmis maske). Kapi: temizlik sonrasi ayni olcumle yildiz bileseni 0."""
+    """yazi satirlari (oge satir gruplari, en buyuk alanli grup = sembol HARIC) cevresinde zemin yildizlarini temizler (cv2.inpaint TELEA,
+    7 px genisletilmis bilesen maskesi; yazi cekirdegine dokunulmaz). Kapi: temizlik sonrasi ayni tanimla yildiz 0."""
     r8 = np.where(fark.any(1))[0]
     if not r8.size:
         return img, dict(pass_=False, neden="oge yok")
     bl = np.split(r8, np.where(np.diff(r8) > 30)[0] + 1)
     alan = [int(fark[b[0]:b[-1] + 1].sum()) for b in bl]
     sembol = int(np.argmax(alan))
-    koru = (cv2.dilate(fark.astype(np.uint8), np.ones((YAZI_KORU, YAZI_KORU), np.uint8)) > 0) | (cv2.dilate(yay.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0)
+    cekirdek = (cv2.dilate(fark.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0) | (cv2.dilate(yay.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0)
     bolge = np.zeros(fark.shape, bool); kutular = []
     for i, b in enumerate(bl):
         if i == sembol:
@@ -1140,25 +1141,36 @@ def yazi_yildiz(img, fark, yay):
         x0, x1 = int(c.min()), int(c.max()); p = int(round((y1 - y0 + 1) * YILDIZ_PAY))
         Y0, Y1, X0, X1 = max(0, y0 - p), min(fark.shape[0], y1 + p + 1), max(0, x0 - p), min(fark.shape[1], x1 + p + 1)
         bolge[Y0:Y1, X0:X1] = True; kutular.append([X0, Y0, X1, Y1])
+    yy, xx = np.where(bolge.any(1))[0], np.where(bolge.any(0))[0]
+    y0, y1, x0, x1 = yy.min(), yy.max() + 1, xx.min(), xx.max() + 1
 
-    def yildiz(a):
-        L = lum(a)
-        Y0, X0 = np.where(bolge.any(1))[0], np.where(bolge.any(0))[0]
-        y0, y1, x0, x1 = Y0.min(), Y0.max() + 1, X0.min(), X0.max() + 1
-        Lm = np.zeros_like(L)
-        Lm[y0:y1, x0:x1] = cv2.medianBlur(np.clip(L[y0:y1, x0:x1], 0, 255).astype(np.uint8), 31).astype(np.float32)
-        m = (L - Lm > YILDIZ_ESIK) & bolge & ~koru
-        n, _, st_, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
-        return m, n - 1
-    m, n0 = yildiz(img)
+    def fark_lum(a):
+        L = lum(a); d = np.zeros_like(L)
+        d[y0:y1, x0:x1] = L[y0:y1, x0:x1] - cv2.medianBlur(np.clip(L[y0:y1, x0:x1], 0, 255).astype(np.uint8), 31).astype(np.float32)
+        return d
+
+    def yildizlar(d, esik):
+        m = (d >= esik) & bolge
+        n, lab, st_, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
+        bag = np.unique(lab[cekirdek & m])
+        sec = [i for i in range(1, n) if YILDIZ_ALAN[0] <= st_[i, 4] <= YILDIZ_ALAN[1] and i not in set(bag.tolist())]
+        return lab, sec
+    d0 = fark_lum(img)
+    dagilim = {str(t): len(yildizlar(d0, t)[1]) for t in (20, 30, 40, 60)}
+    lab, sec = yildizlar(d0, YILDIZ_ESIK)
     out = img
-    if n0:
-        mk = cv2.dilate(m.astype(np.uint8), np.ones((5, 5), np.uint8))
-        mk[koru] = 0
+    if sec:
+        mk = np.isin(lab, sec).astype(np.uint8)
+        mk = cv2.dilate(mk, np.ones((7, 7), np.uint8)); mk[cekirdek] = 0
         out = cv2.inpaint(np.ascontiguousarray(img), mk, 5, cv2.INPAINT_TELEA)
-    _, n1 = yildiz(out)
-    return out, dict(once_yildiz=int(n0), sonra_yildiz=int(n1), temizlenen_px=int(m.sum()), kutu=kutular, esik=YILDIZ_ESIK, pay=YILDIZ_PAY,
-                     pass_=bool(n1 == 0))
+    _, sec1 = yildizlar(fark_lum(out), YILDIZ_ESIK)
+    px, py = YILDIZ_PROBE
+    probe = None
+    if img.shape[:2] == (5400, 3600):
+        probe = dict(xy=[px, py], once=round(float(d0[py - 6:py + 7, px - 6:px + 7].max()), 1),
+                     sonra=round(float(fark_lum(out)[py - 6:py + 7, px - 6:px + 7].max()), 1))
+    return out, dict(once_yildiz=len(sec), sonra_yildiz=len(sec1), esik_dagilim_bilgi=dagilim, kutu=kutular, esik=YILDIZ_ESIK,
+                     alan=list(YILDIZ_ALAN), pay=YILDIZ_PAY, probe_12x18=probe, pass_=bool(len(sec1) == 0))
 
 
 SERIT_STD = (0.8, 1.25)   # F7 it. 2 serit doku kapisi (ONERI): uzatilan / kaynak yuksek frekans std orani
