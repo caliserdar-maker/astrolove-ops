@@ -118,8 +118,7 @@ def leke_ic(m):
     ince catlak / delik (kapanisla dolan, kenardan > 2 px icerde) sayilir (inceleme V5 bulgu 2)."""
     b = (m > 0.5).astype(np.uint8)
     c = cv2.morphologyEx(b, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)))
-    c = ((c > 0) | kucuk_delikler(c)).astype(np.uint8)
-    return cv2.erode(c, np.ones((3, 3), np.uint8), iterations=LEKE_ICE) > 0
+    return cv2.erode(c, np.ones((3, 3), np.uint8), iterations=LEKE_ICE) > 0   # hedef boyda kapali bosluk doldurulmaz (Libra / A ic bosluklari tasarim)
 
 
 def leke_kapisi(M, rgb, bronz_acik_L=None):
@@ -476,18 +475,22 @@ def main():
     R['yerlesim'] = yer
     sonuc, rgbler = {}, {}
     TON_A = {}
+    V4_YAZI_OGE = o4.YAZI_OGE
+    A_YAZI_OGE = V4_YAZI_OGE + ('halka',)          # 4.2 px halka ince cizgili oge: gomulu kenar x GOMU_YAZI (koyu kenar ucta baskin, kontrast)
     for zad, (z, tur) in zem.items():
         # A-T1 ve A-T2 ayni ton (inceleme V5 bulgu 3: sutunlar renkte kiyaslanabilir): ikisinin de gecen en hafif tonu
         ortak = []
         for sad, (Y, s0) in secenek.items():
             if sad == 'V4':
                 continue
+            o4.YAZI_OGE = A_YAZI_OGE
             sx = Y['E']['sembol']
             model = o1.Model(td, sx[0], sx[1], 4800 * (o1.bbox(sx[1], 0.5)[2] - o1.bbox(sx[1], 0.5)[0]) / 2084)
             ortak.append(boya_sec(Y, model, z, tur, td, pp, s0)['deger'])
         ton_A = max(ortak) if tur == 'koyu' else min(ortak)
         TON_A[zad] = ton_A
         for sad, (Y, s0) in secenek.items():
+            o4.YAZI_OGE = V4_YAZI_OGE if sad == 'V4' else A_YAZI_OGE
             sx = Y['E']['sembol']
             model = o1.Model(td, sx[0], sx[1], 4800 * (o1.bbox(sx[1], 0.5)[2] - o1.bbox(sx[1], 0.5)[0]) / 2084)
             b = boya_sec(Y, model, z, tur, td, pp, s0 if s0 is not None else 0.20, sabit=None if sad == 'V4' else ton_A)
@@ -633,6 +636,7 @@ def main():
         uz['bosluk_px'] = bosluklar(YU['E'])
         uz['isim_guvenli_daireye_px'] = isim_guvenli(YU['E'])
     ayarla('koyu')
+    o4.YAZI_OGE = A_YAZI_OGE
     gorseller = []
     for Yx in (YU, YU_tam):
         if Yx is None:
@@ -676,7 +680,7 @@ def main():
     ak = ana5[..., 3]
     ic_k, kaynak_tanim = leke_ic_kaynak(ak)
     kaynak_onarimli = int((ic_k & (ak < 0.9)).sum())
-    dt = cv2.distanceTransform((ak > 0.5).astype(np.uint8), cv2.DIST_L2, 5)
+    dt = cv2.distanceTransform(np.pad((ak > 0.5).astype(np.uint8), 1), cv2.DIST_L2, 5)[1:-1, 1:-1]   # goruntu kenari da sinir
     yy0, xx0 = np.unravel_index(int(dt.argmax()), dt.shape)
     ad20 = ak.copy(); ad20[yy0 - 10:yy0 + 10, xx0 - 10:xx0 + 10] = 0.0
     ic20, _ = leke_ic_kaynak(ad20)
