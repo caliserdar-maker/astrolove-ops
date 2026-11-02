@@ -32,10 +32,17 @@ ADRES = {'US': {'state_code': 'NY', 'city': 'New York', 'zip': '10001'}, 'DE': {
 KARGO_VARYANT_SINIR = int(os.environ.get('KARGO_VARYANT_SINIR', '6'))   # urun basina en ucuz (v2 WW) N varyant
 # sinif esikleri (tasarim kurali; olculur, tahmin degil): ornament gorunen dairesi 70 mm; yazi isim buyuk harfi 2.38 mm icin daire capi en az
 # 2.0 inc (51 mm) gerekir (ornament duzeni %73 olcek). Sarma: en / boy > 2.2.
-MIN_KISA_INC = 2.0
+MIN_KISA_INC = 2.0   # esik DEGERLENDIRME: 2.0 inc (51 mm) dairede isim harfi 2.39 x 51 / 70 = 1.74 mm (hesap)
 SARMA_ORAN = 2.2
 YUVARLAK = re.compile(r'\b(round|circle|circular)\b', re.I)
-SARMA_AD = re.compile(r'\b(mug|tumbler|bottle|pint glass|wine glass|rocks glass|can-shaped glass|can cooler|candle|socks)\b', re.I)
+# inceleme 6: mum ve can cooler duz etiket / ayri on-arka alan; olcuyle (en/boy) siniflanir, ad kurali yalniz silindir sarma urunleri
+SARMA_AD = re.compile(r'\b(mug|tumbler|bottle|pint glass|wine glass|rocks glass|can-shaped glass|socks)\b', re.I)
+# inceleme 2/8: varyant adi daire disi kesim sekli diyorsa (aciklamadaki diameter o varyanta uygulanmaz)
+KESIM_SEKIL = re.compile(r'\b(heart|star|bell|snowflake|stocking|tree|paw|scalloped)\b', re.I)
+# inceleme 18: giyilebilir aksesuar (kapsam: giyim haric)
+GIYILEBILIR = re.compile(r'\b(gaiter|bandana|scrunchie|headband|hoodie|sweater|beanie)\b', re.I)
+CAP_ACIK = re.compile(r'(?:diameter|size)[^\d]{0,20}([\d.]+)\s*(?:″|"|in\b)', re.I)
+SADECE_ABD = re.compile(r'(US only|United States only|ships only to the US|only (?:available|ships) (?:in|to) the (?:US|United States))', re.I)
 
 
 def j(p):
@@ -121,6 +128,7 @@ def urun_ozet(ham, pid, a):
     r1 = (v1.get('yanit') or {}).get('result')
     p1 = r1.get('product', {}) if isinstance(r1, dict) else {}
     vs1 = liste_l(r1.get('variants')) if isinstance(r1, dict) else []
+    v2_http = (j(ham / f'urun_{pid}_v2.json') or {}).get('http')
     v2 = ((j(ham / f'urun_{pid}_v2.json') or {}).get('yanit') or {}).get('data')
     p2 = v2 if isinstance(v2, dict) else {}
     vs2 = liste_l(((j(ham / f'urun_{pid}_v2_variants.json') or {}).get('yanit') or {}).get('data'))
@@ -133,11 +141,14 @@ def urun_ozet(ham, pid, a):
         d = d if isinstance(d, dict) else {}
         r = {}
         for v in liste_l(d.get('variants')):
-            ps = [float(t['price']) for t in liste_l(v.get('techniques')) if t.get('price') not in (None, '')]
+            ps = [float(t[k]) for t in liste_l(v.get('techniques')) for k in ('price', 'discounted_price') if t.get(k) not in (None, '')]
             if ps:
                 r[v.get('id')] = min(ps)
-        return r
-    fWW, fNA = fiyat('WW'), fiyat('NA')
+        return r, (d.get('paging') if isinstance(d, dict) else None) or ((j(ham / f'urun_{pid}_v2_prices_{etk}.json') or {}).get('yanit') or {}).get('paging')
+    (fWW, pgW), (fNA, pgN) = fiyat('WW'), fiyat('NA')
+    def kapsam(pg, f):
+        t = (pg or {}).get('total') if isinstance(pg, dict) else None
+        return f'{len(f)}/{t}' if t is not None else str(len(f))
     # fiyat yaniti katalog varyant listesinde olmayan kimlikler de iceriyor (or. 358: 22522 2.25); yalniz listelenen varyantlar
     gecerli = {v.get('id') for v in (vs2 or vs1)}
     fWW = {k: v for k, v in fWW.items() if k in gecerli}
@@ -166,6 +177,7 @@ def urun_ozet(ham, pid, a):
         vid = v.get('id')
         vad = str(v.get('name') or '') + ' ' + str(v.get('size') or '')
         dims = [d for d in liste_l(v.get('placement_dimensions')) if not re.search(r'mockup|label|inside', str(d.get('placement')))]
+        dims = [d for d in dims if max(float(d.get('width') or 0), float(d.get('height') or 0)) <= 120]   # inceleme 17: 964'te deger px
         if dims:
             d = max(dims, key=lambda d: (d.get('width') or 0) * (d.get('height') or 0))
             w_in, h_in, bk = float(d.get('width') or 0), float(d.get('height') or 0), 'v2 placement_dimensions'
@@ -175,45 +187,74 @@ def urun_ozet(ham, pid, a):
             siniflar.append(('C', vid, 'baski olcusu API vermedi')); continue
         kisa, oran = min(w_in, h_in), max(w_in, h_in) / max(min(w_in, h_in), 1e-6)
         tek_olcu = bool(re.fullmatch(r'\s*[\d.]+\s*(″|"|in)\s*', str(v.get('size') or '')))
+        if tek_olcu:   # inceleme 4: varyant boyutu fiziksel yuz (660: 1.25 / 2.25 inc); baski alani kenar sarma payi dahil
+            fiz = float(re.sub(r'[^\d.]', '', str(v.get('size'))))
+            if fiz < kisa:
+                kisa, bk = fiz, f'varyant boyutu {fiz:g} inc fiziksel (baski alani {w_in:g}x{h_in:g} sarma / tasma dahil)'
         kanit = ('adda round/circle' if YUVARLAK.search(ad) or YUVARLAK.search(vad) else
                  'aciklamada diameter' if re.search(r'diameter', acik, re.I) else
                  'die-cut: kesim tasarim kenarini izler (urun adi)' if re.search(r'die-cut', ad, re.I) else
                  'varyant boyutu tek olcu (cap)' if tek_olcu else '')
         if re.search(r'square shape|square', acik, re.I) and not re.search(r'round|circle|diameter', ad + vad + acik, re.I):
             kanit = ''                                                   # aciklama kare diyor (or. Wall Clock 10x10 square shape)
-        nakis = bool(re.search(r'embroider', ad, re.I)) or (bool(liste_l(p2.get('techniques'))) and
-                                                              all(t.get('key') == 'embroidery' for t in liste_l(p2.get('techniques'))))
-        if nakis:
+        kesim = KESIM_SEKIL.search(' '.join(re.findall(r'\(([^)]*)\)', str(v.get('name') or ''))) + ' ' + str(v.get('size') or ''))
+        if kesim and not YUVARLAK.search(vad):
+            kanit = ''
+        t2 = [str(t.get('key')).lower() for t in liste_l(p2.get('techniques'))]
+        t1 = [str(t.get('key')).lower() for t in liste_l(p1.get('techniques'))]   # inceleme 5: v2 404 ise v1 teknik
+        nakis = bool(re.search(r'embroider', ad, re.I)) or bool(t2 or t1) and all(t == 'embroidery' for t in (t2 or t1))
+        if GIYILEBILIR.search(ad):
+            siniflar.append(('C', vid, 'giyilebilir aksesuar (kapsam: giyim haric)'))
+        elif nakis:
             siniflar.append(('C', vid, 'nakis (urun adi / teknik): altin doku ve 2.4 mm yazi nakisla uygulanamaz'))
         elif SARMA_AD.search(ad) or oran > SARMA_ORAN:
             siniflar.append(('C', vid, f'sarma / uzun bant baski (en/boy {oran:.2f})'))
+        elif kesim and not YUVARLAK.search(vad):
+            siniflar.append(('C', vid, f'kesim sekli {kesim.group(1)} (varyant adi): daire duzeni bu sekle uymaz'))
         elif re.search(r'\bslit\b', acik, re.I):
             siniflar.append(('C', vid, 'ortada yarik (aciklama): daire ortasi kesilir'))
         elif kisa < MIN_KISA_INC:
-            siniflar.append(('C', vid, f'kucuk: kisa kenar {kisa:.2f} inc < {MIN_KISA_INC} ({bk}); isim 2.38 mm sigmaz'))
+            siniflar.append(('C', vid, f'kucuk: kisa kenar {kisa:.2f} inc < {MIN_KISA_INC} ({bk}); isim harfi {2.39 * kisa * 25.4 / 70:.2f} mm (hesap)'))
         elif kanit and oran < 1.05:
-            siniflar.append(('A', vid, f'yuvarlak ({kanit}); {w_in:g}x{h_in:g} inc ({bk})'))
+            siniflar.append(('A', vid, f'yuvarlak ({kanit}); {w_in:g}x{h_in:g} inc ({bk}); fiziksel kisa {kisa:g} inc'))
         elif oran < 1.05:
-            siniflar.append(('B', vid, f'kare {w_in:g}x{h_in:g} inc ({bk}): daire ortada, zemin koselere uzar'))
+            siniflar.append(('B', vid, f'kare {w_in:g}x{h_in:g} inc ({bk}): daire ortada, zemin koselere uzar' +
+                             ('; sekil API\'de yok, aciklamada tek olcu (cap olabilir, dogrulanmadi)' if CAP_ACIK.search(acik) and not re.search('diameter', acik, re.I) else '')))
         else:
             siniflar.append(('B', vid, f'dikdortgen {w_in:g}x{h_in:g} inc (en/boy {oran:.2f}; {bk}): daire ortada, zemin uzar'))
     if siniflar:
         en_iyi = min(x[0] for x in siniflar)
         uygun = [x for x in siniflar if x[0] == en_iyi]
-        sinif, gerekce = en_iyi, uygun[0][2] + (f' (+{len(uygun) - 1} varyant ayni sinif)' if len(uygun) > 1 else '')
+        v1p = {v.get('id'): float(v['price']) for v in vs1 if v.get('price') not in (None, '') and float(v['price']) > 0}
+        temsil = min(uygun, key=lambda x: (fWW.get(x[1], v1p.get(x[1], 9e9)), str(x[1])))
+        temsil_id = temsil[1]
+        sinif, gerekce = en_iyi, f'[temsil varyant {temsil[1]}, en ucuz uygun] ' + temsil[2] + (f' (+{len(uygun) - 1} varyant ayni sinif)' if len(uygun) > 1 else '')
         uygun_var = ','.join(str(x[1]) for x in uygun)
     else:
-        sinif, gerekce, uygun_var = 'C', 'varyant / baski olcusu API vermedi', ''
+        sinif, gerekce, uygun_var, temsil_id = 'C', 'varyant / baski olcusu API vermedi', '', None
     yuvarlak = sinif == 'A'
-    sekil = 'daire' if yuvarlak else ('kare' if boyutlar and max(boyutlar, key=lambda b: b[0] * b[1])[0] == max(boyutlar, key=lambda b: b[0] * b[1])[1] else ('dikdortgen' if boyutlar else ''))
+    sekil = ('daire' if yuvarlak else 'kare' if ' kare ' in f' {gerekce} ' else 'dikdortgen' if 'dikdortgen' in gerekce else
+             'kesim sekilli' if 'kesim sekli' in gerekce else '')   # inceleme 16: temsil varyanttan
     bolge = sorted({x.get('region') for v in vs1 for x in liste_l(v.get('availability_status')) if x.get('status') in ('in_stock', 'stocked_on_demand')})
-    v1min = min((float(v['price']) for v in vs1 if v.get('price') not in (None, '')), default=None)
+    v1min = min((float(v['price']) for v in vs1 if v.get('price') not in (None, '') and float(v['price']) > 0), default=None)   # inceleme 17: 0.00 yok
+    mal = sorted({m.get('name') for v in vs1 for m in liste_l(v.get('material')) if m.get('name')})
+    kisit = []
+    if SADECE_ABD.search(acik):
+        kisit.append('aciklama: yalniz ABD')
+    if v2_http == 404:
+        kisit.append('v2 worldwide urun 404')
+    cap_m = (re.search(r'diameter[^\d]{0,20}([\d.]+)\s*(?:″|"|in\b)', acik, re.I) or
+             re.search(r'\bsize:\s*([\d.]+)\s*(?:″|"|in\b)', acik, re.I))   # once diameter; "Size: 3.5″" yalniz tek olcuyse
+    cift = ('back' in yerler) or bool(re.search(r'2-side|two-sided|double-sided', ' '.join(map(str, yerler.values())) + ' ' + ad, re.I)) if yerler else ''
     return dict(urun_id=pid, ad=ad, kok_kategori=a['kok'], alt_kategori=a['alt'], katalog=('v1+v2' if 'v1' in a['kaynak'] and 'v2' in a['kaynak'] else '+'.join(a['kaynak'])),
                 durdurulmus=p2.get('is_discontinued', p1.get('is_discontinued', '')), varyant_sayisi=len(vs2 or vs1),
-                baski_yerlesimleri=';'.join(sorted(yerler)) if yerler else '', cift_yuz=('back' in yerler) if yerler else '',
+                baski_yerlesimleri=';'.join(sorted(yerler)) if yerler else '', cift_yuz=cift,
                 sekil=sekil, baski_px=';'.join(f'{w}x{h}' for w, h, _ in boyutlar), baski_dpi=';'.join(sorted({str(d) for _, _, d in boyutlar})),
                 en_ucuz_usd_v2_WW=min(fWW.values()) if fWW else '', en_ucuz_usd_v2_NA=min(fNA.values()) if fNA else '',
                 en_ucuz_usd_v1=v1min if v1min is not None else '',
+                temsil_varyant=temsil_id if temsil_id is not None else '', temsil_usd_v2_WW=fWW.get(temsil_id, ''), temsil_usd_v1=v1p.get(temsil_id, '') if siniflar else '',
+                fiyat_kapsam_WW=kapsam(pgW, fWW), fiyat_kapsam_NA=kapsam(pgN, fNA),
+                aciklama_olcu=(cap_m.group(0)[:40] if cap_m else ''), malzeme_v1=';'.join(mal), satis_kisiti=';'.join(kisit),
                 v1_bolgeler=','.join(b for b in bolge if b), sinif=sinif, uygun_varyantlar=uygun_var, gerekce=gerekce,
                 kaynak='Printful API (v1 /products, /mockup-generator/printfiles, v2 catalog-products, v2 prices)')
 
@@ -282,7 +323,7 @@ def cmd_secilen(cikti, ids):
         def fiy(etk):
             d = ((j(ham / f'urun_{pid}_v2_prices_{etk}.json') or {}).get('yanit') or {}).get('data')
             d = d if isinstance(d, dict) else {}
-            return {v.get('id'): min((float(t['price']) for t in liste_l(v.get('techniques')) if t.get('price') not in (None, '')), default=None)
+            return {v.get('id'): min((float(t[k]) for t in liste_l(v.get('techniques')) for k in ('price', 'discounted_price') if t.get(k) not in (None, '')), default=None)
                     for v in liste_l(d.get('variants'))}
         fWW, fNA = fiy('WW'), fiy('NA')
         av = liste_l(((j(ham / f'urun_{pid}_v2_availability.json') or {}).get('yanit') or {}).get('data'))
@@ -295,7 +336,7 @@ def cmd_secilen(cikti, ids):
                      malzeme=';'.join(f"{m.get('name')} {m.get('percentage')}%" for m in liste_l((vs1.get(vid) or {}).get('material'))),
                      baski=';'.join(f"{y}={x.get('width')}x{x.get('height')}@{x.get('dpi')}" for y, x in pfa),
                      baski_inc_v2=';'.join(f"{d.get('placement')}={d.get('width')}x{d.get('height')}" for d in liste_l(v.get('placement_dimensions'))),
-                     cift_yuz=any(y == 'back' for y, _ in pfa), fiyat_usd_v2_WW=fWW.get(vid) if fWW.get(vid) is not None else '',
+                     cift_yuz=oz['cift_yuz'], fiyat_usd_v2_WW=fWW.get(vid) if fWW.get(vid) is not None else '',
                      fiyat_usd_v2_NA=fNA.get(vid) if fNA.get(vid) is not None else '', fiyat_usd_v1=(vs1.get(vid) or {}).get('price', ''),
                      uygunluk_v2=avm.get(vid, ''))
             for u in ULKELER:
