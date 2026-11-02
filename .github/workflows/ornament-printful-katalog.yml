@@ -13,6 +13,9 @@ name: ornament-printful-katalog
 #   Cikti Drive TEMP/ORNAMENT_ORNEK_<damga>/ (+ STIL3/) + dal docs/ornament/ornek/<damga>/. Etsy / Printful API istegi yok.
 # mod=ornek2 (Merkez inceleme + Serdar 2 Kas): yalniz STIL3 V2 (scripts/printful/ornament_ornek2.py). Cikti Drive
 #   TEMP/ORNAMENT_ORNEK_<damga>/STIL3_V2/ + dal docs/ornament/ornek/<damga>/STIL3_V2/.
+# mod=urun1 / urun2 (Merkez 2 Kas, Serdar): Printful urun taramasi, YALNIZ OKUMA (scripts/printful/urun_katalog.py). alt = damga.
+#   urun1: katalog + urun basina GET, TUM_LISTE.csv. urun2: veri = virgullu urun id; kargo (POST /v2/shipping-rates) + SECILEN25.csv.
+#   Cikti Drive TEMP/PRINTFUL_URUN_<alt>/ + dal docs/printful_urun/<alt>/.
 # mod=ornek3 (Merkez STIL3_V3, Serdar 2 Kas): halkali + halkasiz x 3 zemin (zemin3/V2), scripts/printful/ornament_ornek3.py; cikti STIL3_V3/.
 on:
   workflow_dispatch:
@@ -49,7 +52,7 @@ jobs:
           python-version: "3.13"
       - name: Girdi
         run: |
-          case "$MOD" in tam|ek|rapor|zemin3|ornek|ornek2|ornek3) ;; *) echo "::error::mod tam, ek, rapor, zemin3, ornek, ornek2 ya da ornek3 ($MOD)"; exit 1;; esac
+          case "$MOD" in tam|ek|rapor|zemin3|ornek|ornek2|ornek3|urun1|urun2) ;; *) echo "::error::bilinmeyen mod ($MOD)"; exit 1;; esac
           if [ "$MOD" != tam ] && [ ! -f s/docs/ornament/ham/_adaylar.json ]; then echo "::error::dalda ham yok"; exit 1; fi
           echo "ref ${GITHUB_REF_NAME} | betik $(git -C main rev-parse --short HEAD) | dal $(git -C s rev-parse --short HEAD)"
       - name: rclone kur
@@ -66,7 +69,7 @@ jobs:
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "::add-mask::$GOOGLE_CLIENT_SECRET"
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
-          if [ "$MOD" = tam ] || [ "$MOD" = ek ]; then
+          if [ "$MOD" = tam ] || [ "$MOD" = ek ] || [ "$MOD" = urun1 ] || [ "$MOD" = urun2 ]; then
             T=$(rclone cat "gdrive:ASTROLOVE/TEMP/PRINTFUL_TOKEN.json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["api_token"].strip())')
             [ -n "$T" ] || { echo "HATA: PRINTFUL_TOKEN.json api_token bos"; exit 1; }
             echo "::add-mask::$T"
@@ -208,6 +211,35 @@ jobs:
           git commit -qm "ornament ornek V3: STIL3_V3 (kosu ${GITHUB_RUN_ID}, $D)" && git push -q origin "HEAD:${DAL}"
           echo "::notice::dal commit $(git rev-parse --short HEAD)"
           exit $k
+      - name: Printful urun taramasi (urun1 / urun2; yalniz GET + kargo ucreti)
+        if: env.MOD == 'urun1' || env.MOD == 'urun2'
+        env:
+          ALT: ${{ inputs.alt }}
+          VERI: ${{ inputs.veri }}
+        run: |
+          set -euo pipefail
+          [ -n "$ALT" ] || { echo "::error::alt (damga) bos"; exit 1; }
+          U="docs/printful_urun/$ALT"; mkdir -p "s/$U"
+          sansur() { sed -u "s|${PRINTFUL_TOKEN}|***|g"; }
+          set +e
+          if [ "$MOD" = urun1 ]; then
+            python3 -I main/scripts/printful/urun_katalog.py liste "s/$U/ham" 2>&1 | sansur | tee "s/$U/KOSU_LOG_1.txt"; k=${PIPESTATUS[0]}
+            [ $k = 0 ] && { python3 -I main/scripts/printful/urun_katalog.py tablo "s/$U" 2>&1 | tee -a "s/$U/KOSU_LOG_1.txt"; k=${PIPESTATUS[0]}; }
+          else
+            [ -n "$VERI" ] || { echo "::error::veri (urun id listesi) bos"; exit 1; }
+            python3 -I main/scripts/printful/urun_katalog.py detay "s/$U/ham" "$VERI" 2>&1 | sansur | tee "s/$U/KOSU_LOG_2.txt"; k=${PIPESTATUS[0]}
+            [ $k = 0 ] && { python3 -I main/scripts/printful/urun_katalog.py secilen "s/$U" "$VERI" 2>&1 | tee -a "s/$U/KOSU_LOG_2.txt"; k=${PIPESTATUS[0]}; }
+          fi
+          set -e
+          if grep -rlF "$PRINTFUL_TOKEN" "s/$U" >/dev/null; then echo "::error::ciktida token, yazilmadi"; exit 1; fi
+          rclone copy "s/$U" "gdrive:ASTROLOVE/TEMP/PRINTFUL_URUN_$ALT" -q
+          echo "::notice::Drive TEMP/PRINTFUL_URUN_$ALT | cikis $k | $(tail -1 s/$U/KOSU_LOG_*.txt | tr '\n' ' ' | cut -c1-300)"
+          cd s && git config user.name "astrolove-bot" && git config user.email "astrolove-bot@users.noreply.github.com"
+          git add "$U"
+          DIS=$(git diff --cached --name-only | grep -v "^$U/" || true)
+          [ -z "$DIS" ] || { echo "::error::izinli klasor disi: $DIS"; exit 1; }
+          git commit -qm "printful urun taramasi $MOD (kosu ${GITHUB_RUN_ID}, $ALT)" && git push -q origin "HEAD:${DAL}"
+          exit $k
       - name: Printful oku (GET + kargo ucreti)
         if: env.MOD == 'tam'
         run: |
@@ -222,7 +254,7 @@ jobs:
           python3 -I main/scripts/printful/ornament_katalog.py ek s/docs/ornament/ham 2>&1 | sed -u "s|${PRINTFUL_TOKEN}|***|g" | tee s/docs/ornament/KOSU_LOG_EK.txt
           k=${PIPESTATUS[0]}; echo "::notice::ek cikis $k | $(grep '^EK ISTEK' s/docs/ornament/KOSU_LOG_EK.txt)"; exit $k
       - name: Rapor + dogrulama
-        if: always() && env.MOD != 'zemin3' && env.MOD != 'ornek' && env.MOD != 'ornek2' && env.MOD != 'ornek3'
+        if: always() && (env.MOD == 'tam' || env.MOD == 'ek' || env.MOD == 'rapor')
         run: |
           set -o pipefail
           cd s/docs/ornament
@@ -232,7 +264,7 @@ jobs:
           cat PRINTFUL_ORNAMENT.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
           [ $r = 0 ] && [ $d = 0 ]
       - name: Drive + dal (token kontrolu)
-        if: always() && env.MOD != 'zemin3' && env.MOD != 'ornek' && env.MOD != 'ornek2' && env.MOD != 'ornek3'
+        if: always() && (env.MOD == 'tam' || env.MOD == 'ek' || env.MOD == 'rapor')
         run: |
           set -euo pipefail
           cd s
