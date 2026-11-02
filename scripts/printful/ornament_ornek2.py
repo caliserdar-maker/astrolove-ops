@@ -7,9 +7,10 @@ Degisiklikler (v1'e gore):
     (arama); sembol posterdeki oranda; tum icerik Printful guvenli dairesinin (cap 760.6, merkez 477,477) >= 15 px icinde; yazi boyu sabit
     (isim buyuk harf 28.07 px = 2.38 mm, tarih 23.9 px = 2.02 mm; kucuk semboller v1 boyu).
   1-3 halka: poster halkasinin (HALKA_BLUE_16x20.png) OLCULEN merkez cizgisi r(aci) ve genislik profili w(aci) korunur; genislik
-    esit oranla en kalin yer (tepe) HALKA_TEPE_PX olacak sekilde buyutulur; uclarda genislik olculen profille 0'a iner (keskin uc,
-    yalniz kapsama azalir); renk boru profili (tek doku modeli profil(t)) ile, aci boyunca tek duze (kabartma yok: aci boyunca parlaklik
-    kesintisi olmasin).
+    esit oranla en kalin yer (tepe) HALKA_TEPE_PX olacak sekilde buyutulur; uclarda genislik olculen profille 0'a iner; renk tek doku
+    modelinin Lmed rengi, tek duz renk (deneme 2; deneme 1'de boru profili ince yerlerde parlaklik kesintisi uretti).
+    Bilinen sinir (inceleme 2 Kas): 7 derece medyan uca 0.13 px duz kuyruk birakir ve clip(h - |d| + 0.5) 1 px alti kapsamayi sisirir;
+    uclar 30-44 derecede soluk gorunur.
   4 okunurluk: isim, sonsuz, tarih arkasina yumusak koyu hale (zemin x (1 - s G)); hedef her yazida min(ortanca, en acik %5) >= 5.0.
     s yetmezse yazi altini en fazla %12 acilir. s ve kazanc raporlanir.
   5 sonsuz: en ince cizgi >= 3 px: kaynak alfa yuksek cozunurlukte genisletilir; kapi = 3x3 acma sonrasi kayip <= %2 ve bilesen sayisi ayni.
