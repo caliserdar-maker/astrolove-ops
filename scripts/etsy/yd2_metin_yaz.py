@@ -110,7 +110,7 @@ def donustur(desc, title):
 def ilan_isle(api, shop, lid, ham_dir, out, mod):
     R = dict(listing_id=lid, sonuc="", neden="", notlar="", istek_once=api.calls, baslik_degisti=False)
     try:
-        if mod != "kontrol" and api.remaining is not None and api.remaining < ILAN_UST + E.KOTA_SINIRI:
+        if mod != "kontrol" and api.remaining is not None and int(api.remaining) < ILAN_UST + E.KOTA_SINIRI:   # x-remaining metin gelir
             R.update(sonuc="KOTA", neden=f"kalan {api.remaining} < {ILAN_UST + E.KOTA_SINIRI}"); return R
         L = api.get(f"/listings/{lid}") or {}
         st, d0, t0 = L.get("state"), norm(L.get("description")), html.unescape(L.get("title") or "")

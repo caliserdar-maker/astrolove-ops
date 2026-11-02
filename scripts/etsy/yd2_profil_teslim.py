@@ -60,7 +60,7 @@ def calis(api, shop, a):
         return dict(R, sonuc="DUR", neden=f"profili YD disinda {len(disari)} ilan kullaniyor")
     if a.mod == "kontrol":
         return dict(R, sonuc="PLAN", plan=dict(au=f"{gun(d)} -> {hedef_gun}", ad=f"{once.get('title')} -> {hedef_ad}"))
-    if api.remaining is not None and api.remaining < 6 + E.KOTA_SINIRI:
+    if api.remaining is not None and int(api.remaining) < 6 + E.KOTA_SINIRI:   # x-remaining metin gelir (kosu 41393660718 TypeError)
         return dict(R, sonuc="KOTA", neden=f"kalan {api.remaining}")
     yazildi = []
     try:

@@ -23,7 +23,7 @@ BASLIK = "Cancer Libra Paper Anniversary Card, Zodiac Print"
 
 
 class Sahte:
-    def __init__(self, state="active", desc=ESKI, title=BASLIK, bozuk_okuma=False, kalan=4000):
+    def __init__(self, state="active", desc=ESKI, title=BASLIK, bozuk_okuma=False, kalan="4000"):   # Etsy x-remaining metin
         self.L = dict(state=state, description=desc.replace('"', "&quot;"), title=title)
         self.calls, self.remaining, self.yaz, self.bozuk = 0, kalan, [], bozuk_okuma
 
@@ -113,7 +113,7 @@ class T(unittest.TestCase):
         self.assertEqual(oz["yapilmadi"], ["2", "3"])
 
     def test_kota(self):
-        api = Sahte(kalan=12); r = M.ilan_isle(api, "S", "1", self.d, self.d, "yaz")
+        api = Sahte(kalan="12"); r = M.ilan_isle(api, "S", "1", self.d, self.d, "yaz")
         self.assertEqual((r["sonuc"], api.calls), ("KOTA", 0))
 
 
