@@ -231,6 +231,8 @@ TINT_OLC = None
 RENK_DONUSUM = None                       # f(cc, model) -> cc: altin -> bronz (acik zeminler)
 SON_KIRP = None                           # f(cc) -> cc: doku sonrasi (bronz acik ucu siniri)
 DIS_GOLGE = None                          # dict(kayma, sigma, opak, koyu): zemin tonlu dis golge (acik zeminler)
+TINT_HARIC = ()                           # golge tonu karisimi uygulanmayan ogeler (V5: yazilar)
+OGE_SON = None                            # f(ad, cc_dokusuz, cc_dokulu) -> cc: oge basina doku sonrasi (V5: bronz yazi)
 
 
 def kapi(E):
@@ -368,7 +370,7 @@ def boya(Y, model, zemin, kazanc, td, doku_guc, doku_kapali=False, butunlesme=Tr
         # aradaki tonlarda dogrusal. Duz renkli ogelerde (halka, isim, tarih, logo) golge tonu yoktur: w = 0 (raporda).
         ink = m > 0.5
         Lref = float(np.median(L[ink])) if ink.any() else 1.0
-        w = (np.clip((0.95 * Lref - L) / max(0.25 * Lref, 1), 0, 1) * TINT_GUC)[..., None]
+        w = (np.clip((0.95 * Lref - L) / max(0.25 * Lref, 1), 0, 1) * (0.0 if ad in TINT_HARIC else TINT_GUC))[..., None]
         tint = zort / max(float(lum(zort[None])[0]), 1.0) * L[..., None]
         cc = cc * (1 - w) + tint * w
         if TINT_OLC is not None and ink.any():
@@ -377,7 +379,10 @@ def boya(Y, model, zemin, kazanc, td, doku_guc, doku_kapali=False, butunlesme=Tr
                                 golge_tonunda_ort_w=round(float(w[..., 0][gt].mean()), 3) if gt.any() else None,
                                 tum_murekkep_ort_w=round(float(w[..., 0][ink].mean()), 3))
         dg = doku_guc.get(ad, 0.0) if isinstance(doku_guc, dict) else doku_guc
+        cc0 = cc
         cc = cc * (1 - dg) + o3.overlay(np.clip(cc, 0, 255), doku_b[..., None]) * dg
+        if OGE_SON is not None:
+            cc = OGE_SON(ad, cc0, cc)
         if SON_KIRP is not None:
             cc = SON_KIRP(cc)
         if butunlesme and (GOMU_KOYU > 0 or GOMU_ACIK > 0):

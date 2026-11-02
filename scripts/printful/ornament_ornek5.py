@@ -49,7 +49,18 @@ KUCUK = ('kucuk_sol', 'kucuk_sag')
 
 
 # ----------------------------------------------------------------------------------------------- kaynak alfa delikleri (madde 6)
+def _pedli(f, rgba, ped):
+    """kenar payi: goruntu sifirla genisletilir, onarim, geri kirpilir (kapanis / asindirma goruntu kenarini sinir sayar; Terazi tepesi duz kesik nedeni)."""
+    P_ = np.pad(rgba, ((ped, ped), (ped, ped), (0, 0)))
+    out, n = f(P_)
+    return out[ped:-ped, ped:-ped], n
+
+
 def delik_kapat(rgba):
+    return _pedli(_delik_kapat, rgba, 24)
+
+
+def _delik_kapat(rgba):
     """alfa > 0.5 maskesi kapanis (k x k elips), 1 px ice; icinde alfa 1, renk inpaint. Doner (rgba, kapatilan piksel)."""
     a = rgba[..., 3]
     ic, _ = leke_ic_kaynak(a)                                          # kapanisin kose dolgusu degismez (inceleme V5 bulgu 5)
@@ -73,6 +84,16 @@ def delik_say(a, k=9):
 
 
 def hedef_kapat(rgb, a):
+    out, n = _pedli(lambda q: _hedef_kapat_rgba(q), np.dstack([rgb, a]).astype(np.float32), 6)
+    return out[..., :3], out[..., 3], n
+
+
+def _hedef_kapat_rgba(q):
+    rgb, a, n = _hedef_kapat(q[..., :3], q[..., 3])
+    return np.dstack([rgb, a]), n
+
+
+def _hedef_kapat(rgb, a):
     """hedef boyda (olceklenmis) ayni kapanis: alfa > 0.5 maskesi 3x3 kapanis, 1 px ice; icinde alfa 1, alfa < 0.9 olan yerde renk inpaint."""
     ic = leke_ic(a)                                                   # kapi ile ayni tanim: kenar (2 px) degismez
     maske = (ic & (a < 0.9)).astype(np.uint8)
@@ -154,8 +175,17 @@ def bronz_fonk(carpan):
     return f, kirp, Lc
 
 
+YAZI = ('isim1', 'isim2', 'tarih', 'sonsuz')
+AKTIF = dict(pvar=None, A=False)             # satir P degiskeni (acik zemin) ve A secenegi mi (V4 sutunu V4 kurallariyla)
+ALTIN_SABIT = 1.12                           # Merkez EK 3: RUBY altin kazanci V4 degeri, arama yok
+
+
 def ayarla(tur, carpan=None):
-    """o4 boyama kancalari: koyu zemin = V4; acik zemin = bronz, isik tasmasi / gomulu kenar kapali, zemin tonlu dis golge."""
+    """o4 boyama kancalari: koyu zemin = V4; acik zemin = bronz, isik tasmasi / gomulu kenar kapali, zemin tonlu dis golge.
+    A seceneklerinde yazilara (isim, tarih, logo) golge tonu karisimi YOK (Merkez EK 3). Acik zeminde bronz yazi:
+    P1 doku yalniz koyulastirir, P2 duz ana ton; ikisinde de yazinin acik ucu ana ton (Merkez EK 2)."""
+    o4.TINT_HARIC = YAZI if AKTIF['A'] else ()
+    o4.OGE_SON = None
     if tur == 'koyu':
         o4.RENK_DONUSUM = o4.SON_KIRP = o4.DIS_GOLGE = None
         o4.GLOW_OPAK, o4.GOMU_KOYU, o4.GOMU_ACIK = 0.16, 0.55, 0.40
@@ -163,6 +193,17 @@ def ayarla(tur, carpan=None):
     f, kirp, Lc = bronz_fonk(carpan)
     o4.RENK_DONUSUM, o4.SON_KIRP, o4.DIS_GOLGE = f, kirp, ACIK_GOLGE
     o4.GLOW_OPAK, o4.GOMU_KOYU, o4.GOMU_ACIK = 0.0, 0.0, 0.0
+    pv = AKTIF['pvar'] if AKTIF['A'] else None
+    if pv:
+        L_ana = float(lum((BRONZ['ana'] * carpan)[None])[0])
+
+        def son(ad, cc0, cc):
+            if ad not in YAZI:
+                return cc
+            out = cc0 if pv == 'P2' else np.minimum(cc, cc0)
+            L = lum(out)
+            return out * np.where(L > L_ana, L_ana / np.maximum(L, 1e-3), 1.0)[..., None]
+        o4.OGE_SON = son
     return Lc
 
 
@@ -411,6 +452,10 @@ def main():
     for f, h in ZEMIN_SHA.items():
         if o1.sha(K / f) != h:
             print('FAIL zemin sha', f, flush=True); return 1
+    # Actions kosularinin kullandigi gercek kaynaklar (Drive; kosu 41502348931 OLCUM kaynak_sha256)
+    GERCEK = {'CANCER_LIBRA_ana.png': 'e86c2629629305fd', 'cancer_symbol_gold.png': '2b5a32121ce8fa92', 'libra_symbol_gold.png': '6fe2d0355ee56f84'}
+    kaynak_durum = {f: ('gercek' if o1.sha(K / f).startswith(h) else 'VEKIL (sha ' + o1.sha(K / f)[:16] + ')') for f, h in GERCEK.items()}
+    print('KAYNAK', json.dumps(kaynak_durum), flush=True)
     o4.YASAK = o4.yasak_m()
     o4.GLOW_K = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * o4.GLOW_R + 1,) * 2)
     o3.YASAK = o4.YASAK
@@ -451,7 +496,7 @@ def main():
     kc4 = {'sol': kucuk('cancer', cap, P['kucuk_sol_h'] / P['cap'], False), 'sag': kucuk('libra', cap, P['kucuk_sag_h'] / P['cap'], False)}
     kc5 = {'sol': kucuk('cancer', cap, P['kucuk_sol_h'] / P['cap'], True), 'sag': kucuk('libra', cap, P['kucuk_sag_h'] / P['cap'], True)}
     zem = {ad: (o1.zemin_canva(K / f), tur) for ad, f, tur in ZEMINLER}
-    R = {'kaynak_sha256': {f.name: o1.sha(f) for f in sorted(K.iterdir()) if f.is_file()},
+    R = {'kaynak_sha256': {f.name: o1.sha(f) for f in sorted(K.iterdir()) if f.is_file()}, 'kaynak_durum': kaynak_durum,
          'sabit': dict(halka=dict(ax=HALKA_AX, by=round(HALKA_AX / pp['el']['oran'], 2), cy=HALKA_CY, tepe_y=round(HALKA_CY - HALKA_AX / pp['el']['oran'], 2),
                                   acik_aci=[pp['t1'], pp['t2']], govde_med=o4.GOVDE_MED, govde_min=o4.GOVDE_MIN),
                        uc_T=UC_T, bosluk_hedef_px=G, bosluk_tanimi=f'ceil({BOSLUK_ORAN} x isim buyuk harf {cap} px); alfa >= 0.5 kutulari, J dahil',
@@ -477,30 +522,36 @@ def main():
     TON_A = {}
     V4_YAZI_OGE = o4.YAZI_OGE
     A_YAZI_OGE = V4_YAZI_OGE + ('halka',)          # 4.2 px halka ince cizgili oge: gomulu kenar x GOMU_YAZI (koyu kenar ucta baskin, kontrast)
-    for zad, (z, tur) in zem.items():
+    SATIR = [('RUBY', 'RUBY', None)] + [(f'{b}_{pv}', b, pv) for b in ('BEIGE', 'AGED_PAPYRUS') for pv in ('P1', 'P2')]
+    for zad, zkay, pv in SATIR:
+        z, tur = zem[zkay]
+        AKTIF['pvar'] = pv
         # A-T1 ve A-T2 ayni ton (inceleme V5 bulgu 3: sutunlar renkte kiyaslanabilir): ikisinin de gecen en hafif tonu
         ortak = []
         for sad, (Y, s0) in secenek.items():
             if sad == 'V4':
                 continue
             o4.YAZI_OGE = A_YAZI_OGE
+            AKTIF['A'] = True
             sx = Y['E']['sembol']
             model = o1.Model(td, sx[0], sx[1], 4800 * (o1.bbox(sx[1], 0.5)[2] - o1.bbox(sx[1], 0.5)[0]) / 2084)
-            ortak.append(boya_sec(Y, model, z, tur, td, pp, s0)['deger'])
+            ortak.append(ALTIN_SABIT if tur == 'koyu' else boya_sec(Y, model, z, tur, td, pp, s0)['deger'])
         ton_A = max(ortak) if tur == 'koyu' else min(ortak)
         TON_A[zad] = ton_A
         for sad, (Y, s0) in secenek.items():
             o4.YAZI_OGE = V4_YAZI_OGE if sad == 'V4' else A_YAZI_OGE
+            AKTIF['A'] = sad != 'V4'
             sx = Y['E']['sembol']
             model = o1.Model(td, sx[0], sx[1], 4800 * (o1.bbox(sx[1], 0.5)[2] - o1.bbox(sx[1], 0.5)[0]) / 2084)
-            b = boya_sec(Y, model, z, tur, td, pp, s0 if s0 is not None else 0.20, sabit=None if sad == 'V4' else ton_A)
+            sabit = (ALTIN_SABIT if tur == 'koyu' else (None if sad == 'V4' else ton_A))
+            b = boya_sec(Y, model, z, tur, td, pp, s0 if s0 is not None else 0.20, sabit=sabit)
             rgb = b['rgb']
             ayarla(tur, b['deger'])
             rgb0 = o4.boya(Y, model, z, b['kazanc'], td, 0.0, doku_kapali=True)
             rgbb = o4.boya(Y, model, z, b['kazanc'], td, b['dg'], butunlesme=False)
             tumm = np.maximum.reduce([Y['M'][k] for k in Y['M']])
             gy, gb = o4.goruntu_yasak(rgb, z, Y['M'].get('halka'))
-            r = dict(tur=tur, ton=('altin kazanci ' if tur == 'koyu' else 'bronz carpani ') + str(b['deger']),
+            r = dict(tur=tur, zemin=zkay, p=pv, yazi_golge_tonu='yok' if sad != 'V4' else 'V4 (var)', ton=('altin kazanci ' if tur == 'koyu' else 'bronz carpani ') + str(b['deger']),
                      bronz_ana_rgb=[round(float(v), 1) for v in BRONZ['ana'] * b['deger']] if tur == 'acik' else None,
                      kontrast_olcutu=('Serdar 2 Kas: acik zeminde zeminin koyu %5 / ogenin acik %5; koyu zeminde zeminin acik %5 / ogenin koyu %5; '
                                       'zemin ogenin 6-12 px cevresi; oge alfa >= 0.9 murekkep. Halka uclari: incelme bolgesinde genislik >= 2 px (kapi); '
@@ -531,7 +582,7 @@ def main():
     # onizleme 3 x 3 + etiket
     font = ImageFont.truetype(str(K / 'EBGaramond-Italic.ttf'), 30)
     satirlar = []
-    for zad, _, _ in ZEMINLER:
+    for zad, _, _ in SATIR:
         im = o4.onizleme([rgbler[(zad, s)] for s in secenek], ara=24)
         tile = (im.width - 48) // 3
         b = Image.new('RGB', (im.width, im.height + 120), 'white'); b.paste(im, (0, 0)); d = ImageDraw.Draw(b)
@@ -547,7 +598,7 @@ def main():
             for j, line in enumerate(t.split('\n')):
                 d.text((i * (tile + 24) + 6, im.height + 8 + j * 34), line, fill=(20, 20, 20), font=font)
         satirlar.append(b)
-    o = Image.new('RGB', (max(s.width for s in satirlar), sum(s.height for s in satirlar) + 24 * 2), 'white')
+    o = Image.new('RGB', (max(s.width for s in satirlar), sum(s.height for s in satirlar) + 24 * (len(satirlar) - 1)), 'white')
     y = 0
     for s in satirlar:
         o.paste(s, (0, y)); y += s.height + 24
@@ -564,7 +615,7 @@ def main():
     xs_, ys_ = [q[0] for q in pts], [q[1] for q in pts]
     kirp = (max(0, int(min(xs_)) - 30), max(0, int(min(ys_)) - 14), min(N, int(max(xs_)) + 30), min(N, int(max(ys_)) + 14))
     parcalar = []
-    for zad in ('RUBY', 'BEIGE'):
+    for zad in ('RUBY', 'BEIGE_P1'):
         sat = []
         for s_ in secenek:
             im = Image.fromarray(rgbler[(zad, s_)]).crop(kirp)
@@ -636,6 +687,7 @@ def main():
     else:
         uz['bosluk_px'] = bosluklar(YU['E'])
         uz['isim_guvenli_daireye_px'] = isim_guvenli(YU['E'])
+    AKTIF.update(A=True, pvar=None)
     ayarla('koyu')
     o4.YAZI_OGE = A_YAZI_OGE
     gorseller = []
@@ -665,7 +717,8 @@ def main():
              bosluk_ge_hedef=all(min(r['bosluk_px']) >= BOSLUK_ORAN * cap for r in A),
              leke_a_0=all(sum(v['alfa_lt_09'] for k_, v in r['leke'].items() if k_ in LEKE_KAPI_OGE) == 0 for r in A),
              leke_b_0=all(sum((v['acik_piksel'] or 0) for v in r['leke'].values()) == 0 for r in A),   # alfa >= 0.9 murekkepte
-             doku_4_6=all(4.0 <= min(r['doku_oge'].values()) and max(r['doku_oge'].values()) <= 6.0 for r in A),
+             doku_4_6=all(4.0 <= min(v for k_, v in r['doku_oge'].items() if not (r['p'] == 'P2' and k_ in YAZI)) and
+                          max(r['doku_oge'].values()) <= 6.0 for r in A),   # P2 yazilari duz (doku yok, tasarim)
              isik_4_10_koyu=all(4 <= r['isik']['p95_px'] and r['isik']['uzanim_px'] <= 10 for r in A if r['tur'] == 'koyu'))
     g = {k: bool(v) for k, v in g.items()}
     R['kapi'] = g
