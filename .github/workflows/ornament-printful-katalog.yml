@@ -6,12 +6,17 @@ name: ornament-printful-katalog
 # mod=rapor: API'ye gitmez, daldaki docs/ornament/ham'dan raporu yeniden uretir.
 # mod=ek (Serdar 2 Kas onayi): yalniz v2'de olan urunler (1664, 1729) icin GET + POST /v2/shipping-rates; daldaki ham'a ekler.
 #   Bu mod dal ornament-printful-katalog'dan tetiklenir (ref=ornament-printful-katalog).
+# mod=zemin3 (Serdar 2 Kas onayi): Canva disa aktarim linklerinden (gecici, imzali) 3 zemin PNG indirir; yalniz GET. veri = base64
+#   "AD URL" satirlari. Cikti Drive TEMP/ORNAMENT_ZEMIN3_20261102/ + dal docs/ornament/zemin3/. Printful / Etsy istegi yok.
 on:
   workflow_dispatch:
     inputs:
       mod:
         description: "tam (API oku + rapor) / ek (1664/1729 v2 kargo + rapor) / rapor (daldaki ham JSON'dan, API yok)"
         default: "tam"
+      veri:
+        description: "zemin3: base64('AD URL' satirlari)"
+        default: ""
 permissions:
   contents: write
 jobs:
@@ -35,7 +40,7 @@ jobs:
           python-version: "3.12"
       - name: Girdi
         run: |
-          case "$MOD" in tam|ek|rapor) ;; *) echo "::error::mod tam, ek ya da rapor ($MOD)"; exit 1;; esac
+          case "$MOD" in tam|ek|rapor|zemin3) ;; *) echo "::error::mod tam, ek, rapor ya da zemin3 ($MOD)"; exit 1;; esac
           if [ "$MOD" != tam ] && [ ! -f s/docs/ornament/ham/_adaylar.json ]; then echo "::error::dalda ham yok"; exit 1; fi
           echo "ref ${GITHUB_REF_NAME} | betik $(git -C main rev-parse --short HEAD) | dal $(git -C s rev-parse --short HEAD)"
       - name: rclone kur
@@ -59,6 +64,44 @@ jobs:
             echo "PRINTFUL_TOKEN=$T" >> "$GITHUB_ENV"
             echo "token okundu (maskeli)"
           fi
+      - name: Zemin3 indir (Canva linkleri, yalniz GET) + Drive + dal
+        if: env.MOD == 'zemin3'
+        env:
+          VERI: ${{ inputs.veri }}
+        run: |
+          set -euo pipefail
+          mkdir -p s/docs/ornament/zemin3
+          printf '%s' "$VERI" | base64 -d > /tmp/liste.txt
+          while read -r ad url; do
+            [ -n "$ad" ] || continue
+            echo "::add-mask::$url"
+            kod=$(curl -sS -m 120 --retry 3 -o "s/docs/ornament/zemin3/${ad}_1264.png" -w '%{http_code}' "$url")
+            echo "$ad HTTP $kod $(stat -c %s s/docs/ornament/zemin3/${ad}_1264.png) bayt"
+            [ "$kod" = 200 ] || { echo "::error::$ad indirilemedi (HTTP $kod)"; exit 1; }
+          done < /tmp/liste.txt
+          rm -f /tmp/liste.txt
+          pip install -q pillow==11.0.0 numpy
+          python3 - <<'PY'
+          import hashlib, json, glob
+          from PIL import Image
+          import numpy as np
+          r = {}
+          for f in sorted(glob.glob('s/docs/ornament/zemin3/*_1264.png')):
+              im = Image.open(f); a = np.asarray(im.convert('RGB'))
+              r[f.split('/')[-1]] = dict(boyut=im.size, mod=im.mode, sha256=hashlib.sha256(open(f, 'rb').read()).hexdigest(),
+                                         ortalama_rgb=[round(float(v), 1) for v in a.reshape(-1, 3).mean(0)])
+              assert im.size == (1264, 1264), (f, im.size)
+          json.dump(r, open('s/docs/ornament/zemin3/ZEMIN3.json', 'w'), indent=1)
+          print(json.dumps(r, indent=1))
+          PY
+          rclone copy s/docs/ornament/zemin3 "gdrive:ASTROLOVE/TEMP/ORNAMENT_ZEMIN3_20261102" -q
+          echo "::notice::Drive TEMP/ORNAMENT_ZEMIN3_20261102: $(ls s/docs/ornament/zemin3 | tr '\n' ' ')"
+          cd s && git config user.name "astrolove-bot" && git config user.email "astrolove-bot@users.noreply.github.com"
+          git add docs/ornament/zemin3
+          DIS=$(git diff --cached --name-only | grep -v '^docs/ornament/zemin3/' || true)
+          [ -z "$DIS" ] || { echo "::error::izinli klasor disi: $DIS"; exit 1; }
+          git commit -qm "ornament zemin3: Canva zeminleri (kosu ${GITHUB_RUN_ID})" && git push -q origin "HEAD:${DAL}"
+          echo "::notice::dal commit $(git rev-parse --short HEAD)"
       - name: Printful oku (GET + kargo ucreti)
         if: env.MOD == 'tam'
         run: |
@@ -73,7 +116,7 @@ jobs:
           python3 -I main/scripts/printful/ornament_katalog.py ek s/docs/ornament/ham 2>&1 | sed -u "s|${PRINTFUL_TOKEN}|***|g" | tee s/docs/ornament/KOSU_LOG_EK.txt
           k=${PIPESTATUS[0]}; echo "::notice::ek cikis $k | $(grep '^EK ISTEK' s/docs/ornament/KOSU_LOG_EK.txt)"; exit $k
       - name: Rapor + dogrulama
-        if: always()
+        if: always() && env.MOD != 'zemin3'
         run: |
           set -o pipefail
           cd s/docs/ornament
@@ -83,7 +126,7 @@ jobs:
           cat PRINTFUL_ORNAMENT.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
           [ $r = 0 ] && [ $d = 0 ]
       - name: Drive + dal (token kontrolu)
-        if: always()
+        if: always() && env.MOD != 'zemin3'
         run: |
           set -euo pipefail
           cd s
