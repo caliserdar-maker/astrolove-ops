@@ -1,0 +1,77 @@
+name: ornament-pazar
+
+# ORNAMENT PAZAR (Merkez gorevi 2 Kas 2026, Serdar onayli). SALT OKUMA: Etsy'ye yazma YOK, yalniz GET, yalniz API anahtari
+# (OAuth token indirilmez / yenilenmez / geri yazilmaz). Etsy kilidine girer (kilit_bekle.py, checkout'tan hemen sonra).
+# En fazla 80 Etsy istegi; baslangicta kalan - 80 >= 500 degilse baska istek yapmadan biter (scripts/etsy/ornament_pazar.py).
+# Kilit altinda Etsy disi is: yalniz 20 kucuk CDN gorseli + temas sayfasi (saniyeler; CLAUDE.md KILIT SURESI).
+# Kosu YALNIZ Merkez "basla" dediginde. Cikti: Drive ASTROLOVE/TEMP/ORNAMENT_PAZAR_<damga>/ (RAPOR_TASLAK.md, ILANLAR.csv,
+# ILK20.csv, TEMAS.jpg, OZET.json). TEMAS.jpg yalniz ic inceleme icindir, yayinlanmaz.
+
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==11.0.0
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: Yerel test (sahte yanit, Etsy'ye istek yok)
+        run: |
+          set -euo pipefail
+          python scripts/etsy/ornament_pazar_selftest.py > selftest.log
+          tail -1 selftest.log
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+            [ -n "${GOOGLE_CLIENT_SECRET:-}" ] && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true
+          fi
+      - name: Oku (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+        run: |
+          set -uo pipefail
+          DAMGA=$(date -u +%Y%m%d_%H%M)
+          echo "DAMGA=$DAMGA" >> "$GITHUB_ENV"
+          python scripts/etsy/ornament_pazar.py --out out
+          kod=$?
+          echo "KOD=$kod" >> "$GITHUB_ENV"
+          exit 0
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -d out ] || { echo "cikti yok"; exit 0; }
+          H="gdrive:ASTROLOVE/TEMP/ORNAMENT_PAZAR_${DAMGA}"
+          rclone copy out "$H" -q
+          rclone lsl "$H"
+          echo "Drive: TEMP/ORNAMENT_PAZAR_${DAMGA}/ (kod ${KOD:-?}; 2 = kota kosulu, baslamadi)"
+      - if: always()
+        run: rm -rf ~/.config/rclone
+      - name: Sonuc (kod 0 degilse kirmizi; 2 = kota kosulu, baslamadi)
+        run: |
+          echo "ornament_pazar cikis kodu: ${KOD:-?}"
+          [ "${KOD:-1}" = "0" ]
