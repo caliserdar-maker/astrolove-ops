@@ -1,8 +1,1 @@
-Traceback (most recent call last):
-  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/printful/ornament_dogrula.py", line 159, in <module>
-    sys.exit(main(Path(sys.argv[1])))
-             ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/astrolove-ops/astrolove-ops/main/scripts/printful/ornament_dogrula.py", line 54, in main
-    n_ham = len((((j(ham / f"urun_{pid}_v1.json") or {}).get("yanit") or {}).get("result") or {}).get("variants") or [])
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'str' object has no attribute 'get'
+DOGRULAMA kontrol 3462 | uyusmazlik 0 | bilgi 0 -> PASS
