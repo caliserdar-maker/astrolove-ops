@@ -56,7 +56,7 @@ class T(unittest.TestCase):
         self.assertEqual(yt, "Cancer Libra Paper Anniversary Gift, Zodiac Print")
         self.assertIn(M.SIZES_SATIR, y)
         self.assertNotIn("card", y.lower().replace("cards", "card").split("care")[0] if False else y.lower().replace("carefully", ""))
-        self.assertTrue(any("Emma" in n for n in notlar))
+        self.assertTrue(any("izinli ornek isimler" in n for n in notlar))
 
     def test_cift_eslesme_blok(self):
         _, _, _, neden = M.donustur(ESKI + "\n1. Choose your style and your format.", BASLIK)
