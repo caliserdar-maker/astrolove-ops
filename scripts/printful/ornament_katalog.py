@@ -237,16 +237,6 @@ def fl(x):
         return None
 
 
-def inch_olcu(s):
-    """Varyant size metnindeki inch degerleri (ornek 3"x3", 2.75″). cm = inch x 2.54 (hesap)."""
-    s = str(s or "")
-    sayi = re.findall(r"(\d+(?:\.\d+)?)\s*(?:\"|″|”|''|in\b|inch)", s)
-    if not sayi:
-        sayi = re.findall(r"(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)", s)
-        sayi = [x for t in sayi for x in t]
-    return [float(x) for x in sayi]
-
-
 def anahtar_bul(d, kelime, yol=""):
     b = {}
     if isinstance(d, dict):
@@ -262,67 +252,96 @@ def anahtar_bul(d, kelime, yol=""):
 
 
 def en_ucuz(secenekler):
-    s = [x for x in secenekler or [] if isinstance(x, dict) and fl(x.get("rate")) is not None]
+    s = [x for x in liste(secenekler) if fl(x.get("rate")) is not None]
     return min(s, key=lambda x: fl(x["rate"])) if s else None
 
 
+def kisa_hata(m):
+    if "united states only" in m.lower():
+        return "ships to United States only"
+    return m[:80]
+
+
+def hata_mesaj(w):
+    y = yanit(w)
+    m = sozluk(y.get("error")).get("message") or (y.get("data") if isinstance(y.get("data"), str) else None) \
+        or (y.get("result") if isinstance(y.get("result"), str) else None)
+    return str(m or y)[:160]
+
+
+def aciklama_satir(metin, desen):
+    parca = [s.strip(" •-*\t") for s in re.split(r"[\n\r]+|•", metin or "") if s.strip(" •-*\t")]
+    return [s for s in parca if re.search(desen, s, re.I)]
+
+
+OLCU = r"″|\d\s*(?:cm|mm)\b|diameter|size"
+MALZEME = r"^material|100%|alumin|acrylic|hinoki|wood\b|glass\b|ceramic\b|base\b"
+PAKET = r"ribbon|string|packag|gift|hole|magnetic|bundle|pack"
+YUZ = r"sided|side print|2-side"
+KALINLIK = r"thickness"
+MENSE = r"sourced from"
+
+
+def olcu_satir(ac, boyut):
+    satir = [s for s in aciklama_satir(ac, OLCU) if re.search(r"″|cm|mm", s) and not re.search(KALINLIK, s, re.I)]
+    kelime = re.split(r"[\s+/(]+", str(boyut or "").strip())[0]
+    if kelime:
+        # "Sizes: Rectangle 3″ x 4″ (...), Scalloped ..." gibi tek satirda birden fazla sekil: virgulle bol
+        parca = [p.strip() for s in satir for p in re.split(r",\s*(?=[A-Z])", s)]
+        es = [p for p in parca if re.search(rf"\b{re.escape(kelime)}\b", p, re.I)]
+        if es:
+            return es
+    return [s for s in satir if not re.search(r"(circle|heart|star|snowflake|round|bell|oval|tree|rectangle|scalloped|paw|tag)",
+                                              s, re.I)] or satir
+
+
 def urun_veri(ham, pid):
-    U = {ad: jy(ham, f"urun_{pid}_{ad}.json") for ad in ("v1", "v1_sizes", "printfiles", "v2", "v2_variants", "v2_prices_USD",
-                                                         "v2_prices_EUR", "v2_availability", "v2_sizes", "v2_mockup_templates")}
+    U = {ad: jy(ham, f"urun_{pid}_{ad}.json") for ad in ("v1", "v1_sizes", "printfiles", "v2", "v2_variants", "v2_availability")}
+    U["tablo"] = {}
+    for t in liste(sozluk(yanit(U["v1_sizes"]).get("result")).get("size_tables")):
+        for m in liste(t.get("measurements")):
+            for x in liste(m.get("values")):
+                deg = x.get("value") if x.get("value") is not None else f"{x.get('min_value')}-{x.get('max_value')}"
+                U["tablo"].setdefault(x.get("size"), []).append(f"{m.get('type_label')} {deg} {m.get('unit') or t.get('unit')}")
     r1 = sozluk(yanit(U["v1"]).get("result"))
     U["p"] = sozluk(r1.get("product"))
-    U["vs"] = liste(r1.get("variants"))
+    U["vs1"] = liste(r1.get("variants"))
     U["p2"] = sozluk(yanit(U["v2"]).get("data"))
+    U["vs2"] = liste(yanit(U["v2_variants"]).get("data"))
     pf = sozluk(yanit(U["printfiles"]).get("result"))
     U["pf_id"] = {x.get("printfile_id"): x for x in liste(pf.get("printfiles"))}
     U["pf_var"] = {x.get("variant_id"): sozluk(x.get("placements")) for x in liste(pf.get("variant_printfiles"))}
     U["pf_yer"] = sozluk(pf.get("available_placements"))
-    # v2 fiyat: variants[].techniques[].price ; urun placements[].price
-    U["fiyat2"] = {}
-    U["yer_fiyat2"] = {}
+    U["fiyat2"], U["yer_fiyat2"] = {}, {}
     for cur in ("USD", "EUR", "EUR_europe", "USD_north_america"):
         d = sozluk(yanit(jy(ham, f"urun_{pid}_v2_prices_{cur}.json")).get("data"))
         for v in liste(d.get("variants")):
-            for t in liste(v.get("techniques")):
-                U["fiyat2"].setdefault((v.get("id"), cur), []).append((t.get("technique_key") or t.get("technique_display_name"),
-                                                                     t.get("price"), t.get("discounted_price")))
-        for pl in liste(sozluk(d.get("product")).get("placements")):
-            U["yer_fiyat2"].setdefault(cur, []).append(pl)
-        U[f"para2_{cur}"] = d.get("currency")
+            U["fiyat2"][(v.get("id"), cur)] = [(t.get("technique_key"), t.get("price")) for t in liste(v.get("techniques"))]
+        U["yer_fiyat2"][cur] = [(pl.get("id"), pl.get("title"), pl.get("price")) for pl in liste(sozluk(d.get("product")).get("placements"))]
     U["uyg2"] = {}
     for v in liste(yanit(U["v2_availability"]).get("data")):
         for t in liste(v.get("techniques")):
             for sr in liste(t.get("selling_regions")):
-                U["uyg2"].setdefault(v.get("catalog_variant_id"), {})[f"{sr.get('name')}"] = sr.get("availability")
+                U["uyg2"].setdefault(v.get("catalog_variant_id"), []).append(f"{sr.get('name')}:{sr.get('availability')}")
     return U
 
 
-def bolgeler_v1(v):
-    durum = liste(v.get("availability_status"))
-    tum = [f"{x.get('region')}:{x.get('status')}" for x in durum]
-    sat = sorted({x.get("region") for x in durum if x.get("status") in ("in_stock", "stocked_on_demand")})
-    return tum, sat
-
-
-def yuz_bilgi(U):
-    yer = list(U["pf_yer"].keys()) or [p.get("placement") for p in liste(U["p2"].get("placements"))]
-    yer = [y for y in yer if y]
-    ek = [f"{f.get('id') or f.get('type')}:{f.get('additional_price')}" for f in liste(U["p"].get("files"))
-          if f.get("type") not in ("preview", "mockup")]
-    if not yer:
-        return YOK, ek
-    arka = [y for y in yer if re.search(r"back|second|side_?2|reverse", y, re.I)]
-    return (f"cift yuz secenegi ({', '.join(yer)})" if arka else f"tek yuz ({', '.join(yer)})"), ek
-
-
-def aciklama_satir(metin, desen):
-    parca = [s.strip(" •-*\t") for s in re.split(r"[\n\r]+|•", metin or "") if s.strip()]
-    return [s for s in parca if re.search(desen, s, re.I)]
-
-
-MALZEME = r"ceramic|porcelain|wood|birch|maple|mdf|plywood|glass|acrylic|alumin|metal|steel|brass|plastic|gloss|matte|finish|thick|mm\b"
-PAKET = r"ribbon|string|cord|twine|loop|hook|hang|box|packag|gift|bag|wrap"
-BASKI = r"sublimat|uv\b|print|dtg|engrav|laser|dye|side|sided|bleed"
+def yuz_bilgi(U, ac):
+    """Baski alanlari: v2 placements (mockup haric) + v1 printfiles available_placements etiketi + aciklama satiri."""
+    yer2 = [(p.get("placement"), p.get("technique")) for p in liste(U["p2"].get("placements")) if p.get("placement") != "mockup"]
+    etiket = U["pf_yer"]
+    alan = [f"{y}" + (f" '{etiket.get(y)}'" if etiket.get(y) else "") for y, _ in yer2] or [f"{y} '{e}'" for y, e in etiket.items()]
+    if not alan:
+        return YOK, YOK
+    yer = [y for y, _ in yer2] or list(etiket)
+    satir = aciklama_satir(ac, YUZ)
+    if any(re.search(r"back", y or "", re.I) for y in yer):
+        sinif = "cift yuz: on + arka ayri baski alani"
+    elif any(re.search(r"2-side|two-sided", str(e), re.I) for e in list(etiket.values()) + satir):
+        sinif = "cift yuz: ayni tasarim, tek dosya"
+    else:
+        sinif = "tek yuz"
+    return sinif, "; ".join(alan) + (" | aciklama: " + " / ".join(satir) if satir else "")
 
 
 def rapor(cikti):
@@ -335,105 +354,99 @@ def rapor(cikti):
     satirlar, kargo_satir, urunler = [], [], []
     for pid in sorted(aday, key=int):
         U = urun_veri(ham, pid)
-        p, vs = U["p"], U["vs"]
-        yuz, ek = yuz_bilgi(U)
-        ac = p.get("description") or U["p2"].get("description") or ""
-        tasma = aciklama_satir(ac, r"bleed")
-        tek = [t.get("display_name") or t.get("key") for t in liste(p.get("techniques"))]
-        tek2 = [t.get("display_name") or t.get("key") for t in liste(U["p2"].get("techniques"))]
-        uru = {"id": pid, "ad": p.get("title") or U["p2"].get("name") or YOK, "neden": aday[pid]["neden"],
-               "http_v1": http(U["v1"]), "http_v2": http(U["v2"]), "tur": p.get("type_name") or YOK,
-               "model": p.get("model") or YOK, "marka": p.get("brand") or YOK, "durdu": p.get("is_discontinued"),
-               "yuz": yuz, "ek_yer": ek, "teknik": tek or tek2 or [YOK], "aciklama": ac, "tasma": tasma,
-               "ort_sure": p.get("avg_fulfillment_time"), "origin": p.get("origin_country"), "olcu_tablo": [],
-               "varyant": [], "kargo": {}, "cikis": {}, "U": U, "kargo_var": aday[pid]["kargo"]}
-        for ad in ("v1_sizes", "v2_sizes"):
-            r = yanit(U[ad]).get("result") or yanit(U[ad]).get("data") or {}
-            tabs = liste(r.get("size_tables")) if isinstance(r, dict) else [t for x in liste(r) for t in liste(x.get("size_tables"))]
-            for t in tabs:
-                for m in liste(t.get("measurements")):
-                    deg = "; ".join(f"{x.get('size')}: {x.get('value') if x.get('value') is not None else str(x.get('min_value')) + '-' + str(x.get('max_value'))}"
-                                    for x in liste(m.get("values")))
-                    uru["olcu_tablo"].append(f"{ad} {t.get('type')} | {m.get('type_label')} ({m.get('unit') or t.get('unit')}): {deg}")
+        p, p2 = U["p"], U["p2"]
+        ac = p2.get("description") or p.get("description") or ""
+        yuz, alan = yuz_bilgi(U, ac)
+        teknik = sorted({f"{y}:{t}" for y, t in ((x.get("placement"), x.get("technique")) for x in liste(p2.get("placements")))
+                         if y != "mockup"}) or [t.get("display_name") for t in liste(p.get("techniques"))]
+        kaynak = "v1" if U["vs1"] else ("v2" if U["vs2"] else YOK)
+        vs = U["vs1"] or U["vs2"]
+        uru = {"id": pid, "ad": p.get("title") or p2.get("name") or YOK, "neden": aday[pid]["neden"], "http_v1": http(U["v1"]),
+               "http_v2": http(U["v2"]), "kaynak": kaynak, "yuz": yuz, "alan": alan, "teknik": teknik or [YOK], "aciklama": ac,
+               "durdu": p2.get("is_discontinued", p.get("is_discontinued")), "varyant": [], "cikis": {}, "U": U,
+               "kargo_var": any(k[0] == pid for k in K1)}
+        ek1 = "; ".join(f"{f.get('id')}:{f.get('additional_price')}" for f in liste(p.get("files")) if f.get("type") != "mockup") or YOK
         for v in vs:
             vid = v.get("id")
-            tum, sat = bolgeler_v1(v)
             yer = U["pf_var"].get(vid) or {}
             pf = [(y, U["pf_id"].get(i) or {}) for y, i in yer.items()]
-            inch = inch_olcu(v.get("size"))
-            f2u = U["fiyat2"].get((vid, "USD"))
-            f2e = U["fiyat2"].get((vid, "EUR"))
-            sat_ = {
-                "urun_id": pid, "urun_adi": uru["ad"], "urun_turu": uru["tur"], "model": uru["model"],
-                "eslesme": "|".join(uru["neden"]), "urun_durdu": p.get("is_discontinued", YOK),
-                "varyant_id": vid, "varyant_adi": v.get("name") or YOK, "boyut_api": v.get("size") or YOK,
-                "renk_api": v.get("color") or YOK,
-                "olcu_inch": " x ".join(f"{x:g}" for x in inch) if inch else YOK,
-                "olcu_cm_hesap": " x ".join(f"{x * 2.54:.2f}" for x in inch) if inch else YOK,
-                "yuz": yuz, "ek_baski_ucreti_v1": "; ".join(ek) or YOK, "teknik": "; ".join(uru["teknik"]),
-                "malzeme_api": json.dumps(v.get("material"), ensure_ascii=False) if v.get("material") else YOK,
-                "aciklama_malzeme": " / ".join(aciklama_satir(ac, MALZEME)) or YOK,
-                "aciklama_paket": " / ".join(aciklama_satir(ac, PAKET)) or YOK,
-                "fiyat_usd_v1": v.get("price") if v.get("price") is not None else YOK,
-                "fiyat_usd_v2": "; ".join(f"{t}:{pr}" for t, pr, _ in f2u) if f2u else YOK,
-                "fiyat_eur_v2": "; ".join(f"{t}:{pr}" for t, pr, _ in f2e) if f2e else YOK,
-                "fiyat_eur_v2_europe": "; ".join(f"{t}:{pr}" for t, pr, _ in U["fiyat2"].get((vid, "EUR_europe")) or []) or YOK,
-                "fiyat_usd_v2_north_america": "; ".join(
-                    f"{t}:{pr}" for t, pr, _ in U["fiyat2"].get((vid, "USD_north_america")) or []) or YOK,
-                "stok_v1": v.get("in_stock", YOK), "bolge_durum_v1": "; ".join(tum) or YOK,
-                "satilabilir_bolgeler_v1": ", ".join(sat) or YOK,
-                "yalniz_abd": "EVET" if sat == ["US"] else ("hayir" if sat else YOK),
-                "bolge_durum_v2": "; ".join(f"{a}:{b}" for a, b in sorted((U["uyg2"].get(vid) or {}).items())) or YOK,
+            durum1 = liste(v.get("availability_status"))
+            f2 = {c: "; ".join(f"{t}:{pr}" for t, pr in U["fiyat2"].get((vid, c)) or []) or YOK
+                  for c in ("USD", "EUR", "EUR_europe", "USD_north_america")}
+            s = {
+                "urun_id": pid, "urun_adi": uru["ad"], "varyant_kaynagi": kaynak, "varyant_id": vid,
+                "varyant_adi": v.get("name") or YOK, "sekil_boyut_api": v.get("size") or YOK,
+                "olcu_aciklama": " / ".join(olcu_satir(ac, v.get("size"))) or YOK,
+                "olcu_tablo_v1": "; ".join(U["tablo"].get(v.get("size")) or []) or YOK,
+                "kalinlik_aciklama": " / ".join(aciklama_satir(ac, KALINLIK)) or YOK,
+                "yuz": yuz, "baski_alanlari": alan, "teknik": "; ".join(uru["teknik"]),
+                "arka_ek_ucret_v1_usd": ek1 if kaynak == "v1" else YOK,
+                "alan_fiyat_v2_usd": "; ".join(f"{i}:{pr}" for i, _, pr in U["yer_fiyat2"]["USD"]) or YOK,
+                "alan_fiyat_v2_eur": "; ".join(f"{i}:{pr}" for i, _, pr in U["yer_fiyat2"]["EUR"]) or YOK,
+                "malzeme_aciklama": " / ".join(aciklama_satir(ac, MALZEME)) or YOK,
+                "paket_kurdele_aciklama": " / ".join(aciklama_satir(ac, PAKET)) or YOK,
+                "mense_aciklama": " / ".join(aciklama_satir(ac, MENSE)) or YOK,
+                "origin_country_v1": p.get("origin_country") or YOK,
+                "fiyat_usd_v1": v.get("price") if kaynak == "v1" and v.get("price") is not None else f"{YOK} (v1 HTTP {uru['http_v1']})",
+                "fiyat_usd_v2": f2["USD"], "fiyat_eur_v2": f2["EUR"], "fiyat_eur_v2_europe": f2["EUR_europe"],
+                "fiyat_usd_v2_north_america": f2["USD_north_america"],
+                "uretim_bolgesi_durum_v1": "; ".join(f"{a.get('region')}:{a.get('status')}" for a in durum1) or YOK,
+                "uygunluk_v2": "; ".join(U["uyg2"].get(vid) or []) or YOK,
                 "printfile_id": "; ".join(f"{y}={x.get('printfile_id')}" for y, x in pf) or YOK,
                 "printfile_px": "; ".join(f"{y}={x.get('width')}x{x.get('height')}" for y, x in pf) or YOK,
                 "printfile_dpi": "; ".join(f"{y}={x.get('dpi')}" for y, x in pf) or YOK,
                 "fill_mode": "; ".join(f"{y}={x.get('fill_mode')}" for y, x in pf) or YOK,
                 "can_rotate": "; ".join(f"{y}={x.get('can_rotate')}" for y, x in pf) or YOK,
-                "tasma_payi": " / ".join(tasma) or YOK,
-                "ort_uretim_suresi_v1": p.get("avg_fulfillment_time") if p.get("avg_fulfillment_time") is not None else YOK,
-                "origin_country_v1": p.get("origin_country") or YOK,
+                "tasma_payi": " / ".join(aciklama_satir(ac, r"bleed")) or YOK,
             }
-            cikis = []
+            gonderim_var, gonderim_yok, cikis = [], [], set()
             for ulke in ULKELER:
                 x1, x2 = K1.get((pid, vid, ulke)), K2.get((pid, vid, ulke))
                 if x1 is None:
-                    sat_[f"kargo_{ulke}_usd"] = "sorgulanmadi" if not uru["kargo_var"] else YOK
+                    s[f"kargo_{ulke}_usd"] = "sorgulanmadi"
                     continue
-                s1 = liste(yanit(x1).get("result"))
-                s2 = liste(yanit(x2).get("data"))
-                e = en_ucuz(s1)
-                m2 = None
-                if e:
-                    m2 = next((y for y in s2 if y.get("shipping") == e.get("id")), None)
-                m2 = m2 or en_ucuz(s2)
+                s1, s2 = liste(yanit(x1).get("result")), liste(yanit(x2).get("data"))
+                e = en_ucuz(s1) if http(x1) == 200 else None
+                m2 = next((y for y in s2 if e and y.get("shipping") == e.get("id")), None) or (en_ucuz(s2) if http(x2) == 200 else None)
                 dep = sorted({sh.get("departure_country") for sh in liste((m2 or {}).get("shipments")) if sh.get("departure_country")})
                 gum = sorted({str(sh.get("customs_fees_possible")) for sh in liste((m2 or {}).get("shipments"))
                               if "customs_fees_possible" in sh})
-                takip = anahtar_bul(e, "track") if e else {}
-                takip.update(anahtar_bul(m2, "track") if m2 else {})
-                sat_[f"kargo_{ulke}_usd"] = e.get("rate") if e else f"HATA HTTP {http(x1)}"
-                cikis += dep
+                takip = {**(anahtar_bul(e, "track") if e else {}), **(anahtar_bul(m2, "track") if m2 else {})}
+                if e:
+                    s[f"kargo_{ulke}_usd"] = e.get("rate")
+                    gonderim_var.append(ulke)
+                else:
+                    s[f"kargo_{ulke}_usd"] = f"HATA {http(x1)}"
+                    gonderim_yok.append(f"{ulke} ({hata_mesaj(x1)})")
+                cikis.update(dep)
                 uru["cikis"].setdefault(ulke, set()).update(dep)
                 kargo_satir.append({
                     "urun_id": pid, "urun_adi": uru["ad"], "varyant_id": vid, "varyant_adi": v.get("name"), "ulke": ulke,
                     "adres": ", ".join(f"{a}={b}" for a, b in ADRES.get(ulke, {}).items()), "http_v1": http(x1),
-                    "yontem_id": e.get("id") if e else YOK, "yontem_adi": e.get("name") if e else YOK,
+                    "yontem_id": e.get("id") if e else YOK, "yontem_adi": (e.get("name") or "").strip() if e else YOK,
                     "ucret": e.get("rate") if e else YOK, "para": e.get("currency") if e else YOK,
-                    "min_gun": e.get("minDeliveryDays") if e and e.get("minDeliveryDays") is not None else YOK,
-                    "max_gun": e.get("maxDeliveryDays") if e and e.get("maxDeliveryDays") is not None else YOK,
+                    "min_gun": e.get("minDeliveryDays") if e else YOK, "max_gun": e.get("maxDeliveryDays") if e else YOK,
+                    "min_tarih": e.get("minDeliveryDate") if e else YOK, "max_tarih": e.get("maxDeliveryDate") if e else YOK,
                     "tum_secenekler_v1": "; ".join(f"{y.get('id')}={y.get('rate')} {y.get('currency')}" for y in s1) or YOK,
-                    "http_v2": http(x2), "yontem_v2": (m2 or {}).get("shipping_method_name") or (m2 or {}).get("shipping") or YOK,
-                    "ucret_v2": (m2 or {}).get("rate") if m2 else YOK,
+                    "http_v2": http(x2), "ucret_v2": m2.get("rate") if m2 else YOK,
                     "cikis_ulkesi_v2": ", ".join(dep) or YOK, "gumruk_olasi_v2": ", ".join(gum) or YOK,
                     "takip_api": json.dumps(takip, ensure_ascii=False) if takip else YOK,
-                    "hata_v1": "" if http(x1) == 200 else json.dumps(yanit(x1), ensure_ascii=False)[:300],
-                    "hata_v2": "" if http(x2) == 200 else json.dumps(yanit(x2), ensure_ascii=False)[:300]})
-            sat_["cikis_ulkesi_v2"] = ", ".join(sorted(set(cikis))) or (YOK if uru["kargo_var"] else "sorgulanmadi")
-            satirlar.append(sat_)
-            uru["varyant"].append(sat_)
+                    "hata_v1": "" if e else hata_mesaj(x1)})
+            s["gonderim_var_9ulke"] = ", ".join(gonderim_var) or ("sorgulanmadi" if not uru["kargo_var"] else "yok")
+            s["gonderim_yok_9ulke"] = "; ".join(gonderim_yok) or ("sorgulanmadi" if not uru["kargo_var"] else "yok")
+            s["cikis_ulkesi_v2"] = ", ".join(sorted(cikis)) or ("sorgulanmadi" if not uru["kargo_var"] else YOK)
+            satirlar.append(s)
+            uru["varyant"].append(s)
+        # urun duzeyi: ABD disi hicbir ulkeye ucret donmedi ve ABD disi her hata "United States only"
+        ks = [k for k in kargo_satir if k["urun_id"] == pid]
+        abd_disi = [k for k in ks if k["ulke"] != "US"]
+        uru["yalniz_abd"] = bool(abd_disi) and all(k["ucret"] == YOK and "united states only" in k["hata_v1"].lower() for k in abd_disi) \
+            and any(k["ulke"] == "US" and k["ucret"] != YOK for k in ks)
+        for s in uru["varyant"]:
+            s["yalniz_abd_urun"] = "EVET" if uru["yalniz_abd"] else ("sorgulanmadi" if not uru["kargo_var"] else "hayir")
         urunler.append(uru)
 
-    alanlar = list(satirlar[0].keys()) if satirlar else ["urun_id"]
+    alanlar = list(dict.fromkeys(k for s in satirlar for k in s)) or ["urun_id"]
     with open(cikti / "PRINTFUL_ORNAMENT.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=alanlar)
         w.writeheader()
@@ -456,14 +469,19 @@ def aralik(deg):
 
 
 def kargo_hucre(ks):
-    """urun x ulke: varyantlar arasi en ucuz yontem ucreti (aralik), yontem adi ve gun."""
+    """urun x ulke: varyantlar arasi en ucuz yontem ucreti (aralik), yontem id ve gun."""
+    if not ks:
+        return "sorgulanmadi"
     ok = [k for k in ks if fl(k["ucret"]) is not None]
     if not ok:
-        return "HATA " + ",".join(sorted({str(k["http_v1"]) for k in ks})) if ks else "sorgulanmadi"
+        m = sorted({kisa_hata(k["hata_v1"]) for k in ks})
+        return "GONDERILMEZ (API: " + " / ".join(m) + ")"
     a = aralik([k["ucret"] for k in ok])
     yon = sorted({str(k["yontem_id"]) for k in ok})
     gun = sorted({f"{k['min_gun']}-{k['max_gun']}" for k in ok})
-    return f"{a} ({'/'.join(yon)}, {'/'.join(gun)} g)"
+    ek = (f"; {len(ks) - len(ok)} varyant HATA: " + " / ".join(sorted({kisa_hata(k["hata_v1"]) for k in ks if k not in ok}))
+          if len(ok) < len(ks) else "")
+    return f"{a} ({'/'.join(yon)}, {'/'.join(gun)} g{ek})"
 
 
 def md(urunler, kargo, ham):
@@ -471,70 +489,69 @@ def md(urunler, kargo, ham):
     post = sorted({x["yol"] for x in ist if x["yontem"] == "POST"})
     zaman = max((x["zaman"] for x in ist), default=YOK)
     L = ["# Printful ornament urunleri (salt okuma)", "",
-         f"Kaynak: Printful API (v1 + v2), ham yanitlar `ham/`. Son istek: {zaman}. Istek: {len(ist)} "
-         f"(GET {sum(1 for x in ist if x['yontem'] == 'GET')}, POST {sum(1 for x in ist if x['yontem'] == 'POST')}: {', '.join(post) or 'yok'}).",
-         "Olcu cm = inch x 2.54 (hesap). Fiyat: v1 `variants[].price` (USD, kargo haric); v2 `prices?currency=` (USD/EUR).",
-         "Kargo: 1 adet, ornek adres (baskent/merkez posta kodu), en ucuz secenek (v1 /shipping/rates). Cikis ulkesi: v2 "
-         "/v2/shipping-rates `shipments[].departure_country`. Takip: API'de takip alani yoksa \"API vermedi\".", "",
-         "## 1. Urunler", "",
-         "| urun | sekil/olcu | yuz | fiyat USD (v1) | uretim yeri (cikis, v2) | satilabildigi bolgeler (v1) | baski dosyasi piksel |",
+         f"Kaynak: Printful API v1 + v2, ham yanitlar `ham/`. Son istek {zaman}. Istek {len(ist)}: GET "
+         f"{sum(1 for x in ist if x['yontem'] == 'GET')}, POST {sum(1 for x in ist if x['yontem'] == 'POST')} (yalniz {', '.join(post) or 'yok'}).",
+         "", "Notlar:",
+         "- Fiyat USD = v1 `variants[].price` (kargo haric); v1'de olmayan urunde v2 `prices?currency=USD&selling_region_name=worldwide`.",
+         "- Olcu, malzeme, kurdele/paket: urun aciklama metni (API, aynen); aciklamada olcu yoksa v1 /products/{id}/sizes tablosu. Hesap yok.",
+         "- Uretim yeri = v2 /v2/shipping-rates `shipments[].departure_country` (hedef ulke basina). v1 `availability_status` "
+         "bolgesi ayrica CSV'de (`uretim_bolgesi_durum_v1`); uretim yeriyle ayni sey degil (881: v1 'US', cikis LV).",
+         "- Satilabildigi bolge = 9 ulke kargo sorgusunda ucret donen ulkeler; donmeyende API hata mesaji.",
+         "- Kargo: 1 adet, ornek adres (merkez posta kodu), USD, en ucuz secenek. Takip: yanitlarda takip alani yok -> API vermedi.",
+         "", "## 1. Urunler", "",
+         "| urun | sekil/olcu | yuz | fiyat USD | uretim yeri (cikis ulkesi) | satilabildigi bolgeler (9 ulke testi) | baski dosyasi piksel (dpi) |",
          "|---|---|---|---|---|---|---|"]
     for u in urunler:
-        sekil = sorted({f"{v['varyant_adi']} [{v['boyut_api']}]" for v in u["varyant"]})
-        sek = "; ".join(sekil) if len(sekil) <= 6 else "; ".join(sekil[:6]) + f" (+{len(sekil) - 6})"
-        fiyat = aralik([v["fiyat_usd_v1"] for v in u["varyant"]])
+        sekil = list(dict.fromkeys(f"{v['sekil_boyut_api']}: " + (v["olcu_aciklama"] if v["olcu_aciklama"] != YOK else
+                                   (f"v1 olcu tablosu: {v['olcu_tablo_v1']}" if v["olcu_tablo_v1"] != YOK else YOK))
+                                   for v in u["varyant"]))
+        if u["kaynak"] == "v1":
+            fiyat = aralik([v["fiyat_usd_v1"] for v in u["varyant"]])
+        else:
+            fiyat = aralik([pr.split(":")[-1] for v in u["varyant"] for pr in v["fiyat_usd_v2"].split("; ")]) + " (v2)"
         grup = {}
         for hedef, dep in u["cikis"].items():
-            grup.setdefault(", ".join(sorted(dep)) or YOK, []).append(hedef)
-        cik = "; ".join(f"{d} (hedef {', '.join(h)})" for d, h in grup.items()) or (
+            grup.setdefault(", ".join(sorted(dep)) or "-", []).append(hedef)
+        cik = "; ".join(f"{d} (hedef {', '.join(h)})" for d, h in grup.items() if d != "-") or (
             "sorgulanmadi" if not u["kargo_var"] else YOK)
-        bol = sorted({b for v in u["varyant"] for b in v["satilabilir_bolgeler_v1"].split(", ") if b and b != YOK})
-        bolt = ", ".join(bol) or YOK
-        if bol == ["US"]:
-            bolt = "**YALNIZ ABD** (US)"
-        px = sorted({v["printfile_px"] for v in u["varyant"]})
-        durdu = " (DURDURULMUS)" if u["durdu"] is True else ""
-        L.append(f"| {u['id']} {u['ad']}{durdu} | {sek or YOK} | {u['yuz']} | {fiyat} | {cik} | {bolt} | {'; '.join(px) or YOK} |")
-    L += ["", "## 2. Kargo ucreti (USD, 1 adet, en ucuz yontem; hucre: ucret (yontem id, min-max gun))", "",
+        var = sorted({b for v in u["varyant"] for b in v["gonderim_var_9ulke"].split(", ")} - {"yok", "sorgulanmadi"},
+                     key=ULKELER.index)
+        if not u["kargo_var"]:
+            uyg = sorted({x for v in u["varyant"] for x in v["uygunluk_v2"].split("; ")})
+            bol = f"kargo sorgulanmadi (v1 HTTP {u['http_v1']}); v2 uygunluk: {', '.join(uyg)}"
+        elif u["yalniz_abd"]:
+            bol = "**YALNIZ ABD** (API: ships to United States only)"
+        else:
+            bol = ", ".join(var) + ("" if len(var) == len(ULKELER) else " (eksik ulke: tablo 2)")
+        px = list(dict.fromkeys(f"{v['printfile_px']} ({v['printfile_dpi'].split('=')[-1]} dpi)" for v in u["varyant"]))
+        L.append(f"| {u['id']} {u['ad']} | {'<br>'.join(sekil) or YOK} | {u['yuz']} | {fiyat} | {cik} | {bol} | {'<br>'.join(px) or YOK} |")
+    L += ["", "## 2. Kargo ucreti (USD, 1 adet, en ucuz yontem). Hucre: ucret (yontem id, min-max is gunu)", "",
           "| urun | " + " | ".join(ULKELER) + " |", "|---|" + "---|" * len(ULKELER)]
     for u in urunler:
-        if not u["kargo_var"]:
-            continue
         hucre = [kargo_hucre([k for k in kargo if k["urun_id"] == u["id"] and k["ulke"] == ul]) for ul in ULKELER]
         L.append(f"| {u['id']} {u['ad']} | " + " | ".join(hucre) + " |")
-    L += ["", "Yontem adlari (v1 `name`, ilk varyant):", ""]
+    adlar = sorted({(k["yontem_id"], re.sub(r"\s*\(Estimated delivery.*", "", k["yontem_adi"])) for k in kargo if k["ucret"] != YOK})
+    L += ["", "Yontem adlari (v1 `name`, tahmini teslim tarihi kismi atildi): " + "; ".join(f"{i} = {a}" for i, a in adlar), ""]
+    L += ["## 3. Urun ayrintilari", ""]
     for u in urunler:
-        ad = sorted({f"{k['ulke']}: {k['yontem_adi']}" for k in kargo if k["urun_id"] == u["id"]
-                     and k["varyant_id"] == (u["varyant"][0]["varyant_id"] if u["varyant"] else None)})
-        if ad:
-            L.append(f"- {u['id']}: " + " | ".join(ad))
-    L += ["", "## 3. Urun ayrintilari", ""]
-    for u in urunler:
-        U = u["U"]
+        v0 = u["varyant"][0] if u["varyant"] else {}
         L += [f"### {u['id']} {u['ad']}", "",
-              f"- eslesme: {', '.join(u['neden'])} | HTTP v1 {u['http_v1']} v2 {u['http_v2']}",
-              f"- tur: {u['tur']} | model: {u['model']} | marka: {u['marka']} | durdurulmus: {u['durdu'] if u['durdu'] is not None else YOK}",
-              f"- baski teknigi: {', '.join(u['teknik'])}",
-              f"- yuz / baski alanlari: {u['yuz']} | v1 files ek ucret: {'; '.join(u['ek_yer']) or YOK}",
-              f"- v2 placement fiyatlari USD: " + ("; ".join(f"{pl.get('id') or pl.get('placement')}:{pl.get('price')}"
-                                                       for pl in U["yer_fiyat2"].get("USD", [])) or YOK),
-              f"- v2 placement fiyatlari EUR: " + ("; ".join(f"{pl.get('id') or pl.get('placement')}:{pl.get('price')}"
-                                                       for pl in U["yer_fiyat2"].get("EUR", [])) or YOK),
-              f"- v2 bolge fiyati (EUR europe / USD north_america), varyant sirasiyla: "
-              + " | ".join(f"{v['varyant_id']}: {v['fiyat_eur_v2_europe']} / {v['fiyat_usd_v2_north_america']}" for v in u["varyant"]),
-              f"- ort. uretim suresi (v1 avg_fulfillment_time): {u['ort_sure'] if u['ort_sure'] is not None else YOK}"
-              f" | origin_country (v1): {u['origin'] or YOK}",
-              f"- tasma payi: {' / '.join(u['tasma']) or YOK}", ""]
-        if u["olcu_tablo"]:
-            L += ["Olcu tablosu (API):", ""] + [f"- {t}" for t in u["olcu_tablo"]] + [""]
-        else:
-            L += [f"Olcu tablosu: {YOK}", ""]
-        L += ["| varyant | ad | size | inch | cm (hesap) | USD v1 | USD v2 | EUR v2 | stok | bolge v1 | printfile | px | dpi | fill |",
-              "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+              f"- eslesme: {', '.join(u['neden'])} | HTTP v1 {u['http_v1']} v2 {u['http_v2']} | varyant kaynagi {u['kaynak']}"
+              f" | durdurulmus: {u['durdu'] if u['durdu'] is not None else YOK}",
+              f"- yuz: {u['yuz']} | alanlar: {u['alan']}",
+              f"- baski teknigi (v2 placement:technique): {', '.join(u['teknik'])}",
+              f"- alan ek ucreti: v1 files {v0.get('arka_ek_ucret_v1_usd', YOK)} | v2 USD {v0.get('alan_fiyat_v2_usd', YOK)}"
+              f" | v2 EUR {v0.get('alan_fiyat_v2_eur', YOK)}",
+              f"- malzeme: {v0.get('malzeme_aciklama', YOK)} | kalinlik: {v0.get('kalinlik_aciklama', YOK)}",
+              f"- kurdele/paket: {v0.get('paket_kurdele_aciklama', YOK)}",
+              f"- mense: {v0.get('mense_aciklama', YOK)} | v1 origin_country: {v0.get('origin_country_v1', YOK)}",
+              f"- tasma payi: {v0.get('tasma_payi', YOK)}", "",
+              "| varyant | ad | USD v1 | USD v2 | EUR v2 | EUR europe | USD north_america | v1 bolge | v2 uygunluk | printfile | px | dpi | fill |",
+              "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
         for v in u["varyant"]:
-            L.append(f"| {v['varyant_id']} | {v['varyant_adi']} | {v['boyut_api']} | {v['olcu_inch']} | {v['olcu_cm_hesap']} | "
-                     f"{v['fiyat_usd_v1']} | {v['fiyat_usd_v2']} | {v['fiyat_eur_v2']} | {v['stok_v1']} | {v['bolge_durum_v1']} | "
-                     f"{v['printfile_id']} | {v['printfile_px']} | {v['printfile_dpi']} | {v['fill_mode']} |")
+            L.append(f"| {v['varyant_id']} | {v['varyant_adi']} | {v['fiyat_usd_v1']} | {v['fiyat_usd_v2']} | {v['fiyat_eur_v2']} | "
+                     f"{v['fiyat_eur_v2_europe']} | {v['fiyat_usd_v2_north_america']} | {v['uretim_bolgesi_durum_v1']} | "
+                     f"{v['uygunluk_v2']} | {v['printfile_id']} | {v['printfile_px']} | {v['printfile_dpi']} | {v['fill_mode']} |")
         L += ["", "Aciklama metni (API, aynen):", "", "```", (u["aciklama"] or YOK).strip(), "```", ""]
     return "\n".join(L) + "\n"
 
