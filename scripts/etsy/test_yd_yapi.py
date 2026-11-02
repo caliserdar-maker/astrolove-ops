@@ -214,7 +214,8 @@ def kuru_testleri(d):
       and {o["quantity"] for p in pr for o in p["offerings"]} == {999}
       and {p["offerings"][0]["readiness_state_id"] for p in pr if K.deger(p, 514) == "Digital File"} == {1512772362964}
       and {p["offerings"][0]["readiness_state_id"] for p in pr if K.deger(p, 514) == "Print"} == {1517641240112}
-      and yuk["price_on_property"] == [514, BOY] and yuk["sku_on_property"] == [513, 514, BOY] and yuk["readiness_state_on_property"] == [514])
+      and yuk["price_on_property"] == [513, 514, BOY] and yuk["sku_on_property"] == [513, 514, BOY]
+      and yuk["readiness_state_on_property"] == [513, 514, BOY] and yuk["quantity_on_property"] == [])
     k("kuru: Style value_id canlidan, Format / Size kimliksiz (Etsy uretir)",
       K.pv(pr[0], 513)["value_ids"] == [138126211616] and "value_ids" not in K.pv(pr[0], 514) and "value_ids" not in K.pv(pr[0], BOY))
     k("kuru: istek = 2 ilan x 3 + poster 1 + taksonomi 1 + profil 1 + tarama 5", api.calls == 14, api.calls)

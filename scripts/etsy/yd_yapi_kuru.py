@@ -16,7 +16,7 @@ Fiyat (hicbiri burada uydurulmadi; FIYAT_KAYNAK):
   boy etiketi / format olmamali; degilse KOSU BLOK (bos envanter ya da etiket degisikligi sessiz gecmez; inceleme 30 Eki madde 2).
 Diger urun alanlari: adet = ilandaki tek adet (999); readiness: Digital File = canli dijital urunlerin readiness'i, Print = canli
   "Shipped print 8x10" urunlerinin readiness'i (her biri tek deger olmali); SKU BY-<AAA_BBB>-<ST|TL|FP|LY|BO>-<boy> (Print) ve
-  ...-<boy>-DIGITAL (Serdar 31 Eki 1a kisa stil kodu, en cok 27 karakter; scripts/siparis_by/by_sku.py, eski uzun kodu da cozer). price_on_property [514, boy], sku_on_property [513, 514, boy], readiness_on [514],
+  ...-<boy>-DIGITAL (Serdar 31 Eki 1a kisa stil kodu, en cok 27 karakter; scripts/siparis_by/by_sku.py, eski uzun kodu da cozer). price_on_property / sku_on_property / readiness_on [513, 514, boy] (Etsy: sifir ya da 3'u; 2 Kas pilot 400),
   quantity_on []. Envanter PUT ?max_variations_supported=3 ile (yazim betigi yd_yapi_yaz.py).
 Kapilar (ilan basina; biri tutmazsa BLOK, yazim yok):
   state active (CLAUDE.md 7 Eyl: updateListing taslagi yayina alir; bu is updateListing CAGIRMAZ, yine de taslak/pasif ilan ATLANIR);
@@ -170,8 +170,11 @@ def envanter_plani(inv, boy_sab):
                                         {**boy_sab, "values": [etiket]}],
                     "offerings": [{"price": DIJITAL_FIYAT if f == DIJITAL else PRINT_FIYAT[kod], "quantity": adet, "is_enabled": True,
                                    "readiness_state_id": hz["dijital" if f == DIJITAL else "baski"]}]})
-    yuk = {"products": urun, "price_on_property": [FORMAT_PID, pid], "quantity_on_property": [],
-           "sku_on_property": [STIL_PID, FORMAT_PID, pid], "readiness_state_on_property": [FORMAT_PID]}
+    # Etsy 400 (kosu 41394068548, pilot): "*_on_property ... Supports only zero or all 3 variation properties, as at least one
+    # `*_on_property` field is linked to all 3 properties" -> sku 3 ozellige bagli oldugu icin fiyat ve hazirlik da 3'une; adet bos.
+    # Fiyat / hazirlik degerleri DEGISMEZ (her urun satirinda ayni; stil fiyati etkilemez).
+    yuk = {"products": urun, "price_on_property": [STIL_PID, FORMAT_PID, pid], "quantity_on_property": [],
+           "sku_on_property": [STIL_PID, FORMAT_PID, pid], "readiness_state_on_property": [STIL_PID, FORMAT_PID, pid]}
     return yuk, hedef_kapisi(yuk, pid)
 
 
