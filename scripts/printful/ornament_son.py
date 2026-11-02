@@ -153,38 +153,55 @@ def main():
         E['sembol'] = sem_A
         M_, yb, cak, ok = o4.kapi(E)
         return dict(E=E, M=M_, yasak=yb, cak=cak, halka=hb), ok
-    lo, hi, en = 0.30, 1.0, None
-    if uzun_yer(1.0)[1]:
-        en = 1.0
-    else:
+    def ara(fn):
+        if fn(1.0)[1]:
+            return 1.0
+        lo, hi, en = 0.30, 1.0, None
         while hi - lo > 0.005:
             sc = (lo + hi) / 2
-            if uzun_yer(sc)[1]:
+            if fn(sc)[1]:
                 lo, en = sc, sc
             else:
                 hi = sc
-    YU, ok = uzun_yer(en)
+        return en
+
+    def uzun_kayan(sc):                                                # V5 olcumuyle ayni: yazi blogu en asagi gecerli yerde, sembol yalniz yukari
+        Yk, _ = o5.yerlesim_V5(pp, ana5, metinler(*UZUN, isim_olcek=sc), kc, ha, hb, G)
+        return Yk, Yk is not None
     z = o1.zemin_canva(K / 'RUBY_1264.png')
-    mU = model_kur(td, YU)
-    bU = o5.boya_sec(YU, mU, z, 'koyu', td, pp, S0, sabit=o5.ALTIN_SABIT)
-    rU = olc(YU, mU, z, 'koyu', td, pp, 'RUBY', bU['rgb'], bU)
-    tasma = {}
-    for k_, isim in (('isim1', UZUN[0]), ('isim2', UZUN[1])):
-        A_, t_ = metinler(*UZUN, isim_olcek=en)[k_]
-        bb = o1.bbox(A_, 0.5)
-        tasma[isim] = dict(genislik_px=bb[2] - bb[0], ust_buyuk_harf_ustu_px=int(round((t_ - cap * en) - bb[1])), alt_taban_alti_px=int(round(bb[3] - t_)))
-    harf_mm = round(cap * en * MM, 2)
-    R['uzun_isim_B'] = dict(isimler=list(UZUN), kural='B: yalniz isim olcegi; sembol / logo / tarih / kucuk burclar / bosluklar ayni', isim_olcegi=round(en, 3),
-                            buyuk_harf_px=round(cap * en, 1), buyuk_harf_mm=harf_mm, harf_11_mm=harf_mm, aksan=tasma, kapi_gecti=bool(ok), sonuc=rU)
-    o1.kaydet(bU['rgb'], O / 'CANCER_LIBRA_RUBY_UZUN_ISIM_B_954.png')
-    onizleme_etiketli([bU['rgb']], [f'RUBY, uzun isim B: isim olcegi {round(en, 3)}, buyuk harf {harf_mm} mm (11 harf)\n'
-                                     f'kontrast (ortanca) {rU["en_kotu_kontrast"]} {"PASS" if rU["hedef_tuttu"] else "FAIL"}, kati {rU["en_kotu_kati_bilgi"]}\n'
-                                     f'bosluk {rU["bosluk_px"][0]}/{rU["bosluk_px"][1]}/{rU["bosluk_px"][2]} px, isim-sinir {rU["isim_guvenli_daireye_px"]} px\n'
-                                     f'aksan: ÇAĞLAYANGÜL ust {tasma[UZUN[0]]["ust_buyuk_harf_ustu_px"]} px, alt {tasma[UZUN[0]]["alt_taban_alti_px"]} px'],
-                      font, h_et=130).save(O / 'UZUN_ISIM_B.png', dpi=(300, 300))
-    print('UZUN B', json.dumps({k: v for k, v in R['uzun_isim_B'].items() if k != 'sonuc'}, ensure_ascii=False), 'kontrast', rU['en_kotu_kontrast'],
-          'bosluk', rU['bosluk_px'], flush=True)
-    A = list(R['sonuc'].values()) + [rU]
+    varyant = {}
+    for vad, fn in (('B_blok_kayan', uzun_kayan), ('B_yer_sabit', uzun_yer)):
+        en = ara(fn)
+        YU, ok = fn(en)
+        mU = model_kur(td, YU)
+        bU = o5.boya_sec(YU, mU, z, 'koyu', td, pp, S0, sabit=o5.ALTIN_SABIT)
+        rU = olc(YU, mU, z, 'koyu', td, pp, 'RUBY', bU['rgb'], bU)
+        tasma = {}
+        for k_, isim in (('isim1', UZUN[0]), ('isim2', UZUN[1])):
+            A_, t_ = metinler(*UZUN, isim_olcek=en)[k_]
+            bb = o1.bbox(A_, 0.5)
+            tasma[isim] = dict(genislik_px=bb[2] - bb[0], ust_buyuk_harf_ustu_px=int(round((t_ - cap * en) - bb[1])), alt_taban_alti_px=int(round(bb[3] - t_)))
+        varyant[vad] = dict(isim_olcegi=round(en, 3), buyuk_harf_px=round(cap * en, 1), buyuk_harf_mm=round(cap * en * MM, 2), aksan=tasma,
+                            kapi_gecti=bool(ok), sembol_kutu=rU['sembol_kutu'], tarih_kutu=list(o5.kutu(YU['E'], 'tarih')), sonuc=rU, rgb=bU['rgb'])
+        o1.kaydet(bU['rgb'], O / f'CANCER_LIBRA_RUBY_UZUN_ISIM_{vad}_954.png')
+        print('UZUN', vad, 'olcek', round(en, 3), 'harf mm', round(cap * en * MM, 2), 'kontrast', rU['en_kotu_kontrast'], 'bosluk', rU['bosluk_px'],
+              'sembol', rU['sembol_kutu'], 'kapi', ok, flush=True)
+    R['uzun_isim_B'] = dict(isimler=list(UZUN), kural='B: yalniz isim olcegi kuculur; sembol / logo / tarih / kucuk burclar boyu ve bosluklar ayni',
+                            not_=('B_blok_kayan: V5 raporundaki 0.557 olcumuyle ayni yontem (yazi blogu en asagi gecerli yerde, sembol yalniz yukari; '
+                                  'yerler degisebilir). B_yer_sabit: tarih ve sembol A-T1 yerinde sabit; isim satiri dairenin dar alt kisminda kalir. '
+                                  'Hangisi B: Serdar karari.'),
+                            varyant={k: {kk: vv for kk, vv in v.items() if kk != 'rgb'} for k, v in varyant.items()})
+    et = []
+    for vad, v in varyant.items():
+        rU = v['sonuc']
+        et.append(f'{vad}: isim olcegi {v["isim_olcegi"]}, buyuk harf {v["buyuk_harf_mm"]} mm (11 harf)\n'
+                  f'kontrast (ortanca) {rU["en_kotu_kontrast"]} {"PASS" if rU["hedef_tuttu"] else "FAIL"}, kati {rU["en_kotu_kati_bilgi"]}\n'
+                  f'bosluk {rU["bosluk_px"][0]}/{rU["bosluk_px"][1]}/{rU["bosluk_px"][2]} px, sembol y {v["sembol_kutu"][1]}, tarih alt {v["tarih_kutu"][3]}\n'
+                  f'aksan: ÇAĞLAYANGÜL ust {v["aksan"][UZUN[0]]["ust_buyuk_harf_ustu_px"]} px, alt {v["aksan"][UZUN[0]]["alt_taban_alti_px"]} px')
+    onizleme_etiketli([v['rgb'] for v in varyant.values()], et, font, h_et=130).save(O / 'UZUN_ISIM_B.png', dpi=(300, 300))
+    rU = varyant['B_blok_kayan']['sonuc']
+    ok = varyant['B_blok_kayan']['kapi_gecti'] and varyant['B_yer_sabit']['kapi_gecti']
+    A = list(R['sonuc'].values()) + [v['sonuc'] for v in varyant.values()]
     g = dict(yasak_0=all(sum(r['yasak_piksel'].values()) == 0 for r in A), cakisma_0=all(not r['cakisma'] for r in A),
              goruntu_yasak_0=all(sum(r['goruntu_yasak'].values()) == 0 for r in A), kontrast=all(r['hedef_tuttu'] for r in A),
              bosluk_ge_hedef=all(min(r['bosluk_px']) >= o5.BOSLUK_ORAN * cap for r in R['sonuc'].values()),
