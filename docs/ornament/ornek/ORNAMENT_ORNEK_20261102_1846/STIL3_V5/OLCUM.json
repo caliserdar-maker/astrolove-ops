@@ -1,0 +1,2193 @@
+{
+ "kaynak_sha256": {
+  "AGED_PAPYRUS_1264.png": "0dfe2f2db5c1996bae7268c77d463b311d85c2b0f7f24d03dc4b2d13b2dd3988",
+  "BEIGE_1264.png": "a55e7703f65ca3bdaeba6ff5055517f0d4f2ecb2920ee3e5b04d021bbf58d29b",
+  "CANCER_LIBRA_ana.png": "e86c2629629305fd90bbb66494238faef9b4ad1acb815eb7b3ed55e7f44fc2d2",
+  "Cinzel.ttf": "f4d83d34d1f6c741193e4acf4b3dff9531e5a67b6aa65228d00a7db72a4e0f34",
+  "EBGaramond-Italic.ttf": "bba2c4499c93c9612b90b9825d32b07da52fce2fe57562a1eb6b833553f93c4e",
+  "EMERALD_1264.png": "f0d1483b42810dd0f99e85af3e9ec05f2873d4fdca24c2f0a8f35b0f7492efd1",
+  "HALKA_BLUE_16x20.png": "2a11ac819c611eaa84e60e469316f345eaa8eb48f6e9e6113d9a7831ab2fa410",
+  "LOGO_1.png": "62239238b25dbc5417dab4dc353fdbf15129599c9372737d5d8ddb86b3042061",
+  "RUBY_1264.png": "7c009226598720039dc47350018fb23a9881007b7d97cd48a9ee1390d650f939",
+  "SAPPHIRE_1264.png": "29df83c0cf1d0df42e765304e6e9950d3171fbf9fc5ca300978801d6647e7ee0",
+  "alfa_ogeler.npz": "d373403191a6245eccf386f0aa01d6380996b72e22d20e3ae8c7c5f6839d16e9",
+  "cancer_libra_alfa.png": "f946f5611431bdf976dce3475db8fd653faf1242ca267c365e2e29c8b3c8a8c2",
+  "cancer_symbol_gold.png": "2b5a32121ce8fa92ceef1a386f5ab1742a573681c30e742223be75005816cf28",
+  "libra_symbol_gold.png": "6fe2d0355ee56f8468eb637d3ca6445fd517983b00e51bce76cac218864f6a4b",
+  "tek_doku.py": "1889906fb29920e9294d5c343ace09b2295d81e4c49153d2badfb8d5101ddbad"
+ },
+ "sabit": {
+  "halka": {
+   "ax": 341.0,
+   "by": 345.57,
+   "cy": 508.6,
+   "tepe_y": 163.03,
+   "acik_aci": [
+    42.800000000000004,
+    137.0
+   ],
+   "govde_med": 4.4,
+   "govde_min": 4.2
+  },
+  "uc_T": {
+   "T1": 0.3,
+   "T2": 0.4
+  },
+  "bosluk_hedef_px": 20,
+  "bosluk_tanimi": "ceil(0.7 x isim buyuk harf 28.2 px); alfa >= 0.5 kutulari, J dahil",
+  "bronz": {
+   "koyu": [
+    40.0,
+    24.0,
+    6.0
+   ],
+   "ana": [
+    84.0,
+    54.0,
+    14.0
+   ],
+   "acik": [
+    140.0,
+    98.0,
+    40.0
+   ]
+  },
+  "acik_golge": {
+   "kayma": 1.5,
+   "sigma": 1.2,
+   "opak": 0.55,
+   "koyu": 0.45
+  },
+  "kapatilan_alfa_lt_09_kaynak": {
+   "ana_1600px": 801,
+   "cancer": 318,
+   "libra": 699
+  },
+  "kapatilan_alfa_lt_09_hedef": {
+   "cancer": {
+    "alfa_lt_09": 27,
+    "degisen_alfa_gt_002": 28,
+    "degisen_alfa_gt_03": 19
+   },
+   "libra": {
+    "alfa_lt_09": 44,
+    "degisen_alfa_gt_002": 48,
+    "degisen_alfa_gt_03": 35
+   },
+   "sembol": {
+    "alfa_lt_09": 20,
+    "degisen_alfa_gt_002": 28,
+    "degisen_alfa_gt_03": 14
+   }
+  },
+  "not_halka": "V4 kosusu 41485011606 halkasi ax 343 / cy 510.6; Merkez kilidi ax 341 / cy 508.6 (V4 deneme 1) uygulandi"
+ },
+ "yerlesim": {
+  "T1": {
+   "alt": 838.0,
+   "sembol_kaldir_px": 14,
+   "sembol_V4_ust": 261
+  },
+  "T2": {
+   "alt": 838.0,
+   "sembol_kaldir_px": 14,
+   "sembol_V4_ust": 261
+  }
+ },
+ "sonuc": {
+  "RUBY": {
+   "V4": {
+    "tur": "koyu",
+    "ton": "altin kazanci 1.36",
+    "bronz_ana_rgb": null,
+    "kontrast_olcutu": "Serdar 2 Kas: acik zeminde zeminin koyu %5 / ogenin acik %5; koyu zeminde zeminin acik %5 / ogenin koyu %5; zemin ogenin 6-12 px cevresi; oge alfa >= 0.9 murekkep. Halka uclari: incelme bolgesinde genislik >= 2 px (kapi); 2 px alti alfa >= 0.5 ile ayri (bilgi)",
+    "en_kotu_kontrast": 3.99,
+    "hedef_tuttu": false,
+    "kontrast": {
+     "isim1": {
+      "deger": 4.72,
+      "zemin_rgb": [
+       82,
+       2,
+       10
+      ],
+      "oge_rgb": [
+       255,
+       82,
+       20
+      ],
+      "ortanca_bilgi": 9.37,
+      "cekirdek_piksel": 653
+     },
+     "isim2": {
+      "deger": 4.72,
+      "zemin_rgb": [
+       77,
+       5,
+       10
+      ],
+      "oge_rgb": [
+       247,
+       87,
+       20
+      ],
+      "ortanca_bilgi": 9.79,
+      "cekirdek_piksel": 616
+     },
+     "tarih": {
+      "deger": 5.22,
+      "zemin_rgb": [
+       76,
+       1,
+       9
+      ],
+      "oge_rgb": [
+       247,
+       102,
+       22
+      ],
+      "ortanca_bilgi": 9.41,
+      "cekirdek_piksel": 534
+     },
+     "halka_uclari": {
+      "deger": 3.99,
+      "zemin_rgb": [
+       71,
+       11,
+       11
+      ],
+      "oge_rgb": [
+       177,
+       113,
+       22
+      ],
+      "ortanca_bilgi": 7.85,
+      "cekirdek_piksel": 957
+     },
+     "halka_uclari_2px_alti": {
+      "deger": 2.77,
+      "zemin_rgb": [
+       65,
+       4,
+       8
+      ],
+      "oge_rgb": [
+       148,
+       81,
+       17
+      ],
+      "ortanca_bilgi": 4.61,
+      "cekirdek_piksel": 370
+     }
+    },
+    "bosluk_px": [
+     10,
+     12,
+     11
+    ],
+    "sembol_kutu": [
+     262,
+     262,
+     690,
+     668
+    ],
+    "sembol_px": [
+     428,
+     406
+    ],
+    "isim_guvenli_daireye_px": 11.5,
+    "yasak_piksel": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "goruntu_yasak": {
+     "guvenli_daire_disi": 0,
+     "delik_halka_disi": 0,
+     "y_221_ustu_halka_disi": 0
+    },
+    "goruntu": {
+     "gercek_pay": 8.4,
+     "ust_y_halka_disi": 256,
+     "delige_uzaklik_halka_disi": 60.2
+    },
+    "doku_oge": {
+     "tarih": 5.0,
+     "isim1": 5.0,
+     "isim2": 5.01,
+     "sonsuz": 5.0,
+     "kucuk_sol": 5.0,
+     "kucuk_sag": 5.0,
+     "halka": 5.0,
+     "sembol": 5.0
+    },
+    "isik": {
+     "uzanim_px": 7.2,
+     "p95_px": 5.0,
+     "luma_artis_1_4px_ortanca": 4.77
+    },
+    "leke": {
+     "tarih": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "isim1": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 3,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "isim2": {
+      "alfa_lt_09": 1,
+      "ic_piksel": 3,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "sonsuz": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "kucuk_sol": {
+      "alfa_lt_09": 2,
+      "ic_piksel": 16,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "kucuk_sag": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 25,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "halka": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 655,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "sembol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16518,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     }
+    },
+    "halka_uc": {
+     "yay_toplam_px": 1599.9,
+     "yay_toplam_mm": 135.5,
+     "sag": {
+      "ince_2px_px": 113.0,
+      "ince_2px_mm": 9.57,
+      "ince_1px_mm": 5.78,
+      "profil": {
+       "0.0": 0.02,
+       "0.02": 0.3,
+       "0.05": 1.17,
+       "0.1": 2.95,
+       "0.2": 4.44,
+       "0.3": 4.24,
+       "0.4": 4.71,
+       "0.5": 7.5
+      }
+     },
+     "sol": {
+      "ince_2px_px": 119.9,
+      "ince_2px_mm": 10.15,
+      "ince_1px_mm": 6.37,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.32,
+       "0.05": 1.04,
+       "0.1": 2.49,
+       "0.2": 4.32,
+       "0.3": 4.16,
+       "0.4": 4.75,
+       "0.5": 7.5
+      }
+     },
+     "govde_max": 7.82
+    },
+    "halka_V4": {
+     "ax": 343.0,
+     "cy": 510.6
+    }
+   },
+   "A-T1": {
+    "tur": "koyu",
+    "ton": "altin kazanci 1.36",
+    "bronz_ana_rgb": null,
+    "kontrast_olcutu": "Serdar 2 Kas: acik zeminde zeminin koyu %5 / ogenin acik %5; koyu zeminde zeminin acik %5 / ogenin koyu %5; zemin ogenin 6-12 px cevresi; oge alfa >= 0.9 murekkep. Halka uclari: incelme bolgesinde genislik >= 2 px (kapi); 2 px alti alfa >= 0.5 ile ayri (bilgi)",
+    "en_kotu_kontrast": 4.75,
+    "hedef_tuttu": true,
+    "kontrast": {
+     "isim1": {
+      "deger": 4.75,
+      "zemin_rgb": [
+       82,
+       1,
+       10
+      ],
+      "oge_rgb": [
+       255,
+       83,
+       20
+      ],
+      "ortanca_bilgi": 9.37,
+      "cekirdek_piksel": 653
+     },
+     "isim2": {
+      "deger": 4.76,
+      "zemin_rgb": [
+       77,
+       1,
+       9
+      ],
+      "oge_rgb": [
+       247,
+       86,
+       20
+      ],
+      "ortanca_bilgi": 9.82,
+      "cekirdek_piksel": 616
+     },
+     "tarih": {
+      "deger": 5.23,
+      "zemin_rgb": [
+       76,
+       1,
+       9
+      ],
+      "oge_rgb": [
+       245,
+       104,
+       23
+      ],
+      "ortanca_bilgi": 9.36,
+      "cekirdek_piksel": 534
+     },
+     "halka_uclari": {
+      "deger": 6.88,
+      "zemin_rgb": [
+       86,
+       3,
+       11
+      ],
+      "oge_rgb": [
+       249,
+       155,
+       24
+      ],
+      "ortanca_bilgi": 9.81,
+      "cekirdek_piksel": 1340
+     },
+     "halka_uclari_2px_alti": {
+      "deger": 3.11,
+      "zemin_rgb": [
+       66,
+       2,
+       8
+      ],
+      "oge_rgb": [
+       156,
+       89,
+       19
+      ],
+      "ortanca_bilgi": 6.44,
+      "cekirdek_piksel": 317
+     }
+    },
+    "bosluk_px": [
+     20,
+     20,
+     20
+    ],
+    "sembol_kutu": [
+     264,
+     247,
+     688,
+     650
+    ],
+    "sembol_px": [
+     424,
+     403
+    ],
+    "isim_guvenli_daireye_px": 11.5,
+    "yasak_piksel": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "goruntu_yasak": {
+     "guvenli_daire_disi": 0,
+     "delik_halka_disi": 0,
+     "y_221_ustu_halka_disi": 0
+    },
+    "goruntu": {
+     "gercek_pay": 8.0,
+     "ust_y_halka_disi": 241,
+     "delige_uzaklik_halka_disi": 44.5
+    },
+    "doku_oge": {
+     "tarih": 5.0,
+     "isim1": 5.0,
+     "isim2": 5.0,
+     "sonsuz": 5.01,
+     "kucuk_sol": 5.0,
+     "kucuk_sag": 5.0,
+     "halka": 5.0,
+     "sembol": 5.0
+    },
+    "isik": {
+     "uzanim_px": 7.0,
+     "p95_px": 5.0,
+     "luma_artis_1_4px_ortanca": 4.77
+    },
+    "leke": {
+     "tarih": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "isim1": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 3,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "isim2": {
+      "alfa_lt_09": 1,
+      "ic_piksel": 3,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "sonsuz": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "kucuk_sol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "kucuk_sag": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 27,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "halka": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 654,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "sembol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16286,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     }
+    },
+    "halka_uc": {
+     "yay_toplam_px": 1590.6,
+     "yay_toplam_mm": 134.7,
+     "sag": {
+      "ince_2px_px": 225.8,
+      "ince_2px_mm": 19.12,
+      "ince_1px_mm": 12.87,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.06,
+       "0.05": 0.25,
+       "0.1": 1.01,
+       "0.2": 3.35,
+       "0.3": 4.26,
+       "0.4": 4.77,
+       "0.5": 7.5
+      }
+     },
+     "sol": {
+      "ince_2px_px": 227.0,
+      "ince_2px_mm": 19.22,
+      "ince_1px_mm": 12.97,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.04,
+       "0.05": 0.29,
+       "0.1": 1.01,
+       "0.2": 3.22,
+       "0.3": 4.28,
+       "0.4": 4.7,
+       "0.5": 7.5
+      }
+     },
+     "govde_max": 7.82
+    }
+   },
+   "A-T2": {
+    "tur": "koyu",
+    "ton": "altin kazanci 1.36",
+    "bronz_ana_rgb": null,
+    "kontrast_olcutu": "Serdar 2 Kas: acik zeminde zeminin koyu %5 / ogenin acik %5; koyu zeminde zeminin acik %5 / ogenin koyu %5; zemin ogenin 6-12 px cevresi; oge alfa >= 0.9 murekkep. Halka uclari: incelme bolgesinde genislik >= 2 px (kapi); 2 px alti alfa >= 0.5 ile ayri (bilgi)",
+    "en_kotu_kontrast": 4.75,
+    "hedef_tuttu": true,
+    "kontrast": {
+     "isim1": {
+      "deger": 4.75,
+      "zemin_rgb": [
+       82,
+       1,
+       10
+      ],
+      "oge_rgb": [
+       255,
+       83,
+       20
+      ],
+      "ortanca_bilgi": 9.37,
+      "cekirdek_piksel": 653
+     },
+     "isim2": {
+      "deger": 4.76,
+      "zemin_rgb": [
+       77,
+       1,
+       9
+      ],
+      "oge_rgb": [
+       247,
+       86,
+       20
+      ],
+      "ortanca_bilgi": 9.82,
+      "cekirdek_piksel": 616
+     },
+     "tarih": {
+      "deger": 5.23,
+      "zemin_rgb": [
+       76,
+       1,
+       9
+      ],
+      "oge_rgb": [
+       245,
+       104,
+       23
+      ],
+      "ortanca_bilgi": 9.36,
+      "cekirdek_piksel": 534
+     },
+     "halka_uclari": {
+      "deger": 6.59,
+      "zemin_rgb": [
+       92,
+       2,
+       12
+      ],
+      "oge_rgb": [
+       246,
+       156,
+       25
+      ],
+      "ortanca_bilgi": 9.43,
+      "cekirdek_piksel": 1804
+     },
+     "halka_uclari_2px_alti": {
+      "deger": 3.05,
+      "zemin_rgb": [
+       67,
+       1,
+       8
+      ],
+      "oge_rgb": [
+       155,
+       88,
+       18
+      ],
+      "ortanca_bilgi": 5.81,
+      "cekirdek_piksel": 448
+     }
+    },
+    "bosluk_px": [
+     20,
+     20,
+     20
+    ],
+    "sembol_kutu": [
+     264,
+     247,
+     688,
+     650
+    ],
+    "sembol_px": [
+     424,
+     403
+    ],
+    "isim_guvenli_daireye_px": 11.5,
+    "yasak_piksel": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "goruntu_yasak": {
+     "guvenli_daire_disi": 0,
+     "delik_halka_disi": 0,
+     "y_221_ustu_halka_disi": 0
+    },
+    "goruntu": {
+     "gercek_pay": 8.0,
+     "ust_y_halka_disi": 241,
+     "delige_uzaklik_halka_disi": 44.5
+    },
+    "doku_oge": {
+     "tarih": 5.0,
+     "isim1": 5.0,
+     "isim2": 5.0,
+     "sonsuz": 5.01,
+     "kucuk_sol": 5.0,
+     "kucuk_sag": 5.0,
+     "halka": 4.99,
+     "sembol": 5.0
+    },
+    "isik": {
+     "uzanim_px": 8.0,
+     "p95_px": 5.0,
+     "luma_artis_1_4px_ortanca": 4.66
+    },
+    "leke": {
+     "tarih": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "isim1": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 3,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "isim2": {
+      "alfa_lt_09": 1,
+      "ic_piksel": 3,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "sonsuz": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "kucuk_sol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "kucuk_sag": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 27,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "halka": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 654,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     },
+     "sembol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16286,
+      "acik_piksel": null,
+      "acik_piksel_kenar_dahil": null
+     }
+    },
+    "halka_uc": {
+     "yay_toplam_px": 1590.6,
+     "yay_toplam_mm": 134.7,
+     "sag": {
+      "ince_2px_px": 300.2,
+      "ince_2px_mm": 25.42,
+      "ince_1px_mm": 17.41,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.0,
+       "0.05": 0.23,
+       "0.1": 0.6,
+       "0.2": 2.29,
+       "0.3": 3.59,
+       "0.4": 4.77,
+       "0.5": 7.5
+      }
+     },
+     "sol": {
+      "ince_2px_px": 302.9,
+      "ince_2px_mm": 25.65,
+      "ince_1px_mm": 17.46,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.0,
+       "0.05": 0.11,
+       "0.1": 0.65,
+       "0.2": 2.19,
+       "0.3": 3.55,
+       "0.4": 4.7,
+       "0.5": 7.5
+      }
+     },
+     "govde_max": 7.82
+    }
+   }
+  },
+  "BEIGE": {
+   "V4": {
+    "tur": "acik",
+    "ton": "bronz carpani 0.48",
+    "bronz_ana_rgb": [
+     40.3,
+     25.9,
+     6.7
+    ],
+    "kontrast_olcutu": "Serdar 2 Kas: acik zeminde zeminin koyu %5 / ogenin acik %5; koyu zeminde zeminin acik %5 / ogenin koyu %5; zemin ogenin 6-12 px cevresi; oge alfa >= 0.9 murekkep. Halka uclari: incelme bolgesinde genislik >= 2 px (kapi); 2 px alti alfa >= 0.5 ile ayri (bilgi)",
+    "en_kotu_kontrast": 3.94,
+    "hedef_tuttu": false,
+    "kontrast": {
+     "isim1": {
+      "deger": 4.78,
+      "zemin_rgb": [
+       206,
+       190,
+       163
+      ],
+      "oge_rgb": [
+       100,
+       69,
+       27
+      ],
+      "ortanca_bilgi": 9.73,
+      "cekirdek_piksel": 653
+     },
+     "isim2": {
+      "deger": 4.4,
+      "zemin_rgb": [
+       205,
+       190,
+       164
+      ],
+      "oge_rgb": [
+       106,
+       74,
+       29
+      ],
+      "ortanca_bilgi": 9.69,
+      "cekirdek_piksel": 616
+     },
+     "tarih": {
+      "deger": 3.94,
+      "zemin_rgb": [
+       207,
+       191,
+       164
+      ],
+      "oge_rgb": [
+       117,
+       81,
+       33
+      ],
+      "ortanca_bilgi": 9.31,
+      "cekirdek_piksel": 534
+     },
+     "halka_uclari": {
+      "deger": 7.41,
+      "zemin_rgb": [
+       188,
+       173,
+       150
+      ],
+      "oge_rgb": [
+       45,
+       29,
+       7
+      ],
+      "ortanca_bilgi": 9.86,
+      "cekirdek_piksel": 957
+     },
+     "halka_uclari_2px_alti": {
+      "deger": 2.87,
+      "zemin_rgb": [
+       205,
+       188,
+       162
+      ],
+      "oge_rgb": [
+       120,
+       105,
+       83
+      ],
+      "ortanca_bilgi": 7.84,
+      "cekirdek_piksel": 370
+     }
+    },
+    "bosluk_px": [
+     10,
+     12,
+     11
+    ],
+    "sembol_kutu": [
+     262,
+     262,
+     690,
+     668
+    ],
+    "sembol_px": [
+     428,
+     406
+    ],
+    "isim_guvenli_daireye_px": 11.5,
+    "yasak_piksel": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "goruntu_yasak": {
+     "guvenli_daire_disi": 0,
+     "delik_halka_disi": 0,
+     "y_221_ustu_halka_disi": 0
+    },
+    "goruntu": {
+     "gercek_pay": 8.0,
+     "ust_y_halka_disi": 261,
+     "delige_uzaklik_halka_disi": 64.5
+    },
+    "doku_oge": {
+     "tarih": 4.98,
+     "isim1": 4.97,
+     "isim2": 5.0,
+     "sonsuz": 5.01,
+     "kucuk_sol": 5.0,
+     "kucuk_sag": 5.01,
+     "halka": 5.02,
+     "sembol": 5.01
+    },
+    "isik": "kapali (acik zemin)",
+    "leke": {
+     "tarih": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "isim1": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 3,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "isim2": {
+      "alfa_lt_09": 1,
+      "ic_piksel": 3,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "sonsuz": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "kucuk_sol": {
+      "alfa_lt_09": 2,
+      "ic_piksel": 16,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "kucuk_sag": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 25,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "halka": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 655,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "sembol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16518,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     }
+    },
+    "halka_uc": {
+     "yay_toplam_px": 1599.9,
+     "yay_toplam_mm": 135.5,
+     "sag": {
+      "ince_2px_px": 113.0,
+      "ince_2px_mm": 9.57,
+      "ince_1px_mm": 5.78,
+      "profil": {
+       "0.0": 0.02,
+       "0.02": 0.3,
+       "0.05": 1.17,
+       "0.1": 2.95,
+       "0.2": 4.44,
+       "0.3": 4.24,
+       "0.4": 4.71,
+       "0.5": 7.5
+      }
+     },
+     "sol": {
+      "ince_2px_px": 119.9,
+      "ince_2px_mm": 10.15,
+      "ince_1px_mm": 6.37,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.32,
+       "0.05": 1.04,
+       "0.1": 2.49,
+       "0.2": 4.32,
+       "0.3": 4.16,
+       "0.4": 4.75,
+       "0.5": 7.5
+      }
+     },
+     "govde_max": 7.82
+    },
+    "halka_V4": {
+     "ax": 343.0,
+     "cy": 510.6
+    }
+   },
+   "A-T1": {
+    "tur": "acik",
+    "ton": "bronz carpani 0.48",
+    "bronz_ana_rgb": [
+     40.3,
+     25.9,
+     6.7
+    ],
+    "kontrast_olcutu": "Serdar 2 Kas: acik zeminde zeminin koyu %5 / ogenin acik %5; koyu zeminde zeminin acik %5 / ogenin koyu %5; zemin ogenin 6-12 px cevresi; oge alfa >= 0.9 murekkep. Halka uclari: incelme bolgesinde genislik >= 2 px (kapi); 2 px alti alfa >= 0.5 ile ayri (bilgi)",
+    "en_kotu_kontrast": 3.94,
+    "hedef_tuttu": false,
+    "kontrast": {
+     "isim1": {
+      "deger": 4.89,
+      "zemin_rgb": [
+       207,
+       190,
+       164
+      ],
+      "oge_rgb": [
+       98,
+       68,
+       26
+      ],
+      "ortanca_bilgi": 9.73,
+      "cekirdek_piksel": 653
+     },
+     "isim2": {
+      "deger": 4.67,
+      "zemin_rgb": [
+       208,
+       192,
+       165
+      ],
+      "oge_rgb": [
+       103,
+       72,
+       28
+      ],
+      "ortanca_bilgi": 9.72,
+      "cekirdek_piksel": 616
+     },
+     "tarih": {
+      "deger": 3.94,
+      "zemin_rgb": [
+       206,
+       189,
+       163
+      ],
+      "oge_rgb": [
+       115,
+       80,
+       34
+      ],
+      "ortanca_bilgi": 9.21,
+      "cekirdek_piksel": 534
+     },
+     "halka_uclari": {
+      "deger": 8.42,
+      "zemin_rgb": [
+       207,
+       191,
+       165
+      ],
+      "oge_rgb": [
+       50,
+       35,
+       15
+      ],
+      "ortanca_bilgi": 10.07,
+      "cekirdek_piksel": 1340
+     },
+     "halka_uclari_2px_alti": {
+      "deger": 2.8,
+      "zemin_rgb": [
+       206,
+       189,
+       163
+      ],
+      "oge_rgb": [
+       122,
+       108,
+       85
+      ],
+      "ortanca_bilgi": 6.34,
+      "cekirdek_piksel": 317
+     }
+    },
+    "bosluk_px": [
+     20,
+     20,
+     20
+    ],
+    "sembol_kutu": [
+     264,
+     247,
+     688,
+     650
+    ],
+    "sembol_px": [
+     424,
+     403
+    ],
+    "isim_guvenli_daireye_px": 11.5,
+    "yasak_piksel": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "goruntu_yasak": {
+     "guvenli_daire_disi": 0,
+     "delik_halka_disi": 0,
+     "y_221_ustu_halka_disi": 0
+    },
+    "goruntu": {
+     "gercek_pay": 9.3,
+     "ust_y_halka_disi": 245,
+     "delige_uzaklik_halka_disi": 48.5
+    },
+    "doku_oge": {
+     "tarih": 5.02,
+     "isim1": 5.01,
+     "isim2": 5.01,
+     "sonsuz": 5.0,
+     "kucuk_sol": 5.0,
+     "kucuk_sag": 5.01,
+     "halka": 5.0,
+     "sembol": 5.01
+    },
+    "isik": "kapali (acik zemin)",
+    "leke": {
+     "tarih": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "isim1": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 3,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "isim2": {
+      "alfa_lt_09": 1,
+      "ic_piksel": 3,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "sonsuz": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "kucuk_sol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "kucuk_sag": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 27,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "halka": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 654,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "sembol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16286,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     }
+    },
+    "halka_uc": {
+     "yay_toplam_px": 1590.6,
+     "yay_toplam_mm": 134.7,
+     "sag": {
+      "ince_2px_px": 225.8,
+      "ince_2px_mm": 19.12,
+      "ince_1px_mm": 12.87,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.06,
+       "0.05": 0.25,
+       "0.1": 1.01,
+       "0.2": 3.35,
+       "0.3": 4.26,
+       "0.4": 4.77,
+       "0.5": 7.5
+      }
+     },
+     "sol": {
+      "ince_2px_px": 227.0,
+      "ince_2px_mm": 19.22,
+      "ince_1px_mm": 12.97,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.04,
+       "0.05": 0.29,
+       "0.1": 1.01,
+       "0.2": 3.22,
+       "0.3": 4.28,
+       "0.4": 4.7,
+       "0.5": 7.5
+      }
+     },
+     "govde_max": 7.82
+    }
+   },
+   "A-T2": {
+    "tur": "acik",
+    "ton": "bronz carpani 0.48",
+    "bronz_ana_rgb": [
+     40.3,
+     25.9,
+     6.7
+    ],
+    "kontrast_olcutu": "Serdar 2 Kas: acik zeminde zeminin koyu %5 / ogenin acik %5; koyu zeminde zeminin acik %5 / ogenin koyu %5; zemin ogenin 6-12 px cevresi; oge alfa >= 0.9 murekkep. Halka uclari: incelme bolgesinde genislik >= 2 px (kapi); 2 px alti alfa >= 0.5 ile ayri (bilgi)",
+    "en_kotu_kontrast": 3.94,
+    "hedef_tuttu": false,
+    "kontrast": {
+     "isim1": {
+      "deger": 4.89,
+      "zemin_rgb": [
+       207,
+       190,
+       164
+      ],
+      "oge_rgb": [
+       98,
+       68,
+       26
+      ],
+      "ortanca_bilgi": 9.73,
+      "cekirdek_piksel": 653
+     },
+     "isim2": {
+      "deger": 4.67,
+      "zemin_rgb": [
+       208,
+       192,
+       165
+      ],
+      "oge_rgb": [
+       103,
+       72,
+       28
+      ],
+      "ortanca_bilgi": 9.72,
+      "cekirdek_piksel": 616
+     },
+     "tarih": {
+      "deger": 3.94,
+      "zemin_rgb": [
+       206,
+       189,
+       163
+      ],
+      "oge_rgb": [
+       115,
+       80,
+       34
+      ],
+      "ortanca_bilgi": 9.21,
+      "cekirdek_piksel": 534
+     },
+     "halka_uclari": {
+      "deger": 8.58,
+      "zemin_rgb": [
+       210,
+       194,
+       168
+      ],
+      "oge_rgb": [
+       51,
+       36,
+       16
+      ],
+      "ortanca_bilgi": 10.25,
+      "cekirdek_piksel": 1804
+     },
+     "halka_uclari_2px_alti": {
+      "deger": 2.74,
+      "zemin_rgb": [
+       206,
+       190,
+       163
+      ],
+      "oge_rgb": [
+       124,
+       109,
+       87
+      ],
+      "ortanca_bilgi": 5.66,
+      "cekirdek_piksel": 448
+     }
+    },
+    "bosluk_px": [
+     20,
+     20,
+     20
+    ],
+    "sembol_kutu": [
+     264,
+     247,
+     688,
+     650
+    ],
+    "sembol_px": [
+     424,
+     403
+    ],
+    "isim_guvenli_daireye_px": 11.5,
+    "yasak_piksel": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "goruntu_yasak": {
+     "guvenli_daire_disi": 0,
+     "delik_halka_disi": 0,
+     "y_221_ustu_halka_disi": 0
+    },
+    "goruntu": {
+     "gercek_pay": 9.3,
+     "ust_y_halka_disi": 245,
+     "delige_uzaklik_halka_disi": 48.5
+    },
+    "doku_oge": {
+     "tarih": 5.02,
+     "isim1": 5.01,
+     "isim2": 5.01,
+     "sonsuz": 5.0,
+     "kucuk_sol": 5.0,
+     "kucuk_sag": 5.01,
+     "halka": 5.01,
+     "sembol": 5.01
+    },
+    "isik": "kapali (acik zemin)",
+    "leke": {
+     "tarih": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "isim1": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 3,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "isim2": {
+      "alfa_lt_09": 1,
+      "ic_piksel": 3,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "sonsuz": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "kucuk_sol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "kucuk_sag": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 27,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "halka": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 654,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "sembol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16286,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     }
+    },
+    "halka_uc": {
+     "yay_toplam_px": 1590.6,
+     "yay_toplam_mm": 134.7,
+     "sag": {
+      "ince_2px_px": 300.2,
+      "ince_2px_mm": 25.42,
+      "ince_1px_mm": 17.41,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.0,
+       "0.05": 0.23,
+       "0.1": 0.6,
+       "0.2": 2.29,
+       "0.3": 3.59,
+       "0.4": 4.77,
+       "0.5": 7.5
+      }
+     },
+     "sol": {
+      "ince_2px_px": 302.9,
+      "ince_2px_mm": 25.65,
+      "ince_1px_mm": 17.46,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.0,
+       "0.05": 0.11,
+       "0.1": 0.65,
+       "0.2": 2.19,
+       "0.3": 3.55,
+       "0.4": 4.7,
+       "0.5": 7.5
+      }
+     },
+     "govde_max": 7.82
+    }
+   }
+  },
+  "AGED_PAPYRUS": {
+   "V4": {
+    "tur": "acik",
+    "ton": "bronz carpani 0.48",
+    "bronz_ana_rgb": [
+     40.3,
+     25.9,
+     6.7
+    ],
+    "kontrast_olcutu": "Serdar 2 Kas: acik zeminde zeminin koyu %5 / ogenin acik %5; koyu zeminde zeminin acik %5 / ogenin koyu %5; zemin ogenin 6-12 px cevresi; oge alfa >= 0.9 murekkep. Halka uclari: incelme bolgesinde genislik >= 2 px (kapi); 2 px alti alfa >= 0.5 ile ayri (bilgi)",
+    "en_kotu_kontrast": 3.11,
+    "hedef_tuttu": false,
+    "kontrast": {
+     "isim1": {
+      "deger": 3.73,
+      "zemin_rgb": [
+       196,
+       167,
+       116
+      ],
+      "oge_rgb": [
+       101,
+       70,
+       27
+      ],
+      "ortanca_bilgi": 7.85,
+      "cekirdek_piksel": 653
+     },
+     "isim2": {
+      "deger": 3.51,
+      "zemin_rgb": [
+       197,
+       167,
+       117
+      ],
+      "oge_rgb": [
+       107,
+       74,
+       29
+      ],
+      "ortanca_bilgi": 7.99,
+      "cekirdek_piksel": 616
+     },
+     "tarih": {
+      "deger": 3.11,
+      "zemin_rgb": [
+       198,
+       169,
+       118
+      ],
+      "oge_rgb": [
+       118,
+       82,
+       34
+      ],
+      "ortanca_bilgi": 7.65,
+      "cekirdek_piksel": 534
+     },
+     "halka_uclari": {
+      "deger": 5.42,
+      "zemin_rgb": [
+       169,
+       145,
+       103
+      ],
+      "oge_rgb": [
+       44,
+       29,
+       7
+      ],
+      "ortanca_bilgi": 8.03,
+      "cekirdek_piksel": 957
+     },
+     "halka_uclari_2px_alti": {
+      "deger": 2.66,
+      "zemin_rgb": [
+       195,
+       166,
+       115
+      ],
+      "oge_rgb": [
+       115,
+       94,
+       61
+      ],
+      "ortanca_bilgi": 6.44,
+      "cekirdek_piksel": 370
+     }
+    },
+    "bosluk_px": [
+     10,
+     12,
+     11
+    ],
+    "sembol_kutu": [
+     262,
+     262,
+     690,
+     668
+    ],
+    "sembol_px": [
+     428,
+     406
+    ],
+    "isim_guvenli_daireye_px": 11.5,
+    "yasak_piksel": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "goruntu_yasak": {
+     "guvenli_daire_disi": 0,
+     "delik_halka_disi": 0,
+     "y_221_ustu_halka_disi": 0
+    },
+    "goruntu": {
+     "gercek_pay": 8.1,
+     "ust_y_halka_disi": 261,
+     "delige_uzaklik_halka_disi": 64.5
+    },
+    "doku_oge": {
+     "tarih": 4.99,
+     "isim1": 5.01,
+     "isim2": 5.01,
+     "sonsuz": 4.97,
+     "kucuk_sol": 4.98,
+     "kucuk_sag": 5.0,
+     "halka": 4.96,
+     "sembol": 5.01
+    },
+    "isik": "kapali (acik zemin)",
+    "leke": {
+     "tarih": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "isim1": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 3,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "isim2": {
+      "alfa_lt_09": 1,
+      "ic_piksel": 3,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "sonsuz": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "kucuk_sol": {
+      "alfa_lt_09": 2,
+      "ic_piksel": 16,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "kucuk_sag": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 25,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "halka": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 655,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "sembol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16518,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     }
+    },
+    "halka_uc": {
+     "yay_toplam_px": 1599.9,
+     "yay_toplam_mm": 135.5,
+     "sag": {
+      "ince_2px_px": 113.0,
+      "ince_2px_mm": 9.57,
+      "ince_1px_mm": 5.78,
+      "profil": {
+       "0.0": 0.02,
+       "0.02": 0.3,
+       "0.05": 1.17,
+       "0.1": 2.95,
+       "0.2": 4.44,
+       "0.3": 4.24,
+       "0.4": 4.71,
+       "0.5": 7.5
+      }
+     },
+     "sol": {
+      "ince_2px_px": 119.9,
+      "ince_2px_mm": 10.15,
+      "ince_1px_mm": 6.37,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.32,
+       "0.05": 1.04,
+       "0.1": 2.49,
+       "0.2": 4.32,
+       "0.3": 4.16,
+       "0.4": 4.75,
+       "0.5": 7.5
+      }
+     },
+     "govde_max": 7.82
+    },
+    "halka_V4": {
+     "ax": 343.0,
+     "cy": 510.6
+    }
+   },
+   "A-T1": {
+    "tur": "acik",
+    "ton": "bronz carpani 0.48",
+    "bronz_ana_rgb": [
+     40.3,
+     25.9,
+     6.7
+    ],
+    "kontrast_olcutu": "Serdar 2 Kas: acik zeminde zeminin koyu %5 / ogenin acik %5; koyu zeminde zeminin acik %5 / ogenin koyu %5; zemin ogenin 6-12 px cevresi; oge alfa >= 0.9 murekkep. Halka uclari: incelme bolgesinde genislik >= 2 px (kapi); 2 px alti alfa >= 0.5 ile ayri (bilgi)",
+    "en_kotu_kontrast": 3.19,
+    "hedef_tuttu": false,
+    "kontrast": {
+     "isim1": {
+      "deger": 3.86,
+      "zemin_rgb": [
+       197,
+       167,
+       116
+      ],
+      "oge_rgb": [
+       99,
+       68,
+       26
+      ],
+      "ortanca_bilgi": 7.91,
+      "cekirdek_piksel": 653
+     },
+     "isim2": {
+      "deger": 3.69,
+      "zemin_rgb": [
+       198,
+       169,
+       118
+      ],
+      "oge_rgb": [
+       104,
+       72,
+       28
+      ],
+      "ortanca_bilgi": 8.06,
+      "cekirdek_piksel": 616
+     },
+     "tarih": {
+      "deger": 3.19,
+      "zemin_rgb": [
+       197,
+       167,
+       116
+      ],
+      "oge_rgb": [
+       114,
+       79,
+       32
+      ],
+      "ortanca_bilgi": 7.44,
+      "cekirdek_piksel": 534
+     },
+     "halka_uclari": {
+      "deger": 6.92,
+      "zemin_rgb": [
+       199,
+       170,
+       120
+      ],
+      "oge_rgb": [
+       49,
+       34,
+       13
+      ],
+      "ortanca_bilgi": 8.18,
+      "cekirdek_piksel": 1340
+     },
+     "halka_uclari_2px_alti": {
+      "deger": 2.57,
+      "zemin_rgb": [
+       196,
+       167,
+       116
+      ],
+      "oge_rgb": [
+       118,
+       97,
+       63
+      ],
+      "ortanca_bilgi": 5.31,
+      "cekirdek_piksel": 317
+     }
+    },
+    "bosluk_px": [
+     20,
+     20,
+     20
+    ],
+    "sembol_kutu": [
+     264,
+     247,
+     688,
+     650
+    ],
+    "sembol_px": [
+     424,
+     403
+    ],
+    "isim_guvenli_daireye_px": 11.5,
+    "yasak_piksel": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "goruntu_yasak": {
+     "guvenli_daire_disi": 0,
+     "delik_halka_disi": 0,
+     "y_221_ustu_halka_disi": 0
+    },
+    "goruntu": {
+     "gercek_pay": 9.4,
+     "ust_y_halka_disi": 245,
+     "delige_uzaklik_halka_disi": 48.8
+    },
+    "doku_oge": {
+     "tarih": 4.99,
+     "isim1": 5.0,
+     "isim2": 5.0,
+     "sonsuz": 5.01,
+     "kucuk_sol": 5.0,
+     "kucuk_sag": 5.0,
+     "halka": 4.95,
+     "sembol": 5.0
+    },
+    "isik": "kapali (acik zemin)",
+    "leke": {
+     "tarih": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "isim1": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 3,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "isim2": {
+      "alfa_lt_09": 1,
+      "ic_piksel": 3,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "sonsuz": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "kucuk_sol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "kucuk_sag": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 27,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "halka": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 654,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "sembol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16286,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     }
+    },
+    "halka_uc": {
+     "yay_toplam_px": 1590.6,
+     "yay_toplam_mm": 134.7,
+     "sag": {
+      "ince_2px_px": 225.8,
+      "ince_2px_mm": 19.12,
+      "ince_1px_mm": 12.87,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.06,
+       "0.05": 0.25,
+       "0.1": 1.01,
+       "0.2": 3.35,
+       "0.3": 4.26,
+       "0.4": 4.77,
+       "0.5": 7.5
+      }
+     },
+     "sol": {
+      "ince_2px_px": 227.0,
+      "ince_2px_mm": 19.22,
+      "ince_1px_mm": 12.97,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.04,
+       "0.05": 0.29,
+       "0.1": 1.01,
+       "0.2": 3.22,
+       "0.3": 4.28,
+       "0.4": 4.7,
+       "0.5": 7.5
+      }
+     },
+     "govde_max": 7.82
+    }
+   },
+   "A-T2": {
+    "tur": "acik",
+    "ton": "bronz carpani 0.48",
+    "bronz_ana_rgb": [
+     40.3,
+     25.9,
+     6.7
+    ],
+    "kontrast_olcutu": "Serdar 2 Kas: acik zeminde zeminin koyu %5 / ogenin acik %5; koyu zeminde zeminin acik %5 / ogenin koyu %5; zemin ogenin 6-12 px cevresi; oge alfa >= 0.9 murekkep. Halka uclari: incelme bolgesinde genislik >= 2 px (kapi); 2 px alti alfa >= 0.5 ile ayri (bilgi)",
+    "en_kotu_kontrast": 3.19,
+    "hedef_tuttu": false,
+    "kontrast": {
+     "isim1": {
+      "deger": 3.86,
+      "zemin_rgb": [
+       197,
+       167,
+       116
+      ],
+      "oge_rgb": [
+       99,
+       68,
+       26
+      ],
+      "ortanca_bilgi": 7.91,
+      "cekirdek_piksel": 653
+     },
+     "isim2": {
+      "deger": 3.69,
+      "zemin_rgb": [
+       198,
+       169,
+       118
+      ],
+      "oge_rgb": [
+       104,
+       72,
+       28
+      ],
+      "ortanca_bilgi": 8.06,
+      "cekirdek_piksel": 616
+     },
+     "tarih": {
+      "deger": 3.19,
+      "zemin_rgb": [
+       197,
+       167,
+       116
+      ],
+      "oge_rgb": [
+       114,
+       79,
+       32
+      ],
+      "ortanca_bilgi": 7.44,
+      "cekirdek_piksel": 534
+     },
+     "halka_uclari": {
+      "deger": 6.99,
+      "zemin_rgb": [
+       201,
+       172,
+       122
+      ],
+      "oge_rgb": [
+       50,
+       35,
+       14
+      ],
+      "ortanca_bilgi": 8.37,
+      "cekirdek_piksel": 1804
+     },
+     "halka_uclari_2px_alti": {
+      "deger": 2.5,
+      "zemin_rgb": [
+       197,
+       167,
+       117
+      ],
+      "oge_rgb": [
+       120,
+       99,
+       64
+      ],
+      "ortanca_bilgi": 4.87,
+      "cekirdek_piksel": 448
+     }
+    },
+    "bosluk_px": [
+     20,
+     20,
+     20
+    ],
+    "sembol_kutu": [
+     264,
+     247,
+     688,
+     650
+    ],
+    "sembol_px": [
+     424,
+     403
+    ],
+    "isim_guvenli_daireye_px": 11.5,
+    "yasak_piksel": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "goruntu_yasak": {
+     "guvenli_daire_disi": 0,
+     "delik_halka_disi": 0,
+     "y_221_ustu_halka_disi": 0
+    },
+    "goruntu": {
+     "gercek_pay": 9.4,
+     "ust_y_halka_disi": 245,
+     "delige_uzaklik_halka_disi": 48.8
+    },
+    "doku_oge": {
+     "tarih": 4.99,
+     "isim1": 5.0,
+     "isim2": 5.0,
+     "sonsuz": 5.01,
+     "kucuk_sol": 5.0,
+     "kucuk_sag": 5.0,
+     "halka": 4.95,
+     "sembol": 5.0
+    },
+    "isik": "kapali (acik zemin)",
+    "leke": {
+     "tarih": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "isim1": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 3,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "isim2": {
+      "alfa_lt_09": 1,
+      "ic_piksel": 3,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "sonsuz": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 0,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "kucuk_sol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "kucuk_sag": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 27,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "halka": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 654,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     },
+     "sembol": {
+      "alfa_lt_09": 0,
+      "ic_piksel": 16286,
+      "acik_piksel": 0,
+      "acik_piksel_kenar_dahil": 0
+     }
+    },
+    "halka_uc": {
+     "yay_toplam_px": 1590.6,
+     "yay_toplam_mm": 134.7,
+     "sag": {
+      "ince_2px_px": 300.2,
+      "ince_2px_mm": 25.42,
+      "ince_1px_mm": 17.41,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.0,
+       "0.05": 0.23,
+       "0.1": 0.6,
+       "0.2": 2.29,
+       "0.3": 3.59,
+       "0.4": 4.77,
+       "0.5": 7.5
+      }
+     },
+     "sol": {
+      "ince_2px_px": 302.9,
+      "ince_2px_mm": 25.65,
+      "ince_1px_mm": 17.46,
+      "profil": {
+       "0.0": 0.0,
+       "0.02": 0.0,
+       "0.05": 0.11,
+       "0.1": 0.65,
+       "0.2": 2.19,
+       "0.3": 3.55,
+       "0.4": 4.7,
+       "0.5": 7.5
+      }
+     },
+     "govde_max": 7.82
+    }
+   }
+  }
+ },
+ "uc_kirp_kutu": [
+  523,
+  158,
+  846,
+  757
+ ],
+ "uzun_isim": {
+  "isimler": [
+   "ÇAĞLAYANGÜL",
+   "MAXIMILIAN"
+  ],
+  "olcek_1_sigar": false,
+  "bilgi": {
+   "hata": "yazi blogu halka ile sigmiyor"
+  },
+  "aksan": {
+   "ÇAĞLAYANGÜL": {
+    "genislik_px": 306,
+    "ust_buyuk_harf_ustu_px": 7,
+    "alt_taban_alti_px": 8,
+    "not_": "ust > 0: aksan (Ğ breve, Ü nokta) buyuk harf ustune tasar; alt > 0: Ç cengeli taban altina iner"
+   },
+   "MAXIMILIAN": {
+    "genislik_px": 255,
+    "ust_buyuk_harf_ustu_px": 0,
+    "alt_taban_alti_px": 1,
+    "not_": "ust > 0: aksan (Ğ breve, Ü nokta) buyuk harf ustune tasar; alt > 0: Ç cengeli taban altina iner"
+   }
+  },
+  "not_": "yalniz bilgi; ana onizlemelerde (EMILY / JAMES) yazi olcegi 1.0. Karar Serdar.",
+  "arama": "isim olcegi 0.30-1.00 ikili arama; logo, bosluk, kucuk burc, tarih ve sembol boyu degismez",
+  "yazi_blogu_sigan_olcek": 0.869,
+  "yazi_blogu_buyuk_harf_mm": 2.07,
+  "yazi_sigan_olcekte_sembol": {
+   "alt": 624.0,
+   "sembol_kaldir_px": 228,
+   "sembol_V4_ust": 261,
+   "hata": "sembol sigmiyor",
+   "yasak": {
+    "guvenli_disi": 7125,
+    "delik": 1423,
+    "ust_cizgi": 28959,
+    "tuval_disi": 0
+   },
+   "cakisma": [
+    "halka/sembol"
+   ],
+   "en_fazla_kaldir": null,
+   "gereken_kucultme_px": 228
+  },
+  "tam_sigan_olcek": 0.562,
+  "tam_buyuk_harf_mm": 1.34,
+  "sinirlayan": "yazi_blogu_sigan_olcek: yalniz yazi blogu (guvenli daire, halka, cakisma); tam_sigan_olcek: sembol de kucultulmeden sigar",
+  "tam_olcekte_bosluk_px": [
+   20,
+   20,
+   20
+  ]
+ },
+ "kapi": {
+  "yasak_0": true,
+  "cakisma_0": true,
+  "goruntu_yasak_0": true,
+  "kontrast": false,
+  "bosluk_ge_hedef": true,
+  "leke_a_0": true,
+  "leke_b_0": true,
+  "doku_4_6": true,
+  "isik_4_10_koyu": true,
+  "leke_kapi_yakaliyor": true,
+  "halka_kilit": true
+ },
+ "leke_kapi_kaniti": {
+  "kaynak_1600_onarimli": 0,
+  "kaynak_1600_yapay_20x20": 400,
+  "yapay_delik_yeri": {
+   "x": 619,
+   "y": 435,
+   "cizgi_yari_genislik_px": 42.2
+  },
+  "kaynak_tanim": {
+   "kapanis": 9,
+   "ice_px": 5,
+   "kucuk_delik_alan_esigi": 2422
+  },
+  "hedef_V4_onarimsiz": {
+   "sembol": 0,
+   "kucuk_sol": 2,
+   "kucuk_sag": 0,
+   "halka": 0
+  },
+  "hedef_A_onarimli": {
+   "sembol": 0,
+   "kucuk_sol": 0,
+   "kucuk_sag": 0,
+   "halka": 0
+  },
+  "yapay_30_delik_sayim": 60,
+  "yazi_logo_bilgi": {
+   "tarih": 0,
+   "isim1": 0,
+   "isim2": 1,
+   "sonsuz": 0
+  },
+  "yontem": "alfa > 0.5 maskesi 3x3 elips kapanis, sonra 2 px iceri daraltma (kenar yumusatmasi ve ic bukey kose dolgusu disarida); icinde alfa < 0.9 piksel sayisi. alfa >= 0.9 siniri YOK (yalniz (b) olcumunde). Kaynakta onarim 9x9 kapanis + 5 px ice (kenar degismez).",
+  "kapi_yakaliyor": true
+ },
+ "halka_kilit_olcum": {
+  "tepe_y": 163.0,
+  "sol_x": 134,
+  "sag_x": 817,
+  "ax_yaklasik": 339.8
+ },
+ "kapi_not": "leke (a) kapisi sembol, kucuk burclar ve halkada; yazi ve logo vektor cizim (kaynakta delik olamaz), sayimlari bilgi (OLCUM leke_kapi_kaniti.yazi_logo_bilgi: dar acili harf birlesimleri ve logonun 2 px alti cizgileri)"
+}
