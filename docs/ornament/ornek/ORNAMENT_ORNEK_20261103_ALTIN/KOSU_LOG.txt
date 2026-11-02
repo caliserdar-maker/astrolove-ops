@@ -1,0 +1,11 @@
+RUBY G1 ortanca 5.22 kati 2.45 yasak 0 leke a 0 dhue max ortanca 0.1 B>=R max % 0.0
+RUBY G2 ortanca 4.35 kati 2.49 yasak 0 leke a 0 dhue max ortanca 0.12 B>=R max % 0.0
+SAPPHIRE G1 ortanca 5.94 kati 2.83 yasak 0 leke a 0 dhue max ortanca 0.1 B>=R max % 0.0
+SAPPHIRE G2 ortanca 4.85 kati 2.89 yasak 0 leke a 0 dhue max ortanca 0.11 B>=R max % 0.0
+EMERALD G1 ortanca 5.47 kati 2.5 yasak 0 leke a 0 dhue max ortanca 0.11 B>=R max % 0.0
+EMERALD G2 ortanca 4.55 kati 2.57 yasak 0 leke a 0 dhue max ortanca 0.11 B>=R max % 0.0
+KAPI {"kontrast_ortanca": false, "goruntu_yasak_0": true, "leke_a_0": true, "leke_a_kaynak_0": true, "renk_sadakati": true, "yerlesim_ayni": true} FAIL
+
+real	0m30.730s
+user	0m23.110s
+sys	0m8.302s
