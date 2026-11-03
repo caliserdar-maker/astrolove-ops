@@ -14,8 +14,13 @@ bolumu okunmadan baslanmaz.
 ## Etsy
 
 - Salt okur isler (listing okuma, dogrulama, SEO taramasi) onaysiz kosulur.
-- Etsy'ye YAZAN her adim onay bekler: state degistirme, medya/ZIP/video
-  yukleme veya silme, yayinlama, fiyat/etiket/aciklama degisikligi.
+- ETSY TOPLU YAZIM (Serdar 3 Kas Soru 14 A; state, medya/ZIP/video yukleme/silme, yayin, fiyat/etiket/aciklama dahil tum yazimlar):
+  1) Yedek (Drive, salt okuma) + kuru kosu (salt okuma) + tek bagimsiz inceleme -> Serdar PLAN onayi.
+  2) Pilot: tek ilan yazilir; Serdar canli sayfada bakar -> PILOT onayi (29 Eki dersi: pilot gorulmeden 18 ilana CI kapak yazildi).
+  3) Kalanlar partiler halinde; partiler ARASI ONAY YOK. Her ilan geri okuma + canli sayfa dogrulamasi; FAIL, son okuma farki ya da
+     karar degisikliginde DUR + kisa rapor. Kota bitince is bolunur, mevcut kotayla kaldigi yerden devam (ilan yarim birakilmaz).
+  4) Her partide tek satir rapor; sonda toplu rapor -> Merkez kontrol.
+  Degismeyenler: tek Etsy yazimi + kilit_bekle.py; kota tabani 10 + "tahmini istek + 10"; salt okuma onaysiz.
 - Token sahibi: Drive `ASTROLOVE/TEMP/ETSY_TOKEN.json` tek kaynaktir; yenilenen
   refresh token her kosuda geri yazilir (bkz. docs/SECRETS.md). Ayni anda tek
   Etsy kosusu: `scripts/etsy/kilit_bekle.py` (28 Eyl 2026, Serdar onayi; GitHub
