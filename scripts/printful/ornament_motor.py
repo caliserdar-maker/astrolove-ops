@@ -192,13 +192,33 @@ def main():
     spec = importlib.util.spec_from_file_location('tek_doku', K_ / 'tek_doku.py')
     td = importlib.util.module_from_spec(spec); spec.loader.exec_module(td)
     pp = o4.poster_profil(K_ / 'HALKA_BLUE_16x20.png')
+    KENAR_ONARIM = {}
+
+    def kenar_onar(ad, g):
+        """Serdar 4 Kas (Kova): olcum payi eski haline (24 px) dondu; kapinin leke saydigi pikseller (ic & alfa < 0.9) varsa goruntu duzeltilir:
+        delik_kapat ic onarimi kapi olcumuyle ayni cercevede (dis pay yok) bir kez daha uygulanir (alfa 1, renk inpaint). Sayi 0 ise dokunulmaz
+        (CANCER_LIBRA ve leke saymayan kaynaklar birebir). Kaynak dosyaya dokunulmaz; yalniz bellekteki kopya."""
+        ic0, _ = o5.leke_ic_kaynak(g[..., 3]); n0 = int((ic0 & (g[..., 3] < 0.9)).sum())
+        if n0 == 0:
+            return g
+        g2, tur = g, []
+        for _ in range(3):                                                   # dolan pikseller kapanisi buyutebilir: sayi 0 olana kadar (en cok 3 tur)
+            g2, n_ = o5._delik_kapat(g2)
+            ic1, _ = o5.leke_ic_kaynak(g2[..., 3]); n1 = int((ic1 & (g2[..., 3] < 0.9)).sum()); tur.append(dict(onarilan=int(n_), kalan=n1))
+            if n1 == 0:
+                break
+        KENAR_ONARIM[ad] = dict(onarim_oncesi_leke_px=n0, tur=tur, alfa_degisimi_en_buyuk=round(float(np.abs(g2[..., 3] - g[..., 3]).max()), 4),
+                                degisen_piksel=int((np.abs(g2 - g) > 1e-6).any(-1).sum()))
+        log('kenar onarim', ad, KENAR_ONARIM[ad])
+        return g2
     ANA_DOSYA = K_ / f'{CIFT}_ana.png'
     ana0 = np.asarray(Image.open(ANA_DOSYA).convert('RGBA'), np.float32); ana0[..., 3] /= 255.0
     ana0 = o1.kirp(ana0, ana0[..., 3], pad=2)
     if ana0.shape[1] > 1600:
         r_, a_ = o1.rgba_olcek(ana0, 1600 / ana0.shape[1]); ana0 = np.dstack([r_, a_])
     ana5, _ = o5.delik_kapat(ana0)
-    ic_, _ = o5.leke_ic_kaynak(ana5[..., 3], olcum=True); o5.KAYNAK_SONRA['ana'] = int((ic_ & (ana5[..., 3] < 0.9)).sum())
+    ana5 = kenar_onar('ana', ana5)
+    ic_, _ = o5.leke_ic_kaynak(ana5[..., 3]); o5.KAYNAK_SONRA['ana'] = int((ic_ & (ana5[..., 3] < 0.9)).sum())
     lsrc = o4.logo_kaynak(K_ / 'LOGO_1.png')
     cap = o4.CAP0
     G = int(math.ceil(o5.BOSLUK_ORAN * cap))
@@ -209,7 +229,8 @@ def main():
             g = np.asarray(Image.open(K_ / f'{burc}_symbol_gold.png').convert('RGBA'), np.float32); g[..., 3] /= 255.0
             g = o1.kirp(g, g[..., 3], pad=2)
             g, _ = o5.delik_kapat(g)
-            ic2, _ = o5.leke_ic_kaynak(g[..., 3], olcum=True); o5.KAYNAK_SONRA[burc] = int((ic2 & (g[..., 3] < 0.9)).sum())
+            g = kenar_onar(burc, g)
+            ic2, _ = o5.leke_ic_kaynak(g[..., 3]); o5.KAYNAK_SONRA[burc] = int((ic2 & (g[..., 3] < 0.9)).sum())
             kucuk_g[burc] = g
         g = kucuk_g[burc]
         gx0, gy0, gx1, gy1 = o1.bbox(g[..., 3], 0.5)
@@ -701,7 +722,7 @@ def main():
                                         h_w_orani=(round(float(s4b[3] - s4b[1]) / float(s4b[2] - s4b[0]), 4) if s4b[2] > s4b[0] else None),
                                         not_='CANCER_LIBRA onayli hali 425 x 404 (kutu fonksiyonu kullanilmaz)'))
     R['kapi_sert'] = g; R['kapi_bilgi'] = BILGI
-    R['kapi'] = g; R['kaynak_leke_onarim_sonrasi'] = dict(o5.KAYNAK_SONRA)
+    R['kapi'] = g; R['kaynak_leke_onarim_sonrasi'] = dict(o5.KAYNAK_SONRA); R['kaynak_kenar_onarim'] = KENAR_ONARIM
     R['bilgi_renk_uyum_dE00_le_1'] = bool(all(v['dE00_sonra'] <= 1.0 for v in ru.values()))   # tanim geregi gecer (medyan -> medyan); yalniz bilgi
     R['deneme4'] = dict(dusus_kucuk_oge_sabit=DUSLAR, dusus_yontem='kucuk ogelerde f_dus = ana sembol (alfa >= 0.9) f_dus ortancasi; ana sembol degismez',
                         esit_kucuk_oge='goz: uret_tam.py gorunen (1/3.6 goz olcegi, alfa agirlikli, aa > 0.85) yuzdelikleri QS poster ana Ys[ana] yuzdeliklerine '

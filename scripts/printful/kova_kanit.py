@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Kova kaynak leke kaniti (Serdar 4 Kas, EK 1 b-c ve EK 2). Uretimden SONRA kosar (ornek78 is klasoru + 954 PNG'ler).
+"""DENEME 3 TESHIS ARACI (4 Kas): kapi payi Serdar talimatiyla 24 px'e dondu (kanit olcutu totolojik bulundu; bagimsiz inceleme). Is akisinda degil.
+Kova kaynak leke kaniti (Serdar 4 Kas, EK 1 b-c ve EK 2). Uretimden SONRA kosar (ornek78 is klasoru + 954 PNG'ler).
 EK 1b: eski payin (24 px) saydigi kaynak pikselleri maske gorseli + ayni yerlerin 954 son dosyalardan (5 stil) 4x yakin plani.
 EK 1c: bu piksellerin son goruntude leke olmadiginin olcumu (ayni yerde):
    - cikti leke tanimi (ornament_ornek5.leke_ic: kapali maske 2 px ice, alfa < 0.9) bolgede piksel sayisi

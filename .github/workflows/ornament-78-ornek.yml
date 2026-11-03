@@ -111,14 +111,6 @@ jobs:
           (cd $K && sha256sum *_ana.png *_symbol_gold.png) | sed 's|  |  kaynak/|' | tee -a /tmp/girdi_sha.txt
           (cd $MD && find . -type f | sort | xargs sha256sum) | sed 's|  \./|  motor_gpt/|' | tee -a /tmp/girdi_sha.txt
           cat /tmp/drive_md5.txt >> /tmp/girdi_sha.txt
-      - name: Kova kaynak leke kapisi testi (bilinen PASS mevcut kaynak, bilinen FAIL yapay leke; Serdar 4 Kas A)
-        id: kova
-        run: |
-          set +e
-          mkdir -p /tmp/rapor; cd s
-          python3 -I scripts/printful/kova_kapi_testi.py --kaynak /tmp/kay/aquarius_symbol_gold.png --cikti /tmp/rapor 2>&1 | tee /tmp/log_kova.txt
-          kt=${PIPESTATUS[0]}; echo "kt=$kt" >> "$GITHUB_OUTPUT"; echo "::notice::kova kapi testi cikis $kt | $(tail -1 /tmp/log_kova.txt | cut -c1-250)"
-          exit 0
       - name: Uretim (6 cift x 5 stil; kontrol cifti once)
         id: uretim
         run: |
@@ -133,15 +125,6 @@ jobs:
           kp=$(python3 -c "import json; print(json.load(open('/tmp/rapor/OLCUM.json')).get('kontrol_pass'))" 2>/dev/null || echo None); echo "kp=$kp" >> "$GITHUB_OUTPUT"
           echo "::notice::ornek78 cikis $k | $(tail -1 /tmp/log_ornek78.txt | cut -c1-200)"
           exit 0                                                             # cikis kodu k ciktisinda; sonraki adimlar her durumda calisir (Serdar 4 Kas B)
-      - name: Kova kaniti (EK 1 b-c, EK 2 kor bant; uretimden sonra)
-        id: kanit
-        if: always()
-        run: |
-          set +e
-          cd s
-          python3 -I scripts/printful/kova_kanit.py --kaynak /tmp/kay --png /tmp/png --cikti /tmp/rapor --cift AQUARIUS_PISCES 2>&1 | tee /tmp/log_kova_kanit.txt
-          kk=${PIPESTATUS[0]}; echo "kk=$kk" >> "$GITHUB_OUTPUT"; echo "::notice::kova kaniti cikis $kk | $(tail -1 /tmp/log_kova_kanit.txt | cut -c1-250)"
-          exit 0
       - name: Drive (her durumda; uretilen PNG'ler)
         if: always()
         run: |
@@ -172,4 +155,4 @@ jobs:
         run: rm -rf ~/.config/rclone
       - name: Sonuc
         if: always()
-        run: 'echo "ornek78 cikis ${{ steps.uretim.outputs.k }} kova testi ${{ steps.kova.outputs.kt }} kova kaniti ${{ steps.kanit.outputs.kk }}"; [ "${{ steps.uretim.outputs.k }}" = "0" ] && [ "${{ steps.kova.outputs.kt }}" = "0" ] && [ "${{ steps.kanit.outputs.kk }}" = "0" ]'
+        run: 'echo "ornek78 cikis ${{ steps.uretim.outputs.k }}"; [ "${{ steps.uretim.outputs.k }}" = "0" ]'

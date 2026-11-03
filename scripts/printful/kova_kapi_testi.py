@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Kova kaynak leke kapisi testi (Serdar 4 Kas, A maddesi). Kapi gevsetme yasagi (Serdar 1 Kas): kapi iki bilinen ornekle denenir.
+"""DENEME 3 TESHIS ARACI (4 Kas): kapi payi Serdar talimatiyla 24 px'e dondu (kanit olcutu totolojik bulundu; bagimsiz inceleme). Is akisinda degil.
+Kova kaynak leke kapisi testi (Serdar 4 Kas, A maddesi). Kapi gevsetme yasagi (Serdar 1 Kas): kapi iki bilinen ornekle denenir.
 Kapi = ornament_motor.py ile ayni yol: kirp (pad 2) -> delik_kapat (onarim) -> leke_ic_kaynak(olcum=True) ic & alfa < 0.9 piksel sayisi.
   bilinen PASS: mevcut kaynak (onarim sonrasi) -> 0 beklenir.
   bilinen FAIL: ayni goruntuye (onarim sonrasi, motorun olctugu goruntu) yapay leke eklenir -> > 0 beklenir.

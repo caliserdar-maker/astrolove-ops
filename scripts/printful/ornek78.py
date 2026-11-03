@@ -151,7 +151,7 @@ def main():
             iou=M_['iou_954'], alfa_fark={k: v['ort_mutlak_fark_murekkep'] for k, v in M_['iou_954_bilgi'].items()},
             kapi=dict(sert=SERT, bilgi=dict(M_['kapi_bilgi'], sade1_okunur=S_['okunur'], sade1_sembol_ust_y=S_.get('sembol_ust_y_bilgi')),
                       kaynak='koyu: ornament_motor OLCUM kapi_sert / kapi_bilgi; sade1: ornament_sade OLCUM aday 1 kapi; fildisi: cikis kodu'),
-            kaynak_leke=M_.get('kaynak_leke_onarim_sonrasi'),
+            kaynak_leke=M_.get('kaynak_leke_onarim_sonrasi'), kaynak_kenar_onarim=M_.get('kaynak_kenar_onarim'),
             cikti_leke_a={s: sum(v['alfa_lt_09'] for k2, v in M_['sonuc'][s]['leke'].items() if k2 in o5.LEKE_KAPI_OGE) for s in ('RUBY', 'SAPPHIRE', 'EMERALD')},
             sade=dict(kati_kontrast=SK['kati_kontrast'], en_kotu_oge=SK['en_kotu_oge'], carpan_L=SK['carpan_L'], hedef=SK['hedef'],
                       koyulasma_oncesi_kati=S_['kati_kontrast_en_kotu'], aday1_ile_ayni=SK['aday1_ile_ayni'], gamut_kroma_kuculen_piksel=SK['gamut_kroma_kuculen_piksel'],
