@@ -53,7 +53,7 @@ def main():
     # 28 Eki (Serdar): celiskili 4 cumlenin yeni hali (pod_5x7_kuru EN_DEGISIKLIK) -> PASS, RU ayni bilgi
     import pod_5x7_kuru as K
     en3 = en2
-    for x, y in K.EN_DEGISIKLIK[4:]:
+    for x, y in K.EN_DEGISIKLIK[4:8]:   # 28 Eki: tam 4 cumle (inceleme 4 Kas: acik uclu dilim yeni maddelerle sessizce degisiyordu)
         assert en3.count(x) == 1, x[:40]
         en3 = en3.replace(x, y)
     ru3, k3 = P.kur(en3, dict(ENV, boy=["5x7"] + ENV["boy"]))
@@ -63,6 +63,14 @@ def main():
               and "переслать в течение 24 часов после вашего одобрения" in ru3 and "в течение 24 часов, и его можно" not in ru3
               and "отправим цифровой файл в виде ссылки для скачивания" in ru3))
     # 3 Kas (Serdar Soru 3 + Soru 11, Lena onayi): yeni PRINT ve onizleme satiri -> PASS; eski anahtarlar korunur (geri alma)
+    # 30 Eki (505e9dac): EN_DEGISIKLIK[8] PACKAGING paragrafini kaldirir -> 15 paragraf, RU'da УПАКОВКА yok (canli 78/78: 15 paragraf)
+    assert len(K.EN_DEGISIKLIK) == 9 and "PACKAGING" in K.EN_DEGISIKLIK[8][0], "EN_DEGISIKLIK degisti: testi guncelle"
+    x8, y8 = K.EN_DEGISIKLIK[8]
+    en3b = en3.replace(x8, y8)
+    ru3b, k3b = P.kur(en3b, dict(ENV, boy=["5x7"] + ENV["boy"]))
+    s.append(("30 Eki: ambalaj paragrafi kalkti -> 15 paragraf PASS, RU'da УПАКОВКА yok", en3.count(x8) == 1 and k3b["pass_"]
+              and k3b["paragraf_en"] == 15 and "\n\nPACKAGING\n" not in en3b and "УПАКОВКА" not in ru3b and "УПАКОВКА" in ru3))
+    en3 = en3b   # sonraki (3 Kas) testler canli bicimle (15 paragraf) kosar
     eski_print = "- Printed on premium matte art paper with long-lasting inks"
     eski_tes = "We send a free preview via Etsy Messages"
     en4 = en3.replace(eski_print, "- Printed on matte art paper").replace(eski_tes, "We send a preview via Etsy Messages")
