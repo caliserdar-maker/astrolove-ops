@@ -61,6 +61,7 @@ def main():
     ap.add_argument('--motor', required=True)
     ap.add_argument('--cikti', required=True)
     ap.add_argument('--son', required=True)
+    ap.add_argument('--zemin', default=None, help='KOYU_G1 (Serdar 3 Kas): koyu zemin dosyalari bu klasorden (ad ayni: RUBY_1264.png ...); kaynak sha kontrolu degismez')
     a = ap.parse_args()
     K_, MD, O, SON = Path(a.kaynak), Path(a.motor), Path(a.cikti), Path(a.son)
     O.mkdir(parents=True, exist_ok=True)
@@ -507,9 +508,11 @@ def main():
          'disarida': 'yansima, temas, isima, poster dis golgesi, zemin_daire (karar 18)', 'temizle': temiz_bilgi, 'iou_954': IOU, 'iou_954_bilgi': IOU_B, 'punto': PUNTO, 'gren': gren_olc,
          'renk_uyum': ru, 'yerlesim': bilgi, 'ton_referans_lab_p5_p95': [round(TON_REF[0], 1), round(TON_REF[1], 1)], 'sonuc': {}}
     rgbler = {}
-    oz_test, DUSLAR = {}, {}
+    oz_test, DUSLAR, ZEMIN_SHA = {}, {}, {}
     for renk, zf in al.RENKLER:
-        z = o1.zemin_canva(K_ / zf)
+        zyol = (Path(a.zemin) / zf) if a.zemin else (K_ / zf)
+        ZEMIN_SHA[renk] = sha(zyol)
+        z = o1.zemin_canva(zyol)
         KAT.clear()
         r0_, _ = al.boya_altin(Y, model, z, td, 'G2', 1.0); r1_, _ = boya_motor(Y, model, z, td, 'G2', 1.0, ICP_A114)
         oz_test[renk] = bool(np.array_equal(r0_, r1_))                      # oz test: a114ddb ayariyla boya_motor == boya_altin (bayt)
@@ -623,6 +626,7 @@ def main():
                                        'iki tur np.interp; KILIT AYAR esit=kazanc yerine (Merkez 3 Kas: Serdar "ayni altin" istegiyle onayli sapma)',
                         qa_goz=[round(float(v), 4) for v in qa_goz], ic_golge='guc 0.35 aynen, kayma ve sigma x min(1, D_oge / D_ana)')
     R['kutu'] = {k: [int(v) for v in o5.kutu(Y['E'], k)] for k in Y['E']}
+    R['zemin'] = dict(klasor=str(a.zemin) if a.zemin else 'kaynak (GERCEK)', sha256=ZEMIN_SHA)
     R['ic_golge'] = dict(yontem='kayma, sigma = a114ddb (1.0, 0.6) x min(1, D_oge / D_ana), guc 0.35 aynen (deneme 4); D = iskelet uzerinde mesafe donusumu ortancasi '
                                 '(yari kalinlik, 954 px; ogeler 10x alfadan, ana 1600 px kaynaktan); INCE (0.15) listesi kullanilmaz',
                          yari_kalinlik_954px=YK, oge=ICP, oz_test_a114ddb_bayt_ayni=oz_test)
