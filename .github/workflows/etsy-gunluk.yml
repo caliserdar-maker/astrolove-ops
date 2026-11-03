@@ -44,7 +44,14 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work _out _in
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_VERI/BIRIKIM.csv" _in/BIRIKIM.csv 2>/dev/null || echo "onceki BIRIKIM yok (ilk kosu)"
+          # inceleme 3 Kas: Drive hatasi "dosya yok" sayilmaz (yoksa BIRIKIM tek gunle ezilirdi). lsf hata verirse kosu durur.
+          L=$(rclone lsf "gdrive:ASTROLOVE/TEMP/ETSY_VERI/" --files-only) || { echo "::error::ETSY_VERI listelenemedi; BIRIKIM ezilmesin diye DUR"; exit 1; }
+          if printf '%s\n' "$L" | grep -qx "BIRIKIM.csv"; then
+            rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_VERI/BIRIKIM.csv" _in/BIRIKIM.csv
+            [ -s _in/BIRIKIM.csv ] || { echo "::error::BIRIKIM.csv indirildi ama bos; DUR"; exit 1; }
+          else
+            echo "onceki BIRIKIM yok (ilk kosu)"
+          fi
       - name: Oku (salt okuma)
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
