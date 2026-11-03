@@ -1,12 +1,15 @@
 name: ornament-son-uretim
-# Serdar 3 Kas, karar 22: ORNAMENT SON URETIM, 6 renk, Actions'ta yeniden uretim (CLAUDE.md KARAR 3). Bu is akisi YALNIZ dal
-# ornament-printful-katalog'da (main'e alinmaz; Serdar). Tetik: dalda docs/ornament/SON_URETIM_TETIK.txt degisince push.
-# Girdiler: Drive dosya kimlikleri (rclone copyid) + dal git show (sabit commit); hepsinin sha256'si BEKLENEN listeyle karsilastirilir, fark DUR.
-# Uretim: ornament_son.py (BEIGE, AGED_PAPYRUS), ornament_motor.py (RUBY, SAPPHIRE, EMERALD, deneme 4), ORN_DUMP + ornament_sade.py (SADE ALTIN).
-#   111 MB katman dosyasi Drive'dan INDIRILMEZ: ayni koddan Actions'ta yeniden uretilir (yerel pkl sha'si bilgi olarak loglanir).
-# Kapi: 6 PNG onayli PNG'lerle (e5412718, a5e3ea2, 029a670d) PIKSEL PIKSEL ayni. Fark varsa DUR: Drive yok, yalniz log dala.
-# PASS: Drive TEMP/ORNAMENT_SON_<damga>/ (6 PNG + ONIZLEME_76mm_6RENK + MOCKUP_1 + OLCUM) ve eski TEMP/ORNAMENT_ORNEK_20261103_SON/STIL3_SON
-#   -> STIL3_SON_ESKI (yeniden adlandirma; SILME YOK). Etsy / Printful API yok, token yok.
+# Serdar 3 Kas, karar 25: ORNAMENT SON URETIM, 5 STIL (RUBY, SAPPHIRE, EMERALD, SADE ALTIN, FILDISI KREM), Actions'ta yeniden uretim
+# (CLAUDE.md KARAR 3). Bu is akisi YALNIZ dal ornament-printful-katalog'da (main'e alinmaz; Serdar). Tetik: dalda
+# docs/ornament/SON_URETIM_TETIK.txt degisince push.
+# Onayli girdi: dal 6daab364, docs/ornament/ornek/ORNAMENT_5STIL_20261103_1539/.
+# Girdiler: Drive dosya kimlikleri (rclone copyid) + dal git show (sabit commit); sha256'lar BEKLENEN listeyle karsilastirilir, fark DUR.
+#   Eliptik koyu zeminler (ON_OLCUM_ELIPS, 6322d66b) onayli girdi dosyasi olarak git'ten alinir (sha kontrollu).
+# Uretim: ornament_motor.py --zemin (RUBY, SAPPHIRE, EMERALD; deneme 4 ogeler), ORN_DUMP + ornament_sade.py (SADE ALTIN),
+#   ornament_fildisi.py (birebir; girdi onayli SADE_1). 111 MB katman dosyasi Actions'ta ayni koddan yeniden uretilir (Drive'dan inmez).
+# Kapi (Merkez 3 Kas, A): ham pikselde en buyuk fark <= 1 seviye ve farkli piksel <= 10 / dosya. FAIL: Drive yok, yalniz log dala.
+# PASS: Drive TEMP/ORNAMENT_SON_<damga>/ (ONAYLI 5 PNG + ONIZLEME_76mm_5STIL + OLCUM + girdi_sha) ve
+#   TEMP/ORNAMENT_ORNEK_20261103_SON/STIL3_SON -> STIL3_SON_ESKI (yeniden adlandirma; SILME YOK). Etsy / Printful API yok, token yok.
 on:
   push:
     branches: [ornament-printful-katalog]
@@ -21,6 +24,8 @@ jobs:
       DAL: ornament-printful-katalog
       MOTOR_COMMIT: 6da763aa5b9820027420f73264fc69d30e120a33
       TEK_DOKU_COMMIT: 2a08a78216ca
+      ONAY_COMMIT: 6daab364
+      O5: docs/ornament/ornek/ORNAMENT_5STIL_20261103_1539
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,7 +40,7 @@ jobs:
           pip install -q pillow==11.0.0 numpy==2.5.4 opencv-python-headless==5.0.0.93 scipy==1.18.1 scikit-image==0.26.0 potracer==0.0.4
           python3 -c "import sys, numpy, cv2, PIL, scipy, skimage; print('python', sys.version.split()[0], 'numpy', numpy.__version__, 'cv2', cv2.__version__, 'pillow', PIL.__version__, 'scipy', scipy.__version__, 'skimage', skimage.__version__)" | tee /tmp/paket.txt
           pip freeze | grep -i potrace | tee -a /tmp/paket.txt
-          lscpu | grep -E 'Model name|Flags' | cut -c1-200 | tee -a /tmp/paket.txt
+          lscpu | grep -E 'Model name' | tee -a /tmp/paket.txt
       - name: rclone kur + yapilandir
         timeout-minutes: 5
         env:
@@ -52,7 +57,7 @@ jobs:
       - name: Girdiler (Drive + git) ve sha256 kapisi
         run: |
           set -euo pipefail
-          K=/tmp/kay; MD=/tmp/mg; mkdir -p $K $MD/kure $MD/palet $MD/girdi78/ana
+          K=/tmp/kay; MD=/tmp/mg; ZE=/tmp/zemin; mkdir -p $K $MD/kure $MD/palet $MD/girdi78/ana $ZE
           rclone backend copyid gdrive: 17V0yS8Uo0nFJO3QpoUfnSaOWjv_o0x5p "$K/" 1xY_Pcr11EM4pMQYyZynLM_4zyS1GJUjS "$K/" 1FHwFRdgOcN5LGYS5PkGBghmCqJo16t7B "$K/"
           git -C s fetch -q origin ornek-tek-doku siparis-gpt gecici/ornament-sembol-renk
           for f in motor/varlik/halka/HALKA_BLUE_16x20.png motor/font/Cinzel.ttf motor/font/EBGaramond-Italic.ttf motor/tek_doku.py; do
@@ -64,6 +69,8 @@ jobs:
           git -C s show $MOTOR_COMMIT:motor_gpt/alfa_ogeler.npz > $K/alfa_ogeler.npz
           for f in KILIT_GPTGIRDI.json golge_motor.py vektor_yuzey.py alfa_temizle.py uret_tam.py renk_uyum.py olustur_alfa_sablon.py kure/k4.npy palet/chatgpt_altin.png yerlesim78.json cember.json girdi78/ana/cancer_libra_alfa.png; do
             git -C s show $MOTOR_COMMIT:motor_gpt/$f > $MD/$f; done
+          for r in RUBY SAPPHIRE EMERALD; do git -C s show $ONAY_COMMIT:docs/ornament/ornek/ORNAMENT_KOYU_G1/ON_OLCUM_ELIPS/${r}_ELIPS_1264.png > $ZE/${r}_1264.png; done
+          git -C s show $ONAY_COMMIT:docs/ornament/ornek/ORNAMENT_SADE_8/SADE_1_ALTIN_TONU_954.png > /tmp/SADE_1.png
           cat > /tmp/beklenen.txt <<'EOF'
           e86c2629629305fd90bbb66494238faef9b4ad1acb815eb7b3ed55e7f44fc2d2  /tmp/kay/CANCER_LIBRA_ana.png
           2b5a32121ce8fa92ceef1a386f5ab1742a573681c30e742223be75005816cf28  /tmp/kay/cancer_symbol_gold.png
@@ -80,44 +87,47 @@ jobs:
           bba2c4499c93c9612b90b9825d32b07da52fce2fe57562a1eb6b833553f93c4e  /tmp/kay/EBGaramond-Italic.ttf
           f946f5611431bdf976dce3475db8fd653faf1242ca267c365e2e29c8b3c8a8c2  /tmp/kay/cancer_libra_alfa.png
           d373403191a6245eccf386f0aa01d6380996b72e22d20e3ae8c7c5f6839d16e9  /tmp/kay/alfa_ogeler.npz
+          e80d6d3fca82e2804865c887277c06bc8e958175e254b1f2d289eaeba03c9044  /tmp/zemin/RUBY_1264.png
+          0d3213f8b592392aa69a3cdcd127d893a6fd2ef3d94e5913cf94ee96f4afb941  /tmp/zemin/SAPPHIRE_1264.png
+          0c232cfc155ba2cbfd34cb92c6f72ffdb0fbbc54570ac9a8e987efdfdcd7f787  /tmp/zemin/EMERALD_1264.png
+          c3b4b280ecd47e1b9116f3af939646bed005800ccbc4c6ab8a3464b1dcc46ab8  /tmp/SADE_1.png
           EOF
           sed -i 's/^ *//' /tmp/beklenen.txt
           sha256sum -c /tmp/beklenen.txt | tee /tmp/girdi_sha.txt
-          (cd $MD && find . -type f | sort | xargs sha256sum) | tee -a /tmp/girdi_sha.txt
+          (cd $MD && find . -type f | sort | xargs sha256sum) | sed 's|  \./|  motor_gpt/|' | tee -a /tmp/girdi_sha.txt
       - name: Uretim (yerel betiklerle ayni komutlar)
         run: |
           set -euo pipefail
-          K=/tmp/kay; MD=/tmp/mg; U=/tmp/uretim; mkdir -p $U /tmp/son /tmp/motor /tmp/sade
-          cd s
-          python3 -I scripts/printful/ornament_son.py --kaynak $K --cikti /tmp/son 2>&1 | tee /tmp/log_son.txt | tail -5
-          python3 -I scripts/printful/ornament_motor.py --kaynak $K --motor $MD --cikti /tmp/motor --son /tmp/son 2>&1 | tee /tmp/log_motor.txt | tail -4 || true
-          ORN_DUMP=/tmp/katman.pkl python3 -I scripts/printful/ornament_motor.py --kaynak $K --motor $MD --cikti /tmp/motor_dump --son /tmp/son 2>&1 | tee /tmp/log_dump.txt | tail -2
+          K=/tmp/kay; MD=/tmp/mg; U=/tmp/uretim; mkdir -p $U /tmp/motor /tmp/motor_dump /tmp/sade
+          SON=s/docs/ornament/ornek/ORNAMENT_ORNEK_20261103_SON/STIL3_SON
+          cd s; SON=docs/ornament/ornek/ORNAMENT_ORNEK_20261103_SON/STIL3_SON
+          python3 -I scripts/printful/ornament_motor.py --kaynak $K --motor $MD --cikti /tmp/motor --son $SON --zemin /tmp/zemin 2>&1 | tee /tmp/log_motor.txt | tail -4 || true
+          ORN_DUMP=/tmp/katman.pkl python3 -I scripts/printful/ornament_motor.py --kaynak $K --motor $MD --cikti /tmp/motor_dump --son $SON 2>&1 | tee /tmp/log_dump.txt | tail -2
           sha256sum /tmp/katman.pkl | tee /tmp/katman_sha.txt
           python3 -I scripts/printful/ornament_sade.py --katman /tmp/katman.pkl --cikti /tmp/sade 2>&1 | tee /tmp/log_sade.txt | tail -2 || true
+          python3 -I scripts/printful/ornament_fildisi.py /tmp/SADE_1.png $U/CANCER_LIBRA_FILDISI_954.png 2>&1 | tee /tmp/log_fildisi.txt
           for r in RUBY SAPPHIRE EMERALD; do cp /tmp/motor/CANCER_LIBRA_${r}_954.png $U/; done
-          for r in BEIGE AGED_PAPYRUS; do cp /tmp/son/CANCER_LIBRA_${r}_954.png $U/; done
           cp /tmp/sade/SADE_1_ALTIN_TONU_954.png $U/CANCER_LIBRA_SADE_ALTIN_954.png
           ls -la $U
-      - name: Kapi (piksel piksel) + paket
+      - name: Kapi (ham piksel, tolerans) + paket
         id: kapi
         run: |
           set -uo pipefail
           ON=/tmp/onayli; mkdir -p $ON; cd s
-          for r in RUBY SAPPHIRE EMERALD; do git show e5412718:docs/ornament/ornek/ORNAMENT_ORNEK_20261103_ALTIN_MOTOR/CANCER_LIBRA_${r}_954.png > $ON/CANCER_LIBRA_${r}_954.png; done
-          for r in BEIGE AGED_PAPYRUS; do git show a5e3ea2:docs/ornament/ornek/ORNAMENT_ORNEK_20261103_SON/STIL3_SON/CANCER_LIBRA_${r}_954.png > $ON/CANCER_LIBRA_${r}_954.png; done
-          git show 029a670d:docs/ornament/ornek/ORNAMENT_SADE_8/SADE_1_ALTIN_TONU_954.png > $ON/CANCER_LIBRA_SADE_ALTIN_954.png
-          git show 029a670d:docs/ornament/ornek/ORNAMENT_SADE_8/MOCKUP_1.jpg > /tmp/MOCKUP_1.jpg
+          for r in RUBY SAPPHIRE EMERALD SADE_ALTIN FILDISI; do git show $ONAY_COMMIT:$O5/CANCER_LIBRA_${r}_954.png > $ON/CANCER_LIBRA_${r}_954.png; done
+          git show $ONAY_COMMIT:$O5/ONIZLEME_76mm_5STIL.png > /tmp/ONIZLEME_76mm_5STIL.png
           D=ORNAMENT_SON_$(date -u +%Y%m%d_%H%M); echo "D=$D" >> "$GITHUB_ENV"
           python3 - <<PY
           import json, subprocess
-          b = dict(kosu='${GITHUB_RUN_ID}', dal_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(), motor_commit='${MOTOR_COMMIT}',
-                   tek_doku_commit='${TEK_DOKU_COMMIT}', paket=open('/tmp/paket.txt').read(), katman_pkl=open('/tmp/katman_sha.txt').read().strip(),
-                   katman_pkl_yerel_bilgi='yerel sade4/motor_katman.pkl (OLCUM SADE_8 karar.katman alaninda sha)', girdi_sha=open('/tmp/girdi_sha.txt').read())
+          b = dict(kosu='${GITHUB_RUN_ID}', dal_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(), onay_commit='${ONAY_COMMIT}',
+                   motor_commit='${MOTOR_COMMIT}', tek_doku_commit='${TEK_DOKU_COMMIT}', paket=open('/tmp/paket.txt').read(),
+                   katman_pkl=open('/tmp/katman_sha.txt').read().strip(), girdi_sha=open('/tmp/girdi_sha.txt').read())
           json.dump(b, open('/tmp/bilgi.json', 'w'), indent=1, ensure_ascii=False)
           PY
-          python3 -I scripts/printful/ornament_son_uretim.py --uretim /tmp/uretim --onayli $ON --mockup /tmp/MOCKUP_1.jpg --kaynak /tmp/kay \
+          python3 -I scripts/printful/ornament_son_uretim.py --uretim /tmp/uretim --onayli $ON --onizleme /tmp/ONIZLEME_76mm_5STIL.png \
             --cikti /tmp/$D --bilgi /tmp/bilgi.json 2>&1 | tee /tmp/log_kapi.txt
           k=${PIPESTATUS[0]}; echo "k=$k" >> "$GITHUB_OUTPUT"
+          [ "$k" = 0 ] && cp /tmp/girdi_sha.txt /tmp/$D/GIRDI_SHA256.txt
           echo "::notice::kapi cikis $k | $(tail -1 /tmp/log_kapi.txt)"
       - name: Drive (yalniz kapi PASS)
         if: steps.kapi.outputs.k == '0'
@@ -132,22 +142,22 @@ jobs:
           else echo "::warning::eski STIL3_SON bulunamadi" | tee /tmp/drive_eski.txt; fi
           rclone lsf "$ESKI" --dirs-only | tee -a /tmp/drive_eski.txt
           ID=$(rclone lsjson gdrive:ASTROLOVE/TEMP --dirs-only | python3 -c "import json,sys; print([d['ID'] for d in json.load(sys.stdin) if d['Name']=='$D'][0])")
-          echo "https://drive.google.com/drive/folders/$ID" | tee /tmp/drive_link.txt
+          echo "$D https://drive.google.com/drive/folders/$ID" | tee /tmp/drive_link.txt
           rclone ls "gdrive:ASTROLOVE/TEMP/$D" | tee -a /tmp/drive_link.txt
-          echo "::notice::Drive TEMP/$D https://drive.google.com/drive/folders/$ID"
-      - name: Dal (log + OLCUM + ONIZLEME; PNG kopyasi yok)
+          echo "::notice::Drive TEMP/$D id $ID"
+      - name: Dal (log + OLCUM; PNG kopyasi yok)
         if: always()
         run: |
           set -euo pipefail
           G=s/docs/ornament/ornek/${D:-ORNAMENT_SON_HATA}; mkdir -p $G
           cp /tmp/log_*.txt /tmp/girdi_sha.txt /tmp/paket.txt $G/ 2>/dev/null || true
           cp /tmp/drive_*.txt $G/ 2>/dev/null || true
-          [ -n "${D:-}" ] && cp /tmp/$D/OLCUM.json /tmp/$D/ONIZLEME_76mm_6RENK.png $G/ 2>/dev/null || true
+          [ -n "${D:-}" ] && cp /tmp/$D/OLCUM.json $G/ 2>/dev/null || true
           cd s && git config user.name "astrolove-bot" && git config user.email "astrolove-bot@users.noreply.github.com"
           git add docs/ornament/ornek
           DIS=$(git diff --cached --name-only | grep -v '^docs/ornament/ornek/' || true)
           [ -z "$DIS" ] || { echo "::error::izinli klasor disi: $DIS"; exit 1; }
-          git commit -qm "ornament son uretim (kosu ${GITHUB_RUN_ID}): kapi cikis ${{ steps.kapi.outputs.k }}" && git push -q origin "HEAD:${DAL}"
+          git commit -qm "ornament son uretim 5 stil (kosu ${GITHUB_RUN_ID}): kapi cikis ${{ steps.kapi.outputs.k }}" && git push -q origin "HEAD:${DAL}"
       - if: always()
         run: rm -rf ~/.config/rclone
       - name: Sonuc

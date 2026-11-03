@@ -1,2 +1,3 @@
-ORNAMENT SON URETIM tetik (Serdar 3 Kas, karar 22): 6 renk, Actions yeniden uretim + piksel kapisi + Drive TEMP/ORNAMENT_SON_<damga>/.
-1. tetik: 2026-11-03T13:09Z
+ORNAMENT SON URETIM tetik (Serdar 3 Kas, karar 25): 5 stil, Actions yeniden uretim + ham piksel tolerans kapisi + Drive TEMP/ORNAMENT_SON_<damga>/.
+1. tetik: 2026-11-03 (6 renk, kapi FAIL, Drive yok)
+2. tetik: 2026-11-03T15:55Z (5 stil)

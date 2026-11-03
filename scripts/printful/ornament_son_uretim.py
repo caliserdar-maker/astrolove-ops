@@ -1,41 +1,36 @@
 #!/usr/bin/env python3
-"""ORNAMENT SON URETIM (Serdar 3 Kas, karar 22): 6 renk, Actions'ta yeniden uretilen PNG'lerin onayli PNG'lerle PIKSEL PIKSEL karsilastirmasi.
-Onayli kaynaklar (is akisi git show ile cikarir):
-  RUBY, SAPPHIRE, EMERALD : ALTIN_MOTOR deneme 4, e5412718 (kontur yok)
-  BEIGE, AGED_PAPYRUS     : STIL3_SON, a5e3ea2
-  SADE ALTIN              : SADE_1_ALTIN_TONU_954.png, 029a670d (seffaf zemin, RGBA)
-Kapi (Merkez 3 Kas, secenek A): her PNG'de ayni mod ve boyut 954 x 954, en buyuk fark <= 1 seviye ve farkli piksel <= 10 (SADE'de alfa dahil).
-  Gerekce: kosu 41641826870 ayni girdi / paket surumleriyle AMD EPYC'de 1-2 piksel 1 seviye fark verdi (yerel Intel Xeon'da 6/6 bayt ayni).
-PASS'ta cikti klasorune ONAYLI PNG'lerin kendisi yazilir (Actions ciktisi yeniden uretilebilirlik kaniti): 6 PNG (CANCER_LIBRA_<RENK>_954.png),
-ONIZLEME_76mm_6RENK.png, MOCKUP_1.jpg (Printful, SADE_1), OLCUM.json.
-Kullanim: ornament_son_uretim.py --uretim DIR --onayli DIR --mockup JPG --kaynak DIR --cikti DIR --bilgi JSON"""
+"""ORNAMENT SON URETIM, 5 STIL (Serdar 3 Kas, karar 25): Actions'ta yeniden uretilen PNG'lerin onayli PNG'lerle HAM PIKSEL karsilastirmasi.
+Onayli kaynak: dal ornament-printful-katalog 6daab364, docs/ornament/ornek/ORNAMENT_5STIL_20261103_1539/ (is akisi git show ile cikarir):
+  RUBY, SAPPHIRE, EMERALD : eliptik zemin (ON_OLCUM_ELIPS, 6322d66b) + ALTIN_MOTOR deneme 4 ogeler (kontur yok)
+  SADE ALTIN              : SADE_1_ALTIN_TONU_954.png (029a670d), seffaf RGBA
+  FILDISI                 : scripts/printful/ornament_fildisi.py birebir (girdi SADE_1); ham piksel sha256 ea47a57f... (Merkez)
+Kapi (Merkez 3 Kas, A): her PNG'de ayni mod ve boyut 954 x 954, ham pikselde en buyuk fark <= 1 seviye ve farkli piksel <= 10 (alfa dahil);
+  PNG sha farki sayilmaz. PASS'ta cikti klasorune ONAYLI PNG'lerin kendisi + ONIZLEME_76mm_5STIL.png (onayli) + OLCUM.json yazilir.
+Kullanim: ornament_son_uretim.py --uretim DIR --onayli DIR --onizleme PNG --cikti DIR --bilgi JSON"""
 import argparse
 import hashlib
-import importlib.util
 import json
 import shutil
 import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageFont
+from PIL import Image
 
-_d = Path(__file__).resolve().parent
-_s = importlib.util.spec_from_file_location('son', _d / 'ornament_son.py'); son = importlib.util.module_from_spec(_s); _s.loader.exec_module(son)
-RENKLER = ('RUBY', 'SAPPHIRE', 'EMERALD', 'BEIGE', 'AGED_PAPYRUS', 'SADE_ALTIN')
-KAYNAK_COMMIT = {'RUBY': 'e5412718', 'SAPPHIRE': 'e5412718', 'EMERALD': 'e5412718', 'BEIGE': 'a5e3ea2', 'AGED_PAPYRUS': 'a5e3ea2',
-                 'SADE_ALTIN': '029a670d'}
+RENKLER = ('RUBY', 'SAPPHIRE', 'EMERALD', 'SADE_ALTIN', 'FILDISI')
+KAYNAK_COMMIT = {r: '6daab364' for r in RENKLER}
+FILDISI_HAM = 'ea47a57f49ec73af4b9606dd3c5636f97f0121f1ac10305630c76431409f952b'
 sha = lambda f: hashlib.sha256(Path(f).read_bytes()).hexdigest()
 TOL_SEVIYE, TOL_PIKSEL = 1, 10
 
 
 def main():
     ap = argparse.ArgumentParser()
-    for k in ('uretim', 'onayli', 'mockup', 'kaynak', 'cikti', 'bilgi'):
+    for k in ('uretim', 'onayli', 'onizleme', 'cikti', 'bilgi'):
         ap.add_argument('--' + k, required=True)
     a = ap.parse_args()
     U, ON, O = Path(a.uretim), Path(a.onayli), Path(a.cikti); O.mkdir(parents=True, exist_ok=True)
-    R = dict(karar='Serdar 3 Kas, karar 22: 6 renk kesin; RUBY / SAPPHIRE / EMERALD deneme 4 kontursuz, BEIGE / AGED_PAPYRUS STIL3_SON, SADE ALTIN seffaf',
+    R = dict(karar='Serdar 3 Kas, karar 25: 5 stil kesin (RUBY, SAPPHIRE, EMERALD eliptik; SADE ALTIN; FILDISI KREM); BEIGE ve AGED_PAPYRUS cikti',
              bilgi=json.loads(Path(a.bilgi).read_text()), karsilastirma={})
     hepsi = True
     for renk in RENKLER:
@@ -47,28 +42,21 @@ def main():
         n = int((au != ao).any(-1).sum()) if ayni_mod else None
         ok = bool(ayni_mod and fark <= TOL_SEVIYE and n <= TOL_PIKSEL and au.shape[:2] == (954, 954))
         hepsi &= ok
+        ham = lambda x: hashlib.sha256(np.ascontiguousarray(x).tobytes()).hexdigest()
         R['karsilastirma'][renk] = dict(onayli_commit=KAYNAK_COMMIT[renk], mod=u.mode, boyut=list(au.shape), en_buyuk_fark=fark, farkli_piksel=n,
-                                        uretim_sha256=sha(U / f), onayli_sha256=sha(ON / f), piksel_ayni=ok)
+                                        uretim_sha256=sha(U / f), onayli_sha256=sha(ON / f), uretim_ham_piksel_sha256=ham(au), onayli_ham_piksel_sha256=ham(ao),
+                                        tolerans_icinde=ok)
+        if renk == 'FILDISI':
+            R['karsilastirma'][renk]['merkez_ham_piksel_sha256'] = FILDISI_HAM
+            R['karsilastirma'][renk]['onayli_merkez_ham_ayni'] = ham(ao) == FILDISI_HAM
         print(f'{renk:13s} mod {u.mode} {au.shape} en buyuk fark {fark} farkli piksel {n} -> {"PASS" if ok else "FAIL"}', flush=True)
     R['kapi'] = dict(tanim=f'en buyuk fark <= {TOL_SEVIYE} seviye ve farkli piksel <= {TOL_PIKSEL} (Merkez 3 Kas, A)', pass_=bool(hepsi))
     R['drive_dosyasi'] = 'onayli PNG (git), Actions ciktisi degil'
     if hepsi:
-        liste, et = [], []
         for renk in RENKLER:
             f = f'CANCER_LIBRA_{renk}_954.png'
             shutil.copyfile(ON / f, O / f)                                  # onayli dosyanin kendisi
-            im = Image.open(O / f)
-            if im.mode == 'RGBA':                                         # seffaf: onizlemede beyaz seramik uzerinde
-                b = Image.new('RGB', im.size, (255, 255, 255)); b.paste(im, (0, 0), im); arr = np.asarray(b)
-                et.append(f'SADE ALTIN (seffaf zemin)\nonizleme beyaz seramik uzerinde\nonayli {KAYNAK_COMMIT[renk]}')
-            else:
-                arr = np.asarray(im.convert('RGB')); et.append(f'{renk}\nonayli {KAYNAK_COMMIT[renk]}')
-            liste.append(arr)
-        font = ImageFont.truetype(str(Path(a.kaynak) / 'EBGaramond-Italic.ttf'), 24)
-        son.onizleme_etiketli(liste, et, font, h_et=110).save(O / 'ONIZLEME_76mm_6RENK.png', dpi=(300, 300))
-        shutil.copyfile(a.mockup, O / 'MOCKUP_1.jpg')
-        R['mockup'] = dict(dosya='MOCKUP_1.jpg', kaynak='Printful v2 mockup, kosu 41629499594, stil 26418 Flat Front, SADE_1 (71a17026 = 029a670d bayt ayni)',
-                           sha256=sha(O / 'MOCKUP_1.jpg'))
+        shutil.copyfile(a.onizleme, O / 'ONIZLEME_76mm_5STIL.png')
         R['cikti_sha256'] = {p.name: sha(p) for p in sorted(O.iterdir()) if p.suffix in ('.png', '.jpg')}
     (O / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False))
     print(f'KAPI (fark <= {TOL_SEVIYE}, piksel <= {TOL_PIKSEL})', 'PASS' if hepsi else 'FAIL', flush=True)
