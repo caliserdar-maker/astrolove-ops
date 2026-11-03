@@ -24,7 +24,10 @@ DESEN = [("premium", "en", re.compile(r"\bpremium\b", re.I)),
          ("long-lasting", "en", re.compile(r"\blong[\s-]?lasting\b", re.I)),
          ("премиал/премиум", "ru", re.compile(r"преми(?:ал|ум)\w*", re.I)),
          ("стойк", "ru", re.compile(r"стойк\w*", re.I)),
-         ("долговеч", "ru", re.compile(r"долговеч\w*", re.I))]
+         ("долговеч", "ru", re.compile(r"долговеч\w*", re.I)),
+         ("free preview", "en", re.compile(r"\bfree\s+preview", re.I)),
+         ("бесплатный макет/превью", "ru", re.compile(r"бесплатн\w*\s+(?:макет|предпросмотр|превью|просмотр)\w*", re.I))]
+TUM_KISISEL = os.environ.get("TUM_KISISEL") == "1"   # kuru-poster-yd dali (Merkez 3 Kas): tum aktif ilanlarda kisisellestirme sorulari
 BURC = re.compile(r"\b(Aries|Taurus|Gemini|Cancer|Leo|Virgo|Libra|Scorpio|Sagittarius|Capricorn|Aquarius|Pisces)\b", re.I)
 
 
@@ -82,7 +85,7 @@ def calis(api, shop, out, poster, yd, tahmin_kapi=True):
         j = api.get("/listings/batch", params={"listing_ids": ",".join(ids[i:i + 100]), "includes": "Images,Translations"}) or {}
         for x in j.get("results") or []:
             L[str(x["listing_id"])] = x
-    satir, poster_g, yd_k, ru_kaynak, tr_bicim = [], [], {}, {"batch": 0, "tekil": 0, "yok": 0}, {}
+    satir, poster_g, yd_k, ru_kaynak, tr_bicim, birlesik = [], [], {}, {"batch": 0, "tekil": 0, "yok": 0}, {}, {}
     for lid in ids:
         x = L.get(lid) or {}
         g, cift = grup(lid, x, poster, yd)
@@ -120,17 +123,22 @@ def calis(api, shop, out, poster, yd, tahmin_kapi=True):
                 poster_g.append(dict(listing_id=lid, cift=cift, rank=k.get("rank"), listing_image_id=k.get("listing_image_id"),
                                      alt_text=k.get("alt_text") or ""))
         pers = None
-        if g == "yd78":
+        if g == "yd78" or TUM_KISISEL:
             pers = api.get(f"/listings/{lid}/personalization", ok404=True)
+        if g == "yd78":
             yd_k[lid] = dict(cift=cift, is_personalizable=x.get("is_personalizable"),
                              personalization_is_required=x.get("personalization_is_required"),
                              personalization_char_count_max=x.get("personalization_char_count_max"),
                              personalization_instructions=x.get("personalization_instructions"), sorular=pers,
                              ru_personalization=ru.get("personalization_instructions") if ru else None)
-            for metin in (json.dumps(pers, ensure_ascii=False) if pers else "",):
-                for ad, _, n in eslesmeler(metin):
-                    satir.append(dict(listing_id=lid, grup=g, cift=cift, alan="kisisellestirme_sorulari", dil="EN/RU", ifade=ad,
-                                      adet=n, gorsel_id=""))
+        for metin in (json.dumps(pers, ensure_ascii=False) if pers else "",):
+            for ad, _, n in eslesmeler(metin):
+                satir.append(dict(listing_id=lid, grup=g, cift=cift, alan="kisisellestirme_sorulari", dil="EN/RU", ifade=ad,
+                                  adet=n, gorsel_id=""))
+        if g in ("poster78", "yd78"):
+            birlesik.setdefault(g, {})[lid] = dict(cift=cift, state=x.get("state"), title=x.get("title"), description=x.get("description"),
+                                                   tags=x.get("tags"), ru=dict(title=ru.get("title"), description=ru.get("description"),
+                                                   tags=ru.get("tags")), personalization=pers, last_modified_timestamp=x.get("last_modified_timestamp"))
         (out / "HAM" / f"{lid}.json").write_text(json.dumps(dict(
             listing_id=lid, grup=g, cift=cift, state=x.get("state"), title=x.get("title"), description=x.get("description"),
             tags=x.get("tags"), materials=x.get("materials"), personalization_instructions=x.get("personalization_instructions"),
@@ -143,6 +151,8 @@ def calis(api, shop, out, poster, yd, tahmin_kapi=True):
     with open(out / "POSTER_GORSEL.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["listing_id", "cift", "rank", "listing_image_id", "alt_text"])
         w.writeheader(); w.writerows(poster_g)
+    for g_, d_ in birlesik.items():   # yedek: canli EN + RU aciklama / baslik / etiket / kisisellestirme (grup basina tek dosya)
+        (out / f"YEDEK_{g_.upper()}.json").write_text(json.dumps(d_, ensure_ascii=False, indent=1), encoding="utf-8")
     (out / "YD_KISISEL.json").write_text(json.dumps(yd_k, ensure_ascii=False, indent=1), encoding="utf-8")
     gs = {}
     for lid in ids:
