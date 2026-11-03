@@ -56,6 +56,26 @@ def main():
     for m, ad in baglam.items():
         b = bul(m)
         k(f"BAGLAM uyarisi: {m!r}", any(x[0] == "BAGLAM" and x[1].startswith(ad) for x in b) and not any(x[0] == "KESIN" for x in b), b)
+    # baglam izinleri (Serdar 3 Kas, cevap 2 ve 5): poster78 aciklamasinda 300 dpi; yd78 aciklama + alt metinde free preview
+    POSTER, YD, KUPA = "4570143815", "4595350971", "4598525642"
+    k_ = lambda m, path, alan="description": E.metin_yasak_kapisi("PATCH", path, data={alan: m})
+    k("ilan grubu: poster78 / yd78 / diger", E.ilan_grubu(POSTER) == "poster78" and E.ilan_grubu(YD) == "yd78" and E.ilan_grubu(KUPA) == "")
+    k("PASS: poster aciklamasi 300 dpi (EN)", k_("- High resolution: 300 dpi at the full size", f"/shops/1/listings/{POSTER}") == [])
+    k("PASS: poster RU ceviri 300 dpi", k_("Высокое разрешение: 300 dpi", f"/listings/{POSTER}/translations/ru") == [])
+    k("FAIL: kupa aciklamasi 300 dpi uyarir", any(x[1].startswith("300 dpi") for x in k_("300 dpi", f"/shops/1/listings/{KUPA}")))
+    k("FAIL: poster gorsel alt metni 300 dpi uyarir (kart yasagi surer)",
+      any(x[1].startswith("300 dpi") for x in E.metin_yasak_kapisi("POST", f"/shops/1/listings/{POSTER}/images", data={"alt_text": "300 dpi"})))
+    k("FAIL: poster baslik 300 dpi uyarir", any(x[1].startswith("300 dpi") for x in k_("300 dpi print", f"/shops/1/listings/{POSTER}", "title")))
+    k("PASS: YD aciklamasi free preview", k_("FREE PREVIEW BEFORE YOU ORDER. We will send you a free preview", f"/shops/1/listings/{YD}") == [])
+    k("PASS: YD alt metni free preview",
+      E.metin_yasak_kapisi("POST", f"/shops/1/listings/{YD}/images", data={"alt_text": "Free preview process card"}) == [])
+    k("FAIL: poster aciklamasi free preview uyarir", any(x[1].startswith("free preview") for x in k_("We send a free preview via Etsy", f"/shops/1/listings/{POSTER}")))
+    k("FAIL: poster RU 'бесплатно отправляем макет' uyarir (aradaki kelime)",
+      any(x[1].startswith("free preview") for x in k_("Мы бесплатно отправляем макет через", f"/listings/{POSTER}/translations/ru")))
+    k("PASS: 'бесплатно заменим' (hasar degisimi) uyarmaz", k_("мы бесплатно заменим постер", f"/listings/{POSTER}/translations/ru") == [])
+    k("FAIL: izin KESIN'i kapsamaz (YD aciklamasi premium)", any(x[0] == "KESIN" for x in k_("premium paper", f"/shops/1/listings/{YD}")))
+    k("PASS: poster aciklamasi yeni metin (premium'suz, free'siz) temiz", k_(
+      "- We send a preview via Etsy Messages within 24 hours.\n- Printed on matte art paper\n- High resolution: 300 dpi", f"/shops/1/listings/{POSTER}") == [])
     # mod
     try:
         bul("premium paper", mod="UYARI"); uy = True
