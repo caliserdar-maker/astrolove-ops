@@ -1,20 +1,21 @@
-# Printful 900 maliyet (salt okuma)
+# Printful 900 Circle (varyant 23133) maliyet, salt okuma
 
-yol: shipping-rates + urun fiyati + KDV yardim sayfasi (orders/read yok)
+Kosu 41672511992 (3 Kas). Siparis / taslak olusturulmadi (estimate-costs cagrilmadi: token orders/read yetkisizi).
+Urun fiyati USD 7.73 (Avrupa EUR 6.95, v2 katalog). KDV: dogrulanamadi (yardim sayfasi 404/403, API yetkisi yok).
 
-| ulke | urun (1 adet) | kargo 1 adet | ek adet kargo | KDV / vergi satiri | toplam 1 adet | toplam 2 adet | kaynak |
-|---|---|---|---|---|---|---|---|
-| US | 0.00 | 5.89 | 0.7 | API'de yok (yardim sayfasi asagida) | - | - | API shipping/rates (HTTP 200/200), katalog fiyati |
-| CA | 0.00 | 9.89 | 1.99 | API'de yok (yardim sayfasi asagida) | - | - | API shipping/rates (HTTP 200/200), katalog fiyati |
-| GB | 0.00 | 9.89 | 1.99 | API'de yok (yardim sayfasi asagida) | - | - | API shipping/rates (HTTP 200/200), katalog fiyati |
-| DE | 0.00 | 9.89 | 1.99 | API'de yok (yardim sayfasi asagida) | - | - | API shipping/rates (HTTP 200/200), katalog fiyati |
-| FR | 0.00 | 9.89 | 1.99 | API'de yok (yardim sayfasi asagida) | - | - | API shipping/rates (HTTP 200/200), katalog fiyati |
-| NL | 0.00 | 9.89 | 1.99 | API'de yok (yardim sayfasi asagida) | - | - | API shipping/rates (HTTP 200/200), katalog fiyati |
-| IT | 0.00 | 9.89 | 1.99 | API'de yok (yardim sayfasi asagida) | - | - | API shipping/rates (HTTP 200/200), katalog fiyati |
-| ES | 0.00 | 9.89 | 1.99 | API'de yok (yardim sayfasi asagida) | - | - | API shipping/rates (HTTP 200/200), katalog fiyati |
-| AU | 0.00 | 9.89 | 1.99 | API'de yok (yardim sayfasi asagida) | - | - | API shipping/rates (HTTP 200/200), katalog fiyati |
-| NZ | 0.00 | 9.89 | 1.99 | API'de yok (yardim sayfasi asagida) | - | - | API shipping/rates (HTTP 200/200), katalog fiyati |
-| JP | 0.00 | 9.89 | 1.99 | API'de yok (yardim sayfasi asagida) | - | - | API shipping/rates (HTTP 200/200), katalog fiyati |
-| CH | 0.00 | 9.89 | 1.99 | API'de yok (yardim sayfasi asagida) | - | - | API shipping/rates (HTTP 200/200), katalog fiyati |
-| NO | 0.00 | 9.89 | 1.99 | API'de yok (yardim sayfasi asagida) | - | - | API shipping/rates (HTTP 200/200), katalog fiyati |
-| TR | 0.00 | 9.89 | 1.99 | API'de yok (yardim sayfasi asagida) | - | - | API shipping/rates (HTTP 200/200), katalog fiyati |
+| ulke | urun (1 adet) | kargo 1 adet (STANDARD) | ek adet kargo | KDV / vergi satiri | kaynak |
+|---|---|---|---|---|---|
+| US | 7.73 USD | 5.89 USD | 0.70 USD | dogrulanamadi | kargo: API POST /shipping/rates (kosu 41672511992, HTTP 200); urun: API v1/v2 katalog (2 Kas) |
+| CA | 7.73 USD | 9.89 USD | 1.99 USD | dogrulanamadi | kargo: API POST /shipping/rates (kosu 41672511992, HTTP 200); urun: API v1/v2 katalog (2 Kas) |
+| GB | 7.73 USD | 9.89 USD | 1.99 USD | dogrulanamadi | kargo: API POST /shipping/rates (kosu 41672511992, HTTP 200); urun: API v1/v2 katalog (2 Kas) |
+| DE | 7.73 USD | 9.89 USD | 1.99 USD | dogrulanamadi | kargo: API POST /shipping/rates (kosu 41672511992, HTTP 200); urun: API v1/v2 katalog (2 Kas) |
+| FR | 7.73 USD | 9.89 USD | 1.99 USD | dogrulanamadi | kargo: API POST /shipping/rates (kosu 41672511992, HTTP 200); urun: API v1/v2 katalog (2 Kas) |
+| NL | 7.73 USD | 9.89 USD | 1.99 USD | dogrulanamadi | kargo: API POST /shipping/rates (kosu 41672511992, HTTP 200); urun: API v1/v2 katalog (2 Kas) |
+| IT | 7.73 USD | 9.89 USD | 1.99 USD | dogrulanamadi | kargo: API POST /shipping/rates (kosu 41672511992, HTTP 200); urun: API v1/v2 katalog (2 Kas) |
+| ES | 7.73 USD | 9.89 USD | 1.99 USD | dogrulanamadi | kargo: API POST /shipping/rates (kosu 41672511992, HTTP 200); urun: API v1/v2 katalog (2 Kas) |
+| AU | 7.73 USD | 9.89 USD | 1.99 USD | dogrulanamadi | kargo: API POST /shipping/rates (kosu 41672511992, HTTP 200); urun: API v1/v2 katalog (2 Kas) |
+| NZ | 7.73 USD | 9.89 USD | 1.99 USD | dogrulanamadi | kargo: API POST /shipping/rates (kosu 41672511992, HTTP 200); urun: API v1/v2 katalog (2 Kas) |
+| JP | 7.73 USD | 9.89 USD | 1.99 USD | dogrulanamadi | kargo: API POST /shipping/rates (kosu 41672511992, HTTP 200); urun: API v1/v2 katalog (2 Kas) |
+| CH | 7.73 USD | 9.89 USD | 1.99 USD | dogrulanamadi | kargo: API POST /shipping/rates (kosu 41672511992, HTTP 200); urun: API v1/v2 katalog (2 Kas) |
+| NO | 7.73 USD | 9.89 USD | 1.99 USD | dogrulanamadi | kargo: API POST /shipping/rates (kosu 41672511992, HTTP 200); urun: API v1/v2 katalog (2 Kas) |
+| TR | 7.73 USD | 9.89 USD | 1.99 USD | dogrulanamadi | kargo: API POST /shipping/rates (kosu 41672511992, HTTP 200); urun: API v1/v2 katalog (2 Kas) |

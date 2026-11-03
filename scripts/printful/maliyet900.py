@@ -104,7 +104,7 @@ def main():
     dokuman(R)
     st, d = pf('GET', '/oauth/scopes')
     sc = sonuc(d) or {}
-    scopes = [s.get('value') for s in sc.get('scopes', [])] if isinstance(sc, dict) else []
+    scopes = [s.get('scope') or s.get('value') for s in sc.get('scopes', [])] if isinstance(sc, dict) else []   # Printful anahtari 'scope' (kosu 41672511992)
     R['yetki'] = dict(http=st, scopes=scopes, ham=d)
     print('yetki', st, scopes, flush=True)
     kod = 0

@@ -387,7 +387,11 @@
     ]
    },
    "extra": []
-  }
+  },
+  "scopes_duzeltilmis": [
+   "sync_products/read",
+   "file_library/read"
+  ]
  },
  "yol": "shipping-rates + urun fiyati + KDV yardim sayfasi (orders/read yok)",
  "urun": {
@@ -406,5 +410,17 @@
    "http": 403
   }
  ],
- "kdv_sayfasi": "dogrulanamadi (sayfa acilmadi)"
+ "kdv_sayfasi": "dogrulanamadi (sayfa acilmadi)",
+ "urun_fiyati": {
+  "usd": 7.73,
+  "eur_avrupa": 6.95,
+  "kaynak": "Printful API v1 /products/900 varyant fiyati 7.73 + v2 catalog prices (sublimation: USD 7.73, EUR Avrupa 6.95); kayit docs/ornament/PRINTFUL_ORNAMENT.csv (2 Kas); bu kosuda GET /products/variant/23133 fiyat 0.00 dondu (bilgi)"
+ },
+ "kdv": {
+  "sonuc": "dogrulanamadi",
+  "neden": "help.printful.com makale 360014008620: Zendesk API 404, HTML 403 (Actions kosusu 41672511992)",
+  "api": "orders/read yetkisi yok (token scopes: sync_products/read, file_library/read) -> estimate-costs denenmedi; KDV satiri API ile alinamadi"
+ },
+ "dokuman_bilgi": "developers.printful.com/docs/ Actions'ta acildi (HTTP 200); /orders/estimate-costs ucu ve \"Calculate shipping rates\" bolumu sayfada var; shipping rates notu: estimate-costs magaza kargo ayarlarini uygular, shipping/rates uygulamaz",
+ "duzeltme_not": "kosu ciktisinda scopes [None, None] ayristirma hatasi (anahtar scope); yol secimi yine dogru (orders/read yok). Tablo urun sutunu kayitli fiyatla duzeltildi."
 }
