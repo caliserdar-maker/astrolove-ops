@@ -48,7 +48,12 @@ AD_MOTOR = {'kucuk_sol': 'kucuk1', 'kucuk_sag': 'kucuk2', 'sonsuz': 'sonsuz', 'i
 TEMIZ_OGE = ('kucuk_sol', 'kucuk_sag', 'sonsuz')
 KUCUK_OGE = ('isim1', 'isim2', 'tarih', 'sonsuz', 'kucuk_sol', 'kucuk_sag', 'halka')   # gorev tanimi: kucuk ogeler halka dahil (inceleme bulgu 3)
 MOTOR_DOSYA = ('KILIT_GPTGIRDI.json', 'golge_motor.py', 'vektor_yuzey.py', 'alfa_temizle.py', 'uret_tam.py', 'renk_uyum.py', 'olustur_alfa_sablon.py',
-               'kure/k4.npy', 'palet/chatgpt_altin.png', 'yerlesim78.json', 'cember.json', 'girdi78/ana/cancer_libra_alfa.png')
+               'kure/k4.npy', 'palet/chatgpt_altin.png', 'yerlesim78.json', 'cember.json')
+# 78 cift (karar 28): kucuk burc poster yuksekligi = KUCUK_1/2 sprite kirpim yuksekligi (olustur_alfa_sablon, 6da763a; >8 kirpim, poster px);
+# ornament hedef = sprite x C (cancer / libra kalibrasyon ortalamasi); CANCER ve LIBRA onayli degerlerle aynen (351 / 363, referans degismesin)
+SPRITE_H = {'AQUARIUS': 381, 'ARIES': 615, 'CANCER': 594, 'CAPRICORN': 700, 'GEMINI': 614, 'LEO': 614, 'LIBRA': 615, 'PISCES': 613,
+            'SAGITTARIUS': 658, 'SCORPIO': 615, 'TAURUS': 612, 'VIRGO': 683}
+SPRITE_C = (351 / 594 + 363 / 615) / 2
 P_VARSAYILAN = dict(pah=0.6, k=0.8, karisim=0.0, g=0.5, gs=60, golge_sigma=12, golge_dx=6, golge_dy=10, golge_opak=0.55, m1=0.0, m2=0.0, poz=1.0,
                     pah_px=0.0, kubbe=0.0, kure='studio2', mot_yer='Y', esit='goz', temas=0.0, zemin_daire=0, sarma=0.0, arka_isik=0.0, renk_ayar=0.0,
                     kararma=0.0, yansima=0.0, isima=0.0, isima_sigma=30.0, gren=0.0, kenar_yum=0.0, egim_max=0.0, pah_oran_max=0.0, ton=0.0, yildiz='t5',
@@ -61,6 +66,7 @@ def main():
     ap.add_argument('--motor', required=True)
     ap.add_argument('--cikti', required=True)
     ap.add_argument('--son', required=True)
+    ap.add_argument('--cift', default='CANCER_LIBRA', help='alfabetik cift anahtari (karar 28); isim1 / sol kucuk burc = ilk burc')
     ap.add_argument('--zemin', default=None, help='KOYU_G1 (Serdar 3 Kas): koyu zemin dosyalari bu klasorden (ad ayni: RUBY_1264.png ...); kaynak sha kontrolu degismez')
     a = ap.parse_args()
     K_, MD, O, SON = Path(a.kaynak), Path(a.motor), Path(a.cikti), Path(a.son)
@@ -71,7 +77,10 @@ def main():
     ortam['PALET_KAYNAK'] = str(MD / 'palet' / 'chatgpt_altin.png')   # KILIT'teki /home/claude/blender/palet/chatgpt_altin.png ile ayni dosya (sha raporda)
     os.environ.update(ortam)
     P = dict(P_VARSAYILAN); P.update(KL['AYAR'])
-    motor_sha = {f: sha(MD / f) for f in MOTOR_DOSYA}
+    CIFT = a.cift.upper(); B1, B2 = CIFT.split('_')
+    assert '_'.join(sorted([B1, B2])) == CIFT, f'cift anahtari alfabetik degil: {CIFT}'
+    POSTER_ALFA = f'girdi78/ana/{CIFT.lower()}_alfa.png'
+    motor_sha = {f: sha(MD / f) for f in MOTOR_DOSYA + (POSTER_ALFA,)}
     log('KILIT ortam', json.dumps(ortam)); log('KILIT AYAR', json.dumps(KL['AYAR'])); log('P', json.dumps(P))
     log('motor sha', json.dumps({k: v[:16] for k, v in motor_sha.items()}))
     assert P['g'] == 0 and P['m1'] == 0 and P['m2'] == 0 and P['parilti'] == 0 and P['isik_leke'] == 0 and P['ton'] == 0 and P['esit'] == 'kazanc' \
@@ -156,8 +165,8 @@ def main():
     def kirp8(x):
         ys, xs = np.nonzero(x > 8)
         return x[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
-    src = kirp8(np.asarray(Image.open(MD / 'girdi78' / 'ana' / 'cancer_libra_alfa.png')).astype(np.float32))
-    Yl = json.loads((MD / 'yerlesim78.json').read_text())['CANCER_LIBRA']
+    src = kirp8(np.asarray(Image.open(MD / POSTER_ALFA)).astype(np.float32))
+    Yl = json.loads((MD / 'yerlesim78.json').read_text())[CIFT]
     Cm = json.loads((MD / 'cember.json').read_text())['cember']
     sp = (Cm['cx'] + Yl['u1'] * Cm['R'] - (Cm['cx'] + Yl['u0'] * Cm['R'])) / src.shape[1]
     tpa = np.clip(cv2.resize(src, None, fx=sp, fy=sp, interpolation=cv2.INTER_AREA if sp < 1 else cv2.INTER_CUBIC), 0, 255).astype(np.uint8)
@@ -183,7 +192,8 @@ def main():
     spec = importlib.util.spec_from_file_location('tek_doku', K_ / 'tek_doku.py')
     td = importlib.util.module_from_spec(spec); spec.loader.exec_module(td)
     pp = o4.poster_profil(K_ / 'HALKA_BLUE_16x20.png')
-    ana0 = np.asarray(Image.open(K_ / 'CANCER_LIBRA_ana.png').convert('RGBA'), np.float32); ana0[..., 3] /= 255.0
+    ANA_DOSYA = K_ / f'{CIFT}_ana.png'
+    ana0 = np.asarray(Image.open(ANA_DOSYA).convert('RGBA'), np.float32); ana0[..., 3] /= 255.0
     ana0 = o1.kirp(ana0, ana0[..., 3], pad=2)
     if ana0.shape[1] > 1600:
         r_, a_ = o1.rgba_olcek(ana0, 1600 / ana0.shape[1]); ana0 = np.dstack([r_, a_])
@@ -213,11 +223,49 @@ def main():
         return np.clip(cv2.resize(lsrc, sz, interpolation=cv2.INTER_AREA if kk <= 1 else cv2.INTER_CUBIC), 0, 1)
     T = dict(isim1=o1.metin_alfa('EMILY', K_ / 'Cinzel.ttf', cap, 500), isim2=o1.metin_alfa('JAMES', K_ / 'Cinzel.ttf', cap, 500),
              tarih=o1.metin_alfa('14 JUNE 2025', K_ / 'EBGaramond-Italic.ttf', Pc['tagline_T'] / Pc['cap'] * cap, None, ref='T'), sonsuz=logo(), cap=cap)
-    kc = {'sol': kucuk('cancer', Pc['kucuk_sol_h'] / Pc['cap']), 'sag': kucuk('libra', Pc['kucuk_sag_h'] / Pc['cap'])}
+    def h_oran(b):
+        if b == 'CANCER':
+            return Pc['kucuk_sol_h'] / Pc['cap']
+        if b == 'LIBRA':
+            return Pc['kucuk_sag_h'] / Pc['cap']
+        return SPRITE_H[b] * SPRITE_C / Pc['cap']
+    kc = {'sol': kucuk(B1.lower(), h_oran(B1)), 'sag': kucuk(B2.lower(), h_oran(B2))}
+    KUCUK_H = {'sol': (B1, round(h_oran(B1) * Pc['cap'], 2)), 'sag': (B2, round(h_oran(B2) * Pc['cap'], 2))}
+    # karar 28: ana sembol CANCER_LIBRA kutusuna (genislik hedefi, yukseklik = CANCER_LIBRA en / boy) orani bozulmadan sigar; buyutme yok
+    if CIFT != 'CANCER_LIBRA':
+        _cl = np.asarray(Image.open(K_ / 'CANCER_LIBRA_ana.png').convert('RGBA'), np.float32); _cl[..., 3] /= 255.0
+        _cl = o1.kirp(_cl, _cl[..., 3], pad=2)
+        if _cl.shape[1] > 1600:
+            _r, _a = o1.rgba_olcek(_cl, 1600 / _cl.shape[1]); _cl = np.dstack([_r, _a])
+        _cl, _ = o5.delik_kapat(_cl)
+        _b = o1.bbox(_cl[..., 3], 0.5); ORAN_CL = (_b[3] - _b[1]) / (_b[2] - _b[0])
+        _orj = o3.sembol_yerlestir
+
+        def sembol_kutu(ana, w_hedef, cx, cy):
+            x0, y0, x1, y1 = o1.bbox(ana[..., 3], 0.5)
+            olc_ = min(w_hedef / (x1 - x0), w_hedef * ORAN_CL / (y1 - y0))
+            KUTU_BILGI.update(w_hedef=round(float(w_hedef), 2), h_hedef=round(float(w_hedef * ORAN_CL), 2), olcek=round(float(olc_), 5),
+                              sinir='genislik' if olc_ == w_hedef / (x1 - x0) else 'yukseklik', buyutme=bool(olc_ > 1))
+            rgb_, a_ = o1.rgba_olcek(ana, olc_)
+            bb_ = o1.bbox(a_, 0.5)
+            return (rgb_, a_, int(round(cx - (bb_[0] + bb_[2]) / 2)), int(round(cy - (bb_[1] + bb_[3]) / 2)))
+        o3.sembol_yerlestir = sembol_kutu
+        o5.o3.sembol_yerlestir = sembol_kutu
+    KUTU_BILGI = {}
     ha, hb = o5.halka_T(pp, son.S0)
     Y, bilgi = o5.yerlesim_V5(pp, ana5, T, kc, ha, hb, G)
     if Y is None:
-        log('FAIL yerlesim'); return 1
+        log('FAIL yerlesim', bilgi); return 1
+    if CIFT != 'CANCER_LIBRA':                                                # alt kenar kucuk burc satirinin G px ustu (bosluk 20/20/20)
+        E_ = Y['E']; k0 = o5.satir(E_, o5.KUCUK)[0]; s4 = o5.kutu(E_, 'sembol'); dy = (k0 - G) - s4[3]
+        o5.kaydir(E_, ('sembol',), dy)
+        M_, yb_, cak_, ok_ = o4.kapi(E_)
+        bilgi.update(sembol_alt_hizalama_dy=int(dy), kapi_ok=bool(ok_), kutu=KUTU_BILGI)
+        if not ok_:
+            log('FAIL yerlesim (alt hizalama sonrasi kapi)', yb_, cak_[:4]); return 1
+        Y.update(M=M_, yasak=yb_, cak=cak_)
+    bilgi['kucuk_burc_hedef_h_poster_px'] = KUCUK_H
+    log('yerlesim', CIFT, bilgi, 'sembol kutu', o5.kutu(Y['E'], 'sembol'))
     model = son.model_kur(td, Y)
 
     # --- 1 10x alfalar (kaynaktan) ---
@@ -262,7 +310,7 @@ def main():
     def logo10(ad):
         h, w = Y['E'][ad][1].shape
         return np.clip(cv2.resize(lsrc, (w * K10, h * K10), interpolation=cv2.INTER_CUBIC), 0, 1)
-    for ad, src10 in (('sonsuz', logo10('sonsuz')), ('kucuk_sol', kucuk10('cancer', 'kucuk_sol')), ('kucuk_sag', kucuk10('libra', 'kucuk_sag'))):
+    for ad, src10 in (('sonsuz', logo10('sonsuz')), ('kucuk_sol', kucuk10(B1.lower(), 'kucuk_sol')), ('kucuk_sag', kucuk10(B2.lower(), 'kucuk_sag'))):
         a8 = np.clip(np.round(src10 * 255), 0, 255).astype(np.uint8)
         q = 40; t8, b_ = temizle(np.pad(a8, q)); temiz_bilgi[ad] = b_
         A10[ad], hiz[ad] = cerceve10(t8[q:-q, q:-q].astype(np.float32) / 255, Y['E'][ad][1], ad)
@@ -536,7 +584,7 @@ def main():
                     break
         r['kucuk_oge_parlaklik_artisi'] = round(artis, 2)
         R['sonuc'][renk] = r; rgbler[renk] = rgb
-        o1.kaydet(rgb, O / f'CANCER_LIBRA_{renk}_954.png')
+        o1.kaydet(rgb, O / f'{CIFT}_{renk}_954.png')
         log(renk, 'ortanca', r['kontrast_ortanca_en_kotu'], 'kati', r['kati_koyu5_en_kotu_bilgi'], 'artis', artis, 'yasak', sum(r['goruntu_yasak'].values()),
             'leke', sum(v['alfa_lt_09'] for k2, v in r['leke'].items() if k2 in o5.LEKE_KAPI_OGE), 'halka', r['halka_sureklilik']['oran'],
             {k: v.get('ortanca_bilgi') for k, v in r['kontrast'].items()})
@@ -549,7 +597,9 @@ def main():
             et.append(f'{renk}: motor (k4 kure, KILIT)\nortanca {r["kontrast_ortanca_en_kotu"]} {"PASS" if r["kontrast_ortanca_en_kotu"] >= 4.5 else "FAIL"}, koyu %5 {r["kati_koyu5_en_kotu_bilgi"]}\n'
                       f'dE00 son dosya (ham) en cok {max(r["dE00_son_ham"].values())} {"PASS" if max(r["dE00_son_ham"].values()) <= 2.0 else "FAIL"}, halka govde {r["halka_sureklilik"]["oran"]}\nkucuk oge parlaklik x{r["kucuk_oge_parlaklik_artisi"]}')
         else:
-            liste.append(np.asarray(Image.open(SON / f'CANCER_LIBRA_{renk}_954.png').convert('RGB'))); et.append(f'{renk}: a5e3ea2 (onayli, aynen)')
+            if not (SON / f'{CIFT}_{renk}_954.png').exists():
+                continue
+            liste.append(np.asarray(Image.open(SON / f'{CIFT}_{renk}_954.png').convert('RGB'))); et.append(f'{renk}: a5e3ea2 (onayli, aynen)')
     son.onizleme_etiketli(liste, et, font, h_et=130).save(O / 'ONIZLEME_76mm_5RENK.png', dpi=(300, 300))
     # YAKIN_DOKU: her oge poster olceginde (10x motor cizimi, zeminsiz, notr koyu zemin; ana: poster katmani) | ornament 954 (3x)
     zem_g = np.array([28, 30, 36], np.float32)
@@ -563,7 +613,7 @@ def main():
         orn = Image.fromarray(rgbler['RUBY']).crop(bx); orn = orn.resize((orn.width * 3, orn.height * 3), Image.NEAREST)
         if ad == 'ana':
             sx_, sy_ = (bx[0] - xS) / aS.shape[1], (bx[1] - yS) / aS.shape[0]
-            g0 = np.asarray(Image.open(K_ / 'CANCER_LIBRA_ana.png').convert('RGBA'), np.float32)
+            g0 = np.asarray(Image.open(ANA_DOSYA).convert('RGBA'), np.float32)
             g0 = o1.kirp(g0, g0[..., 3] / 255, pad=2)
             fx = g0.shape[1] / aS.shape[1]
             x0_, y0_ = int((bx[0] - xS) * fx), int((bx[1] - yS) * fx)
