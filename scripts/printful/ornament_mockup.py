@@ -57,8 +57,10 @@ def stiller(d):
         if blok.get('placement') != 'front':
             continue
         for s in blok.get('mockup_styles', []):
-            out.append(dict(id=s.get('id'), kategori=s.get('category_name'), gorunum=s.get('view_name'), teknik=blok.get('technique')))
-    return [s for s in out if s['id'] is not None]
+            out.append(dict(id=s.get('id'), kategori=s.get('category_name'), gorunum=s.get('view_name'), teknik=blok.get('technique'),
+                            varyant=s.get('restricted_to_variants') or []))
+    # deneme 1 (kosu 41626773407): diger varyantlarin stilleri 400 verdi; yalniz 23133'e ait (ya da kisitsiz) ve on gorunum
+    return [s for s in out if s['id'] is not None and (not s['varyant'] or VARYANT in s['varyant']) and (s['gorunum'] or '').lower() == 'front']
 
 
 def main():
