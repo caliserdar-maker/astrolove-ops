@@ -82,12 +82,19 @@ def calis(api, shop, out, poster, yd, tahmin_kapi=True):
         j = api.get("/listings/batch", params={"listing_ids": ",".join(ids[i:i + 100]), "includes": "Images,Translations"}) or {}
         for x in j.get("results") or []:
             L[str(x["listing_id"])] = x
-    satir, poster_g, yd_k, ru_kaynak = [], [], {}, {"batch": 0, "tekil": 0, "yok": 0}
+    satir, poster_g, yd_k, ru_kaynak, tr_bicim = [], [], {}, {"batch": 0, "tekil": 0, "yok": 0}, {}
     for lid in ids:
         x = L.get(lid) or {}
         g, cift = grup(lid, x, poster, yd)
         ru = None
-        for t in (x.get("translations") or []):
+        tr = x.get("translations")
+        adaylar = []
+        if isinstance(tr, dict):            # {"ru": {...}} ya da tek ceviri nesnesi
+            adaylar = [dict(v, language=v.get("language", k)) for k, v in tr.items() if isinstance(v, dict)] or [tr]
+        elif isinstance(tr, list):
+            adaylar = [t for t in tr if isinstance(t, dict)]
+        tr_bicim[type(tr).__name__] = tr_bicim.get(type(tr).__name__, 0) + 1
+        for t in adaylar:
             if str(t.get("language", "")).lower().startswith("ru"):
                 ru = t
         if ru is not None:
@@ -144,7 +151,7 @@ def calis(api, shop, out, poster, yd, tahmin_kapi=True):
     ilan_es = {}
     for s in satir:
         ilan_es.setdefault(s["grup"], set()).add(s["listing_id"])
-    oz = dict(aktif=len(ids), grup=gs, ru_kaynak=ru_kaynak, eslesme_satiri=len(satir),
+    oz = dict(aktif=len(ids), grup=gs, ru_kaynak=ru_kaynak, ceviri_bicim=tr_bicim, eslesme_satiri=len(satir),
               eslesen_ilan={k: len(v) for k, v in ilan_es.items()}, istek=api.calls, kota_son=api.remaining)
     (out / "OZET.json").write_text(json.dumps(oz, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"::notice::PREMIUM TARA: aktif {len(ids)} {gs} | eslesen ilan {oz['eslesen_ilan']} | ru {ru_kaynak} | "
