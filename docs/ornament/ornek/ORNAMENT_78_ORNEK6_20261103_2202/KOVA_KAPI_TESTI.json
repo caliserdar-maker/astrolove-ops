@@ -1,0 +1,141 @@
+{
+ "kaynak": "/tmp/kay/aquarius_symbol_gold.png",
+ "boyut": [
+  4501,
+  10817
+ ],
+ "kenara_degen_murekkep": {
+  "ust": true,
+  "alt": true
+ },
+ "ham_onarim_oncesi_yeni_pay_bilgi": 0,
+ "bilinen_pass_mevcut_kaynak": {
+  "yeni_pay": {
+   "leke_px": 0,
+   "bilesen": [],
+   "tanim": {
+    "kapanis": 61,
+    "ice_px": 34,
+    "kenar_payi": 66,
+    "kucuk_delik_alan_esigi": 494248
+   }
+  },
+  "eski_pay_24": {
+   "leke_px": 445,
+   "bilesen": [
+    {
+     "x": 8348,
+     "y": 0,
+     "w": 48,
+     "h": 2,
+     "alan": 73
+    },
+    {
+     "x": 8398,
+     "y": 0,
+     "w": 5,
+     "h": 1,
+     "alan": 5
+    },
+    {
+     "x": 8452,
+     "y": 0,
+     "w": 39,
+     "h": 2,
+     "alan": 55
+    },
+    {
+     "x": 5122,
+     "y": 4500,
+     "w": 37,
+     "h": 1,
+     "alan": 37
+    },
+    {
+     "x": 5161,
+     "y": 4500,
+     "w": 193,
+     "h": 1,
+     "alan": 193
+    },
+    {
+     "x": 5355,
+     "y": 4500,
+     "w": 30,
+     "h": 1,
+     "alan": 30
+    },
+    {
+     "x": 5393,
+     "y": 4500,
+     "w": 52,
+     "h": 1,
+     "alan": 52
+    }
+   ],
+   "tanim": {
+    "kapanis": 61,
+    "ice_px": 34,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 494248
+   }
+  }
+ },
+ "bilinen_fail_leke_ic": {
+  "merkez": [
+   3300,
+   673
+  ],
+  "yaricap": 18,
+  "yeni_pay": {
+   "leke_px": 1009,
+   "bilesen": [
+    {
+     "x": 3282,
+     "y": 655,
+     "w": 37,
+     "h": 37,
+     "alan": 1009
+    }
+   ],
+   "tanim": {
+    "kapanis": 61,
+    "ice_px": 34,
+    "kenar_payi": 66,
+    "kucuk_delik_alan_esigi": 494248
+   }
+  }
+ },
+ "bilinen_fail_leke_kenar_40px": {
+  "merkez": [
+   8427,
+   40
+  ],
+  "yaricap": 18,
+  "yeni_pay": {
+   "leke_px": 704,
+   "bilesen": [
+    {
+     "x": 8409,
+     "y": 34,
+     "w": 37,
+     "h": 25,
+     "alan": 704
+    }
+   ],
+   "tanim": {
+    "kapanis": 61,
+    "ice_px": 34,
+    "kenar_payi": 66,
+    "kucuk_delik_alan_esigi": 494248
+   }
+  }
+ },
+ "sonuc": {
+  "bilinen_pass_PASS_verdi": true,
+  "bilinen_fail_ic_FAIL_verdi": true,
+  "bilinen_fail_kenar_FAIL_verdi": true,
+  "test_gecti": true,
+  "not_": "kapi sert degeri onarim (delik_kapat) sonrasi olculur; ham kaynaktaki ic leke onarimla kapanir (V5 davranisi, degismedi)"
+ }
+}

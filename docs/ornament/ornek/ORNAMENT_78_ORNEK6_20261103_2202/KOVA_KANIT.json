@@ -1,0 +1,294 @@
+{
+ "cift": "AQUARIUS_PISCES",
+ "oge": "kucuk_sol",
+ "kaynak_boyut": [
+  4501,
+  10817
+ ],
+ "eski_pay": {
+  "tanim": {
+   "kapanis": 61,
+   "ice_px": 34,
+   "kenar_payi": 24,
+   "kucuk_delik_alan_esigi": 494248
+  },
+  "leke_px": 445,
+  "bilesen": [
+   {
+    "x": 8348,
+    "y": 0,
+    "w": 48,
+    "h": 2,
+    "alan": 73
+   },
+   {
+    "x": 8398,
+    "y": 0,
+    "w": 5,
+    "h": 1,
+    "alan": 5
+   },
+   {
+    "x": 8452,
+    "y": 0,
+    "w": 39,
+    "h": 2,
+    "alan": 55
+   },
+   {
+    "x": 5122,
+    "y": 4500,
+    "w": 37,
+    "h": 1,
+    "alan": 37
+   },
+   {
+    "x": 5161,
+    "y": 4500,
+    "w": 193,
+    "h": 1,
+    "alan": 193
+   },
+   {
+    "x": 5355,
+    "y": 4500,
+    "w": 30,
+    "h": 1,
+    "alan": 30
+   },
+   {
+    "x": 5393,
+    "y": 4500,
+    "w": 52,
+    "h": 1,
+    "alan": 52
+   }
+  ],
+  "kenar_satirinda": {
+   "ust_y_le_2": 133,
+   "alt_y_ge_H_3": 312,
+   "toplam": 445
+  }
+ },
+ "yeni_pay": {
+  "tanim": {
+   "kapanis": 61,
+   "ice_px": 34,
+   "kenar_payi": 66,
+   "kucuk_delik_alan_esigi": 494248
+  },
+  "leke_px": 0
+ },
+ "esleme_954": {
+  "oge_kutu": [
+   282,
+   693,
+   370,
+   730
+  ],
+  "kaynak_murekkep_kutu": [
+   0,
+   0,
+   10817,
+   4501
+  ],
+  "olcek": [
+   0.008135,
+   0.00822
+  ],
+  "benzersiz_954_piksel": 7,
+  "bolge_piksel_3x3": 33
+ },
+ "kanit": {
+  "cikti_leke_bolgede": 0,
+  "cikti_leke_oge_toplam": 0,
+  "oge_kenarina_uzaklik_px": {
+   "en_buyuk": 1.0,
+   "ortanca": 1.0
+  },
+  "kaynak_son_alfa_farki_bolge": {
+   "ortalama": 0.009,
+   "en_buyuk": 0.093
+  },
+  "stil_luma_bilgi": {
+   "RUBY": {
+    "bolge_murekkep_px": 18,
+    "oge_luma_p1_p99": [
+     99.8,
+     217.1
+    ],
+    "bolge_luma_min_max": [
+     133.7,
+     182.0
+    ],
+    "aralik_disi_px": 0
+   },
+   "SAPPHIRE": {
+    "bolge_murekkep_px": 18,
+    "oge_luma_p1_p99": [
+     99.2,
+     217.1
+    ],
+    "bolge_luma_min_max": [
+     132.7,
+     182.0
+    ],
+    "aralik_disi_px": 0
+   },
+   "EMERALD": {
+    "bolge_murekkep_px": 18,
+    "oge_luma_p1_p99": [
+     99.5,
+     217.1
+    ],
+    "bolge_luma_min_max": [
+     133.3,
+     182.0
+    ],
+    "aralik_disi_px": 0
+   },
+   "SADE_ALTIN": {
+    "bolge_murekkep_px": 18,
+    "oge_luma_p1_p99": [
+     99.2,
+     204.3
+    ],
+    "bolge_luma_min_max": [
+     134.7,
+     171.0
+    ],
+    "aralik_disi_px": 0
+   },
+   "FILDISI": {
+    "bolge_murekkep_px": 18,
+    "oge_luma_p1_p99": [
+     105.4,
+     217.1
+    ],
+    "bolge_luma_min_max": [
+     143.3,
+     182.0
+    ],
+    "aralik_disi_px": 0
+   }
+  },
+  "kanit_var": true,
+  "tanim": "kanit_var = bolgede cikti leke (leke_ic, alfa < 0.9) 0 VE tum eslenen noktalar oge kenarinda (murekkep disina uzaklik <= 2 px = leke_ic ice payi). Uzaklik kucukse piksel kenar yumusatmasidir, ic delik degil."
+ },
+ "kor_bant": {
+  "oge": {
+   "AQUARIUS_PISCES/kucuk_sol/AQUARIUS": {
+    "kaynak_W": 10817,
+    "kenar_payi": 66,
+    "pay_degisti": true,
+    "ice_px_kaynak": 34,
+    "bant_954_px": 0.279,
+    "bant_mm": 0.0223,
+    "murekkep_kenara_degiyor": true
+   },
+   "AQUARIUS_PISCES/kucuk_sag/PISCES": {
+    "kaynak_W": 1296,
+    "kenar_payi": 24,
+    "pay_degisti": false,
+    "ice_px_kaynak": 4,
+    "bant_954_px": 0.192,
+    "bant_mm": 0.0153,
+    "murekkep_kenara_degiyor": true
+   },
+   "ARIES_ARIES/kucuk_sol/ARIES": {
+    "kaynak_W": 1299,
+    "kenar_payi": 24,
+    "pay_degisti": false,
+    "ice_px_kaynak": 4,
+    "bant_954_px": 0.2,
+    "bant_mm": 0.0159,
+    "murekkep_kenara_degiyor": true
+   },
+   "ARIES_ARIES/kucuk_sag/ARIES": {
+    "kaynak_W": 1299,
+    "kenar_payi": 24,
+    "pay_degisti": false,
+    "ice_px_kaynak": 4,
+    "bant_954_px": 0.2,
+    "bant_mm": 0.0159,
+    "murekkep_kenara_degiyor": true
+   },
+   "CANCER_LIBRA/kucuk_sol/CANCER": {
+    "kaynak_W": 1167,
+    "kenar_payi": 24,
+    "pay_degisti": false,
+    "ice_px_kaynak": 4,
+    "bant_954_px": 0.229,
+    "bant_mm": 0.0183,
+    "murekkep_kenara_degiyor": true
+   },
+   "CANCER_LIBRA/kucuk_sag/LIBRA": {
+    "kaynak_W": 1448,
+    "kenar_payi": 24,
+    "pay_degisti": false,
+    "ice_px_kaynak": 5,
+    "bant_954_px": 0.277,
+    "bant_mm": 0.022,
+    "murekkep_kenara_degiyor": true
+   },
+   "CAPRICORN_SAGITTARIUS/kucuk_sol/CAPRICORN": {
+    "kaynak_W": 1171,
+    "kenar_payi": 24,
+    "pay_degisti": false,
+    "ice_px_kaynak": 4,
+    "bant_954_px": 0.238,
+    "bant_mm": 0.0189,
+    "murekkep_kenara_degiyor": true
+   },
+   "CAPRICORN_SAGITTARIUS/kucuk_sag/SAGITTARIUS": {
+    "kaynak_W": 1057,
+    "kenar_payi": 24,
+    "pay_degisti": false,
+    "ice_px_kaynak": 3,
+    "bant_954_px": 0.136,
+    "bant_mm": 0.0109,
+    "murekkep_kenara_degiyor": true
+   },
+   "GEMINI_VIRGO/kucuk_sol/GEMINI": {
+    "kaynak_W": 1213,
+    "kenar_payi": 24,
+    "pay_degisti": false,
+    "ice_px_kaynak": 4,
+    "bant_954_px": 0.188,
+    "bant_mm": 0.015,
+    "murekkep_kenara_degiyor": true
+   },
+   "GEMINI_VIRGO/kucuk_sag/VIRGO": {
+    "kaynak_W": 1189,
+    "kenar_payi": 24,
+    "pay_degisti": false,
+    "ice_px_kaynak": 4,
+    "bant_954_px": 0.222,
+    "bant_mm": 0.0177,
+    "murekkep_kenara_degiyor": true
+   },
+   "LEO_SCORPIO/kucuk_sol/LEO": {
+    "kaynak_W": 1031,
+    "kenar_payi": 24,
+    "pay_degisti": false,
+    "ice_px_kaynak": 3,
+    "bant_954_px": 0.15,
+    "bant_mm": 0.0119,
+    "murekkep_kenara_degiyor": true
+   },
+   "LEO_SCORPIO/kucuk_sag/SCORPIO": {
+    "kaynak_W": 1361,
+    "kenar_payi": 24,
+    "pay_degisti": false,
+    "ice_px_kaynak": 4,
+    "bant_954_px": 0.215,
+    "bant_mm": 0.0171,
+    "murekkep_kenara_degiyor": true
+   }
+  },
+  "pay_degisen_en_buyuk_954_px": 0.279,
+  "pay_degisen_en_buyuk_mm": 0.0222,
+  "ek_kontrol_gerekli": false,
+  "not_": "ana sembol kaynagi 1600 px (motor) -> pay 24 degismedi; yalniz pay degisen kaynaklar yeni kor bant"
+ }
+}

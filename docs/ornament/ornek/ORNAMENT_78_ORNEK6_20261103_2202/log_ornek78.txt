@@ -1,0 +1,18 @@
+[    0.0s] cift CANCER_LIBRA
+[  217.7s] CANCER_LIBRA yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.19, 'SAPPHIRE': 5.88, 'EMERALD': 5.46} dE00 {'RUBY': 0.756, 'SAPPHIRE': 0.86, 'EMERALD': 0.854} sembol [264, 246, 689, 650] uzaklik {'guvenli_disi': 8.6, 'delik': 49.0, 'ust_cizgi': 25.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  217.8s] KONTROL RUBY 1 1 PASS
+[  217.8s] KONTROL SAPPHIRE 1 1 PASS
+[  217.9s] KONTROL EMERALD 1 1 PASS
+[  218.0s] KONTROL SADE_ALTIN 1 1 PASS
+[  218.0s] KONTROL FILDISI 1 1 PASS
+[  218.0s] cift ARIES_ARIES
+[  438.3s] ARIES_ARIES yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.72, 'SAPPHIRE': 6.45, 'EMERALD': 5.99} dE00 {'RUBY': 0.557, 'SAPPHIRE': 0.622, 'EMERALD': 0.65} sembol [270, 249, 681, 652] uzaklik {'guvenli_disi': 8.6, 'delik': 92.7, 'ust_cizgi': 28.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  438.3s] cift CAPRICORN_SAGITTARIUS
+[  656.6s] CAPRICORN_SAGITTARIUS yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 6.27, 'SAPPHIRE': 7.22, 'EMERALD': 6.7} dE00 {'RUBY': 0.4, 'SAPPHIRE': 0.522, 'EMERALD': 0.436} sembol [316, 237, 637, 641] uzaklik {'guvenli_disi': 8.6, 'delik': 43.9, 'ust_cizgi': 16.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  656.6s] cift AQUARIUS_PISCES
+[  882.4s] AQUARIUS_PISCES yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 6.18, 'SAPPHIRE': 7.03, 'EMERALD': 6.54} dE00 {'RUBY': 0.748, 'SAPPHIRE': 0.742, 'EMERALD': 0.661} sembol [322, 250, 631, 652] uzaklik {'guvenli_disi': 8.6, 'delik': 113.6, 'ust_cizgi': 28.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  882.4s] cift GEMINI_VIRGO
+[ 1106.3s] GEMINI_VIRGO yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 7.45, 'SAPPHIRE': 8.55, 'EMERALD': 7.93} dE00 {'RUBY': 1.383, 'SAPPHIRE': 1.372, 'EMERALD': 1.378} sembol [269, 246, 683, 644] uzaklik {'guvenli_disi': 8.6, 'delik': 129.4, 'ust_cizgi': 23.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[ 1106.3s] cift LEO_SCORPIO
+[ 1326.2s] LEO_SCORPIO yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.06, 'SAPPHIRE': 5.77, 'EMERALD': 5.39} dE00 {'RUBY': 0.899, 'SAPPHIRE': 1.025, 'EMERALD': 1.023} sembol [293, 247, 659, 650] uzaklik {'guvenli_disi': 8.6, 'delik': 53.2, 'ust_cizgi': 26.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[ 1333.4s] BITTI 30 PNG | cikis 0 {}

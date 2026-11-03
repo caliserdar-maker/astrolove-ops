@@ -1,0 +1,1 @@
+{"boyut": [4501, 10817], "pass_yeni": 0, "pass_eski24": 445, "fail_ic": 1009, "fail_kenar": 704, "ham_bilgi": 0, "sonuc": true}

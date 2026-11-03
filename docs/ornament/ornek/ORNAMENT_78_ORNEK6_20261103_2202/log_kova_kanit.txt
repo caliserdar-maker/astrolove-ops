@@ -1,0 +1,1 @@
+{"eski": 445, "yeni": 0, "kanit": true, "leke_bolge": 0, "uzaklik": {"en_buyuk": 1.0, "ortanca": 1.0}, "alfa_fark": {"ortalama": 0.009, "en_buyuk": 0.093}, "kor_bant_px": 0.279, "kor_bant_mm": 0.0222, "ek_kontrol": false}
