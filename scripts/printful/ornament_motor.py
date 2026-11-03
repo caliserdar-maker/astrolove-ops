@@ -365,6 +365,57 @@ def main():
         return np.clip(cc * kazanc * KAT.get(ad, 1.0), 0, 255)
     al.oge_renk = oge_renk_motor
     um = o5.uc_maske(pp, son.S0)
+    # --- deneme 3 (Merkez 3 Kas): ic golge oge yari kalinligina oranli; ana sembolde a114ddb ile ayni ---
+    from skimage.morphology import skeletonize
+
+    def yari_kal(a):
+        m = (a > 0.5).astype(np.uint8)
+        dt = cv2.distanceTransform(m, cv2.DIST_L2, cv2.DIST_MASK_PRECISE)
+        return float(np.median(dt[skeletonize(m > 0)]))
+    sx0_, _, sx1_, _ = o1.bbox(Y['E']['sembol'][1], 0.5); ax0_, _, ax1_, _ = o1.bbox(ana5[..., 3], 0.5)
+    D_ana = yari_kal(ana5[..., 3]) * (sx1_ - sx0_) / (ax1_ - ax0_)          # ana kaynak (1600 px) cozunurlugunde olculur, 954 pikseline cevrilir
+    YK = {'sembol': round(D_ana, 3)}
+    YK.update({ad: round(yari_kal(A10[ad]) / K10, 3) for ad in A10})        # 10x alfadan, 954 pikseline
+    IC0 = al.IC_GOLGE
+    ICP = {}
+    for ad in Y['E']:
+        r_ = min(1.0, YK[ad] / D_ana)
+        ICP[ad] = dict(oran=round(r_, 4), kayma=IC0['kayma'] * r_, sigma=IC0['sigma'] * r_, guc=IC0['guc'] * r_)
+    ICP_A114 = {ad: dict(oran=None, kayma=IC0['kayma'], sigma=IC0['sigma'], guc=IC0['ince'] if ad in al.INCE else IC0['guc']) for ad in Y['E']}
+    log('yari kalinlik (954 px)', YK); log('ic golge', {k: (v['oran'], round(v['guc'], 3)) for k, v in ICP.items()})
+
+    def f_dus_hesap(z):
+        """ornament_altin.boya_altin 2. adim ile ayni formul (alt 0.92, us 0.25, sigma 60)."""
+        zf = z.astype(np.float32)
+        Lz = cv2.GaussianBlur(lum(zf), (0, 0), al.DUSUS['sigma'])
+        yy, xx = np.mgrid[0:N, 0:N]
+        Lref = float(np.median(Lz[np.hypot(xx + 0.5 - CX, yy + 0.5 - CY) < 150]))
+        return np.clip((Lz / max(Lref, 1)) ** al.DUSUS['us'], al.DUSUS['alt'], 1.0)
+
+    def boya_motor(Y_, model_, z, td_, varyant, kazanc, icp):
+        """ornament_altin.boya_altin (a114ddb) ile ayni; tek fark: ic golge (kayma, sigma, guc) ogeye gore icp'den."""
+        M = Y_['M']
+        zf = z.astype(np.float32)
+        out = zf.copy()
+        tum = np.maximum.reduce([M[k] for k in M])
+        gm_ = cv2.GaussianBlur(tum, (0, 0), al.DIS_GOLGE['sigma'])
+        gm_ = cv2.warpAffine(gm_, np.float32([[1, 0, al.DIS_GOLGE['kayma']], [0, 1, al.DIS_GOLGE['kayma']]]), (N, N))
+        out = out * (1 - al.DIS_GOLGE['opak'] * gm_)[..., None]
+        f_dus = f_dus_hesap(z)
+        f_doku = np.ones((N, N), np.float32)
+        once = {}
+        sh = lambda a_, d: cv2.warpAffine(a_, np.float32([[1, 0, d], [0, 1, d]]), (N, N))
+        for ad in Y_['E']:
+            cc = al.oge_renk(Y_, model_, td_, ad, varyant, kazanc)
+            once[ad] = cc.copy()
+            m = M[ad]; q = icp[ad]
+            ic = cv2.GaussianBlur(np.clip(m - sh(m, q['kayma']), 0, 1), (0, 0), q['sigma']) * m
+            carpan = f_dus * f_doku * (1 - q['guc'] * ic)
+            cc = cc * carpan[..., None]
+            sat = cc.max(2, keepdims=True)
+            cc = np.where(sat > 255, cc * 255 / np.maximum(sat, 1e-3), cc)
+            out = out * (1 - m[..., None]) + cc * m[..., None]
+        return np.clip(np.round(out), 0, 255).astype(np.uint8), once
     # halka govdesi (T1: s >= 0.30)
     yy_, xx_ = np.mgrid[0:N, 0:N].astype(np.float32)
     angm = (np.degrees(np.arctan2(yy_ + 0.5 - cyh, xx_ + 0.5 - CX)) + 360) % 360
@@ -401,6 +452,12 @@ def main():
         m0 = Y['M']['sembol'] >= 0.9; Ls_ = lab_med(img, m0)
         return {k: round(de00(Ls_, lab_med(img, Y['M'][k] >= 0.9)), 3) for k in Y['E'] if k != 'sembol'}
 
+    def de_dusus(rgb, z):
+        """son dosya: dusus carpani (sRGB'de uygulanan tek skaler) bolunerek; oge ve ana sembol alfa >= 0.9 ortanca Lab dE00."""
+        fd = f_dus_hesap(z)
+        rb = np.clip(rgb.astype(np.float32) / fd[..., None], 0, 255)
+        return de_tablo(rb)
+
     def olc(rgb, once, z):
         onc = np.zeros((N, N, 3), np.float32)
         for k in Y['E']:
@@ -414,20 +471,25 @@ def main():
         return dict(kontrast_ortanca_en_kotu=round(min(v['ortanca_bilgi'] for v in kk), 2), kati_koyu5_en_kotu_bilgi=round(min(v['deger'] for v in kk), 2),
                     kontrast=ok, goruntu_yasak=gy, goruntu=gb, leke=o5.leke_kapisi(Y['M'], rgb, None), renk_sadakati=al.renk_sadakati(rgb, once, Y['M']),
                     ton_lab=s2.ton_kapisi(rgb, Y['M'], TON_REF), bosluk_px=o5.bosluklar(Y['E']), sembol_kutu=list(o5.kutu(Y['E'], 'sembol')),
-                    halka_sureklilik=sureklilik(rgb), dE00_butunlesme_oncesi=de_tablo(onc), dE00_son_dosya_bilgi=de_tablo(rgb))
+                    halka_sureklilik=sureklilik(rgb), dE00_butunlesme_oncesi=de_tablo(onc), dE00_son_dosya_bilgi=de_tablo(rgb), dE00_son_dusus_bolunmus=de_dusus(rgb, z))
     R = {'motor': dict(dal='siparis-gpt', commit='6da763a', dosya_sha256=motor_sha, KILIT_ortam=ortam, KILIT_AYAR=KL['AYAR'], P=P,
                        paketler=dict(numpy=np.__version__, opencv=cv2.__version__, pillow=Image.__version__,
-                                     not_='motor BENIOKU: numpy 2.5.3, pillow 12.3.0; burada ornament hatti (Pillow 11.0.0) ile tek surec')),
+                                     not_='Pillow 11.0.0 kalir (Merkez 3 Kas): a114ddb maskeleri 11.0.0 ile uretildi; motor Pillow kutuphanesini yalniz okuma icin kullanir. Motor is akisi 12.3.0 / numpy 2.5.3 kurar')),
          'olcek': dict(k=K10, not_='tek tam sayi olcek; alfalar 10x kaynaktan; poster parametreleri (kenar_yum 0.5, YON_SIGMA 6, sirt 0.7, gren sigma 0.8) '
                                    'poster pikselinde ve 10x cizimde AYNEN (poster ogesi / ornament 10x orani: isim 298 / 282 = 1.06, halka 5695 / ' + str(H10.shape[1]) + ' = ' + str(round(5695 / H10.shape[1], 2)) + ')',
                        logo='LOGO_1 kaynagi 200 px yukseklik; 10x 282 px -> 1.41 buyutme (INTER_CUBIC); kaynak yetersiz', hizalama=hiz),
          'disarida': 'yansima, temas, isima, poster dis golgesi, zemin_daire (karar 18)', 'temizle': temiz_bilgi, 'iou_954': IOU, 'iou_954_bilgi': IOU_B, 'punto': PUNTO, 'gren': gren_olc,
          'renk_uyum': ru, 'yerlesim': bilgi, 'ton_referans_lab_p5_p95': [round(TON_REF[0], 1), round(TON_REF[1], 1)], 'sonuc': {}}
     rgbler = {}
+    oz_test = {}
     for renk, zf in al.RENKLER:
         z = o1.zemin_canva(K_ / zf)
         KAT.clear()
-        rgb, once = al.boya_altin(Y, model, z, td, 'G2', 1.0)
+        r0_, _ = al.boya_altin(Y, model, z, td, 'G2', 1.0); r1_, _ = boya_motor(Y, model, z, td, 'G2', 1.0, ICP_A114)
+        oz_test[renk] = bool(np.array_equal(r0_, r1_))                      # oz test: a114ddb ayariyla boya_motor == boya_altin (bayt)
+        if not oz_test[renk]:
+            log('FAIL oz test boya_motor', renk, int(np.abs(r0_.astype(int) - r1_).max())); return 4
+        rgb, once = boya_motor(Y, model, z, td, 'G2', 1.0, ICP)
         r = olc(rgb, once, z)
         artis = 1.0
         if r['kontrast_ortanca_en_kotu'] < o4.HEDEF:
@@ -438,7 +500,7 @@ def main():
             for k100 in range(101, 161):
                 artis = k100 / 100
                 KAT.clear(); KAT.update({k: artis for k in KUCUK_OGE})
-                rgb, once = al.boya_altin(Y, model, z, td, 'G2', 1.0)
+                rgb, once = boya_motor(Y, model, z, td, 'G2', 1.0, ICP)
                 r = olc(rgb, once, z)
                 if r['kontrast_ortanca_en_kotu'] >= o4.HEDEF:
                     break
@@ -455,7 +517,7 @@ def main():
             r = R['sonuc'][renk]
             liste.append(rgbler[renk])
             et.append(f'{renk}: motor (k4 kure, KILIT)\nortanca {r["kontrast_ortanca_en_kotu"]} {"PASS" if r["kontrast_ortanca_en_kotu"] >= 4.5 else "FAIL"}, koyu %5 {r["kati_koyu5_en_kotu_bilgi"]}\n'
-                      f'dE00 en cok {max(r["dE00_butunlesme_oncesi"].values())} (once), son dosya {max(r["dE00_son_dosya_bilgi"].values())}, halka govde {r["halka_sureklilik"]["oran"]}\nkucuk oge parlaklik x{r["kucuk_oge_parlaklik_artisi"]}')
+                      f'dE00 once {max(r["dE00_butunlesme_oncesi"].values())}, son (dusus bolunmus) {max(r["dE00_son_dusus_bolunmus"].values())} {"PASS" if max(r["dE00_son_dusus_bolunmus"].values()) <= 2.0 else "FAIL"}, halka govde {r["halka_sureklilik"]["oran"]}\nkucuk oge parlaklik x{r["kucuk_oge_parlaklik_artisi"]}')
         else:
             liste.append(np.asarray(Image.open(SON / f'CANCER_LIBRA_{renk}_954.png').convert('RGB'))); et.append(f'{renk}: a5e3ea2 (onayli, aynen)')
     son.onizleme_etiketli(liste, et, font, h_et=130).save(O / 'ONIZLEME_76mm_5RENK.png', dpi=(300, 300))
@@ -507,6 +569,15 @@ def main():
         c.paste(pim, (0, 0)); c.paste(orn, (pim.width + 24, 0))
         ImageDraw.Draw(c).text((4, max(pim.height, orn.height) + 4), yazi, fill=(20, 20, 20), font=font)
         satirlar.append(c)
+    kb = o5.kutu(Y['E'], 'kucuk_sol')
+    bx = (kb[0] - 12, kb[1] - 20 - 70, kb[2] + 60, kb[3] + 6)                       # kucuk burc + ustundeki ana sembol alt kismi
+    for renk in ('RUBY', 'SAPPHIRE', 'EMERALD'):
+        orn = Image.fromarray(rgbler[renk]).crop(bx); orn = orn.resize((orn.width * 3, orn.height * 3), Image.NEAREST)
+        yazi = f'{renk}: ana sembol (ust) ve kucuk burc (alt) ayni karede, 954 (3x)'
+        tw = int(ImageDraw.Draw(Image.new('RGB', (1, 1))).textlength(yazi, font=font)) + 12
+        c = Image.new('RGB', (max(orn.width, tw), orn.height + 36), 'white'); c.paste(orn, (0, 0))
+        ImageDraw.Draw(c).text((4, orn.height + 4), yazi, fill=(20, 20, 20), font=font)
+        satirlar.append(c)
     u = Image.new('RGB', (max(s.width for s in satirlar), sum(s.height for s in satirlar) + 24 * (len(satirlar) - 1)), 'white'); yy0 = 0
     for s in satirlar:
         u.paste(s, (0, yy0)); yy0 += s.height + 24
@@ -523,10 +594,18 @@ def main():
                  all(v['aralikta'] and v['b_ge_r_yuzde'] == 0 for r in A_ for v in r['ton_lab'].values()),
              halka_govde_sureklilik=all(r['halka_sureklilik']['oran'] >= 0.70 for r in A_),
              yerlesim_ayni=all(r['bosluk_px'] == [20, 20, 20] and r['sembol_kutu'][1] == 246 for r in A_),
-             iou_ge_098=all(v >= 0.98 for v in IOU.values()),
+             iou_kucuk_logo_ge_098=all(IOU[k] >= 0.98 for k in ('kucuk_sol', 'kucuk_sag', 'sonsuz')),
+             alfa_fark_metin_halka_le_0035=all(IOU_B[k]['ort_mutlak_fark_murekkep'] <= 0.035 for k in ('isim1', 'isim2', 'tarih', 'halka')),
+             dE00_son_dusus_bolunmus_le_2=all(max(r['dE00_son_dusus_bolunmus'].values()) <= 2.0 for r in A_),
              artis_yalniz_ruby=all(R['sonuc'][r]['kucuk_oge_parlaklik_artisi'] == 1.0 for r in ('SAPPHIRE', 'EMERALD')))
     g = {k: bool(v) for k, v in g.items()}
     R['kapi'] = g; R['kaynak_leke_onarim_sonrasi'] = dict(o5.KAYNAK_SONRA)
+    R['ic_golge'] = dict(yontem='kayma, sigma, guc = a114ddb (1.0, 0.6, 0.35) x min(1, D_oge / D_ana); D = iskelet uzerinde mesafe donusumu ortancasi '
+                                '(yari kalinlik, 954 px; ogeler 10x alfadan, ana 1600 px kaynaktan); INCE (0.15) listesi kullanilmaz',
+                         yari_kalinlik_954px=YK, oge=ICP, oz_test_a114ddb_bayt_ayni=oz_test)
+    R['dE00_son_yontem'] = ('son PNG / f_dus (boya_altin dusus carpani, sRGB tek skaler; alt 0.92, us 0.25 aynen) -> oge ve ana sembol alfa >= 0.9 '
+                            'pikselleri ortanca Lab -> CIEDE2000 (renk_uyum.py de00); kapi <= 2.0')
+    R['iou_kapi'] = 'kucuk_sol / kucuk_sag / sonsuz: IoU (alfa > 0.5) >= 0.98; isim / tarih / halka: IoU bilgi, kapi ort_mutlak_fark_murekkep (murekkep bolgesi: iki maskeden birinde alfa > 0.02) <= 0.035 (Merkez 3 Kas + onay)'
     (O / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=float))
     log('KAPI', json.dumps(g), 'PASS' if all(g.values()) else 'FAIL')
     return 0 if all(g.values()) else 1
