@@ -1,0 +1,64 @@
+{
+ "http": 400,
+ "govde": {
+  "format": "jpg",
+  "products": [
+   {
+    "source": "catalog",
+    "catalog_product_id": 900,
+    "catalog_variant_ids": [
+     23133
+    ],
+    "mockup_style_ids": [
+     26418,
+     26422,
+     26426,
+     26430,
+     26434,
+     26438,
+     26442,
+     26446,
+     26419,
+     26423,
+     26427,
+     26431,
+     26435,
+     26439,
+     26443,
+     26447,
+     26420,
+     26424,
+     26428,
+     26432,
+     26436,
+     26440,
+     26444,
+     26448,
+     26421,
+     26425,
+     26429,
+     26433,
+     26437,
+     26441,
+     26445,
+     26449
+    ],
+    "placements": [
+     {
+      "placement": "front",
+      "technique": "sublimation",
+      "layers": [
+       {
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/f6a0ac1ad15852afb8840959999a34b9435824a5/docs/ornament/ornek/ORNAMENT_SADE_8/SADE_1_KLASIK_ALTIN_954.png"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "yanit": {
+  "hata": "{\"data\":\"Following `style_ids`: 26419, 26423, 26427, 26431, 26435, 26439, 26443, 26447, 26420, 26424, 26428, 26432, 26436, 26440, 26444, 26448, 26421, 26425, 26429, 26433, 26437, 26441, 26445, 26449 are not available for catalog variant: 23133 with placements: front. Available `style_ids` are: 26414, 26418, 26422, 26426, 26430, 26434, 26438, 26442, 26446\",\"error\":{\"reason\":\"BadRequest\",\"message\":\"Following `style_ids`: 26419, 26423, 26427, 26431, 26435, 26439, 26443, 26447, 26420, 26424, 26428, 26432, 26436, 26440, 26444, 26448, 26421, 26425, 26429, 26433, 26437, 26441, 26445, 26449 are not available for catalog variant: 23133 with placements: front. Available `style_ids` are: 26414, 26418, 26422, 26426, 26430, 26434, 26438, 26442, 26446\"}}"
+ }
+}

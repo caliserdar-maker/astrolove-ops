@@ -1,0 +1,318 @@
+{
+ "http": 200,
+ "yanit": {
+  "data": [
+   {
+    "placement": "front",
+    "display_name": "2-Side print",
+    "technique": "sublimation",
+    "print_area_width": 3.18,
+    "print_area_height": 3.18,
+    "print_area_type": "simple",
+    "dpi": 300,
+    "mockup_styles": [
+     {
+      "id": 26418,
+      "category_name": "Flat",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23133
+      ]
+     },
+     {
+      "id": 26422,
+      "category_name": "Flat 2",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23133
+      ]
+     },
+     {
+      "id": 26426,
+      "category_name": "Lifestyle",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23133
+      ]
+     },
+     {
+      "id": 26430,
+      "category_name": "Lifestyle 2",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23133
+      ]
+     },
+     {
+      "id": 26434,
+      "category_name": "Flat",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23133
+      ]
+     },
+     {
+      "id": 26438,
+      "category_name": "Flat 2",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23133
+      ]
+     },
+     {
+      "id": 26442,
+      "category_name": "Lifestyle",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23133
+      ]
+     },
+     {
+      "id": 26446,
+      "category_name": "Lifestyle 2",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23133
+      ]
+     }
+    ]
+   },
+   {
+    "placement": "front",
+    "display_name": "2-Side print",
+    "technique": "sublimation",
+    "print_area_width": 3.26,
+    "print_area_height": 3.24,
+    "print_area_type": "simple",
+    "dpi": 300,
+    "mockup_styles": [
+     {
+      "id": 26419,
+      "category_name": "Flat",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23144
+      ]
+     },
+     {
+      "id": 26423,
+      "category_name": "Flat 2",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23144
+      ]
+     },
+     {
+      "id": 26427,
+      "category_name": "Lifestyle",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23144
+      ]
+     },
+     {
+      "id": 26431,
+      "category_name": "Lifestyle 2",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23144
+      ]
+     },
+     {
+      "id": 26435,
+      "category_name": "Flat",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23144
+      ]
+     },
+     {
+      "id": 26439,
+      "category_name": "Flat 2",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23144
+      ]
+     },
+     {
+      "id": 26443,
+      "category_name": "Lifestyle",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23144
+      ]
+     },
+     {
+      "id": 26447,
+      "category_name": "Lifestyle 2",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23144
+      ]
+     }
+    ]
+   },
+   {
+    "placement": "front",
+    "display_name": "2-Side print",
+    "technique": "sublimation",
+    "print_area_width": 3.4766666666666666,
+    "print_area_height": 3.32,
+    "print_area_type": "simple",
+    "dpi": 300,
+    "mockup_styles": [
+     {
+      "id": 26420,
+      "category_name": "Flat",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23151
+      ]
+     },
+     {
+      "id": 26424,
+      "category_name": "Flat 2",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23151
+      ]
+     },
+     {
+      "id": 26428,
+      "category_name": "Lifestyle",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23151
+      ]
+     },
+     {
+      "id": 26432,
+      "category_name": "Lifestyle 2",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23151
+      ]
+     },
+     {
+      "id": 26436,
+      "category_name": "Flat",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23151
+      ]
+     },
+     {
+      "id": 26440,
+      "category_name": "Flat 2",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23151
+      ]
+     },
+     {
+      "id": 26444,
+      "category_name": "Lifestyle",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23151
+      ]
+     },
+     {
+      "id": 26448,
+      "category_name": "Lifestyle 2",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23151
+      ]
+     }
+    ]
+   },
+   {
+    "placement": "front",
+    "display_name": "2-Side print",
+    "technique": "sublimation",
+    "print_area_width": 2.8833333333333333,
+    "print_area_height": 3.2,
+    "print_area_type": "simple",
+    "dpi": 300,
+    "mockup_styles": [
+     {
+      "id": 26421,
+      "category_name": "Flat",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23155
+      ]
+     },
+     {
+      "id": 26425,
+      "category_name": "Flat 2",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23155
+      ]
+     },
+     {
+      "id": 26429,
+      "category_name": "Lifestyle",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23155
+      ]
+     },
+     {
+      "id": 26433,
+      "category_name": "Lifestyle 2",
+      "view_name": "Front",
+      "restricted_to_variants": [
+       23155
+      ]
+     },
+     {
+      "id": 26437,
+      "category_name": "Flat",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23155
+      ]
+     },
+     {
+      "id": 26441,
+      "category_name": "Flat 2",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23155
+      ]
+     },
+     {
+      "id": 26445,
+      "category_name": "Lifestyle",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23155
+      ]
+     },
+     {
+      "id": 26449,
+      "category_name": "Lifestyle 2",
+      "view_name": "Back",
+      "restricted_to_variants": [
+       23155
+      ]
+     }
+    ]
+   }
+  ],
+  "extra": [],
+  "paging": {
+   "total": 4,
+   "limit": 10,
+   "offset": 0
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.printful.com/v2/catalog-products/900/mockup-styles?placements=front&limit=10"
+   }
+  }
+ }
+}
