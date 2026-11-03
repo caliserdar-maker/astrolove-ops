@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Urun metni kurali (tek kaynak). Serdar karari 25 Eyl 2026; 24 Eyl B-5 kuralini gunceller.
+"""EMEKLI (Serdar 3 Kas A): KULLANILMAZ. Tek kaynak main etsy_common.METIN_KESIN / METIN_BAGLAM (metin_yasak_kapisi). Asagidaki
+IZINLI liste 23 Eki kagit karariyla gecersiz (Hahnemuhle / cotton / museum yazilmaz). Dosya iz icin silinmedi.
+
+Eski: Urun metni kurali (tek kaynak). Serdar karari 25 Eyl 2026; 24 Eyl B-5 kuralini gunceller.
 Birincil kaynak: Hahnemuhle Photo Rag datasheet + urun sayfasi; Prodigi HPR urun foyu.
 IZINLI: acid-free, 100% cotton, pigment-based archival inks, natural white, matte,
         "Hahnemuhle rates Photo Rag as museum quality (ISO 9706)".
