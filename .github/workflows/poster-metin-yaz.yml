@@ -1,0 +1,102 @@
+name: poster-metin-yaz
+# Poster aciklama yazimi (Serdar 4 Kas "a": PLAN_POSTER_YAZIM.md). Etsy'ye YAZAR: yalniz EN aciklama + RU aciklama.
+# Kod: scripts/etsy/poster_metin_yaz.py (tek kaynak poster_metin_kuru.plan_ilan; onayli metin + onay ozeti kuru kosudan:
+# Drive TEMP/POSTER_KURU_20261103_220036). Kilit: kilit_bekle.py checkout'tan hemen sonra, token indirmeden ONCE. Kota: ilan basina
+# kalan >= 20 + 10 (plan 13'ten sikilastirma, inceleme 4 Kas), her istekte KOTA_SINIRI 10. Cikti: Drive TEMP/POSTER_YAZ_<UTC damga>/DEGISIKLIK.csv (ilan, EN UTC, RU UTC, last_modified).
+# onay girdisi "POSTER-METIN-<KIP>-<ids>" (KIP: KURU | YAZ | GERI; inceleme 4 Kas: geri alma ayri onay sozcugu); pilot yazimi:
+# ids=4570143815 uygula=1 onay=POSTER-METIN-YAZ-4570143815. Kosu logu sir taramasindan gecip Drive'a (LOG.txt) yazilir.
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      ids:
+        description: "ilan id'leri (virgulle). Pilot: 4570143815"
+        required: true
+        default: "4570143815"
+      onay:
+        description: "POSTER-METIN-<KURU|YAZ|GERI>-<ids> (kip + ids birebir); farkliysa kosu durur"
+        required: true
+        default: ""
+      uygula:
+        description: "1 = yaz; 0 = kuru (yazim yok)"
+        default: "0"
+      geri_al:
+        description: "1 = geri al (EN once + RU ru_geri)"
+        default: "0"
+jobs:
+  yaz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    steps:
+      - name: Onay kapisi
+        env:
+          IDS: ${{ inputs.ids }}
+          ONAY: ${{ inputs.onay }}
+          UYGULA: ${{ inputs.uygula }}
+          GERI: ${{ inputs.geri_al }}
+        run: |
+          [[ "$IDS" =~ ^[0-9]+(,[0-9]+)*$ ]] || { echo "::error::ids bicimi"; exit 1; }
+          K=KURU; [ "$UYGULA" = "1" ] && K=YAZ; [ "$UYGULA" = "1" ] && [ "$GERI" = "1" ] && K=GERI
+          [ "$GERI" = "1" ] && [ "$UYGULA" != "1" ] && K=KURU
+          [ "$ONAY" = "POSTER-METIN-$K-$IDS" ] || { echo "::error::onay girdisi POSTER-METIN-$K-<ids> degil"; exit 1; }
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+          echo "CIKTI=POSTER_YAZ_$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"; echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Token + onayli kuru plan
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out _kuru
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          for f in ONCE_SONRA.json YEDEK.json; do
+            rclone copyto "gdrive:ASTROLOVE/TEMP/POSTER_KURU_20261103_220036/$f" "_kuru/$f"
+            [ -s "_kuru/$f" ] || { echo "::error::kuru plan dosyasi yok: $f"; exit 1; }
+          done
+      - name: Yaz
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          IDS: ${{ inputs.ids }}
+          UYGULA: ${{ inputs.uygula }}
+          GERI: ${{ inputs.geri_al }}
+        run: |
+          set -o pipefail
+          A=""; [ "$UYGULA" = "1" ] && A="--uygula"; [ "$GERI" = "1" ] && A="$A --geri-al"
+          sha256sum _kuru/ONCE_SONRA.json _kuru/YEDEK.json
+          python3 scripts/etsy/poster_metin_yaz.py --kuru _kuru --ids "$IDS" --out _out $A 2>&1 \
+            | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/ETSY_TOKEN.json _out/LOG.txt
+      - name: Token geri yaz + cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          TOKEN_RC=0; OUT_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
+          if ls _out/* >/dev/null 2>&1; then
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/${CIKTI:?}" --immutable -q && echo "::notice title=POSTER-YAZ::TEMP/$CIKTI/" || OUT_RC=1
+          fi
+          [ "$TOKEN_RC" = 0 ] && [ "$OUT_RC" = 0 ] || exit 1
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
