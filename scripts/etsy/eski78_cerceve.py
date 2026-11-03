@@ -6,7 +6,7 @@ Ilan basina: envanter GET -> varyasyon gorsel baglari GET (once) -> envanter PUT
   Natural Frame) urunleri SILINIR, 'Digital File, Print or Framed?' menu adi 'Format' olur; kalan urunlerin fiyat/stok/sku/
   readiness/deger id'leri AYNI (390 -> 130) -> updateListing PATCH yalniz {description, materials} -> baglar GET (sonra, once ile ayni).
 Kagit ifadesi (Serdar NOT 1, 15 Eki; tedarikci kararina BAGLI DEGIL): PRINT bolumunde Hahnemuhle / Photo Rag / 308 gsm /
-  100% cotton / giclee / archival / ISO 9706 -> "Printed on premium matte art paper with long-lasting inks"; materials -> MATERIALS.
+  100% cotton / giclee / archival / ISO 9706 -> "Printed on matte art paper" (3 Kas; once premium + long-lasting); materials -> MATERIALS.
 Aciklama: onaylanan once/sonra listesi (her degisiklik tam 1 kez bulunmali, yoksa DUR). Sonuc metinde 'frame' yalniz
   "Frames shown in photos are for display only and are not included. Prints ship unframed." satirinda gecer; uzun tire yok.
 Tekrar kosu: aciklamasi zaten yeni ve envanterde cerceve yoksa ATLANIR. Ilk hatada DUR; kota < 10 DUR; ilan active degilse DUR.
@@ -31,7 +31,7 @@ YENI_AD = "Format"
 CERCEVE = {"Antique Gold Frame", "Black Frame", "White Frame", "Natural Frame"}
 KALAN = {"Digital File", "Print"}
 YENI_SATIR = "Frames shown in photos are for display only and are not included. Prints ship unframed."
-KAGIT_SATIR = "- Printed on premium matte art paper with long-lasting inks"
+KAGIT_SATIR = "- Printed on matte art paper"   # Serdar 3 Kas Soru 3 A (premium / long-lasting yok)
 MATERIALS = ["matte art paper", "ink"]
 KAGIT_YASAK = re.compile(r"hahnem|photo rag|\bgsm\b|cotton|gicl|archival|museum|iso 9706|acid", re.I)
 DEGIS = [

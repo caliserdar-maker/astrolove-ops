@@ -41,7 +41,7 @@ from pathlib import Path
 import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from etsy_common import API, Etsy, TokenStore, ai_beyan_kapisi, mask  # noqa: E402
+from etsy_common import API, Etsy, TokenStore, ai_beyan_kapisi, mask, metin_yasak_kapisi  # noqa: E402
 
 KOTA_MIN = 10
 OAS = "https://www.etsy.com/openapi/generated/oas/3.0.0.json"
@@ -384,6 +384,7 @@ class Kilitli(Etsy):
         """createDraftListing: TEK deneme (tekrar ikinci ilan acabilir). (status, json|None, metin)."""
         self._izin("POST", f"/shops/{shop}/listings")
         ai_beyan_kapisi("POST", f"/shops/{shop}/listings", data=body)  # AI beyan kapisi (Gorev E): dogrudan requests _call'i atlar; kapi burada
+        metin_yasak_kapisi("POST", f"/shops/{shop}/listings", data=body); self.kota(); self._istek_oncesi()   # Serdar 3 Kas cevap 4: metin kapisi + kota tabani ISTEKTEN ONCE
         self.calls += 1
         r_ = requests.post(API + f"/shops/{shop}/listings", data=body, headers=self._headers(), timeout=120)
         self.remaining = r_.headers.get("x-remaining-today", self.remaining)

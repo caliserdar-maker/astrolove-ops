@@ -13,6 +13,7 @@ Hicbir sir loga yazilmaz; okunan her token degeri ::add-mask:: ile
 maskelenir.
 """
 import atexit
+import csv
 import hashlib
 import html
 import posixpath
@@ -271,12 +272,43 @@ METIN_BAGLAM = [
     ("metallic foil (olumsuz cumle disinda)", r"(?<!not )(?<!no )(?<!without )\bmetallic\s+foil\b"),
     ("308 (kagit baglaminda)", r"\b308\s*(?:g\b|gsm|g/m|г/м)|\b308\b[^.\n]{0,40}\bpaper\b"),
     ("300 dpi (yalniz kartta)", r"\b300\s*dpi\b"),
-    ("free preview (kanit gerekir)", r"\bfree\s+preview\b|бесплатн\w*\s+(?:предпросмотр|превью|макет)"),
+    ("free preview (kanit gerekir)", r"\bfree\s+preview\b|бесплатн\w*(?:\s+[^\s.]+){0,2}?\s+(?:предпросмотр|превью|макет)"),
     ("tracking (kanit gerekir)", r"\btracking\b|отслежива\w*"),
 ]
 _METIN_RX = [(ad, "KESIN", re.compile(rx, re.I)) for ad, rx in METIN_KESIN] + \
             [(ad, "BAGLAM", re.compile(rx, re.I)) for ad, rx in METIN_BAGLAM]
 METIN_UYARI = []          # [(yontem, yol, sinif, ad, eslesen)] bu surecteki eslesmeler
+# Baglam izinleri (Serdar 3 Kas, kuru kosu cevaplari 2 ve 5): (BAGLAM kural adi basi, ilan grubu, alanlar). Eslesme bu ilan grubunun bu
+# alanindaysa uyari verilmez. "300 dpi": poster78 aciklamasinda (dijital dosya satiri + SSS, EN + RU) izinli; galeri kartinda yasak surer.
+# "free preview": yd78 aciklama ve gorsel alt metninde izinli (surec karti); poster78 aciklamasinda uyari verir (Soru 11).
+METIN_IZIN = [("300 dpi", "poster78", ("description",)), ("free preview", "yd78", ("description", "alt_text"))]
+_IZIN_YOL = re.compile(r"/listings/0*(\d+)(?:/|$)")
+_ILAN_GRUP = None
+
+
+def ilan_grubu(lid):
+    """data/pod/pod78_ids.csv -> poster78, data/pod/yd78_ids.csv -> yd78, diger -> '' (bir kez okunur)."""
+    global _ILAN_GRUP
+    if _ILAN_GRUP is None:
+        _ILAN_GRUP = {}
+        kok = Path(__file__).resolve().parents[2] / "data" / "pod"
+        for ad, grup in (("pod78_ids.csv", "poster78"), ("yd78_ids.csv", "yd78")):
+            try:
+                with open(kok / ad, encoding="utf-8-sig") as f:
+                    for r in csv.DictReader(f):
+                        _ILAN_GRUP[str(r.get("listing_id", "")).strip()] = grup
+            except OSError:
+                pass
+    return _ILAN_GRUP.get(str(lid or "").strip(), "")
+
+
+def metin_izinli(ad, path, anahtar):
+    """BAGLAM eslesmesi bu ilan grubunun bu alaninda izinli mi (METIN_IZIN)."""
+    m = _IZIN_YOL.search(str(path or ""))
+    if not m:
+        return False
+    grup, alan = ilan_grubu(m.group(1)), str(anahtar or "").split(".")[-1].split("[")[0]
+    return any(ad.startswith(k) and grup == g and alan in alanlar for k, g, alanlar in METIN_IZIN)
 
 
 def _metin_degerleri(g, yol="", ust=True):
@@ -298,6 +330,23 @@ def _metin_degerleri(g, yol="", ust=True):
     return []
 
 
+HTML_ALAN = {"description", "title", "tags", "materials", "alt_text", "personalization_instructions", "instructions", "question_text"}
+_HTML_VARLIK = re.compile(r"&(?:#\d+|#x[0-9a-fA-F]+|[A-Za-z]+);")
+
+
+def html_coz(g, alan=None):
+    """Yazma govdesindeki musteri metinlerinde HTML varliklarini cozer (Serdar 3 Kas B6: canli GET aciklamayi "&#39;" gibi kacisli
+    verir; geri yazilirsa musteri "&#39;" gorur). Yalniz HTML_ALAN anahtarlari (ic ice sozluk/liste dahil); digerleri aynen.
+    Yeni nesne doner (girdi degismez); urlencoded dize govdeye dokunulmaz."""
+    if isinstance(g, dict):
+        return {k: html_coz(v, k if k in HTML_ALAN else (alan if isinstance(v, (list, tuple)) else None)) for k, v in g.items()}
+    if isinstance(g, (list, tuple)):
+        return type(g)(html_coz(v, alan) for v in g)
+    if isinstance(g, str) and alan in HTML_ALAN and _HTML_VARLIK.search(g):
+        return html.unescape(g)
+    return g
+
+
 def metin_yasak_kapisi(method, path, data=None, json_body=None, params=None, mod=None):
     """Yazma isteginden once tum metin degerlerini tarar. -> eslesme listesi. mod ENGEL ve KESIN eslesme: SystemExit (istek yok)."""
     if str(method or "").upper() in ("GET", "HEAD", "OPTIONS"):
@@ -308,6 +357,8 @@ def metin_yasak_kapisi(method, path, data=None, json_body=None, params=None, mod
         for anahtar, metin in _metin_degerleri(g):
             for ad, sinif, rx in _METIN_RX:
                 for m in rx.finditer(str(metin)):
+                    if sinif == "BAGLAM" and metin_izinli(ad, path, anahtar):
+                        continue
                     bul.append((sinif, ad, anahtar, m.group(0)))
     for sinif, ad, anahtar, es in bul:
         METIN_UYARI.append((str(method).upper(), str(path), sinif, ad, es))
@@ -762,6 +813,7 @@ class Etsy:
         """Multipart yukleme (gorsel/dosya). Ilk denemede 400 normal olabilir
         (B37); 3 deneme. tekrar=1 (eski78_gorsel_yukle, Serdar 24 Eki): hata yanitinda yeniden GONDERMEZ (cift yukleme
         riski); cagiran galeriyi okuyup karar verir. 401 token yenilemesi her durumda bir kez yapilir."""
+        data = html_coz(data)   # B6: alt metin / taslak metni HTML varliksiz gider
         ai_beyan_kapisi("POST", path, data)   # multipart createDraftListing da kapidan gecer (gorsel / video yolu eslesmez, gecer)
         metin_yasak_kapisi("POST", path, data)   # alt metin / taslak metinleri (UYARI modu)
         self._istek_oncesi()
@@ -792,6 +844,8 @@ class Etsy:
             raise SystemExit(f"HATA: POST(file) {path} -> {r.status_code}: {r.text[:300]}")
 
     def _call(self, method, path, params=None, data=None, ok404=False, json_body=None):
+        if str(method).upper() not in ("GET", "HEAD", "OPTIONS"):   # B6 (Serdar 3 Kas): HTML varliklari yazmadan once cozulur
+            data, json_body = html_coz(data), html_coz(json_body)
         ru_yazim_kapisi(method, path, data, json_body)
         ai_beyan_kapisi(method, path, data, json_body, params, canli_ceviri=lambda: self._canli_ceviri(path), baslik=self._baslik(path))
         self.yayin_beyan_kontrol(method, path, data, json_body, params)

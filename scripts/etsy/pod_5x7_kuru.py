@@ -46,7 +46,7 @@ EN_DEGISIKLIK = [
      "- High resolution: 300 dpi at the full size you choose, from 5 x 7 to 24 x 36 inches, or A4 to A2"),
     ("\n- US orders ship with tracking.", ""),
     ("- Delivered to your Etsy order within 24 hours. We check every personalization by hand before sending",
-     "- We send a free preview via Etsy Messages within 24 hours. After you approve, your file is emailed to you within 24 hours. "
+     "- We send a preview via Etsy Messages within 24 hours. After you approve, your file is emailed to you within 24 hours. "   # Soru 11
      "We check every personalization by hand before sending"),
     # Serdar 28 Eki: celiskili 4 cumlenin yeni hali (canli metinden dogrulandi: KURU_4570143815.json aciklama_ham satir 16, 22, 59)
     ("Download it from Purchases in a web browser. The Etsy app can't download files",

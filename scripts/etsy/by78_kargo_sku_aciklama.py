@@ -41,7 +41,7 @@ FORMAT_KOD = {"Digital card 5x7": "CARD5X7", "Digital file 8x10": "FILE8X10", "S
 
 ESKI_SHIP_FMT = ("- Shipped print 8x10: printed on matte paper and shipped to you by our production partner. "
                  "Unframed; it fits standard frames.")
-YENI_SHIP_FMT = ("- Shipped print 8x10: printed on premium matte art paper with long-lasting inks and shipped to you by "
+YENI_SHIP_FMT = ("- Shipped print 8x10: printed on matte art paper and shipped to you by "   # Serdar 3 Kas Soru 3 A
                  "our production partner.")
 ESKI_DELIV = ("- Shipped print: made and shipped within 4 to 7 days after your approval, with free shipping. "
               "Estimated delivery: US 3 to 8 days, UK and Australia 5 to 10 days, EU 5 to 12 days.")
