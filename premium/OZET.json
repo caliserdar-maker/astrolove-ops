@@ -1,0 +1,23 @@
+{
+ "aktif": 246,
+ "grup": {
+  "kupa_sade": 12,
+  "kupa_cift": 78,
+  "poster78": 78,
+  "yd78": 78
+ },
+ "ru_kaynak": {
+  "batch": 156,
+  "tekil": 0,
+  "yok": 90
+ },
+ "ceviri_bicim": {
+  "dict": 246
+ },
+ "eslesme_satiri": 312,
+ "eslesen_ilan": {
+  "poster78": 78
+ },
+ "istek": 174,
+ "kota_son": "4152"
+}

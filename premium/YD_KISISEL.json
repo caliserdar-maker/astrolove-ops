@@ -1,0 +1,4838 @@
+{
+ "4595426614": {
+  "cift": "VIRGO_VIRGO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name on the left",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163685360,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name on the right",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153050681,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163685362,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153050683,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153050685,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595404741": {
+  "cift": "TAURUS_VIRGO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Taurus",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163684332,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Virgo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163684334,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153049707,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163684336,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153049709,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595425130": {
+  "cift": "TAURUS_TAURUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name on the left",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163683456,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name on the right",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153048849,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153048851,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163683458,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163683460,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595424388": {
+  "cift": "SCORPIO_VIRGO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Scorpio",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153048091,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Virgo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163682642,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163682644,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163682646,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153048093,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595402683": {
+  "cift": "SCORPIO_TAURUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Scorpio",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153047337,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Taurus",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153047339,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153047341,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163681840,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163681842,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595422932": {
+  "cift": "SCORPIO_SCORPIO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name on the left",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163681096,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name on the right",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163681098,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153046583,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163681100,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153046585,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595401409": {
+  "cift": "SAGITTARIUS_VIRGO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Sagittarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163680232,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Virgo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163680234,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153045851,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153045853,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163680236,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595421558": {
+  "cift": "SAGITTARIUS_TAURUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Sagittarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163679588,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Taurus",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153045287,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163679590,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153045289,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163679592,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595399925": {
+  "cift": "SAGITTARIUS_SCORPIO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Sagittarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163678670,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Scorpio",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153044433,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163678672,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163678674,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153044435,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595419990": {
+  "cift": "SAGITTARIUS_SAGITTARIUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name on the left",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163677882,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name on the right",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163677884,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153043679,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153043681,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153043683,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595398449": {
+  "cift": "PISCES_VIRGO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Pisces",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153043013,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Virgo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153043015,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163677164,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153043017,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153043019,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595418714": {
+  "cift": "PISCES_TAURUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Pisces",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153042411,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Taurus",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153042413,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163676504,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163676506,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153042415,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595417982": {
+  "cift": "PISCES_SCORPIO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Pisces",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153041535,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Scorpio",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163675608,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163675610,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153041537,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163675612,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595396303": {
+  "cift": "PISCES_SAGITTARIUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Pisces",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163674918,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Sagittarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153040869,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163674920,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163674922,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163674924,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595395675": {
+  "cift": "PISCES_PISCES",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name on the left",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153040119,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name on the right",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163674132,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153040121,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153040123,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163674134,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595394917": {
+  "cift": "LIBRA_VIRGO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Libra",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163673480,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Virgo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163673482,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163673484,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163673486,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163673488,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595394145": {
+  "cift": "LIBRA_TAURUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Libra",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163672622,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Taurus",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163672624,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163672626,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163672628,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163672630,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595392755": {
+  "cift": "LIBRA_SAGITTARIUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Libra",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163671324,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Sagittarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163671326,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163671328,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163671330,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153037449,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595414290": {
+  "cift": "LIBRA_SCORPIO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Libra",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163671954,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Scorpio",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153038079,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163671956,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153038081,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153038083,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595391927": {
+  "cift": "LIBRA_PISCES",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Libra",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163669864,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Pisces",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163669866,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153036093,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153036095,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163669868,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595412098": {
+  "cift": "LIBRA_LIBRA",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name on the left",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163669136,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name on the right",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163669138,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153035401,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153035403,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163669140,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595389847": {
+  "cift": "LEO_TAURUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Leo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163668038,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Taurus",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163668042,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153034355,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163668046,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153034357,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595411488": {
+  "cift": "LEO_VIRGO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Leo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153034955,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Virgo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163668650,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153034957,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163668652,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153034959,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595410092": {
+  "cift": "LEO_SCORPIO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Leo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153033527,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Scorpio",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153033529,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163667190,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163667192,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153033531,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595409370": {
+  "cift": "LEO_SAGITTARIUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Leo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153032881,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Sagittarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153032883,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153032885,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153032887,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163666574,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595387831": {
+  "cift": "LEO_PISCES",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Leo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163665930,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Pisces",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153032263,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163665932,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153032265,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163665934,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595387165": {
+  "cift": "LEO_LIBRA",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Leo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153031785,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Libra",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153031787,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163665460,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153031789,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153031791,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595407350": {
+  "cift": "LEO_LEO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name on the left",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163664860,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name on the right",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153031201,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163664862,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153031203,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153031205,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595385171": {
+  "cift": "GEMINI_TAURUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Gemini",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153030141,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Taurus",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163663776,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153030143,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163663778,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163663780,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595406674": {
+  "cift": "GEMINI_VIRGO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Gemini",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163664354,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Virgo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153030649,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153030651,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163664356,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163664358,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595384437": {
+  "cift": "GEMINI_SCORPIO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Gemini",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153029667,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Scorpio",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163663334,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153029669,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163663336,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153029671,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595383671": {
+  "cift": "GEMINI_SAGITTARIUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Gemini",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153029019,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Sagittarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163662658,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163662660,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163662662,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163662664,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595382939": {
+  "cift": "GEMINI_PISCES",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Gemini",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163662070,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Pisces",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153028489,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163662072,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153028491,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163662074,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595403026": {
+  "cift": "GEMINI_LIBRA",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Gemini",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163661348,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Libra",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153027861,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163661350,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153027863,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163661352,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595381663": {
+  "cift": "GEMINI_LEO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Gemini",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153027493,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Leo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153027495,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163660924,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153027497,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163660926,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595401640": {
+  "cift": "GEMINI_GEMINI",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name on the left",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163660276,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name on the right",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153026925,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153026927,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163660278,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163660280,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595380189": {
+  "cift": "CAPRICORN_VIRGO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Capricorn",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163659580,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Virgo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153026279,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153026281,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163659582,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163659584,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595378777": {
+  "cift": "CAPRICORN_SCORPIO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Capricorn",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153024887,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Scorpio",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153024889,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163658168,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163658170,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153024891,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595379499": {
+  "cift": "CAPRICORN_TAURUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Capricorn",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163658920,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Taurus",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163658922,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163658924,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153025631,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163658926,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595398752": {
+  "cift": "CAPRICORN_SAGITTARIUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Capricorn",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153024169,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Sagittarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163657348,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153024171,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163657350,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163657352,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595398012": {
+  "cift": "CAPRICORN_PISCES",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Capricorn",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163656484,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Pisces",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153023399,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153023401,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163656488,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153023405,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595376637": {
+  "cift": "CAPRICORN_LIBRA",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Capricorn",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163655698,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Libra",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163655700,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153022701,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153022703,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153022705,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595396482": {
+  "cift": "CAPRICORN_LEO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Capricorn",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163655082,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Leo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153022113,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163655084,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153022115,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153022117,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595395874": {
+  "cift": "CAPRICORN_GEMINI",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Capricorn",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163654332,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Gemini",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153021471,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163654334,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153021473,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153021475,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595373647": {
+  "cift": "CANCER_VIRGO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Cancer",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153020131,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Virgo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153020133,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163652924,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163652926,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153020135,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595395166": {
+  "cift": "CAPRICORN_CAPRICORN",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name on the left",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163653600,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name on the right",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163653602,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153020767,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153020769,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163653604,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595372909": {
+  "cift": "CANCER_TAURUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Cancer",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153019059,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Taurus",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163651944,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153019061,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163651946,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163651948,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595372339": {
+  "cift": "CANCER_SCORPIO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Cancer",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153018609,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Scorpio",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153018611,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163651386,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153018613,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153018615,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595371653": {
+  "cift": "CANCER_SAGITTARIUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Cancer",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163650710,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Sagittarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153017977,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163650712,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153017979,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163650714,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595371089": {
+  "cift": "CANCER_PISCES",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Cancer",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163650082,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Pisces",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163650084,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163650086,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153017287,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153017289,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595350971": {
+  "cift": "CANCER_LIBRA",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Cancer",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163629866,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Libra",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463152997903,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163629868,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463152997905,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163629870,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595370463": {
+  "cift": "CANCER_LEO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Cancer",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153016729,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Leo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153016731,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163649468,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163649470,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153016733,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595390234": {
+  "cift": "CANCER_GEMINI",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Cancer",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153016069,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Gemini",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163648832,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163648834,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163648836,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153016071,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595368387": {
+  "cift": "CANCER_CANCER",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name on the left",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163647318,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name on the right",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153014677,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153014679,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163647320,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163647322,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595369037": {
+  "cift": "CANCER_CAPRICORN",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Cancer",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153015455,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Capricorn",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163648166,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153015457,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163648168,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163648170,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595388012": {
+  "cift": "ARIES_VIRGO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aries",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163646732,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Virgo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153014157,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163646734,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153014159,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153014161,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595387360": {
+  "cift": "ARIES_TAURUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aries",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153013585,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Taurus",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163646090,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163646092,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153013587,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163646094,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595386626": {
+  "cift": "ARIES_SCORPIO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aries",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163645478,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Scorpio",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163645480,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153012983,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163645482,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153012985,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595385920": {
+  "cift": "ARIES_SAGITTARIUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aries",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153012177,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Sagittarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153012179,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163644608,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163644610,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163644612,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595364151": {
+  "cift": "ARIES_LIBRA",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aries",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153010793,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Libra",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163643220,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153010797,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153010801,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153010805,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595364785": {
+  "cift": "ARIES_PISCES",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aries",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153011485,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Pisces",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163643916,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153011487,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163643918,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163643920,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595363435": {
+  "cift": "ARIES_LEO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aries",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153010241,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Leo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163642678,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153010243,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163642680,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163642682,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595383084": {
+  "cift": "ARIES_GEMINI",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aries",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153009451,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Gemini",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163641882,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163641884,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163641886,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153009453,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595361893": {
+  "cift": "ARIES_CAPRICORN",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aries",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153008361,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Capricorn",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163640846,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163640848,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163640850,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153008363,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595381666": {
+  "cift": "ARIES_CANCER",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aries",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163640342,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Cancer",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163640344,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153007799,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163640346,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153007801,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595381040": {
+  "cift": "ARIES_ARIES",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name on the left",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153007131,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name on the right",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163639624,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153007133,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163639626,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163639628,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595380382": {
+  "cift": "AQUARIUS_VIRGO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aquarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153006693,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Virgo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163639160,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163639162,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153006695,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163639164,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595379718": {
+  "cift": "AQUARIUS_TAURUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aquarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153006041,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Taurus",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153006043,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163638488,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153006045,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163638490,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595379160": {
+  "cift": "AQUARIUS_SCORPIO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aquarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153005447,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Scorpio",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163637816,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163637818,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153005449,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163637820,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595378616": {
+  "cift": "AQUARIUS_SAGITTARIUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aquarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153004931,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Sagittarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163637318,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153004933,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153004935,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153004937,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595357483": {
+  "cift": "AQUARIUS_PISCES",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aquarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153004259,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Pisces",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163636592,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153004261,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163636594,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153004263,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595377314": {
+  "cift": "AQUARIUS_LIBRA",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aquarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163636046,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Libra",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163636048,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153003687,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163636050,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153003689,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595356133": {
+  "cift": "AQUARIUS_LEO",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aquarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153002991,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Leo",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163635282,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163635284,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163635288,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163635290,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595376002": {
+  "cift": "AQUARIUS_GEMINI",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aquarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163634396,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Gemini",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153002111,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153002113,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153002115,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163634398,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595354141": {
+  "cift": "AQUARIUS_CANCER",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aquarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153001039,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Cancer",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163633236,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153001041,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153001043,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153001045,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595354831": {
+  "cift": "AQUARIUS_CAPRICORN",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aquarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153001551,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Capricorn",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163633766,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153001553,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153001555,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463163633768,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595373902": {
+  "cift": "AQUARIUS_ARIES",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name under Aquarius",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463153000365,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name under Aries",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163632408,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463153000367,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463153000369,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463153000371,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ },
+ "4595373190": {
+  "cift": "AQUARIUS_AQUARIUS",
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "sorular": {
+   "personalization_questions": [
+    {
+     "question_text": "Name on the left",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463163631664,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Name on the right",
+     "instructions": "Up to 11 letters. Printed in capitals.",
+     "question_id": 1463152999619,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 11,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Your special date",
+     "instructions": "Write the month in letters, for example 14 June 2025",
+     "question_id": 1463163631666,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Heading",
+     "instructions": "Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+     "question_id": 1463163631668,
+     "question_type": "text_input",
+     "required": true,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    },
+    {
+     "question_text": "Optional short line",
+     "instructions": "Leave empty for Year One",
+     "question_id": 1463152999621,
+     "question_type": "text_input",
+     "required": false,
+     "max_allowed_characters": 20,
+     "max_allowed_files": null,
+     "add_on_price": null
+    }
+   ]
+  },
+  "ru_personalization": null
+ }
+}
