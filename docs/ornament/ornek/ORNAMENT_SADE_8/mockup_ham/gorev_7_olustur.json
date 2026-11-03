@@ -22,7 +22,7 @@
       "layers": [
        {
         "type": "file",
-        "url": "https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/da73501a1a4edbc3ed15608cf9708ed0f2306a85/docs/ornament/ornek/ORNAMENT_SADE_8/SADE_7_BORDO_954.png"
+        "url": "https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/71a17026a6ee0f6fadc9edc651e0ee0b4765bf45/docs/ornament/ornek/ORNAMENT_SADE_8/SADE_7_BORDO_954.png"
        }
       ]
      }
@@ -33,13 +33,13 @@
  "yanit": {
   "data": [
    {
-    "id": 996805683,
+    "id": 996812478,
     "status": "pending",
     "catalog_variant_mockups": [],
     "failure_reasons": [],
     "_links": {
      "self": {
-      "href": "https://api.printful.com/v2/mockup-tasks?id=996805683"
+      "href": "https://api.printful.com/v2/mockup-tasks?id=996812478"
      }
     }
    }
