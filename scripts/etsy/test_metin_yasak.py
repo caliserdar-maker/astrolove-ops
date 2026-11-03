@@ -73,6 +73,9 @@ def main():
     k("FAIL: poster RU 'бесплатно отправляем макет' uyarir (aradaki kelime)",
       any(x[1].startswith("free preview") for x in k_("Мы бесплатно отправляем макет через", f"/listings/{POSTER}/translations/ru")))
     k("PASS: 'бесплатно заменим' (hasar degisimi) uyarmaz", k_("мы бесплатно заменим постер", f"/listings/{POSTER}/translations/ru") == [])
+    k("PASS: YD Pinterest metninde free preview izinli (Serdar 4 Kas karar 2)", E.metin_izinli_grup("free preview (kanit gerekir)", "yd78", "pinterest"))
+    k("FAIL: poster Pinterest metninde free preview izinli DEGIL", not E.metin_izinli_grup("free preview (kanit gerekir)", "poster78", "pinterest"))
+    k("FAIL: YD Pinterest metninde premium izinli DEGIL (yalniz BAGLAM izni)", not E.metin_izinli_grup("premium", "yd78", "pinterest"))
     k("FAIL: izin KESIN'i kapsamaz (YD aciklamasi premium)", any(x[0] == "KESIN" for x in k_("premium paper", f"/shops/1/listings/{YD}")))
     k("PASS: poster aciklamasi yeni metin (premium'suz, free'siz) temiz", k_(
       "- We send a preview via Etsy Messages within 24 hours.\n- Printed on matte art paper\n- High resolution: 300 dpi", f"/shops/1/listings/{POSTER}") == [])

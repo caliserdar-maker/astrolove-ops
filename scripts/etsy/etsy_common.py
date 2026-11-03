@@ -281,7 +281,8 @@ METIN_UYARI = []          # [(yontem, yol, sinif, ad, eslesen)] bu surecteki esl
 # Baglam izinleri (Serdar 3 Kas, kuru kosu cevaplari 2 ve 5): (BAGLAM kural adi basi, ilan grubu, alanlar). Eslesme bu ilan grubunun bu
 # alanindaysa uyari verilmez. "300 dpi": poster78 aciklamasinda (dijital dosya satiri + SSS, EN + RU) izinli; galeri kartinda yasak surer.
 # "free preview": yd78 aciklama ve gorsel alt metninde izinli (surec karti); poster78 aciklamasinda uyari verir (Soru 11).
-METIN_IZIN = [("300 dpi", "poster78", ("description",)), ("free preview", "yd78", ("description", "alt_text"))]
+METIN_IZIN = [("300 dpi", "poster78", ("description",)), ("free preview", "yd78", ("description", "alt_text", "pinterest"))]
+# Serdar 4 Kas karar 2: YD Pinterest metninde (pin basligi / aciklama / alt metin; Metricool) "free preview" KALIR -> alan "pinterest".
 _IZIN_YOL = re.compile(r"/listings/0*(\d+)(?:/|$)")
 _ILAN_GRUP = None
 
@@ -300,6 +301,11 @@ def ilan_grubu(lid):
             except OSError:
                 pass
     return _ILAN_GRUP.get(str(lid or "").strip(), "")
+
+
+def metin_izinli_grup(ad, grup, alan):
+    """Etsy disi metinler (or. Metricool / Pinterest) icin: BAGLAM kural adi + ilan grubu + alan -> izinli mi (METIN_IZIN)."""
+    return any(ad.startswith(k) and grup == g and alan in alanlar for k, g, alanlar in METIN_IZIN)
 
 
 def metin_izinli(ad, path, anahtar):
