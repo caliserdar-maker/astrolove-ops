@@ -1,0 +1,154 @@
+{
+ "karar": "Serdar 3 Kas, karar 23 / 24: 5 stil (RUBY, SAPPHIRE, EMERALD eliptik zemin; SADE ALTIN; FILDISI KREM); BEIGE ve AGED_PAPYRUS cikti",
+ "koyu": {
+  "oge": "ALTIN_MOTOR deneme 4 ayarlari (e5412718), kontur yok; zemin ON_OLCUM_ELIPS (6322d66b) eliptik",
+  "zemin_sha256": {
+   "RUBY": "e80d6d3fca82e2804865c887277c06bc8e958175e254b1f2d289eaeba03c9044",
+   "SAPPHIRE": "0d3213f8b592392aa69a3cdcd127d893a6fd2ef3d94e5913cf94ee96f4afb941",
+   "EMERALD": "0c232cfc155ba2cbfd34cb92c6f72ffdb0fbbc54570ac9a8e987efdfdcd7f787"
+  },
+  "kapi": {
+   "kontrast_ortanca_ge_45": true,
+   "dE00_ham_le_2": true,
+   "iou_kucuk_logo_ge_098": true,
+   "alfa_fark_le_0035": true,
+   "leke_0": true,
+   "tasma_0": true,
+   "yerlesim": true
+  },
+  "olculen": {
+   "RUBY": {
+    "kontrast_ortanca": 5.19,
+    "kontrast_oge": {
+     "isim1": 5.39,
+     "isim2": 5.52,
+     "tarih": 5.54,
+     "kucuk_sol": 5.2,
+     "kucuk_sag": 5.19,
+     "sonsuz": 5.21,
+     "halka_govde": 5.23,
+     "halka_uclari_2px_alti_bilgi": 3.85
+    },
+    "dE00_ham": {
+     "tarih": 0.146,
+     "isim1": 0.399,
+     "isim2": 0.233,
+     "sonsuz": 0.079,
+     "kucuk_sol": 0.542,
+     "kucuk_sag": 0.245,
+     "halka": 0.756
+    },
+    "halka_sureklilik_bilgi": 0.693,
+    "hucre_dE00_bilgi": {
+     "hucre_dE00_maks": 1.863,
+     "p95": 1.245,
+     "ortanca": 0.604,
+     "hucre_gt2": 0,
+     "leke": 0.268
+    }
+   },
+   "SAPPHIRE": {
+    "kontrast_ortanca": 5.88,
+    "kontrast_oge": {
+     "isim1": 6.02,
+     "isim2": 6.11,
+     "tarih": 6.13,
+     "kucuk_sol": 5.94,
+     "kucuk_sag": 5.89,
+     "sonsuz": 5.88,
+     "halka_govde": 5.95,
+     "halka_uclari_2px_alti_bilgi": 4.09
+    },
+    "dE00_ham": {
+     "tarih": 0.29,
+     "isim1": 0.356,
+     "isim2": 0.423,
+     "sonsuz": 0.3,
+     "kucuk_sol": 0.659,
+     "kucuk_sag": 0.28,
+     "halka": 0.86
+    },
+    "halka_sureklilik_bilgi": 0.692,
+    "hucre_dE00_bilgi": {
+     "hucre_dE00_maks": 2.601,
+     "p95": 1.841,
+     "ortanca": 0.548,
+     "hucre_gt2": 4,
+     "leke": 0.325
+    }
+   },
+   "EMERALD": {
+    "kontrast_ortanca": 5.46,
+    "kontrast_oge": {
+     "isim1": 5.66,
+     "isim2": 5.75,
+     "tarih": 5.8,
+     "kucuk_sol": 5.49,
+     "kucuk_sag": 5.51,
+     "sonsuz": 5.46,
+     "halka_govde": 5.54,
+     "halka_uclari_2px_alti_bilgi": 4.03
+    },
+    "dE00_ham": {
+     "tarih": 0.419,
+     "isim1": 0.271,
+     "isim2": 0.528,
+     "sonsuz": 0.374,
+     "kucuk_sol": 0.661,
+     "kucuk_sag": 0.309,
+     "halka": 0.854
+    },
+    "halka_sureklilik_bilgi": 0.692,
+    "hucre_dE00_bilgi": {
+     "hucre_dE00_maks": 1.89,
+     "p95": 1.595,
+     "ortanca": 0.643,
+     "hucre_gt2": 0,
+     "leke": 0.201
+    }
+   }
+  },
+  "iou": {
+   "kucuk_sol": 1.0,
+   "kucuk_sag": 1.0,
+   "sonsuz": 0.9984,
+   "isim1": 0.9792,
+   "isim2": 0.9751,
+   "tarih": 0.9534,
+   "halka": 0.9796
+  },
+  "alfa_fark": {
+   "kucuk_sol": 0.0005,
+   "kucuk_sag": 0.0,
+   "sonsuz": 0.0043,
+   "isim1": 0.0177,
+   "isim2": 0.0314,
+   "tarih": 0.0289,
+   "halka": 0.0117
+  },
+  "bilgi": "halka govde surekliligi 0.692-0.693 ve SAPPHIRE hucre dE00 2.60 (4 hucre) Serdar kabul, bilgi"
+ },
+ "sade": {
+  "kaynak": "ORNAMENT_SADE_8/SADE_1_ALTIN_TONU_954.png (029a670d)",
+  "sha256": "c3b4b280ecd47e1b9116f3af939646bed005800ccbc4c6ab8a3464b1dcc46ab8",
+  "kontrast_bilgi": 1.54
+ },
+ "fildisi": {
+  "betik": "scripts/printful/ornament_fildisi.py (Merkez metni birebir)",
+  "girdi_sha256": "c3b4b280ecd47e1b9116f3af939646bed005800ccbc4c6ab8a3464b1dcc46ab8",
+  "yerel_sha256": "7f933ac2acf16f6bac7ff3ed3b359872e77964249000e4fb049fcc7023279159",
+  "merkez_sha256": "e65287dac12a82f53488a02a9eb3ecd725342dcbd46316ff2965679dc709b081",
+  "ortam": "Pillow 12.3.0 + numpy 2.5.3 (ve Pillow 11.0.0 + numpy 2.5.4: ayni bayt)",
+  "ham_piksel_sha256": "ea47a57f49ec73af4b9606dd3c5636f97f0121f1ac10305630c76431409f952b",
+  "piksel_farki": "Merkez dosyasi elde yok; max piksel farki olculemedi",
+  "kontrast_bilgi": "2.53 (Merkez olcumu, istisna)"
+ },
+ "dosya_sha256": {
+  "CANCER_LIBRA_EMERALD_954.png": "02421dbba9e4fb004f3941ed007c2579a75afacd050404afb3a9944e2bc6818f",
+  "CANCER_LIBRA_FILDISI_954.png": "7f933ac2acf16f6bac7ff3ed3b359872e77964249000e4fb049fcc7023279159",
+  "CANCER_LIBRA_RUBY_954.png": "e7be8a3bd936cf92f155cda07be098dba4e0fe7ce786c677350e8d5afef243b1",
+  "CANCER_LIBRA_SADE_ALTIN_954.png": "c3b4b280ecd47e1b9116f3af939646bed005800ccbc4c6ab8a3464b1dcc46ab8",
+  "CANCER_LIBRA_SAPPHIRE_954.png": "e4c71ecfb2a8505e8f8b41425c36d86637183e23e7aebd3367386b8f59b569c8",
+  "ONIZLEME_76mm_5STIL.png": "bc81ecad74072f445cbc8ed349df2c4de91a582d1196b675376cf6476b4a8f3c"
+ }
+}
