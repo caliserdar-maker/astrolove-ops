@@ -24,6 +24,7 @@ def main():
     R = json.loads((O / 'OLCUM.json').read_text())
     font = ImageFont.truetype(a.font, 24)
     satir = []
+    kutu = R.get('kutu', {})
     for renk in ('RUBY', 'SAPPHIRE', 'EMERALD'):
         rgb = np.asarray(Image.open(O / f'CANCER_LIBRA_{renk}_954.png').convert('RGB'))
         x0, y0, x1, y1 = R['sonuc'][renk]['sembol_kutu']
@@ -33,35 +34,30 @@ def main():
         cy, cx = np.unravel_index(int(np.argmax(dt)), dt.shape)
         W = 70
         ana = (cx - W // 2, cy - W // 2, cx + W // 2, cy + W // 2)
-        alt = np.zeros_like(m); alt[y1:y1 + 120, x0 - 60:(x0 + x1) // 2] = m[y1:y1 + 120, x0 - 60:(x0 + x1) // 2]
-        n, lab, st, _ = cv2.connectedComponentsWithStats(cv2.dilate(alt, np.ones((9, 9), np.uint8)), 8)   # sembol parcalari birlesir (isim satiri 20 px uzakta)
-        i = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
-        kx, ky, kw, kh = st[i, :4]
-        kuc = (kx - 2, ky - 2, kx + kw + 2, ky + kh + 2)
+        if 'kucuk_sol' in kutu:                                         # deneme 4: OLCUM kutulari (yerlesim, kesin)
+            k_ = kutu['kucuk_sol']; kuc = (k_[0] - 2, k_[1] - 2, k_[2] + 2, k_[3] + 2)
+            i_ = kutu['isim1']; ism = (i_[0] - 2, i_[1] - 2, i_[2] + 2, i_[3] + 2)
+        else:
+            alt = np.zeros_like(m); alt[y1:y1 + 120, x0 - 60:(x0 + x1) // 2] = m[y1:y1 + 120, x0 - 60:(x0 + x1) // 2]
+            n, lab, st, _ = cv2.connectedComponentsWithStats(cv2.dilate(alt, np.ones((9, 9), np.uint8)), 8)
+            i = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+            kx, ky, kw, kh = st[i, :4]
+            kuc = (kx - 2, ky - 2, kx + kw + 2, ky + kh + 2); ism = None
         im = Image.fromarray(rgb)
-        p1 = im.crop(ana); p2 = im.crop(kuc)
-        h = max(p1.height, p2.height)
-        c = Image.new('RGB', (p1.width + p2.width + 8, h), 'white'); c.paste(p1, (0, 0)); c.paste(p2, (p1.width + 8, 0))
+        par = [im.crop(ana), im.crop(kuc)] + ([im.crop(ism)] if ism else [])
+        h = max(p_.height for p_ in par)
+        c = Image.new('RGB', (sum(p_.width for p_ in par) + 8 * (len(par) - 1), h), 'white'); xx = 0
+        for p_ in par:
+            c.paste(p_, (xx, 0)); xx += p_.width + 8
         c = c.resize((c.width * 3, c.height * 3), Image.NEAREST)
-        yazi = f'{renk}: sol ana sembol govdesi (en kalin yer), sag kucuk burc; ayni karede yan yana, 954 (3x)'
+        yazi = f'{renk}: sol ana sembol govdesi (en kalin yer), orta kucuk burc, sag isim; son PNG, ayni karede yan yana, 954 (3x)'
         tw = int(ImageDraw.Draw(Image.new('RGB', (1, 1))).textlength(yazi, font=font)) + 12
         k = Image.new('RGB', (max(c.width, tw), c.height + 36), 'white'); k.paste(c, (0, 0))
         ImageDraw.Draw(k).text((4, c.height + 4), yazi, fill=(20, 20, 20), font=font)
-        satir.append((k, dict(ana_pencere=[int(v) for v in ana], kucuk_kutu=[int(v) for v in kuc])))
-    # mevcut YAKIN_DOKU: alt alta 3 satiri (son 3 satir) cikar, yan yana satirlari ekle
+        satir.append((k, dict(ana_pencere=[int(v) for v in ana], kucuk_kutu=[int(v) for v in kuc], isim_kutu=[int(v) for v in ism] if ism else None)))
+    # deneme 4: ornament_motor artik alt alta kare uretmez; yan yana satirlar YAKIN_DOKU sonuna eklenir
     yd = np.asarray(Image.open(O / 'YAKIN_DOKU.png').convert('RGB'))
-    bos = (yd > 250).all(2).all(1)
-    bant, i = [], 0
-    while i < len(bos):
-        if not bos[i]:
-            j = i
-            while j < len(bos) and not bos[j]:
-                j += 1
-            bant.append((i, j)); i = j
-        else:
-            i += 1
-    # her satir = gorsel blogu + etiket blogu; son 3 satir (6 bant) alt alta karelerdir
-    kes = bant[-6][0] - 12
+    kes = yd.shape[0]
     ust = Image.fromarray(yd[:kes])
     W_ = max(ust.width, max(s.width for s, _ in satir))
     u = Image.new('RGB', (W_, ust.height + sum(s.height + 24 for s, _ in satir)), 'white'); u.paste(ust, (0, 0)); yy = ust.height + 12
