@@ -26,6 +26,8 @@ name: ornament-printful-katalog
 #   izin listesi: GET mockup-styles, POST /v2/mockup-tasks, GET gorev durumu. Urun / sablon / siparis YOK. Drive kopyasi YOK; cikti yalniz dal.
 # mod=maliyet900 (Merkez / Serdar 3 Kas): Printful 900 maliyet dogrulama, SALT OKUMA (scripts/printful/maliyet900.py; izin listesi betikte:
 #   GET /oauth/scopes, GET /orders?limit=5, POST /orders/estimate-costs, POST /shipping/rates, GET variant). Taslak / siparis YOK. Cikti yalniz dal docs/ornament/ham/.
+# mod=kaynak78 (Merkez karar 28, 3 Kas): 78 cift ornek icin kaynak indirme; Drive ANA_SEMBOL78_KATMAN <CIFT>_ana.png + 12 burc altin PNG.
+#   veri = 'AD=DRIVEID' satirlari base64. Cikti YALNIZ is akisi artifact'i (depoya / Drive'a yazma yok). Printful / Etsy / token yok.
 # mod=ornek3 (Merkez STIL3_V3, Serdar 2 Kas): halkali + halkasiz x 3 zemin (zemin3/V2), scripts/printful/ornament_ornek3.py; cikti STIL3_V3/.
 on:
   workflow_dispatch:
@@ -62,7 +64,7 @@ jobs:
           python-version: "3.13"
       - name: Girdi
         run: |
-          case "$MOD" in tam|ek|rapor|zemin3|ornek|ornek2|ornek3|ornek4|ornek5|urun1|urun2|urun3|urun_drive|kaynak_kopya|drive_kopya|mockup_sade|maliyet900) ;; *) echo "::error::bilinmeyen mod ($MOD)"; exit 1;; esac
+          case "$MOD" in tam|ek|rapor|zemin3|ornek|ornek2|ornek3|ornek4|ornek5|urun1|urun2|urun3|urun_drive|kaynak_kopya|drive_kopya|mockup_sade|maliyet900|kaynak78) ;; *) echo "::error::bilinmeyen mod ($MOD)"; exit 1;; esac
           if [ "$MOD" != tam ] && [ ! -f s/docs/ornament/ham/_adaylar.json ]; then echo "::error::dalda ham yok"; exit 1; fi
           echo "ref ${GITHUB_REF_NAME} | betik $(git -C main rev-parse --short HEAD) | dal $(git -C s rev-parse --short HEAD)"
       - name: rclone kur
@@ -321,6 +323,26 @@ jobs:
           [ -z "$DIS" ] || { echo "::error::izinli klasor disi: $DIS"; exit 1; }
           git commit -qm "printful urun taramasi $MOD (kosu ${GITHUB_RUN_ID}, $ALT)" && git push -q origin "HEAD:${DAL}"
           exit $k
+      - name: Kaynak 78 (kaynak78; Drive indirme -> artifact, depo / Drive yazma yok)
+        if: env.MOD == 'kaynak78'
+        env:
+          VERI: ${{ inputs.veri }}
+        run: |
+          set -euo pipefail
+          K=/tmp/kaynak78; mkdir -p $K
+          printf '%s' "$VERI" | base64 -d > /tmp/liste.txt
+          while IFS='=' read -r ad id; do
+            [ -n "$ad" ] || continue
+            rclone backend copyid gdrive: "$id" "$K/$ad"
+          done < /tmp/liste.txt
+          (cd $K && sha256sum * | tee SHA256.txt)
+          ls -la $K
+      - uses: actions/upload-artifact@v4
+        if: env.MOD == 'kaynak78'
+        with:
+          name: kaynak78
+          path: /tmp/kaynak78
+          retention-days: 3
       - name: Printful 900 maliyet (maliyet900; salt okuma, siparis yok, Drive yok)
         if: env.MOD == 'maliyet900'
         run: |
