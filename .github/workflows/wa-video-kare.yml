@@ -1,6 +1,6 @@
 name: wa-video-kare
 # ETSY API YOK, KILITSIZ (KILIT SURESI kurali): wa-video-oku kaydindan canli video ilk/son kare <-> canli kapak ve <-> v7d kaynak kare farki.
-# Kod: scripts/etsy/wa_video_kare.py. Girdi: TEMP/<klasor>/VIDEO_KAYIT.json + TEMP/VIDEO_V7D_YUKLE_KAYNAK/20261030_144551/*.mp4.
+# Kod: scripts/etsy/wa_video_kare.py. Girdi: TEMP/<klasor>/VIDEO_KAYIT.json + TEMP/VIDEO_V7_DUZELTME/20261028_134859/TAM78/*.mp4 (MANIFEST: VIDEO_V7D_YUKLE_KAYNAK/20261030_144551).
 # Cikti: ayni klasorde KARE/ (TABLO.csv + ornek kareler). Esik yok; degerler raporlanir.
 permissions:
   contents: read
@@ -41,13 +41,13 @@ jobs:
           set -euo pipefail
           mkdir -p _in/v7d _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/$K/VIDEO_KAYIT.json" _in/VIDEO_KAYIT.json
-          rclone copy "gdrive:ASTROLOVE/TEMP/VIDEO_V7D_YUKLE_KAYNAK/20261030_144551" _in/v7d --include "*.mp4" --transfers 8 -q
-          echo "v7d: $(ls _in/v7d | wc -l)"
+          rclone copy "gdrive:ASTROLOVE/TEMP/VIDEO_V7_DUZELTME/20261028_134859/TAM78" _in/v7d --include "*.mp4" --transfers 8 -q
+          n=$(ls _in/v7d | wc -l); echo "v7d: $n"; [ "$n" -eq 78 ] || { echo "::error::v7d dosya sayisi $n (78 beklenir)"; exit 1; }
       - name: Kare olcumu
         run: python3 scripts/etsy/wa_video_kare.py --kayit _in/VIDEO_KAYIT.json --v7d-dir _in/v7d --out _out
       - name: Drive'a
         if: ${{ always() }}
         env: {K: "${{ inputs.klasor }}"}
         run: |
-          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/$K/KARE" --immutable -q && echo "::notice title=WAKARE::TEMP/$K/KARE/"
+          [ -d _out ] && rclone copy _out "gdrive:ASTROLOVE/TEMP/$K/KARE_${GITHUB_RUN_ID}" --immutable -q && echo "::notice title=WAKARE::TEMP/$K/KARE_${GITHUB_RUN_ID}/"
           rm -rf ~/.config/rclone
