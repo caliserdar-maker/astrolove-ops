@@ -84,7 +84,12 @@ bolumu okunmadan baslanmaz.
 
 ## HIZ VE KALITE KURALLARI (2 Eyl 2026 karari)
 
-1. Alt-ajan / review workflow / paralel ajan YASAK. Tek surec.
+1. Alt ajan (Serdar 26 Eki + 3 Kas A): yalniz dosya/gorsel/video URETIMI paralel alt ajanlara bolunebilir; ajan sayisi her
+   gorev metninde yazilir. Etsy (ve Metricool) yazimi ajanla yapilmaz: sirayla, kilit_bekle.py ile. Toplu uretimden once
+   gercek oranda ornek + Serdar onayi; paralel uretilen gorseller bagimsiz goz kontrolu bitmeden disa aktarilmaz/yayina gitmez.
+   "En fazla 2 deneme" TOPLAMDIR, ajan sayisiyla cogalmaz; "Actions en fazla 1 kez" ve "yontem degisecekse DUR, sor" aynen.
+   Yasak kalir: arastirma icin ajan surusu, cok ajanli inceleme is akisi, Extra/ultracode. Inceleme: tek bagimsiz inceleme
+   ajani (asagida "Capraz inceleme"). Ortak kaynak: kilit, kota ve ayni dosyaya iki ajan yazmaz.
 2. Iterasyon YERELDE: kucuk ornek (6 poster / 1 cift) ile 60 sn altinda
    test. Actions yalniz yerelde temiz cikan surum icin, en fazla 1 kez.
 3. Her gorev basinda 3 satir yaz: (a) yontem, (b) "bitti" tanimi (olculur
@@ -165,7 +170,7 @@ Hedef: Serdar isim + burc yeri + tagline verir, 15 dk icinde 5 PDF Drive'da (Tes
   job loglari okunamadiginda once bunlara bakilir.
 
 ## Çapraz inceleme ve bağlam (Serdar, 21 Eki 2026)
-- Etsy'ye veya Metricool'a toplu yazmadan önce ve sonuç raporu vermeden önce TEK bir bağımsız inceleme ajanı çalıştırılır. Görevi: "Bu planın/raporun neden yanlış olduğunu kanıtla; kapıların atladığı hataları, yanlış varsayımları ve kaynaksız iddiaları bul." Bulgular düzeltilmeden rapor verilmez. Bunun dışında "alt ajan yok" kuralı geçerlidir.
+- Etsy'ye veya Metricool'a toplu yazmadan önce ve sonuç raporu vermeden önce TEK bir bağımsız inceleme ajanı çalıştırılır. Görevi: "Bu planın/raporun neden yanlış olduğunu kanıtla; kapıların atladığı hataları, yanlış varsayımları ve kaynaksız iddiaları bul." Bulgular düzeltilmeden rapor verilmez. Bunun dışında alt ajan yalnız dosya/görsel/video ÜRETİMİ için kullanılır (HIZ VE KALITE madde 1; Serdar 26 Eki + 3 Kas A): Etsy/Metricool yazımı ajanla yapılmaz, araştırma ajan sürüsü ve çok ajanlı inceleme yasak.
 - Raporlardaki her rakamın kaynağı yazılır (ölçüm / API / dosya / tahmin). Kaynaksız rakam yok.
 - Görev metinlerinde rol verme yok; oturum, işe başlamadan ilgili karar dosyalarını ve önceki sonuçları okur.
 - İş sırasında görevin dışında bir hata, risk ya da fırsat görülürse (ör. sipariş hattında kapı FAIL'i), kanıtıyla rapora eklenir; kendiliğinden düzeltilmez.
