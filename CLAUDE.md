@@ -171,8 +171,9 @@ Hedef: Serdar isim + burc yeri + tagline verir, 15 dk icinde 5 PDF Drive'da (Tes
 - Test, birkac dakika once main'e giren DOGRULANMAMIS kodla baslatilmaz (Test 3, 4fb7a35 ile 1 dk sonra kostu).
 - Ayni koda ayni anda tek oturum dokunur: duzeltmeyi kim yapiyorsa o; koordinator o sirada kod degistirmez.
 - Koordinator sessiz kalmaz: hata ayiklarken de en gec 2 dk'da bir Serdar'a tek satir durum.
-- Test sonucu boru (`| tail`) ile maskelenmez: once test, cikis kodu kontrol, SONRA commit/push (1 Eki: `--is` anahtar
-  sozcugu hatasi bu yuzden main'e gitti, 1 dk sonra duzeltildi).
+- Test sonucu maskelenmez (Serdar 1 Eki + 4 Kas): test komutu TEK BASINA kosar, cikis kodu AYRI kontrol edilir; boru (`| tail`,
+  `| grep`), `|| true` ya da `&&` zinciri sonucu gizlemez (boru gerekiyorsa `set -o pipefail`). FAIL varken commit, push ve kosu YOK
+  (1 Eki: `--is` hatasi main'e gitti; 4 Kas: poster kuru betiginde test 13/14 FAIL iken grep cikisi zinciri surdurdu, commit + kosu gitti).
 - Baska oturumun izledigi kosu iptal edilmeden once o oturuma/Serdar'a yeni kosu no bildirilir.
 - Uzun bloklayan izleme dongusu yok: en fazla ~2 dk bekle, sonra Serdar'a durum yaz (Serdar iki kez durdurdu).
 - Yeni test/arac ilk surumde hizli tasarlanir: yalniz gereken boylar, paralel indirme/olcum.
@@ -181,6 +182,16 @@ Hedef: Serdar isim + burc yeri + tagline verir, 15 dk icinde 5 PDF Drive'da (Tes
 
 ## Çapraz inceleme ve bağlam (Serdar, 21 Eki 2026)
 - Etsy'ye veya Metricool'a toplu yazmadan önce ve sonuç raporu vermeden önce TEK bir bağımsız inceleme ajanı çalıştırılır. Görevi: "Bu planın/raporun neden yanlış olduğunu kanıtla; kapıların atladığı hataları, yanlış varsayımları ve kaynaksız iddiaları bul." Bulgular düzeltilmeden rapor verilmez. Bunun dışında alt ajan yalnız dosya/görsel/video ÜRETİMİ için kullanılır (HIZ VE KALITE madde 1; Serdar 26 Eki + 3 Kas A): Etsy/Metricool yazımı ajanla yapılmaz, araştırma ajan sürüsü ve çok ajanlı inceleme yasak.
+- KALİTE KURALLARI (Serdar 4 Kas, "onaylıyorum"; 4 Kas olayları):
+  1. Etsy'ye yazan yeni ya da değişen kod (kapı dahil), yazım koşusundan ÖNCE işi yapmamış tek ajana bağımsız incelemeye verilir
+     ("bunun neden yanlış olduğunu kanıtla"); bulgular düzeltilmeden koşu yok. İncelemeden sonra yazım yolu yeniden değişirse
+     değişen kısım da incelenir. (4 Kas: YD talimat kapı kodu incelenmeden main'e alındı, 2 dk sonra 77 ilan yazıldı.)
+  2. Testlerin çıkış kodu: "Test 3 dersleri" bölümündeki "Test sonucu maskelenmez" maddesi (tek başına koşum, ayrı çıkış kodu, pipefail, FAIL'de commit/koşu yok).
+  3. Her kapı ve test bilinen PASS + bilinen FAIL örneğiyle denenir. Yalnız kendi kurduğu veriyi doğrulayan (FAIL veremeyen) test
+     kanıt sayılmaz; raporda "zayıf test" diye yazılır. (4 Kas: YD c testi kendi sahte verisini doğruluyordu.)
+  4. KAPI GEVŞETME YASAĞI (Serdar 1 Kas "b" + 4 Kas): kapı tanımı gevşetilmez, yalnız sıkılaştırılır. Ölçüm bölgesini daraltan,
+     payı büyüten, eşiği gevşeten değişiklik gevşetmedir; Serdar onayı olmadan yapılmaz. Ölçüm ile üretim aynı parametreyle çalışır;
+     farklıysa raporda yazılır. (4 Kas: ornament Kova kapısının ölçüm payı 24 -> 66 px büyütüldü, üretim 24 px'te kaldı: kör bant.)
 - Raporlardaki her rakamın kaynağı yazılır (ölçüm / API / dosya / tahmin). Kaynaksız rakam yok.
 - Görev metinlerinde rol verme yok; oturum, işe başlamadan ilgili karar dosyalarını ve önceki sonuçları okur.
 - İş sırasında görevin dışında bir hata, risk ya da fırsat görülürse (ör. sipariş hattında kapı FAIL'i), kanıtıyla rapora eklenir; kendiliğinden düzeltilmez.
