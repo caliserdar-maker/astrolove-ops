@@ -1,0 +1,3 @@
+GEMINI_VIRGO cikis 1 ['[   20.2s] FAIL yerlesim {"alt": 838.0, "sembol_kaldir_px": 19, "sembol_V4_ust": 263, "hata": "sembol sigmiyor", "yasak": {"guvenli_disi": 0, "delik": 0, "ust_cizgi": 0, "tuval_disi": 0}, "cakisma": ["halka/sembol"], "en_fazla_kaldir": 17, "gereken_kucultme_px": 2}']
+ARIES_ARIES sade 0 1
+TESHIS bitti

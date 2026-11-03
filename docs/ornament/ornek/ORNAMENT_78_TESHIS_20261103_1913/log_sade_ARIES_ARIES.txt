@@ -1,0 +1,9 @@
+1 ALTIN_TONU: kati 1.42 OKUNMAZ (uretim adayi degil) | sembol 1.2 | uclar 1.46 | leke 0 | yasak 0 | seffaf True 0 | gamut 0
+2 KOYU_BRONZ: kati 8.86 | sembol 5.5 | uclar 10.23 | leke 0 | yasak 0 | seffaf True 0 | gamut 0
+3 MAT_SIYAH: kati 13.18 | sembol 12.23 | uclar 14.71 | leke 0 | yasak 0 | seffaf True 0 | gamut 0
+4 GRAFIT_GRI: kati 8.09 | sembol 4.68 | uclar 10.07 | leke 0 | yasak 0 | seffaf True 0 | gamut 0
+5 GUMUS_TONU: kati 1.43 OKUNMAZ (uretim adayi degil) | sembol 1.2 | uclar 1.47 | leke 0 | yasak 0 | seffaf True 0 | gamut 0
+6 ROSE_TONU: kati 1.42 OKUNMAZ (uretim adayi degil) | sembol 1.2 | uclar 1.46 | leke 0 | yasak 0 | seffaf True 0 | gamut 7892
+7 BORDO: kati 9.51 | sembol 5.52 | uclar 11.33 | leke 0 | yasak 0 | seffaf True 0 | gamut 0
+8 LACIVERT: kati 11.5 | sembol 8.94 | uclar 12.97 | leke 0 | yasak 0 | seffaf True 0 | gamut 0
+TEKNIK KAPI FAIL | okunur ['2', '3', '4', '7', '8'] | okunmaz ['1', '5', '6']
