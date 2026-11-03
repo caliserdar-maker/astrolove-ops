@@ -13,6 +13,8 @@ import by_baski_ekle as E  # noqa: E402
 D = Path(__file__).resolve().parent
 A77 = html.unescape((D / "testdata_by_aciklama_77.txt").read_text(encoding="utf-8"))  # canli API metni (varlik kodlu) cozulmus
 ACL = (D / "testdata_by_aciklama_cl.txt").read_text(encoding="utf-8")
+# 3 Kas Soru 3 A: SATIR_FORMAT premium'suz; CL ornegindeki eski (premium) bicim satiri yeni bicime cevrilir (teslim satiri testi aynen)
+ACL = ACL.replace("printed on premium matte art paper with long-lasting inks and shipped", "printed on matte art paper and shipped")
 STIL = [("Starlit", 138126211616, "STARLIT"), ("Timeless", 108763733183, "TIMELESS"), ("First Page", 176794359732, "FIRSTPAGE"),
         ("Layers", 108661364507, "LAYERS"), ("Botanical", 101440971797, "BOTANICAL")]
 FMT = [("Digital card 5x7", 1523008985108, "CARD5X7", 390), ("Digital file 8x10", 1046101489652, "FILE8X10", 490)]

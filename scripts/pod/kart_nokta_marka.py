@@ -90,7 +90,7 @@ def ozellik(a, b):
             S((640, 1572, 1400, 1614), "and size. 300 dpi. Delivered to your", "and size, 300 dpi, delivered to your", "merkez",
               aile="lato"),
             S((640, 1617, 1400, 1662), "Etsy order within 24 hours.", "Etsy order within 24 hours", "merkez", aile="lato"),
-            S((1500, 1526, 2420, 1569), "Premium matte art paper, long-lasting inks.", "Premium matte art paper, long-lasting inks", "merkez"),
+            S((1500, 1526, 2420, 1569), "Premium matte art paper, long-lasting inks.", "Printed on matte art paper", "merkez"),   # 3 Kas Soru 3 A
             S((1500, 1572, 2420, 1614), "Unframed, ready for your frame.", "Unframed, ready for your frame", "merkez"),
             S((1130, 1828, 1870, 1885), f"A personal gift for {a} and {b} couples.", f"A personal gift for {a} and {b} couples", "merkez",
               ara=(400, 2600))],
@@ -138,7 +138,7 @@ def ozellik(a, b):
              S((975, 2053, 2025, 2102), "Artwork enlargement, not a physical print photograph.",
                "Artwork enlargement, not a physical print photograph", "merkez")],
         11: [et, S((135, 192, 1435, 327), "Fine art, down to the paper.", "Fine art, down to the paper"),
-             S((146, 330, 1075, 391), "Printed on premium matte art paper.", "Printed on premium matte art paper"),
+             S((146, 330, 1075, 391), "Printed on premium matte art paper.", "Printed on matte art paper"),   # 3 Kas Soru 3 A
              S((1356, 671, 2315, 728), "A smooth matte art paper with rich detail.", "A smooth matte art paper with rich detail"),
              S((1356, 1027, 2325, 1084), "A refined surface without a glossy coating.", "A refined surface without a glossy coating"),
              S((1356, 1385, 2310, 1458), "Deep, even color across the whole design.", "Deep, even color across the whole design"),

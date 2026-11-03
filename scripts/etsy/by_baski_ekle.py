@@ -60,7 +60,7 @@ SATIR_TESLIM_ESKI = ("- Shipped print: made and shipped within 4 to 7 days after
 # Serdar 24 Eki "ok" (secenek B: her yere ucretsiz; teslim gunleri baski profili 318080539024 ile ayni)
 SATIR_TESLIM = ("- Shipped print: made and shipped within 4 to 7 days after your approval, with free shipping worldwide. "
                 "Estimated delivery: US 3 to 8 days, UK and Australia 5 to 10 days, EU 5 to 12 days, other countries 7 to 21 days.")
-SATIR_FORMAT = ("- Shipped print 8x10: printed on premium matte art paper with long-lasting inks and shipped to you by our "
+SATIR_FORMAT = ("- Shipped print 8x10: printed on matte art paper and shipped to you by our "   # Serdar 3 Kas Soru 3 A
                 "production partner.")
 DEGIS = [  # (simdiki, yeni)
     ("As soon as you approve it, we prepare your file.", "As soon as you approve it, we prepare your file or your print."),

@@ -195,7 +195,8 @@ k("T1 envanter 140, ilk urun 5x7, 10 yeni (Print 19.90 x5, Digital 3.90 x5)",
 k("T1 mevcut 130 urun aynen (imza)", Y.imza({"products": [p for p in inv if Y.boy(p) != K.ETIKET_5X7]})[0]
   == Y.imza(PK[A]["envanter_ham_yedek"])[0])
 k("T1 EN = plan en_yeni; '24 hours' onizleme cumlesi; yasak yok",
-  norm(api.L[A]["description"]) == PK[A]["en_yeni"] and "We send a free preview via Etsy Messages within 24 hours. After you approve, "
+  norm(api.L[A]["description"]) == PK[A]["en_yeni"] and "We send a preview via Etsy Messages within 24 hours. After you approve, "   # 3 Kas Soru 11
+  
   "your file is emailed to you within 24 hours. We check every personalization by hand before sending" in api.L[A]["description"]
   and not K.YASAK_EN.search(api.L[A]["description"]) and "14 sizes, from 5 x 7" in api.L[A]["description"])
 k("T1 RU = plan ru_yeni, RU baslik + etiket aynen", api.ru[A]["description"] == PK[A]["ru_yeni"] and api.ru[A]["title"] == F["ru"]["title"]
