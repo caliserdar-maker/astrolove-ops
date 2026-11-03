@@ -12,11 +12,11 @@ vektor_yuzey.yon_alani; alfa_temizle.temizle) ve KILIT_GPTGIRDI.json AYAR + ORTA
 4 GREN: KILIT gren (1.0), uret_tam formulu (sRGB 0-255, GaussianBlur(N(0,1), 0.8) / 0.35 x gren), yalniz ogede, 10x cizimde; 954'te kalan genlik olculur.
 5 DISARIDA: yansima, temas, isima, poster dis golgesi, zemin_daire (karar 18: zemin rengi ogeye tasinmaz).
 7 ALFA_TEMIZLE: yalniz kucuk burclar ve logo (posterde uygulandigi ogeler), 10x olcekte, pad 40 (olustur_alfa_sablon ile ayni). Isim / tarih / halka YOK.
-Butunlesme: boya_motor = ornament_altin.boya_altin (a114ddb) ile ayni; deneme 4: kucuk ogelerde dusus = ana sembol ortanca carpani, esit goz, ic golge guc 0.35 + genislik x min(1, D_oge / D_ana) (deneme 3,
-Merkez 3 Kas); dusus (alt 0.92, us 0.25) aynen. Kapilar: renk_uyum dE00 <= 1 (not: medyani medyana kaydirdigi icin bu kapi tanim geregi gecer),
-son dosya dE00 <= 2 (dusus carpani bolunerek; ham deger bilgi), ortanca kontrast >= 4.5 (logo ve halka govdesi dahil; kati bilgi), leke 0, tasma 0,
-ton (Lab kaynak araligi + B >= R), halka govde surekliligi (s >= 0.30, 3 px yay, >= %70 govde ortancasi), yerlesim a114ddb,
-IoU: kucuk burc / logo >= 0.98; isim / tarih / halka IoU bilgi, murekkep bolgesi ort. alfa farki <= 0.035; RUBY kurali.
+Butunlesme: boya_motor = ornament_altin.boya_altin (a114ddb) ile ayni; deneme 4 (Merkez 3 Kas, Serdar kabul): kucuk ogelerde dusus = ana sembol
+ortanca carpani (dus_sabit), esit 'goz' (KILIT esit=kazanc'tan onayli sapma; KILIT kontrolu yalniz dosya degerini dogrular), ic golge guc 0.35,
+genislik x min(1, D_oge / D_ana). Kapilar: son dosya HAM dE00 <= 2 (dusus bolunmus deger ve renk_uyum dE00 <= 1 yalniz bilgi), ortanca kontrast
+>= 4.5 (logo ve halka govdesi dahil), leke 0, tasma 0, ton, halka govde surekliligi (s >= 0.30, 3 px yay, >= %70; deneme 4: 0.692 FAIL, Serdar kabul;
+neden esit 'goz' govdeyi parlatti), yerlesim a114ddb, IoU: kucuk burc / logo >= 0.98; isim / tarih / halka murekkep bolgesi ort. alfa farki <= 0.035; RUBY kurali.
 Kullanim: ornament_motor.py --kaynak DIR --motor DIR(motor_gpt kopyasi) --cikti DIR --son DIR(a5e3ea2 STIL3_SON)"""
 import argparse
 import hashlib
@@ -405,7 +405,7 @@ def main():
         return np.clip((Lz / max(Lref, 1)) ** al.DUSUS['us'], al.DUSUS['alt'], 1.0)
 
     def boya_motor(Y_, model_, z, td_, varyant, kazanc, icp, dus_sabit=None):
-        """ornament_altin.boya_altin (a114ddb) ile ayni; tek fark: ic golge (kayma, sigma, guc) ogeye gore icp'den."""
+        """ornament_altin.boya_altin (a114ddb) ile ayni; farklar: ic golge (kayma, sigma, guc) ogeye gore icp'den; dus_sabit verilirse sembol disi ogelerde sabit dusus."""
         M = Y_['M']
         zf = z.astype(np.float32)
         out = zf.copy()

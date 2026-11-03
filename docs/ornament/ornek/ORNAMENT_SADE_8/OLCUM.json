@@ -184,6 +184,12 @@
    "zemin_seffaf": true,
    "zemin_disi_alfa_sifir_olmayan": 0,
    "gamut_kroma_kuculen_piksel": 0,
+   "gamut_kroma_kaybi": null,
+   "halka_sureklilik_bilgi": {
+    "govde_ortanca": 150.7,
+    "en_dusuk_3px": 104.3,
+    "oran": 0.692
+   },
    "bosluk_px": [
     20,
     20,
@@ -395,6 +401,12 @@
    "zemin_seffaf": true,
    "zemin_disi_alfa_sifir_olmayan": 0,
    "gamut_kroma_kuculen_piksel": 0,
+   "gamut_kroma_kaybi": null,
+   "halka_sureklilik_bilgi": {
+    "govde_ortanca": 57.6,
+    "en_dusuk_3px": 40.6,
+    "oran": 0.704
+   },
    "bosluk_px": [
     20,
     20,
@@ -606,6 +618,12 @@
    "zemin_seffaf": true,
    "zemin_disi_alfa_sifir_olmayan": 0,
    "gamut_kroma_kuculen_piksel": 0,
+   "gamut_kroma_kaybi": null,
+   "halka_sureklilik_bilgi": {
+    "govde_ortanca": 30.0,
+    "en_dusuk_3px": 23.3,
+    "oran": 0.778
+   },
    "bosluk_px": [
     20,
     20,
@@ -817,6 +835,12 @@
    "zemin_seffaf": true,
    "zemin_disi_alfa_sifir_olmayan": 0,
    "gamut_kroma_kuculen_piksel": 0,
+   "gamut_kroma_kaybi": null,
+   "halka_sureklilik_bilgi": {
+    "govde_ortanca": 65.3,
+    "en_dusuk_3px": 51.0,
+    "oran": 0.782
+   },
    "bosluk_px": [
     20,
     20,
@@ -1028,6 +1052,12 @@
    "zemin_seffaf": true,
    "zemin_disi_alfa_sifir_olmayan": 0,
    "gamut_kroma_kuculen_piksel": 0,
+   "gamut_kroma_kaybi": null,
+   "halka_sureklilik_bilgi": {
+    "govde_ortanca": 155.8,
+    "en_dusuk_3px": 109.4,
+    "oran": 0.702
+   },
    "bosluk_px": [
     20,
     20,
@@ -1239,6 +1269,16 @@
    "zemin_seffaf": true,
    "zemin_disi_alfa_sifir_olmayan": 0,
    "gamut_kroma_kuculen_piksel": 9631,
+   "gamut_kroma_kaybi": {
+    "ortanca": 10.5,
+    "p95": 20.4,
+    "en_cok": 30.8
+   },
+   "halka_sureklilik_bilgi": {
+    "govde_ortanca": 159.0,
+    "en_dusuk_3px": 111.5,
+    "oran": 0.701
+   },
    "bosluk_px": [
     20,
     20,
@@ -1450,6 +1490,12 @@
    "zemin_seffaf": true,
    "zemin_disi_alfa_sifir_olmayan": 0,
    "gamut_kroma_kuculen_piksel": 0,
+   "gamut_kroma_kaybi": null,
+   "halka_sureklilik_bilgi": {
+    "govde_ortanca": 51.9,
+    "en_dusuk_3px": 40.6,
+    "oran": 0.783
+   },
    "bosluk_px": [
     20,
     20,
@@ -1661,6 +1707,12 @@
    "zemin_seffaf": true,
    "zemin_disi_alfa_sifir_olmayan": 0,
    "gamut_kroma_kuculen_piksel": 0,
+   "gamut_kroma_kaybi": null,
+   "halka_sureklilik_bilgi": {
+    "govde_ortanca": 38.9,
+    "en_dusuk_3px": 30.4,
+    "oran": 0.781
+   },
    "bosluk_px": [
     20,
     20,

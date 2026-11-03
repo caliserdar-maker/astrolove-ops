@@ -69,7 +69,10 @@ def gamut_kroma(L_):
             lo = np.where(ok, mid, lo); hi = np.where(ok, hi, mid)
         t = base.copy(); t[:, 1:] *= lo[:, None]
         r[dis] = lab_rgb_ham(t)
-    return np.clip(r, 0, 1) * 255, n
+    kayip = None
+    if n:
+        Ce = np.hypot(base[:, 1], base[:, 2]); kayip = Ce * (1 - lo)
+    return np.clip(r, 0, 1) * 255, n, kayip
 
 
 HEX = lambda h: np.array([int(h[i:i + 2], 16) for i in (1, 3, 5)], np.float32)
@@ -111,7 +114,18 @@ def main():
     beyaz = np.full((N, N, 3), 255, np.uint8)
     BR = o5.BRONZ
     Lr = float(lum(BR['acik'][None])[0] / lum(BR['ana'][None])[0])
-    gamut = {}
+    gamut, KAYIP = {}, {}
+
+    def sureklilik(rgb):
+        """ornament_motor.sureklilik ile ayni olcum (bilgi): halka orta ekseni, govde s >= 0.30, 3 px yay penceresi / govde ortancasi."""
+        hb = D['hb']; ax, by, cyh = hb['ax'], hb['by'], hb['cy']; hm = M['halka']
+        L = lum(rgb.astype(np.float32)); Tg = np.arange(0, 360, 0.05); tr = np.radians(Tg)
+        px = (CX + ax * np.cos(tr) - 0.5).astype(np.float32)[None]; py = (cyh + by * np.sin(tr) - 0.5).astype(np.float32)[None]
+        al_ = cv2.remap(hm, px, py, cv2.INTER_LINEAR)[0]; gv = cv2.remap(govde.astype(np.float32), px, py, cv2.INTER_NEAREST)[0] > 0.5
+        Lv = cv2.remap(L, px, py, cv2.INTER_LINEAR)[0]; ok = gv & (al_ >= 0.5)
+        x_, y_ = px[0], py[0]; s = np.cumsum(np.hypot(np.diff(np.r_[x_, x_[0]]), np.diff(np.r_[y_, y_[0]])))
+        med = float(np.median(Lv[ok])); en = min(float(Lv[ok & (np.abs(s - s[i]) <= 1.5)].mean()) for i in np.nonzero(ok)[0][::4])
+        return dict(govde_ortanca=round(med, 1), en_dusuk_3px=round(en, 1), oran=round(en / med, 3))
 
     def ton(cc, m, hedef, anahtar):
         sec = m > 0.001
@@ -126,8 +140,10 @@ def main():
         C = np.hypot(L_[:, 1], L_[:, 2]); h = np.arctan2(L_[:, 2], L_[:, 1]) + np.radians(ht - h_alt)
         C2 = C * (Ct / max(C_alt, 1e-3))
         L_[:, 1], L_[:, 2] = C2 * np.cos(h), C2 * np.sin(h)
-        out[sec], n = gamut_kroma(L_)
+        out[sec], n, kayip = gamut_kroma(L_)
         gamut[anahtar] = gamut.get(anahtar, 0) + n
+        if kayip is not None:
+            KAYIP.setdefault(anahtar, []).append(kayip)
         return out
 
     def murekkep(cc, ad, ana):
@@ -187,6 +203,10 @@ def main():
                  goruntu_yasak=gy, leke_a=sum(v['alfa_lt_09'] for k2, v in lk.items() if k2 in o5.LEKE_KAPI_OGE),
                  zemin_seffaf=bool((rgba[..., 3][disari] == 0).all()), zemin_disi_alfa_sifir_olmayan=int((rgba[..., 3][disari] != 0).sum()),
                  gamut_kroma_kuculen_piksel=gamut.get(ad_r, 0),
+                 gamut_kroma_kaybi=(lambda k: dict(ortanca=round(float(np.median(k)), 1), p95=round(float(np.percentile(k, 95)), 1),
+                                                   en_cok=round(float(k.max()), 1)) if k is not None else None)(
+                     np.concatenate(KAYIP[ad_r]) if ad_r in KAYIP else None),
+                 halka_sureklilik_bilgi=sureklilik(rgb),
                  bosluk_px=o5.bosluklar(E), sembol_kutu=list(o5.kutu(E, 'sembol')),
                  renk_medyan_rgb={k: [int(v) for v in np.median(rgb[M[k] >= 0.9], 0)] for k in ('sembol', 'isim1', 'kucuk_sol', 'halka')})
         dosya = f'SADE_{n}_{ad_r}_954.png'
