@@ -1,0 +1,410 @@
+{
+ "gorev": "Printful 900 maliyet dogrulama (salt okuma, siparis yok)",
+ "varyant": 23133,
+ "dosya": "https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/6daab364/docs/ornament/ornek/ORNAMENT_5STIL_20261103_1539/CANCER_LIBRA_FILDISI_954.png",
+ "damga": "20261103_1617",
+ "satir": [
+  {
+   "ulke": "US",
+   "http_1": 200,
+   "kargo_1": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 10⁠–12) ",
+    "rate": "5.89",
+    "currency": "USD",
+    "minDeliveryDays": 4,
+    "maxDeliveryDays": 6,
+    "minDeliveryDate": "2026-11-10",
+    "maxDeliveryDate": "2026-11-12"
+   },
+   "http_2": 200,
+   "kargo_2": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 10⁠–12) ",
+    "rate": "6.59",
+    "currency": "USD",
+    "minDeliveryDays": 4,
+    "maxDeliveryDays": 6,
+    "minDeliveryDate": "2026-11-10",
+    "maxDeliveryDate": "2026-11-12"
+   }
+  },
+  {
+   "ulke": "CA",
+   "http_1": 200,
+   "kargo_1": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 18⁠–24) ",
+    "rate": "9.89",
+    "currency": "USD",
+    "minDeliveryDays": 12,
+    "maxDeliveryDays": 18,
+    "minDeliveryDate": "2026-11-18",
+    "maxDeliveryDate": "2026-11-24"
+   },
+   "http_2": 200,
+   "kargo_2": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 18⁠–24) ",
+    "rate": "11.88",
+    "currency": "USD",
+    "minDeliveryDays": 12,
+    "maxDeliveryDays": 18,
+    "minDeliveryDate": "2026-11-18",
+    "maxDeliveryDate": "2026-11-24"
+   }
+  },
+  {
+   "ulke": "GB",
+   "http_1": 200,
+   "kargo_1": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 10⁠–18) ",
+    "rate": "9.89",
+    "currency": "USD",
+    "minDeliveryDays": 4,
+    "maxDeliveryDays": 12,
+    "minDeliveryDate": "2026-11-10",
+    "maxDeliveryDate": "2026-11-18"
+   },
+   "http_2": 200,
+   "kargo_2": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 10⁠–18) ",
+    "rate": "11.88",
+    "currency": "USD",
+    "minDeliveryDays": 4,
+    "maxDeliveryDays": 12,
+    "minDeliveryDate": "2026-11-10",
+    "maxDeliveryDate": "2026-11-18"
+   }
+  },
+  {
+   "ulke": "DE",
+   "http_1": 200,
+   "kargo_1": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 12⁠–21) ",
+    "rate": "9.89",
+    "currency": "USD",
+    "minDeliveryDays": 6,
+    "maxDeliveryDays": 15,
+    "minDeliveryDate": "2026-11-12",
+    "maxDeliveryDate": "2026-11-21"
+   },
+   "http_2": 200,
+   "kargo_2": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 12⁠–21) ",
+    "rate": "11.88",
+    "currency": "USD",
+    "minDeliveryDays": 6,
+    "maxDeliveryDays": 15,
+    "minDeliveryDate": "2026-11-12",
+    "maxDeliveryDate": "2026-11-21"
+   }
+  },
+  {
+   "ulke": "FR",
+   "http_1": 200,
+   "kargo_1": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 12⁠–21) ",
+    "rate": "9.89",
+    "currency": "USD",
+    "minDeliveryDays": 6,
+    "maxDeliveryDays": 15,
+    "minDeliveryDate": "2026-11-12",
+    "maxDeliveryDate": "2026-11-21"
+   },
+   "http_2": 200,
+   "kargo_2": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 12⁠–21) ",
+    "rate": "11.88",
+    "currency": "USD",
+    "minDeliveryDays": 6,
+    "maxDeliveryDays": 15,
+    "minDeliveryDate": "2026-11-12",
+    "maxDeliveryDate": "2026-11-21"
+   }
+  },
+  {
+   "ulke": "NL",
+   "http_1": 200,
+   "kargo_1": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 12⁠–21) ",
+    "rate": "9.89",
+    "currency": "USD",
+    "minDeliveryDays": 6,
+    "maxDeliveryDays": 15,
+    "minDeliveryDate": "2026-11-12",
+    "maxDeliveryDate": "2026-11-21"
+   },
+   "http_2": 200,
+   "kargo_2": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 12⁠–21) ",
+    "rate": "11.88",
+    "currency": "USD",
+    "minDeliveryDays": 6,
+    "maxDeliveryDays": 15,
+    "minDeliveryDate": "2026-11-12",
+    "maxDeliveryDate": "2026-11-21"
+   }
+  },
+  {
+   "ulke": "IT",
+   "http_1": 200,
+   "kargo_1": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 12⁠–21) ",
+    "rate": "9.89",
+    "currency": "USD",
+    "minDeliveryDays": 6,
+    "maxDeliveryDays": 15,
+    "minDeliveryDate": "2026-11-12",
+    "maxDeliveryDate": "2026-11-21"
+   },
+   "http_2": 200,
+   "kargo_2": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 12⁠–21) ",
+    "rate": "11.88",
+    "currency": "USD",
+    "minDeliveryDays": 6,
+    "maxDeliveryDays": 15,
+    "minDeliveryDate": "2026-11-12",
+    "maxDeliveryDate": "2026-11-21"
+   }
+  },
+  {
+   "ulke": "ES",
+   "http_1": 200,
+   "kargo_1": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 12⁠–21) ",
+    "rate": "9.89",
+    "currency": "USD",
+    "minDeliveryDays": 6,
+    "maxDeliveryDays": 15,
+    "minDeliveryDate": "2026-11-12",
+    "maxDeliveryDate": "2026-11-21"
+   },
+   "http_2": 200,
+   "kargo_2": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 12⁠–21) ",
+    "rate": "11.88",
+    "currency": "USD",
+    "minDeliveryDays": 6,
+    "maxDeliveryDays": 15,
+    "minDeliveryDate": "2026-11-12",
+    "maxDeliveryDate": "2026-11-21"
+   }
+  },
+  {
+   "ulke": "AU",
+   "http_1": 200,
+   "kargo_1": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 18⁠–24) ",
+    "rate": "9.89",
+    "currency": "USD",
+    "minDeliveryDays": 12,
+    "maxDeliveryDays": 18,
+    "minDeliveryDate": "2026-11-18",
+    "maxDeliveryDate": "2026-11-24"
+   },
+   "http_2": 200,
+   "kargo_2": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 18⁠–24) ",
+    "rate": "11.88",
+    "currency": "USD",
+    "minDeliveryDays": 12,
+    "maxDeliveryDays": 18,
+    "minDeliveryDate": "2026-11-18",
+    "maxDeliveryDate": "2026-11-24"
+   }
+  },
+  {
+   "ulke": "NZ",
+   "http_1": 200,
+   "kargo_1": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 18⁠–24) ",
+    "rate": "9.89",
+    "currency": "USD",
+    "minDeliveryDays": 12,
+    "maxDeliveryDays": 18,
+    "minDeliveryDate": "2026-11-18",
+    "maxDeliveryDate": "2026-11-24"
+   },
+   "http_2": 200,
+   "kargo_2": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 18⁠–24) ",
+    "rate": "11.88",
+    "currency": "USD",
+    "minDeliveryDays": 12,
+    "maxDeliveryDays": 18,
+    "minDeliveryDate": "2026-11-18",
+    "maxDeliveryDate": "2026-11-24"
+   }
+  },
+  {
+   "ulke": "JP",
+   "http_1": 200,
+   "kargo_1": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 18⁠–24) ",
+    "rate": "9.89",
+    "currency": "USD",
+    "minDeliveryDays": 12,
+    "maxDeliveryDays": 18,
+    "minDeliveryDate": "2026-11-18",
+    "maxDeliveryDate": "2026-11-24"
+   },
+   "http_2": 200,
+   "kargo_2": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 18⁠–24) ",
+    "rate": "11.88",
+    "currency": "USD",
+    "minDeliveryDays": 12,
+    "maxDeliveryDays": 18,
+    "minDeliveryDate": "2026-11-18",
+    "maxDeliveryDate": "2026-11-24"
+   }
+  },
+  {
+   "ulke": "CH",
+   "http_1": 200,
+   "kargo_1": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 12⁠–21) ",
+    "rate": "9.89",
+    "currency": "USD",
+    "minDeliveryDays": 6,
+    "maxDeliveryDays": 15,
+    "minDeliveryDate": "2026-11-12",
+    "maxDeliveryDate": "2026-11-21"
+   },
+   "http_2": 200,
+   "kargo_2": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 12⁠–21) ",
+    "rate": "11.88",
+    "currency": "USD",
+    "minDeliveryDays": 6,
+    "maxDeliveryDays": 15,
+    "minDeliveryDate": "2026-11-12",
+    "maxDeliveryDate": "2026-11-21"
+   }
+  },
+  {
+   "ulke": "NO",
+   "http_1": 200,
+   "kargo_1": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 12⁠–21) ",
+    "rate": "9.89",
+    "currency": "USD",
+    "minDeliveryDays": 6,
+    "maxDeliveryDays": 15,
+    "minDeliveryDate": "2026-11-12",
+    "maxDeliveryDate": "2026-11-21"
+   },
+   "http_2": 200,
+   "kargo_2": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 12⁠–21) ",
+    "rate": "11.88",
+    "currency": "USD",
+    "minDeliveryDays": 6,
+    "maxDeliveryDays": 15,
+    "minDeliveryDate": "2026-11-12",
+    "maxDeliveryDate": "2026-11-21"
+   }
+  },
+  {
+   "ulke": "TR",
+   "http_1": 200,
+   "kargo_1": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 18⁠–24) ",
+    "rate": "9.89",
+    "currency": "USD",
+    "minDeliveryDays": 12,
+    "maxDeliveryDays": 18,
+    "minDeliveryDate": "2026-11-18",
+    "maxDeliveryDate": "2026-11-24"
+   },
+   "http_2": 200,
+   "kargo_2": {
+    "id": "STANDARD",
+    "name": "Flat Rate (Estimated delivery: Nov 18⁠–24) ",
+    "rate": "11.88",
+    "currency": "USD",
+    "minDeliveryDays": 12,
+    "maxDeliveryDays": 18,
+    "minDeliveryDate": "2026-11-18",
+    "maxDeliveryDate": "2026-11-24"
+   }
+  }
+ ],
+ "dokuman": {
+  "http": 200,
+  "uzunluk": 5534949,
+  "eslesme": 10,
+  "parca": [
+   "gon points=\"17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 \"> object 400 Bad Request 401 Unauthorized post /orders/estimate-costs The Printful API is a RESTful API, that uses the HTTP protocol for communication. HTTP GET, POST, PUT and DELETE methods are used to access the API. https://api.printful.com /orders/estimate-costs Request samples Payload Curl <div class=\"react-tabs__tab-panel react-tabs__tab-panel--selected\" role=\"tabpa",
+   "sc-httZfN jEuzUJ\"> 401 Unauthorized post /orders/estimate-costs The Printful API is a RESTful API, that uses the HTTP protocol for communication. HTTP GET, POST, PUT and DELETE methods are used to access the API. https://api.printful.com /orders/estimate-costs Request samples Payload Curl Content type application/json Copy Expand all Collapse all { \"external_id\" : &quot;4235234213&quot; , <l",
+   "ngRates\" data-section-id=\"tag/Shipping-Rate-API/operation/calculateShippingRates\" class=\"sc-eCstZk bCpIRB\"> Calculate shipping rates Returns available shipping options and rates for the given list of products. Recipient Address Requirements: Only country_code is required in the recipient object state_code is only required for United States (US), Australia (AU), and Canada (CA) All other recipient fields are optional Note: Providing more address information may produce more precise results and more shipping options. While only the country code is required, including additional details like city, postal code, and state/province can help return more accurate shipping rates and additional delivery options. Important: Shipping rates returned by this endpoint may differ from those returned by /orders/estimate-cost",
+   "ybc\"> Calculate shipping rates Returns available shipping options and rates for the given list of products. Recipient Address Requirements: Only country_code is required in the recipient object state_code is only required for United States (US), Australia (AU), and Canada (CA) All other recipient fields are optional Note: Providing more address information may produce more precise results and more shipping options. While only the country code is required, including additional details like city, postal code, and state/province can help return more accurate shipping rates and additional delivery options. Important: Shipping rates returned by this endpoint may differ from those returned by /orders/estimate-costs if your store has store shipping settings configured. The /orders/estimate-costs endpoint automatically applies your s"
+  ]
+ },
+ "yetki": {
+  "http": 200,
+  "scopes": [
+   null,
+   null
+  ],
+  "ham": {
+   "code": 200,
+   "result": {
+    "scopes": [
+     {
+      "scope": "sync_products/read",
+      "display_name": "View store products"
+     },
+     {
+      "scope": "file_library/read",
+      "display_name": "View store files"
+     }
+    ]
+   },
+   "extra": []
+  }
+ },
+ "yol": "shipping-rates + urun fiyati + KDV yardim sayfasi (orders/read yok)",
+ "urun": {
+  "http": 200,
+  "ad": "Ceramic Ornaments, 2-Side Print (1 pc / Circle)",
+  "fiyat": "0.00",
+  "para": "USD (Printful katalog)"
+ },
+ "kdv_sayfasi_denemeler": [
+  {
+   "url": "https://help.printful.com/api/v2/help_center/en-us/articles/360014008620.json",
+   "http": 404
+  },
+  {
+   "url": "https://help.printful.com/hc/en-us/articles/360014008620",
+   "http": 403
+  }
+ ],
+ "kdv_sayfasi": "dogrulanamadi (sayfa acilmadi)"
+}
