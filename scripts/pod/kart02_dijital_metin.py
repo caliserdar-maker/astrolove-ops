@@ -4,9 +4,10 @@ Yeni metin: 'One print-ready JPG in your chosen color and size. 300 dpi. Deliver
 Eski genislikte (en fazla 759 px, Lato 38) 3 satir; ayni merkez (dijital yigin ekseni), ayni satir araligi (45 px), ayni renk."""
 FONT, PUNTO, MERKEZ_X, RENK = 'Lato-Regular.ttf', 38, 489.5, (37, 44, 57)
 ESKI = [('All 5 colors as print-ready PDFs. 300 dpi. Sent', 1558, 108, (37, 44, 57)), ('within 24 hours via Etsy Messages.', 1603, 200, (37, 45, 56))]  # 30 Eyl, birebir
-YENI = [('One print-ready JPG in your chosen color', 1558, None, RENK), ('and size. 300 dpi. Delivered to your', 1603, None, RENK),
+YENI = [('One print-ready JPG in your chosen color', 1558, None, RENK), ('and size. Delivered to your', 1603, None, RENK),   # 3 Kas: kartta 300 dpi yok
         ('Etsy order within 24 hours.', 1648, None, RENK)]
-TAM_METIN = 'One print-ready JPG in your chosen color and size. 300 dpi. Delivered to your Etsy order within 24 hours.'
+TAM_METIN = 'One print-ready JPG in your chosen color and size. Delivered to your Etsy order within 24 hours.'
+assert '300 dpi' not in TAM_METIN.lower() and 'premium' not in TAM_METIN.lower()   # Serdar 3 Kas: galeri kartinda 300 dpi / premium yok
 assert ' '.join(t[0] for t in YENI) == TAM_METIN
 assert not any(ch in TAM_METIN for ch in '—–')        # uzun/orta tire yok
 

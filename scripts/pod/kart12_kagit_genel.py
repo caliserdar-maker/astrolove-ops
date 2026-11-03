@@ -29,13 +29,13 @@ from duvar_zemin import duvar, duvar_lum, kontrast, lum, yazi_rengi
 
 GIR, SAHNE, FD, CIK = sys.argv[1:5]
 BA, BB = sys.argv[5:7] if len(sys.argv) > 6 else ('Cancer', 'Libra')
-ALT_BASLIK = 'Printed on premium matte art paper.'
-MADDE = [('Premium paper', 'A smooth matte art paper with rich detail.'),
+ALT_BASLIK = 'Printed on matte art paper.'   # Serdar 3 Kas Soru 3 A: premium / long-lasting yok (madde basliklari Serdar onayina)
+MADDE = [('Matte art paper', 'A smooth matte art paper with rich detail.'),
          ('Matte finish', 'A refined surface without a glossy coating.'),
-         ('Long-lasting inks', 'Deep, even color across the whole design.'),
+         ('Even color', 'Deep, even color across the whole design.'),
          ('Made for you', 'Printed after you approve your preview.')]
 YASAK = (r'hahnem', r'photo rag', r'\bgsm\b', r'cotton', r'\bframed\b', r'gicl', r'archival', r'acid', r'museum',
-         r'prodigi', r'printful', r'\byears?\b', '—', '–')
+         r'prodigi', r'printful', r'\byears?\b', r'premium', r'long[\s-]?lasting', r'300\s*dpi', '—', '–')
 SIL = [(140, 325, 1090, 395), (1340, 540, 2900, 1800)]   # alt baslik, sag sutun (ust etiket canli kartta kalir)
 MON, GAR = 'Montserrat[wght].ttf', 'EBGaramond[wght].ttf'
 

@@ -33,7 +33,7 @@ ESKI, SAHNE, FD, CIK = sys.argv[1:5]
 BA, BB = sys.argv[5:7] if len(sys.argv) > 6 else ('Cancer', 'Libra')
 ALT_BASLIK = 'One design, two ways to enjoy it.'
 BASKI_SATIR = ['Printed on matte art paper.', 'Unframed, ready for your frame.']   # Serdar 3 Kas Soru 3 A
-YASAK = (r'hahnem', r'photo rag', r'\bgsm\b', r'cotton', r'\bframed\b', r'gicl', r'prodigi', r'printful', r'premium', r'long[\s-]?lasting', '\u2014', '\u2013')  # 'Unframed' serbest (C aciklama satiri)
+YASAK = (r'hahnem', r'photo rag', r'\bgsm\b', r'cotton', r'\bframed\b', r'gicl', r'prodigi', r'printful', r'premium', r'long[\s-]?lasting', r'300\s*dpi', '\u2014', '\u2013')  # 'Unframed' serbest (C aciklama satiri)
 K = Image.open(ESKI).convert('RGB')
 D = duvar(SAHNE)
 

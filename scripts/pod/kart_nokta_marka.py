@@ -87,7 +87,7 @@ def ozellik(a, b):
             # sol sutun uc satir birlikte yeniden yazilir (ayni ton; kart02_iki_sutun.py: Lato 38)
             S((640, 1526, 1400, 1569), "One print-ready JPG in your chosen color", "One print-ready JPG in your chosen color", "merkez",
               aile="lato"),
-            S((640, 1572, 1400, 1614), "and size. 300 dpi. Delivered to your", "and size, 300 dpi, delivered to your", "merkez",
+            S((640, 1572, 1400, 1614), "and size. 300 dpi. Delivered to your", "and size, delivered to your", "merkez",   # 3 Kas cevap 2: kartta 300 dpi yok
               aile="lato"),
             S((640, 1617, 1400, 1662), "Etsy order within 24 hours.", "Etsy order within 24 hours", "merkez", aile="lato"),
             S((1500, 1526, 2420, 1569), "Premium matte art paper, long-lasting inks.", "Printed on matte art paper", "merkez"),   # 3 Kas Soru 3 A
@@ -493,6 +493,8 @@ def main():
                 dosya[n] = os.path.join(a.hedef_dir, f)
     R, tum_hata = {}, []
     for sira in sorted(secim):
+        if sira == 11:   # Serdar 3 Kas Soru 3 A: kart 11 madde basliklari "Premium paper" / "Long-lasting inks" kutulari olculmedi
+            tum_hata.append("r11: DUR: 'Premium paper' ve 'Long-lasting inks' basliklari icin kutu olcumu yok (3 Kas); kart 11 uretilmez"); continue
         if sira not in dosya or not os.path.exists(dosya[sira]):
             tum_hata.append(f"r{sira}: hedef dosya yok ({os.path.basename(dosya.get(sira, '?'))})"); continue
         if D.size != Image.open(dosya[sira]).size:
