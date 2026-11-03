@@ -330,6 +330,23 @@ def _metin_degerleri(g, yol="", ust=True):
     return []
 
 
+HTML_ALAN = {"description", "title", "tags", "materials", "alt_text", "personalization_instructions", "instructions", "question_text"}
+_HTML_VARLIK = re.compile(r"&(?:#\d+|#x[0-9a-fA-F]+|[A-Za-z]+);")
+
+
+def html_coz(g, alan=None):
+    """Yazma govdesindeki musteri metinlerinde HTML varliklarini cozer (Serdar 3 Kas B6: canli GET aciklamayi "&#39;" gibi kacisli
+    verir; geri yazilirsa musteri "&#39;" gorur). Yalniz HTML_ALAN anahtarlari (ic ice sozluk/liste dahil); digerleri aynen.
+    Yeni nesne doner (girdi degismez); urlencoded dize govdeye dokunulmaz."""
+    if isinstance(g, dict):
+        return {k: html_coz(v, k if k in HTML_ALAN else (alan if isinstance(v, (list, tuple)) else None)) for k, v in g.items()}
+    if isinstance(g, (list, tuple)):
+        return type(g)(html_coz(v, alan) for v in g)
+    if isinstance(g, str) and alan in HTML_ALAN and _HTML_VARLIK.search(g):
+        return html.unescape(g)
+    return g
+
+
 def metin_yasak_kapisi(method, path, data=None, json_body=None, params=None, mod=None):
     """Yazma isteginden once tum metin degerlerini tarar. -> eslesme listesi. mod ENGEL ve KESIN eslesme: SystemExit (istek yok)."""
     if str(method or "").upper() in ("GET", "HEAD", "OPTIONS"):
@@ -796,6 +813,7 @@ class Etsy:
         """Multipart yukleme (gorsel/dosya). Ilk denemede 400 normal olabilir
         (B37); 3 deneme. tekrar=1 (eski78_gorsel_yukle, Serdar 24 Eki): hata yanitinda yeniden GONDERMEZ (cift yukleme
         riski); cagiran galeriyi okuyup karar verir. 401 token yenilemesi her durumda bir kez yapilir."""
+        data = html_coz(data)   # B6: alt metin / taslak metni HTML varliksiz gider
         ai_beyan_kapisi("POST", path, data)   # multipart createDraftListing da kapidan gecer (gorsel / video yolu eslesmez, gecer)
         metin_yasak_kapisi("POST", path, data)   # alt metin / taslak metinleri (UYARI modu)
         self._istek_oncesi()
@@ -826,6 +844,8 @@ class Etsy:
             raise SystemExit(f"HATA: POST(file) {path} -> {r.status_code}: {r.text[:300]}")
 
     def _call(self, method, path, params=None, data=None, ok404=False, json_body=None):
+        if str(method).upper() not in ("GET", "HEAD", "OPTIONS"):   # B6 (Serdar 3 Kas): HTML varliklari yazmadan once cozulur
+            data, json_body = html_coz(data), html_coz(json_body)
         ru_yazim_kapisi(method, path, data, json_body)
         ai_beyan_kapisi(method, path, data, json_body, params, canli_ceviri=lambda: self._canli_ceviri(path), baslik=self._baslik(path))
         self.yayin_beyan_kontrol(method, path, data, json_body, params)

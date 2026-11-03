@@ -76,6 +76,16 @@ def main():
     k("FAIL: izin KESIN'i kapsamaz (YD aciklamasi premium)", any(x[0] == "KESIN" for x in k_("premium paper", f"/shops/1/listings/{YD}")))
     k("PASS: poster aciklamasi yeni metin (premium'suz, free'siz) temiz", k_(
       "- We send a preview via Etsy Messages within 24 hours.\n- Printed on matte art paper\n- High resolution: 300 dpi", f"/shops/1/listings/{POSTER}") == [])
+    # B6 (Serdar 3 Kas): HTML varliklari yazmadan once cozulur
+    g0 = {"description": "Couple&#39;s gift &amp; keepsake", "tags": ["mom&#39;s gift", "b"], "price": "1&amp;2", "sku": ["A&#39;"]}
+    g1 = E.html_coz(g0)
+    k("html_coz: aciklama ve etiket cozulur", g1["description"] == "Couple's gift & keepsake" and g1["tags"] == ["mom's gift", "b"], g1)
+    k("html_coz: metin disi alan (price, sku) aynen", g1["price"] == "1&amp;2" and g1["sku"] == ["A&#39;"], g1)
+    k("html_coz: girdi degismez + iki kez ayni", g0["description"].endswith("&amp; keepsake") and E.html_coz(g1) == g1)
+    j1 = E.html_coz({"personalization_questions": [{"question_text": "Heading", "instructions": "Our &quot;First&quot; Year", "question_id": 5}]})
+    k("html_coz: ic ice JSON talimati cozulur", j1["personalization_questions"][0]["instructions"] == 'Our "First" Year'
+      and j1["personalization_questions"][0]["question_id"] == 5, j1)
+    k("html_coz: duz metin (varliksiz) aynen", E.html_coz({"description": "Plain & simple"}) == {"description": "Plain & simple"})
     # mod
     try:
         bul("premium paper", mod="UYARI"); uy = True
@@ -137,6 +147,13 @@ def main():
         except Exception as e:  # noqa: BLE001
             print("   not:", type(e).__name__, str(e)[:80])
         k("post_file: alt metin kapidan gecer ve uyarilir", len(E.METIN_UYARI) > n0)
+        n2 = len(gonderilen)
+        try:
+            api._call("PATCH", "/shops/1/listings/9", data={"description": "It&#39;s yours. We use AI tools to help create the artwork."})
+        except Exception as e:  # noqa: BLE001
+            print("   not:", type(e).__name__, str(e)[:80])
+        k("Etsy._call: gonderilen aciklama HTML varliksiz (B6)", len(gonderilen) > n2 and gonderilen[n2][1].get("data") == {"description": "It's yours. We use AI tools to help create the artwork."},
+          gonderilen[n2:n2 + 1])
         E.METIN_KAPI_MOD = "ENGEL"
         n1 = len(gonderilen)
         try:
