@@ -1,0 +1,100 @@
+{
+ "karar": "Serdar 3 Kas, karar 22: 6 renk kesin; RUBY / SAPPHIRE / EMERALD deneme 4 kontursuz, BEIGE / AGED_PAPYRUS STIL3_SON, SADE ALTIN seffaf",
+ "bilgi": {
+  "kosu": "41641826870",
+  "dal_commit": "848f76c38a3611c21bb76fefb7ead769c2945166",
+  "motor_commit": "6da763aa5b9820027420f73264fc69d30e120a33",
+  "tek_doku_commit": "2a08a78216ca",
+  "paket": "python 3.13.18 numpy 2.5.4 cv2 5.0.0 pillow 11.0.0 scipy 1.18.1 skimage 0.26.0\npotracer==0.0.4\nModel name:                              AMD EPYC 7763 64-Core Processor\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc \n",
+  "katman_pkl": "487776ac7ae6c5942e11c21cdfc2df5a7a4e3deaa5bb7b83300475fa5a966d5d  /tmp/katman.pkl",
+  "katman_pkl_yerel_bilgi": "yerel sade4/motor_katman.pkl (OLCUM SADE_8 karar.katman alaninda sha)",
+  "girdi_sha": "/tmp/kay/CANCER_LIBRA_ana.png: OK\n/tmp/kay/cancer_symbol_gold.png: OK\n/tmp/kay/libra_symbol_gold.png: OK\n/tmp/kay/AGED_PAPYRUS_1264.png: OK\n/tmp/kay/BEIGE_1264.png: OK\n/tmp/kay/EMERALD_1264.png: OK\n/tmp/kay/RUBY_1264.png: OK\n/tmp/kay/SAPPHIRE_1264.png: OK\n/tmp/kay/HALKA_BLUE_16x20.png: OK\n/tmp/kay/LOGO_1.png: OK\n/tmp/kay/tek_doku.py: OK\n/tmp/kay/Cinzel.ttf: OK\n/tmp/kay/EBGaramond-Italic.ttf: OK\n/tmp/kay/cancer_libra_alfa.png: OK\n/tmp/kay/alfa_ogeler.npz: OK\n8ab7a9ea4725b41a9187dfe44f4e062912a243c066dfbe649d291273d4ccba43  ./KILIT_GPTGIRDI.json\n8e3f34dc80032572798ed8d7e056fe96869a03121bc6cda45e1f3f40766bdaeb  ./alfa_temizle.py\n8fc9dc92bf9c63bf7b37afdbdc2a215eba3ba37e41438d661e4118e9a262c70b  ./cember.json\nf946f5611431bdf976dce3475db8fd653faf1242ca267c365e2e29c8b3c8a8c2  ./girdi78/ana/cancer_libra_alfa.png\ne7592412d5fc370c465fb628c5e8955ac219fb5f98a47b08c7dfc53eac42094f  ./golge_motor.py\n21816b3bc961a293cdf06d60cda6f06da533d0343978722eda91fb3d83fd2a65  ./kure/k4.npy\nd67b54a020d749de8ffa4ae9a170fceced111a9105bf46268d456d6a7434f807  ./olustur_alfa_sablon.py\nb4480319399f7c5a8a152e59ab3ad5df9ee3b3eb426b0e1fa6e74abd0e3a33e8  ./palet/chatgpt_altin.png\n9fe7758573bd6f5acd131f5b68712cbb4be3efebd8b6cc3710c2cacb18804971  ./renk_uyum.py\n5a9078ea2ed4496343d1d5fcc3d2c5bfbb38d08d202f63e04430257caa17dfcd  ./uret_tam.py\n92aa56eae68d9e199780d683e893d1edc892993533c665addfb2e402b228a4b5  ./vektor_yuzey.py\na833ffec0d05aa35dfdd6608fd9003784ccb5cc7546e55f96e4c38bbe96af783  ./yerlesim78.json\n"
+ },
+ "karsilastirma": {
+  "RUBY": {
+   "onayli_commit": "e5412718",
+   "mod": "RGB",
+   "boyut": [
+    954,
+    954,
+    3
+   ],
+   "en_buyuk_fark": 1,
+   "farkli_piksel": 1,
+   "uretim_sha256": "3984465f720e2909b3c91e0a854efedec1e0f29d3d4f51cbe397c8390c22e666",
+   "onayli_sha256": "f6007b7acc686baacc0f030f8f6e09e6e340ab716e4f5800d8aa7abaae952a3f",
+   "piksel_ayni": false
+  },
+  "SAPPHIRE": {
+   "onayli_commit": "e5412718",
+   "mod": "RGB",
+   "boyut": [
+    954,
+    954,
+    3
+   ],
+   "en_buyuk_fark": 1,
+   "farkli_piksel": 1,
+   "uretim_sha256": "98732d4fab364518a45b8ed168701610e0d1bc13179005bde31511b79c38941d",
+   "onayli_sha256": "dd29a67c7ebbc376a46ec2216423221009682c87d2fa5ff33011f8c823ae0cdc",
+   "piksel_ayni": false
+  },
+  "EMERALD": {
+   "onayli_commit": "e5412718",
+   "mod": "RGB",
+   "boyut": [
+    954,
+    954,
+    3
+   ],
+   "en_buyuk_fark": 1,
+   "farkli_piksel": 1,
+   "uretim_sha256": "835d5e1450e6be7dc03d107497809775e6aefcafaa065b17ccd206ed29d40468",
+   "onayli_sha256": "45f7c6e58bc36ae5f9f686edb23e6b1012cb99dbbf50b8113062bdc93de39065",
+   "piksel_ayni": false
+  },
+  "BEIGE": {
+   "onayli_commit": "a5e3ea2",
+   "mod": "RGB",
+   "boyut": [
+    954,
+    954,
+    3
+   ],
+   "en_buyuk_fark": 0,
+   "farkli_piksel": 0,
+   "uretim_sha256": "2051ed530d4ad75703913bfcd0618cb5a62f174c9c74a54b50ac0ca28dd967b8",
+   "onayli_sha256": "2051ed530d4ad75703913bfcd0618cb5a62f174c9c74a54b50ac0ca28dd967b8",
+   "piksel_ayni": true
+  },
+  "AGED_PAPYRUS": {
+   "onayli_commit": "a5e3ea2",
+   "mod": "RGB",
+   "boyut": [
+    954,
+    954,
+    3
+   ],
+   "en_buyuk_fark": 1,
+   "farkli_piksel": 2,
+   "uretim_sha256": "89748e449309de478fddff374e65b247a1d3be3a7e9fd92b03aef0927b89b623",
+   "onayli_sha256": "a8833657bd97e875f8054b3d3bbbfb13ab31ad8b021e60cf41ae27141a29760d",
+   "piksel_ayni": false
+  },
+  "SADE_ALTIN": {
+   "onayli_commit": "029a670d",
+   "mod": "RGBA",
+   "boyut": [
+    954,
+    954,
+    4
+   ],
+   "en_buyuk_fark": 1,
+   "farkli_piksel": 1,
+   "uretim_sha256": "53006f28297d4e14baac774c83dd4a82baaf6fffea775a10cc5f97cc8742e259",
+   "onayli_sha256": "c3b4b280ecd47e1b9116f3af939646bed005800ccbc4c6ab8a3464b1dcc46ab8",
+   "piksel_ayni": false
+  }
+ },
+ "kapi_piksel_ayni": false
+}

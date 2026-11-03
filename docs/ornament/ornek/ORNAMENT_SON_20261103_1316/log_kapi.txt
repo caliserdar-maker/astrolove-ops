@@ -1,0 +1,7 @@
+RUBY          mod RGB (954, 954, 3) en buyuk fark 1 farkli piksel 1 -> FAIL
+SAPPHIRE      mod RGB (954, 954, 3) en buyuk fark 1 farkli piksel 1 -> FAIL
+EMERALD       mod RGB (954, 954, 3) en buyuk fark 1 farkli piksel 1 -> FAIL
+BEIGE         mod RGB (954, 954, 3) en buyuk fark 0 farkli piksel 0 -> PASS
+AGED_PAPYRUS  mod RGB (954, 954, 3) en buyuk fark 1 farkli piksel 2 -> FAIL
+SADE_ALTIN    mod RGBA (954, 954, 4) en buyuk fark 1 farkli piksel 1 -> FAIL
+KAPI piksel ayni FAIL

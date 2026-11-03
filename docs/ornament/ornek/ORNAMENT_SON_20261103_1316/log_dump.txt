@@ -1,0 +1,21 @@
+[    0.0s] KILIT ortam {"KONT_A": "1.5", "KONT_B": "3.0", "KONT_M": "0.45", "YON_SIGMA": "6", "SIRT_KESKIN": "1", "KURE_SIGMA": "6", "KAVSAK_YUM": "0", "KAVSAK_R": "3.0", "KAVSAK_KAZANC": "1.6", "ALFA_TEMIZ": "1", "ALFA_KAVSAK": "1", "ALFA_KAVSAK_ORAN": "0.8", "VEKTOR": "1", "SERIT": "0", "KEMER_KAVSAK": "0", "SIRT_SUREKLI": "0", "SERIT_MOD": "sert", "PALET_KAYNAK": "/tmp/mg/palet/chatgpt_altin.png"}
+[    0.0s] KILIT AYAR {"g": 0, "esit": "kazanc", "harita": "dogrusal", "yildiz": "refkopya", "golge_opak": 0.85, "golge_sigma": 16, "golge_dx": 10, "golge_dy": 16, "pah": 1.0, "karisim": 1.0, "pah_px": 0, "kubbe": 0.0, "k": 0.5, "kure": "k4", "temas": 0.5, "yansima": 0.15, "isima": 0.04, "gren": 1.0, "kenar_yum": 0.5, "zemin_daire": 1}
+[    0.0s] P {"pah": 1.0, "k": 0.5, "karisim": 1.0, "g": 0, "gs": 60, "golge_sigma": 16, "golge_dx": 10, "golge_dy": 16, "golge_opak": 0.85, "m1": 0.0, "m2": 0.0, "poz": 1.0, "pah_px": 0, "kubbe": 0.0, "kure": "k4", "mot_yer": "Y", "esit": "kazanc", "temas": 0.5, "zemin_daire": 1, "sarma": 0.0, "arka_isik": 0.0, "renk_ayar": 0.0, "kararma": 0.0, "yansima": 0.15, "isima": 0.04, "isima_sigma": 30.0, "gren": 1.0, "kenar_yum": 0.5, "egim_max": 0.0, "pah_oran_max": 0.0, "ton": 0.0, "yildiz": "refkopya", "parilti": 0.0, "parilti_esik": 2.3, "isik_leke": 0.0, "mot_poz": 0, "mot_s2": 5.0, "harita": "dogrusal"}
+[    0.0s] motor sha {"KILIT_GPTGIRDI.json": "8ab7a9ea4725b41a", "golge_motor.py": "e7592412d5fc370c", "vektor_yuzey.py": "92aa56eae68d9e19", "alfa_temizle.py": "8e3f34dc80032572", "uret_tam.py": "5a9078ea2ed44963", "renk_uyum.py": "9fe7758573bd6f5a", "olustur_alfa_sablon.py": "d67b54a020d749de", "kure/k4.npy": "21816b3bc961a293", "palet/chatgpt_altin.png": "b4480319399f7c5a", "yerlesim78.json": "a833ffec0d05aa35", "cember.json": "8fc9dc92bf9c63bf", "girdi78/ana/cancer_libra_alfa.png": "f946f5611431bdf9"}
+[    0.4s] palet 160268
+[    6.4s] poster ana (3332, 3541) olcek 0.4326 {'Dm': 54.0, 'tasma': 1, 'dolgu': 3, 'red': 95}
+[   17.8s] harita [0.7604, 3.672, 0.3991, 0.9304, 0.3649] qa50 1.2631
+[   24.0s] temizle {"sonsuz": {"Dm": 12.0, "tasma": 0, "dolgu": 8, "red": 28}, "kucuk_sol": {"Dm": 18.0, "tasma": 0, "dolgu": 2, "red": 16}, "kucuk_sag": {"Dm": 18.6, "tasma": 0, "dolgu": 1, "red": 3}}
+[   80.7s] 10x alfalar {'isim1': (420, 1350), 'isim2': (490, 1360), 'tarih': (430, 2130), 'sonsuz': (280, 900), 'kucuk_sol': (580, 670), 'kucuk_sag': (600, 810), 'halka': (5850, 6900)}
+[   81.2s] oge kucuk_sol (580, 670) gren 954 kalan 0.262
+[   81.7s] oge kucuk_sag (600, 810) gren 954 kalan 0.263
+[   82.3s] oge sonsuz (280, 900) gren 954 kalan 0.251
+[   82.5s] oge isim1 (420, 1350) gren 954 kalan 0.258
+[   82.7s] oge isim2 (490, 1360) gren 954 kalan 0.263
+[   83.0s] oge tarih (430, 2130) gren 954 kalan 0.27
+[   95.6s] oge halka (5850, 6900) gren 954 kalan 0.263
+[   95.7s] IoU {'kucuk_sol': 1.0, 'kucuk_sag': 1.0, 'sonsuz': 0.9984, 'isim1': 0.9792, 'isim2': 0.9751, 'tarih': 0.9534, 'halka': 0.9796}
+[   95.8s] renk_uyum {"kucuk_sol": [5.613, 0.121], "kucuk_sag": [5.639, 0.059], "sonsuz": [5.751, 0.129], "isim1": [5.441, 0.144], "isim2": [5.329, 0.116], "tarih": [4.834, 0.105], "halka": [5.612, 0.119]}
+[   98.6s] yari kalinlik (954 px) {'sembol': 6.433, 'isim1': 1.077, 'isim2': 1.077, 'tarih': 0.9, 'sonsuz': 1.2, 'kucuk_sol': 1.789, 'kucuk_sag': 1.8, 'halka': 2.012}
+[   98.6s] ic golge {'tarih': (0.1399, 0.35), 'isim1': (0.1674, 0.35), 'isim2': (0.1674, 0.35), 'sonsuz': (0.1865, 0.35), 'kucuk_sol': (0.2781, 0.35), 'kucuk_sag': (0.2798, 0.35), 'halka': (0.3128, 0.35), 'sembol': (1.0, 0.35)}
+[   98.7s] DUMP /tmp/katman.pkl

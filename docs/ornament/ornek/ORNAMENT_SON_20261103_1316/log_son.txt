@@ -1,0 +1,8 @@
+RUBY altin kazanci 1.12 kontrast 5.38 ortanca kati 2.24 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a 0 b 0 doku 5.0 5.01
+SAPPHIRE altin kazanci 1.12 kontrast 5.72 ortanca kati 2.39 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a 0 b 0 doku 5.0 5.01
+EMERALD altin kazanci 1.12 kontrast 5.56 ortanca kati 2.32 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a 0 b 0 doku 5.0 5.01
+BEIGE bronz carpani 1.0 kontrast 5.08 kati kati 5.08 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a 0 b 0 doku 4.94 5.01
+AGED_PAPYRUS bronz carpani 0.92 kontrast 4.54 kati kati 4.54 bosluk [20, 20, 20] sembol [264, 246, 689, 650] yasak 0 cak [] leke a 0 b 0 doku 4.98 5.01
+UZUN B_blok_kayan olcek 0.557 harf mm 1.33 kontrast 5.05 bosluk [20, 20, 20] sembol [264, 232, 689, 636] kapi True
+UZUN B_yer_sabit olcek 0.415 harf mm 0.99 kontrast 5.44 bosluk [41, 20, 20] sembol [264, 246, 689, 650] kapi True
+KAPI {"yasak_0": true, "cakisma_0": true, "goruntu_yasak_0": true, "kontrast": true, "bosluk_ge_hedef": true, "leke_a_0": true, "leke_a_kaynak_0": true, "leke_b_0": true, "doku_4_6": true, "isik_4_10_koyu": true, "uzun_isim_B": true, "halka_kilit": true} PASS

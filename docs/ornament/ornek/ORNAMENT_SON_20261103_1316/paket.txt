@@ -1,0 +1,4 @@
+python 3.13.18 numpy 2.5.4 cv2 5.0.0 pillow 11.0.0 scipy 1.18.1 skimage 0.26.0
+potracer==0.0.4
+Model name:                              AMD EPYC 7763 64-Core Processor
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc 
