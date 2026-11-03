@@ -31,7 +31,12 @@
      ],
      "us": 1.34,
      "guc": 1.0,
-     "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni alan)"
+     "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni tane ALANI); 0'a yakin kanallarda uint8 kirpma: tane tek yonlu (inceleme: kirpilan piksel %28-54, tane std %20-37 dusuk)",
+     "kirpilan_piksel_yuzde": {
+      "R": 0.0,
+      "G": 47.6,
+      "B": 3.7
+     }
     },
     "leke_eski": {
      "pencere_ortalama_std": 1.804,
@@ -678,7 +683,8 @@
     "kapi": {
      "leke_le_beige": true,
      "renk_dE00_le_2": true
-    }
+    },
+    "bilgi_pencere_ici_std_le_beige": true
    },
    "SAPPHIRE": {
     "g1": {
@@ -694,7 +700,12 @@
      ],
      "us": 1.29,
      "guc": 1.0,
-     "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni alan)"
+     "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni tane ALANI); 0'a yakin kanallarda uint8 kirpma: tane tek yonlu (inceleme: kirpilan piksel %28-54, tane std %20-37 dusuk)",
+     "kirpilan_piksel_yuzde": {
+      "R": 54.4,
+      "G": 2.0,
+      "B": 0.0
+     }
     },
     "leke_eski": {
      "pencere_ortalama_std": 2.696,
@@ -1341,7 +1352,8 @@
     "kapi": {
      "leke_le_beige": true,
      "renk_dE00_le_2": true
-    }
+    },
+    "bilgi_pencere_ici_std_le_beige": true
    },
    "EMERALD": {
     "g1": {
@@ -1357,7 +1369,12 @@
      ],
      "us": 1.33,
      "guc": 1.0,
-     "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni alan)"
+     "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni tane ALANI); 0'a yakin kanallarda uint8 kirpma: tane tek yonlu (inceleme: kirpilan piksel %28-54, tane std %20-37 dusuk)",
+     "kirpilan_piksel_yuzde": {
+      "R": 28.3,
+      "G": 0.0,
+      "B": 0.8
+     }
     },
     "leke_eski": {
      "pencere_ortalama_std": 3.985,
@@ -2004,7 +2021,8 @@
     "kapi": {
      "leke_le_beige": true,
      "renk_dE00_le_2": true
-    }
+    },
+    "bilgi_pencere_ici_std_le_beige": true
    }
   },
   "kapi_zemin": true
@@ -2053,10 +2071,18 @@
   "zemin_leke_le_beige_g1": true,
   "zemin_renk_dE00_le_2": true,
   "kontrast_ortanca": true,
-  "leke_0": true,
+  "oge_alfa_leke_0": true,
   "tasma_0": true,
   "yerlesim_ayni": true,
-  "halka_sureklilik_bilgi_deneme4_ile_ayni": true
+  "halka_sureklilik_deneme4_ile_ayni": true
  },
- "motor_olcum_tam": "motor OLCUM (deneme 4 formati) KOSU klasorunde; ozet burada"
+ "motor_genel": {
+  "sonuc": "FAIL",
+  "cikis_kodu": 1,
+  "neden": [
+   "halka_govde_sureklilik"
+  ],
+  "not_": "halka govde surekliligi 0.692-0.693 < 0.70; deneme 4 ile ayni; Serdar 3 Kas deneme 4 sonucunu kabul etti (soru yaniti)"
+ },
+ "motor_olcum_tam": "OLCUM_MOTOR.json (bu klasorde)"
 }

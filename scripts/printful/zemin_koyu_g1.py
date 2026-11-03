@@ -108,15 +108,18 @@ def main():
         dE = [round(de00(lab(pe[1][None])[0], lab(pn[1][None])[0]), 3) for pe, pn in zip(P, Pn) if pe[0] <= RMAX_FIT]
         le, ln = leke(eski), leke(yeni)
         le['ortanca_profil_bilgi'] = leke(eski, True)['pencere_ortalama_std']; ln['ortanca_profil_bilgi'] = leke(yeni, True)['pencere_ortalama_std']
-        k_leke = ln['pencere_ortalama_std'] <= esik['pencere_ortalama_std'] and ln['pencere_ici_std_ortanca'] <= esik['pencere_ici_std_ortanca']
+        k_leke = ln['pencere_ortalama_std'] <= esik['pencere_ortalama_std']   # inceleme: pencere ici std leke yakalamiyor (eski RUBY 1.10 < BEIGE 1.99), bilgi
         k_renk = max(dE) <= 2.0
         hepsi &= bool(k_leke and k_renk)
         R['renk'][renk] = dict(g1=dict(merkez=[round(float(v), 2) for v in M], kenar=[round(float(v), 2) for v in Kc], us=round(us, 4), guc=1.0,
-                                       tane='zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni alan)'),
+                                       tane='zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni tane ALANI); 0\'a yakin '
+                                            'kanallarda uint8 kirpma: tane tek yonlu (inceleme: kirpilan piksel %28-54, tane std %20-37 dusuk)',
+                                       kirpilan_piksel_yuzde={c: round(float((yeni[..., i][rr <= 0.941] == 0).mean() * 100), 1) for i, c in enumerate('RGB')}),
                                leke_eski=le, leke_yeni=ln, renk_dE00_halka_maks=max(dE), renk_dE00_halka_ortanca=round(float(np.median(dE)), 3),
                                renk_dE00_halka=dE, profil_eski=[[round(p[0], 4)] + [round(float(v), 1) for v in p[1]] for p in P],
                                profil_yeni=[[round(p[0], 4)] + [round(float(v), 1) for v in p[1]] for p in Pn],
-                               kapi=dict(leke_le_beige=bool(k_leke), renk_dE00_le_2=bool(k_renk)))
+                               kapi=dict(leke_le_beige=bool(k_leke), renk_dE00_le_2=bool(k_renk)),
+                               bilgi_pencere_ici_std_le_beige=bool(ln['pencere_ici_std_ortanca'] <= esik['pencere_ici_std_ortanca']))
         print(renk, 'G1 merkez', [round(float(v), 1) for v in M], 'kenar', [round(float(v), 1) for v in Kc], 'us', round(us, 3),
               '| leke eski', le, 'yeni', ln, '| dE00 halka maks', max(dE), flush=True)
     R['kapi_zemin'] = bool(hepsi)

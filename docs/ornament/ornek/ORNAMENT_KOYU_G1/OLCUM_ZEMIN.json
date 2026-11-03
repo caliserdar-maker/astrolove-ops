@@ -29,7 +29,12 @@
     ],
     "us": 1.34,
     "guc": 1.0,
-    "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni alan)"
+    "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni tane ALANI); 0'a yakin kanallarda uint8 kirpma: tane tek yonlu (inceleme: kirpilan piksel %28-54, tane std %20-37 dusuk)",
+    "kirpilan_piksel_yuzde": {
+     "R": 0.0,
+     "G": 47.6,
+     "B": 3.7
+    }
    },
    "leke_eski": {
     "pencere_ortalama_std": 1.804,
@@ -676,7 +681,8 @@
    "kapi": {
     "leke_le_beige": true,
     "renk_dE00_le_2": true
-   }
+   },
+   "bilgi_pencere_ici_std_le_beige": true
   },
   "SAPPHIRE": {
    "g1": {
@@ -692,7 +698,12 @@
     ],
     "us": 1.29,
     "guc": 1.0,
-    "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni alan)"
+    "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni tane ALANI); 0'a yakin kanallarda uint8 kirpma: tane tek yonlu (inceleme: kirpilan piksel %28-54, tane std %20-37 dusuk)",
+    "kirpilan_piksel_yuzde": {
+     "R": 54.4,
+     "G": 2.0,
+     "B": 0.0
+    }
    },
    "leke_eski": {
     "pencere_ortalama_std": 2.696,
@@ -1339,7 +1350,8 @@
    "kapi": {
     "leke_le_beige": true,
     "renk_dE00_le_2": true
-   }
+   },
+   "bilgi_pencere_ici_std_le_beige": true
   },
   "EMERALD": {
    "g1": {
@@ -1355,7 +1367,12 @@
     ],
     "us": 1.33,
     "guc": 1.0,
-    "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni alan)"
+    "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni tane ALANI); 0'a yakin kanallarda uint8 kirpma: tane tek yonlu (inceleme: kirpilan piksel %28-54, tane std %20-37 dusuk)",
+    "kirpilan_piksel_yuzde": {
+     "R": 28.3,
+     "G": 0.0,
+     "B": 0.8
+    }
    },
    "leke_eski": {
     "pencere_ortalama_std": 3.985,
@@ -2002,7 +2019,8 @@
    "kapi": {
     "leke_le_beige": true,
     "renk_dE00_le_2": true
-   }
+   },
+   "bilgi_pencere_ici_std_le_beige": true
   }
  },
  "kapi_zemin": true
