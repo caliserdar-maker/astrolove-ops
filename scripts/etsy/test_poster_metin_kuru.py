@@ -38,7 +38,7 @@ class Sahte:
             return {"results": [x]}
         if path.endswith("/inventory"):
             return {"products": [{"property_values": [{"property_id": 513, "values": [b]}], "offerings": [{"price": {"amount": 1990, "divisor": 100}}]} for b in self.boy]}
-        if path.endswith("/translations/ru"):
+        if path == f"/shops/1/listings/{LID}/translations/ru":
             return ru
         raise AssertionError(path)
 
@@ -58,7 +58,9 @@ with tempfile.TemporaryDirectory() as d:
     k("yedek: baslik, etiket, ru, gorsel, fiyat", y["title"] == D["title"] and y["ru"]["title"] and y["gorsel"] == [1] and y["fiyatlar"] == [19.9])
     k("boylar: 14 (5x7 dahil)", p["boylar"][0] == "5x7" and len(p["boylar"]) == 14, p["boylar"])
     b = Sahte(ru_batch=False); P.calis(b, "1", [LID], {LID: "X"}, out / "b")
-    k("RU batch'te yoksa tekil GET", b.calls == 3)
+    k("RU batch'te yoksa tekil GET (/shops/{shop}/... yolu)", b.calls == 3 and b.yol[-1] == f"/shops/1/listings/{LID}/translations/ru", b.yol)
+    k("onay ozeti kayitli ve sonra metinden hesaplanir", p["onay_ozet"] == P.R.onay_ozet(p["en_sonra"], p["ru_sonra"]) and len(p["onay_ozet"]) == 64)
+    k("geri alma RU'su kur(EN once) = canli RU", p["ru_geri"].strip() == p["ru_once"].strip())
     try:
         P.calis(Sahte(desc=D["description"].replace("- Printed on premium matte art paper with long-lasting inks", "- Printed on premium paper")), "1", [LID], {LID: "X"}, out / "c"); dur = False
     except SystemExit:

@@ -96,6 +96,7 @@ def plan_ilan(lid, x, ru, inv, shop):
     if re.search(r"[{}]", en1 + ru1):
         hata.append("suslu parantez kaldi")
     k = dict(listing_id=lid, state=x.get("state"), boylar=by, en_once=en0, en_sonra=en1, ru_once=ru0, ru_sonra=ru1,
+             onay_ozet=R.onay_ozet(en1, ru1), once_ozet=R.onay_ozet(en0, ru0), ru_geri=ru_kur0,
              en_fark=fark(en0, en1), ru_fark=fark(ru0, ru1), kapi_uyari=len(kapi), hata=hata)
     return k, hata
 
@@ -131,7 +132,7 @@ def calis(api, shop, ids, cift, out):
         tr = x.get("translations") or {}
         ru = tr.get("ru") if isinstance(tr, dict) else next((t for t in tr if str(t.get("language", "")).startswith("ru")), None)
         if not ru or not ru.get("description"):
-            ru = api.get(f"/listings/{lid}/translations/ru", ok404=True) or {}
+            ru = api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True) or {}   # inceleme 4 Kas: depodaki okuyucularla ayni yol
         inv = api.get(f"/listings/{lid}/inventory") or {}
         fiyat = sorted({K.para((o or {}).get("price")) for p in inv.get("products") or [] for o in p.get("offerings") or []})
         yedek[lid] = dict(cift=cift.get(lid, ""), state=x.get("state"), title=x.get("title"), description=x.get("description"),
@@ -141,7 +142,7 @@ def calis(api, shop, ids, cift, out):
         k, hata = plan_ilan(lid, x, ru, inv, shop)
         plan[lid] = k
         toplam_hata += bool(hata)
-        satir.append(dict(listing_id=lid, cift=cift.get(lid, ""), state=x.get("state"), en_degisen=len(k["en_fark"]) // 2,
+        satir.append(dict(listing_id=lid, cift=cift.get(lid, ""), state=x.get("state"), onay_ozet=k["onay_ozet"], en_degisen=len(k["en_fark"]) // 2,
                           ru_degisen=len(k["ru_fark"]) // 2, en_kar_once=len(k["en_once"]), en_kar_sonra=len(k["en_sonra"]),
                           ru_kar_once=len(k["ru_once"]), ru_kar_sonra=len(k["ru_sonra"]), boy_sayisi=len(k["boylar"]),
                           kapi_uyari=k["kapi_uyari"], baslik_etiket_degisir=False, hata="; ".join(hata)))
