@@ -22,6 +22,8 @@ name: ornament-printful-katalog
 # mod=drive_kopya: veri = daldaki docs/ornament/ornek/... klasoru, alt = Drive TEMP altindaki hedef (ORNAMENT_ORNEK_*/...); yalniz kopya.
 # mod=kaynak_kopya (Serdar 2 Kas aksam): yalniz cancer / libra_symbol_gold.png Drive -> dal docs/ornament/kaynak/, sha kontrolu.
 # mod=urun_drive: API yok; daldaki docs/printful_urun/<alt>/ RAPOR.md + TUM_LISTE.csv + SECILEN25.csv'yi Drive'a yazar.
+# mod=mockup_sade (Merkez / Serdar 3 Kas, SADE_8): YALNIZ Printful v2 mockup gorevi (urun 900, varyant 23133); scripts/printful/ornament_mockup.py
+#   izin listesi: GET mockup-styles, POST /v2/mockup-tasks, GET gorev durumu. Urun / sablon / siparis YOK. Drive kopyasi YOK; cikti yalniz dal.
 # mod=ornek3 (Merkez STIL3_V3, Serdar 2 Kas): halkali + halkasiz x 3 zemin (zemin3/V2), scripts/printful/ornament_ornek3.py; cikti STIL3_V3/.
 on:
   workflow_dispatch:
@@ -58,7 +60,7 @@ jobs:
           python-version: "3.13"
       - name: Girdi
         run: |
-          case "$MOD" in tam|ek|rapor|zemin3|ornek|ornek2|ornek3|ornek4|ornek5|urun1|urun2|urun3|urun_drive|kaynak_kopya|drive_kopya) ;; *) echo "::error::bilinmeyen mod ($MOD)"; exit 1;; esac
+          case "$MOD" in tam|ek|rapor|zemin3|ornek|ornek2|ornek3|ornek4|ornek5|urun1|urun2|urun3|urun_drive|kaynak_kopya|drive_kopya|mockup_sade) ;; *) echo "::error::bilinmeyen mod ($MOD)"; exit 1;; esac
           if [ "$MOD" != tam ] && [ ! -f s/docs/ornament/ham/_adaylar.json ]; then echo "::error::dalda ham yok"; exit 1; fi
           echo "ref ${GITHUB_REF_NAME} | betik $(git -C main rev-parse --short HEAD) | dal $(git -C s rev-parse --short HEAD)"
       - name: rclone kur
@@ -75,7 +77,7 @@ jobs:
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "::add-mask::$GOOGLE_CLIENT_SECRET"
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
-          if [ "$MOD" = tam ] || [ "$MOD" = ek ] || [ "$MOD" = urun1 ] || [ "$MOD" = urun2 ] || [ "$MOD" = urun3 ]; then
+          if [ "$MOD" = tam ] || [ "$MOD" = ek ] || [ "$MOD" = urun1 ] || [ "$MOD" = urun2 ] || [ "$MOD" = urun3 ] || [ "$MOD" = mockup_sade ]; then
             T=$(rclone cat "gdrive:ASTROLOVE/TEMP/PRINTFUL_TOKEN.json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["api_token"].strip())')
             [ -n "$T" ] || { echo "HATA: PRINTFUL_TOKEN.json api_token bos"; exit 1; }
             echo "::add-mask::$T"
@@ -316,6 +318,26 @@ jobs:
           DIS=$(git diff --cached --name-only | grep -v "^$U/" || true)
           [ -z "$DIS" ] || { echo "::error::izinli klasor disi: $DIS"; exit 1; }
           git commit -qm "printful urun taramasi $MOD (kosu ${GITHUB_RUN_ID}, $ALT)" && git push -q origin "HEAD:${DAL}"
+          exit $k
+      - name: Printful mockup (mockup_sade; yalniz mockup gorevi, Drive yok)
+        if: env.MOD == 'mockup_sade'
+        run: |
+          set -euo pipefail
+          U="docs/ornament/ornek/ORNAMENT_SADE_8"
+          [ -f "s/$U/OLCUM.json" ] || { echo "::error::dalda SADE_8 yok"; exit 1; }
+          SHA=$(git -C s rev-parse HEAD)
+          sansur() { sed -u "s|${PRINTFUL_TOKEN}|***|g"; }
+          set +e
+          python3 -I main/scripts/printful/ornament_mockup.py "s/$U" "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/$SHA/$U" 2>&1 | sansur | tee "s/$U/KOSU_LOG_MOCKUP.txt"; k=${PIPESTATUS[0]}
+          set -e
+          if grep -rlF "$PRINTFUL_TOKEN" "s/$U" >/dev/null; then echo "::error::ciktida token, yazilmadi"; exit 1; fi
+          if grep -rlE "Bearer [A-Za-z0-9]" "s/$U" >/dev/null; then echo "::error::ciktida Bearer, yazilmadi"; exit 1; fi
+          echo "::notice::mockup cikis $k | $(tail -1 s/$U/KOSU_LOG_MOCKUP.txt | cut -c1-200)"
+          cd s && git config user.name "astrolove-bot" && git config user.email "astrolove-bot@users.noreply.github.com"
+          git add "$U"
+          DIS=$(git diff --cached --name-only | grep -v "^$U/" || true)
+          [ -z "$DIS" ] || { echo "::error::izinli klasor disi: $DIS"; exit 1; }
+          git commit -qm "ornament SADE_8 Printful mockup (kosu ${GITHUB_RUN_ID}, kaynak $SHA)" && git push -q origin "HEAD:${DAL}"
           exit $k
       - name: Daldaki cikti klasorunu Drive'a kopyala (drive_kopya; yalniz kopya, API / token yok)
         if: env.MOD == 'drive_kopya'

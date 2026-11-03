@@ -424,6 +424,11 @@ def main():
     r_p = (pp['el']['a'] + pp['el']['b']) / 2
     s_m = np.minimum(np.radians((pp['t1'] - angm) % 360), np.radians((angm - pp['t2']) % 360)) * r_p / pp['L']
     govde = (s_m >= son.S0) & ~((angm > pp['t1']) & (angm < pp['t2']))
+    if os.environ.get('ORN_DUMP'):                                          # SADE_8 icin: renk_uyum sonrasi oge katmanlari + duzen (varsayilan kapali)
+        import pickle
+        pickle.dump(dict(CC=CC, E=Y['E'], M=Y['M'], ICP=ICP, YK=YK, govde=govde, um=um, hb=hb, iou=IOU, iou_bilgi=IOU_B, renk_uyum=ru,
+                         motor_sha=motor_sha, yerlesim=bilgi), open(os.environ['ORN_DUMP'], 'wb'))
+        log('DUMP', os.environ['ORN_DUMP']); return 0
     hk_ = s2.lab_ton(ana5[..., :3][ana5[..., 3] >= 0.98].astype(np.float32))
     TON_REF = (float(np.percentile(hk_, 5)), float(np.percentile(hk_, 95)))
 
