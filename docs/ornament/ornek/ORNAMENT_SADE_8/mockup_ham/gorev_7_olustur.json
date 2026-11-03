@@ -1,0 +1,49 @@
+{
+ "http": 200,
+ "govde": {
+  "format": "jpg",
+  "products": [
+   {
+    "source": "catalog",
+    "catalog_product_id": 900,
+    "catalog_variant_ids": [
+     23133
+    ],
+    "mockup_style_ids": [
+     26418,
+     26422,
+     26426,
+     26430
+    ],
+    "placements": [
+     {
+      "placement": "front",
+      "technique": "sublimation",
+      "layers": [
+       {
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/da73501a1a4edbc3ed15608cf9708ed0f2306a85/docs/ornament/ornek/ORNAMENT_SADE_8/SADE_7_BORDO_954.png"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "yanit": {
+  "data": [
+   {
+    "id": 996805683,
+    "status": "pending",
+    "catalog_variant_mockups": [],
+    "failure_reasons": [],
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/mockup-tasks?id=996805683"
+     }
+    }
+   }
+  ],
+  "extra": []
+ }
+}

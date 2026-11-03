@@ -1,5 +1,5 @@
 {
- "http": 400,
+ "http": 200,
  "govde": {
   "format": "jpg",
   "products": [
@@ -13,35 +13,7 @@
      26418,
      26422,
      26426,
-     26430,
-     26434,
-     26438,
-     26442,
-     26446,
-     26419,
-     26423,
-     26427,
-     26431,
-     26435,
-     26439,
-     26443,
-     26447,
-     26420,
-     26424,
-     26428,
-     26432,
-     26436,
-     26440,
-     26444,
-     26448,
-     26421,
-     26425,
-     26429,
-     26433,
-     26437,
-     26441,
-     26445,
-     26449
+     26430
     ],
     "placements": [
      {
@@ -50,7 +22,7 @@
       "layers": [
        {
         "type": "file",
-        "url": "https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/f6a0ac1ad15852afb8840959999a34b9435824a5/docs/ornament/ornek/ORNAMENT_SADE_8/SADE_1_KLASIK_ALTIN_954.png"
+        "url": "https://raw.githubusercontent.com/caliserdar-maker/astrolove-ops/da73501a1a4edbc3ed15608cf9708ed0f2306a85/docs/ornament/ornek/ORNAMENT_SADE_8/SADE_1_KLASIK_ALTIN_954.png"
        }
       ]
      }
@@ -59,6 +31,19 @@
   ]
  },
  "yanit": {
-  "hata": "{\"data\":\"Following `style_ids`: 26419, 26423, 26427, 26431, 26435, 26439, 26443, 26447, 26420, 26424, 26428, 26432, 26436, 26440, 26444, 26448, 26421, 26425, 26429, 26433, 26437, 26441, 26445, 26449 are not available for catalog variant: 23133 with placements: front. Available `style_ids` are: 26414, 26418, 26422, 26426, 26430, 26434, 26438, 26442, 26446\",\"error\":{\"reason\":\"BadRequest\",\"message\":\"Following `style_ids`: 26419, 26423, 26427, 26431, 26435, 26439, 26443, 26447, 26420, 26424, 26428, 26432, 26436, 26440, 26444, 26448, 26421, 26425, 26429, 26433, 26437, 26441, 26445, 26449 are not available for catalog variant: 23133 with placements: front. Available `style_ids` are: 26414, 26418, 26422, 26426, 26430, 26434, 26438, 26442, 26446\"}}"
+  "data": [
+   {
+    "id": 996805256,
+    "status": "pending",
+    "catalog_variant_mockups": [],
+    "failure_reasons": [],
+    "_links": {
+     "self": {
+      "href": "https://api.printful.com/v2/mockup-tasks?id=996805256"
+     }
+    }
+   }
+  ],
+  "extra": []
  }
 }

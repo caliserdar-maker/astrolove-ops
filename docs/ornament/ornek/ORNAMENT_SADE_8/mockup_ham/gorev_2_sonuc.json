@@ -1,0 +1,49 @@
+{
+ "id": 996805316,
+ "status": "completed",
+ "catalog_variant_mockups": [
+  {
+   "catalog_variant_id": 23133,
+   "mockups": [
+    {
+     "placement": "front",
+     "display_name": "2-Side print",
+     "technique": "sublimation",
+     "style_id": 26418,
+     "mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/0bed13e6719829e480243ac8924a2b79/ceramic-ornaments,-2-side-print-1-pc-circle-front-6ae9c4270b346.jpg",
+     "view": "Front"
+    },
+    {
+     "placement": "front",
+     "display_name": "2-Side print",
+     "technique": "sublimation",
+     "style_id": 26422,
+     "mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/295215f69d14a2a9d58940e0b7592d24/ceramic-ornaments,-2-side-print-1-pc-circle-front-6ae9c4270b4ba.jpg",
+     "view": "Front"
+    },
+    {
+     "placement": "front",
+     "display_name": "2-Side print",
+     "technique": "sublimation",
+     "style_id": 26426,
+     "mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/1fffc1732303be9fdd2958bf5e75beac/ceramic-ornaments,-2-side-print-1-pc-circle-front-6ae9c4270b4f4.jpg",
+     "view": "Front"
+    },
+    {
+     "placement": "front",
+     "display_name": "2-Side print",
+     "technique": "sublimation",
+     "style_id": 26430,
+     "mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/409bea423b72973d04a976347e191001/ceramic-ornaments,-2-side-print-1-pc-circle-front-6ae9c4270b50f.jpg",
+     "view": "Front"
+    }
+   ]
+  }
+ ],
+ "failure_reasons": [],
+ "_links": {
+  "self": {
+   "href": "https://api.printful.com/v2/mockup-tasks?id=996805316"
+  }
+ }
+}

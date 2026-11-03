@@ -1,0 +1,254 @@
+{
+ "urun": 900,
+ "varyant": 23133,
+ "printfile": 845,
+ "secilen_stil": {
+  "id": 26418,
+  "kategori": "Flat",
+  "gorunum": "Front",
+  "teknik": "sublimation",
+  "varyant": [
+   23133
+  ]
+ },
+ "stiller": [
+  {
+   "id": 26418,
+   "kategori": "Flat",
+   "gorunum": "Front",
+   "teknik": "sublimation",
+   "varyant": [
+    23133
+   ]
+  },
+  {
+   "id": 26422,
+   "kategori": "Flat 2",
+   "gorunum": "Front",
+   "teknik": "sublimation",
+   "varyant": [
+    23133
+   ]
+  },
+  {
+   "id": 26426,
+   "kategori": "Lifestyle",
+   "gorunum": "Front",
+   "teknik": "sublimation",
+   "varyant": [
+    23133
+   ]
+  },
+  {
+   "id": 26430,
+   "kategori": "Lifestyle 2",
+   "gorunum": "Front",
+   "teknik": "sublimation",
+   "varyant": [
+    23133
+   ]
+  }
+ ],
+ "gorev": {
+  "1": {
+   "gorev_id": 996805256,
+   "mockup": [
+    {
+     "style_id": 26418,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_1_26418.jpg"
+    },
+    {
+     "style_id": 26422,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_1_26422.jpg"
+    },
+    {
+     "style_id": 26426,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_1_26426.jpg"
+    },
+    {
+     "style_id": 26430,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_1_26430.jpg"
+    }
+   ]
+  },
+  "2": {
+   "gorev_id": 996805316,
+   "mockup": [
+    {
+     "style_id": 26418,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_2_26418.jpg"
+    },
+    {
+     "style_id": 26422,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_2_26422.jpg"
+    },
+    {
+     "style_id": 26426,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_2_26426.jpg"
+    },
+    {
+     "style_id": 26430,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_2_26430.jpg"
+    }
+   ]
+  },
+  "3": {
+   "gorev_id": 996805365,
+   "mockup": [
+    {
+     "style_id": 26418,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_3_26418.jpg"
+    },
+    {
+     "style_id": 26422,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_3_26422.jpg"
+    },
+    {
+     "style_id": 26426,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_3_26426.jpg"
+    },
+    {
+     "style_id": 26430,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_3_26430.jpg"
+    }
+   ]
+  },
+  "4": {
+   "gorev_id": 996805472,
+   "mockup": [
+    {
+     "style_id": 26418,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_4_26418.jpg"
+    },
+    {
+     "style_id": 26422,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_4_26422.jpg"
+    },
+    {
+     "style_id": 26426,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_4_26426.jpg"
+    },
+    {
+     "style_id": 26430,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_4_26430.jpg"
+    }
+   ]
+  },
+  "5": {
+   "gorev_id": 996805539,
+   "mockup": [
+    {
+     "style_id": 26418,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_5_26418.jpg"
+    },
+    {
+     "style_id": 26422,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_5_26422.jpg"
+    },
+    {
+     "style_id": 26426,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_5_26426.jpg"
+    },
+    {
+     "style_id": 26430,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_5_26430.jpg"
+    }
+   ]
+  },
+  "6": {
+   "gorev_id": 996805613,
+   "mockup": [
+    {
+     "style_id": 26418,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_6_26418.jpg"
+    },
+    {
+     "style_id": 26422,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_6_26422.jpg"
+    },
+    {
+     "style_id": 26426,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_6_26426.jpg"
+    },
+    {
+     "style_id": 26430,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_6_26430.jpg"
+    }
+   ]
+  },
+  "7": {
+   "gorev_id": 996805683,
+   "mockup": [
+    {
+     "style_id": 26418,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_7_26418.jpg"
+    },
+    {
+     "style_id": 26422,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_7_26422.jpg"
+    },
+    {
+     "style_id": 26426,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_7_26426.jpg"
+    },
+    {
+     "style_id": 26430,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_7_26430.jpg"
+    }
+   ]
+  },
+  "8": {
+   "gorev_id": 996805751,
+   "mockup": [
+    {
+     "style_id": 26418,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_8_26418.jpg"
+    },
+    {
+     "style_id": 26422,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_8_26422.jpg"
+    },
+    {
+     "style_id": 26426,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_8_26426.jpg"
+    },
+    {
+     "style_id": 26430,
+     "ad": "2-Side print",
+     "dosya": "mockup_tum/MOCKUP_8_26430.jpg"
+    }
+   ]
+  }
+ }
+}
