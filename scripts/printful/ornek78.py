@@ -20,7 +20,7 @@ import time
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 
 _d = Path(__file__).resolve().parent
 _s = importlib.util.spec_from_file_location('altin', _d / 'ornament_altin.py'); al = importlib.util.module_from_spec(_s); _s.loader.exec_module(al)
@@ -42,6 +42,31 @@ def kos(arg, env=None, log_dosya=None):
     if log_dosya:
         Path(log_dosya).write_text(r.stdout + r.stderr)
     return r.returncode
+
+
+N_ = 954
+DPI_76 = N_ / (76 / 25.4)                                                    # 954 px = 76 mm
+
+
+def sinir_ciz(im):
+    """onizleme: ornament dis cizgisi (954 daire) ve delik (o4.DELIK) gri 2 px; yalniz onizleme, uretim PNG'sine dokunmaz."""
+    im = im.convert('RGB').copy(); d = ImageDraw.Draw(im)
+    d.ellipse((0, 0, N_ - 1, N_ - 1), outline=(150, 150, 150), width=2)
+    x, y, r = o4.DELIK                                                         # r 34 = delik halkasi dis, 25 = ic (o4.DELIK notu)
+    for r_ in (r, 25.0):
+        d.ellipse((x - r_, y - r_, x + r_, y + r_), outline=(150, 150, 150), width=2)
+    return im
+
+
+def acik_kontrast(rgb, D):
+    """FILDISI (bilgi): ornament_sade kati kontrast ile ayni ogeler ve yontem (o5.kontrast_yeni 'acik'); kati = en kotu oge, ortanca = en kotu ortanca."""
+    M = D['M']
+    ok = {k: o5.kontrast_yeni(rgb, M[k], 'acik') for k in ('isim1', 'isim2', 'tarih', 'kucuk_sol', 'kucuk_sag', 'sonsuz')}
+    ok['halka_govde'] = o5.kontrast_yeni(rgb, M['halka'] * D['govde'], 'acik')
+    ok['halka_uclari'] = o5.kontrast_yeni(rgb, M['halka'] * D['um'][0], 'acik')
+    kk = {k: v['deger'] for k, v in ok.items() if v.get('deger') is not None}
+    oo = {k: v['ortanca_bilgi'] for k, v in ok.items() if v.get('ortanca_bilgi') is not None}
+    return dict(kati=min(kk.values()), kati_en_kotu_oge=min(kk, key=kk.get), ortanca=min(oo.values()), oge=kk, oge_ortanca=oo)
 
 
 def ham(a):
@@ -83,12 +108,13 @@ def main():
         k2 = kos([_d / 'ornament_motor.py', '--kaynak', a.kaynak, '--motor', a.motor, '--cikti', w / 'dump', '--son', a.son, '--cift', cift],
                  env={'ORN_DUMP': str(w / 'katman.pkl')}, log_dosya=w / 'log_dump.txt')
         k3 = kos([_d / 'ornament_sade.py', '--katman', w / 'katman.pkl', '--cikti', w / 'sade', '--cift', cift], log_dosya=w / 'log_sade.txt') if k2 == 0 else 9
-        sade1 = w / 'sade' / 'SADE_1_ALTIN_TONU_954.png'
+        sade1 = w / 'sade' / 'SADE_1_ALTIN_TONU_954.png'                  # FILDISI girdisi: aday 1 (koyulastirilmamis; Serdar 4 Kas: diger stiller degismez)
+        sadek = w / 'sade' / 'SADE_KOYU_954.png'                           # SADE ALTIN: kati kontrast >= 1.54 olana kadar koyulasmis (karar 2)
         k4 = kos([_d / 'ornament_fildisi.py', sade1, O / f'{cift}_FILDISI_954.png'], log_dosya=w / 'log_fildisi.txt') if sade1.exists() else 9
         for s in ('RUBY', 'SAPPHIRE', 'EMERALD'):
             shutil.copyfile(w / 'motor' / f'{cift}_{s}_954.png', O / f'{cift}_{s}_954.png')
-        if sade1.exists():
-            shutil.copyfile(sade1, O / f'{cift}_SADE_ALTIN_954.png')
+        if sadek.exists():
+            shutil.copyfile(sadek, O / f'{cift}_SADE_ALTIN_954.png')
         r['cikis_kodlari'] = dict(motor=k1, dump=k2, sade=k3, fildisi=k4)
         eksik = [s for s in STIL if not (O / f'{cift}_{s}_954.png').exists()]
         r['eksik'] = eksik
@@ -101,7 +127,7 @@ def main():
                 (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str)); return 3
             continue
         M_ = json.loads((w / 'motor' / 'OLCUM.json').read_text())
-        S_ = json.loads((w / 'sade' / 'OLCUM.json').read_text())['aday']['1']
+        S_all = json.loads((w / 'sade' / 'OLCUM.json').read_text()); S_ = S_all['aday']['1']; SK = S_all['sade_koyu']
         D = pickle.load(open(w / 'katman.pkl', 'rb'))
         _, yb, cak, ok = o4.kapi(D['E'])
         cv2 = __import__('cv2')
@@ -111,7 +137,7 @@ def main():
             dd = cv2.distanceTransform((~ym.astype(bool)).astype(np.uint8), cv2.DIST_L2, 5)
             uzak[yk] = round(float(dd[ink].min()), 1) if ink.any() else None
         SERT = dict({f'koyu_{k}': v for k, v in M_['kapi_sert'].items()}, **{f'sade1_{k}': bool(v) for k, v in S_['kapi'].items()},
-                    fildisi_cikis_0=bool(k4 == 0))                           # tek kaynak: motor kapi_sert + SADE_1 teknik kapi + fildisi cikisi
+                    **{f'sade_koyu_{k}': bool(v) for k, v in SK['kapi'].items()}, fildisi_cikis_0=bool(k4 == 0))                           # tek kaynak: motor kapi_sert + SADE_1 teknik kapi + fildisi cikisi
         r['not_'] = 'sert kapilar: ' + ('gecti' if all(SERT.values()) else 'FAIL ' + ', '.join(k for k, v in SERT.items() if not v))
         r.update(
             yerlesim=dict(maske_yasak_px=yb, maske_yasak_not_='o4.kapi oge maskesinden olcum (kapi sonucu motor kapi_sert goruntu_yasak_0)', cakisma=cak[:4], bosluk_px=M_['sonuc']['RUBY']['bosluk_px'], sembol_kutu=M_['kutu']['sembol'],
@@ -127,8 +153,12 @@ def main():
                       kaynak='koyu: ornament_motor OLCUM kapi_sert / kapi_bilgi; sade1: ornament_sade OLCUM aday 1 kapi; fildisi: cikis kodu'),
             kaynak_leke=M_.get('kaynak_leke_onarim_sonrasi'),
             cikti_leke_a={s: sum(v['alfa_lt_09'] for k2, v in M_['sonuc'][s]['leke'].items() if k2 in o5.LEKE_KAPI_OGE) for s in ('RUBY', 'SAPPHIRE', 'EMERALD')},
-            sade=dict(kati_kontrast_bilgi=S_['kati_kontrast_en_kotu'], goruntu_yasak=S_['goruntu_yasak'], leke_a=S_['leke_a'], zemin_seffaf=S_['zemin_seffaf']),
-            fildisi=dict(yerlesim_yasak_px=yb, not_='fildisi ayni oge katmani (SADE_1) + krem zemin; yasak px yerlesimden'))
+            sade=dict(kati_kontrast=SK['kati_kontrast'], en_kotu_oge=SK['en_kotu_oge'], carpan_L=SK['carpan_L'], hedef=SK['hedef'],
+                      koyulasma_oncesi_kati=S_['kati_kontrast_en_kotu'], aday1_ile_ayni=SK['aday1_ile_ayni'], gamut_kroma_kuculen_piksel=SK['gamut_kroma_kuculen_piksel'],
+                      goruntu_yasak=S_['goruntu_yasak'], leke_a=S_['leke_a'], zemin_seffaf=S_['zemin_seffaf']),
+            fildisi=dict(kontrast_bilgi=acik_kontrast(np.asarray(Image.open(O / f'{cift}_FILDISI_954.png').convert('RGB')), D),
+                         merkez_istisna=2.53, merkez_not_='2.53 Merkez olcumu (yontem kayitli degil); bizim olcumde ortanca olcegine uyar, kati (en kotu) ayri',
+                         yerlesim_yasak_px=yb, not_='fildisi girdisi aday 1 (koyulastirilmamis SADE) + krem zemin; yasak px yerlesimden'))
         R['cift'][cift] = r
         log(cift, 'yasak', yb, 'kontrast', {s: r['koyu'][s]['kontrast_ortanca'] for s in r['koyu']}, 'dE00', {s: r['koyu'][s]['dE00_ham_maks'] for s in r['koyu']},
             'sembol', r['yerlesim']['sembol_kutu'], 'uzaklik', uzak, 'sert FAIL', [k for k, v in SERT.items() if not v], 'cikis', r['cikis_kodlari'])
@@ -157,10 +187,13 @@ def main():
             im = Image.open(O / f'{cift}_{s}_954.png')
             if im.mode == 'RGBA':
                 b = Image.new('RGB', im.size, (255, 255, 255)); b.paste(im, (0, 0), im); im = b
+            if s == 'SADE_ALTIN':
+                im = sinir_ciz(im)                                            # Serdar 4 Kas karar 3: beyaz sayfada dis cizgi ve delik
             liste.append(np.asarray(im.convert('RGB')))
             k = R['cift'][cift]
             v = (f'kontrast {k["koyu"][s]["kontrast_ortanca"]}, dE00 {k["koyu"][s]["dE00_ham_maks"]}' if s in k['koyu'] else
-                 (f'kati kontrast {k["sade"]["kati_kontrast_bilgi"]} (bilgi)' if s == 'SADE_ALTIN' else 'krem zemin (bilgi)'))
+                 (f'kati {k["sade"]["kati_kontrast"]} (L x {k["sade"]["carpan_L"]})' if s == 'SADE_ALTIN' else
+                  f'kati {k["fildisi"]["kontrast_bilgi"]["kati"]}, ortanca {k["fildisi"]["kontrast_bilgi"]["ortanca"]}'))
             et.append(f'{cift} / {s}\n{v}\nyasak px {sum(k["yerlesim"]["maske_yasak_px"].values())}')
         satir.append(son.onizleme_etiketli(liste, et, font, h_et=96))
     if satir:                                                                 # tum ciftler atlandiysa onizleme yok (OLCUM yine yazilir)
@@ -169,6 +202,10 @@ def main():
         for x in satir:
             u.paste(x, (0, y)); y += x.height + 16
         u.save(RP / 'ONIZLEME_76mm_6CIFT.png', dpi=(300, 300))
+    gv = O / 'GEMINI_VIRGO_SADE_ALTIN_954.png'                                # karar 4 Kas: GEMINI_VIRGO SADE tek gorsel, gercek boy (76 mm)
+    if gv.exists():
+        im = Image.open(gv); b = Image.new('RGB', im.size, (255, 255, 255)); b.paste(im, (0, 0), im)
+        sinir_ciz(b).save(RP / 'GEMINI_VIRGO_SADE_GERCEK_BOY_76mm.png', dpi=(DPI_76, DPI_76))
     R['png_sha256'] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(O.glob('*_954.png'))}
     fail = {c: v.get('not_') for c, v in R['cift'].items() if v.get('eksik') or not all((v.get('kapi') or {}).get('sert', {'x': False}).values())}
     cokus = [c for c, v in R['cift'].items() if 2 in (v.get('cikis_kodlari') or {}).values()]

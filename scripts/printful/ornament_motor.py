@@ -198,7 +198,7 @@ def main():
     if ana0.shape[1] > 1600:
         r_, a_ = o1.rgba_olcek(ana0, 1600 / ana0.shape[1]); ana0 = np.dstack([r_, a_])
     ana5, _ = o5.delik_kapat(ana0)
-    ic_, _ = o5.leke_ic_kaynak(ana5[..., 3]); o5.KAYNAK_SONRA['ana'] = int((ic_ & (ana5[..., 3] < 0.9)).sum())
+    ic_, _ = o5.leke_ic_kaynak(ana5[..., 3], olcum=True); o5.KAYNAK_SONRA['ana'] = int((ic_ & (ana5[..., 3] < 0.9)).sum())
     lsrc = o4.logo_kaynak(K_ / 'LOGO_1.png')
     cap = o4.CAP0
     G = int(math.ceil(o5.BOSLUK_ORAN * cap))
@@ -209,7 +209,7 @@ def main():
             g = np.asarray(Image.open(K_ / f'{burc}_symbol_gold.png').convert('RGBA'), np.float32); g[..., 3] /= 255.0
             g = o1.kirp(g, g[..., 3], pad=2)
             g, _ = o5.delik_kapat(g)
-            ic2, _ = o5.leke_ic_kaynak(g[..., 3]); o5.KAYNAK_SONRA[burc] = int((ic2 & (g[..., 3] < 0.9)).sum())
+            ic2, _ = o5.leke_ic_kaynak(g[..., 3], olcum=True); o5.KAYNAK_SONRA[burc] = int((ic2 & (g[..., 3] < 0.9)).sum())
             kucuk_g[burc] = g
         g = kucuk_g[burc]
         gx0, gy0, gx1, gy1 = o1.bbox(g[..., 3], 0.5)

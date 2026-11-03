@@ -111,11 +111,20 @@ jobs:
           (cd $K && sha256sum *_ana.png *_symbol_gold.png) | sed 's|  |  kaynak/|' | tee -a /tmp/girdi_sha.txt
           (cd $MD && find . -type f | sort | xargs sha256sum) | sed 's|  \./|  motor_gpt/|' | tee -a /tmp/girdi_sha.txt
           cat /tmp/drive_md5.txt >> /tmp/girdi_sha.txt
+      - name: Kova kaynak leke kapisi testi (bilinen PASS mevcut kaynak, bilinen FAIL yapay leke; Serdar 4 Kas A)
+        id: kova
+        run: |
+          set +e
+          mkdir -p /tmp/rapor; cd s
+          python3 -I scripts/printful/kova_kapi_testi.py --kaynak /tmp/kay/aquarius_symbol_gold.png --cikti /tmp/rapor 2>&1 | tee /tmp/log_kova.txt
+          kt=${PIPESTATUS[0]}; echo "kt=$kt" >> "$GITHUB_OUTPUT"; echo "::notice::kova kapi testi cikis $kt | $(tail -1 /tmp/log_kova.txt | cut -c1-250)"
+          exit 0
       - name: Uretim (6 cift x 5 stil; kontrol cifti once)
         id: uretim
         run: |
+          set +e
           set -uo pipefail
-          D=ORNAMENT_78_ORNEK6_$(date -u +%Y%m%d_%H%M); echo "D=$D" >> "$GITHUB_ENV"; mkdir -p /tmp/son_yok
+          D=ORNAMENT_78_ORNEK6_$(date -u +%Y%m%d_%H%M); echo "D=$D" >> "$GITHUB_ENV"; mkdir -p /tmp/son_yok /tmp/png
           cd s
           python3 -I scripts/printful/ornek78.py --kaynak /tmp/kay --motor /tmp/mg --zemin /tmp/zemin \
             --son /tmp/son_yok --onayli /tmp/onayli \
@@ -123,10 +132,12 @@ jobs:
           k=${PIPESTATUS[0]}; echo "k=$k" >> "$GITHUB_OUTPUT"
           kp=$(python3 -c "import json; print(json.load(open('/tmp/rapor/OLCUM.json')).get('kontrol_pass'))" 2>/dev/null || echo None); echo "kp=$kp" >> "$GITHUB_OUTPUT"
           echo "::notice::ornek78 cikis $k | $(tail -1 /tmp/log_ornek78.txt | cut -c1-200)"
-      - name: Drive (kontrol cifti gecti; cikis 0, 1 ya da 2 ile uretilen PNG)
-        if: steps.uretim.outputs.kp == 'True' && (steps.uretim.outputs.k == '0' || steps.uretim.outputs.k == '1' || steps.uretim.outputs.k == '2')
+          exit 0                                                             # cikis kodu k ciktisinda; sonraki adimlar her durumda calisir (Serdar 4 Kas B)
+      - name: Drive (her durumda; uretilen PNG'ler)
+        if: always()
         run: |
           set -euo pipefail
+          n=$(ls /tmp/png/*_954.png 2>/dev/null | wc -l); echo "PNG $n"; [ "$n" -gt 0 ] || { echo "::warning::Drive'a yazilacak PNG yok"; exit 0; }
           rclone copy /tmp/png "gdrive:ASTROLOVE/TEMP/$D" --include "*_954.png" -q
           ID=$(rclone lsjson gdrive:ASTROLOVE/TEMP --dirs-only | python3 -c "import json,sys; print([d['ID'] for d in json.load(sys.stdin) if d['Name']=='$D'][0])")
           echo "$D https://drive.google.com/drive/folders/$ID" | tee /tmp/drive_link.txt
@@ -137,8 +148,8 @@ jobs:
         run: |
           set -euo pipefail
           G=s/docs/ornament/ornek/${D:-ORNAMENT_78_ORNEK6_HATA}; mkdir -p $G
-          cp /tmp/rapor/ONIZLEME_76mm_6CIFT.png /tmp/rapor/OLCUM.json $G/ 2>/dev/null || true
-          cp /tmp/girdi_sha.txt /tmp/paket.txt /tmp/log_ornek78.txt $G/ 2>/dev/null || true
+          for f in ONIZLEME_76mm_6CIFT.png OLCUM.json KOVA_KAPI_TESTI.json GEMINI_VIRGO_SADE_GERCEK_BOY_76mm.png; do cp /tmp/rapor/$f $G/ 2>/dev/null || true; done
+          cp /tmp/girdi_sha.txt /tmp/paket.txt /tmp/log_ornek78.txt /tmp/log_kova.txt $G/ 2>/dev/null || true
           cp /tmp/drive_link.txt $G/ 2>/dev/null || true
           cd s && git config user.name "astrolove-bot" && git config user.email "astrolove-bot@users.noreply.github.com"
           git add --sparse docs/ornament/ornek
@@ -150,4 +161,4 @@ jobs:
         run: rm -rf ~/.config/rclone
       - name: Sonuc
         if: always()
-        run: '[ "${{ steps.uretim.outputs.k }}" = "0" ] || [ "${{ steps.uretim.outputs.k }}" = "1" ]'
+        run: 'echo "ornek78 cikis ${{ steps.uretim.outputs.k }} kova testi ${{ steps.kova.outputs.kt }}"; [ "${{ steps.uretim.outputs.k }}" = "0" ] && [ "${{ steps.kova.outputs.kt }}" = "0" ]'

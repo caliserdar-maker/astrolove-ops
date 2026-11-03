@@ -125,18 +125,23 @@ def kucuk_delikler(c, oran=0.001):
     return out
 
 
-def leke_ic_kaynak(a):
-    """kaynak olcegi (1600 px'te kapanis 9 x 9, 5 px ice; boyla olceklenir) + kapali kucuk delikler (alan < %0.1)."""
+def leke_ic_kaynak(a, olcum=False):
+    """kaynak olcegi (1600 px'te kapanis 9 x 9, 5 px ice; boyla olceklenir) + kapali kucuk delikler (alan < %0.1).
+    olcum=True yalniz kapi olcumu (leke_a_kaynak) icin; delik_kapat (goruntuyu degistiren onarim) eski payla kalir, goruntu degismez."""
     W = a.shape[1]
-    ped = 24                                                           # goruntu kenari sinir sayilmasin (kenar satirlari sayilmaz)
-    a = np.pad(a, ped)
     k = int(round(9 * W / 1600)) | 1
     ice = max(2, int(round(5 * W / 1600)))
+    # goruntu kenari sinir sayilmasin. Serdar 4 Kas (Kova 445 px): eski sabit pay 24 px, W 10817'de kapanis yaricapi 30 px'ten kucuktu;
+    # kenara degen murekkebin kenar satiri ic sayiliyordu. Pay = kapanis yaricapi + ice asindirma + 2 (en az 24; esik degismez)
+    ped = max(24, k // 2 + ice + 2) if olcum else 24
+    H0 = a.shape[0]
+    a = np.pad(a, ped)
+    oran_ = KAYNAK_DELIK_ORAN * (H0 + 48) * (W + 48) / (a.shape[0] * a.shape[1])   # kucuk delik alan esigi eski (24 px pay) ile ayni piksel
     m = (a > 0.5).astype(np.uint8)
     c = cv2.morphologyEx(m, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
-    c = (c > 0) | kucuk_delikler(c, KAYNAK_DELIK_ORAN)
+    c = (c > 0) | kucuk_delikler(c, oran_)
     ic = cv2.erode(c.astype(np.uint8), np.ones((3, 3), np.uint8), iterations=ice) > 0
-    return ic[ped:-ped, ped:-ped], dict(kapanis=k, ice_px=ice, kenar_payi=ped, kucuk_delik_alan_esigi=int(KAYNAK_DELIK_ORAN * (a.shape[0] - 2 * ped) * W))
+    return ic[ped:-ped, ped:-ped], dict(kapanis=k, ice_px=ice, kenar_payi=ped, kucuk_delik_alan_esigi=int(oran_ * a.shape[0] * a.shape[1]))
 
 
 def leke_ic(m):

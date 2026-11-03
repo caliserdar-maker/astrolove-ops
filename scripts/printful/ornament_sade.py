@@ -33,6 +33,7 @@ N, CX, CY = o5.N, o5.CX, o5.CY
 lum = o4.lum
 KUCUK_OGE = ('isim1', 'isim2', 'tarih', 'sonsuz', 'kucuk_sol', 'kucuk_sag', 'halka')
 KAPI_OGE = ('isim1', 'isim2', 'tarih', 'kucuk_sol', 'kucuk_sag', 'sonsuz')
+SADE_HEDEF = 1.54                                                       # Serdar 4 Kas karar 2 (CANCER_LIBRA kabul duzeyi); yeni esik degil
 
 
 def lab(x):
@@ -219,6 +220,40 @@ def main():
         R['aday'][str(n)] = r
         print(r['etiket'], '| sembol', r['sembol_kati_bilgi'], '| uclar', r['halka_uclari_kati'], '| leke', r['leke_a'], '| yasak', sum(gy.values()),
               '| seffaf', r['zemin_seffaf'], r['zemin_disi_alfa_sifir_olmayan'], '| gamut', r['gamut_kroma_kuculen_piksel'], flush=True)
+    # Serdar 4 Kas karar 2: SADE (beyaz) altin tonu, kati kontrast her ciftte en az SADE_HEDEF (CANCER_LIBRA kabul duzeyi) olana kadar koyulasir.
+    # Yontem: ALTIN_TONU (aday 1) renginde Lab L carpanla duser (a, b aynen; gamut disinda kroma kuculur), carpan 0.01 adim, en az 0.50.
+    # Carpan 1.00'da kontrast >= hedef ise dosya aday 1 ile birebir (CANCER_LIBRA degismez). Diger stiller ve FILDISI girdisi (aday 1) degismez.
+    def kati(rgb):
+        ok = {k: o5.kontrast_yeni(rgb, M[k], 'acik') for k in KAPI_OGE}
+        ok['halka_govde'] = o5.kontrast_yeni(rgb, M['halka'] * govde, 'acik')
+        ok['halka_uclari'] = o5.kontrast_yeni(rgb, M['halka'] * um[0], 'acik')
+        kk = {k: v['deger'] for k, v in ok.items() if v.get('deger') is not None}
+        return kk[min(kk, key=kk.get)], min(kk, key=kk.get), kk
+
+    def koyu(cc, m, f):
+        sec = m > 0.001; out = cc.copy()
+        L_ = lab(cc[sec]); L_[:, 0] *= f
+        out[sec], n, _ = gamut_kroma(L_)
+        return out, n
+    f, iz = 1.0, []
+    rgba_k, rgb_k = butunlestir(ALT); kv, ko, kk_ = kati(rgb_k); gam_k = 0
+    iz.append(dict(carpan=1.0, kati=kv, en_kotu=ko))
+    while kv < SADE_HEDEF and f > 0.505:
+        f = round(f - 0.01, 2)
+        renk, gam_k = {}, 0
+        for ad in E:
+            renk[ad], n_ = koyu(ALT[ad], M[ad], f); gam_k += n_
+        rgba_k, rgb_k = butunlestir(renk); kv, ko, kk_ = kati(rgb_k)
+        iz.append(dict(carpan=f, kati=kv, en_kotu=ko))
+    gy_k, _ = o4.goruntu_yasak(rgb_k, beyaz, M.get('halka'))
+    lk_k = o5.leke_kapisi(M, rgb_k, None)
+    Image.fromarray(rgba_k, 'RGBA').save(O / 'SADE_KOYU_954.png')
+    R['sade_koyu'] = dict(dosya='SADE_KOYU_954.png', hedef=SADE_HEDEF, hedef_kaynak='CANCER_LIBRA kabul duzeyi (Serdar 4 Kas karar 2)',
+                          carpan_L=f, kati_kontrast=kv, en_kotu_oge=ko, kontrast=kk_, iz=iz, gamut_kroma_kuculen_piksel=gam_k,
+                          aday1_ile_ayni=bool(f == 1.0),
+                          kapi=dict(kontrast_ge_hedef=bool(kv >= SADE_HEDEF), leke_0=sum(v['alfa_lt_09'] for k2, v in lk_k.items() if k2 in o5.LEKE_KAPI_OGE) == 0,
+                                    tasma_ve_yasak_0=sum(gy_k.values()) == 0, zemin_seffaf=bool((rgba_k[..., 3][disari] == 0).all())))
+    print('SADE_KOYU carpan', f, 'kati', kv, ko, 'kapi', R['sade_koyu']['kapi'], flush=True)
     R['teknik_kapi_hepsi'] = all(all(v['kapi'].values()) for v in R['aday'].values())
     R['okunur_adaylar'] = [n for n, v in R['aday'].items() if v['okunur']]
     R['okunmaz_adaylar'] = [n for n, v in R['aday'].items() if not v['okunur']]
