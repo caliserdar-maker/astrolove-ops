@@ -12,9 +12,11 @@ vektor_yuzey.yon_alani; alfa_temizle.temizle) ve KILIT_GPTGIRDI.json AYAR + ORTA
 4 GREN: KILIT gren (1.0), uret_tam formulu (sRGB 0-255, GaussianBlur(N(0,1), 0.8) / 0.35 x gren), yalniz ogede, 10x cizimde; 954'te kalan genlik olculur.
 5 DISARIDA: yansima, temas, isima, poster dis golgesi, zemin_daire (karar 18: zemin rengi ogeye tasinmaz).
 7 ALFA_TEMIZLE: yalniz kucuk burclar ve logo (posterde uygulandigi ogeler), 10x olcekte, pad 40 (olustur_alfa_sablon ile ayni). Isim / tarih / halka YOK.
-Butunlesme a114ddb ile ayni (ornament_altin.boya_altin). Kapilar: dE00 <= 1, ortanca kontrast >= 4.5 (logo ve halka govdesi dahil; kati bilgi),
-leke 0, tasma 0, ton (Lab kaynak araligi + B >= R), halka govde surekliligi (s >= 0.30, 3 px, >= %70 govde ortancasi), yerlesim a114ddb,
-954 alfa IoU >= 0.98 (a114ddb maskesine), RUBY kurali.
+Butunlesme: boya_motor = ornament_altin.boya_altin (a114ddb) ile ayni, tek fark ic golge (kayma, sigma, guc) x min(1, D_oge / D_ana) (deneme 3,
+Merkez 3 Kas); dusus (alt 0.92, us 0.25) aynen. Kapilar: renk_uyum dE00 <= 1 (not: medyani medyana kaydirdigi icin bu kapi tanim geregi gecer),
+son dosya dE00 <= 2 (dusus carpani bolunerek; ham deger bilgi), ortanca kontrast >= 4.5 (logo ve halka govdesi dahil; kati bilgi), leke 0, tasma 0,
+ton (Lab kaynak araligi + B >= R), halka govde surekliligi (s >= 0.30, 3 px yay, >= %70 govde ortancasi), yerlesim a114ddb,
+IoU: kucuk burc / logo >= 0.98; isim / tarih / halka IoU bilgi, murekkep bolgesi ort. alfa farki <= 0.035; RUBY kurali.
 Kullanim: ornament_motor.py --kaynak DIR --motor DIR(motor_gpt kopyasi) --cikti DIR --son DIR(a5e3ea2 STIL3_SON)"""
 import argparse
 import hashlib

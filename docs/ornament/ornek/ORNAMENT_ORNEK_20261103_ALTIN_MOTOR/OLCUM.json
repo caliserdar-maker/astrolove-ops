@@ -1378,5 +1378,59 @@
   }
  },
  "dE00_son_yontem": "son PNG / f_dus (boya_altin dusus carpani, sRGB tek skaler; alt 0.92, us 0.25 aynen) -> oge ve ana sembol alfa >= 0.9 pikselleri ortanca Lab -> CIEDE2000 (renk_uyum.py de00); kapi <= 2.0",
- "iou_kapi": "kucuk_sol / kucuk_sag / sonsuz: IoU (alfa > 0.5) >= 0.98; isim / tarih / halka: IoU bilgi, kapi ort_mutlak_fark_murekkep (murekkep bolgesi: iki maskeden birinde alfa > 0.02) <= 0.035 (Merkez 3 Kas + onay)"
+ "iou_kapi": "kucuk_sol / kucuk_sag / sonsuz: IoU (alfa > 0.5) >= 0.98; isim / tarih / halka: IoU bilgi, kapi ort_mutlak_fark_murekkep (murekkep bolgesi: iki maskeden birinde alfa > 0.02) <= 0.035 (Merkez 3 Kas + onay)",
+ "yakin_doku_yan_yana": {
+  "RUBY": {
+   "ana_pencere": [
+    497,
+    327,
+    567,
+    397
+   ],
+   "kucuk_kutu": [
+    286,
+    666,
+    364,
+    736
+   ]
+  },
+  "SAPPHIRE": {
+   "ana_pencere": [
+    393,
+    327,
+    463,
+    397
+   ],
+   "kucuk_kutu": [
+    287,
+    666,
+    364,
+    736
+   ]
+  },
+  "EMERALD": {
+   "ana_pencere": [
+    393,
+    327,
+    463,
+    397
+   ],
+   "kucuk_kutu": [
+    287,
+    666,
+    364,
+    736
+   ]
+  }
+ },
+ "inceleme_ad3aa746": {
+  "KRITIK_1": "kapi PASS yalniz dusus bolunmus goruntude; teslim dosyasinda ham dE00 1.90-2.77, 21 oge/renk ciftinin 19u > 2.0. Neden: kucuk ogelerde f_dus 0.92 tabaninda (ort 0.920-0.926), ana sembolde 0.972-0.979 (en dusuk 0.939); ayni f_dus bolgesinde olcum mumkun degil. \"alt 0.92 aynen\" ile \"ayni altin\" celisiyor: Merkez / Serdar karari.",
+  "KRITIK_2": "medyan dE00 \"ayni altin\"i temsil etmiyor: RUBY son dosya ana L p95 88.0, IQR 22.2, L>=80 %15.4; kucuk ogeler L p95 71.4-78.2, IQR 6.7-16.0, L>=80 %0. Butunlesme oncesi de ana p95 91.6, ogeler 78.5-86.0 (motor cizimi daha duz). YAKIN_DOKU yan yana karelerde gorunur.",
+  "ORTA_3": "dE00_le_1 (renk_uyum) totoloji: medyan medyana kaydirilip ayni medyan olculuyor.",
+  "ORTA_4": "ic golge genislik ve guc birlikte r ile carpildi: cekirdek koyulasma ana %1.59, ogeler %0.26-0.58; sigma 0.08-0.19 GaussianBlur birim donusum. Ogelerde ic golge fiilen kalkti.",
+  "ORTA_5": "duzeltildi (koşu degil): YAKIN_DOKU sonuna son PNGlerden ana govde + kucuk burc yan yana (scripts/printful/ornament_yan_yana.py).",
+  "ORTA_6": "duzeltildi: betik basligi guncellendi.",
+  "BILGI": "ana sembol pikselleri a114ddb G2 ile 3 renkte 31316/31316 ayni; BEIGE/AGED_PAPYRUS degismedi; D_ana 6.43 (954 maskeden 6.40) tutarli; RUBY kontrast payi 0.10; metin alfa esigi 0.035 degerler goruldukten sonra onaylandi (kayit).",
+  "kaynak": "bagimsiz inceleme ajan olcumleri (scratchpad inc11: a1.py, a2.py, a3.py)"
+ }
 }
