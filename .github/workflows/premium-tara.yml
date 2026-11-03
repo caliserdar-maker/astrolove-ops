@@ -1,6 +1,6 @@
-name: premium-tara
-# SALT OKUMA (Etsy'ye yazim YOK): "premium" / "long-lasting" taramasi + YD kisisellestirme okumasi (Serdar 3 Kas; Merkez adim 2).
-# Kod: scripts/etsy/premium_tara.py (SaltOku: yalniz GET). Kilit: kilit_bekle.py checkout'tan hemen sonra, token indirmeden ONCE.
+name: yd-talimat-pilot
+# DAL yd-talimat-pilot: YD Heading talimati PILOT yazimi, YALNIZ 4595350971 (Serdar 3 Kas Soru 7 + Soru 14 A plan onayi; Merkez 3 Kas A).
+# Kod: scripts/etsy/yd_talimat_yaz.py (yedek -> tek POST -> geri okuma; question_id degisirse DUR). Kilit: kilit_bekle.py checkout'tan hemen sonra, token indirmeden ONCE.
 # Cikti: Drive TEMP/PREMIUM_TARAMA_<UTC damga>/ (TABLO.csv, POSTER_GORSEL.csv, YD_KISISEL.json, HAM/, OZET.json).
 permissions:
   actions: read
@@ -24,7 +24,7 @@ jobs:
           set -euo pipefail
           pip install -q requests==2.34.2
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
-          echo "CIKTI=PREMIUM_TARAMA_$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+          echo "CIKTI=YD_TALIMAT_PILOT_$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
       - name: rclone.conf
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -40,20 +40,20 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work _out
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-      - name: Tara (salt okuma)
+      - name: YD talimat pilot (tek ilan)
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
-        run: python3 scripts/etsy/premium_tara.py --out _out
+        run: python3 scripts/etsy/yd_talimat_yaz.py --ids 4595350971 --out _out --uygula
       - name: Token geri yaz + cikti Drive'a
         if: ${{ always() }}
         run: |
           TOKEN_RC=0; OUT_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
           if ls _out/* >/dev/null 2>&1; then
             python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
-            rclone copy _out "gdrive:ASTROLOVE/TEMP/${CIKTI:?}" --immutable -q && echo "::notice title=PREMIUM::TEMP/$CIKTI/" || OUT_RC=1
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/${CIKTI:?}" --immutable -q && echo "::notice title=YD-TALIMAT::TEMP/$CIKTI/" || OUT_RC=1
           fi
           [ "$TOKEN_RC" = 0 ] && [ "$OUT_RC" = 0 ] || exit 1
       - if: always()
