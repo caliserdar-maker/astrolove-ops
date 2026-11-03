@@ -88,9 +88,16 @@ def main():
         S_ = json.loads((w / 'sade' / 'OLCUM.json').read_text())['aday']['1']
         D = pickle.load(open(w / 'katman.pkl', 'rb'))
         _, yb, cak, ok = o4.kapi(D['E'])
+        cv2 = __import__('cv2')
+        ink = np.maximum.reduce([D['M'][k] for k in D['M'] if k != 'halka']) > 0.02     # halka haric (delikten gecer, muaf)
+        uzak = {}
+        for yk, ym in o4.YASAK.items():
+            dd = cv2.distanceTransform((~ym.astype(bool)).astype(np.uint8), cv2.DIST_L2, 5)
+            uzak[yk] = round(float(dd[ink].min()), 1) if ink.any() else None
         r.update(
             yerlesim=dict(kapi_ok=bool(ok), yasak_px=yb, cakisma=cak[:4], bosluk_px=M_['sonuc']['RUBY']['bosluk_px'], sembol_kutu=M_['kutu']['sembol'],
                           halka_kutu=M_['kutu']['halka'], kucuk_sol_kutu=M_['kutu']['kucuk_sol'], kucuk_sag_kutu=M_['kutu']['kucuk_sag'],
+                          sembol_ust_y=M_['kutu']['sembol'][1], sembol_ust_y_cancer_libra=246, yasak_bolgeye_en_kisa_uzaklik_px=uzak,
                           yerlesim_bilgi=M_['yerlesim']),
             koyu={s: dict(kontrast_ortanca=M_['sonuc'][s]['kontrast_ortanca_en_kotu'], kati_koyu5_bilgi=M_['sonuc'][s]['kati_koyu5_en_kotu_bilgi'],
                           dE00_ham_maks=max(M_['sonuc'][s]['dE00_son_ham'].values()), goruntu_yasak=M_['sonuc'][s]['goruntu_yasak'],
@@ -102,7 +109,7 @@ def main():
             fildisi=dict(yerlesim_yasak_px=yb, not_='fildisi ayni oge katmani (SADE_1) + krem zemin; yasak px yerlesimden'))
         R['cift'][cift] = r
         log(cift, 'yasak', yb, 'kontrast', {s: r['koyu'][s]['kontrast_ortanca'] for s in r['koyu']}, 'dE00', {s: r['koyu'][s]['dE00_ham_maks'] for s in r['koyu']},
-            'sembol', r['yerlesim']['sembol_kutu'], 'kapi', {k: v for k, v in M_['kapi'].items() if not v})
+            'sembol', r['yerlesim']['sembol_kutu'], 'uzaklik', uzak, 'kapi', {k: v for k, v in M_['kapi'].items() if not v})
         if cift == 'CANCER_LIBRA':
             hepsi = True
             for s in STIL:

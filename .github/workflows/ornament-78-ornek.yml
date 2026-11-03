@@ -17,17 +17,29 @@ jobs:
     env:
       DAL: ornament-printful-katalog
       MOTOR_COMMIT: 6da763aa5b9820027420f73264fc69d30e120a33
-      TEK_DOKU_COMMIT: 2a08a78216ca
-      ONAY_COMMIT: 6daab364
+      TEK_DOKU_COMMIT: 2a08a78216ca19dd632e7dedda31c4c53c365c25
+      ACIK_COMMIT: 28774956a2561c9776dca0d1484c8a17b81f6aac
+      ONAY_COMMIT: 6daab364816e4c4b8602258b9b8d8bec28231cfc
       O5: docs/ornament/ornek/ORNAMENT_5STIL_20261103_1539
       ANA_KLASOR: 1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD
       BURC_KLASOR: 1j9TBPj86_5njsmf_t0v6tczuwcDyLuXu
     steps:
+      # hafif checkout (Merkez 3 Kas: tam gecmis 41 dk takildi, kosu 41682303288 iptal): sig, blobsuz, yalniz gereken yollar
       - uses: actions/checkout@v4
         with:
           ref: ornament-printful-katalog
-          fetch-depth: 0
+          fetch-depth: 1
+          lfs: false
+          filter: blob:none
+          sparse-checkout: |
+            scripts/printful
+            docs/ornament/zemin3/V2
           path: s
+      - name: Gereken commit'ler (sig, blobsuz; git show dosyalari tek tek indirir)
+        run: |
+          set -euo pipefail
+          for c in $MOTOR_COMMIT $TEK_DOKU_COMMIT $ACIK_COMMIT $ONAY_COMMIT; do git -C s fetch -q --depth 1 --filter=blob:none origin $c; done
+          git -C s log --oneline -1 HEAD
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
@@ -68,10 +80,9 @@ jobs:
           print('drive md5 karsilastirma', len(y), 'dosya, uyusmayan', bad)
           assert not bad and len(y) == 18, 'DUR: Drive md5 uyusmuyor ya da dosya eksik'
           PY
-          git -C s fetch -q origin ornek-tek-doku siparis-gpt gecici/ornament-sembol-renk
           for f in motor/varlik/halka/HALKA_BLUE_16x20.png motor/font/Cinzel.ttf motor/font/EBGaramond-Italic.ttf motor/tek_doku.py; do
             git -C s show "$TEK_DOKU_COMMIT:$f" > "$K/$(basename $f)"; done
-          for f in BEIGE_1264.png AGED_PAPYRUS_1264.png; do git -C s show 2877495:zemin_acik/$f > $K/$f; done
+          for f in BEIGE_1264.png AGED_PAPYRUS_1264.png; do git -C s show $ACIK_COMMIT:zemin_acik/$f > $K/$f; done
           cp s/docs/ornament/zemin3/V2/RUBY_1264.png s/docs/ornament/zemin3/V2/SAPPHIRE_1264.png s/docs/ornament/zemin3/V2/EMERALD_1264.png $K/
           git -C s show $MOTOR_COMMIT:motor_gpt/girdi/LOGO_1.png > $K/LOGO_1.png
           git -C s show $MOTOR_COMMIT:motor_gpt/girdi78/ana/cancer_libra_alfa.png > $K/cancer_libra_alfa.png
@@ -104,10 +115,10 @@ jobs:
         id: uretim
         run: |
           set -uo pipefail
-          D=ORNAMENT_78_ORNEK6_$(date -u +%Y%m%d_%H%M); echo "D=$D" >> "$GITHUB_ENV"
+          D=ORNAMENT_78_ORNEK6_$(date -u +%Y%m%d_%H%M); echo "D=$D" >> "$GITHUB_ENV"; mkdir -p /tmp/son_yok
           cd s
           python3 -I scripts/printful/ornek78.py --kaynak /tmp/kay --motor /tmp/mg --zemin /tmp/zemin \
-            --son docs/ornament/ornek/ORNAMENT_ORNEK_20261103_SON/STIL3_SON --onayli /tmp/onayli \
+            --son /tmp/son_yok --onayli /tmp/onayli \
             --cikti /tmp/png --rapor /tmp/rapor --font /tmp/kay/EBGaramond-Italic.ttf 2>&1 | tee /tmp/log_ornek78.txt
           k=${PIPESTATUS[0]}; echo "k=$k" >> "$GITHUB_OUTPUT"
           echo "::notice::ornek78 cikis $k | $(tail -1 /tmp/log_ornek78.txt | cut -c1-200)"
@@ -129,7 +140,7 @@ jobs:
           cp /tmp/girdi_sha.txt /tmp/paket.txt /tmp/log_ornek78.txt $G/ 2>/dev/null || true
           cp /tmp/drive_link.txt $G/ 2>/dev/null || true
           cd s && git config user.name "astrolove-bot" && git config user.email "astrolove-bot@users.noreply.github.com"
-          git add docs/ornament/ornek
+          git add --sparse docs/ornament/ornek
           DIS=$(git diff --cached --name-only | grep -v '^docs/ornament/ornek/' || true)
           [ -z "$DIS" ] || { echo "::error::izinli klasor disi: $DIS"; exit 1; }
           if git diff --cached --name-only | grep -E '_954\.png$'; then echo "::error::dala PNG yazilmaz"; exit 1; fi
