@@ -1,6 +1,6 @@
 name: ornament-printful-katalog
 # Serdar 2 Kas 2026: Printful ornament urunleri SALT OKUMA. Yalniz GET + kargo ucreti sorgusu (POST /shipping/rates,
-# POST /v2/shipping-rates; izin listesi betikte). Siparis / urun / sablon / mockup gorevi OLUSTURULMAZ. Etsy'ye dokunmaz.
+# POST /v2/shipping-rates; izin listesi betikte). Siparis / urun / sablon OLUSTURULMAZ; mockup gorevi yalniz mod=mockup_sade'de. Etsy'ye dokunmaz.
 # Token: Drive TEMP/PRINTFUL_TOKEN.json (printful-kupa-15oz deseni, maskeli, ciktiya yazilmaz).
 # Cikti: Drive TEMP/ORNAMENT_PRINTFUL_20261102/ (CSV, MD, ham/) + dal ornament-printful-katalog docs/ornament/ (normal commit).
 # mod=rapor: API'ye gitmez, daldaki docs/ornament/ham'dan raporu yeniden uretir.

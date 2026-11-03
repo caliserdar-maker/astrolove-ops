@@ -1,10 +1,13 @@
 {
  "karar": {
-  "zemin": "duz beyaz #FFFFFF (Serdar 3 Kas, soru yaniti); Printful 900 printfiles kaydi zemin belirtmiyor (fill_mode cover), sablon technique sublimation",
-  "katman": "ornament_motor.py ORN_DUMP (ad3aa746 ile ayni kod ve girdi); ana sembol a114ddb G2, kucuk ogeler motor_gpt 6da763a + renk_uyum",
-  "dis_golge": "yok (zemin murekkepsiz sarti)",
-  "dusus": "beyaz duz zeminde 1.0",
-  "hedef_ton_kaynak": "tahmin / yaygin renk adlari: bronz = BEIGE bronzu (o5.BRONZ), rose gold #B76E79, gumus C 3 h 250, siyah #1E1E20, grafit #404246, bordo #70182A, lacivert #182656"
+  "zemin": "SEFFAF PNG, maske disi alfa 0 (Merkez 3 Kas karar A); kontrast ve gorunum beyaz seramik (255) uzerinde birlestirilerek olculur",
+  "katman": "ornament_motor.py ORN_DUMP, ALTIN_MOTOR deneme 4 (e5412718, Serdar kabul); pkl sha256 c5a576ef780b55f2ddb6e01aa193aee1b77442324a5594ccca290fae543bcb5e",
+  "uretim": "yerel (Merkez gorevi: \"yerelde calis\"); KARAR 3 (Actions) ile celiski raporda",
+  "dis_golge": "yok (karar 18, zemin murekkepsiz)",
+  "dusus": "yok (beyaz duz zeminde 1.0)",
+  "ton_adaylari": "sublimasyonda metalik murekkep yok: 1, 5, 6 duz baski renkleri (ALTIN_TONU, GUMUS_TONU, ROSE_TONU)",
+  "bronz": "BEIGE bronz paleti (o5.BRONZ, carpan 1.0); kucuk ogeler motor dokusuyla (BEIGE duz model rengiyle cizilmisti)",
+  "hedef_ton_kaynak": "tahmin / yaygin renk adlari: rose #B76E79, gumus C 3 h 250, siyah #1E1E20, grafit #404246, bordo #70182A, lacivert #182656"
  },
  "altin_referans": {
   "Lmed_luma": 145.21,
@@ -13,12 +16,42 @@
  },
  "aday": {
   "1": {
-   "tur": "metal",
-   "kati_kontrast_en_kotu": 1.47,
+   "tur": "ton",
+   "kati_kontrast_en_kotu": 1.54,
    "en_kotu_oge": "halka_govde",
    "okunur": false,
    "kontrast": {
     "isim1": {
+     "deger": 1.81,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      217,
+      192,
+      86
+     ],
+     "ortanca_bilgi": 2.97,
+     "cekirdek_piksel": 653
+    },
+    "isim2": {
+     "deger": 1.72,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      220,
+      197,
+      90
+     ],
+     "ortanca_bilgi": 2.9,
+     "cekirdek_piksel": 616
+    },
+    "tarih": {
      "deger": 1.64,
      "zemin_rgb": [
       255,
@@ -26,60 +59,30 @@
       255
      ],
      "oge_rgb": [
-      226,
+      225,
       202,
-      93
+      91
      ],
      "ortanca_bilgi": 2.93,
-     "cekirdek_piksel": 653
-    },
-    "isim2": {
-     "deger": 1.58,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      228,
-      206,
-      98
-     ],
-     "ortanca_bilgi": 2.87,
-     "cekirdek_piksel": 616
-    },
-    "tarih": {
-     "deger": 1.63,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      229,
-      201,
-      95
-     ],
-     "ortanca_bilgi": 2.85,
      "cekirdek_piksel": 534
     },
     "kucuk_sol": {
-     "deger": 1.5,
+     "deger": 1.55,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      229,
-      213,
-      100
+      226,
+      209,
+      98
      ],
      "ortanca_bilgi": 2.93,
      "cekirdek_piksel": 710
     },
     "kucuk_sag": {
-     "deger": 1.49,
+     "deger": 1.55,
      "zemin_rgb": [
       255,
       255,
@@ -87,41 +90,56 @@
      ],
      "oge_rgb": [
       227,
-      214,
-      103
+      209,
+      97
      ],
-     "ortanca_bilgi": 2.87,
+     "ortanca_bilgi": 2.95,
      "cekirdek_piksel": 644
     },
     "sonsuz": {
-     "deger": 1.48,
+     "deger": 1.63,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      229,
-      215,
-      98
+      222,
+      204,
+      94
      ],
-     "ortanca_bilgi": 2.9,
+     "ortanca_bilgi": 2.92,
      "cekirdek_piksel": 404
     },
     "halka_govde": {
-     "deger": 1.47,
+     "deger": 1.54,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      229,
-      215,
-      103
+      227,
+      210,
+      98
      ],
-     "ortanca_bilgi": 2.92,
+     "ortanca_bilgi": 2.93,
      "cekirdek_piksel": 3083
+    },
+    "halka_uclari": {
+     "deger": 1.58,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      224,
+      207,
+      97
+     ],
+     "ortanca_bilgi": 2.94,
+     "cekirdek_piksel": 1340
     },
     "sembol_bilgi": {
      "deger": 1.23,
@@ -139,29 +157,33 @@
      "cekirdek_piksel": 25502
     },
     "halka_uclari_2px_alti_bilgi": {
-     "deger": 1.44,
+     "deger": 1.48,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      238,
-      213,
-      152
+      235,
+      210,
+      151
      ],
-     "ortanca_bilgi": 2.19,
+     "ortanca_bilgi": 2.29,
      "cekirdek_piksel": 317
     }
    },
+   "sembol_kati_bilgi": 1.23,
+   "halka_uclari_kati": 1.58,
+   "ortanca_en_kotu_bilgi": 2.9,
    "goruntu_yasak": {
     "guvenli_daire_disi": 0,
     "delik_halka_disi": 0,
     "y_221_ustu_halka_disi": 0
    },
    "leke_a": 0,
-   "zemin_murekkepsiz": true,
-   "zemin_disi_255_olmayan": 0,
+   "zemin_seffaf": true,
+   "zemin_disi_alfa_sifir_olmayan": 0,
+   "gamut_kroma_kuculen_piksel": 0,
    "bosluk_px": [
     20,
     20,
@@ -180,9 +202,9 @@
      28
     ],
     "isim1": [
-     200,
+     196,
      139,
-     36
+     31
     ],
     "kucuk_sol": [
      200,
@@ -190,73 +212,43 @@
      31
     ],
     "halka": [
-     201,
+     200,
      139,
-     33
+     31
     ]
    },
-   "dosya": "SADE_1_KLASIK_ALTIN_954.png",
+   "dosya": "SADE_1_ALTIN_TONU_954.png",
    "kapi": {
     "leke_0": true,
     "tasma_ve_yasak_0": true,
-    "zemin_murekkepsiz": true,
+    "zemin_seffaf": true,
     "yerlesim_ayni": true
    },
-   "etiket": "1 KLASIK_ALTIN: kati 1.47 OKUNMAZ (uretim adayi degil)"
+   "etiket": "1 ALTIN_TONU: kati 1.54 OKUNMAZ (uretim adayi degil)"
   },
   "2": {
    "tur": "murekkep",
-   "kati_kontrast_en_kotu": 8.65,
+   "kati_kontrast_en_kotu": 8.86,
    "en_kotu_oge": "tarih",
    "okunur": true,
    "kontrast": {
     "isim1": {
-     "deger": 9.49,
+     "deger": 9.9,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      90,
-      65,
-      32
+      88,
+      62,
+      29
      ],
-     "ortanca_bilgi": 11.04,
+     "ortanca_bilgi": 11.42,
      "cekirdek_piksel": 653
     },
     "isim2": {
-     "deger": 9.26,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      93,
-      66,
-      33
-     ],
-     "ortanca_bilgi": 11.09,
-     "cekirdek_piksel": 616
-    },
-    "tarih": {
-     "deger": 8.65,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      96,
-      71,
-      38
-     ],
-     "ortanca_bilgi": 11.09,
-     "cekirdek_piksel": 534
-    },
-    "kucuk_sol": {
-     "deger": 9.43,
+     "deger": 9.78,
      "zemin_rgb": [
       255,
       255,
@@ -264,40 +256,70 @@
      ],
      "oge_rgb": [
       91,
-      65,
-      32
+      62,
+      23
      ],
-     "ortanca_bilgi": 11.2,
+     "ortanca_bilgi": 11.31,
+     "cekirdek_piksel": 616
+    },
+    "tarih": {
+     "deger": 8.86,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      93,
+      70,
+      38
+     ],
+     "ortanca_bilgi": 11.3,
+     "cekirdek_piksel": 534
+    },
+    "kucuk_sol": {
+     "deger": 9.65,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      89,
+      64,
+      30
+     ],
+     "ortanca_bilgi": 11.36,
      "cekirdek_piksel": 710
     },
     "kucuk_sag": {
-     "deger": 9.24,
+     "deger": 9.75,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      94,
-      66,
+      89,
+      63,
       29
      ],
-     "ortanca_bilgi": 11.09,
+     "ortanca_bilgi": 11.48,
      "cekirdek_piksel": 644
     },
     "sonsuz": {
-     "deger": 8.93,
+     "deger": 9.21,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      94,
-      69,
-      36
+      92,
+      67,
+      34
      ],
-     "ortanca_bilgi": 11.2,
+     "ortanca_bilgi": 11.36,
      "cekirdek_piksel": 404
     },
     "halka_govde": {
@@ -312,8 +334,23 @@
       55,
       19
      ],
-     "ortanca_bilgi": 11.15,
+     "ortanca_bilgi": 11.31,
      "cekirdek_piksel": 3083
+    },
+    "halka_uclari": {
+     "deger": 10.23,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      83,
+      61,
+      29
+     ],
+     "ortanca_bilgi": 11.53,
+     "cekirdek_piksel": 1340
     },
     "sembol_bilgi": {
      "deger": 5.39,
@@ -331,29 +368,33 @@
      "cekirdek_piksel": 25502
     },
     "halka_uclari_2px_alti_bilgi": {
-     "deger": 2.72,
+     "deger": 2.75,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      169,
-      155,
+      168,
+      154,
       135
      ],
-     "ortanca_bilgi": 6.28,
+     "ortanca_bilgi": 6.37,
      "cekirdek_piksel": 317
     }
    },
+   "sembol_kati_bilgi": 5.39,
+   "halka_uclari_kati": 10.23,
+   "ortanca_en_kotu_bilgi": 11.3,
    "goruntu_yasak": {
     "guvenli_daire_disi": 0,
     "delik_halka_disi": 0,
     "y_221_ustu_halka_disi": 0
    },
    "leke_a": 0,
-   "zemin_murekkepsiz": true,
-   "zemin_disi_255_olmayan": 0,
+   "zemin_seffaf": true,
+   "zemin_disi_alfa_sifir_olmayan": 0,
+   "gamut_kroma_kuculen_piksel": 0,
    "bosluk_px": [
     20,
     20,
@@ -372,18 +413,18 @@
      14
     ],
     "isim1": [
-     83,
-     54,
-     15
+     80,
+     52,
+     14
     ],
     "kucuk_sol": [
-     80,
-     54,
+     79,
+     53,
      14
     ],
     "halka": [
-     81,
-     54,
+     79,
+     53,
      14
     ]
    },
@@ -391,64 +432,34 @@
    "kapi": {
     "leke_0": true,
     "tasma_ve_yasak_0": true,
-    "zemin_murekkepsiz": true,
+    "zemin_seffaf": true,
     "yerlesim_ayni": true
    },
-   "etiket": "2 KOYU_BRONZ: kati 8.65"
+   "etiket": "2 KOYU_BRONZ: kati 8.86"
   },
   "3": {
    "tur": "murekkep",
-   "kati_kontrast_en_kotu": 12.98,
+   "kati_kontrast_en_kotu": 13.18,
    "en_kotu_oge": "tarih",
    "okunur": true,
    "kontrast": {
     "isim1": {
-     "deger": 13.74,
+     "deger": 14.32,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      45,
-      45,
-      47
+      42,
+      42,
+      44
      ],
-     "ortanca_bilgi": 16.64,
+     "ortanca_bilgi": 16.83,
      "cekirdek_piksel": 653
     },
     "isim2": {
-     "deger": 13.74,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      45,
-      45,
-      47
-     ],
-     "ortanca_bilgi": 16.64,
-     "cekirdek_piksel": 616
-    },
-    "tarih": {
-     "deger": 12.98,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      49,
-      49,
-      51
-     ],
-     "ortanca_bilgi": 16.64,
-     "cekirdek_piksel": 534
-    },
-    "kucuk_sol": {
-     "deger": 14.13,
+     "deger": 14.04,
      "zemin_rgb": [
       255,
       255,
@@ -460,25 +471,55 @@
       45
      ],
      "ortanca_bilgi": 16.64,
+     "cekirdek_piksel": 616
+    },
+    "tarih": {
+     "deger": 13.18,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      48,
+      48,
+      49
+     ],
+     "ortanca_bilgi": 16.83,
+     "cekirdek_piksel": 534
+    },
+    "kucuk_sol": {
+     "deger": 14.32,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      42,
+      42,
+      44
+     ],
+     "ortanca_bilgi": 16.66,
      "cekirdek_piksel": 710
     },
     "kucuk_sag": {
-     "deger": 13.94,
+     "deger": 14.13,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      44,
-      44,
-      46
+      43,
+      43,
+      45
      ],
-     "ortanca_bilgi": 16.64,
+     "ortanca_bilgi": 16.83,
      "cekirdek_piksel": 644
     },
     "sonsuz": {
-     "deger": 13.55,
+     "deger": 13.56,
      "zemin_rgb": [
       255,
       255,
@@ -487,9 +528,9 @@
      "oge_rgb": [
       46,
       46,
-      48
+      47
      ],
-     "ortanca_bilgi": 16.64,
+     "ortanca_bilgi": 16.83,
      "cekirdek_piksel": 404
     },
     "halka_govde": {
@@ -506,6 +547,21 @@
      ],
      "ortanca_bilgi": 16.64,
      "cekirdek_piksel": 3083
+    },
+    "halka_uclari": {
+     "deger": 14.71,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      40,
+      40,
+      42
+     ],
+     "ortanca_bilgi": 16.83,
+     "cekirdek_piksel": 1340
     },
     "sembol_bilgi": {
      "deger": 12.21,
@@ -538,14 +594,18 @@
      "cekirdek_piksel": 317
     }
    },
+   "sembol_kati_bilgi": 12.21,
+   "halka_uclari_kati": 14.71,
+   "ortanca_en_kotu_bilgi": 16.64,
    "goruntu_yasak": {
     "guvenli_daire_disi": 0,
     "delik_halka_disi": 0,
     "y_221_ustu_halka_disi": 0
    },
    "leke_a": 0,
-   "zemin_murekkepsiz": true,
-   "zemin_disi_255_olmayan": 0,
+   "zemin_seffaf": true,
+   "zemin_disi_alfa_sifir_olmayan": 0,
+   "gamut_kroma_kuculen_piksel": 0,
    "bosluk_px": [
     20,
     20,
@@ -564,112 +624,67 @@
      32
     ],
     "isim1": [
-     30,
-     30,
-     32
+     29,
+     29,
+     31
     ],
     "kucuk_sol": [
      30,
      30,
-     32
+     31
     ],
     "halka": [
-     30,
-     30,
-     32
+     29,
+     29,
+     31
     ]
    },
    "dosya": "SADE_3_MAT_SIYAH_954.png",
    "kapi": {
     "leke_0": true,
     "tasma_ve_yasak_0": true,
-    "zemin_murekkepsiz": true,
+    "zemin_seffaf": true,
     "yerlesim_ayni": true
    },
-   "etiket": "3 MAT_SIYAH: kati 12.98"
+   "etiket": "3 MAT_SIYAH: kati 13.18"
   },
   "4": {
    "tur": "murekkep",
-   "kati_kontrast_en_kotu": 7.84,
+   "kati_kontrast_en_kotu": 8.09,
    "en_kotu_oge": "tarih",
    "okunur": true,
    "kontrast": {
     "isim1": {
-     "deger": 8.48,
+     "deger": 9.31,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      75,
-      77,
-      80
+      69,
+      71,
+      75
      ],
-     "ortanca_bilgi": 10.07,
+     "ortanca_bilgi": 10.39,
      "cekirdek_piksel": 653
     },
     "isim2": {
-     "deger": 8.35,
+     "deger": 9.02,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      76,
-      78,
-      81
+      71,
+      73,
+      77
      ],
-     "ortanca_bilgi": 10.07,
+     "ortanca_bilgi": 10.24,
      "cekirdek_piksel": 616
     },
     "tarih": {
-     "deger": 7.84,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      80,
-      82,
-      85
-     ],
-     "ortanca_bilgi": 10.07,
-     "cekirdek_piksel": 534
-    },
-    "kucuk_sol": {
-     "deger": 8.66,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      74,
-      75,
-      79
-     ],
-     "ortanca_bilgi": 10.23,
-     "cekirdek_piksel": 710
-    },
-    "kucuk_sag": {
-     "deger": 8.41,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      75,
-      77,
-      81
-     ],
-     "ortanca_bilgi": 10.07,
-     "cekirdek_piksel": 644
-    },
-    "sonsuz": {
      "deger": 8.09,
      "zemin_rgb": [
       255,
@@ -681,7 +696,52 @@
       80,
       83
      ],
-     "ortanca_bilgi": 10.07,
+     "ortanca_bilgi": 10.39,
+     "cekirdek_piksel": 534
+    },
+    "kucuk_sol": {
+     "deger": 8.75,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      73,
+      75,
+      78
+     ],
+     "ortanca_bilgi": 10.24,
+     "cekirdek_piksel": 710
+    },
+    "kucuk_sag": {
+     "deger": 8.85,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      73,
+      74,
+      78
+     ],
+     "ortanca_bilgi": 10.52,
+     "cekirdek_piksel": 644
+    },
+    "sonsuz": {
+     "deger": 8.35,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      76,
+      78,
+      81
+     ],
+     "ortanca_bilgi": 10.39,
      "cekirdek_piksel": 404
     },
     "halka_govde": {
@@ -696,8 +756,23 @@
       66,
       70
      ],
-     "ortanca_bilgi": 10.07,
+     "ortanca_bilgi": 10.23,
      "cekirdek_piksel": 3083
+    },
+    "halka_uclari": {
+     "deger": 10.07,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      64,
+      66,
+      70
+     ],
+     "ortanca_bilgi": 10.55,
+     "cekirdek_piksel": 1340
     },
     "sembol_bilgi": {
      "deger": 4.61,
@@ -715,29 +790,33 @@
      "cekirdek_piksel": 25502
     },
     "halka_uclari_2px_alti_bilgi": {
-     "deger": 2.62,
+     "deger": 2.65,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
+      158,
       159,
-      160,
-      162
+      161
      ],
-     "ortanca_bilgi": 5.82,
+     "ortanca_bilgi": 5.85,
      "cekirdek_piksel": 317
     }
    },
+   "sembol_kati_bilgi": 4.61,
+   "halka_uclari_kati": 10.07,
+   "ortanca_en_kotu_bilgi": 10.23,
    "goruntu_yasak": {
     "guvenli_daire_disi": 0,
     "delik_halka_disi": 0,
     "y_221_ustu_halka_disi": 0
    },
    "leke_a": 0,
-   "zemin_murekkepsiz": true,
-   "zemin_disi_255_olmayan": 0,
+   "zemin_seffaf": true,
+   "zemin_disi_alfa_sifir_olmayan": 0,
+   "gamut_kroma_kuculen_piksel": 0,
    "bosluk_px": [
     20,
     20,
@@ -756,37 +835,67 @@
      70
     ],
     "isim1": [
+     62,
      64,
-     66,
-     70
+     68
     ],
     "kucuk_sol": [
      63,
      65,
-     69
+     68
     ],
     "halka": [
-     63,
-     65,
-     69
+     62,
+     64,
+     68
     ]
    },
    "dosya": "SADE_4_GRAFIT_GRI_954.png",
    "kapi": {
     "leke_0": true,
     "tasma_ve_yasak_0": true,
-    "zemin_murekkepsiz": true,
+    "zemin_seffaf": true,
     "yerlesim_ayni": true
    },
-   "etiket": "4 GRAFIT_GRI: kati 7.84"
+   "etiket": "4 GRAFIT_GRI: kati 8.09"
   },
   "5": {
-   "tur": "metal",
-   "kati_kontrast_en_kotu": 1.47,
+   "tur": "ton",
+   "kati_kontrast_en_kotu": 1.55,
    "en_kotu_oge": "halka_govde",
    "okunur": false,
    "kontrast": {
     "isim1": {
+     "deger": 1.81,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      190,
+      193,
+      198
+     ],
+     "ortanca_bilgi": 2.95,
+     "cekirdek_piksel": 653
+    },
+    "isim2": {
+     "deger": 1.73,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      195,
+      197,
+      202
+     ],
+     "ortanca_bilgi": 2.92,
+     "cekirdek_piksel": 616
+    },
+    "tarih": {
      "deger": 1.64,
      "zemin_rgb": [
       255,
@@ -796,28 +905,43 @@
      "oge_rgb": [
       199,
       202,
-      206
+      207
      ],
-     "ortanca_bilgi": 2.91,
-     "cekirdek_piksel": 653
+     "ortanca_bilgi": 2.95,
+     "cekirdek_piksel": 534
     },
-    "isim2": {
-     "deger": 1.58,
+    "kucuk_sol": {
+     "deger": 1.56,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      203,
       205,
-      210
+      207,
+      212
      ],
-     "ortanca_bilgi": 2.85,
-     "cekirdek_piksel": 616
+     "ortanca_bilgi": 2.92,
+     "cekirdek_piksel": 710
     },
-    "tarih": {
-     "deger": 1.63,
+    "kucuk_sag": {
+     "deger": 1.56,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      205,
+      207,
+      212
+     ],
+     "ortanca_bilgi": 2.95,
+     "cekirdek_piksel": 644
+    },
+    "sonsuz": {
+     "deger": 1.64,
      "zemin_rgb": [
       255,
       255,
@@ -825,71 +949,41 @@
      ],
      "oge_rgb": [
       200,
-      203,
-      208
+      202,
+      207
      ],
-     "ortanca_bilgi": 2.88,
-     "cekirdek_piksel": 534
-    },
-    "kucuk_sol": {
-     "deger": 1.5,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      208,
-      211,
-      216
-     ],
-     "ortanca_bilgi": 2.91,
-     "cekirdek_piksel": 710
-    },
-    "kucuk_sag": {
-     "deger": 1.5,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      209,
-      211,
-      216
-     ],
-     "ortanca_bilgi": 2.88,
-     "cekirdek_piksel": 644
-    },
-    "sonsuz": {
-     "deger": 1.48,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      210,
-      212,
-      217
-     ],
-     "ortanca_bilgi": 2.91,
+     "ortanca_bilgi": 2.92,
      "cekirdek_piksel": 404
     },
     "halka_govde": {
-     "deger": 1.47,
+     "deger": 1.55,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      211,
-      213,
-      218
+      205,
+      208,
+      213
      ],
      "ortanca_bilgi": 2.92,
      "cekirdek_piksel": 3083
+    },
+    "halka_uclari": {
+     "deger": 1.59,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      202,
+      205,
+      210
+     ],
+     "ortanca_bilgi": 2.95,
+     "cekirdek_piksel": 1340
     },
     "sembol_bilgi": {
      "deger": 1.24,
@@ -907,29 +1001,33 @@
      "cekirdek_piksel": 25502
     },
     "halka_uclari_2px_alti_bilgi": {
-     "deger": 1.43,
+     "deger": 1.45,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
+      211,
       214,
-      216,
-      219
+      216
      ],
-     "ortanca_bilgi": 2.16,
+     "ortanca_bilgi": 2.26,
      "cekirdek_piksel": 317
     }
    },
+   "sembol_kati_bilgi": 1.24,
+   "halka_uclari_kati": 1.59,
+   "ortanca_en_kotu_bilgi": 2.92,
    "goruntu_yasak": {
     "guvenli_daire_disi": 0,
     "delik_halka_disi": 0,
     "y_221_ustu_halka_disi": 0
    },
    "leke_a": 0,
-   "zemin_murekkepsiz": true,
-   "zemin_disi_255_olmayan": 0,
+   "zemin_seffaf": true,
+   "zemin_disi_alfa_sifir_olmayan": 0,
+   "gamut_kroma_kuculen_piksel": 0,
    "bosluk_px": [
     20,
     20,
@@ -948,79 +1046,79 @@
      155
     ],
     "isim1": [
-     147,
-     152,
-     156
+     146,
+     151,
+     155
     ],
     "kucuk_sol": [
-     147,
+     146,
      152,
      156
     ],
     "halka": [
      146,
-     152,
+     151,
      156
     ]
    },
-   "dosya": "SADE_5_GUMUS_PLATIN_954.png",
+   "dosya": "SADE_5_GUMUS_TONU_954.png",
    "kapi": {
     "leke_0": true,
     "tasma_ve_yasak_0": true,
-    "zemin_murekkepsiz": true,
+    "zemin_seffaf": true,
     "yerlesim_ayni": true
    },
-   "etiket": "5 GUMUS_PLATIN: kati 1.47 OKUNMAZ (uretim adayi degil)"
+   "etiket": "5 GUMUS_TONU: kati 1.55 OKUNMAZ (uretim adayi degil)"
   },
   "6": {
-   "tur": "metal",
-   "kati_kontrast_en_kotu": 1.53,
-   "en_kotu_oge": "kucuk_sag",
+   "tur": "ton",
+   "kati_kontrast_en_kotu": 1.54,
+   "en_kotu_oge": "halka_govde",
    "okunur": false,
    "kontrast": {
     "isim1": {
-     "deger": 1.66,
+     "deger": 1.83,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      252,
-      184,
-      177
+      240,
+      176,
+      171
      ],
-     "ortanca_bilgi": 2.92,
+     "ortanca_bilgi": 2.99,
      "cekirdek_piksel": 653
     },
     "isim2": {
-     "deger": 1.61,
+     "deger": 1.76,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      253,
-      188,
-      179
+      242,
+      180,
+      174
      ],
-     "ortanca_bilgi": 2.86,
+     "ortanca_bilgi": 2.92,
      "cekirdek_piksel": 616
     },
     "tarih": {
-     "deger": 1.64,
+     "deger": 1.65,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      253,
-      185,
-      179
+      243,
+      189,
+      182
      ],
-     "ortanca_bilgi": 2.86,
+     "ortanca_bilgi": 2.93,
      "cekirdek_piksel": 534
     },
     "kucuk_sol": {
@@ -1031,29 +1129,44 @@
       255
      ],
      "oge_rgb": [
-      253,
-      194,
-      182
+      250,
+      195,
+      185
      ],
-     "ortanca_bilgi": 2.92,
+     "ortanca_bilgi": 2.94,
      "cekirdek_piksel": 710
     },
     "kucuk_sag": {
-     "deger": 1.53,
+     "deger": 1.55,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      254,
-      195,
-      182
+      252,
+      194,
+      185
      ],
-     "ortanca_bilgi": 2.89,
+     "ortanca_bilgi": 2.96,
      "cekirdek_piksel": 644
     },
     "sonsuz": {
+     "deger": 1.63,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      247,
+      189,
+      180
+     ],
+     "ortanca_bilgi": 2.92,
+     "cekirdek_piksel": 404
+    },
+    "halka_govde": {
      "deger": 1.54,
      "zemin_rgb": [
       255,
@@ -1063,43 +1176,13 @@
      "oge_rgb": [
       252,
       195,
-      182
-     ],
-     "ortanca_bilgi": 2.9,
-     "cekirdek_piksel": 404
-    },
-    "halka_govde": {
-     "deger": 1.53,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      253,
-      196,
-      183
+      186
      ],
      "ortanca_bilgi": 2.92,
      "cekirdek_piksel": 3083
     },
-    "sembol_bilgi": {
-     "deger": 1.34,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      255,
-      214,
-      199
-     ],
-     "ortanca_bilgi": 3.01,
-     "cekirdek_piksel": 25502
-    },
-    "halka_uclari_2px_alti_bilgi": {
-     "deger": 1.44,
+    "halka_uclari": {
+     "deger": 1.58,
      "zemin_rgb": [
       255,
       255,
@@ -1107,21 +1190,55 @@
      ],
      "oge_rgb": [
       248,
-      205,
-      206
+      193,
+      184
      ],
-     "ortanca_bilgi": 2.16,
+     "ortanca_bilgi": 2.95,
+     "cekirdek_piksel": 1340
+    },
+    "sembol_bilgi": {
+     "deger": 1.23,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      255,
+      225,
+      219
+     ],
+     "ortanca_bilgi": 3.01,
+     "cekirdek_piksel": 25502
+    },
+    "halka_uclari_2px_alti_bilgi": {
+     "deger": 1.47,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      244,
+      203,
+      204
+     ],
+     "ortanca_bilgi": 2.29,
      "cekirdek_piksel": 317
     }
    },
+   "sembol_kati_bilgi": 1.23,
+   "halka_uclari_kati": 1.58,
+   "ortanca_en_kotu_bilgi": 2.92,
    "goruntu_yasak": {
     "guvenli_daire_disi": 0,
     "delik_halka_disi": 0,
     "y_221_ustu_halka_disi": 0
    },
    "leke_a": 0,
-   "zemin_murekkepsiz": true,
-   "zemin_disi_255_olmayan": 0,
+   "zemin_seffaf": true,
+   "zemin_disi_alfa_sifir_olmayan": 0,
+   "gamut_kroma_kuculen_piksel": 9631,
    "bosluk_px": [
     20,
     20,
@@ -1140,38 +1257,113 @@
      139
     ],
     "isim1": [
-     206,
-     130,
-     141
+     202,
+     129,
+     139
     ],
     "kucuk_sol": [
      206,
-     130,
-     141
+     129,
+     140
     ],
     "halka": [
      206,
-     130,
-     141
+     129,
+     140
     ]
    },
-   "dosya": "SADE_6_ROSE_GOLD_954.png",
+   "dosya": "SADE_6_ROSE_TONU_954.png",
    "kapi": {
     "leke_0": true,
     "tasma_ve_yasak_0": true,
-    "zemin_murekkepsiz": true,
+    "zemin_seffaf": true,
     "yerlesim_ayni": true
    },
-   "etiket": "6 ROSE_GOLD: kati 1.53 OKUNMAZ (uretim adayi degil)"
+   "etiket": "6 ROSE_TONU: kati 1.54 OKUNMAZ (uretim adayi degil)"
   },
   "7": {
    "tur": "murekkep",
-   "kati_kontrast_en_kotu": 9.2,
+   "kati_kontrast_en_kotu": 9.51,
    "en_kotu_oge": "tarih",
    "okunur": true,
    "kontrast": {
     "isim1": {
-     "deger": 9.79,
+     "deger": 10.29,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      114,
+      38,
+      51
+     ],
+     "ortanca_bilgi": 11.64,
+     "cekirdek_piksel": 653
+    },
+    "isim2": {
+     "deger": 10.26,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      118,
+      34,
+      51
+     ],
+     "ortanca_bilgi": 11.62,
+     "cekirdek_piksel": 616
+    },
+    "tarih": {
+     "deger": 9.51,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      120,
+      43,
+      59
+     ],
+     "ortanca_bilgi": 11.58,
+     "cekirdek_piksel": 534
+    },
+    "kucuk_sol": {
+     "deger": 10.17,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      115,
+      38,
+      53
+     ],
+     "ortanca_bilgi": 11.58,
+     "cekirdek_piksel": 710
+    },
+    "kucuk_sag": {
+     "deger": 10.25,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      114,
+      38,
+      55
+     ],
+     "ortanca_bilgi": 11.81,
+     "cekirdek_piksel": 644
+    },
+    "sonsuz": {
+     "deger": 9.78,
      "zemin_rgb": [
       255,
       255,
@@ -1180,84 +1372,9 @@
      "oge_rgb": [
       119,
       40,
-      56
-     ],
-     "ortanca_bilgi": 11.33,
-     "cekirdek_piksel": 653
-    },
-    "isim2": {
-     "deger": 9.65,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      121,
-      40,
       57
      ],
-     "ortanca_bilgi": 11.33,
-     "cekirdek_piksel": 616
-    },
-    "tarih": {
-     "deger": 9.2,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      124,
-      44,
-      60
-     ],
-     "ortanca_bilgi": 11.33,
-     "cekirdek_piksel": 534
-    },
-    "kucuk_sol": {
-     "deger": 10.0,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      118,
-      38,
-      54
-     ],
-     "ortanca_bilgi": 11.41,
-     "cekirdek_piksel": 710
-    },
-    "kucuk_sag": {
-     "deger": 9.85,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      120,
-      38,
-      55
-     ],
-     "ortanca_bilgi": 11.41,
-     "cekirdek_piksel": 644
-    },
-    "sonsuz": {
-     "deger": 9.58,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      121,
-      41,
-      58
-     ],
-     "ortanca_bilgi": 11.41,
+     "ortanca_bilgi": 11.72,
      "cekirdek_piksel": 404
     },
     "halka_govde": {
@@ -1272,8 +1389,23 @@
       24,
       42
      ],
-     "ortanca_bilgi": 11.33,
+     "ortanca_bilgi": 11.5,
      "cekirdek_piksel": 3083
+    },
+    "halka_uclari": {
+     "deger": 11.33,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      112,
+      24,
+      42
+     ],
+     "ortanca_bilgi": 11.81,
+     "cekirdek_piksel": 1340
     },
     "sembol_bilgi": {
      "deger": 5.42,
@@ -1291,29 +1423,33 @@
      "cekirdek_piksel": 25502
     },
     "halka_uclari_2px_alti_bilgi": {
-     "deger": 2.94,
+     "deger": 2.95,
      "zemin_rgb": [
       255,
       255,
       255
      ],
      "oge_rgb": [
-      183,
+      182,
       139,
       148
      ],
-     "ortanca_bilgi": 6.95,
+     "ortanca_bilgi": 6.99,
      "cekirdek_piksel": 317
     }
    },
+   "sembol_kati_bilgi": 5.42,
+   "halka_uclari_kati": 11.33,
+   "ortanca_en_kotu_bilgi": 11.5,
    "goruntu_yasak": {
     "guvenli_daire_disi": 0,
     "delik_halka_disi": 0,
     "y_221_ustu_halka_disi": 0
    },
    "leke_a": 0,
-   "zemin_murekkepsiz": true,
-   "zemin_disi_255_olmayan": 0,
+   "zemin_seffaf": true,
+   "zemin_disi_alfa_sifir_olmayan": 0,
+   "gamut_kroma_kuculen_piksel": 0,
    "bosluk_px": [
     20,
     20,
@@ -1332,38 +1468,113 @@
      42
     ],
     "isim1": [
-     112,
-     24,
-     42
+     109,
+     23,
+     41
     ],
     "kucuk_sol": [
-     111,
+     109,
      24,
-     42
+     41
     ],
     "halka": [
-     111,
-     24,
-     42
+     108,
+     23,
+     41
     ]
    },
    "dosya": "SADE_7_BORDO_954.png",
    "kapi": {
     "leke_0": true,
     "tasma_ve_yasak_0": true,
-    "zemin_murekkepsiz": true,
+    "zemin_seffaf": true,
     "yerlesim_ayni": true
    },
-   "etiket": "7 BORDO: kati 9.2"
+   "etiket": "7 BORDO: kati 9.51"
   },
   "8": {
    "tur": "murekkep",
-   "kati_kontrast_en_kotu": 11.31,
+   "kati_kontrast_en_kotu": 11.5,
    "en_kotu_oge": "tarih",
    "okunur": true,
    "kontrast": {
     "isim1": {
-     "deger": 11.92,
+     "deger": 12.69,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      38,
+      48,
+      90
+     ],
+     "ortanca_bilgi": 14.69,
+     "cekirdek_piksel": 653
+    },
+    "isim2": {
+     "deger": 12.22,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      39,
+      51,
+      93
+     ],
+     "ortanca_bilgi": 14.67,
+     "cekirdek_piksel": 616
+    },
+    "tarih": {
+     "deger": 11.5,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      43,
+      55,
+      98
+     ],
+     "ortanca_bilgi": 14.67,
+     "cekirdek_piksel": 534
+    },
+    "kucuk_sol": {
+     "deger": 12.39,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      38,
+      50,
+      92
+     ],
+     "ortanca_bilgi": 14.67,
+     "cekirdek_piksel": 710
+    },
+    "kucuk_sag": {
+     "deger": 12.34,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      38,
+      50,
+      92
+     ],
+     "ortanca_bilgi": 14.73,
+     "cekirdek_piksel": 644
+    },
+    "sonsuz": {
+     "deger": 11.9,
      "zemin_rgb": [
       255,
       255,
@@ -1372,84 +1583,9 @@
      "oge_rgb": [
       40,
       53,
-      94
+      95
      ],
-     "ortanca_bilgi": 14.48,
-     "cekirdek_piksel": 653
-    },
-    "isim2": {
-     "deger": 12.0,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      40,
-      52,
-      96
-     ],
-     "ortanca_bilgi": 14.48,
-     "cekirdek_piksel": 616
-    },
-    "tarih": {
-     "deger": 11.31,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      44,
-      56,
-      100
-     ],
-     "ortanca_bilgi": 14.48,
-     "cekirdek_piksel": 534
-    },
-    "kucuk_sol": {
-     "deger": 12.19,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      39,
-      51,
-      94
-     ],
-     "ortanca_bilgi": 14.51,
-     "cekirdek_piksel": 710
-    },
-    "kucuk_sag": {
-     "deger": 12.15,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      39,
-      51,
-      96
-     ],
-     "ortanca_bilgi": 14.48,
-     "cekirdek_piksel": 644
-    },
-    "sonsuz": {
-     "deger": 11.68,
-     "zemin_rgb": [
-      255,
-      255,
-      255
-     ],
-     "oge_rgb": [
-      41,
-      54,
-      98
-     ],
-     "ortanca_bilgi": 14.51,
+     "ortanca_bilgi": 14.73,
      "cekirdek_piksel": 404
     },
     "halka_govde": {
@@ -1464,8 +1600,23 @@
       38,
       86
      ],
-     "ortanca_bilgi": 14.48,
+     "ortanca_bilgi": 14.54,
      "cekirdek_piksel": 3083
+    },
+    "halka_uclari": {
+     "deger": 12.97,
+     "zemin_rgb": [
+      255,
+      255,
+      255
+     ],
+     "oge_rgb": [
+      36,
+      47,
+      87
+     ],
+     "ortanca_bilgi": 14.89,
+     "cekirdek_piksel": 1340
     },
     "sembol_bilgi": {
      "deger": 8.79,
@@ -1483,7 +1634,7 @@
      "cekirdek_piksel": 25502
     },
     "halka_uclari_2px_alti_bilgi": {
-     "deger": 3.09,
+     "deger": 3.1,
      "zemin_rgb": [
       255,
       255,
@@ -1492,20 +1643,24 @@
      "oge_rgb": [
       139,
       146,
-      170
+      169
      ],
-     "ortanca_bilgi": 8.02,
+     "ortanca_bilgi": 8.03,
      "cekirdek_piksel": 317
     }
    },
+   "sembol_kati_bilgi": 8.79,
+   "halka_uclari_kati": 12.97,
+   "ortanca_en_kotu_bilgi": 14.54,
    "goruntu_yasak": {
     "guvenli_daire_disi": 0,
     "delik_halka_disi": 0,
     "y_221_ustu_halka_disi": 0
    },
    "leke_a": 0,
-   "zemin_murekkepsiz": true,
-   "zemin_disi_255_olmayan": 0,
+   "zemin_seffaf": true,
+   "zemin_disi_alfa_sifir_olmayan": 0,
+   "gamut_kroma_kuculen_piksel": 0,
    "bosluk_px": [
     20,
     20,
@@ -1524,30 +1679,43 @@
      86
     ],
     "isim1": [
-     24,
-     38,
-     86
+     23,
+     37,
+     84
     ],
     "kucuk_sol": [
      24,
-     38,
-     85
+     37,
+     84
     ],
     "halka": [
-     24,
-     38,
-     85
+     23,
+     37,
+     84
     ]
    },
    "dosya": "SADE_8_LACIVERT_954.png",
    "kapi": {
     "leke_0": true,
     "tasma_ve_yasak_0": true,
-    "zemin_murekkepsiz": true,
+    "zemin_seffaf": true,
     "yerlesim_ayni": true
    },
-   "etiket": "8 LACIVERT: kati 11.31"
+   "etiket": "8 LACIVERT: kati 11.5"
   }
  },
- "kapi_hepsi": true
+ "teknik_kapi_hepsi": true,
+ "okunur_adaylar": [
+  "2",
+  "3",
+  "4",
+  "7",
+  "8"
+ ],
+ "okunmaz_adaylar": [
+  "1",
+  "5",
+  "6"
+ ],
+ "not_": "teknik_kapi_hepsi yalniz leke / tasma / zemin / yerlesim; okunurluk ayri (okunur_adaylar)"
 }

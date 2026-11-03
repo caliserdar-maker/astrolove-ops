@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Printful v2 mockup gorevi: urun 900 (seramik ornament), varyant 23133 (Circle), placement front, technique sublimation.
 YALNIZ mockup uretimi (Merkez / Serdar 3 Kas, SADE_8). Magazada urun, sablon ya da siparis OLUSTURULMAZ.
-Izinli istekler: GET /v2/catalog-products/900/mockup-styles, POST /v2/mockup-tasks, GET /v2/mockup-tasks?id=..., Printful CDN indirme.
+Izinli Printful API istekleri: GET /v2/catalog-products/900/mockup-styles, POST /v2/mockup-tasks, GET /v2/mockup-tasks?id=... (assert).
+Izin listesi disi yalniz GET: gorsel URL denetimi (raw.githubusercontent, depo herkese acik) ve mockup indirme (Printful'un verdigi S3 adresi).
+UYARI: raw URL herkese acik; musteri tasarimi icin bu yol KULLANILMAZ.
 Gorsel URL'si once yetkisiz GET ile denetlenir (PNG, 954 x 954); degilse DUR (cikis 2), gorev acilmaz.
 Kullanim: ornament_mockup.py <klasor (SADE_<n>_*_954.png)> <ham_url_koku>   Ortam: PRINTFUL_TOKEN"""
 import json

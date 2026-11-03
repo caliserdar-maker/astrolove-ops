@@ -12,7 +12,7 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--dir', required=True); ap.add_argument('--font', required=True)
     a = ap.parse_args(); O = Path(a.dir)
     R = json.loads((O / 'OLCUM.json').read_text())
-    W, H_ET = 600, 96
+    W, H_ET = 600, 104
     f1, f2 = ImageFont.truetype(a.font, 30), ImageFont.truetype(a.font, 24)
     u = Image.new('RGB', (4 * W + 5 * 16, 2 * (W + H_ET) + 3 * 16), 'white')
     for i in range(8):
@@ -25,8 +25,10 @@ def main():
         ad = r['dosya'].replace('_954.png', '').replace('SADE_', '').replace('_', ' ')
         d.text((x + 4, y + W + 6), ad, fill=(20, 20, 20), font=f1)
         okun = r['okunur']
-        d.text((x + 4, y + W + 46), f'kati kontrast {r["kati_kontrast_en_kotu"]}' + ('' if okun else '  OKUNMAZ'),
+        d.text((x + 4, y + W + 40), f'kati kontrast {r["kati_kontrast_en_kotu"]} (en kotu kucuk oge / halka)' + ('' if okun else '  OKUNMAZ'),
                fill=(20, 20, 20) if okun else (170, 20, 20), font=f2)
+        d.text((x + 4, y + W + 68), f'ana sembol {r.get("sembol_kati_bilgi")} | halka uclari {r.get("halka_uclari_kati")}',
+               fill=(90, 90, 90), font=f2)
     u.save(O / 'KONTAK_8.jpg', quality=92)
     print('KONTAK_8.jpg', u.size)
 
