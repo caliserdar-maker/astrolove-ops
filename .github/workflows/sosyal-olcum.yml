@@ -2,6 +2,7 @@ name: sosyal-olcum
 # Sosyal once/sonra olcumu (SALT OKUMA, yalniz GET; Metricool'a / aglara yazma yok). Baslangic 20 Eki 2026; 27 Eki ve 3 Kas ayni is.
 # scripts/sosyal/analiz/olcum.py --tarih T: 6 ag hesap gunluk (T-14..T-1, Europe/Istanbul) + T-14..T yayinlanan gonderiler
 # (eski/yeni gorunum etiketi, esik --degisim). Cikti Drive TEMP/<klasor>/ (her ag GUNLUK/GONDERI csv, OZET.txt, TANIMLAR.txt, HAM/).
+# DAL sosyal-donem-olcum (Serdar 3 Kas "uygun"): donem_olcum.py 12 Eki..2 Kas + 4 hafta + takvim; yalniz GET.
 # Token: secret METRICOOL_USER_TOKEN; loga yazilmaz (::add-mask:: + sir_koru).
 permissions:
   contents: read
@@ -20,7 +21,7 @@ on:
 jobs:
   oku:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Tarih + klasor
@@ -57,7 +58,7 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/kimlik.json
           python3 -c "import json,os;d=json.load(open('_work/kimlik.json'));json.dump({'userToken':os.environ['MC_TOK'],'userId':d['userId'],'blogId':d['blogId']},open('_work/mc.json','w'))"
           python3 -c "import json;print('::add-mask::'+json.load(open('_work/kimlik.json'))['userToken'])"
-          python3 scripts/sosyal/analiz/olcum.py _work/mc.json _out --tarih "$T" --degisim "$DEGISIM" | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
+          python3 scripts/sosyal/analiz/donem_olcum.py _work/mc.json _out --bas 2026-10-12 --son 2026-11-02 --hafta-bas 2026-10-06 | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/mc.json --sir-json _work/kimlik.json "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
           mkdir -p _work/engel
           find _out -type f | while read -r f; do
