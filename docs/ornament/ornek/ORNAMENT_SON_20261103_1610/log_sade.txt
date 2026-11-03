@@ -1,0 +1,9 @@
+1 ALTIN_TONU: kati 1.54 OKUNMAZ (uretim adayi degil) | sembol 1.23 | uclar 1.58 | leke 0 | yasak 0 | seffaf True 0 | gamut 0
+2 KOYU_BRONZ: kati 8.86 | sembol 5.39 | uclar 10.23 | leke 0 | yasak 0 | seffaf True 0 | gamut 0
+3 MAT_SIYAH: kati 13.18 | sembol 12.21 | uclar 14.71 | leke 0 | yasak 0 | seffaf True 0 | gamut 0
+4 GRAFIT_GRI: kati 8.09 | sembol 4.61 | uclar 10.07 | leke 0 | yasak 0 | seffaf True 0 | gamut 0
+5 GUMUS_TONU: kati 1.55 OKUNMAZ (uretim adayi degil) | sembol 1.24 | uclar 1.59 | leke 0 | yasak 0 | seffaf True 0 | gamut 0
+6 ROSE_TONU: kati 1.54 OKUNMAZ (uretim adayi degil) | sembol 1.23 | uclar 1.58 | leke 0 | yasak 0 | seffaf True 0 | gamut 9631
+7 BORDO: kati 9.51 | sembol 5.42 | uclar 11.33 | leke 0 | yasak 0 | seffaf True 0 | gamut 0
+8 LACIVERT: kati 11.5 | sembol 8.79 | uclar 12.97 | leke 0 | yasak 0 | seffaf True 0 | gamut 0
+TEKNIK KAPI PASS | okunur ['2', '3', '4', '7', '8'] | okunmaz ['1', '5', '6']

@@ -1,0 +1,6 @@
+RUBY          mod RGB (954, 954, 3) en buyuk fark 1 farkli piksel 1 -> PASS
+SAPPHIRE      mod RGB (954, 954, 3) en buyuk fark 1 farkli piksel 1 -> PASS
+EMERALD       mod RGB (954, 954, 3) en buyuk fark 1 farkli piksel 1 -> PASS
+SADE_ALTIN    mod RGBA (954, 954, 4) en buyuk fark 1 farkli piksel 1 -> PASS
+FILDISI       mod RGB (954, 954, 3) en buyuk fark 0 farkli piksel 0 -> PASS
+KAPI (fark <= 1, piksel <= 10) PASS

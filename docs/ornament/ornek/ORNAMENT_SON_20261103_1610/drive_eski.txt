@@ -1,0 +1,2 @@
+eski klasor: STIL3_SON -> STIL3_SON_ESKI (silme yok)
+STIL3_SON_ESKI/

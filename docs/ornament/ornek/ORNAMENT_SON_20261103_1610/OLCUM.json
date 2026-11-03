@@ -1,0 +1,110 @@
+{
+ "karar": "Serdar 3 Kas, karar 25: 5 stil kesin (RUBY, SAPPHIRE, EMERALD eliptik; SADE ALTIN; FILDISI KREM); BEIGE ve AGED_PAPYRUS cikti",
+ "bilgi": {
+  "kosu": "41668820617",
+  "dal_commit": "e2899864b62dca590ff6e3dfce936bd820e9ea18",
+  "onay_commit": "6daab364",
+  "motor_commit": "6da763aa5b9820027420f73264fc69d30e120a33",
+  "tek_doku_commit": "2a08a78216ca",
+  "paket": "python 3.13.18 numpy 2.5.4 cv2 5.0.0 pillow 11.0.0 scipy 1.18.1 skimage 0.26.0\npotracer==0.0.4\nModel name:                              AMD EPYC 7763 64-Core Processor\n",
+  "katman_pkl": "487776ac7ae6c5942e11c21cdfc2df5a7a4e3deaa5bb7b83300475fa5a966d5d  /tmp/katman.pkl",
+  "girdi_sha": "/tmp/kay/CANCER_LIBRA_ana.png: OK\n/tmp/kay/cancer_symbol_gold.png: OK\n/tmp/kay/libra_symbol_gold.png: OK\n/tmp/kay/AGED_PAPYRUS_1264.png: OK\n/tmp/kay/BEIGE_1264.png: OK\n/tmp/kay/EMERALD_1264.png: OK\n/tmp/kay/RUBY_1264.png: OK\n/tmp/kay/SAPPHIRE_1264.png: OK\n/tmp/kay/HALKA_BLUE_16x20.png: OK\n/tmp/kay/LOGO_1.png: OK\n/tmp/kay/tek_doku.py: OK\n/tmp/kay/Cinzel.ttf: OK\n/tmp/kay/EBGaramond-Italic.ttf: OK\n/tmp/kay/cancer_libra_alfa.png: OK\n/tmp/kay/alfa_ogeler.npz: OK\n/tmp/zemin/RUBY_1264.png: OK\n/tmp/zemin/SAPPHIRE_1264.png: OK\n/tmp/zemin/EMERALD_1264.png: OK\n/tmp/SADE_1.png: OK\n8ab7a9ea4725b41a9187dfe44f4e062912a243c066dfbe649d291273d4ccba43  motor_gpt/KILIT_GPTGIRDI.json\n8e3f34dc80032572798ed8d7e056fe96869a03121bc6cda45e1f3f40766bdaeb  motor_gpt/alfa_temizle.py\n8fc9dc92bf9c63bf7b37afdbdc2a215eba3ba37e41438d661e4118e9a262c70b  motor_gpt/cember.json\nf946f5611431bdf976dce3475db8fd653faf1242ca267c365e2e29c8b3c8a8c2  motor_gpt/girdi78/ana/cancer_libra_alfa.png\ne7592412d5fc370c465fb628c5e8955ac219fb5f98a47b08c7dfc53eac42094f  motor_gpt/golge_motor.py\n21816b3bc961a293cdf06d60cda6f06da533d0343978722eda91fb3d83fd2a65  motor_gpt/kure/k4.npy\nd67b54a020d749de8ffa4ae9a170fceced111a9105bf46268d456d6a7434f807  motor_gpt/olustur_alfa_sablon.py\nb4480319399f7c5a8a152e59ab3ad5df9ee3b3eb426b0e1fa6e74abd0e3a33e8  motor_gpt/palet/chatgpt_altin.png\n9fe7758573bd6f5acd131f5b68712cbb4be3efebd8b6cc3710c2cacb18804971  motor_gpt/renk_uyum.py\n5a9078ea2ed4496343d1d5fcc3d2c5bfbb38d08d202f63e04430257caa17dfcd  motor_gpt/uret_tam.py\n92aa56eae68d9e199780d683e893d1edc892993533c665addfb2e402b228a4b5  motor_gpt/vektor_yuzey.py\na833ffec0d05aa35dfdd6608fd9003784ccb5cc7546e55f96e4c38bbe96af783  motor_gpt/yerlesim78.json\n"
+ },
+ "karsilastirma": {
+  "RUBY": {
+   "onayli_commit": "6daab364",
+   "mod": "RGB",
+   "boyut": [
+    954,
+    954,
+    3
+   ],
+   "en_buyuk_fark": 1,
+   "farkli_piksel": 1,
+   "uretim_sha256": "e1025fcc0898001900b150f720e343008decdddb974a09616e0ff9601473fa4f",
+   "onayli_sha256": "e7be8a3bd936cf92f155cda07be098dba4e0fe7ce786c677350e8d5afef243b1",
+   "uretim_ham_piksel_sha256": "c572da00b4e9c8e4502908800014d3f3780ba71b66c726d5c004aea18834ed53",
+   "onayli_ham_piksel_sha256": "f76927b071579231bcfeb2223b6c6bc793420d029bfbdb1d54fd1578b9115d87",
+   "tolerans_icinde": true
+  },
+  "SAPPHIRE": {
+   "onayli_commit": "6daab364",
+   "mod": "RGB",
+   "boyut": [
+    954,
+    954,
+    3
+   ],
+   "en_buyuk_fark": 1,
+   "farkli_piksel": 1,
+   "uretim_sha256": "50652a23075750a1c2855c7ceeb48c16c213346a8ab59bafd25d3be05a77f340",
+   "onayli_sha256": "e4c71ecfb2a8505e8f8b41425c36d86637183e23e7aebd3367386b8f59b569c8",
+   "uretim_ham_piksel_sha256": "00dad5bd341053b09a7e3a27821611ba040e7e5058dae2cda2bc080d2cf2909a",
+   "onayli_ham_piksel_sha256": "68701718f7dc3107ea1921eeefbf69129dbfc4272d0cf832b5cd2f09e3ddadb7",
+   "tolerans_icinde": true
+  },
+  "EMERALD": {
+   "onayli_commit": "6daab364",
+   "mod": "RGB",
+   "boyut": [
+    954,
+    954,
+    3
+   ],
+   "en_buyuk_fark": 1,
+   "farkli_piksel": 1,
+   "uretim_sha256": "34582627f2a938216671f8ca7ad3a4495a36d493a2e8b3d6942791a3d196899d",
+   "onayli_sha256": "02421dbba9e4fb004f3941ed007c2579a75afacd050404afb3a9944e2bc6818f",
+   "uretim_ham_piksel_sha256": "919c129e67876a0b7a4379ecbbc5846d83b57e47d8025f79661efa64765351f8",
+   "onayli_ham_piksel_sha256": "4c2e3a513e0de882ac0e08f7c5d3a5ad28ce07dcc78386d75f3ef98fb356d6eb",
+   "tolerans_icinde": true
+  },
+  "SADE_ALTIN": {
+   "onayli_commit": "6daab364",
+   "mod": "RGBA",
+   "boyut": [
+    954,
+    954,
+    4
+   ],
+   "en_buyuk_fark": 1,
+   "farkli_piksel": 1,
+   "uretim_sha256": "53006f28297d4e14baac774c83dd4a82baaf6fffea775a10cc5f97cc8742e259",
+   "onayli_sha256": "c3b4b280ecd47e1b9116f3af939646bed005800ccbc4c6ab8a3464b1dcc46ab8",
+   "uretim_ham_piksel_sha256": "4899fd21ec09647444ef604859f3192829b8138a8a0e4a3a6bc456b20143580d",
+   "onayli_ham_piksel_sha256": "f6a566ec0f04782deb36edb4b15636e3b9af5ba9bc00ac083077389259a7e9fb",
+   "tolerans_icinde": true
+  },
+  "FILDISI": {
+   "onayli_commit": "6daab364",
+   "mod": "RGB",
+   "boyut": [
+    954,
+    954,
+    3
+   ],
+   "en_buyuk_fark": 0,
+   "farkli_piksel": 0,
+   "uretim_sha256": "7f933ac2acf16f6bac7ff3ed3b359872e77964249000e4fb049fcc7023279159",
+   "onayli_sha256": "7f933ac2acf16f6bac7ff3ed3b359872e77964249000e4fb049fcc7023279159",
+   "uretim_ham_piksel_sha256": "ea47a57f49ec73af4b9606dd3c5636f97f0121f1ac10305630c76431409f952b",
+   "onayli_ham_piksel_sha256": "ea47a57f49ec73af4b9606dd3c5636f97f0121f1ac10305630c76431409f952b",
+   "tolerans_icinde": true,
+   "merkez_ham_piksel_sha256": "ea47a57f49ec73af4b9606dd3c5636f97f0121f1ac10305630c76431409f952b",
+   "onayli_merkez_ham_ayni": true
+  }
+ },
+ "kapi": {
+  "tanim": "en buyuk fark <= 1 seviye ve farkli piksel <= 10 (Merkez 3 Kas, A)",
+  "pass_": true
+ },
+ "drive_dosyasi": "onayli PNG (git), Actions ciktisi degil",
+ "cikti_sha256": {
+  "CANCER_LIBRA_EMERALD_954.png": "02421dbba9e4fb004f3941ed007c2579a75afacd050404afb3a9944e2bc6818f",
+  "CANCER_LIBRA_FILDISI_954.png": "7f933ac2acf16f6bac7ff3ed3b359872e77964249000e4fb049fcc7023279159",
+  "CANCER_LIBRA_RUBY_954.png": "e7be8a3bd936cf92f155cda07be098dba4e0fe7ce786c677350e8d5afef243b1",
+  "CANCER_LIBRA_SADE_ALTIN_954.png": "c3b4b280ecd47e1b9116f3af939646bed005800ccbc4c6ab8a3464b1dcc46ab8",
+  "CANCER_LIBRA_SAPPHIRE_954.png": "e4c71ecfb2a8505e8f8b41425c36d86637183e23e7aebd3367386b8f59b569c8",
+  "ONIZLEME_76mm_5STIL.png": "bc81ecad74072f445cbc8ed349df2c4de91a582d1196b675376cf6476b4a8f3c"
+ }
+}
