@@ -1,0 +1,258 @@
+{
+ "yontem": "KOYU ZEMIN G1 + UST ISIK (Serdar 3 Kas, deneme 3): lekesiz, merkez-kenar G1 aynen, eski zemindeki ustten gelen isik geri.\nModel: c(x, y) = max(G1(r) x (1 + a S), 3) + tane\n  G1(r) = merkez (1 - t) + kenar t, t = clip(r, 0, 1)^us (zemin_gradyan.py G1)\n  S = -yn x r^p (yn = (y - N/2) / (N/2), ust -1 -> isik +; carpimsal, ton degismez); 3 = en koyu kanala +3 taban (Merkez onayi)\n  tane = zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni alan)\nHedef: eski zemin cv2.medianBlur(129 px) ile yumusatilir (leke silinir); 8 sektor x 18 halka (r <= 0.96) hucre ORTANCASI.\nUydurma: us (0.6-3.0), a (-0.2-0.8), p (0, 0.5, 1, 1.5, 2) izgarasi; her uclude merkez / kenar RGB dogrusal en kucuk kareler (kapali cozum);\n  secim = hucrelerde en buyuk dE00 (vektorel CIEDE2000, renk_uyum.py ile ayni formul) en kucuk. Ince arama: kaba izgara etrafinda.\nKapilar: (1) her hucrede dE00(yeni hucre ortancasi, yumusatilmis eski hucre ortancasi) <= 2.0; asilirsa DUR (cikis 2, motor kosulmaz).\n  (2) leke: kalan = luma - duzgun alan; duzgun alan = halka ortalamasi profili x (1 + b (-yn)), b her goruntuye en kucuk karelerle\n  (BEIGE'e de AYNI yontem; esik = BEIGE G1 bu yontemle; 0.206 = onceki radyal yontem, bilgi); olcu = 32 px pencere ortalamalarinin std'si.",
+ "beige_g1_leke": {
+  "pencere_ortalama_std": 0.206,
+  "b": 0.0,
+  "pencere_ortalama_maks_sapma": 0.63
+ },
+ "beige_g1_leke_onceki_radyal_bilgi": 0.206,
+ "renk": {
+  "RUBY": {
+   "model": {
+    "merkez": [
+     119.12,
+     1.83,
+     17.4
+    ],
+    "kenar": [
+     36.43,
+     0.56,
+     0.8
+    ],
+    "us": 1.38,
+    "isik_a": 0.11,
+    "isik_p": 0.0,
+    "taban": 3.0,
+    "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim"
+   },
+   "uydurma_tahmini_maks_dE00": 3.105,
+   "hucre_dE00_maks": 3.282,
+   "hucre_dE00_ortanca": 0.635,
+   "hucre_dE00_p95": 2.585,
+   "en_kotu_hucre": {
+    "r": 0.934,
+    "yn": -0.841,
+    "eski": [
+     58.0,
+     1.0,
+     5.0
+    ],
+    "yeni": [
+     47.0,
+     2.0,
+     2.0
+    ]
+   },
+   "ust_alt_luma": {
+    "eski_ust": 17.61,
+    "eski_alt": 15.07,
+    "yeni_ust": 17.43,
+    "yeni_alt": 15.71
+   },
+   "leke_eski": {
+    "pencere_ortalama_std": 1.424,
+    "b": 0.16,
+    "pencere_ortalama_maks_sapma": 3.81
+   },
+   "leke_yeni": {
+    "pencere_ortalama_std": 0.194,
+    "b": 0.1,
+    "pencere_ortalama_maks_sapma": 0.64
+   },
+   "kirpilan_piksel_yuzde": {
+    "R": 0.0,
+    "G": 16.67,
+    "B": 2.86
+   },
+   "kapi": {
+    "hucre_dE00_le_2": false,
+    "leke_le_beige": true
+   },
+   "onceki_g1": {
+    "merkez": [
+     120.16,
+     1.8,
+     17.54
+    ],
+    "kenar": [
+     35.58,
+     0.57,
+     0.66
+    ],
+    "us": 1.34,
+    "guc": 1.0,
+    "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni tane ALANI); 0'a yakin kanallarda uint8 kirpma: tane tek yonlu (inceleme: kirpilan piksel %28-54, tane std %20-37 dusuk)",
+    "kirpilan_piksel_yuzde": {
+     "R": 0.0,
+     "G": 47.6,
+     "B": 3.7
+    }
+   }
+  },
+  "SAPPHIRE": {
+   "model": {
+    "merkez": [
+     1.23,
+     26.62,
+     119.9
+    ],
+    "kenar": [
+     0.48,
+     0.37,
+     22.65
+    ],
+    "us": 1.35,
+    "isik_a": 0.26,
+    "isik_p": 0.0,
+    "taban": 3.0,
+    "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim"
+   },
+   "uydurma_tahmini_maks_dE00": 4.425,
+   "hucre_dE00_maks": 4.428,
+   "hucre_dE00_ortanca": 0.852,
+   "hucre_dE00_p95": 3.284,
+   "en_kotu_hucre": {
+    "r": 0.934,
+    "yn": 0.841,
+    "eski": [
+     0.0,
+     4.0,
+     34.0
+    ],
+    "yeni": [
+     2.0,
+     2.0,
+     24.0
+    ]
+   },
+   "ust_alt_luma": {
+    "eski_ust": 14.71,
+    "eski_alt": 10.8,
+    "yeni_ust": 13.4,
+    "yeni_alt": 10.49
+   },
+   "leke_eski": {
+    "pencere_ortalama_std": 2.092,
+    "b": 0.32,
+    "pencere_ortalama_maks_sapma": 6.54
+   },
+   "leke_yeni": {
+    "pencere_ortalama_std": 0.215,
+    "b": 0.255,
+    "pencere_ortalama_maks_sapma": 0.85
+   },
+   "kirpilan_piksel_yuzde": {
+    "R": 16.67,
+    "G": 1.65,
+    "B": 0.0
+   },
+   "kapi": {
+    "hucre_dE00_le_2": false,
+    "leke_le_beige": false
+   },
+   "onceki_g1": {
+    "merkez": [
+     1.36,
+     27.06,
+     121.65
+    ],
+    "kenar": [
+     0.33,
+     0.19,
+     22.36
+    ],
+    "us": 1.29,
+    "guc": 1.0,
+    "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni tane ALANI); 0'a yakin kanallarda uint8 kirpma: tane tek yonlu (inceleme: kirpilan piksel %28-54, tane std %20-37 dusuk)",
+    "kirpilan_piksel_yuzde": {
+     "R": 54.4,
+     "G": 2.0,
+     "B": 0.0
+    }
+   }
+  },
+  "EMERALD": {
+   "model": {
+    "merkez": [
+     3.67,
+     63.9,
+     32.27
+    ],
+    "kenar": [
+     1.12,
+     13.86,
+     2.45
+    ],
+    "us": 1.05,
+    "isik_a": 0.2,
+    "isik_p": 1.5,
+    "taban": 3.0,
+    "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim"
+   },
+   "uydurma_tahmini_maks_dE00": 3.319,
+   "hucre_dE00_maks": 3.429,
+   "hucre_dE00_ortanca": 0.739,
+   "hucre_dE00_p95": 2.957,
+   "en_kotu_hucre": {
+    "r": 0.72,
+    "yn": -0.268,
+    "eski": [
+     2.0,
+     24.0,
+     9.0
+    ],
+    "yeni": [
+     2.0,
+     29.0,
+     11.0
+    ]
+   },
+   "ust_alt_luma": {
+    "eski_ust": 26.39,
+    "eski_alt": 21.25,
+    "yeni_ust": 23.72,
+    "yeni_alt": 21.25
+   },
+   "leke_eski": {
+    "pencere_ortalama_std": 3.305,
+    "b": 0.22,
+    "pencere_ortalama_maks_sapma": 9.51
+   },
+   "leke_yeni": {
+    "pencere_ortalama_std": 0.457,
+    "b": 0.11,
+    "pencere_ortalama_maks_sapma": 1.26
+   },
+   "kirpilan_piksel_yuzde": {
+    "R": 16.37,
+    "G": 0.0,
+    "B": 0.34
+   },
+   "kapi": {
+    "hucre_dE00_le_2": false,
+    "leke_le_beige": false
+   },
+   "onceki_g1": {
+    "merkez": [
+     3.38,
+     60.8,
+     30.24
+    ],
+    "kenar": [
+     1.22,
+     10.9,
+     0.86
+    ],
+    "us": 1.33,
+    "guc": 1.0,
+    "tane": "zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni tane ALANI); 0'a yakin kanallarda uint8 kirpma: tane tek yonlu (inceleme: kirpilan piksel %28-54, tane std %20-37 dusuk)",
+    "kirpilan_piksel_yuzde": {
+     "R": 28.3,
+     "G": 0.0,
+     "B": 0.8
+    }
+   }
+  }
+ },
+ "kapi_zemin": false
+}
