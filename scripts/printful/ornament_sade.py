@@ -90,7 +90,7 @@ ADAY = [
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument('--katman', required=True); ap.add_argument('--cikti', required=True)
+    ap = argparse.ArgumentParser(); ap.add_argument('--katman', required=True); ap.add_argument('--cikti', required=True); ap.add_argument('--cift', default='CANCER_LIBRA')
     a = ap.parse_args(); O = Path(a.cikti); O.mkdir(parents=True, exist_ok=True)
     pkl_sha = hashlib.sha256(Path(a.katman).read_bytes()).hexdigest()
     D = pickle.load(open(a.katman, 'rb'))
@@ -213,7 +213,8 @@ def main():
         Image.fromarray(rgba, 'RGBA').save(O / dosya)
         r['dosya'] = dosya
         r['kapi'] = dict(leke_0=r['leke_a'] == 0, tasma_ve_yasak_0=sum(gy.values()) == 0, zemin_seffaf=r['zemin_seffaf'],
-                         yerlesim_ayni=r['bosluk_px'] == [20, 20, 20] and r['sembol_kutu'][1] == 246)
+                         yerlesim_ayni=r['bosluk_px'] == [20, 20, 20] and (r['sembol_kutu'][1] == 246 if a.cift == 'CANCER_LIBRA' else True))
+        r['sembol_ust_y_bilgi'] = dict(olculen=int(r['sembol_kutu'][1]), cancer_libra=246, not_='yeni ciftte bilgi; sert yalniz CANCER_LIBRA')
         r['etiket'] = f'{n} {ad_r}: kati {r["kati_kontrast_en_kotu"]}' + ('' if r['okunur'] else ' OKUNMAZ (uretim adayi degil)')
         R['aday'][str(n)] = r
         print(r['etiket'], '| sembol', r['sembol_kati_bilgi'], '| uclar', r['halka_uclari_kati'], '| leke', r['leke_a'], '| yasak', sum(gy.values()),
@@ -228,4 +229,11 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except SystemExit:
+        raise
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        sys.exit(2)

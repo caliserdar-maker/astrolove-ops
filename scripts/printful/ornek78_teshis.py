@@ -78,7 +78,7 @@ def bolum12(a, K, W, O, son, T):
     # 2 ARIES_ARIES SADE adimi
     k2, t2 = kos([_d / 'ornament_motor.py', '--kaynak', K, '--motor', a.motor, '--cikti', W / 'aa_dump', '--son', son, '--cift', 'ARIES_ARIES'],
                  env={'ORN_DUMP': str(W / 'aa.pkl')}, log_dosya=O / 'log_dump_ARIES_ARIES.txt')
-    k3, t3 = kos([_d / 'ornament_sade.py', '--katman', W / 'aa.pkl', '--cikti', W / 'aa_sade'], log_dosya=O / 'log_sade_ARIES_ARIES.txt') if k2 == 0 else (9, '')
+    k3, t3 = kos([_d / 'ornament_sade.py', '--katman', W / 'aa.pkl', '--cikti', W / 'aa_sade', '--cift', 'ARIES_ARIES'], log_dosya=O / 'log_sade_ARIES_ARIES.txt') if k2 == 0 else (9, '')
     so = json.loads((W / 'aa_sade' / 'OLCUM.json').read_text())['aday']['1'] if (W / 'aa_sade' / 'OLCUM.json').exists() else None
     T['ARIES_ARIES_SADE'] = dict(dump_cikis=k2, sade_cikis=k3, traceback=(t2 + t3)[(t2 + t3).find('Traceback'):] if 'Traceback' in (t2 + t3) else None,
                                  sade_kuyruk=t3.splitlines()[-4:], sade_olcum=dict(kati=so['kati_kontrast_en_kotu'], yasak=so['goruntu_yasak'],

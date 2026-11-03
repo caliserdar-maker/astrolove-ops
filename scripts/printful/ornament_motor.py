@@ -243,17 +243,29 @@ def main():
 
         def sembol_kutu(ana, w_hedef, cx, cy):
             x0, y0, x1, y1 = o1.bbox(ana[..., 3], 0.5)
-            olc_ = min(w_hedef / (x1 - x0), w_hedef * ORAN_CL / (y1 - y0))
+            olc0_ = min(w_hedef / (x1 - x0), w_hedef * ORAN_CL / (y1 - y0))
+            olc_ = olc0_
+            if KUCULT[0] > 0:                                                 # teshis 3 Kas: halka ile sigmazsa yukseklik KUCULT px kucultulur (oran sabit, yalniz kucultme)
+                h_s = (y1 - y0) * olc0_; olc_ = olc0_ * (h_s - KUCULT[0]) / h_s
             KUTU_BILGI.update(w_hedef=round(float(w_hedef), 2), h_hedef=round(float(w_hedef * ORAN_CL), 2), olcek=round(float(olc_), 5),
-                              sinir='genislik' if olc_ == w_hedef / (x1 - x0) else 'yukseklik', buyutme=bool(olc_ > 1))
+                              olcek_kutu=round(float(olc0_), 5), kucultme_px=int(KUCULT[0]),
+                              sinir='genislik' if olc0_ == w_hedef / (x1 - x0) else 'yukseklik', buyutme=bool(olc_ > 1))
             rgb_, a_ = o1.rgba_olcek(ana, olc_)
             bb_ = o1.bbox(a_, 0.5)
             return (rgb_, a_, int(round(cx - (bb_[0] + bb_[2]) / 2)), int(round(cy - (bb_[1] + bb_[3]) / 2)))
         o3.sembol_yerlestir = sembol_kutu
         o5.o3.sembol_yerlestir = sembol_kutu
     KUTU_BILGI = {}
+    KUCULT = [0]
     ha, hb = o5.halka_T(pp, son.S0)
     Y, bilgi = o5.yerlesim_V5(pp, ana5, T, kc, ha, hb, G)
+    KUCULT_IZ = []
+    while CIFT != 'CANCER_LIBRA' and Y is None and bilgi.get('hata') == 'sembol sigmiyor' and len(KUCULT_IZ) < 10:
+        KUCULT_IZ.append(dict(kucultme_px=KUCULT[0], gereken_kucultme_px=bilgi.get('gereken_kucultme_px'), cakisma=bilgi.get('cakisma')))
+        KUCULT[0] += max(1, int(bilgi.get('gereken_kucultme_px') or 1))
+        log('sembol sigmiyor: kutu yuksekligi', KUCULT[0], 'px kucultulup yeniden', KUCULT_IZ[-1])
+        Y, bilgi = o5.yerlesim_V5(pp, ana5, T, kc, ha, hb, G)
+    KUTU_BILGI['kucultme_iz'] = KUCULT_IZ
     if Y is None:
         log('FAIL yerlesim', json.dumps(bilgi, default=str))
         (O / 'OLCUM.json').write_text(json.dumps(dict(hata='yerlesim_V5', cift=CIFT, bilgi=bilgi, kucuk_burc_hedef_h_poster_px=KUCUK_H, kutu=KUTU_BILGI),
@@ -684,6 +696,9 @@ def main():
                  sembol_genislik=int(s4b[2] - s4b[0]), sembol_yukseklik=int(s4b[3] - s4b[1]),
                  sembol_kutu_hedef=dict(w=KUTU_BILGI.get('w_hedef'), h=KUTU_BILGI.get('h_hedef', 404), sinir=KUTU_BILGI.get('sinir'),
                                         olcek=KUTU_BILGI.get('olcek'), buyutme=KUTU_BILGI.get('buyutme'),
+                                        olcek_kutu=KUTU_BILGI.get('olcek_kutu'), kucultme_px=KUTU_BILGI.get('kucultme_px', 0),
+                                        kucultme_iz=KUTU_BILGI.get('kucultme_iz', []),
+                                        h_w_orani=(round(float(s4b[3] - s4b[1]) / float(s4b[2] - s4b[0]), 4) if s4b[2] > s4b[0] else None),
                                         not_='CANCER_LIBRA onayli hali 425 x 404 (kutu fonksiyonu kullanilmaz)'))
     R['kapi_sert'] = g; R['kapi_bilgi'] = BILGI
     R['kapi'] = g; R['kaynak_leke_onarim_sonrasi'] = dict(o5.KAYNAK_SONRA)
