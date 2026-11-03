@@ -57,7 +57,7 @@ def sorular(pair):
             dict(question_text=l2, instructions=ad, question_type="text_input", required=True, max_allowed_characters=11),
             dict(question_text="Your special date", instructions="Write the month in letters, for example 14 June 2025",
                  question_type="text_input", required=True, max_allowed_characters=20),
-            dict(question_text="Heading", instructions="Paper Anniversary or Our First Year. Poster only; the card says Happy First Anniversary.",
+            dict(question_text="Heading", instructions="Paper Anniversary or Our First Year.",   # Serdar 3 Kas (Soru 7, YD talimat plani)
                  question_type="text_input", required=True, max_allowed_characters=20),
             dict(question_text="Optional short line", instructions="Leave empty for Year One", question_type="text_input",
                  required=False, max_allowed_characters=20)]
@@ -110,6 +110,9 @@ class Kilitli(Etsy):
 
 
 def main():
+    # Serdar 3 Kas cevap 4: Etsy'ye yazan yol (dogrudan requests createDraftListing, kapi disi) KAPALI; dosya YD soru setinin kod
+    # kaynagi (sorular) olarak kalir. Yeniden acmak icin yazim yolu Etsy._call / metin_yasak_kapisi + kota tabanina baglanir ve Serdar onayi.
+    raise SystemExit("KAPALI (Serdar 3 Kas): by78_taslak Etsy yazimi kapali; yalniz sorular() kaynak olarak kullanilir")
     out = Path(os.environ.get("OUT", "_out")); out.mkdir(parents=True, exist_ok=True)
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
     mask(k); mask(s)
