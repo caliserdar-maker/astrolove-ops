@@ -1,0 +1,71 @@
+name: etsy-gunluk
+# Etsy gunluk ilan verisi (Serdar 3 Kas "sen gir, api den hersey sen bul"; Merkez 3 Kas). SALT OKUMA: yalniz GET (SaltOku);
+# Etsy'ye yazma yok. Kod: scripts/etsy/etsy_gunluk.py (aktif ilanlar views + num_favorers + grup; son 24 saat makbuz -> ilan bazinda
+# adet + gelir; musteri bilgisi hicbir dosyaya/loga yazilmaz). Her gun 06:15 TR (03:15 UTC). Kilit: kilit_bekle.py (token indirmeden
+# ONCE). Kota: ilk sayfadan sonra kalan >= tahmin + 10, her istekte taban 10 (etsy_common.KOTA_SINIRI).
+# Cikti Drive ASTROLOVE/TEMP/ETSY_VERI/: gunluk/<AAAAGG>.csv, BIRIKIM.csv (ilan x gun, gunluk goruntulenme farki), OZET/<AAAAGG>.json.
+permissions:
+  actions: read
+  contents: read
+on:
+  schedule:
+    - cron: "15 3 * * *"
+  workflow_dispatch: {}
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"; echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Token + onceki birikim
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out _in
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_VERI/BIRIKIM.csv" _in/BIRIKIM.csv 2>/dev/null || echo "onceki BIRIKIM yok (ilk kosu)"
+      - name: Oku (salt okuma)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set -euo pipefail
+          B=""; [ -f _in/BIRIKIM.csv ] && B="--birikim _in/BIRIKIM.csv"
+          python3 scripts/etsy/etsy_gunluk.py --cikti _out $B
+      - name: Token geri yaz + cikti Drive'a
+        if: ${{ always() }}
+        run: |
+          TOKEN_RC=0; OUT_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
+          if [ -f _out/OZET.json ]; then
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
+            T=$(python3 -c "import json;print(json.load(open('_out/OZET.json'))['tarih'].replace('-',''))")
+            mkdir -p _out/OZET; mv _out/OZET.json "_out/OZET/$T.json"
+            rclone copy _out "gdrive:ASTROLOVE/TEMP/ETSY_VERI" -q && echo "::notice title=ETSY-GUNLUK::TEMP/ETSY_VERI/gunluk/$T.csv" || OUT_RC=1
+            cat "_out/OZET/$T.json" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          [ "$TOKEN_RC" = 0 ] && [ "$OUT_RC" = 0 ] || exit 1
+      - if: always()
+        run: rm -rf _work ~/.config/rclone
