@@ -147,7 +147,7 @@ jobs:
         run: |
           set -euo pipefail
           n=$(ls /tmp/png/*_954.png 2>/dev/null | wc -l); echo "PNG $n"; [ "$n" -gt 0 ] || { echo "::warning::Drive'a yazilacak PNG yok"; exit 0; }
-          rclone copy /tmp/png "gdrive:ASTROLOVE/TEMP/$D" --include "*_954.png" -q
+          rclone copy /tmp/png "gdrive:ASTROLOVE/TEMP/$D" --include "/*_954.png" --max-depth 1 -q   # yalniz ust klasor (deneme 3: _is ara PNG de gitti)
           for f in ONIZLEME_76mm_6CIFT.png OLCUM.json KOVA_KAPI_TESTI.json KOVA_KANIT.json KOVA_ESKI_PAY_MASKE.png KOVA_954_YAKIN_4x.png GEMINI_VIRGO_SADE_GERCEK_BOY_76mm.png; do
             if [ -f /tmp/rapor/$f ]; then rclone copyto /tmp/rapor/$f "gdrive:ASTROLOVE/TEMP/$D/RAPOR/$f" -q; fi; done
           ID=$(rclone lsjson gdrive:ASTROLOVE/TEMP --dirs-only | python3 -c "import json,sys; print([d['ID'] for d in json.load(sys.stdin) if d['Name']=='$D'][0])")
