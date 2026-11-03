@@ -25,7 +25,8 @@ HEDIYE = ("THE PERFECT GIFT\nA keepsake made for Aries and Leo couples. Short on
           "hours, ready to print or share.")
 YENI_URETIM = [k for k in P.SABIT if k.startswith("PRODUCTION AND DELIVERY") and "tracking" not in k][0]   # 26 Eki takipsiz paragraf
 YENI_ONIZLEME = [k for k in P.SABIT if k.startswith("YOUR PREVIEW\nWe send you")][0]   # 28 Eki onizleme paragrafi
-sabit = [k for k in P.SABIT if k not in (P.BEYAN, YENI_URETIM, YENI_ONIZLEME)]
+YENI_PRINT = [k for k in P.SABIT if k.startswith("PRINT\n- Printed on matte")][0]   # 3 Kas PRINT paragrafi (premium'suz)
+sabit = [k for k in P.SABIT if k not in (P.BEYAN, YENI_URETIM, YENI_ONIZLEME, YENI_PRINT)]
 EN_CANLI = "\n\n".join([GIRIS, P.BEYAN, "Aries: March 21 to April 19. Leo: July 23 to August 22.", SIPARIS, sabit[0], DIJITAL] + sabit[1:3]
                  + [BOY] + sabit[3:] + [HEDIYE])
 EN = P.poster_en(EN_CANLI)   # Serdar 23 Eki madde 1-2: Latin harf notu
@@ -61,7 +62,16 @@ def main():
               and "Мы печатаем постер или готовим файл сразу после того, как вы одобрите макет" in ru3 and "Для каждого заказа постера" not in ru3
               and "переслать в течение 24 часов после вашего одобрения" in ru3 and "в течение 24 часов, и его можно" not in ru3
               and "отправим цифровой файл в виде ссылки для скачивания" in ru3))
-    s.append(("kalip disi paragraf FAIL", not P.kur(EN + "\n\nNEW\nSomething.", ENV)[1]["pass_"]))
+    # 3 Kas (Serdar Soru 3 + Soru 11, Lena onayi): yeni PRINT ve onizleme satiri -> PASS; eski anahtarlar korunur (geri alma)
+    eski_print = "- Printed on premium matte art paper with long-lasting inks"
+    eski_tes = "We send a free preview via Etsy Messages"
+    en4 = en3.replace(eski_print, "- Printed on matte art paper").replace(eski_tes, "We send a preview via Etsy Messages")
+    ru4, k4 = P.kur(en4, dict(ENV, boy=["5x7"] + ENV["boy"]))
+    s.append(("3 Kas: yeni PRINT + onizleme satiri PASS, RU yeni satirlar", k4["pass_"] and en3.count(eski_print) == 1
+              and en3.count(eski_tes) == 1 and "- Печать на матовой художественной бумаге\n" in ru4
+              and "- Мы отправляем макет через сообщения Etsy" in ru4))
+    s.append(("3 Kas: yeni RU'da premium / stoykiy / besplatno maket yok", not any(x in ru4 for x in ("преми", "стойк", "бесплатно отправляем"))))
+    s.append(("3 Kas: eski EN (geri alma) hala PASS", k3["pass_"] and "бесплатно отправляем" in ru3))
     s.append(("envanter boy sayisi farki FAIL", not P.kur(EN, dict(ENV, boy=ENV["boy"][:12]))[1]["pass_"]))
     s.append(("beyansiz EN FAIL", not P.kur(EN.replace(P.BEYAN + "\n\n", ""), ENV)[1]["pass_"]))
     s.append(("EN'de tek harf degisirse FAIL (sabit bolum)", not P.kur(EN.replace("damp rooms", "damp room"), ENV)[1]["pass_"]))

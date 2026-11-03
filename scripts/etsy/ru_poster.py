@@ -107,6 +107,10 @@ TESLIM_RU = {
     "We send a free preview via Etsy Messages within 24 hours. After you approve, your file is emailed to you within 24 hours":
         "Мы бесплатно отправляем макет через сообщения Etsy в течение 24 часов. После вашего одобрения файл придёт вам на "
         "электронную почту в течение 24 часов",
+    # Serdar 3 Kas Soru 11 ("free" yok) + Lena onayi (RU_POSTER_SABLON_ONERI.diff); eski satir geri alma icin kalir
+    "We send a preview via Etsy Messages within 24 hours. After you approve, your file is emailed to you within 24 hours":
+        "Мы отправляем макет через сообщения Etsy в течение 24 часов. После вашего одобрения файл придёт вам на "
+        "электронную почту в течение 24 часов",
 }
 
 
@@ -174,6 +178,10 @@ SABIT = {
     "included. Prints ship unframed.":
         "ПЕЧАТЬ\n- Печать на премиальной матовой художественной бумаге стойкими чернилами\nРамы на фото показаны только для "
         "примера и в комплект не входят. Постеры отправляются без рамы.",
+    # Serdar 3 Kas Soru 3 (premium / long-lasting cikar; kagit yalniz "matte art paper") + Lena onayi; eski paragraf geri alma icin kalir
+    "PRINT\n- Printed on matte art paper\nFrames shown in photos are for display only and are not included. Prints ship unframed.":
+        "ПЕЧАТЬ\n- Печать на матовой художественной бумаге\nРамы на фото показаны только для примера и в комплект не входят. "
+        "Постеры отправляются без рамы.",
     "COLORS\nSee the color photo. The gold look is a printed color, not metallic foil or raised ink. Colors may vary slightly "
     "between screens and paper.":
         "ЦВЕТА\nСмотрите фото с цветами. Золотистый эффект создаётся при печати: это не металлическая фольга и не рельефная "
