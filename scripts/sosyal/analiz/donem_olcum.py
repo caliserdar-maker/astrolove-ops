@@ -28,17 +28,23 @@ SON_TAKVIM = datetime(2027, 1, 31)
 # gonderi etkilesim alanlari (toplanir)
 PROFIL = {
     'pinterest': dict(gosterim='gosterim', takipci='takipci', dis=['dis_tiklama'], g_gos=['gosterim'],
-                      g_etk=['kaydetme', 'pin_tiklama', 'dis_tiklama']),
-    'instagram': dict(gosterim='goruntulenme', takipci='takipci', dis=['web_tiklama', 'profil_link_tiklama'],
+                      g_etk=['kaydetme', 'pin_tiklama', 'dis_tiklama'], g_dis=['dis_tiklama']),
+    'instagram': dict(gosterim='goruntulenme', takipci='takipci', dis=['web_tiklama', 'tiklama_toplam'],
                       g_gos=['goruntulenme'], g_etk=['begeni', 'yorum', 'kaydetme', 'paylasim']),
     'facebook': dict(gosterim='sayfa_medya_izlenme', takipci='takipci', dis=['web_tiklama', 'cta_tiklama'],
-                     g_gos=['gosterim', 'izlenme'], g_etk=['tepki', 'yorum', 'paylasim']),
+                     g_gos=['gosterim', 'izlenme'], g_etk=['tepki', 'yorum', 'paylasim'], g_dis=['link_tiklama']),
     'threads': dict(gosterim='goruntulenme', takipci='takipci', dis=[], g_gos=['goruntulenme'],
                     g_etk=['begeni', 'yanit', 'yeniden_paylasim', 'alinti']),
     'tiktok': dict(gosterim='video_goruntulenme', takipci='takipci', dis=[], g_gos=['izlenme'],
                    g_etk=['begeni', 'yorum', 'paylasim']),
     'youtube': dict(gosterim='izlenme', takipci='abone', dis=[], g_gos=['izlenme'], g_etk=['begeni', 'yorum', 'paylasim']),
 }
+# 3 Kas inceleme duzeltmesi: olcum.py'deki gecersiz/eksik metrikler (HAM 400 yaniti gecerli adlari listeledi)
+ALL, PIR = {'scope': 'all'}, {'scope': 'publishedInRange'}
+EK = {'youtube': [('abone', 'totalSubscribers', [ALL, O.N, PIR], 'son'), ('abone_kazanilan', 'subscribersGained', [ALL, O.N, PIR], 'toplam'),
+                  ('abone_kaybedilen', 'subscribersLost', [ALL, O.N, PIR], 'toplam'), ('izleme_dk', 'watchMinutes', [ALL, O.N, PIR], 'toplam')],
+      'instagram': [('tiklama_toplam', 'clicks_total', [O.A, O.N], 'toplam')]}
+CIKAR = {'youtube': {'abone', 'izleme_dk'}, 'instagram': {'profil_link_tiklama'}}
 LOG, TANIM = [], []
 
 
@@ -66,7 +72,7 @@ def gunler(a, b):
 def hesap(mc, out, ag, g):
     """{sutun: ({gun: deger}, tur, metric, varyant)}"""
     S = {}
-    for sut, m, varyant, tur in O.HESAP[ag]:
+    for sut, m, varyant, tur in [x for x in O.HESAP[ag] if x[0] not in CIKAR.get(ag, set())] + EK.get(ag, []):
         sec = None
         for v in varyant:
             p = dict(network=ag, metric=m, **{'from': f'{g[0]}T00:00:00', 'to': f'{g[-1]}T23:59:59', 'timezone': TZ}, **v)
@@ -156,7 +162,7 @@ def main():
                   f'Okuma {okuma:%Y-%m-%dT%H:%M:%SZ} UTC. Haftalar: ' + ', '.join(f'H{k + 1} {x}..{y}' for k, (x, y) in enumerate(HAFTA)),
                   'Hesap metrikleri gunluk degerlerin toplami; takipci = ilk/son gunun degeri (birikimli seviye).',
                   'Gonderi metrikleri okuma anindaki KUMULATIF degerler; yeni gonderiler daha az birikmistir (yas_saat).',
-                  'Etkilesim (gonderi alanlari toplami): ' + '; '.join(f'{k}=' + '+'.join(v['g_etk']) for k, v in PROFIL.items()),
+                  'Gonderi gosterimi: her gonderide ilk dolu alan (FB foto impressions, reel blueReelsPlayCount). Etkilesim (gonderi alanlari toplami): ' + '; '.join(f'{k}=' + '+'.join(v['g_etk']) for k, v in PROFIL.items()),
                   'Gosterim (hesap timeline): ' + '; '.join(f'{k}={v["gosterim"]}' for k, v in PROFIL.items()),
                   '"veri yok": Metricool vermedi (HTTP hata, bos yanit ya da alan yok). Tahmin yok.', ''])
     log('--- TAKVIM (/v2/scheduler/posts)')
@@ -204,18 +210,27 @@ def main():
         def gtop(alanlar, R):
             v = [r[k] for r in R for k in alanlar if r.get(k) is not None]
             return sum(v) if v else None
+
+        def gilk(alanlar, R):
+            v = [next(r[k] for k in alanlar if r.get(k) is not None) for r in R if any(r.get(k) is not None for k in alanlar)]
+            return sum(v) if v else None
         gos, gos_n = top(P['gosterim'], B, S_)
         tb, tbg = seviye(P['takipci'], True)
         ts, tsg = seviye(P['takipci'], False)
         dis = {d: top(d, B, S_)[0] for d in P['dis']}
-        g_gos = gtop(P['g_gos'][:1], GD)
+        g_gos = gilk(P['g_gos'], GD)
+        g_dis = gtop(P.get('g_dis', []), GD) if P.get('g_dis') else None
         g_etk = gtop(P['g_etk'], GD)
         n = len(GD)
         bk = [z for z, x in bek if x == ag]
         yay = sum(1 for z, x, s in tsat if x == ag and s == 'PUBLISHED' and B <= z.date() <= S_)
         satir = dict(platform=ag, gonderi_analitik=n, gonderi_takvim_published=yay,
                      gosterim_hesap=yuvarla(gos), gosterim_metrik=S[P['gosterim']][2],
-                     gosterim_gun=gos_n, gonderi_gosterim_toplam=yuvarla(g_gos), gonderi_gosterim_alan=P['g_gos'][0],
+                     gosterim_gun=gos_n, gonderi_gosterim_toplam=yuvarla(g_gos), gonderi_gosterim_alan='|'.join(P['g_gos']),
+                     gonderi_dis_tiklama=yuvarla(g_dis) if P.get('g_dis') else YOK,
+                     yeni_takip=yuvarla(top('yeni_takip', B, S_)[0]) if 'yeni_takip' in S else '',
+                     abone_kazanilan_kaybedilen=(f"{yuvarla(top('abone_kazanilan', B, S_)[0])}/{yuvarla(top('abone_kaybedilen', B, S_)[0])}"
+                                                 if 'abone_kazanilan' in S else ''),
                      etkilesim_toplam=yuvarla(g_etk), etkilesim_tanim='+'.join(P['g_etk']),
                      takipci_bas=yuvarla(tb), takipci_bas_gun=tbg, takipci_son=yuvarla(ts), takipci_son_gun=tsg,
                      dis_tiklama=('; '.join(f'{d}={yuvarla(v)}' for d, v in dis.items()) if dis else YOK + ' (Metricool metrigi yok)'),
@@ -228,7 +243,8 @@ def main():
             R = [r for r in gs if x <= r['gun'] <= y]
             hg, hn = top(P['gosterim'], x, y)
             haft.append(dict(platform=ag, hafta=f'H{k + 1}', bas=str(x), son=str(y), gonderi=len(R), gosterim_hesap=yuvarla(hg),
-                             gosterim_gun=hn, gonderi_gosterim=yuvarla(gtop(P['g_gos'][:1], R)), etkilesim=yuvarla(gtop(P['g_etk'], R)),
+                             gosterim_gun=hn, gonderi_gosterim=yuvarla(gilk(P['g_gos'], R)),
+                             gunluk_ort_gosterim=yuvarla(round(hg / hn, 1)) if hg is not None and hn else YOK, etkilesim=yuvarla(gtop(P['g_etk'], R)),
                              takipci_son=yuvarla(son_deger(S[P['takipci']][0], y))))
         log(f'  OZET {json.dumps(satir, ensure_ascii=False, default=str)}')
     for ad, R in (('OZET.csv', ozet), ('HAFTALIK.csv', haft)):
