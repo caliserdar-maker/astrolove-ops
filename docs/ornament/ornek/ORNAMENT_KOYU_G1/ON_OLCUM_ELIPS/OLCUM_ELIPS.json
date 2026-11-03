@@ -1,0 +1,202 @@
+{
+ "yontem": "KOYU_G1 ON OLCUM (Merkez 3 Kas, A; deneme sayilmaz, motor kosmaz): serbest yonlu, kaydirilmis merkezli ELIPTIK isik modeli.\nModel: c(x, y) = max(f(x, y) x G1(rho), 3) + tane\n  rho = eliptik yaricap: merkez (cx, cy) kaydirilmis, eksenler theta kadar donuk, en / boy orani e^q (alan korunur: sx = e^(q/2), sy = e^(-q/2))\n  G1(rho) = merkez (1 - t) + kenar t, t = clip(rho, 0, 1)^us\n  f = 1 + a (cos phi xn + sin phi yn): serbest yonlu dogrusal isik\n  3 = en koyu kanala +3 taban; tane = zemin_gradyan.tane(2.0), default_rng(7) ilk cekim (BEIGE_G1 ile ayni alan)\nHedef: eski zemin medianBlur 129 px; 8 sektor x 18 halka (r <= 0.96) hucre ortancasi (zemin_koyu_g1_isik ile ayni hucreler).\nUydurma: geometri (cx, cy, q, theta, us, a, phi) Nelder-Mead, 24 baslangic; merkez / kenar RGB her adimda dogrusal en kucuk kareler;\n  amac = yumusak maksimum (sum dE00^8)^(1/8) hucre merkezlerinde; KESIN deger = uretilen 1264 px goruntunun hucre ortancalari.\nLeke: duzgun alan AYNI aile (eliptik rho profili x dogrusal isik), her goruntuye ayri uydurulur (BEIGE dahil); olcu = 32 px pencere\n  ortalamalarinin std'si (r <= 0.94). Esik = BEIGE G1 bu yontemle.\nGorsel: yalniz zemin (ogesiz), 7.6 cm daire (954 px baski dosyasi olcegi, ornament onizleme), 3 renk x ESKI | DENEME 2 | DENEME 3 | ELIPTIK.",
+ "beige_g1_leke_elips": {
+  "pencere_ortalama_std": 0.206,
+  "geometri": [
+   0.0,
+   0.0,
+   -0.0001,
+   0.0001,
+   0.0,
+   0.0001
+  ]
+ },
+ "renk": {
+  "RUBY": {
+   "eliptik_model": {
+    "cx": 0.0708,
+    "cy": -0.0893,
+    "en_boy": 0.8403,
+    "theta_derece": 16.66,
+    "us": 1.1712,
+    "isik_a": 0.1323,
+    "isik_yon_derece": 176.11,
+    "merkez": [
+     125.24,
+     1.92,
+     18.51
+    ],
+    "kenar": [
+     37.45,
+     0.58,
+     1.18
+    ],
+    "taban": 3.0,
+    "yumusak_maks_amac": 1.782
+   },
+   "olcum": {
+    "deneme2_radyal": {
+     "hucre_dE00_maks": 5.155,
+     "p95": 3.361,
+     "ortanca": 0.692,
+     "hucre_gt2": 24,
+     "leke": 0.154
+    },
+    "deneme3_duseyisik": {
+     "hucre_dE00_maks": 3.282,
+     "p95": 2.585,
+     "ortanca": 0.635,
+     "hucre_gt2": 15,
+     "leke": 0.2
+    },
+    "eliptik": {
+     "hucre_dE00_maks": 1.863,
+     "p95": 1.245,
+     "ortanca": 0.604,
+     "hucre_gt2": 0,
+     "leke": 0.268
+    }
+   },
+   "leke_eski": {
+    "pencere_ortalama_std": 0.86,
+    "geometri": [
+     0.1238,
+     -0.1297,
+     -0.206,
+     0.3256,
+     -0.2568,
+     -0.2235
+    ]
+   },
+   "kirpilan_piksel_yuzde_eliptik": {
+    "R": 0.0,
+    "G": 16.67,
+    "B": 3.36
+   }
+  },
+  "SAPPHIRE": {
+   "eliptik_model": {
+    "cx": -0.0541,
+    "cy": 0.0039,
+    "en_boy": 1.1796,
+    "theta_derece": 104.92,
+    "us": 1.3691,
+    "isik_a": 0.2908,
+    "isik_yon_derece": 316.0,
+    "merkez": [
+     1.25,
+     26.68,
+     120.5
+    ],
+    "kenar": [
+     0.42,
+     0.0,
+     19.98
+    ],
+    "taban": 3.0,
+    "yumusak_maks_amac": 1.768
+   },
+   "olcum": {
+    "deneme2_radyal": {
+     "hucre_dE00_maks": 5.748,
+     "p95": 4.437,
+     "ortanca": 0.731,
+     "hucre_gt2": 32,
+     "leke": 0.185
+    },
+    "deneme3_duseyisik": {
+     "hucre_dE00_maks": 4.428,
+     "p95": 3.284,
+     "ortanca": 0.852,
+     "hucre_gt2": 27,
+     "leke": 0.215
+    },
+    "eliptik": {
+     "hucre_dE00_maks": 2.601,
+     "p95": 1.841,
+     "ortanca": 0.548,
+     "hucre_gt2": 4,
+     "leke": 0.325
+    }
+   },
+   "leke_eski": {
+    "pencere_ortalama_std": 1.379,
+    "geometri": [
+     -0.0706,
+     -0.2454,
+     -0.2323,
+     0.1109,
+     0.5181,
+     7.1334
+    ]
+   },
+   "kirpilan_piksel_yuzde_eliptik": {
+    "R": 16.67,
+    "G": 2.19,
+    "B": 0.0
+   }
+  },
+  "EMERALD": {
+   "eliptik_model": {
+    "cx": 0.0332,
+    "cy": -0.1012,
+    "en_boy": 0.8279,
+    "theta_derece": 12.67,
+    "us": 1.0705,
+    "isik_a": 0.0911,
+    "isik_yon_derece": 154.4,
+    "merkez": [
+     3.72,
+     65.01,
+     32.87
+    ],
+    "kenar": [
+     1.05,
+     12.33,
+     1.58
+    ],
+    "taban": 3.0,
+    "yumusak_maks_amac": 1.736
+   },
+   "olcum": {
+    "deneme2_radyal": {
+     "hucre_dE00_maks": 5.086,
+     "p95": 3.612,
+     "ortanca": 0.715,
+     "hucre_gt2": 35,
+     "leke": 0.197
+    },
+    "deneme3_duseyisik": {
+     "hucre_dE00_maks": 3.429,
+     "p95": 2.957,
+     "ortanca": 0.731,
+     "hucre_gt2": 33,
+     "leke": 0.457
+    },
+    "eliptik": {
+     "hucre_dE00_maks": 1.89,
+     "p95": 1.595,
+     "ortanca": 0.643,
+     "hucre_gt2": 0,
+     "leke": 0.201
+    }
+   },
+   "leke_eski": {
+    "pencere_ortalama_std": 2.424,
+    "geometri": [
+     0.0458,
+     -0.1022,
+     -0.2247,
+     0.2569,
+     -0.132,
+     -0.087
+    ]
+   },
+   "kirpilan_piksel_yuzde_eliptik": {
+    "R": 16.35,
+    "G": 0.0,
+    "B": 1.7
+   }
+  }
+ }
+}
