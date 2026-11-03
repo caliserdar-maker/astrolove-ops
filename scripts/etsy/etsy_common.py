@@ -244,6 +244,80 @@ def ru_yazim_kapisi(method, path, data=None, json_body=None):
 
 
 
+# ------------------------------------------------------------------ METIN YASAK KAPISI (tek kaynak; Serdar 3 Kas "A")
+# Musteriye gorunen her metin degeri (baslik, aciklama, etiket, malzeme, varyasyon adi, kisisellestirme, alt metin, magaza metni;
+# EN + RU) Etsy'ye giden HER yazma isteginde (_call + post_file) taranir. Iki sinif:
+#   KESIN YASAK: duz liste (asagida). BAGLAM: duz listeye konmaz, baglama gore uyari (olumsuz cumle, kagit/kart baglami, kanit).
+# MOD "UYARI" (3 Kas): eslesme ::warning:: + METIN_UYARI listesine yazilir, istek GONDERILIR. "ENGEL"e gecis canli metinler
+# temizlendikten sonra AYRI Serdar onayiyla (KESIN eslesmede SystemExit; BAGLAM her modda yalniz uyari). metin_kurali.py
+# (medya-v1) emekli: bu liste tek kaynaktir.
+METIN_KAPI_MOD = "UYARI"
+METIN_KESIN = [
+    ("tedarikci adi", r"\b(?:Prodigi|Printful|Gelato|Printify|Gooten)\b"),
+    ("Hahnemuhle", r"Hahnem(?:u|ü|ue)hle|Ханем"),
+    ("Photo Rag", r"Photo\s*Rag"),
+    ("giclee", r"gicl(?:e|é)e|жикле"),
+    ("cotton", r"\bcotton\b|хлоп(?:ок|к)"),
+    ("museum / ISO 9706", r"\bmuseum\b|музе|ISO\s*9706"),
+    ("OBA-free", r"\bOBA\b"),
+    ("bright white", r"\bbright[\s-]+white\b"),
+    ("12-colour", r"\b12[\s-]*colou?rs?\b"),
+    ("premium", r"\bpremium\b|преми(?:ал|ум)\w*"),
+    ("long-lasting", r"\blong[\s-]?lasting\b|стойк\w*|долговеч\w*"),
+    ("uzun/orta tire", r"[\u2014\u2013]"),
+    ("kisi adi", r"\b(?:Lena|Serdar)\b"),
+]
+METIN_BAGLAM = [
+    ("metallic foil (olumsuz cumle disinda)", r"(?<!not )(?<!no )(?<!without )\bmetallic\s+foil\b"),
+    ("308 (kagit baglaminda)", r"\b308\s*(?:g\b|gsm|g/m|г/м)|\b308\b[^.\n]{0,40}\bpaper\b"),
+    ("300 dpi (yalniz kartta)", r"\b300\s*dpi\b"),
+    ("free preview (kanit gerekir)", r"\bfree\s+preview\b|бесплатн\w*\s+(?:предпросмотр|превью|макет)"),
+    ("tracking (kanit gerekir)", r"\btracking\b|отслежива\w*"),
+]
+_METIN_RX = [(ad, "KESIN", re.compile(rx, re.I)) for ad, rx in METIN_KESIN] + \
+            [(ad, "BAGLAM", re.compile(rx, re.I)) for ad, rx in METIN_BAGLAM]
+METIN_UYARI = []          # [(yontem, yol, sinif, ad, eslesen)] bu surecteki eslesmeler
+
+
+def _metin_degerleri(g, yol="", ust=True):
+    """data / json / params icindeki tum metin degerleri (ic ice sozluk/liste; en ustte urlencoded govde) -> [(anahtar_yolu, metin)].
+    Ic ice metin degerleri ayristirilmaz (duz metin); yalniz en ust duzeydeki '=' iceren str/bytes govde urlencoded sayilir."""
+    if g is None:
+        return []
+    if isinstance(g, (bytes, str)):
+        t = g.decode("utf-8", "replace") if isinstance(g, bytes) else g
+        if ust and "=" in t:
+            d = _govde(t)
+            if d:
+                return [(f"{yol}.{k}" if yol else str(k), v) for k, v in d.items()] + [(yol or "govde", t)]
+        return [(yol or "govde", t)]
+    if isinstance(g, dict):
+        return [x for k, v in g.items() for x in _metin_degerleri(v, f"{yol}.{k}" if yol else str(k), False)]
+    if isinstance(g, (list, tuple)):
+        return [x for i, v in enumerate(g) for x in _metin_degerleri(v, f"{yol}[{i}]", False)]
+    return []
+
+
+def metin_yasak_kapisi(method, path, data=None, json_body=None, params=None, mod=None):
+    """Yazma isteginden once tum metin degerlerini tarar. -> eslesme listesi. mod ENGEL ve KESIN eslesme: SystemExit (istek yok)."""
+    if str(method or "").upper() in ("GET", "HEAD", "OPTIONS"):
+        return []
+    mod = mod or METIN_KAPI_MOD
+    bul = []
+    for g in (data, json_body, params):
+        for anahtar, metin in _metin_degerleri(g):
+            for ad, sinif, rx in _METIN_RX:
+                for m in rx.finditer(str(metin)):
+                    bul.append((sinif, ad, anahtar, m.group(0)))
+    for sinif, ad, anahtar, es in bul:
+        METIN_UYARI.append((str(method).upper(), str(path), sinif, ad, es))
+        log(f"::warning::METIN KAPISI ({mod}) {sinif} '{ad}' {method} {path} alan {anahtar}: {es!r}")
+    kesin = [b for b in bul if b[0] == "KESIN"]
+    if mod == "ENGEL" and kesin:
+        raise SystemExit(f"DUR: metin yasak kapisi: {path} KESIN yasak {sorted({(b[1], b[3]) for b in kesin})}; yazim yok")
+    return bul
+
+
 # AI BEYAN KAPISI (Merkez 31 Eki, Serdar "ok"): Etsy kurali "Sellers must disclose within their listing description if an item is created
 # with the use of AI." Aciklama (description) yazan HER istek (updateListing PATCH/PUT, createDraftListing POST, ceviri PUT/POST) gondermeden
 # once SON metinde beyan cumlesi aranir; tum betikler Etsy._call'dan gectigi icin kapi tek yerde (kopya kod yok). description anahtari
@@ -689,6 +763,7 @@ class Etsy:
         (B37); 3 deneme. tekrar=1 (eski78_gorsel_yukle, Serdar 24 Eki): hata yanitinda yeniden GONDERMEZ (cift yukleme
         riski); cagiran galeriyi okuyup karar verir. 401 token yenilemesi her durumda bir kez yapilir."""
         ai_beyan_kapisi("POST", path, data)   # multipart createDraftListing da kapidan gecer (gorsel / video yolu eslesmez, gecer)
+        metin_yasak_kapisi("POST", path, data)   # alt metin / taslak metinleri (UYARI modu)
         self._istek_oncesi()
         attempt, yenilendi = 0, False
         while True:   # 401 (istek islenmedi) bir kez, hangi denemede gelirse gelsin: yenile + tekrar (deneme sayilmaz)
@@ -720,6 +795,7 @@ class Etsy:
         ru_yazim_kapisi(method, path, data, json_body)
         ai_beyan_kapisi(method, path, data, json_body, params, canli_ceviri=lambda: self._canli_ceviri(path), baslik=self._baslik(path))
         self.yayin_beyan_kontrol(method, path, data, json_body, params)
+        metin_yasak_kapisi(method, path, data, json_body, params)
         self._istek_oncesi()
         attempt, yenilendi = 0, False
         while True:   # en fazla 3 gonderim (5xx / kisa 429); 401 (istek islenmedi) bir kez, hangi denemede gelirse gelsin, sayilmaz

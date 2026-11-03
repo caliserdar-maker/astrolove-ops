@@ -57,14 +57,15 @@ bolumu okunmadan baslanmaz.
 - KAGIT (Serdar 23 Eki): baski Hahnemuhle DEGIL. Kagit turu 13 Eki'de kriter olmaktan cikti; canli EN ve materials
   "matte art paper". Hahnemuhle / Photo Rag / 308 g/m2 / giclee / Prodigi / %100 cotton / museum (ISO 9706) ifadeleri
   HICBIR dilde yazilmaz; RU ve diger ceviriler EN ile birebir ayni bilgiyi verir. (25 Eyl Hahnemuhle izni KALDIRILDI.)
-- Izinli: yalniz canli EN aciklamadaki ifadeler (23 Eki: "premium matte art paper", "long-lasting inks").
+- PREMIUM (Serdar 3 Kas A): "premium" ve "long-lasting"/"long lasting" (RU: премиал/премиум, стойк, долговеч) musteriye gorunen hicbir metin/gorselde kullanilmaz; kagit icin yalniz "matte art paper" (15 Eki genel ifade izninin yerine).
 - RU YAZIM KAPISI (Serdar 23 Eki madde 4): her RU ceviri yazimi `etsy_common.ru_yazim_kapisi`'ndan gecer; yasak ifade
   (RU_YASAK) varsa istek gonderilmez. 78 poster ilaninda (data/pod/pod78_ids.csv) RU aciklama yalniz `ru_poster.kur` + kontrol
   PASS + `ru_poster.izin_ver` ile yazilir. metin_78, yayilim_78 yaz/metin2 ve pod_ru_tags --apply KAPALI (eski poster metni).
 - Yasak: OBA-free, bright white, omur yili (orn. 100-200 years), "12-colour".
   Ingilizce metinde uzun/orta tire yok.
-- Tek kaynak ve PASS/FAIL denetim: `scripts/medya_v1/uretim/metin_kurali.py`
-  (medya-v1 dali).
+- Tek kaynak (Serdar 3 Kas A): `etsy_common.METIN_KESIN` + `METIN_BAGLAM`; `metin_yasak_kapisi` Etsy._call ve post_file icinde tum istek
+  degerlerini (EN + RU) tarar. 3 Kas: UYARI modu (eslesme raporlanir, yazim durmaz); ENGEL moduna gecis canli metinler temizlendikten
+  sonra ayri Serdar onayiyla. `scripts/medya_v1/uretim/metin_kurali.py` (medya-v1) EMEKLI, kullanilmaz.
 
 ## Uretim
 
