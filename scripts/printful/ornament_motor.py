@@ -44,7 +44,7 @@ def sha(f):
 K10 = 10
 AD_MOTOR = {'kucuk_sol': 'kucuk1', 'kucuk_sag': 'kucuk2', 'sonsuz': 'sonsuz', 'isim1': 'isim1', 'isim2': 'isim2', 'tarih': 'tagline', 'halka': 'cember'}
 TEMIZ_OGE = ('kucuk_sol', 'kucuk_sag', 'sonsuz')
-KUCUK_OGE = ('isim1', 'isim2', 'tarih', 'sonsuz', 'kucuk_sol', 'kucuk_sag')
+KUCUK_OGE = ('isim1', 'isim2', 'tarih', 'sonsuz', 'kucuk_sol', 'kucuk_sag', 'halka')   # gorev tanimi: kucuk ogeler halka dahil (inceleme bulgu 3)
 MOTOR_DOSYA = ('KILIT_GPTGIRDI.json', 'golge_motor.py', 'vektor_yuzey.py', 'alfa_temizle.py', 'uret_tam.py', 'renk_uyum.py', 'olustur_alfa_sablon.py',
                'kure/k4.npy', 'palet/chatgpt_altin.png', 'yerlesim78.json', 'cember.json', 'girdi78/ana/cancer_libra_alfa.png')
 P_VARSAYILAN = dict(pah=0.6, k=0.8, karisim=0.0, g=0.5, gs=60, golge_sigma=12, golge_dx=6, golge_dy=10, golge_opak=0.55, m1=0.0, m2=0.0, poz=1.0,
@@ -210,24 +210,9 @@ def main():
     model = son.model_kur(td, Y)
 
     # --- 1 10x alfalar (kaynaktan) ---
-    def mer(a):
-        t = float(a.sum()); ys = np.arange(a.shape[0]) + 0.5; xs = np.arange(a.shape[1]) + 0.5
-        return float((a.sum(1) * ys).sum() / t), float((a.sum(0) * xs).sum() / t)
-
-    def hizala(a10, a954):
-        """10x alfa -> 954 oge cercevesinin 10 kati; alfa agirlik merkezi 10 x (954 agirlik merkezi) (cozunurlukten bagimsiz, 0.1 px adim).
-        (deneme 1: >0.5 murekkep kutusu ile hizalama ince seriflerde ~2 px kaydiriyordu; duzeltildi)"""
-        h, w = a954.shape
-        out = np.zeros((h * K10, w * K10), np.float32)
-        c9, c1 = mer(a954), mer(a10)
-        dy, dx = int(round(K10 * c9[0] - c1[0])), int(round(K10 * c9[1] - c1[1]))
-        ys0, xs0 = max(0, dy), max(0, dx)
-        ys1, xs1 = min(h * K10, dy + a10.shape[0]), min(w * K10, dx + a10.shape[1])
-        out[ys0:ys1, xs0:xs1] = a10[ys0 - dy:ys1 - dy, xs0 - dx:xs1 - dx]
-        return out, (int(dy), int(dx))
-
     def metin_alfa10(metin, font_yolu, cap_px, wght=None, ref='H', ss=4):
-        """o1.metin_alfa ile ayni punto arama (954 cap); 954'te kullanilan TAM SAYI punto x 10 ile cizim, ss 4 -> 10x alfa."""
+        """o1.metin_alfa ile ayni punto arama (954 cap). 954'un 4x tuvalinin TAM 10 kati tuval, ayni capa x 10, punto x 10;
+        olcek 954'teki gibi (round(W/ss), round(H/ss)) x 10 cerceveye INTER_AREA (954 yuvarlamasi aynen). Hizalama yok."""
         def f_(pt):
             f = ImageFont.truetype(str(font_yolu), max(4, int(round(pt))))
             if wght:
@@ -237,24 +222,39 @@ def main():
         for _ in range(4):
             f = f_(pt); b = f.getbbox(ref, anchor='ls'); pt *= cap_px * ss / max(1, -b[1])
         pt_i = max(4, int(round(pt)))
-        f = f_(pt_i * K10)
-        b = f.getbbox(metin, anchor='ls'); pad = 6 * ss * K10
-        im = Image.new('L', (b[2] - b[0] + 2 * pad, b[3] - b[1] + 2 * pad), 0)
-        ImageDraw.Draw(im).text((pad - b[0], pad - b[1]), metin, font=f, fill=255, anchor='ls')
+        b1 = f_(pt_i).getbbox(metin, anchor='ls'); pad = 6 * ss
+        W1, H1 = b1[2] - b1[0] + 2 * pad, b1[3] - b1[1] + 2 * pad
+        w9, h9 = max(1, round(W1 / ss)), max(1, round(H1 / ss))
+        im = Image.new('L', (W1 * K10, H1 * K10), 0)
+        ImageDraw.Draw(im).text(((pad - b1[0]) * K10, (pad - b1[1]) * K10), metin, font=f_(pt_i * K10), fill=255, anchor='ls')
         PUNTO[metin] = dict(punto_954_ss4=pt_i, punto_10x_ss4=pt_i * K10)
-        return o1.olcek(np.asarray(im, np.float32) / 255.0, 1 / ss)
+        return cv2.resize(np.asarray(im, np.float32) / 255.0, (w9 * K10, h9 * K10), interpolation=cv2.INTER_AREA)
+
+    def cerceve10(a10, a954, ad):
+        assert a10.shape == (a954.shape[0] * K10, a954.shape[1] * K10), (ad, a10.shape, a954.shape)
+        return a10, (0, 0)
     PUNTO = {}
     A10, hiz = {}, {}
-    A10['isim1'], hiz['isim1'] = hizala(metin_alfa10('EMILY', K_ / 'Cinzel.ttf', cap, 500), Y['E']['isim1'][1])
-    A10['isim2'], hiz['isim2'] = hizala(metin_alfa10('JAMES', K_ / 'Cinzel.ttf', cap, 500), Y['E']['isim2'][1])
-    A10['tarih'], hiz['tarih'] = hizala(metin_alfa10('14 JUNE 2025', K_ / 'EBGaramond-Italic.ttf', Pc['tagline_T'] / Pc['cap'] * cap, None, ref='T'),
-                                       Y['E']['tarih'][1])
+    A10['isim1'], hiz['isim1'] = cerceve10(metin_alfa10('EMILY', K_ / 'Cinzel.ttf', cap, 500), Y['E']['isim1'][1], 'isim1')
+    A10['isim2'], hiz['isim2'] = cerceve10(metin_alfa10('JAMES', K_ / 'Cinzel.ttf', cap, 500), Y['E']['isim2'][1], 'isim2')
+    A10['tarih'], hiz['tarih'] = cerceve10(metin_alfa10('14 JUNE 2025', K_ / 'EBGaramond-Italic.ttf', Pc['tagline_T'] / Pc['cap'] * cap, None, ref='T'),
+                                       Y['E']['tarih'][1], 'tarih')
     temiz_bilgi = {}
-    for ad, src10 in (('sonsuz', logo(K10)), ('kucuk_sol', kucuk('cancer', Pc['kucuk_sol_h'] / Pc['cap'], K10)[1]),
-                      ('kucuk_sag', kucuk('libra', Pc['kucuk_sag_h'] / Pc['cap'], K10)[1])):
+    def kucuk10(burc, ad):
+        """a114ddb zinciri: delik_kapat'li kaynak -> 954 cercevesinin TAM 10 kati (w x 10, h x 10) on carpilmis INTER_AREA -> hedef_kapat.
+        (deneme 2: yuvarlanmamis olcek x 10 ile cizim 954 boyu yuvarlamasindan %0.4-0.9 sapiyordu; inceleme bulgu 1)"""
+        g = kucuk_g[burc]; h, w = Y['E'][ad][1].shape
+        pm = cv2.resize(np.concatenate([g[..., :3] * g[..., 3:4], g[..., 3:4]], -1), (w * K10, h * K10), interpolation=cv2.INTER_AREA)
+        a2 = np.clip(pm[..., 3], 0, 1); rgb_ = np.clip(pm[..., :3] / np.maximum(a2[..., None], 1e-4), 0, 255)
+        return o5.hedef_kapat(rgb_, a2)[1]
+
+    def logo10(ad):
+        h, w = Y['E'][ad][1].shape
+        return np.clip(cv2.resize(lsrc, (w * K10, h * K10), interpolation=cv2.INTER_CUBIC), 0, 1)
+    for ad, src10 in (('sonsuz', logo10('sonsuz')), ('kucuk_sol', kucuk10('cancer', 'kucuk_sol')), ('kucuk_sag', kucuk10('libra', 'kucuk_sag'))):
         a8 = np.clip(np.round(src10 * 255), 0, 255).astype(np.uint8)
         q = 40; t8, b_ = temizle(np.pad(a8, q)); temiz_bilgi[ad] = b_
-        A10[ad], hiz[ad] = hizala(t8[q:-q, q:-q].astype(np.float32) / 255, Y['E'][ad][1])
+        A10[ad], hiz[ad] = cerceve10(t8[q:-q, q:-q].astype(np.float32) / 255, Y['E'][ad][1], ad)
     log('temizle', json.dumps(temiz_bilgi))
     # halka 10x: o5.halka_T ile ayni yontem (analitik, ikili ss = 4 alt ornek / piksel), 10x piksel izgarasinda (= 954'te ss 40), ayni T1
     hm = Y['M']['halka']
@@ -389,11 +389,22 @@ def main():
             v = float(Lv[w_].mean())
             if v < en: en, yer = v, float(Tg[i])
         uc = (~gv) & (al_ >= 0.5)
-        return dict(govde_ortanca=round(med, 1), en_dusuk_3px=round(en, 1), oran=round(en / med, 3), en_dusuk_aci=yer,
+        return dict(yontem='orta eksen (1 px cizgi, 0.05 derece adim) uzerinde 3 px yay penceresi ortalamasi; yalniz govde (s >= 0.30, alfa >= 0.5)',
+                    govde_ortanca=round(med, 1), en_dusuk_3px=round(en, 1), oran=round(en / med, 3), en_dusuk_aci=yer,
                     uclar_bilgi=dict(ortanca=round(float(np.median(Lv[uc])), 1) if uc.any() else None,
                                      en_dusuk=round(float(Lv[uc].min()), 1) if uc.any() else None))
 
+    def lab_med(img, m):
+        return np.median(labf(img[m]), 0)
+
+    def de_tablo(img):
+        m0 = Y['M']['sembol'] >= 0.9; Ls_ = lab_med(img, m0)
+        return {k: round(de00(Ls_, lab_med(img, Y['M'][k] >= 0.9)), 3) for k in Y['E'] if k != 'sembol'}
+
     def olc(rgb, once, z):
+        onc = np.zeros((N, N, 3), np.float32)
+        for k in Y['E']:
+            msk = Y['M'][k] >= 0.9; onc[msk] = once[k][msk]
         ok = {k: o5.kontrast_yeni(rgb, Y['M'][k], 'koyu') for k in ('isim1', 'isim2', 'tarih', 'kucuk_sol', 'kucuk_sag')}
         ok['sonsuz'] = o5.kontrast_yeni(rgb, Y['M']['sonsuz'], 'koyu')                                # logo kapida (standart cekirdek alfa >= 0.9)
         ok['halka_govde'] = o5.kontrast_yeni(rgb, Y['M']['halka'] * govde, 'koyu')
@@ -403,12 +414,12 @@ def main():
         return dict(kontrast_ortanca_en_kotu=round(min(v['ortanca_bilgi'] for v in kk), 2), kati_koyu5_en_kotu_bilgi=round(min(v['deger'] for v in kk), 2),
                     kontrast=ok, goruntu_yasak=gy, goruntu=gb, leke=o5.leke_kapisi(Y['M'], rgb, None), renk_sadakati=al.renk_sadakati(rgb, once, Y['M']),
                     ton_lab=s2.ton_kapisi(rgb, Y['M'], TON_REF), bosluk_px=o5.bosluklar(Y['E']), sembol_kutu=list(o5.kutu(Y['E'], 'sembol')),
-                    halka_sureklilik=sureklilik(rgb))
+                    halka_sureklilik=sureklilik(rgb), dE00_butunlesme_oncesi=de_tablo(onc), dE00_son_dosya_bilgi=de_tablo(rgb))
     R = {'motor': dict(dal='siparis-gpt', commit='6da763a', dosya_sha256=motor_sha, KILIT_ortam=ortam, KILIT_AYAR=KL['AYAR'], P=P,
                        paketler=dict(numpy=np.__version__, opencv=cv2.__version__, pillow=Image.__version__,
                                      not_='motor BENIOKU: numpy 2.5.3, pillow 12.3.0; burada ornament hatti (Pillow 11.0.0) ile tek surec')),
          'olcek': dict(k=K10, not_='tek tam sayi olcek; alfalar 10x kaynaktan; poster parametreleri (kenar_yum 0.5, YON_SIGMA 6, sirt 0.7, gren sigma 0.8) '
-                                   'poster pikselinde ve 10x cizimde AYNEN (poster ogesi / ornament 10x orani: isim 298 / 282 = 1.06, halka 5695 / 6830 = 0.83)',
+                                   'poster pikselinde ve 10x cizimde AYNEN (poster ogesi / ornament 10x orani: isim 298 / 282 = 1.06, halka 5695 / ' + str(H10.shape[1]) + ' = ' + str(round(5695 / H10.shape[1], 2)) + ')',
                        logo='LOGO_1 kaynagi 200 px yukseklik; 10x 282 px -> 1.41 buyutme (INTER_CUBIC); kaynak yetersiz', hizalama=hiz),
          'disarida': 'yansima, temas, isima, poster dis golgesi, zemin_daire (karar 18)', 'temizle': temiz_bilgi, 'iou_954': IOU, 'iou_954_bilgi': IOU_B, 'punto': PUNTO, 'gren': gren_olc,
          'renk_uyum': ru, 'yerlesim': bilgi, 'ton_referans_lab_p5_p95': [round(TON_REF[0], 1), round(TON_REF[1], 1)], 'sonuc': {}}
@@ -444,7 +455,7 @@ def main():
             r = R['sonuc'][renk]
             liste.append(rgbler[renk])
             et.append(f'{renk}: motor (k4 kure, KILIT)\nortanca {r["kontrast_ortanca_en_kotu"]} {"PASS" if r["kontrast_ortanca_en_kotu"] >= 4.5 else "FAIL"}, koyu %5 {r["kati_koyu5_en_kotu_bilgi"]}\n'
-                      f'dE00 en cok {max(v["dE00_sonra"] for v in ru.values())}, halka govde {r["halka_sureklilik"]["oran"]}\nkucuk oge parlaklik x{r["kucuk_oge_parlaklik_artisi"]}')
+                      f'dE00 en cok {max(r["dE00_butunlesme_oncesi"].values())} (once), son dosya {max(r["dE00_son_dosya_bilgi"].values())}, halka govde {r["halka_sureklilik"]["oran"]}\nkucuk oge parlaklik x{r["kucuk_oge_parlaklik_artisi"]}')
         else:
             liste.append(np.asarray(Image.open(SON / f'CANCER_LIBRA_{renk}_954.png').convert('RGB'))); et.append(f'{renk}: a5e3ea2 (onayli, aynen)')
     son.onizleme_etiketli(liste, et, font, h_et=130).save(O / 'ONIZLEME_76mm_5RENK.png', dpi=(300, 300))
@@ -479,16 +490,22 @@ def main():
                 arr = np.load(fpath).astype(np.float32); rgb_, a_, x, y = Y['E'][ad]
                 y0_, x0_ = (bx[1] - y) * K10, (bx[0] - x) * K10
                 cr = arr[max(0, y0_):max(0, y0_) + (bx[3] - bx[1]) * K10, max(0, x0_):max(0, x0_) + (bx[2] - bx[0]) * K10]
-                pst = cr[..., :3] * (cr[..., 3:] / 255) + zem_g * (1 - cr[..., 3:] / 255)
+                c3 = cr[..., :3].reshape(-1, 3)
+                Lk = labf(c3) + np.array(ru[ad]['kaydirma_Lab'], np.float32)[None]
+                c3 = np.clip(cv2.cvtColor(Lk.reshape(-1, 1, 3).astype(np.float32), cv2.COLOR_Lab2RGB).reshape(cr.shape[:2] + (3,)) * 255, 0, 255)
+                pst = c3 * (cr[..., 3:] / 255) + zem_g * (1 - cr[..., 3:] / 255)
             else:                                                     # halka: 10x katman tekrar yerine 954 katmanin 10x yakin goruntusu yok; alfa x renk
                 a10c = A10['halka'][ys0:ys1, xs0:xs1]
                 c10 = cv2.resize(katman['halka'][bx[1] - hy0:bx[3] - hy0, bx[0] - hx0:bx[2] - hx0], (a10c.shape[1], a10c.shape[0]), interpolation=cv2.INTER_CUBIC)
                 pst = c10 * a10c[..., None] + zem_g * (1 - a10c[..., None])
         pim = Image.fromarray(np.clip(pst, 0, 255).astype(np.uint8)).resize((orn.width, orn.height), Image.LANCZOS)
-        c = Image.new('RGB', (pim.width + orn.width + 24, max(pim.height, orn.height) + 36), 'white')
+        etk = ('poster katmani CANCER_LIBRA_ana.png (ornament kirpiminin ayni bolgesi)' if ad == 'ana' else
+               ('954 halka rengi x 10x alfa (poster pikseli degil)' if ad == 'halka' else 'motor 10x cizim + renk_uyum kaydirmasi (poster pikseli degil)'))
+        yazi = f'{ad}: sol {etk}, notr zemin | sag ornament RUBY 954 (3x)'
+        tw = int(ImageDraw.Draw(Image.new('RGB', (1, 1))).textlength(yazi, font=font)) + 12
+        c = Image.new('RGB', (max(pim.width + orn.width + 24, tw), max(pim.height, orn.height) + 36), 'white')
         c.paste(pim, (0, 0)); c.paste(orn, (pim.width + 24, 0))
-        etk = ('poster katmani (CANCER_LIBRA_ana.png)' if ad == 'ana' else ('motor 10x (halka: renk 954, alfa 10x)' if ad == 'halka' else 'motor 10x (poster olcegi)'))
-        ImageDraw.Draw(c).text((4, max(pim.height, orn.height) + 4), f'{ad}: sol {etk}, notr zemin | sag ornament RUBY 954 (3x)', fill=(20, 20, 20), font=font)
+        ImageDraw.Draw(c).text((4, max(pim.height, orn.height) + 4), yazi, fill=(20, 20, 20), font=font)
         satirlar.append(c)
     u = Image.new('RGB', (max(s.width for s in satirlar), sum(s.height for s in satirlar) + 24 * (len(satirlar) - 1)), 'white'); yy0 = 0
     for s in satirlar:
@@ -497,7 +514,7 @@ def main():
     for f in O.glob('_poster10x_*.npy'):
         f.unlink()
     A_ = list(R['sonuc'].values())
-    g = dict(dE00_le_1=all(v['dE00_sonra'] <= 1.0 for v in ru.values()),
+    g = dict(dE00_le_1=all(v['dE00_sonra'] <= 1.0 for v in ru.values()) and all(max(r['dE00_butunlesme_oncesi'].values()) <= 1.0 for r in R['sonuc'].values()),
              kontrast_ortanca=all(r['kontrast_ortanca_en_kotu'] >= o4.HEDEF for r in A_),
              goruntu_yasak_0=all(sum(r['goruntu_yasak'].values()) == 0 for r in A_),
              leke_a_0=all(sum(v['alfa_lt_09'] for k2, v in r['leke'].items() if k2 in o5.LEKE_KAPI_OGE) == 0 for r in A_),

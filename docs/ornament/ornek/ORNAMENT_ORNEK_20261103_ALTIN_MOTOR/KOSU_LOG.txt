@@ -3,21 +3,20 @@
 [    0.0s] P {"pah": 1.0, "k": 0.5, "karisim": 1.0, "g": 0, "gs": 60, "golge_sigma": 16, "golge_dx": 10, "golge_dy": 16, "golge_opak": 0.85, "m1": 0.0, "m2": 0.0, "poz": 1.0, "pah_px": 0, "kubbe": 0.0, "kure": "k4", "mot_yer": "Y", "esit": "kazanc", "temas": 0.5, "zemin_daire": 1, "sarma": 0.0, "arka_isik": 0.0, "renk_ayar": 0.0, "kararma": 0.0, "yansima": 0.15, "isima": 0.04, "isima_sigma": 30.0, "gren": 1.0, "kenar_yum": 0.5, "egim_max": 0.0, "pah_oran_max": 0.0, "ton": 0.0, "yildiz": "refkopya", "parilti": 0.0, "parilti_esik": 2.3, "isik_leke": 0.0, "mot_poz": 0, "mot_s2": 5.0, "harita": "dogrusal"}
 [    0.0s] motor sha {"KILIT_GPTGIRDI.json": "8ab7a9ea4725b41a", "golge_motor.py": "e7592412d5fc370c", "vektor_yuzey.py": "92aa56eae68d9e19", "alfa_temizle.py": "8e3f34dc80032572", "uret_tam.py": "5a9078ea2ed44963", "renk_uyum.py": "9fe7758573bd6f5a", "olustur_alfa_sablon.py": "d67b54a020d749de", "kure/k4.npy": "21816b3bc961a293", "palet/chatgpt_altin.png": "b4480319399f7c5a", "yerlesim78.json": "a833ffec0d05aa35", "cember.json": "8fc9dc92bf9c63bf", "girdi78/ana/cancer_libra_alfa.png": "f946f5611431bdf9"}
 [    0.6s] palet 160268
-[    9.4s] poster ana (3332, 3541) olcek 0.4326 {'Dm': 54.0, 'tasma': 1, 'dolgu': 3, 'red': 95}
-[   22.7s] harita [0.7604, 3.672, 0.3991, 0.9304, 0.3649] qa50 1.2631
-[   33.3s] temizle {"sonsuz": {"Dm": 12.0, "tasma": 0, "dolgu": 8, "red": 26}, "kucuk_sol": {"Dm": 18.0, "tasma": 0, "dolgu": 2, "red": 17}, "kucuk_sag": {"Dm": 18.6, "tasma": 0, "dolgu": 2, "red": 2}}
-[  141.8s] 10x alfalar {'isim1': (420, 1350), 'isim2': (490, 1360), 'tarih': (430, 2130), 'sonsuz': (280, 900), 'kucuk_sol': (580, 670), 'kucuk_sag': (600, 810), 'halka': (5850, 6900)}
-[  142.4s] oge kucuk_sol (580, 670) gren 954 kalan 0.261
-[  143.0s] oge kucuk_sag (600, 810) gren 954 kalan 0.262
-[  143.5s] oge sonsuz (280, 900) gren 954 kalan 0.252
-[  143.7s] oge isim1 (420, 1350) gren 954 kalan 0.258
-[  143.9s] oge isim2 (490, 1360) gren 954 kalan 0.266
-[  144.3s] oge tarih (430, 2130) gren 954 kalan 0.269
-[  181.9s] oge halka (5850, 6900) gren 954 kalan 0.263
-[  182.0s] IoU {'kucuk_sol': 0.9154, 'kucuk_sag': 0.9305, 'sonsuz': 0.9471, 'isim1': 0.9793, 'isim2': 0.962, 'tarih': 0.9243, 'halka': 0.9796}
-[  182.1s] renk_uyum {"kucuk_sol": [5.613, 0.157], "kucuk_sag": [5.698, 0.109], "sonsuz": [5.762, 0.041], "isim1": [5.651, 0.009], "isim2": [5.571, 0.113], "tarih": [5.635, 0.066], "halka": [5.59, 0.117]}
-[  186.4s] RUBY ortanca 4.51 kati 2.14 artis 1.02 yasak 0 leke 0 halka 0.746 {'isim1': 5.0, 'isim2': 5.04, 'tarih': 4.8, 'kucuk_sol': 4.51, 'kucuk_sag': 4.62, 'sonsuz': 4.57, 'halka_govde': 4.58, 'halka_uclari_2px_alti_bilgi': 3.55}
-[  188.1s] SAPPHIRE ortanca 4.96 kati 2.45 artis 1.0 yasak 0 leke 0 halka 0.751 {'isim1': 5.51, 'isim2': 5.44, 'tarih': 5.16, 'kucuk_sol': 4.96, 'kucuk_sag': 5.11, 'sonsuz': 5.1, 'halka_govde': 5.26, 'halka_uclari_2px_alti_bilgi': 3.81}
-[  189.8s] EMERALD ortanca 4.61 kati 2.11 artis 1.0 yasak 0 leke 0 halka 0.751 {'isim1': 5.13, 'isim2': 5.09, 'tarih': 4.88, 'kucuk_sol': 4.61, 'kucuk_sag': 4.75, 'sonsuz': 4.7, 'halka_govde': 4.82, 'halka_uclari_2px_alti_bilgi': 3.79}
-[  192.6s] KAPI {"dE00_le_1": true, "kontrast_ortanca": true, "goruntu_yasak_0": true, "leke_a_0": true, "leke_a_kaynak_0": true, "ton": true, "halka_govde_sureklilik": true, "yerlesim_ayni": true, "iou_ge_098": false, "artis_yalniz_ruby": true} FAIL
-EXIT 1
+[   10.3s] poster ana (3332, 3541) olcek 0.4326 {'Dm': 54.0, 'tasma': 1, 'dolgu': 3, 'red': 95}
+[   24.0s] harita [0.7604, 3.672, 0.3991, 0.9304, 0.3649] qa50 1.2631
+[   35.0s] temizle {"sonsuz": {"Dm": 12.0, "tasma": 0, "dolgu": 8, "red": 28}, "kucuk_sol": {"Dm": 18.0, "tasma": 0, "dolgu": 2, "red": 16}, "kucuk_sag": {"Dm": 18.6, "tasma": 0, "dolgu": 1, "red": 3}}
+[  143.6s] 10x alfalar {'isim1': (420, 1350), 'isim2': (490, 1360), 'tarih': (430, 2130), 'sonsuz': (280, 900), 'kucuk_sol': (580, 670), 'kucuk_sag': (600, 810), 'halka': (5850, 6900)}
+[  144.1s] oge kucuk_sol (580, 670) gren 954 kalan 0.262
+[  144.6s] oge kucuk_sag (600, 810) gren 954 kalan 0.263
+[  145.1s] oge sonsuz (280, 900) gren 954 kalan 0.251
+[  145.3s] oge isim1 (420, 1350) gren 954 kalan 0.259
+[  145.6s] oge isim2 (490, 1360) gren 954 kalan 0.264
+[  146.1s] oge tarih (430, 2130) gren 954 kalan 0.271
+[  184.5s] oge halka (5850, 6900) gren 954 kalan 0.263
+[  184.5s] IoU {'kucuk_sol': 1.0, 'kucuk_sag': 1.0, 'sonsuz': 0.9984, 'isim1': 0.9792, 'isim2': 0.9751, 'tarih': 0.9534, 'halka': 0.9796}
+[  184.7s] renk_uyum {"kucuk_sol": [5.613, 0.118], "kucuk_sag": [5.791, 0.009], "sonsuz": [5.771, 0.083], "isim1": [5.656, 0.009], "isim2": [5.65, 0.033], "tarih": [6.026, 0.03], "halka": [5.59, 0.117]}
+[  189.4s] RUBY ortanca 4.55 kati 2.14 artis 1.02 yasak 0 leke 0 halka 0.745 {'isim1': 5.0, 'isim2': 5.1, 'tarih': 4.76, 'kucuk_sol': 4.55, 'kucuk_sag': 4.58, 'sonsuz': 4.56, 'halka_govde': 4.77, 'halka_uclari_2px_alti_bilgi': 3.67}
+[  191.2s] SAPPHIRE ortanca 4.98 kati 2.45 artis 1.0 yasak 0 leke 0 halka 0.751 {'isim1': 5.51, 'isim2': 5.46, 'tarih': 5.16, 'kucuk_sol': 4.98, 'kucuk_sag': 5.08, 'sonsuz': 5.1, 'halka_govde': 5.26, 'halka_uclari_2px_alti_bilgi': 3.81}
+[  193.1s] EMERALD ortanca 4.65 kati 2.11 artis 1.0 yasak 0 leke 0 halka 0.751 {'isim1': 5.13, 'isim2': 5.11, 'tarih': 4.83, 'kucuk_sol': 4.65, 'kucuk_sag': 4.72, 'sonsuz': 4.7, 'halka_govde': 4.82, 'halka_uclari_2px_alti_bilgi': 3.79}
+[  196.4s] KAPI {"dE00_le_1": true, "kontrast_ortanca": true, "goruntu_yasak_0": true, "leke_a_0": true, "leke_a_kaynak_0": true, "ton": true, "halka_govde_sureklilik": true, "yerlesim_ayni": true, "iou_ge_098": false, "artis_yalniz_ruby": true} FAIL
