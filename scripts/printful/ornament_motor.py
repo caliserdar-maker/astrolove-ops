@@ -255,14 +255,20 @@ def main():
     ha, hb = o5.halka_T(pp, son.S0)
     Y, bilgi = o5.yerlesim_V5(pp, ana5, T, kc, ha, hb, G)
     if Y is None:
-        log('FAIL yerlesim', bilgi); return 1
+        log('FAIL yerlesim', json.dumps(bilgi, default=str))
+        (O / 'OLCUM.json').write_text(json.dumps(dict(hata='yerlesim_V5', cift=CIFT, bilgi=bilgi, kucuk_burc_hedef_h_poster_px=KUCUK_H, kutu=KUTU_BILGI),
+                                                  indent=1, ensure_ascii=False, default=str))
+        return 1
     if CIFT != 'CANCER_LIBRA':                                                # alt kenar kucuk burc satirinin G px ustu (bosluk 20/20/20)
         E_ = Y['E']; k0 = o5.satir(E_, o5.KUCUK)[0]; s4 = o5.kutu(E_, 'sembol'); dy = (k0 - G) - s4[3]
         o5.kaydir(E_, ('sembol',), dy)
         M_, yb_, cak_, ok_ = o4.kapi(E_)
         bilgi.update(sembol_alt_hizalama_dy=int(dy), kapi_ok=bool(ok_), kutu=KUTU_BILGI)
         if not ok_:
-            log('FAIL yerlesim (alt hizalama sonrasi kapi)', yb_, cak_[:4]); return 1
+            log('FAIL yerlesim (alt hizalama sonrasi kapi)', yb_, cak_[:4])
+            (O / 'OLCUM.json').write_text(json.dumps(dict(hata='alt_hizalama_kapi', cift=CIFT, yasak=yb_, cakisma=cak_[:8], bilgi=bilgi),
+                                                      indent=1, ensure_ascii=False, default=str))
+            return 1
         Y.update(M=M_, yasak=yb_, cak=cak_)
     bilgi['kucuk_burc_hedef_h_poster_px'] = KUCUK_H
     log('yerlesim', CIFT, bilgi, 'sembol kutu', o5.kutu(Y['E'], 'sembol'))
@@ -574,7 +580,8 @@ def main():
             if renk != 'RUBY':
                 R['sonuc'][renk] = r
                 log('DUR', renk, 'ortanca', r['kontrast_ortanca_en_kotu'])
-                (O / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=float)); return 3
+                R['cikis'] = dict(kod=1, fail=[f'kontrast_ortanca {renk}'], aciklama='sert kapi FAIL (SAPPHIRE / EMERALD kontrast: DUR)')
+                (O / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=float)); return 1
             for k100 in range(101, 161):
                 artis = k100 / 100
                 KAT.clear(); KAT.update({k: artis for k in KUCUK_OGE})
@@ -662,13 +669,23 @@ def main():
              leke_a_kaynak_0=all(v == 0 for v in o5.KAYNAK_SONRA.values()),
              ton=all(v['dhue_ortanca'] < 1.0 and v['b_ge_r_yuzde'] == 0 for r in A_ for v in r['renk_sadakati'].values()) and
                  all(v['aralikta'] and v['b_ge_r_yuzde'] == 0 for r in A_ for v in r['ton_lab'].values()),
-             halka_govde_sureklilik=all(r['halka_sureklilik']['oran'] >= 0.70 for r in A_),
-             yerlesim_ayni=all(r['bosluk_px'] == [20, 20, 20] and r['sembol_kutu'][1] == 246 for r in A_),
+             bosluk_20_20_20=all(r['bosluk_px'] == [20, 20, 20] for r in A_),
              iou_kucuk_logo_ge_098=all(IOU[k] >= 0.98 for k in ('kucuk_sol', 'kucuk_sag', 'sonsuz')),
              alfa_fark_metin_halka_le_0035=all(IOU_B[k]['ort_mutlak_fark_murekkep'] <= 0.035 for k in ('isim1', 'isim2', 'tarih', 'halka')),
              dE00_son_ham_le_2=all(max(r['dE00_son_ham'].values()) <= 2.0 for r in A_),
              artis_yalniz_ruby=all(R['sonuc'][r]['kucuk_oge_parlaklik_artisi'] == 1.0 for r in ('SAPPHIRE', 'EMERALD')))
+    if CIFT == 'CANCER_LIBRA':                                                 # onayli CL: sembol ust y 246 sert (kapi listesi)
+        g['sembol_ust_246_cancer_libra'] = all(r['sembol_kutu'][1] == 246 for r in A_)
     g = {k: bool(v) for k, v in g.items()}
+    s4b = o5.kutu(Y['E'], 'sembol')
+    BILGI = dict(halka_govde_sureklilik=dict(gecti=bool(all(r['halka_sureklilik']['oran'] >= 0.70 for r in A_)),
+                                             oran={k: R['sonuc'][k]['halka_sureklilik']['oran'] for k in R['sonuc']}, esik=0.70),
+                 sembol_ust_y=int(s4b[1]), sembol_ust_y_cancer_libra=246,
+                 sembol_genislik=int(s4b[2] - s4b[0]), sembol_yukseklik=int(s4b[3] - s4b[1]),
+                 sembol_kutu_hedef=dict(w=KUTU_BILGI.get('w_hedef'), h=KUTU_BILGI.get('h_hedef', 404), sinir=KUTU_BILGI.get('sinir'),
+                                        olcek=KUTU_BILGI.get('olcek'), buyutme=KUTU_BILGI.get('buyutme'),
+                                        not_='CANCER_LIBRA onayli hali 425 x 404 (kutu fonksiyonu kullanilmaz)'))
+    R['kapi_sert'] = g; R['kapi_bilgi'] = BILGI
     R['kapi'] = g; R['kaynak_leke_onarim_sonrasi'] = dict(o5.KAYNAK_SONRA)
     R['bilgi_renk_uyum_dE00_le_1'] = bool(all(v['dE00_sonra'] <= 1.0 for v in ru.values()))   # tanim geregi gecer (medyan -> medyan); yalniz bilgi
     R['deneme4'] = dict(dusus_kucuk_oge_sabit=DUSLAR, dusus_yontem='kucuk ogelerde f_dus = ana sembol (alfa >= 0.9) f_dus ortancasi; ana sembol degismez',
@@ -684,7 +701,10 @@ def main():
                             'dusus bolunmus deger bilgi')
     R['iou_kapi'] = 'kucuk_sol / kucuk_sag / sonsuz: IoU (alfa > 0.5) >= 0.98; isim / tarih / halka: IoU bilgi, kapi ort_mutlak_fark_murekkep (murekkep bolgesi: iki maskeden birinde alfa > 0.02) <= 0.035 (Merkez 3 Kas + onay)'
     (O / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=float))
-    log('KAPI', json.dumps(g), 'PASS' if all(g.values()) else 'FAIL')
+    R['cikis'] = dict(kod=0 if all(g.values()) else 1, aciklama='0 = sert kapilar gecti, 1 = sert kapi FAIL, 2 = cokus; bilgi kapilari etkilemez',
+                      fail=[k for k, v in g.items() if not v])
+    (O / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=float))
+    log('KAPI sert', json.dumps(g), 'PASS' if all(g.values()) else 'FAIL', '| bilgi', json.dumps(BILGI, default=str))
     return 0 if all(g.values()) else 1
 
 
@@ -716,4 +736,9 @@ def de00(Lab1, Lab2):
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except Exception:                                                          # noqa: BLE001  (cikis 2 = cokus, tam traceback)
+        import traceback
+        traceback.print_exc()
+        sys.exit(2)

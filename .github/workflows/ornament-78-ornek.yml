@@ -122,8 +122,8 @@ jobs:
             --cikti /tmp/png --rapor /tmp/rapor --font /tmp/kay/EBGaramond-Italic.ttf 2>&1 | tee /tmp/log_ornek78.txt
           k=${PIPESTATUS[0]}; echo "k=$k" >> "$GITHUB_OUTPUT"
           echo "::notice::ornek78 cikis $k | $(tail -1 /tmp/log_ornek78.txt | cut -c1-200)"
-      - name: Drive (yalniz cikis 0; 30 PNG)
-        if: steps.uretim.outputs.k == '0'
+      - name: Drive (kontrol cifti gecti ve dosyalar uretildi, cikis 0 ya da 1)
+        if: steps.uretim.outputs.k == '0' || steps.uretim.outputs.k == '1'
         run: |
           set -euo pipefail
           rclone copy /tmp/png "gdrive:ASTROLOVE/TEMP/$D" --include "*_954.png" -q
@@ -149,4 +149,4 @@ jobs:
         run: rm -rf ~/.config/rclone
       - name: Sonuc
         if: always()
-        run: '[ "${{ steps.uretim.outputs.k }}" = "0" ]'
+        run: '[ "${{ steps.uretim.outputs.k }}" = "0" ] || [ "${{ steps.uretim.outputs.k }}" = "1" ]'

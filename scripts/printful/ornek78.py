@@ -63,26 +63,42 @@ def main():
         log('cift', cift)
         k1 = kos([_d / 'ornament_motor.py', '--kaynak', a.kaynak, '--motor', a.motor, '--cikti', w / 'motor', '--son', a.son, '--zemin', a.zemin, '--cift', cift],
                  log_dosya=w / 'log_motor.txt')
+        motor_png = all((w / 'motor' / f'{cift}_{s}_954.png').exists() for s in ('RUBY', 'SAPPHIRE', 'EMERALD'))
+        mlog = (w / 'log_motor.txt').read_text() if (w / 'log_motor.txt').exists() else ''
+        r = dict(cikis_kodlari=dict(motor=k1))
+        if k1 == 2 or not motor_png:                                         # cokus ya da cikti yok: dump / sade / fildisi CALISMAZ
+            tb = mlog[mlog.find('Traceback'):] if 'Traceback' in mlog else None
+            fail = [l for l in mlog.splitlines() if 'FAIL' in l or 'DUR' in l]
+            mo = json.loads((w / 'motor' / 'OLCUM.json').read_text()) if (w / 'motor' / 'OLCUM.json').exists() else None
+            r.update(eksik=list(STIL), atlanan=['dump', 'sade', 'fildisi'], traceback=tb, hata_satiri=fail[-3:], log_kuyruk=mlog.splitlines()[-25:],
+                     motor_olcum=mo, not_=('motor cokus (cikis 2), traceback asagida' if k1 == 2 else
+                                           f'motor cikti uretmedi (cikis {k1}): ' + (fail[-1] if fail else 'neden logda yok')))
+            R['cift'][cift] = r
+            log('FAIL', cift, r['not_'])
+            if tb:
+                print(tb, flush=True)
+            if cift == 'CANCER_LIBRA':
+                (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str)); return 3
+            continue
         k2 = kos([_d / 'ornament_motor.py', '--kaynak', a.kaynak, '--motor', a.motor, '--cikti', w / 'dump', '--son', a.son, '--cift', cift],
                  env={'ORN_DUMP': str(w / 'katman.pkl')}, log_dosya=w / 'log_dump.txt')
-        k3 = kos([_d / 'ornament_sade.py', '--katman', w / 'katman.pkl', '--cikti', w / 'sade'], log_dosya=w / 'log_sade.txt')
+        k3 = kos([_d / 'ornament_sade.py', '--katman', w / 'katman.pkl', '--cikti', w / 'sade'], log_dosya=w / 'log_sade.txt') if k2 == 0 else 9
         sade1 = w / 'sade' / 'SADE_1_ALTIN_TONU_954.png'
         k4 = kos([_d / 'ornament_fildisi.py', sade1, O / f'{cift}_FILDISI_954.png'], log_dosya=w / 'log_fildisi.txt') if sade1.exists() else 9
         for s in ('RUBY', 'SAPPHIRE', 'EMERALD'):
-            f = w / 'motor' / f'{cift}_{s}_954.png'
-            if f.exists():
-                shutil.copyfile(f, O / f'{cift}_{s}_954.png')
+            shutil.copyfile(w / 'motor' / f'{cift}_{s}_954.png', O / f'{cift}_{s}_954.png')
         if sade1.exists():
             shutil.copyfile(sade1, O / f'{cift}_SADE_ALTIN_954.png')
-        cikis = dict(motor=k1, dump=k2, sade=k3, fildisi=k4)
+        r['cikis_kodlari'] = dict(motor=k1, dump=k2, sade=k3, fildisi=k4)
         eksik = [s for s in STIL if not (O / f'{cift}_{s}_954.png').exists()]
-        r = dict(cikis_kodlari=cikis, eksik=eksik, not_='motor cikis 1 beklenen (halka surekliligi bilgi kapisi)')
+        r['eksik'] = eksik
         if eksik:
-            r['hata'] = 'eksik dosya'
+            r['not_'] = 'eksik dosya: ' + ', '.join(eksik) + ' (dump / sade / fildisi loglari: ' + \
+                        ' | '.join(((w / f).read_text().splitlines() or [''])[-1][:200] for f in ('log_dump.txt', 'log_sade.txt', 'log_fildisi.txt') if (w / f).exists()) + ')'
             R['cift'][cift] = r
-            log('FAIL eksik', cift, eksik, cikis)
+            log('FAIL eksik', cift, r['not_'])
             if cift == 'CANCER_LIBRA':
-                (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False)); return 3
+                (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str)); return 3
             continue
         M_ = json.loads((w / 'motor' / 'OLCUM.json').read_text())
         S_ = json.loads((w / 'sade' / 'OLCUM.json').read_text())['aday']['1']
@@ -94,8 +110,9 @@ def main():
         for yk, ym in o4.YASAK.items():
             dd = cv2.distanceTransform((~ym.astype(bool)).astype(np.uint8), cv2.DIST_L2, 5)
             uzak[yk] = round(float(dd[ink].min()), 1) if ink.any() else None
+        r['not_'] = 'sert kapilar: ' + ('gecti' if all(M_['kapi_sert'].values()) else 'FAIL ' + ', '.join(k for k, v in M_['kapi_sert'].items() if not v))
         r.update(
-            yerlesim=dict(kapi_ok=bool(ok), yasak_px=yb, cakisma=cak[:4], bosluk_px=M_['sonuc']['RUBY']['bosluk_px'], sembol_kutu=M_['kutu']['sembol'],
+            yerlesim=dict(maske_yasak_px=yb, maske_yasak_not_='o4.kapi oge maskesinden olcum (kapi sonucu motor kapi_sert goruntu_yasak_0)', cakisma=cak[:4], bosluk_px=M_['sonuc']['RUBY']['bosluk_px'], sembol_kutu=M_['kutu']['sembol'],
                           halka_kutu=M_['kutu']['halka'], kucuk_sol_kutu=M_['kutu']['kucuk_sol'], kucuk_sag_kutu=M_['kutu']['kucuk_sag'],
                           sembol_ust_y=M_['kutu']['sembol'][1], sembol_ust_y_cancer_libra=246, yasak_bolgeye_en_kisa_uzaklik_px=uzak,
                           yerlesim_bilgi=M_['yerlesim']),
@@ -104,12 +121,14 @@ def main():
                           halka_sureklilik_bilgi=M_['sonuc'][s]['halka_sureklilik']['oran'], kucuk_oge_artis=M_['sonuc'][s]['kucuk_oge_parlaklik_artisi'])
                   for s in ('RUBY', 'SAPPHIRE', 'EMERALD')},
             iou=M_['iou_954'], alfa_fark={k: v['ort_mutlak_fark_murekkep'] for k, v in M_['iou_954_bilgi'].items()},
-            motor_kapi=M_['kapi'], kaynak_leke=M_.get('kaynak_leke_onarim_sonrasi'),
+            kapi=dict(sert=M_['kapi_sert'], bilgi=M_['kapi_bilgi'], kaynak='ornament_motor OLCUM kapi_sert / kapi_bilgi (tek kaynak)'),
+            kaynak_leke=M_.get('kaynak_leke_onarim_sonrasi'),
+            cikti_leke_a={s: sum(v['alfa_lt_09'] for k2, v in M_['sonuc'][s]['leke'].items() if k2 in o5.LEKE_KAPI_OGE) for s in ('RUBY', 'SAPPHIRE', 'EMERALD')},
             sade=dict(kati_kontrast_bilgi=S_['kati_kontrast_en_kotu'], goruntu_yasak=S_['goruntu_yasak'], leke_a=S_['leke_a'], zemin_seffaf=S_['zemin_seffaf']),
             fildisi=dict(yerlesim_yasak_px=yb, not_='fildisi ayni oge katmani (SADE_1) + krem zemin; yasak px yerlesimden'))
         R['cift'][cift] = r
         log(cift, 'yasak', yb, 'kontrast', {s: r['koyu'][s]['kontrast_ortanca'] for s in r['koyu']}, 'dE00', {s: r['koyu'][s]['dE00_ham_maks'] for s in r['koyu']},
-            'sembol', r['yerlesim']['sembol_kutu'], 'uzaklik', uzak, 'kapi', {k: v for k, v in M_['kapi'].items() if not v})
+            'sembol', r['yerlesim']['sembol_kutu'], 'uzaklik', uzak, 'sert FAIL', [k for k, v in M_['kapi_sert'].items() if not v], 'motor cikis', k1)
         if cift == 'CANCER_LIBRA':
             hepsi = True
             for s in STIL:
@@ -139,7 +158,7 @@ def main():
             k = R['cift'][cift]
             v = (f'kontrast {k["koyu"][s]["kontrast_ortanca"]}, dE00 {k["koyu"][s]["dE00_ham_maks"]}' if s in k['koyu'] else
                  (f'kati kontrast {k["sade"]["kati_kontrast_bilgi"]} (bilgi)' if s == 'SADE_ALTIN' else 'krem zemin (bilgi)'))
-            et.append(f'{cift} / {s}\n{v}\nyasak px {sum(k["yerlesim"]["yasak_px"].values())}')
+            et.append(f'{cift} / {s}\n{v}\nyasak px {sum(k["yerlesim"]["maske_yasak_px"].values())}')
         satir.append(son.onizleme_etiketli(liste, et, font, h_et=96))
     Wd = max(x.width for x in satir)
     u = Image.new('RGB', (Wd, sum(x.height + 16 for x in satir)), 'white'); y = 0
@@ -147,10 +166,18 @@ def main():
         u.paste(x, (0, y)); y += x.height + 16
     u.save(RP / 'ONIZLEME_76mm_6CIFT.png', dpi=(300, 300))
     R['png_sha256'] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(O.glob('*_954.png'))}
-    (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False))
-    log('BITTI', len(R['png_sha256']), 'PNG')
-    return 0
+    fail = {c: v.get('not_') for c, v in R['cift'].items() if v.get('eksik') or not all((v.get('kapi') or {}).get('sert', {'x': False}).values())}
+    R['cikis'] = dict(kod=0 if not fail else 1, aciklama='0 tum ciftlerde sert kapilar gecti, 1 en az bir cift sert FAIL / eksik, 2 cokus, 3 kontrol cifti DUR',
+                      fail=fail)
+    (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str))
+    log('BITTI', len(R['png_sha256']), 'PNG | cikis', R['cikis']['kod'], fail)
+    return R['cikis']['kod']
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except Exception:                                                          # noqa: BLE001
+        import traceback
+        traceback.print_exc()
+        sys.exit(2)

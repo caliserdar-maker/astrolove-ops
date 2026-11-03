@@ -1,0 +1,138 @@
+name: ornament-78-teshis
+# TESHIS (Merkez / Serdar 3 Kas; deneme SAYILMAZ, uretim yok, Drive'a yazma yok): scripts/printful/ornek78_teshis.py
+#   GEMINI_VIRGO motor nedeni + traceback, ARIES_ARIES SADE adimi, aquarius kaynak leke koordinat / kirpim. Cikti yalniz dal (json, log, kucuk kirpim).
+# Merkez / Serdar 3 Kas, karar 28: ORNAMENT_78_ORNEK6 (6 cift x 5 stil) Actions'ta uretim (Serdar istisnasi: kaynaklar yalniz Actions'tan
+# okunabiliyor; depo public, kaynaklar depoya girmez). YALNIZ dal ornament-printful-katalog; tetik docs/ornament/ORNEK78_TETIK.txt degisince push.
+# Kapi listesi: docs/ornament/ornek/ORNEK78_KAPI_LISTESI.md (kosudan once). Kontrol cifti CANCER_LIBRA: onayli 5STIL'e <= 1 seviye / 10 px; FAIL = DUR.
+# Girdiler: Drive (ANA_SEMBOL78_KATMAN <CIFT>_ana.png, 12 burc altin PNG; Drive md5 ile butunluk) + git (sabit commit, sha listesi).
+# Cikti: 30 PNG YALNIZ Drive TEMP/ORNAMENT_78_ORNEK6_<damga>/; dala ONIZLEME_76mm_6CIFT.png + OLCUM.json + girdi sha. Etsy / Printful / silme yok.
+on:
+  push:
+    branches: [ornament-printful-katalog]
+    paths: [docs/ornament/ORNEK78_TESHIS_TETIK.txt]
+permissions:
+  contents: write
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      DAL: ornament-printful-katalog
+      MOTOR_COMMIT: 6da763aa5b9820027420f73264fc69d30e120a33
+      TEK_DOKU_COMMIT: 2a08a78216ca19dd632e7dedda31c4c53c365c25
+      ACIK_COMMIT: 28774956a2561c9776dca0d1484c8a17b81f6aac
+      ONAY_COMMIT: 6daab364816e4c4b8602258b9b8d8bec28231cfc
+      O5: docs/ornament/ornek/ORNAMENT_5STIL_20261103_1539
+      ANA_KLASOR: 1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD
+      BURC_KLASOR: 1j9TBPj86_5njsmf_t0v6tczuwcDyLuXu
+    steps:
+      # hafif checkout (Merkez 3 Kas: tam gecmis 41 dk takildi, kosu 41682303288 iptal): sig, blobsuz, yalniz gereken yollar
+      - uses: actions/checkout@v4
+        with:
+          ref: ornament-printful-katalog
+          fetch-depth: 1
+          lfs: false
+          filter: blob:none
+          sparse-checkout: |
+            scripts/printful
+            docs/ornament/zemin3/V2
+          path: s
+      - name: Gereken commit'ler (sig, blobsuz; git show dosyalari tek tek indirir)
+        run: |
+          set -euo pipefail
+          for c in $MOTOR_COMMIT $TEK_DOKU_COMMIT $ACIK_COMMIT $ONAY_COMMIT; do git -C s fetch -q --depth 1 --filter=blob:none origin $c; done
+          git -C s log --oneline -1 HEAD
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Paketler (yerel uretimle ayni surumler)
+        run: |
+          pip install -q pillow==11.0.0 numpy==2.5.4 opencv-python-headless==5.0.0.93 scipy==1.18.1 scikit-image==0.26.0 potracer==0.0.4
+          python3 -c "import sys, numpy, cv2, PIL, scipy, skimage; print('python', sys.version.split()[0], 'numpy', numpy.__version__, 'cv2', cv2.__version__, 'pillow', PIL.__version__, 'scipy', scipy.__version__, 'skimage', skimage.__version__)" | tee /tmp/paket.txt
+          lscpu | grep -E 'Model name' | tee -a /tmp/paket.txt
+      - name: rclone kur + yapilandir
+        timeout-minutes: 5
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Girdiler (Drive + git), sha ve Drive md5 kapisi
+        run: |
+          set -euo pipefail
+          K=/tmp/kay; MD=/tmp/mg; ZE=/tmp/zemin; mkdir -p $K $MD/kure $MD/palet $MD/girdi78/ana $ZE
+          for c in CANCER_LIBRA ARIES_ARIES CAPRICORN_SAGITTARIUS AQUARIUS_PISCES GEMINI_VIRGO LEO_SCORPIO; do
+            rclone copy "gdrive:" "$K/" --drive-root-folder-id "$ANA_KLASOR" --include "${c}_ana.png" -q; done
+          for b in aquarius aries cancer capricorn gemini leo libra pisces sagittarius scorpio taurus virgo; do
+            rclone copy "gdrive:" "$K/" --drive-root-folder-id "$BURC_KLASOR" --include "${b}_symbol_gold.png" -q; done
+          # Drive md5 ile butunluk (Drive kaydi)
+          { rclone md5sum "gdrive:" --drive-root-folder-id "$ANA_KLASOR" --include "*_ana.png" --max-depth 1;
+            rclone md5sum "gdrive:" --drive-root-folder-id "$BURC_KLASOR" --include "*_symbol_gold.png" --max-depth 1; } > /tmp/drive_md5.txt
+          (cd $K && md5sum *_ana.png *_symbol_gold.png) > /tmp/yerel_md5.txt
+          python3 - <<'PY'
+          d = {l.split()[1]: l.split()[0] for l in open('/tmp/drive_md5.txt') if l.strip()}
+          y = {l.split()[1]: l.split()[0] for l in open('/tmp/yerel_md5.txt') if l.strip()}
+          bad = [f for f in y if d.get(f) != y[f]]
+          print('drive md5 karsilastirma', len(y), 'dosya, uyusmayan', bad)
+          assert not bad and len(y) == 18, 'DUR: Drive md5 uyusmuyor ya da dosya eksik'
+          PY
+          for f in motor/varlik/halka/HALKA_BLUE_16x20.png motor/font/Cinzel.ttf motor/font/EBGaramond-Italic.ttf motor/tek_doku.py; do
+            git -C s show "$TEK_DOKU_COMMIT:$f" > "$K/$(basename $f)"; done
+          for f in BEIGE_1264.png AGED_PAPYRUS_1264.png; do git -C s show $ACIK_COMMIT:zemin_acik/$f > $K/$f; done
+          cp s/docs/ornament/zemin3/V2/RUBY_1264.png s/docs/ornament/zemin3/V2/SAPPHIRE_1264.png s/docs/ornament/zemin3/V2/EMERALD_1264.png $K/
+          git -C s show $MOTOR_COMMIT:motor_gpt/girdi/LOGO_1.png > $K/LOGO_1.png
+          git -C s show $MOTOR_COMMIT:motor_gpt/girdi78/ana/cancer_libra_alfa.png > $K/cancer_libra_alfa.png
+          git -C s show $MOTOR_COMMIT:motor_gpt/alfa_ogeler.npz > $K/alfa_ogeler.npz
+          for f in KILIT_GPTGIRDI.json golge_motor.py vektor_yuzey.py alfa_temizle.py uret_tam.py renk_uyum.py olustur_alfa_sablon.py kure/k4.npy palet/chatgpt_altin.png yerlesim78.json cember.json; do
+            git -C s show $MOTOR_COMMIT:motor_gpt/$f > $MD/$f; done
+          for c in cancer_libra aries_aries capricorn_sagittarius aquarius_pisces gemini_virgo leo_scorpio; do
+            git -C s show $MOTOR_COMMIT:motor_gpt/girdi78/ana/${c}_alfa.png > $MD/girdi78/ana/${c}_alfa.png; done
+          for r in RUBY SAPPHIRE EMERALD; do git -C s show $ONAY_COMMIT:docs/ornament/ornek/ORNAMENT_KOYU_G1/ON_OLCUM_ELIPS/${r}_ELIPS_1264.png > $ZE/${r}_1264.png; done
+          mkdir -p /tmp/onayli; for r in RUBY SAPPHIRE EMERALD SADE_ALTIN FILDISI; do git -C s show $ONAY_COMMIT:$O5/CANCER_LIBRA_${r}_954.png > /tmp/onayli/CANCER_LIBRA_${r}_954.png; done
+          cat > /tmp/beklenen.txt <<'EOF'
+          e86c2629629305fd90bbb66494238faef9b4ad1acb815eb7b3ed55e7f44fc2d2  /tmp/kay/CANCER_LIBRA_ana.png
+          2b5a32121ce8fa92ceef1a386f5ab1742a573681c30e742223be75005816cf28  /tmp/kay/cancer_symbol_gold.png
+          6fe2d0355ee56f8468eb637d3ca6445fd517983b00e51bce76cac218864f6a4b  /tmp/kay/libra_symbol_gold.png
+          e80d6d3fca82e2804865c887277c06bc8e958175e254b1f2d289eaeba03c9044  /tmp/zemin/RUBY_1264.png
+          0d3213f8b592392aa69a3cdcd127d893a6fd2ef3d94e5913cf94ee96f4afb941  /tmp/zemin/SAPPHIRE_1264.png
+          0c232cfc155ba2cbfd34cb92c6f72ffdb0fbbc54570ac9a8e987efdfdcd7f787  /tmp/zemin/EMERALD_1264.png
+          2a11ac819c611eaa84e60e469316f345eaa8eb48f6e9e6113d9a7831ab2fa410  /tmp/kay/HALKA_BLUE_16x20.png
+          62239238b25dbc5417dab4dc353fdbf15129599c9372737d5d8ddb86b3042061  /tmp/kay/LOGO_1.png
+          1889906fb29920e9294d5c343ace09b2295d81e4c49153d2badfb8d5101ddbad  /tmp/kay/tek_doku.py
+          f4d83d34d1f6c741193e4acf4b3dff9531e5a67b6aa65228d00a7db72a4e0f34  /tmp/kay/Cinzel.ttf
+          bba2c4499c93c9612b90b9825d32b07da52fce2fe57562a1eb6b833553f93c4e  /tmp/kay/EBGaramond-Italic.ttf
+          EOF
+          sed -i 's/^ *//' /tmp/beklenen.txt
+          sha256sum -c /tmp/beklenen.txt | tee /tmp/girdi_sha.txt
+          (cd $K && sha256sum *_ana.png *_symbol_gold.png) | sed 's|  |  kaynak/|' | tee -a /tmp/girdi_sha.txt
+          (cd $MD && find . -type f | sort | xargs sha256sum) | sed 's|  \./|  motor_gpt/|' | tee -a /tmp/girdi_sha.txt
+          cat /tmp/drive_md5.txt >> /tmp/girdi_sha.txt
+      - name: Teshis
+        id: teshis
+        run: |
+          set -uo pipefail
+          D=ORNAMENT_78_TESHIS_$(date -u +%Y%m%d_%H%M); echo "D=$D" >> "$GITHUB_ENV"; mkdir -p /tmp/teshis
+          cd s
+          python3 -I scripts/printful/ornek78_teshis.py --kaynak /tmp/kay --motor /tmp/mg --zemin /tmp/zemin --cikti /tmp/teshis 2>&1 | tee /tmp/log_teshis.txt
+          k=${PIPESTATUS[0]}; echo "k=$k" >> "$GITHUB_OUTPUT"
+      - name: Dal (teshis json + log + kirpim; uretim PNG yok)
+        if: always()
+        run: |
+          set -euo pipefail
+          G=s/docs/ornament/ornek/${D:-ORNAMENT_78_TESHIS_HATA}; mkdir -p $G
+          cp -r /tmp/teshis/. $G/ 2>/dev/null || true
+          cp /tmp/log_teshis.txt /tmp/girdi_sha.txt /tmp/paket.txt $G/ 2>/dev/null || true
+          cd s && git config user.name "astrolove-bot" && git config user.email "astrolove-bot@users.noreply.github.com"
+          git add --sparse docs/ornament/ornek
+          DIS=$(git diff --cached --name-only | grep -v '^docs/ornament/ornek/' || true)
+          [ -z "$DIS" ] || { echo "::error::izinli klasor disi: $DIS"; exit 1; }
+          if git diff --cached --name-only | grep -E '_954\.png$'; then echo "::error::dala uretim PNG yazilmaz"; exit 1; fi
+          git commit -qm "ornament 78 teshis (kosu ${GITHUB_RUN_ID}): cikis ${{ steps.teshis.outputs.k }}" && git push -q origin "HEAD:${DAL}"
+      - if: always()
+        run: rm -rf ~/.config/rclone
