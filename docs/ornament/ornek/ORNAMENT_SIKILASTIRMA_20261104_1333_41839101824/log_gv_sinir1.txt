@@ -1,0 +1,4 @@
+[    0.0s] cift GEMINI_VIRGO
+[  221.4s] GEMINI_VIRGO yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 7.45, 'SAPPHIRE': 8.55, 'EMERALD': 7.93} dE00 {'RUBY': 1.383, 'SAPPHIRE': 1.372, 'EMERALD': 1.378} sembol [269, 246, 683, 644] uzaklik {'guvenli_disi': 8.6, 'delik': 129.4, 'ust_cizgi': 23.0} sert FAIL ['koyu_kucultme_le_sinir'] cikis {'motor': 1, 'dump': 0, 'sade': 0, 'fildisi': 0}
+::warning::GEMINI_VIRGO: kucultme 2 px > sinir 1 px, is durur, gorsel Serdar'a
+[  223.8s] BITTI 5 PNG | cikis 1 {'GEMINI_VIRGO': 'sert kapilar: FAIL koyu_kucultme_le_sinir'}

@@ -1,0 +1,370 @@
+{
+ "beklentiler": [
+  {
+   "beklenti": "cl_kontrol",
+   "gecti": true,
+   "olculen": {
+    "RUBY": {
+     "en_buyuk_fark": 1,
+     "farkli_piksel": 1,
+     "tolerans_icinde": true,
+     "uretim_ham": "c572da00b4e9c8e4502908800014d3f3780ba71b66c726d5c004aea18834ed53",
+     "onayli_ham": "f76927b071579231bcfeb2223b6c6bc793420d029bfbdb1d54fd1578b9115d87"
+    },
+    "SAPPHIRE": {
+     "en_buyuk_fark": 1,
+     "farkli_piksel": 1,
+     "tolerans_icinde": true,
+     "uretim_ham": "00dad5bd341053b09a7e3a27821611ba040e7e5058dae2cda2bc080d2cf2909a",
+     "onayli_ham": "68701718f7dc3107ea1921eeefbf69129dbfc4272d0cf832b5cd2f09e3ddadb7"
+    },
+    "EMERALD": {
+     "en_buyuk_fark": 1,
+     "farkli_piksel": 1,
+     "tolerans_icinde": true,
+     "uretim_ham": "919c129e67876a0b7a4379ecbbc5846d83b57e47d8025f79661efa64765351f8",
+     "onayli_ham": "4c2e3a513e0de882ac0e08f7c5d3a5ad28ce07dcc78386d75f3ef98fb356d6eb"
+    },
+    "SADE_ALTIN": {
+     "en_buyuk_fark": 1,
+     "farkli_piksel": 1,
+     "tolerans_icinde": true,
+     "uretim_ham": "4899fd21ec09647444ef604859f3192829b8138a8a0e4a3a6bc456b20143580d",
+     "onayli_ham": "f6a566ec0f04782deb36edb4b15636e3b9af5ba9bc00ac083077389259a7e9fb"
+    },
+    "FILDISI": {
+     "en_buyuk_fark": 1,
+     "farkli_piksel": 1,
+     "tolerans_icinde": true,
+     "uretim_ham": "c98be4d76b3033025b44c1a19db7a0ea840056aa3e13063e67072f55017bbf8a",
+     "onayli_ham": "ea47a57f49ec73af4b9606dd3c5636f97f0121f1ac10305630c76431409f952b"
+    }
+   },
+   "kaynak": "OLCUM.json kontrol (onayli 6daab364 5 stil)",
+   "not_": null
+  },
+  {
+   "beklenti": "kova_onayli_kiyas",
+   "gecti": true,
+   "olculen": {
+    "RUBY": {
+     "en_buyuk_fark": 0,
+     "farkli_piksel": 0,
+     "tolerans_icinde": true,
+     "onayli_sha256": "938e05d743664d16566d5a5e7bdfb9c73daf9a580d46a2a1651e4fcea1695276"
+    },
+    "SAPPHIRE": {
+     "en_buyuk_fark": 0,
+     "farkli_piksel": 0,
+     "tolerans_icinde": true,
+     "onayli_sha256": "aa411ea7723a1dbc56ce55322b63b28dc25f80c81a8424d958622c5d1af05c9c"
+    },
+    "EMERALD": {
+     "en_buyuk_fark": 0,
+     "farkli_piksel": 0,
+     "tolerans_icinde": true,
+     "onayli_sha256": "b4062298e1fd358f9484a348866258a28d05579fe5d7183a32210bf7496b47c5"
+    }
+   },
+   "kaynak": "OLCUM cift.AQUARIUS_PISCES.onayli_kiyas (onayli: Drive ORNAMENT_KOVA_DUZELTME_20261104_1058_41817771849)",
+   "not_": null
+  },
+  {
+   "beklenti": "o2_sha_esit_AQUARIUS_PISCES",
+   "gecti": true,
+   "olculen": {
+    "sade_altin": "043e99736c6d5890945fde44fdc2a99eb9ca46d16d706f881e1a3cc1b1436a85",
+    "sade1": "043e99736c6d5890945fde44fdc2a99eb9ca46d16d706f881e1a3cc1b1436a85",
+    "fildisi_girdi": "043e99736c6d5890945fde44fdc2a99eb9ca46d16d706f881e1a3cc1b1436a85"
+   },
+   "kaynak": "OLCUM png_sha256 + sade.sade1_sha256 + fildisi.girdi_sha256",
+   "not_": "zayif test (KALITE 3): uc deger ayni SADE_1 dosyasindan, yapisi geregi esit; O2 kaniti o2_kati_aqu + o2_bilinen_fail"
+  },
+  {
+   "beklenti": "o2_sha_esit_GEMINI_VIRGO",
+   "gecti": true,
+   "olculen": {
+    "sade_altin": "28b461cea591a084b70b3760e9a09824034c4091f926ff5e6ddabdae27ca162f",
+    "sade1": "28b461cea591a084b70b3760e9a09824034c4091f926ff5e6ddabdae27ca162f",
+    "fildisi_girdi": "28b461cea591a084b70b3760e9a09824034c4091f926ff5e6ddabdae27ca162f"
+   },
+   "kaynak": "OLCUM png_sha256 + sade.sade1_sha256 + fildisi.girdi_sha256",
+   "not_": "zayif test (KALITE 3): uc deger ayni SADE_1 dosyasindan, yapisi geregi esit; O2 kaniti o2_kati_aqu + o2_bilinen_fail"
+  },
+  {
+   "beklenti": "o2_kati_aqu",
+   "gecti": true,
+   "olculen": 1.3545462648367224,
+   "kaynak": "OLCUM sade.kati_ham; beklenen 1.35 (1f24d49 koyulasma_oncesi_kati)",
+   "not_": null
+  },
+  {
+   "beklenti": "o2_bilinen_fail",
+   "gecti": true,
+   "olculen": {
+    "yeni": "043e99736c6d5890945fde44fdc2a99eb9ca46d16d706f881e1a3cc1b1436a85",
+    "eski": "b8dba3d7259fa00330101590513389eb09eb184c204f30c3d3a69a53decd9da8"
+   },
+   "kaynak": "eski koyulastirilmis dosya sha (1f24d49 OLCUM)",
+   "not_": null
+  },
+  {
+   "beklenti": "o2_cl_zayif",
+   "gecti": true,
+   "olculen": null,
+   "kaynak": "bilgi",
+   "not_": "CANCER_LIBRA SADE kiyasi O2 icin zayif test (CL carpan 1,0: eski SADE_KOYU = SADE_1); kanit AQUARIUS_PISCES ve GEMINI_VIRGO"
+  },
+  {
+   "beklenti": "kapi_onarimsiz_iddia",
+   "gecti": true,
+   "olculen": {
+    "iddia": "onarim kapaliyken kapi sayisi > 0 (bilinen FAIL)",
+    "olculen": 445,
+    "gecti": true
+   },
+   "kaynak": "KOVA_KAPI_TESTI.json (gercek aquarius)",
+   "not_": null
+  },
+  {
+   "beklenti": "kova_onarimsiz_neden",
+   "gecti": true,
+   "olculen": {
+    "gecti": true,
+    "neden": "tek neden leke_a_kaynak_0 (aquarius 445 px)",
+    "onarimsiz_motor_cikis": 1,
+    "onarilan_kaynak": [
+     "aquarius"
+    ]
+   },
+   "kaynak": "OLCUM cift.AQUARIUS_PISCES.kenar_onarimsiz_neden (onarimsiz motor OLCUM)",
+   "not_": null
+  },
+  {
+   "beklenti": "gv_varsayilan",
+   "gecti": true,
+   "olculen": {
+    "fail": [],
+    "kucultme": {
+     "toplam_px": 2,
+     "iz": [
+      {
+       "kucultme_px": 0,
+       "gereken_kucultme_px": 2,
+       "cakisma": [
+        "halka/sembol"
+       ]
+      }
+     ],
+     "sinir_px": 2,
+     "sinir_kaynak": "sabit",
+     "not_": "yerlesim 5 stilde ortak; 2 px asan kucultmede is durur, gorsel Serdar onayina"
+    }
+   },
+   "kaynak": "OLCUM cift.GEMINI_VIRGO",
+   "not_": "beklenti 2202 olcumunden (2 px, gecer; kenar onarimi yok); kenar_onar oncesi olcum, dogrulanmadi"
+  },
+  {
+   "beklenti": "gv_sinir1",
+   "gecti": true,
+   "olculen": {
+    "cikis": "1",
+    "sert_fail": [
+     "koyu_kucultme_le_sinir"
+    ],
+    "png": [
+     "RUBY",
+     "SAPPHIRE",
+     "EMERALD",
+     "SADE_ALTIN",
+     "FILDISI"
+    ],
+    "gercek_boy": true,
+    "kucultme": {
+     "toplam_px": 2,
+     "iz": [
+      {
+       "kucultme_px": 0,
+       "gereken_kucultme_px": 2,
+       "cakisma": [
+        "halka/sembol"
+       ]
+      }
+     ],
+     "sinir_px": 1,
+     "sinir_kaynak": "test parametresi ORN_KUCULT_SINIR_PX",
+     "not_": "yerlesim 5 stilde ortak; 2 px asan kucultmede is durur, gorsel Serdar onayina"
+    }
+   },
+   "kaynak": "GV_SINIR1 OLCUM.json + dosyalar (ORN_KUCULT_SINIR_PX=1)",
+   "not_": null
+  },
+  {
+   "beklenti": "genel_cikis",
+   "gecti": true,
+   "olculen": "0",
+   "kaynak": "ornek78 cikis (ana adim)",
+   "not_": null
+  },
+  {
+   "beklenti": "listeler",
+   "gecti": true,
+   "olculen": {
+    "dusuk_kontrast": {
+     "liste": {
+      "SADE_ALTIN": [
+       {
+        "cift": "CANCER_LIBRA",
+        "stil": "SADE_ALTIN",
+        "kati": 1.54,
+        "ortanca": 2.9,
+        "kati_ham": 1.5372,
+        "ortanca_ham": 2.9049,
+        "en_kotu_oge": "halka_govde",
+        "duzey": {
+         "kati": 1.54,
+         "ortanca": null
+        },
+        "duzey_kaynak": "3 Kas CL SADE kati 1,54 olcumu (O2 b karari listesi; sert kapi degil)"
+       },
+       {
+        "cift": "AQUARIUS_PISCES",
+        "stil": "SADE_ALTIN",
+        "kati": 1.35,
+        "ortanca": 2.49,
+        "kati_ham": 1.3545,
+        "ortanca_ham": 2.494,
+        "en_kotu_oge": "kucuk_sol",
+        "duzey": {
+         "kati": 1.54,
+         "ortanca": null
+        },
+        "duzey_kaynak": "3 Kas CL SADE kati 1,54 olcumu (O2 b karari listesi; sert kapi degil)"
+       },
+       {
+        "cift": "GEMINI_VIRGO",
+        "stil": "SADE_ALTIN",
+        "kati": 1.17,
+        "ortanca": 2.06,
+        "kati_ham": 1.1743,
+        "ortanca_ham": 2.0551,
+        "en_kotu_oge": "halka_govde",
+        "duzey": {
+         "kati": 1.54,
+         "ortanca": null
+        },
+        "duzey_kaynak": "3 Kas CL SADE kati 1,54 olcumu (O2 b karari listesi; sert kapi degil)"
+       }
+      ],
+      "FILDISI": [
+       {
+        "cift": "AQUARIUS_PISCES",
+        "stil": "FILDISI",
+        "kati": 1.15,
+        "ortanca": 2.15,
+        "kati_ham": 1.1493,
+        "ortanca_ham": 2.1466,
+        "en_kotu_oge": "kucuk_sol",
+        "duzey": {
+         "kati": 1.31,
+         "ortanca": 2.48
+        },
+        "duzey_kaynak": "ORNAMENT_KARAR 24 onayli istisna duzeyi CL kati 1,31 / ortanca 2,48 (O4 a)"
+       },
+       {
+        "cift": "GEMINI_VIRGO",
+        "stil": "FILDISI",
+        "kati": 1.01,
+        "ortanca": 1.75,
+        "kati_ham": 1.0117,
+        "ortanca_ham": 1.7494,
+        "en_kotu_oge": "halka_govde",
+        "duzey": {
+         "kati": 1.31,
+         "ortanca": 2.48
+        },
+        "duzey_kaynak": "ORNAMENT_KARAR 24 onayli istisna duzeyi CL kati 1,31 / ortanca 2,48 (O4 a)"
+       }
+      ]
+     },
+     "cancer_libra_bu_kosu_bilgi": {
+      "SADE_ALTIN": {
+       "kati_ham": 1.5372019972515825,
+       "ortanca_ham": 2.9049393728231205
+      },
+      "FILDISI": {
+       "kati_ham": 1.3121089433704032,
+       "ortanca_ham": 2.4839142049569367
+      }
+     },
+     "not_": "bilgi; FILDISI listesindeki ciftler 78 sonrasi Serdar goz onayina (O4 a)"
+    },
+    "kucultme": [
+     {
+      "cift": "CANCER_LIBRA",
+      "toplam_px": 0,
+      "sinir_px": 2,
+      "sinir_kaynak": "sabit",
+      "iz": [],
+      "sinir_gecti": true
+     },
+     {
+      "cift": "AQUARIUS_PISCES",
+      "toplam_px": 0,
+      "sinir_px": 2,
+      "sinir_kaynak": "sabit",
+      "iz": [],
+      "sinir_gecti": true
+     },
+     {
+      "cift": "GEMINI_VIRGO",
+      "toplam_px": 2,
+      "sinir_px": 2,
+      "sinir_kaynak": "sabit",
+      "iz": [
+       {
+        "kucultme_px": 0,
+        "gereken_kucultme_px": 2,
+        "cakisma": [
+         "halka/sembol"
+        ]
+       }
+      ],
+      "sinir_gecti": true
+     }
+    ],
+    "kenar_onarim_uyari": [
+     {
+      "cift": "AQUARIUS_PISCES",
+      "kaynak": "aquarius",
+      "degisen_piksel": 464,
+      "alfa_farki_en_buyuk": 1.0
+     }
+    ]
+   },
+   "kaynak": "OLCUM.json",
+   "not_": null
+  },
+  {
+   "beklenti": "gercek_boy",
+   "gecti": true,
+   "olculen": [
+    [
+     "GERCEK_BOY_GEMINI_VIRGO_5STIL_300dpi.png",
+     true
+    ],
+    [
+     "GERCEK_BOY_AQUARIUS_PISCES_5STIL_300dpi.png",
+     true
+    ],
+    [
+     "GERCEK_BOY_GEMINI_VIRGO_5STIL_300dpi.png",
+     true
+    ]
+   ],
+   "kaynak": "GERCEK_BOY_KONTROL.json",
+   "not_": null
+  }
+ ],
+ "hepsi_gecti": true
+}

@@ -1,0 +1,15 @@
+PASS cl_kontrol | {"RUBY": {"en_buyuk_fark": 1, "farkli_piksel": 1, "tolerans_icinde": true, "uretim_ham": "c572da00b4e9c8e4502908800014d3f3780ba71b66c726d5c004aea18834ed53", "onayli_ham": "f76927b071579231bcfeb2223b6c6bc793420d029bfbdb1d
+PASS kova_onayli_kiyas | {"RUBY": {"en_buyuk_fark": 0, "farkli_piksel": 0, "tolerans_icinde": true, "onayli_sha256": "938e05d743664d16566d5a5e7bdfb9c73daf9a580d46a2a1651e4fcea1695276"}, "SAPPHIRE": {"en_buyuk_fark": 0, "farkli_piksel": 0, "toler
+PASS o2_sha_esit_AQUARIUS_PISCES | {"sade_altin": "043e99736c6d5890945fde44fdc2a99eb9ca46d16d706f881e1a3cc1b1436a85", "sade1": "043e99736c6d5890945fde44fdc2a99eb9ca46d16d706f881e1a3cc1b1436a85", "fildisi_girdi": "043e99736c6d5890945fde44fdc2a99eb9ca46d16d
+PASS o2_sha_esit_GEMINI_VIRGO | {"sade_altin": "28b461cea591a084b70b3760e9a09824034c4091f926ff5e6ddabdae27ca162f", "sade1": "28b461cea591a084b70b3760e9a09824034c4091f926ff5e6ddabdae27ca162f", "fildisi_girdi": "28b461cea591a084b70b3760e9a09824034c4091f9
+PASS o2_kati_aqu | 1.3545462648367224
+PASS o2_bilinen_fail | {"yeni": "043e99736c6d5890945fde44fdc2a99eb9ca46d16d706f881e1a3cc1b1436a85", "eski": "b8dba3d7259fa00330101590513389eb09eb184c204f30c3d3a69a53decd9da8"}
+PASS o2_cl_zayif | null
+PASS kapi_onarimsiz_iddia | {"iddia": "onarim kapaliyken kapi sayisi > 0 (bilinen FAIL)", "olculen": 445, "gecti": true}
+PASS kova_onarimsiz_neden | {"gecti": true, "neden": "tek neden leke_a_kaynak_0 (aquarius 445 px)", "onarimsiz_motor_cikis": 1, "onarilan_kaynak": ["aquarius"]}
+PASS gv_varsayilan | {"fail": [], "kucultme": {"toplam_px": 2, "iz": [{"kucultme_px": 0, "gereken_kucultme_px": 2, "cakisma": ["halka/sembol"]}], "sinir_px": 2, "sinir_kaynak": "sabit", "not_": "yerlesim 5 stilde ortak; 2 px asan kucultmede 
+PASS gv_sinir1 | {"cikis": "1", "sert_fail": ["koyu_kucultme_le_sinir"], "png": ["RUBY", "SAPPHIRE", "EMERALD", "SADE_ALTIN", "FILDISI"], "gercek_boy": true, "kucultme": {"toplam_px": 2, "iz": [{"kucultme_px": 0, "gereken_kucultme_px": 2
+PASS genel_cikis | "0"
+PASS listeler | {"dusuk_kontrast": {"liste": {"SADE_ALTIN": [{"cift": "CANCER_LIBRA", "stil": "SADE_ALTIN", "kati": 1.54, "ortanca": 2.9, "kati_ham": 1.5372, "ortanca_ham": 2.9049, "en_kotu_oge": "halka_govde", "duzey": {"kati": 1.54, "
+PASS gercek_boy | [["GERCEK_BOY_GEMINI_VIRGO_5STIL_300dpi.png", true], ["GERCEK_BOY_AQUARIUS_PISCES_5STIL_300dpi.png", true], ["GERCEK_BOY_GEMINI_VIRGO_5STIL_300dpi.png", true]]
+BEKLENEN PASS
