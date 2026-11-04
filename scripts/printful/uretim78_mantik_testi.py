@@ -238,6 +238,64 @@ def main():
     vaka('beklenen', 'bilinen FAIL: dpi piksel degisti', False, lambda: bk.beklenti(B3, kapi, kenar, sip, pd, ornek)['hepsi_gecti'])
     vaka('beklenen', 'bilinen FAIL: kenar on olcum farkli (aquarius 440)', False,
          lambda: bk.beklenti(Bs, kapi, dict(kaynak=dict(aquarius=dict(n0=440, degisen_piksel=464))), sip, pd, ornek)['hepsi_gecti'])
+    # 9b yeni duzen (Serdar 4 Kas gece; asama 2): bolum, CL sonda, kontrol bayragi, birlestir kontrol_ad, beklenen --bolum yeni_duzen
+    Py = u.parcalar(J, 'yeni_duzen')
+    tum_y = [c for p in Py['parcalar'] for c in p['uretim']]
+    vaka('yeni_duzen', '4 parca, CL her parcada ilk, CL yalniz parca 3 sonunda uretim, 11 tekil cift', [4, True, [False, False, True, False], 11, 11],
+         lambda: [Py['parca_sayisi'], all(p['ciftler'][0] == 'CANCER_LIBRA' for p in Py['parcalar']), [p['cl_yeni'] for p in Py['parcalar']], len(tum_y), len(set(tum_y))])
+    vaka('yeni_duzen', 'uretim listesi = YD11', sorted(u.YD11), lambda: sorted(tum_y))
+    Jy1 = copy.deepcopy(J); Jy1['ornek']['cl_yeni_parca'] = 1
+    vaka('yeni_duzen', 'bilinen FAIL: cl_yeni_parca ornek bolumunde', 'HATA ValueError', lambda: u.parcalar(Jy1, 'ornek'))
+    Jy2 = copy.deepcopy(J); Jy2['yeni_duzen']['parcalar'][0].pop()
+    vaka('yeni_duzen', 'bilinen FAIL: yeni_duzen bolumunde eksik cift', 'HATA ValueError', lambda: u.parcalar(Jy2, 'yeni_duzen'))
+    Jy3 = copy.deepcopy(J); Jy3['yeni_duzen']['cl_yeni_parca'] = 9
+    vaka('yeni_duzen', 'bilinen FAIL: cl_yeni_parca aralik disi', 'HATA ValueError', lambda: u.parcalar(Jy3, 'yeni_duzen'))
+    Jy4 = copy.deepcopy(J); del Jy4['yeni_duzen']['cl_yeni_parca']
+    vaka('yeni_duzen', 'bilinen FAIL: cl_yeni_parca yok (CL uretilmez)', 'HATA ValueError', lambda: u.parcalar(Jy4, 'yeni_duzen'))
+    py3 = copy.deepcopy(Py['parcalar'][2]); py3['ciftler'] = ['CANCER_LIBRA', 'CANCER_LIBRA'] + py3['ciftler'][1:-1]
+    vaka('yeni_duzen', 'bilinen FAIL: yeni duzen CL sonda degil', 'HATA ValueError', lambda: u.kenar_dogrula(py3))
+    tY = Path(tempfile.mkdtemp(dir=O))
+    for x in ('png', 'rapor', 'de', '_is/CANCER_LIBRA'):
+        (tY / x).mkdir(parents=True)
+    for s_ in u.STIL:
+        shutil.copyfile(T / 'X_Y_RUBY_954.png', tY / 'png' / f'CANCER_LIBRA_{s_}_954.png')
+    kY = u.cift_sonu('CANCER_LIBRA', dict(kapi=dict(sert=dict(a=True))), tY / 'png', tY / 'rapor', tY / 'de', tY / '_is' / 'CANCER_LIBRA', 3, gercek_boy_fn=None,
+                     env=dict(ORNEK78_YEREL_DRIVE=str(tY / 'drive')), kontrol=False)
+    lY = sorted(str(p.relative_to(tY / 'drive')) for p in (tY / 'drive').rglob('*') if p.is_file()) if (tY / 'drive').exists() else []
+    vaka('yeni_duzen', 'bilinen PASS: kontrol=False CL 5 PNG yuklenir (kokte)', [False, 5], lambda: [kY['kontrol'], sum(x.endswith('_954.png') and '/' not in x for x in lY)])
+
+    def Ry(ok=True, kp=True):
+        return dict(kontrol_pass=kp, kontrol={}, cift={u.KONTROL_ESKI: dict(kapi=dict(sert=dict(a=True))), 'CANCER_LIBRA': dict(kapi=dict(sert=dict(a=ok))),
+                                                       'TAURUS_TAURUS': dict(kapi=dict(sert=dict(a=True)))},
+                    kenar_onarim_uyari=[], kucultme=[dict(cift=u.KONTROL_ESKI), dict(cift='CANCER_LIBRA')],
+                    cift_sonu=[dict(cift='CANCER_LIBRA', kontrol=True), dict(cift='TAURUS_TAURUS'), dict(cift='CANCER_LIBRA', kontrol=False)], cikis=dict(cokus_ciftler=[]))
+    By = u.birlestir({1: Ry()}, 1, u.KONTROL_ESKI)
+    vaka('yeni_duzen', 'birlestir kontrol_ad=KONTROL_ESKI: CL uretim birlesimde, kontrol yok, yukleme 2', [['CANCER_LIBRA', 'TAURUS_TAURUS'], 2, 1, True],
+         lambda: [sorted(By['cift']), len(By['yukleme']), len(By['kucultme']), By['gecti']])
+    vaka('yeni_duzen', 'bilinen FAIL: yeni duzen CL uretimi FAIL -> birlesim FAIL', ['CANCER_LIBRA'], lambda: u.birlestir({1: Ry(ok=False)}, 1, u.KONTROL_ESKI)['fail'])
+    vaka('yeni_duzen', 'bilinen FAIL: varsayilan kontrol_ad CL uretimini atlar (yeni duzende kullanilmamali)', False,
+         lambda: 'CANCER_LIBRA' in u.birlestir({1: Ry()}, 1)['cift'])
+    orn_y = [c for p in J['yeni_duzen']['parcalar'] for c in p] + ['CANCER_LIBRA']
+    pdy = O / 'bk_parca_yd'
+    for n in (1, 2, 3, 4):
+        (pdy / f'PARCA_{n}').mkdir(parents=True, exist_ok=True)
+        (pdy / f'PARCA_{n}' / 'SIPARIS.json').write_text('{}')
+        (pdy / f'PARCA_{n}' / 'OLCUM.json').write_text(json.dumps(dict(cift_sonu=[{}] * 3)))
+        (pdy / f'PARCA_{n}' / 'log_ornek78.txt').write_text('\n'.join(['[ 1s] ETA x'] * 3))
+    Bsy = copy.deepcopy(Bs)
+    Bsy['kontrol_parca'] = {n: dict(kontrol_pass=True) for n in (1, 2, 3, 4)}
+    Bsy['yukleme'] = [dict(cift=c, temizlik=dict(katman_pkl_var=False, dump_var=False), yukleme=dict(dosyalar=[dict(yol=f'{c}_{s}_954.png') for s in u.STIL])) for c in orn_y]
+    Bsy['cift'] = {c: dict(kapi=dict(sert=dict({f'printful_dosya_{s}': True for s in u.STIL}, yeni_duzen_kapilari_var=True)), dpi_yazim={s: dict(piksel_ayni=True) for s in u.STIL},
+                           sade=sd, fildisi=dict(girdi_piksel_sha='p'), kaynak_kenar_onarim=dict(aquarius=dict(n0=445, degisen_piksel=464)) if 'AQUARIUS' in c else {},
+                           **(dict(kenar_onarimsiz_neden=dict(gecti=True)) if 'AQUARIUS' in c else {})) for c in orn_y}
+    ydt = dict(ref_sabit_esit=True, gecen=78, fail=[], bilinen_fail_hepsi=True, bilinen_fail_sayi=48)
+    vaka('yeni_duzen', 'beklenen bilinen PASS: yeni_duzen sahte tam veri', True, lambda: bk.beklenti(Bsy, kapi, kenar, sip, pdy, orn_y, 'yeni_duzen', ydt)['hepsi_gecti'])
+    Bsy2 = copy.deepcopy(Bsy); del Bsy2['cift']['CANCER_LIBRA']['kapi']['sert']['yeni_duzen_kapilari_var']
+    vaka('yeni_duzen', 'beklenen bilinen FAIL: CL yeni duzen modunda degil', False, lambda: bk.beklenti(Bsy2, kapi, kenar, sip, pdy, orn_y, 'yeni_duzen', ydt)['hepsi_gecti'])
+    vaka('yeni_duzen', 'beklenen bilinen FAIL: hazirlik yerel testi yok', False, lambda: bk.beklenti(Bsy, kapi, kenar, sip, pdy, orn_y, 'yeni_duzen', None)['hepsi_gecti'])
+    vaka('yeni_duzen', 'beklenen bilinen FAIL: yerel test ref != SABIT', False,
+         lambda: bk.beklenti(Bsy, kapi, kenar, sip, pdy, orn_y, 'yeni_duzen', dict(ydt, ref_sabit_esit=False))['hepsi_gecti'])
+    vaka('yeni_duzen', 'eski bolum (ornek) beklentisi yeni_duzen kapilarini istemez', True, lambda: bk.beklenti(Bs, kapi, kenar, sip, pd, ornek)['hepsi_gecti'])
     # 10 ornek78 alt surec vakalari
     if a.ornek78_hizli:
         bos = Path(tempfile.mkdtemp(dir=O)); (bos / 'k').mkdir()

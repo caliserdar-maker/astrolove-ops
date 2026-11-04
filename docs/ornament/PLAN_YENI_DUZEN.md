@@ -283,3 +283,36 @@ Ek açık sorular:
 7. **(D8) Yatay merkez** 476 mı, halka merkezi 475,5 mi? Öneri: 475,5 ± 1.
 
 Aşama 2'ye geçiş koşulu: K1, K2 (karar), K3, O2-O7 kapanır, yerel test yeniden PASS. Bu, yeni bir aşama 1 iterasyonu ister (Serdar onayı).
+
+## 9. Aşama 1b (Merkez, 4 Kas gece; Serdar kararları "katılıyorum": sabit referans çizgi, isim ölçümü, 475,5, logo dahil)
+
+Yapılan (kod, yerel, Pillow 11.0.0 = iş akışı sürümü):
+- K2: dikey çizgiler referans metinden (EMILY / JAMES / JUNE 14, 2025) bir kez; isim ve tarih taban çizgisine oturur (`yeni_duzen.referans_cizgi`, `yazi_yerlestir`).
+- K3: kapılar `SABIT`e bağlı (tarih_taban 787,5; isim_taban 724; sonsuz_y 696; kucuk_alt 663; kucuk_ust_sabit 594; sembol_alt_sinir 562; h_max 69). Pillow 12.3.0'da tarih_taban 787,75 çıkıyor: sürüm farkı `ref_cizgi_sabit` ile yakalanır.
+- K1 / O2: B3 ölçeği çizilen piksellerle (render ikili arama); kapı ölçeği yeniden hesaplar, ×0,85 sembolü yeniden çizer, ÇİZİLEN kutuyla 1 px karşılaştırır. Render / nokta modeli oranı 0,9973-1,0120 (78 çift).
+- D2 logo boşluk kapısında; D8 merkez 475,5; O3 her kapıya negatif vaka (3 çift × 15 = 45); O4 tarih sığmazsa çıkış 1; O5 `kapat` yolu; O6 h_max yukarı yuvarlama + `kucuk_ust_ge_sabit`; D5 girdi /tmp; D7 kısmen.
+- Aşama 2 kodu (koşulmadı): `URETIM78_CIFTLER.json` "yeni_duzen" bölümü (aktif DEĞİŞMEDİ, "ornek"), uretim78 (cl_yeni_parca, KONTROL_ESKI, cift_sonu kontrol bayrağı, birlestir kontrol_ad), ornek78 (kontrol CL alt süreçleri YENI_DUZEN=0, sondaki CL üretim), beklenen `--bolum yeni_duzen`, yml (hazırlıkta `yeni_duzen_yerel_test.py --yalniz_kapi`, klasör öneki YENI_DUZEN, parça env).
+
+Sonuç (yerel; `ornek/YENI_DUZEN_YEREL_1B_20261104/`):
+- ref = SABIT; 78/78 PASS; bilinen FAIL 45/45 beklenen kapıdan.
+- En geniş tarih SEPTEMBER 10, 2007 = 328 px, sığar.
+- İsim: N (W) = 4. SSA (ssa.gov, 1926-2025 ilk 100 + 100): bugünkü boyda erkek × kadın çiftlerinin %66,0'ı sığar (eşik toplam genişlik 331 px; yaklaşık, aşağıdaki K-1b-3). İki SAMANTHA için isim %29, iki JACQUELINE için %35,2 küçülmeli (bilgi; karar 3 gereği boy sabit).
+- Testler: uretim78_mantik_testi 86/86, sikilastirma_mantik_testi PASS, test_workflows 494 YAML PASS, py_compile 0.
+- Yerel test ÇIKIŞ 1: isim eşiğinin "yalnız toplam genişliğe bağlı" varsayımı tutmadı (JENNIFER / GRACE toplam 329 < 331 ama taşıyor). Geometri kapıları temiz; isim oranı yaklaşık.
+
+DUR (HIZ VE KALİTE 4: 2 yerel iterasyon). Aşama 2 Actions koşusu YAPILMADI. Bağımsız inceleme (tek ajan) 15 bulgu; aşama 1c listesi:
+- K-1b-1 YÜKSEK: `o5.hedef_kapat` 3. değeri dict; `sembol_yerlestir` `int(n_)` yapıyor: YENI_DUZEN=1 motoru her çiftte çöker. Yerel testte `kapat` vakası yok.
+- K-1b-2 YÜKSEK: O7 açık: motor + dump + sade YENI_DUZEN=1 hiç koşulmadı (yerel ölçüm alfa maske + dikdörtgen işaret; motor `_ana`, gerçek sprite, kenar_onar, hedef_kapat).
+- K-1b-3 ORTA: isim oranı için toplam genişlik varsayımı yanlış; her çift tek tek denenmeli (ya da sol/sağ uç ayrı).
+- K-1b-4 ORTA: sondaki CL düşerse kontrolün eski düzen PNG'leri Drive'a gider; kontrol sonrası O/CANCER_LIBRA_* ve YAKIN_CANCER_LIBRA_* taşınmalı.
+- K-1b-5 ORTA: `kenar_kayit` onarımsız motoru kontrol CL'de `ek_env` olmadan çağırıyor.
+- K-1b-6 ORTA: `b3_en_buyuk` FAIL veremez (zayıf); çizimden ölçülmeli ya da kaldırılmalı.
+- K-1b-7 ORTA: `ref_cizgi_sabit` için bilinen FAIL yok (h_max 68 / 0, taban +0,25).
+- K-1b-8 DÜŞÜK-ORTA: taban kapıları üst veriden; sipariş için mürekkep taban ölçümü gerekir.
+- K-1b-9 DÜŞÜK-ORTA: hazırlık testi benzetim (alfa maske); etikete "benzetim", ya da gerçek sprite ile.
+- K-1b-10 DÜŞÜK: bilinen FAIL sayısı `> 0` yerine `== 45`.
+- K-1b-11 DÜŞÜK: s_max <= 0 durumunda çöküş yerine FAIL.
+- K-1b-12 DÜŞÜK: sade boşluğu isim1+isim2 (logo hariç); bugün sayı aynı, tanım farklı.
+- K-1b-13 DÜŞÜK: `yeni_duzen_kapilari_var` tarih metnini denetlemiyor.
+- K-1b-14 DÜŞÜK: PARCA dışı eski çağrıda CL ilk sırada değilse kontrol sayılmıyor (bugünkü çağıranlar etkilenmez).
+- K-1b-15 DÜŞÜK: hazırlık yerel testinin süresi ve belleği Actions'ta ölçülmedi (yerelde 15-18 dk; tüm maskeler önbellekte tutulunca 8 GB'ta OOM, düzeltildi).

@@ -304,11 +304,14 @@ def main():
     YD = None
     if YENI_DUZEN:                                                           # karar 1-4 (yeni_duzen.yeni_yerlesim; yataylar o3.yazi_blogu)
         ha, hb = o5.halka_T(pp, son.S0)
-        h_max = yd.h_max_12(h_oran, cap, sorted(SPRITE_H))                    # karar 3: 12 kucuk isaretin en yuksegi (nominal h_oran x cap)
-        E_, cizgi_, d_, g_yd, olc_yd = yd.yeni_yerlesim(o3.yazi_blogu, o1.rgba_olcek, T, kc, ana5, h_max)
+        h_max = yd.h_max_12(h_oran, cap, sorted(SPRITE_H))                    # karar 3 (O6): 12 kucuk isaretin nominal en yuksegi, yukari yuvarlanmis
+        kapat_ = (lambda r_, a_: o5.hedef_kapat(r_, a_)) if o5.KAPAT_HEDEF else None   # O5: eski yolla ayni hedef boy kapanisi
+        E_, cizgi_, d_, g_yd, olc_yd = yd.yeni_yerlesim(o3.yazi_blogu, o1.rgba_olcek, T, kc, ana5, h_max, kapat=kapat_)
+        if 'hedef_kapatilan' in d_:
+            o5.HEDEF_KAPATILAN['sembol'] = d_['hedef_kapatilan']
         E_['halka'] = (None, ha, 0, 0)
         M_, yb_, cak_, ok_ = o4.kapi(E_)
-        YD = dict(cizgi=cizgi_, sembol=d_, kapi=g_yd, olcum=olc_yd, o4_kapi=bool(ok_))
+        YD = dict(cizgi=cizgi_, sembol=d_, kapi=g_yd, olcum=olc_yd, o4_kapi=bool(ok_), h_max=h_max, sabit=yd.SABIT)   # O6: kullanilan iki kucuk isaret kapi kucuk_ust_ge_sabit ile
         bilgi = dict(yeni_duzen=YD, kutu=KUTU_BILGI)
         if not ok_:
             log('FAIL yerlesim (yeni duzen o4.kapi)', yb_, cak_[:4])

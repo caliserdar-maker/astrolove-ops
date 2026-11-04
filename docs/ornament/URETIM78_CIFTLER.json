@@ -1,5 +1,5 @@
 {
- "aciklama": "ornament 78 uretim cift listesi (Serdar 4 Kas, PLAN_78_URETIM.md 9f88868 + onaylar). aktif: hangi bolum kosar (\"ornek\" | \"78\"). Parcalar CANCER_LIBRA olmadan yazilir; uretim78.parcalar CL kontrolu her parcanin basina ekler. 78 bolumu = 75 cift (CANCER_LIBRA onayli 6daab364; AQUARIUS_PISCES ve GEMINI_VIRGO onayli 41839101824, Serdar 4 Kas \"A\"). 78 kosusunda yalniz aktif ve TETIK degisir.",
+ "aciklama": "ornament 78 uretim cift listesi (Serdar 4 Kas, PLAN_78_URETIM.md 9f88868 + onaylar). aktif: hangi bolum kosar (\"ornek\" | \"78\"). Parcalar CANCER_LIBRA olmadan yazilir; uretim78.parcalar CL kontrolu her parcanin basina ekler. 78 bolumu = 75 cift (CANCER_LIBRA onayli 6daab364; AQUARIUS_PISCES ve GEMINI_VIRGO onayli 41839101824, Serdar 4 Kas \"A\"). 78 kosusunda yalniz aktif ve TETIK degisir. aktif \"yeni_duzen\": yeni duzen ornek kosusu (Serdar 4 Kas gece); kosudan sonra aktif \"ornek\"e geri alinir.",
  "aktif": "ornek",
  "kontrol_cifti": "CANCER_LIBRA",
  "onayli": {
@@ -115,5 +115,30 @@
     "SCORPIO_VIRGO"
    ]
   ]
+ },
+ "yeni_duzen": {
+  "max_parallel": 4,
+  "cl_yeni_parca": 3,
+  "parcalar": [
+   [
+    "TAURUS_TAURUS",
+    "CANCER_TAURUS",
+    "LIBRA_LIBRA"
+   ],
+   [
+    "AQUARIUS_CANCER",
+    "ARIES_SCORPIO",
+    "LEO_SAGITTARIUS"
+   ],
+   [
+    "AQUARIUS_AQUARIUS",
+    "CAPRICORN_CAPRICORN"
+   ],
+   [
+    "AQUARIUS_PISCES",
+    "GEMINI_VIRGO"
+   ]
+  ],
+  "aciklama": "Serdar 4 Kas gece (KARARLAR_20261104_2): yeni duzen asama 2 ornek kosusu, 11 cift x 5 stil. CL parca 3 sonunda yeni duzende uretilir (cl_yeni_parca); her parcanin ilk CL kontrolu eski modda. 75 cift uretimi bu kosunun Serdar gorsel onayindan sonra ayri."
  }
 }

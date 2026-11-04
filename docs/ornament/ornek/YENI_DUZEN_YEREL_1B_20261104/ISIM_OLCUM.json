@@ -1,0 +1,1486 @@
+{
+ "tarih": {
+  "aday_sayisi": 3456,
+  "tum_bilesim": false,
+  "en_genis": "SEPTEMBER 10, 2007",
+  "genislik_px": 328,
+  "genislik_mm": 27.8,
+  "ilk10": [
+   [
+    "SEPTEMBER 10, 2007",
+    328
+   ],
+   [
+    "SEPTEMBER 10, 2017",
+    328
+   ],
+   [
+    "SEPTEMBER 10, 2027",
+    328
+   ],
+   [
+    "SEPTEMBER 11, 2007",
+    328
+   ],
+   [
+    "SEPTEMBER 11, 2017",
+    328
+   ],
+   [
+    "SEPTEMBER 11, 2027",
+    328
+   ],
+   [
+    "SEPTEMBER 20, 2007",
+    328
+   ],
+   [
+    "SEPTEMBER 20, 2017",
+    328
+   ],
+   [
+    "SEPTEMBER 20, 2027",
+    328
+   ],
+   [
+    "SEPTEMBER 22, 2007",
+    328
+   ]
+  ],
+  "ornek": {
+   "dizgi": "JUNE 14, 2025",
+   "px": -1
+  },
+  "sigar": {
+   "halka_ic_r_max": 326.15,
+   "o4_kapi": true,
+   "yasak": {
+    "guvenli_disi": 0,
+    "delik": 0,
+    "ust_cizgi": 0,
+    "tuval_disi": 0
+   },
+   "cakisma": [],
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_olcek": true,
+    "b3_en_buyuk": true,
+    "y2_ust": true,
+    "tarih_taban": true,
+    "isim_taban": true,
+    "sonsuz_y": true,
+    "kucuk_alta_yasli": true,
+    "kucuk_ust_ge_sabit": true,
+    "ref_cizgi_sabit": true
+   },
+   "gecti": true
+  }
+ },
+ "isim": {
+  "W_testi": [
+   {
+    "isim1": "WWW",
+    "isim2": "WWW",
+    "isim_k": 1.0,
+    "halka_r_max": 308.89,
+    "o4_kapi": true,
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "satir_x": [
+     270,
+     682
+    ],
+    "gecti": true,
+    "harf": 3
+   },
+   {
+    "isim1": "WWWW",
+    "isim2": "WWWW",
+    "isim_k": 1.0,
+    "halka_r_max": 322.3,
+    "o4_kapi": true,
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "satir_x": [
+     231,
+     721
+    ],
+    "gecti": true,
+    "harf": 4
+   },
+   {
+    "isim1": "WWWWW",
+    "isim2": "WWWWW",
+    "isim_k": 1.0,
+    "halka_r_max": 352.02,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 10,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     191,
+     761
+    ],
+    "gecti": false,
+    "harf": 5
+   },
+   {
+    "isim1": "WWWWWW",
+    "isim2": "WWWWWW",
+    "isim_k": 1.0,
+    "halka_r_max": 383.93,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 2645,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     152,
+     800
+    ],
+    "gecti": false,
+    "harf": 6
+   },
+   {
+    "isim1": "WWWWWWW",
+    "isim2": "WWWWWWW",
+    "isim_k": 1.0,
+    "halka_r_max": 416.85,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 5987,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     112,
+     840
+    ],
+    "gecti": false,
+    "harf": 7
+   },
+   {
+    "isim1": "WWWWWWWW",
+    "isim2": "WWWWWWWW",
+    "isim_k": 1.0,
+    "halka_r_max": 450.53,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 9255,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     73,
+     879
+    ],
+    "gecti": false,
+    "harf": 8
+   },
+   {
+    "isim1": "WWWWWWWWW",
+    "isim2": "WWWWWWWWW",
+    "isim_k": 1.0,
+    "halka_r_max": 485.46,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 12563,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2",
+     "halka/kucuk_sag"
+    ],
+    "satir_x": [
+     34,
+     918
+    ],
+    "gecti": false,
+    "harf": 9
+   },
+   {
+    "isim1": "WWWWWWWWWW",
+    "isim2": "WWWWWWWWWW",
+    "isim_k": 1.0,
+    "halka_r_max": 521.03,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 15161,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 84
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2",
+     "halka/kucuk_sol",
+     "halka/kucuk_sag"
+    ],
+    "satir_x": [
+     -6,
+     958
+    ],
+    "gecti": false,
+    "harf": 10
+   },
+   {
+    "isim1": "WWWWWWWWWWW",
+    "isim2": "WWWWWWWWWWW",
+    "isim_k": 1.0,
+    "halka_r_max": 557.59,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 16014,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 922
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2",
+     "halka/kucuk_sol",
+     "halka/kucuk_sag"
+    ],
+    "satir_x": [
+     -46,
+     998
+    ],
+    "gecti": false,
+    "harf": 11
+   },
+   {
+    "isim1": "WWWWWWWWWWWW",
+    "isim2": "WWWWWWWWWWWW",
+    "isim_k": 1.0,
+    "halka_r_max": 593.67,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 18054,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 1708
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2",
+     "halka/kucuk_sol",
+     "halka/kucuk_sag"
+    ],
+    "satir_x": [
+     -85,
+     1037
+    ],
+    "gecti": false,
+    "harf": 12
+   },
+   {
+    "isim1": "WWWWWWWWWWWWW",
+    "isim2": "WWWWWWWWWWWWW",
+    "isim_k": 1.0,
+    "halka_r_max": 630.45,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 20414,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 2556
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2",
+     "halka/kucuk_sol",
+     "halka/kucuk_sag"
+    ],
+    "satir_x": [
+     -124,
+     1076
+    ],
+    "gecti": false,
+    "harf": 13
+   },
+   {
+    "isim1": "WWWWWWWWWWWWWW",
+    "isim2": "WWWWWWWWWWWWWW",
+    "isim_k": 1.0,
+    "halka_r_max": 668.32,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 22875,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 3392
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     -164,
+     1116
+    ],
+    "gecti": false,
+    "harf": 14
+   }
+  ],
+  "verilen": [
+   {
+    "isim1": "MAXIMILIAN",
+    "isim2": "CHRISTOPHER",
+    "isim_k": 1.0,
+    "halka_r_max": 424.2,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 6359,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     113,
+     839
+    ],
+    "gecti": false,
+    "harf": [
+     10,
+     11
+    ]
+   },
+   {
+    "isim1": "ALEXANDRIA",
+    "isim2": "ANNA",
+    "isim_k": 1.0,
+    "halka_r_max": 358.15,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 240,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     193,
+     759
+    ],
+    "gecti": false,
+    "harf": [
+     10,
+     4
+    ]
+   },
+   {
+    "isim1": "MARY-JANE",
+    "isim2": "O'NEIL",
+    "isim_k": 1.0,
+    "halka_r_max": 346.42,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     207,
+     745
+    ],
+    "gecti": false,
+    "harf": [
+     8,
+     5
+    ]
+   },
+   {
+    "isim1": "EMILY",
+    "isim2": "JAMES",
+    "isim_k": 1.0,
+    "halka_r_max": 308.89,
+    "o4_kapi": true,
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "satir_x": [
+     267,
+     685
+    ],
+    "gecti": true,
+    "harf": [
+     5,
+     5
+    ]
+   },
+   {
+    "isim1": "QUINN",
+    "isim2": "JOSEPH",
+    "isim_k": 1.0,
+    "halka_r_max": 320.84,
+    "o4_kapi": true,
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "satir_x": [
+     242,
+     710
+    ],
+    "gecti": true,
+    "harf": [
+     5,
+     6
+    ]
+   }
+  ],
+  "not_": "harf sayisi tire / kesme isareti haric; sinir halka ic dairesi (r 336) + o4.kapi; W en genis buyuk harf (Cinzel); isim boyu karar 3 geregi sabit (isim_k = 1); k < 1 yalniz bilgi",
+  "N_W": 4,
+  "ssa": {
+   "kaynak": "ssa.gov/oact/babynames/decades/century.html (1926-2025, ilk 100 erkek + ilk 100 kadin; resmi kaynak)",
+   "ad_sayisi": 200,
+   "esik_toplam_px": 331,
+   "esik_monoton_dogrulama": [
+    {
+     "cift": [
+      "ZACHARY",
+      "BRYAN"
+     ],
+     "toplam": 325,
+     "gecti": true,
+     "beklenen": true
+    },
+    {
+     "cift": [
+      "RICHARD",
+      "HENRY"
+     ],
+     "toplam": 326,
+     "gecti": true,
+     "beklenen": true
+    },
+    {
+     "cift": [
+      "SHIRLEY",
+      "CHERYL"
+     ],
+     "toplam": 327,
+     "gecti": true,
+     "beklenen": true
+    },
+    {
+     "cift": [
+      "ASHLEY",
+      "EDWARD"
+     ],
+     "toplam": 328,
+     "gecti": true,
+     "beklenen": true
+    },
+    {
+     "cift": [
+      "JENNIFER",
+      "GRACE"
+     ],
+     "toplam": 329,
+     "gecti": false,
+     "beklenen": true
+    },
+    {
+     "cift": [
+      "GEORGE",
+      "JORDAN"
+     ],
+     "toplam": 330,
+     "gecti": true,
+     "beklenen": true
+    },
+    {
+     "cift": [
+      "MEGAN",
+      "STEPHEN"
+     ],
+     "toplam": 331,
+     "gecti": true,
+     "beklenen": true
+    },
+    {
+     "cift": [
+      "RACHEL",
+      "ARTHUR"
+     ],
+     "toplam": 332,
+     "gecti": false,
+     "beklenen": false
+    },
+    {
+     "cift": [
+      "DENNIS",
+      "ISABELLA"
+     ],
+     "toplam": 333,
+     "gecti": false,
+     "beklenen": false
+    },
+    {
+     "cift": [
+      "JANET",
+      "CAMERON"
+     ],
+     "toplam": 334,
+     "gecti": false,
+     "beklenen": false
+    },
+    {
+     "cift": [
+      "ROBERT",
+      "STEPHEN"
+     ],
+     "toplam": 335,
+     "gecti": false,
+     "beklenen": false
+    },
+    {
+     "cift": [
+      "ISABELLA",
+      "GLORIA"
+     ],
+     "toplam": 336,
+     "gecti": false,
+     "beklenen": false
+    }
+   ],
+   "monoton": false,
+   "oran_erkek_kadin_yuzde": 66.0,
+   "oran_tum_ciftler_yuzde": 65.8,
+   "tek_isim_sigar_yuzde_ayni_genislikte_es": 61.0,
+   "harf_tablosu": {
+    "3": {
+     "ad_sayisi": 4,
+     "en_genis": "ANN",
+     "px": 92,
+     "iki_en_genis_sigar": true
+    },
+    "4": {
+     "ad_sayisi": 27,
+     "en_genis": "ADAM",
+     "px": 123,
+     "iki_en_genis_sigar": true
+    },
+    "5": {
+     "ad_sayisi": 55,
+     "en_genis": "DONNA",
+     "px": 157,
+     "iki_en_genis_sigar": true
+    },
+    "6": {
+     "ad_sayisi": 48,
+     "en_genis": "AMANDA",
+     "px": 186,
+     "iki_en_genis_sigar": false
+    },
+    "7": {
+     "ad_sayisi": 39,
+     "en_genis": "ANTHONY",
+     "px": 214,
+     "iki_en_genis_sigar": false
+    },
+    "8": {
+     "ad_sayisi": 16,
+     "en_genis": "SAMANTHA",
+     "px": 234,
+     "iki_en_genis_sigar": false
+    },
+    "9": {
+     "ad_sayisi": 9,
+     "en_genis": "CHARLOTTE",
+     "px": 248,
+     "iki_en_genis_sigar": false
+    },
+    "10": {
+     "ad_sayisi": 1,
+     "en_genis": "JACQUELINE",
+     "px": 252,
+     "iki_en_genis_sigar": false
+    },
+    "11": {
+     "ad_sayisi": 1,
+     "en_genis": "CHRISTOPHER",
+     "px": 291,
+     "iki_en_genis_sigar": false
+    }
+   },
+   "kucultme": {
+    "8": {
+     "ad": "SAMANTHA",
+     "iki_isim": "SAMANTHA / SAMANTHA",
+     "gereken_k": 0.71,
+     "kuculme_yuzde": 29.0,
+     "not_": "bilgi; karar 3 geregi isim boyu degismez (Serdar karari olcumden sonra)"
+    },
+    "10": {
+     "ad": "JACQUELINE",
+     "iki_isim": "JACQUELINE / JACQUELINE",
+     "gereken_k": 0.648,
+     "kuculme_yuzde": 35.2,
+     "not_": "bilgi; karar 3 geregi isim boyu degismez (Serdar karari olcumden sonra)"
+    }
+   },
+   "genislik": {
+    "AARON": {
+     "harf": 5,
+     "px": 147
+    },
+    "ABIGAIL": {
+     "harf": 7,
+     "px": 163
+    },
+    "ADAM": {
+     "harf": 4,
+     "px": 123
+    },
+    "ALAN": {
+     "harf": 4,
+     "px": 111
+    },
+    "ALBERT": {
+     "harf": 6,
+     "px": 150
+    },
+    "ALEXANDER": {
+     "harf": 9,
+     "px": 247
+    },
+    "ALEXIS": {
+     "harf": 6,
+     "px": 134
+    },
+    "ALICE": {
+     "harf": 5,
+     "px": 116
+    },
+    "AMANDA": {
+     "harf": 6,
+     "px": 186
+    },
+    "AMBER": {
+     "harf": 5,
+     "px": 140
+    },
+    "AMY": {
+     "harf": 3,
+     "px": 90
+    },
+    "ANDREA": {
+     "harf": 6,
+     "px": 172
+    },
+    "ANDREW": {
+     "harf": 6,
+     "px": 182
+    },
+    "ANGELA": {
+     "harf": 6,
+     "px": 167
+    },
+    "ANN": {
+     "harf": 3,
+     "px": 92
+    },
+    "ANNA": {
+     "harf": 4,
+     "px": 122
+    },
+    "ANTHONY": {
+     "harf": 7,
+     "px": 214
+    },
+    "ARTHUR": {
+     "harf": 6,
+     "px": 171
+    },
+    "ASHLEY": {
+     "harf": 6,
+     "px": 154
+    },
+    "AUSTIN": {
+     "harf": 6,
+     "px": 149
+    },
+    "AVA": {
+     "harf": 3,
+     "px": 76
+    },
+    "BARBARA": {
+     "harf": 7,
+     "px": 187
+    },
+    "BENJAMIN": {
+     "harf": 8,
+     "px": 204
+    },
+    "BETTY": {
+     "harf": 5,
+     "px": 123
+    },
+    "BEVERLY": {
+     "harf": 7,
+     "px": 170
+    },
+    "BILLY": {
+     "harf": 5,
+     "px": 104
+    },
+    "BRADLEY": {
+     "harf": 7,
+     "px": 182
+    },
+    "BRANDON": {
+     "harf": 7,
+     "px": 208
+    },
+    "BRENDA": {
+     "harf": 6,
+     "px": 164
+    },
+    "BRIAN": {
+     "harf": 5,
+     "px": 122
+    },
+    "BRITTANY": {
+     "harf": 8,
+     "px": 200
+    },
+    "BRUCE": {
+     "harf": 5,
+     "px": 131
+    },
+    "BRYAN": {
+     "harf": 5,
+     "px": 129
+    },
+    "CALEB": {
+     "harf": 5,
+     "px": 127
+    },
+    "CAMERON": {
+     "harf": 7,
+     "px": 210
+    },
+    "CARL": {
+     "harf": 4,
+     "px": 106
+    },
+    "CAROL": {
+     "harf": 5,
+     "px": 140
+    },
+    "CAROLYN": {
+     "harf": 7,
+     "px": 195
+    },
+    "CATHERINE": {
+     "harf": 9,
+     "px": 234
+    },
+    "CHARLES": {
+     "harf": 7,
+     "px": 183
+    },
+    "CHARLOTTE": {
+     "harf": 9,
+     "px": 248
+    },
+    "CHERYL": {
+     "harf": 6,
+     "px": 161
+    },
+    "CHRISTIAN": {
+     "harf": 9,
+     "px": 224
+    },
+    "CHRISTINA": {
+     "harf": 9,
+     "px": 225
+    },
+    "CHRISTINE": {
+     "harf": 9,
+     "px": 220
+    },
+    "CHRISTOPHER": {
+     "harf": 11,
+     "px": 291
+    },
+    "CYNTHIA": {
+     "harf": 7,
+     "px": 191
+    },
+    "DANIEL": {
+     "harf": 6,
+     "px": 150
+    },
+    "DANIELLE": {
+     "harf": 8,
+     "px": 195
+    },
+    "DAVID": {
+     "harf": 5,
+     "px": 126
+    },
+    "DEBORAH": {
+     "harf": 7,
+     "px": 196
+    },
+    "DEBRA": {
+     "harf": 5,
+     "px": 133
+    },
+    "DENISE": {
+     "harf": 6,
+     "px": 142
+    },
+    "DENNIS": {
+     "harf": 6,
+     "px": 152
+    },
+    "DIANA": {
+     "harf": 5,
+     "px": 132
+    },
+    "DIANE": {
+     "harf": 5,
+     "px": 126
+    },
+    "DONALD": {
+     "harf": 6,
+     "px": 178
+    },
+    "DONNA": {
+     "harf": 5,
+     "px": 157
+    },
+    "DOROTHY": {
+     "harf": 7,
+     "px": 207
+    },
+    "DOUGLAS": {
+     "harf": 7,
+     "px": 196
+    },
+    "DYLAN": {
+     "harf": 5,
+     "px": 138
+    },
+    "EDWARD": {
+     "harf": 6,
+     "px": 174
+    },
+    "ELIJAH": {
+     "harf": 6,
+     "px": 130
+    },
+    "ELIZABETH": {
+     "harf": 9,
+     "px": 217
+    },
+    "EMILY": {
+     "harf": 5,
+     "px": 117
+    },
+    "EMMA": {
+     "harf": 4,
+     "px": 123
+    },
+    "ERIC": {
+     "harf": 4,
+     "px": 89
+    },
+    "ETHAN": {
+     "harf": 5,
+     "px": 139
+    },
+    "EVELYN": {
+     "harf": 6,
+     "px": 151
+    },
+    "FRANCES": {
+     "harf": 7,
+     "px": 181
+    },
+    "FRANK": {
+     "harf": 5,
+     "px": 135
+    },
+    "GABRIEL": {
+     "harf": 7,
+     "px": 170
+    },
+    "GARY": {
+     "harf": 4,
+     "px": 111
+    },
+    "GEORGE": {
+     "harf": 6,
+     "px": 166
+    },
+    "GERALD": {
+     "harf": 6,
+     "px": 163
+    },
+    "GLORIA": {
+     "harf": 6,
+     "px": 155
+    },
+    "GRACE": {
+     "harf": 5,
+     "px": 137
+    },
+    "GREGORY": {
+     "harf": 7,
+     "px": 198
+    },
+    "HANNAH": {
+     "harf": 6,
+     "px": 184
+    },
+    "HAROLD": {
+     "harf": 6,
+     "px": 172
+    },
+    "HEATHER": {
+     "harf": 7,
+     "px": 191
+    },
+    "HELEN": {
+     "harf": 5,
+     "px": 131
+    },
+    "HENRY": {
+     "harf": 5,
+     "px": 138
+    },
+    "ISAAC": {
+     "harf": 5,
+     "px": 116
+    },
+    "ISABELLA": {
+     "harf": 8,
+     "px": 181
+    },
+    "JACK": {
+     "harf": 4,
+     "px": 98
+    },
+    "JACOB": {
+     "harf": 5,
+     "px": 127
+    },
+    "JACQUELINE": {
+     "harf": 10,
+     "px": 252
+    },
+    "JAMES": {
+     "harf": 5,
+     "px": 121
+    },
+    "JANET": {
+     "harf": 5,
+     "px": 124
+    },
+    "JANICE": {
+     "harf": 6,
+     "px": 141
+    },
+    "JASON": {
+     "harf": 5,
+     "px": 125
+    },
+    "JEAN": {
+     "harf": 4,
+     "px": 95
+    },
+    "JEFFREY": {
+     "harf": 7,
+     "px": 159
+    },
+    "JENNIFER": {
+     "harf": 8,
+     "px": 192
+    },
+    "JEREMY": {
+     "harf": 6,
+     "px": 150
+    },
+    "JERRY": {
+     "harf": 5,
+     "px": 115
+    },
+    "JESSE": {
+     "harf": 5,
+     "px": 99
+    },
+    "JESSICA": {
+     "harf": 7,
+     "px": 150
+    },
+    "JOAN": {
+     "harf": 4,
+     "px": 105
+    },
+    "JOE": {
+     "harf": 3,
+     "px": 68
+    },
+    "JOHN": {
+     "harf": 4,
+     "px": 110
+    },
+    "JONATHAN": {
+     "harf": 8,
+     "px": 223
+    },
+    "JORDAN": {
+     "harf": 6,
+     "px": 164
+    },
+    "JOSE": {
+     "harf": 4,
+     "px": 89
+    },
+    "JOSEPH": {
+     "harf": 6,
+     "px": 146
+    },
+    "JOSHUA": {
+     "harf": 6,
+     "px": 160
+    },
+    "JOYCE": {
+     "harf": 5,
+     "px": 124
+    },
+    "JUAN": {
+     "harf": 4,
+     "px": 103
+    },
+    "JUDITH": {
+     "harf": 6,
+     "px": 146
+    },
+    "JUDY": {
+     "harf": 4,
+     "px": 102
+    },
+    "JULIA": {
+     "harf": 5,
+     "px": 110
+    },
+    "JULIE": {
+     "harf": 5,
+     "px": 103
+    },
+    "JUSTIN": {
+     "harf": 6,
+     "px": 136
+    },
+    "KAREN": {
+     "harf": 5,
+     "px": 135
+    },
+    "KATHERINE": {
+     "harf": 9,
+     "px": 229
+    },
+    "KATHLEEN": {
+     "harf": 8,
+     "px": 210
+    },
+    "KATHRYN": {
+     "harf": 7,
+     "px": 192
+    },
+    "KAYLA": {
+     "harf": 5,
+     "px": 128
+    },
+    "KEITH": {
+     "harf": 5,
+     "px": 118
+    },
+    "KELLY": {
+     "harf": 5,
+     "px": 117
+    },
+    "KENNETH": {
+     "harf": 7,
+     "px": 194
+    },
+    "KEVIN": {
+     "harf": 5,
+     "px": 123
+    },
+    "KIMBERLY": {
+     "harf": 8,
+     "px": 196
+    },
+    "KYLE": {
+     "harf": 4,
+     "px": 97
+    },
+    "LARRY": {
+     "harf": 5,
+     "px": 128
+    },
+    "LAURA": {
+     "harf": 5,
+     "px": 133
+    },
+    "LAUREN": {
+     "harf": 6,
+     "px": 160
+    },
+    "LAWRENCE": {
+     "harf": 8,
+     "px": 221
+    },
+    "LIAM": {
+     "harf": 4,
+     "px": 98
+    },
+    "LINDA": {
+     "harf": 5,
+     "px": 126
+    },
+    "LISA": {
+     "harf": 4,
+     "px": 81
+    },
+    "LOGAN": {
+     "harf": 5,
+     "px": 145
+    },
+    "LORI": {
+     "harf": 4,
+     "px": 90
+    },
+    "LUCAS": {
+     "harf": 5,
+     "px": 128
+    },
+    "LUKE": {
+     "harf": 4,
+     "px": 100
+    },
+    "MADISON": {
+     "harf": 7,
+     "px": 196
+    },
+    "MARGARET": {
+     "harf": 8,
+     "px": 228
+    },
+    "MARIA": {
+     "harf": 5,
+     "px": 134
+    },
+    "MARILYN": {
+     "harf": 7,
+     "px": 183
+    },
+    "MARK": {
+     "harf": 4,
+     "px": 118
+    },
+    "MARTHA": {
+     "harf": 6,
+     "px": 177
+    },
+    "MARY": {
+     "harf": 4,
+     "px": 116
+    },
+    "MASON": {
+     "harf": 5,
+     "px": 150
+    },
+    "MATTHEW": {
+     "harf": 7,
+     "px": 209
+    },
+    "MEGAN": {
+     "harf": 5,
+     "px": 151
+    },
+    "MELISSA": {
+     "harf": 7,
+     "px": 165
+    },
+    "MICHAEL": {
+     "harf": 7,
+     "px": 188
+    },
+    "MICHELLE": {
+     "harf": 8,
+     "px": 205
+    },
+    "NANCY": {
+     "harf": 5,
+     "px": 149
+    },
+    "NATALIE": {
+     "harf": 7,
+     "px": 166
+    },
+    "NATHAN": {
+     "harf": 6,
+     "px": 175
+    },
+    "NICHOLAS": {
+     "harf": 8,
+     "px": 211
+    },
+    "NICOLE": {
+     "harf": 6,
+     "px": 153
+    },
+    "NOAH": {
+     "harf": 4,
+     "px": 121
+    },
+    "OLIVIA": {
+     "harf": 6,
+     "px": 139
+    },
+    "PAMELA": {
+     "harf": 6,
+     "px": 158
+    },
+    "PATRICIA": {
+     "harf": 8,
+     "px": 182
+    },
+    "PATRICK": {
+     "harf": 7,
+     "px": 167
+    },
+    "PAUL": {
+     "harf": 4,
+     "px": 98
+    },
+    "PETER": {
+     "harf": 5,
+     "px": 122
+    },
+    "RACHEL": {
+     "harf": 6,
+     "px": 161
+    },
+    "RANDY": {
+     "harf": 5,
+     "px": 143
+    },
+    "RAYMOND": {
+     "harf": 7,
+     "px": 209
+    },
+    "REBECCA": {
+     "harf": 7,
+     "px": 184
+    },
+    "RICHARD": {
+     "harf": 7,
+     "px": 188
+    },
+    "ROBERT": {
+     "harf": 6,
+     "px": 155
+    },
+    "ROGER": {
+     "harf": 5,
+     "px": 140
+    },
+    "RONALD": {
+     "harf": 6,
+     "px": 172
+    },
+    "RUTH": {
+     "harf": 4,
+     "px": 109
+    },
+    "RYAN": {
+     "harf": 4,
+     "px": 105
+    },
+    "SAMANTHA": {
+     "harf": 8,
+     "px": 234
+    },
+    "SAMUEL": {
+     "harf": 6,
+     "px": 162
+    },
+    "SANDRA": {
+     "harf": 6,
+     "px": 168
+    },
+    "SARA": {
+     "harf": 4,
+     "px": 102
+    },
+    "SARAH": {
+     "harf": 5,
+     "px": 132
+    },
+    "SCOTT": {
+     "harf": 5,
+     "px": 133
+    },
+    "SEAN": {
+     "harf": 4,
+     "px": 102
+    },
+    "SHARON": {
+     "harf": 6,
+     "px": 172
+    },
+    "SHIRLEY": {
+     "harf": 7,
+     "px": 166
+    },
+    "SOPHIA": {
+     "harf": 6,
+     "px": 151
+    },
+    "STEPHANIE": {
+     "harf": 9,
+     "px": 224
+    },
+    "STEPHEN": {
+     "harf": 7,
+     "px": 180
+    },
+    "STEVEN": {
+     "harf": 6,
+     "px": 153
+    },
+    "SUSAN": {
+     "harf": 5,
+     "px": 131
+    },
+    "TERESA": {
+     "harf": 6,
+     "px": 147
+    },
+    "TERRY": {
+     "harf": 5,
+     "px": 127
+    },
+    "THERESA": {
+     "harf": 7,
+     "px": 181
+    },
+    "THOMAS": {
+     "harf": 6,
+     "px": 176
+    },
+    "TIFFANY": {
+     "harf": 7,
+     "px": 171
+    },
+    "TIMOTHY": {
+     "harf": 7,
+     "px": 194
+    },
+    "TYLER": {
+     "harf": 5,
+     "px": 127
+    },
+    "VICTORIA": {
+     "harf": 8,
+     "px": 200
+    },
+    "VINCENT": {
+     "harf": 7,
+     "px": 189
+    },
+    "VIRGINIA": {
+     "harf": 8,
+     "px": 190
+    },
+    "WALTER": {
+     "harf": 6,
+     "px": 159
+    },
+    "WAYNE": {
+     "harf": 5,
+     "px": 142
+    },
+    "WILLIAM": {
+     "harf": 7,
+     "px": 177
+    },
+    "WILLIE": {
+     "harf": 6,
+     "px": 134
+    },
+    "ZACHARY": {
+     "harf": 7,
+     "px": 196
+    }
+   }
+  }
+ }
+}

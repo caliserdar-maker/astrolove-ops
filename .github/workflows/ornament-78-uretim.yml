@@ -1,6 +1,8 @@
 name: ornament-78-uretim
 # Serdar 4 Kas (PLAN_78_URETIM.md 9f88868 onaylari): ornament matrix uretimi. Bolum docs/ornament/URETIM78_CIFTLER.json "aktif" alanindan
 # ("ornek": 2 parca x 4 denenmemis cift; "78": 75 cift, 6 parca). Her parcada CANCER_LIBRA ilk ve YALNIZ kontrol (onayli 6daab364'e <= 1 seviye / 10 px).
+# "yeni_duzen" (Serdar 4 Kas gece; asama 2): 11 cift, YENI_DUZEN=1; her parcada ilk CL ESKI modda kontrol, cl_yeni_parca'nin sonunda CL yeni duzen
+# uretimi; hazirlikta yeni_duzen_yerel_test.py --yalniz_kapi (ref = SABIT, 78/78, bilinen FAIL) FAIL ise uretim yok; Drive klasor oneki YENI_DUZEN.
 # Tetik: YALNIZ docs/ornament/URETIM78_TETIK.txt (dal ornament-printful-katalog). Eski ornament-78-ornek.yml ve ORNEK78_TETIK.txt ayri, degismedi.
 # Isler: hazirlik (parcalar, siparis kontrolu, tek Drive klasoru + alt klasorler, kapi testi, kenar onarimi on olcumu, onayli printful bilgi) ->
 #   parca (matrix; cift sonu kancasi: Drive'a tek yukleme, ETA, temizlik) -> birlestir (tekillestirme, Drive sha kiyasi, beklenti, dal tek yazici).
@@ -26,7 +28,7 @@ env:
 jobs:
   hazirlik:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 75
     permissions:
       actions: read
       contents: read
@@ -49,6 +51,7 @@ jobs:
             scripts/printful/
             docs/ornament/URETIM78_CIFTLER.json
             docs/ornament/zemin3/V2/
+            docs/ornament/kaynak/
           path: s
       - uses: actions/setup-python@v5
         with:
@@ -79,6 +82,16 @@ jobs:
           pip install -q pillow==11.0.0 numpy==2.5.4 opencv-python-headless==5.0.0.93 scipy==1.18.1 scikit-image==0.26.0 potracer==0.0.4
           python3 -c "import sys, numpy, cv2, PIL; print('python', sys.version.split()[0], 'numpy', numpy.__version__, 'cv2', cv2.__version__, 'pillow', PIL.__version__)" | tee /tmp/hz/paket.txt
           { nproc; free -m; df -h /tmp; } | tee -a /tmp/hz/paket.txt
+      - name: Yeni duzen kapi testi (yalniz aktif yeni_duzen; Serdar 4 Kas gece; FAIL ise uretim yok)
+        if: steps.parca.outputs.aktif == 'yeni_duzen'
+        timeout-minutes: 30
+        run: |
+          set +e
+          set -uo pipefail
+          python3 -I s/scripts/printful/yeni_duzen_yerel_test.py --cikti /tmp/yd_test --girdi /tmp/yd_girdi --yalniz_kapi 2>&1 | tee /tmp/hz/log_yd_test.txt
+          k=${PIPESTATUS[0]}
+          cp /tmp/yd_test/YERLESIM78_TEST.json /tmp/hz/YD_YERLESIM78_TEST.json 2>/dev/null || true
+          echo "yeni duzen kapi testi cikis $k"; exit $k
       - name: rclone kur + yapilandir
         timeout-minutes: 5
         env:
@@ -97,7 +110,7 @@ jobs:
         run: |
           set -euo pipefail
           A=$(python3 -c "import json; print(json.load(open('/tmp/hz/PARCALAR.json'))['aktif'])")
-          [ "$A" = "78" ] && B=URETIM || B=ORNEK
+          case "$A" in 78) B=URETIM ;; yeni_duzen) B=YENI_DUZEN ;; *) B=ORNEK ;; esac
           D=ORNAMENT_78${B}_$(date -u +%Y%m%d_%H%M)_${GITHUB_RUN_ID}; echo "D=$D" >> "$GITHUB_OUTPUT"
           rclone mkdir "gdrive:ASTROLOVE/TEMP/$D"
           rclone lsjson gdrive:ASTROLOVE/TEMP --dirs-only > /tmp/temp_dirs.json     # dala / artifact'a girmez (Drive ad + ID listesi)
@@ -187,6 +200,7 @@ jobs:
       GERCEK_BOY_CIFTLER: ${{ matrix.gercek_boy }}
       ORNEK78_DRIVE_KOK_ID: ${{ needs.hazirlik.outputs.kok_id }}
       ORNEK78_DRIVE_EK: /tmp/drive_ek
+      YENI_DUZEN: ${{ needs.hazirlik.outputs.aktif == 'yeni_duzen' && '1' || '0' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -369,8 +383,9 @@ jobs:
           rclone lsjson "gdrive:" --drive-root-folder-id "$KOK" -R --dirs-only > /tmp/bir_ozel/drive_dirs.json; l2=$?
           cd s
           python3 -I scripts/printful/uretim78.py klasor --lsjson /tmp/bir_ozel/drive_dirs.json 2>&1 | tee /tmp/bir/log_klasor.txt; kk=${PIPESTATUS[0]}
+          KA=CANCER_LIBRA; [ "$AKTIF" = "yeni_duzen" ] && KA=CANCER_LIBRA_KONTROL_ESKI      # yeni duzen: CL kontrol kaydi ayri anahtar, sondaki CL uretim
           python3 -I scripts/printful/uretim78.py birlestir --parca_dir /tmp/parcalar --parca_sayisi "$N" --drive_lsjson /tmp/bir_ozel/drive_lsjson.json \
-            --cikti /tmp/bir/BIRLESIK.json 2>&1 | tee /tmp/bir/log_birlestir.txt; bb=${PIPESTATUS[0]}
+            --kontrol_ad "$KA" --cikti /tmp/bir/BIRLESIK.json 2>&1 | tee /tmp/bir/log_birlestir.txt; bb=${PIPESTATUS[0]}
           python3 - <<'PY' > /tmp/bir/GERCEK_BOY_TOPLU.json
           import glob, json
           R = []
@@ -384,6 +399,12 @@ jobs:
             python3 -I scripts/printful/uretim78_beklenen.py --birlesik /tmp/bir/BIRLESIK.json --kapi /tmp/art/hazirlik/KOVA_KAPI_TESTI.json \
               --kenar_on /tmp/art/hazirlik/KENAR_ON_OLCUM.json --siparis /tmp/art/hazirlik/SIPARIS_HAZIRLIK.json --parca_dir /tmp/parcalar \
               --ciftler_json docs/ornament/URETIM78_CIFTLER.json --cikti /tmp/bir/BEKLENEN_SONUC_ORNEK.json 2>&1 | tee /tmp/bir/log_beklenen.txt; be=${PIPESTATUS[0]}
+          fi
+          if [ "$AKTIF" = "yeni_duzen" ]; then
+            python3 -I scripts/printful/uretim78_beklenen.py --birlesik /tmp/bir/BIRLESIK.json --kapi /tmp/art/hazirlik/KOVA_KAPI_TESTI.json \
+              --kenar_on /tmp/art/hazirlik/KENAR_ON_OLCUM.json --siparis /tmp/art/hazirlik/SIPARIS_HAZIRLIK.json --parca_dir /tmp/parcalar \
+              --ciftler_json docs/ornament/URETIM78_CIFTLER.json --bolum yeni_duzen --yd_test /tmp/art/hazirlik/YD_YERLESIM78_TEST.json \
+              --cikti /tmp/bir/BEKLENEN_SONUC_YENI_DUZEN.json 2>&1 | tee /tmp/bir/log_beklenen.txt; be=${PIPESTATUS[0]}
           fi
           echo "lsjson $l1/$l2 klasor $kk birlestir $bb gercek_boy $gb beklenen $be" | tee /tmp/bir/SONUC.txt
           b=$(( l1 || l2 || kk || bb || gb || be ? 1 : 0 )); echo "b=$b" >> "$GITHUB_OUTPUT"

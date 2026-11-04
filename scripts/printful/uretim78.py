@@ -28,6 +28,9 @@ CIFT78 = sorted('_'.join(sorted(p)) for p in itertools.combinations_with_replace
 STIL = ('RUBY', 'SAPPHIRE', 'EMERALD', 'SADE_ALTIN', 'FILDISI')
 KONTROL = 'CANCER_LIBRA'
 ONAYLI = ('CANCER_LIBRA', 'AQUARIUS_PISCES', 'GEMINI_VIRGO')       # Serdar 4 Kas "A": 78 kosusunda uretilmez, onayli dosyalari kullanilir
+YD11 = ('TAURUS_TAURUS', 'CANCER_TAURUS', 'AQUARIUS_CANCER', 'LIBRA_LIBRA', 'AQUARIUS_AQUARIUS', 'ARIES_SCORPIO', 'LEO_SAGITTARIUS',
+        'CAPRICORN_CAPRICORN', 'CANCER_LIBRA', 'AQUARIUS_PISCES', 'GEMINI_VIRGO')   # yeni duzen asama 2 ornek ciftleri (Serdar 4 Kas gece)
+KONTROL_ESKI = 'CANCER_LIBRA_KONTROL_ESKI'                           # yeni duzen kosusunda eski mod CL kontrolunun OLCUM anahtari
 ETKIN = ('queued', 'in_progress', 'waiting', 'pending', 'requested')
 SIPARIS_DESEN = re.compile(r'siparis|order', re.I)
 DPI, DPI_TOL = 300.0, 0.5
@@ -47,14 +50,23 @@ def parcalar(J, aktif=None):
         raise ValueError(f'tekrar eden cift: {sorted(c for c in set(tum) if tum.count(c) > 1)}')
     if KONTROL in tum:
         raise ValueError('CANCER_LIBRA parcaya yazilmaz (kontrol cifti otomatik eklenir)')
+    cl_yeni = B.get('cl_yeni_parca')                                         # yeni duzen (Serdar 4 Kas gece karar 6): CL bu parcanin SONUNDA yeni duzende uretilir
+    if cl_yeni is not None and aktif != 'yeni_duzen':
+        raise ValueError("cl_yeni_parca yalniz 'yeni_duzen' bolumunde")
+    if cl_yeni is not None and not (isinstance(cl_yeni, int) and 1 <= cl_yeni <= len(B['parcalar'])):
+        raise ValueError(f'cl_yeni_parca gecersiz: {cl_yeni}')
+    if aktif == 'yeni_duzen':
+        if sorted(tum + [KONTROL]) != sorted(YD11) or cl_yeni is None:
+            raise ValueError(f"'yeni_duzen' bolumu 10 cift + cl_yeni_parca (CL) olmali: eksik {sorted(set(YD11) - set(tum) - {KONTROL})}, fazla {sorted(set(tum) - set(YD11))}")
     if aktif == '78':
         bek = sorted(c for c in CIFT78 if c not in ONAYLI)
         if sorted(tum) != bek:
             raise ValueError(f"'78' bolumu 75 cift olmali: eksik {sorted(set(bek) - set(tum))}, fazla {sorted(set(tum) - set(bek))}")
     P = []
     for i, p in enumerate(B['parcalar']):
-        P.append(dict(parca=i + 1, ciftler=[KONTROL] + list(p), uretim=list(p),
-                      kenar_zorunlu=[c for c in p if 'AQUARIUS' in c.split('_')], gercek_boy=list(p)))
+        ek = [KONTROL] if cl_yeni == i + 1 else []
+        P.append(dict(parca=i + 1, ciftler=[KONTROL] + list(p) + ek, uretim=list(p) + ek, cl_yeni=bool(ek),
+                      kenar_zorunlu=[c for c in p if 'AQUARIUS' in c.split('_')], gercek_boy=list(p) + ek))
     for p in P:
         kenar_dogrula(p)
     return dict(aktif=aktif, max_parallel=int(B.get('max_parallel', len(P))), parca_sayisi=len(P), parcalar=P,
@@ -68,8 +80,9 @@ def kenar_dogrula(p):
     eks = sorted(set(ak) - set(p['kenar_zorunlu']))
     if eks:
         raise ValueError(f"parca {p['parca']}: Kova cifti kenar_zorunlu listesinde yok: {eks}")
-    if not p['ciftler'] or p['ciftler'][0] != KONTROL or p['ciftler'].count(KONTROL) != 1:
-        raise ValueError(f"parca {p['parca']}: ilk ve tek kontrol cifti CANCER_LIBRA olmali")
+    n_cl = 2 if p.get('cl_yeni') else 1                                     # yeni duzen: ilk CL kontrol (eski mod), son CL yeni duzen uretimi
+    if not p['ciftler'] or p['ciftler'][0] != KONTROL or p['ciftler'].count(KONTROL) != n_cl or (n_cl == 2 and p['ciftler'][-1] != KONTROL):
+        raise ValueError(f"parca {p['parca']}: ilk ve tek kontrol cifti CANCER_LIBRA olmali (yeni duzen CL'si yalniz sonda)")
     return True
 
 
@@ -228,12 +241,12 @@ def yukle(sahne, kok_id, rclone='rclone', yerel=None, deneme=3, bekle=5):
     return dict(ok=False, deneme=deneme, hata=son, hedef='drive')
 
 
-def cift_sonu(cift, r, O, RP, DE, w, parca, gercek_boy_fn=None, onizleme_fn=None, env=None):
+def cift_sonu(cift, r, O, RP, DE, w, parca, gercek_boy_fn=None, onizleme_fn=None, env=None, kontrol=None):
     """ornek78 cift sonu: dosya listesi (PASS kok / FAIL FAIL/<CIFT>/), gercek boy, onizleme, yakin plan, parca ara OLCUM tek yukleme;
     katman.pkl ve dump/ silinir. Kontrol cifti (CL) PNG'leri yuklenmez. Doner kayit; yukleme hatasi cifti FAIL yapar (yukleme_hata)."""
     env = env if env is not None else os.environ
     O, RP, DE, w = Path(O), Path(RP), Path(DE), Path(w)
-    k = dict(cift=cift, kontrol=cift == KONTROL)
+    k = dict(cift=cift, kontrol=(cift == KONTROL) if kontrol is None else bool(kontrol))   # yeni duzen: sondaki CL kontrol degil (yuklenir)
     sahne = w / '_sahne'
     if sahne.exists():
         shutil.rmtree(sahne)
@@ -314,15 +327,16 @@ def drive_karsilastir(lsjson, beklenen):
                 sha_yok=shasiz, sayi_esit=uretim == len(beklenen), gecti=not (eks or fark or cift_ad or shasiz) and uretim == len(beklenen))
 
 
-def birlestir(parca_olcum, parca_sayisi):
-    """parca_olcum: {n: R ya da None}. CL tekillestirme (kontrol parca basina), eksik parca FAIL."""
+def birlestir(parca_olcum, parca_sayisi, kontrol_ad=KONTROL):
+    """parca_olcum: {n: R ya da None}. CL tekillestirme (kontrol parca basina), eksik parca FAIL. kontrol_ad: atlanacak OLCUM anahtari
+    (yeni duzen kosusunda KONTROL_ESKI; o kosuda 'CANCER_LIBRA' anahtari yeni duzen uretimidir ve birlesime girer)."""
     eksik = sorted(n for n in range(1, parca_sayisi + 1) if not parca_olcum.get(n))
     B = dict(cift={}, kontrol_parca={}, eksik_parca=eksik, kenar_onarim_uyari=[], kucultme=[], kenar_onarimsiz_ek_fail={}, yukleme=[], cokus=[])
     for n in sorted(k for k, v in parca_olcum.items() if v):
         R = parca_olcum[n]
         B['kontrol_parca'][n] = dict(kontrol_pass=R.get('kontrol_pass'), kontrol=R.get('kontrol'))
         for c, v in R.get('cift', {}).items():
-            if c == KONTROL:
+            if c == kontrol_ad:
                 continue
             if c in B['cift']:
                 raise ValueError(f'cift iki parcada: {c}')
@@ -331,10 +345,10 @@ def birlestir(parca_olcum, parca_sayisi):
                 B['kenar_onarimsiz_ek_fail'][c] = v['kenar_onarimsiz_ek_fail']
         u = R.get('kenar_onarim_uyari')
         if isinstance(u, list):
-            B['kenar_onarim_uyari'] += [x for x in u if x.get('cift') != KONTROL]
-        B['kucultme'] += [x for x in (R.get('kucultme') or []) if x.get('cift') != KONTROL]
+            B['kenar_onarim_uyari'] += [x for x in u if x.get('cift') != kontrol_ad]
+        B['kucultme'] += [x for x in (R.get('kucultme') or []) if x.get('cift') != kontrol_ad]
         B['yukleme'] += [x for x in (R.get('cift_sonu') or []) if not x.get('kontrol')]
-        B['cokus'] += [c for c in (R.get('cikis') or {}).get('cokus_ciftler', []) if c != KONTROL]
+        B['cokus'] += [c for c in (R.get('cikis') or {}).get('cokus_ciftler', []) if c != kontrol_ad]
     B['fail'] = sorted(c for c, v in B['cift'].items() if cift_fail_mi(v))
     B['kontrol_hepsi'] = bool(B['kontrol_parca']) and all(v.get('kontrol_pass') is True for v in B['kontrol_parca'].values())
     B['gecti'] = bool(not eksik and B['kontrol_hepsi'] and not B['fail'] and not B['cokus'])
@@ -359,7 +373,7 @@ def main():
     p = sp.add_parser('onayli'); p.add_argument('--klasor', nargs='+', required=True); p.add_argument('--cikti', required=True)
     p = sp.add_parser('klasor'); p.add_argument('--lsjson', required=True)
     p = sp.add_parser('birlestir'); p.add_argument('--parca_dir', required=True); p.add_argument('--parca_sayisi', type=int, required=True)
-    p.add_argument('--drive_lsjson'); p.add_argument('--cikti', required=True)
+    p.add_argument('--drive_lsjson'); p.add_argument('--cikti', required=True); p.add_argument('--kontrol_ad', default=KONTROL)
     p = sp.add_parser('dal_kapisi'); p.add_argument('dosya', nargs='*')
     a = ap.parse_args()
     if a.k == 'parcalar':
@@ -391,7 +405,7 @@ def main():
         for n in range(1, a.parca_sayisi + 1):
             f = Path(a.parca_dir) / f'PARCA_{n}' / 'OLCUM.json'
             PO[n] = json.loads(f.read_text()) if f.exists() else None
-        B = birlestir(PO, a.parca_sayisi)
+        B = birlestir(PO, a.parca_sayisi, a.kontrol_ad)
         if a.drive_lsjson:
             bek = [(y['yol'], y['sha256']) for x in B['yukleme'] for y in (x.get('yukleme') or {}).get('dosyalar', [])]
             B['drive'] = drive_karsilastir(json.loads(Path(a.drive_lsjson).read_text()), bek)

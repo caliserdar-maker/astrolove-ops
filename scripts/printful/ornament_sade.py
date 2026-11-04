@@ -214,7 +214,7 @@ def main():
         Image.fromarray(rgba, 'RGBA').save(O / dosya)
         r['dosya'] = dosya
         r['kapi'] = dict(leke_0=r['leke_a'] == 0, tasma_ve_yasak_0=sum(gy.values()) == 0, zemin_seffaf=r['zemin_seffaf'],
-                         yerlesim_ayni=(all(abs(v - 32) <= 1 for v in r['bosluk_px'][1:]) if os.environ.get('YENI_DUZEN') == '1' else   # yeni duzen: 32 / 32
+                         yerlesim_ayni=((all(abs(v - 32) <= 1 for v in r['bosluk_px'][1:]) and r['bosluk_px'][0] >= 31) if os.environ.get('YENI_DUZEN') == '1' else   # yeni duzen: 32 / 32, sembol-kucuk >= 32 - 1 (Merkez 4 Kas gece)
                                         r['bosluk_px'] == [20, 20, 20] and (r['sembol_kutu'][1] == 246 if a.cift == 'CANCER_LIBRA' else True)))
         r['sembol_ust_y_bilgi'] = dict(olculen=int(r['sembol_kutu'][1]), cancer_libra=246, not_='yeni ciftte bilgi; sert yalniz CANCER_LIBRA')
         r['etiket'] = f'{n} {ad_r}: kati {r["kati_kontrast_en_kotu"]}' + ('' if r['okunur'] else ' OKUNMAZ (uretim adayi degil)')
