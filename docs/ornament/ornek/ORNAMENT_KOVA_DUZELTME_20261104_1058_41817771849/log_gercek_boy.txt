@@ -1,0 +1,1 @@
+PASS /tmp/rapor/GERCEK_BOY_AQUARIUS_PISCES_SADE_3KOYU_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True

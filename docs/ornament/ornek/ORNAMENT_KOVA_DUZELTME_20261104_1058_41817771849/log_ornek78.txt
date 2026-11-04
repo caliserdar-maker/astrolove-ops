@@ -1,0 +1,11 @@
+[    0.0s] cift CANCER_LIBRA
+[  222.5s] CANCER_LIBRA yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.19, 'SAPPHIRE': 5.88, 'EMERALD': 5.46} dE00 {'RUBY': 0.756, 'SAPPHIRE': 0.86, 'EMERALD': 0.854} sembol [264, 246, 689, 650] uzaklik {'guvenli_disi': 8.6, 'delik': 49.0, 'ust_cizgi': 25.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  222.6s] KONTROL RUBY 1 1 PASS
+[  222.7s] KONTROL SAPPHIRE 1 1 PASS
+[  222.7s] KONTROL EMERALD 1 1 PASS
+[  222.8s] KONTROL SADE_ALTIN 1 1 PASS
+[  222.9s] KONTROL FILDISI 1 1 PASS
+[  222.9s] cift AQUARIUS_PISCES
+[  592.6s] onarimsiz motor AQUARIUS_PISCES cikis 1
+[  592.7s] AQUARIUS_PISCES yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 6.18, 'SAPPHIRE': 7.03, 'EMERALD': 6.54} dE00 {'RUBY': 0.748, 'SAPPHIRE': 0.742, 'EMERALD': 0.661} sembol [322, 250, 631, 652] uzaklik {'guvenli_disi': 8.6, 'delik': 113.6, 'ust_cizgi': 28.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  595.8s] BITTI 10 PNG | cikis 0 {}

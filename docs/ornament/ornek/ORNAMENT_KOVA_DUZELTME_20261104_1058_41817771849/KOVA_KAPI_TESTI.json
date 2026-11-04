@@ -1,0 +1,514 @@
+{
+ "yol": "kirp pad 2 -> (ana 1600) -> delik_kapat -> [kenar_onar] -> leke_ic_kaynak(olcum=False, pay 24)",
+ "kaynaklar": [
+  {
+   "kaynak": "cancer_symbol_gold.png",
+   "tur": "kucuk",
+   "boyut": [
+    1012,
+    1167
+   ],
+   "olcum": {
+    "kapanis": 7,
+    "ice_px": 4,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 12879
+   },
+   "yaricap": 6,
+   "kenara_degen_murekkep": {
+    "ust": false,
+    "alt": true
+   },
+   "mod_kapali": {
+    "kapi_sayisi": 0,
+    "bilinen_pass": {
+     "beklenen": 0,
+     "olculen": 0,
+     "gecti": true
+    },
+    "bilinen_fail_ic": {
+     "merkez": [
+      181,
+      208
+     ],
+     "yaricap": 6,
+     "disk_px": 113,
+     "disk_icinde_sayilan": 113,
+     "gecti": true
+    },
+    "bilgi_ham_ic_leke_delik_kapat_sonrasi": 0,
+    "bilinen_fail_kenar": {
+     "merkez": [
+      569,
+      1010
+     ],
+     "kenar": "alt",
+     "yaricap": 6,
+     "disk_px": 74,
+     "sayim_bolgesi": "disk ve kenardan ilk 3 px",
+     "bolge_px": 35,
+     "disk_icinde_sayilan": 0,
+     "zorunlu": false,
+     "gecti": true,
+     "not_": "kenar bandi kor (ice 4 px); bilgi, FAIL degil"
+    }
+   },
+   "mod_acik_bilgi": {
+    "kenar_onar": {
+     "n0": 0,
+     "kapali": false,
+     "boyut": [
+      1012,
+      1167
+     ],
+     "olcum": {
+      "kapanis": 7,
+      "ice_px": 4,
+      "kenar_payi": 24,
+      "kucuk_delik_alan_esigi": 12879
+     },
+     "sb": [
+      1,
+      1,
+      1167,
+      1012
+     ],
+     "tur": [],
+     "degisen_piksel": 0,
+     "alfa_farki_en_buyuk": 0.0,
+     "bilesen": [],
+     "kenara_uzaklik": null
+    },
+    "kapi_sayisi_onarim_sonrasi_bilgi": 0,
+    "yapay_kenar_lekesi": {
+     "onarim_oncesi_bolgede": 0,
+     "onarim_sonrasi_bolgede": 0,
+     "gizlendi": false,
+     "disk_icinde_alfa_farki_en_buyuk": 0.0,
+     "not_": "kenar_onar sayi 0 olana kadar onarir: gizlendi yapisi geregi True beklenir (zayif; bilgi)"
+    }
+   },
+   "gecti": true
+  },
+  {
+   "kaynak": "libra_symbol_gold.png",
+   "tur": "kucuk",
+   "boyut": [
+    1084,
+    1448
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 16934
+   },
+   "yaricap": 6,
+   "kenara_degen_murekkep": {
+    "ust": true,
+    "alt": true
+   },
+   "mod_kapali": {
+    "kapi_sayisi": 0,
+    "bilinen_pass": {
+     "beklenen": 0,
+     "olculen": 0,
+     "gecti": true
+    },
+    "bilinen_fail_ic": {
+     "merkez": [
+      725,
+      38
+     ],
+     "yaricap": 6,
+     "disk_px": 113,
+     "disk_icinde_sayilan": 113,
+     "gecti": true
+    },
+    "bilgi_ham_ic_leke_delik_kapat_sonrasi": 0,
+    "bilinen_fail_kenar": {
+     "merkez": [
+      726,
+      1
+     ],
+     "kenar": "ust",
+     "yaricap": 6,
+     "disk_px": 74,
+     "sayim_bolgesi": "disk ve kenardan ilk 3 px",
+     "bolge_px": 35,
+     "disk_icinde_sayilan": 0,
+     "zorunlu": false,
+     "gecti": true,
+     "not_": "kenar bandi kor (ice 5 px); bilgi, FAIL degil"
+    }
+   },
+   "mod_acik_bilgi": {
+    "kenar_onar": {
+     "n0": 0,
+     "kapali": false,
+     "boyut": [
+      1084,
+      1448
+     ],
+     "olcum": {
+      "kapanis": 9,
+      "ice_px": 5,
+      "kenar_payi": 24,
+      "kucuk_delik_alan_esigi": 16934
+     },
+     "sb": [
+      0,
+      0,
+      1447,
+      1084
+     ],
+     "tur": [],
+     "degisen_piksel": 0,
+     "alfa_farki_en_buyuk": 0.0,
+     "bilesen": [],
+     "kenara_uzaklik": null
+    },
+    "kapi_sayisi_onarim_sonrasi_bilgi": 0,
+    "yapay_kenar_lekesi": {
+     "onarim_oncesi_bolgede": 0,
+     "onarim_sonrasi_bolgede": 0,
+     "gizlendi": false,
+     "disk_icinde_alfa_farki_en_buyuk": 0.0,
+     "not_": "kenar_onar sayi 0 olana kadar onarir: gizlendi yapisi geregi True beklenir (zayif; bilgi)"
+    }
+   },
+   "gecti": true
+  },
+  {
+   "kaynak": "aquarius_symbol_gold.png",
+   "tur": "kucuk",
+   "boyut": [
+    4501,
+    10817
+   ],
+   "olcum": {
+    "kapanis": 61,
+    "ice_px": 34,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 494248
+   },
+   "yaricap": 18,
+   "kenara_degen_murekkep": {
+    "ust": true,
+    "alt": true
+   },
+   "mod_kapali": {
+    "kapi_sayisi": 445,
+    "gercek_kaynak_onarimsiz_leke_px_bilgi": 445,
+    "bilinen_fail_ic": {
+     "merkez": [
+      3300,
+      673
+     ],
+     "yaricap": 18,
+     "disk_px": 1009,
+     "disk_icinde_sayilan": 1009,
+     "gecti": true
+    },
+    "bilgi_ham_ic_leke_delik_kapat_sonrasi": 0,
+    "bilinen_fail_kenar": {
+     "merkez": [
+      8424,
+      1
+     ],
+     "kenar": "ust",
+     "yaricap": 18,
+     "disk_px": 558,
+     "sayim_bolgesi": "disk ve kenardan ilk 3 px",
+     "bolge_px": 107,
+     "disk_icinde_sayilan": 107,
+     "zorunlu": true,
+     "gecti": true,
+     "not_": null
+    }
+   },
+   "mod_acik_bilgi": {
+    "kenar_onar": {
+     "n0": 445,
+     "kapali": false,
+     "boyut": [
+      4501,
+      10817
+     ],
+     "olcum": {
+      "kapanis": 61,
+      "ice_px": 34,
+      "kenar_payi": 24,
+      "kucuk_delik_alan_esigi": 494248
+     },
+     "sb": [
+      0,
+      0,
+      10817,
+      4501
+     ],
+     "tur": [
+      {
+       "onarilan": 445,
+       "kalan": 0
+      }
+     ],
+     "degisen_piksel": 464,
+     "alfa_farki_en_buyuk": 1.0,
+     "bilesen": [
+      {
+       "x": 5122,
+       "y": 4499,
+       "w": 323,
+       "h": 2,
+       "alan": 324
+      },
+      {
+       "x": 8348,
+       "y": 0,
+       "w": 57,
+       "h": 2,
+       "alan": 82
+      },
+      {
+       "x": 8449,
+       "y": 0,
+       "w": 42,
+       "h": 2,
+       "alan": 58
+      }
+     ],
+     "kenara_uzaklik": {
+      "en_kucuk": 0,
+      "en_buyuk": 1,
+      "ortanca": 0.0
+     },
+     "bilesen_sayisi": 3
+    },
+    "kapi_sayisi_onarim_sonrasi_bilgi": 0,
+    "yapay_kenar_lekesi": {
+     "onarim_oncesi_bolgede": 107,
+     "onarim_sonrasi_bolgede": 0,
+     "gizlendi": true,
+     "disk_icinde_alfa_farki_en_buyuk": 0.5,
+     "not_": "kenar_onar sayi 0 olana kadar onarir: gizlendi yapisi geregi True beklenir (zayif; bilgi)"
+    }
+   },
+   "gecti": true
+  },
+  {
+   "kaynak": "pisces_symbol_gold.png",
+   "tur": "kucuk",
+   "boyut": [
+    1206,
+    1296
+   ],
+   "olcum": {
+    "kapanis": 7,
+    "ice_px": 4,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 16853
+   },
+   "yaricap": 6,
+   "kenara_degen_murekkep": {
+    "ust": true,
+    "alt": true
+   },
+   "mod_kapali": {
+    "kapi_sayisi": 0,
+    "gercek_kaynak_onarimsiz_leke_px_bilgi": 0,
+    "bilinen_fail_ic": {
+     "merkez": [
+      858,
+      604
+     ],
+     "yaricap": 6,
+     "disk_px": 113,
+     "disk_icinde_sayilan": 113,
+     "gecti": true
+    },
+    "bilgi_ham_ic_leke_delik_kapat_sonrasi": 0,
+    "bilinen_fail_kenar": {
+     "gecti": true,
+     "not_": "kenara degen dolu murekkep yok, leke konamadi (bilgi; zorunlu degil)"
+    }
+   },
+   "mod_acik_bilgi": {
+    "kenar_onar": {
+     "n0": 0,
+     "kapali": false,
+     "boyut": [
+      1206,
+      1296
+     ],
+     "olcum": {
+      "kapanis": 7,
+      "ice_px": 4,
+      "kenar_payi": 24,
+      "kucuk_delik_alan_esigi": 16853
+     },
+     "sb": [
+      0,
+      0,
+      1296,
+      1206
+     ],
+     "tur": [],
+     "degisen_piksel": 0,
+     "alfa_farki_en_buyuk": 0.0,
+     "bilesen": [],
+     "kenara_uzaklik": null
+    },
+    "kapi_sayisi_onarim_sonrasi_bilgi": 0
+   },
+   "gecti": true
+  },
+  {
+   "kaynak": "CANCER_LIBRA_ana.png",
+   "tur": "ana",
+   "boyut": [
+    1514,
+    1600
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 25741
+   },
+   "yaricap": 6,
+   "kenara_degen_murekkep": {
+    "ust": false,
+    "alt": false
+   },
+   "mod_kapali": {
+    "kapi_sayisi": 0,
+    "bilinen_pass": {
+     "beklenen": 0,
+     "olculen": 0,
+     "gecti": true
+    },
+    "bilinen_fail_ic": {
+     "merkez": [
+      620,
+      435
+     ],
+     "yaricap": 6,
+     "disk_px": 113,
+     "disk_icinde_sayilan": 113,
+     "gecti": true
+    },
+    "bilgi_ham_ic_leke_delik_kapat_sonrasi": 0,
+    "bilinen_fail_kenar": {
+     "gecti": true,
+     "not_": "kenara degen dolu murekkep yok, leke konamadi (bilgi; zorunlu degil)"
+    }
+   },
+   "mod_acik_bilgi": {
+    "kenar_onar": {
+     "n0": 0,
+     "kapali": false,
+     "boyut": [
+      1514,
+      1600
+     ],
+     "olcum": {
+      "kapanis": 9,
+      "ice_px": 5,
+      "kenar_payi": 24,
+      "kucuk_delik_alan_esigi": 25741
+     },
+     "sb": [
+      1,
+      1,
+      1599,
+      1513
+     ],
+     "tur": [],
+     "degisen_piksel": 0,
+     "alfa_farki_en_buyuk": 0.0,
+     "bilesen": [],
+     "kenara_uzaklik": null
+    },
+    "kapi_sayisi_onarim_sonrasi_bilgi": 0
+   },
+   "gecti": true
+  },
+  {
+   "kaynak": "AQUARIUS_PISCES_ana.png",
+   "tur": "ana",
+   "boyut": [
+    2073,
+    1600
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 34954
+   },
+   "yaricap": 6,
+   "kenara_degen_murekkep": {
+    "ust": false,
+    "alt": false
+   },
+   "mod_kapali": {
+    "kapi_sayisi": 0,
+    "gercek_kaynak_onarimsiz_leke_px_bilgi": 0,
+    "bilinen_fail_ic": {
+     "merkez": [
+      564,
+      1086
+     ],
+     "yaricap": 6,
+     "disk_px": 113,
+     "disk_icinde_sayilan": 113,
+     "gecti": true
+    },
+    "bilgi_ham_ic_leke_delik_kapat_sonrasi": 0,
+    "bilinen_fail_kenar": {
+     "gecti": true,
+     "not_": "kenara degen dolu murekkep yok, leke konamadi (bilgi; zorunlu degil)"
+    }
+   },
+   "mod_acik_bilgi": {
+    "kenar_onar": {
+     "n0": 0,
+     "kapali": false,
+     "boyut": [
+      2073,
+      1600
+     ],
+     "olcum": {
+      "kapanis": 9,
+      "ice_px": 5,
+      "kenar_payi": 24,
+      "kucuk_delik_alan_esigi": 34954
+     },
+     "sb": [
+      3,
+      2,
+      1598,
+      2071
+     ],
+     "tur": [],
+     "degisen_piksel": 0,
+     "alfa_farki_en_buyuk": 0.0,
+     "bilesen": [],
+     "kenara_uzaklik": null
+    },
+    "kapi_sayisi_onarim_sonrasi_bilgi": 0
+   },
+   "gecti": true
+  }
+ ],
+ "kenar_zorunlu": [
+  "aquarius"
+ ],
+ "kenar_zorunlu_eksik": [],
+ "gercek_kova_onarimsiz_leke_px": {
+  "aquarius_symbol_gold.png": 445,
+  "AQUARIUS_PISCES_ana.png": 0
+ },
+ "test_gecti": true
+}
