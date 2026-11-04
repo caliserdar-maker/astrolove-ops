@@ -29,6 +29,8 @@ CIFTLER = tuple(os.environ.get('ORNEK78_CIFTLER', 'CANCER_LIBRA,ARIES_ARIES,CAPR
 STIL = ('RUBY', 'SAPPHIRE', 'EMERALD', 'SADE_ALTIN', 'FILDISI')
 TOL_SEVIYE, TOL_PIKSEL = 1, 10
 KENAR_ZORUNLU = tuple(x for x in os.environ.get('ORNEK78_KENAR_ZORUNLU', '').split(',') if x)      # B: onarimsiz motorun nedeni leke olmali (sert)
+PARCA = os.environ.get('ORNEK78_PARCA', '')                                 # matrix parca no (ornament-78-uretim.yml); bos: eski davranis
+_s2 = importlib.util.spec_from_file_location('uretim78', _d / 'uretim78.py'); u78 = importlib.util.module_from_spec(_s2); _s2.loader.exec_module(u78)
 ONAYLI_EK = dict(x.split('=', 1) for x in os.environ.get('ORNEK78_ONAYLI_EK', '').split(',') if '=' in x)   # E: CIFT=klasor (onayli 3 koyu stil kiyasi)
 PY = sys.executable
 T0 = time.time()
@@ -126,7 +128,8 @@ def dusuk_kontrast_liste(ciftler):
             alt = v['kati_ham'] < d['kati'] or (d['ortanca'] is not None and v['ortanca_ham'] < d['ortanca'])
             if alt:
                 L[s].append(dict(cift=c, stil=s, kati=v['kati'], ortanca=v['ortanca'], kati_ham=round(v['kati_ham'], 4), ortanca_ham=round(v['ortanca_ham'], 4),
-                                 en_kotu_oge=v['en_kotu_oge'], duzey=dict(kati=d['kati'], ortanca=d['ortanca']), duzey_kaynak=d['kaynak']))
+                                 en_kotu_oge=v['en_kotu_oge'], duzey=dict(kati=d['kati'], ortanca=d['ortanca']), duzey_kaynak=d['kaynak'],
+                                 kontrol_cifti=bool(c == 'CANCER_LIBRA')))
     return dict(liste=L, cancer_libra_bu_kosu_bilgi=cl, not_='bilgi; FILDISI listesindeki ciftler 78 sonrasi Serdar goz onayina (O4 a)')
 
 
@@ -194,6 +197,9 @@ def kenar_kayit(a, cift, w, M_, O, DE, KENAR, r, RP, UYARI):
         SERT = r['kapi']['sert']
         r['not_'] = 'sert kapilar: ' + ('gecti' if all(SERT.values()) else 'FAIL ' + ', '.join(k for k, v in SERT.items() if not v))
         log('onarimsiz neden', cift, ok_, neden)
+    if degisen:                                                              # Serdar 4 Kas soru 6: onarimsiz taraftaki ek FAIL'ler ayri liste (kume)
+        mo_ = json.loads((w / 'motor_onarimsiz' / 'OLCUM.json').read_text()) if (w / 'motor_onarimsiz' / 'OLCUM.json').exists() else {}
+        r['kenar_onarimsiz_ek_fail'] = sorted(set((mo_.get('cikis') or {}).get('fail') or []) - {'leke_a_kaynak_0'})
     for ad, k_ in KO.items():
         row = dict(cift=cift, kaynak=ad, n0=k_['n0'], degisen_piksel=k_['degisen_piksel'], alfa_farki_en_buyuk=k_['alfa_farki_en_buyuk'],
                    tur=k_['tur'], bilesen=k_['bilesen'], bilesen_sayisi=k_.get('bilesen_sayisi', 0), kenara_uzaklik=k_['kenara_uzaklik'],
@@ -242,6 +248,42 @@ def onayli_kiyas(O, cift, klasor, stiller=('RUBY', 'SAPPHIRE', 'EMERALD')):
     return R_
 
 
+def cift_sonu_calistir(cift, R, O, RP, DE, w, a, i_c):
+    """G (4 Kas): cift sonu kancasi (parca ara OLCUM, Drive tek yukleme, gercek boy, onizleme, yakin plan, temizlik, ETA). Kanca hatasi cifti FAIL yapar."""
+    r = R['cift'].setdefault(cift, {})
+    try:
+        (RP / 'OLCUM_PARCA.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str))
+
+        def gb(c):
+            g_ = gercek_boy(O, c, STIL, RP / f'GERCEK_BOY_{c}_5STIL_300dpi.png')     # None: dosya eksik -> cift_sonu gercek_boy_var FAIL
+            return (RP / f'GERCEK_BOY_{c}_5STIL_300dpi.png') if g_ else None
+
+        def oz(c):
+            if not all((O / f'{c}_{s}_954.png').exists() for s in STIL):
+                return None
+            liste = []
+            for s in STIL:
+                im = Image.open(O / f'{c}_{s}_954.png')
+                if im.mode == 'RGBA':
+                    b = Image.new('RGB', im.size, (255, 255, 255)); b.paste(im, (0, 0), im); im = b
+                liste.append(np.asarray((sinir_ciz(im) if s == 'SADE_ALTIN' else im).convert('RGB')))
+            f = RP / f'ONIZLEME_{c}.png'
+            son.onizleme_etiketli(liste, [f'{c} / {s}' for s in STIL], ImageFont.truetype(a.font, 24), h_et=40).save(f, dpi=(300, 300))
+            return f
+        k = u78.cift_sonu(cift, r, O, RP, DE, w, PARCA, gercek_boy_fn=gb, onizleme_fn=oz)
+    except Exception:                                                        # noqa: BLE001
+        import traceback
+        k = dict(cift=cift, kanca_hata=traceback.format_exc()[-1500:])
+        r.setdefault('kapi', {}).setdefault('sert', {})['cift_sonu_kanca'] = False
+        log('KANCA HATA', cift, k['kanca_hata'].strip().splitlines()[-1])
+    R['cift_sonu'].append(k)
+    if r.get('kapi', {}).get('sert'):
+        S_ = r['kapi']['sert']
+        r['not_'] = r.get('not_') if r.get('cokus') else 'sert kapilar: ' + ('gecti' if all(S_.values()) else 'FAIL ' + ', '.join(x for x, v in S_.items() if not v))
+    (RP / 'OLCUM_PARCA.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str))
+    log(u78.eta_satiri(i_c + 1, len(CIFTLER), time.time() - T0))
+
+
 def ham(a):
     return hashlib.sha256(np.ascontiguousarray(a).tobytes()).hexdigest()
 
@@ -258,111 +300,139 @@ def main():
     R = dict(gorev='ORNAMENT_78_ORNEK6 (karar 28)', kapi_listesi='docs/ornament/ornek/ORNEK78_KAPI_LISTESI.md', cift={}, kontrol={})
     DE = Path(os.environ.get('ORNEK78_DRIVE_EK', str(O / '_drive_ek'))); DE.mkdir(parents=True, exist_ok=True)   # kaynak kirpimlari: YALNIZ Drive
     KENAR, UYARI = [], []
-    for cift in CIFTLER:
+    R['cift_sonu'] = []
+    if PARCA and (not CIFTLER or CIFTLER[0] != 'CANCER_LIBRA'):             # G: matrix parcasinda ilk cift kontrol cifti olmali
+        log('YAPILANDIRMA HATASI: ilk cift CANCER_LIBRA degil', CIFTLER); R['cikis'] = dict(kod=4, aciklama='yapilandirma hatasi: ilk cift CL degil')
+        (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str)); return 4
+    for i_c, cift in enumerate(CIFTLER):
         w = W / cift; w.mkdir(exist_ok=True)
-        log('cift', cift)
-        k1 = kos([_d / 'ornament_motor.py', '--kaynak', a.kaynak, '--motor', a.motor, '--cikti', w / 'motor', '--son', a.son, '--zemin', a.zemin, '--cift', cift],
-                 env={'ORN_YAKIN_DIR': str(DE)}, log_dosya=w / 'log_motor.txt')
-        motor_png = all((w / 'motor' / f'{cift}_{s}_954.png').exists() for s in ('RUBY', 'SAPPHIRE', 'EMERALD'))
-        mlog = (w / 'log_motor.txt').read_text() if (w / 'log_motor.txt').exists() else ''
-        r = dict(cikis_kodlari=dict(motor=k1))
-        if k1 == 2 or not motor_png:                                         # cokus ya da cikti yok: dump / sade / fildisi CALISMAZ
-            tb = mlog[mlog.find('Traceback'):] if 'Traceback' in mlog else None
-            fail = [l for l in mlog.splitlines() if 'FAIL' in l or 'DUR' in l]
-            mo = json.loads((w / 'motor' / 'OLCUM.json').read_text()) if (w / 'motor' / 'OLCUM.json').exists() else None
-            r.update(eksik=list(STIL), atlanan=['dump', 'sade', 'fildisi'], traceback=tb, hata_satiri=fail[-3:], log_kuyruk=mlog.splitlines()[-25:],
-                     motor_olcum=mo, not_=('motor cokus (cikis 2), traceback asagida' if k1 == 2 else
-                                           f'motor cikti uretmedi (cikis {k1}): ' + (fail[-1] if fail else 'neden logda yok')))
+        try:
+            if os.environ.get('ORNEK78_TEST_HATA') == cift:                  # yalniz yerel test (cift dayanikliligi): bu ciftte sahte hata
+                raise RuntimeError(f'test hatasi {cift}')
+            log('cift', cift)
+            k1 = kos([_d / 'ornament_motor.py', '--kaynak', a.kaynak, '--motor', a.motor, '--cikti', w / 'motor', '--son', a.son, '--zemin', a.zemin, '--cift', cift],
+                     env={'ORN_YAKIN_DIR': str(DE)}, log_dosya=w / 'log_motor.txt')
+            motor_png = all((w / 'motor' / f'{cift}_{s}_954.png').exists() for s in ('RUBY', 'SAPPHIRE', 'EMERALD'))
+            mlog = (w / 'log_motor.txt').read_text() if (w / 'log_motor.txt').exists() else ''
+            r = dict(cikis_kodlari=dict(motor=k1))
+            if k1 == 2 or not motor_png:                                         # cokus ya da cikti yok: dump / sade / fildisi CALISMAZ
+                tb = mlog[mlog.find('Traceback'):] if 'Traceback' in mlog else None
+                fail = [l for l in mlog.splitlines() if 'FAIL' in l or 'DUR' in l]
+                mo = json.loads((w / 'motor' / 'OLCUM.json').read_text()) if (w / 'motor' / 'OLCUM.json').exists() else None
+                r.update(eksik=list(STIL), atlanan=['dump', 'sade', 'fildisi'], traceback=tb, hata_satiri=fail[-3:], log_kuyruk=mlog.splitlines()[-25:],
+                         motor_olcum=mo, not_=('motor cokus (cikis 2), traceback asagida' if k1 == 2 else
+                                               f'motor cikti uretmedi (cikis {k1}): ' + (fail[-1] if fail else 'neden logda yok')))
+                R['cift'][cift] = r
+                log('FAIL', cift, r['not_'])
+                if tb:
+                    print(tb, flush=True)
+                if cift == 'CANCER_LIBRA':
+                    (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str)); return 3
+                continue
+            k2 = kos([_d / 'ornament_motor.py', '--kaynak', a.kaynak, '--motor', a.motor, '--cikti', w / 'dump', '--son', a.son, '--cift', cift],
+                     env={'ORN_DUMP': str(w / 'katman.pkl')}, log_dosya=w / 'log_dump.txt')
+            k3 = kos([_d / 'ornament_sade.py', '--katman', w / 'katman.pkl', '--cikti', w / 'sade', '--cift', cift], log_dosya=w / 'log_sade.txt') if k2 == 0 else 9
+            sade1 = w / 'sade' / 'SADE_1_ALTIN_TONU_954.png'                  # O2 b (Serdar 4 Kas): SADE ALTIN = aday 1, koyulastirma yok; FILDISI girdisi ayni dosya
+            k4 = kos([_d / 'ornament_fildisi.py', sade1, O / f'{cift}_FILDISI_954.png'], log_dosya=w / 'log_fildisi.txt') if sade1.exists() else 9
+            for s in ('RUBY', 'SAPPHIRE', 'EMERALD'):
+                shutil.copyfile(w / 'motor' / f'{cift}_{s}_954.png', O / f'{cift}_{s}_954.png')
+            if sade1.exists():
+                shutil.copyfile(sade1, O / f'{cift}_SADE_ALTIN_954.png')
+            r['cikis_kodlari'] = dict(motor=k1, dump=k2, sade=k3, fildisi=k4)
+            r['dpi_yazim'] = {s: u78.dpi_yaz(O / f'{cift}_{s}_954.png') for s in STIL if (O / f'{cift}_{s}_954.png').exists()}   # Serdar 4 Kas karar 4
+            eksik = [s for s in STIL if not (O / f'{cift}_{s}_954.png').exists()]
+            r['eksik'] = eksik
+            if eksik:
+                r['not_'] = 'eksik dosya: ' + ', '.join(eksik) + ' (dump / sade / fildisi loglari: ' + \
+                            ' | '.join(((w / f).read_text().splitlines() or [''])[-1][:200] for f in ('log_dump.txt', 'log_sade.txt', 'log_fildisi.txt') if (w / f).exists()) + ')'
+                R['cift'][cift] = r
+                log('FAIL eksik', cift, r['not_'])
+                if cift == 'CANCER_LIBRA':
+                    (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str)); return 3
+                continue
+            M_ = json.loads((w / 'motor' / 'OLCUM.json').read_text())
+            S_all = json.loads((w / 'sade' / 'OLCUM.json').read_text()); S_ = S_all['aday']['1']; SKK = sade_kontrast(S_)
+            D = pickle.load(open(w / 'katman.pkl', 'rb'))
+            _, yb, cak, ok = o4.kapi(D['E'])
+            cv2 = __import__('cv2')
+            ink = np.maximum.reduce([D['M'][k] for k in D['M'] if k != 'halka']) > 0.02     # halka haric (delikten gecer, muaf)
+            uzak = {}
+            for yk, ym in o4.YASAK.items():
+                dd = cv2.distanceTransform((~ym.astype(bool)).astype(np.uint8), cv2.DIST_L2, 5)
+                uzak[yk] = round(float(dd[ink].min()), 1) if ink.any() else None
+            SERT = dict({f'koyu_{k}': v for k, v in M_['kapi_sert'].items()}, **{f'sade1_{k}': bool(v) for k, v in S_['kapi'].items()},
+                        fildisi_cikis_0=bool(k4 == 0))                           # tek kaynak: motor kapi_sert + SADE_1 teknik kapi + fildisi cikisi
+            r['printful_dosya'] = {s: u78.printful_dosya(O / f'{cift}_{s}_954.png', s) for s in STIL}
+            for s_ in STIL:                                                  # yeni ciktilar (Serdar 4 Kas karar 4); onayli dosyalar yalniz bilgi (uretim78 onayli)
+                SERT[f'printful_dosya_{s_}'] = r['printful_dosya'][s_]['gecti']
+            SERT['dpi_yazim_piksel_ayni'] = all(v['piksel_ayni'] for v in r['dpi_yazim'].values())
+            r['not_'] = 'sert kapilar: ' + ('gecti' if all(SERT.values()) else 'FAIL ' + ', '.join(k for k, v in SERT.items() if not v))
+            r.update(
+                yerlesim=dict(maske_yasak_px=yb, maske_yasak_not_='o4.kapi oge maskesinden olcum (kapi sonucu motor kapi_sert goruntu_yasak_0)', cakisma=cak[:4], bosluk_px=M_['sonuc']['RUBY']['bosluk_px'], sembol_kutu=M_['kutu']['sembol'],
+                              halka_kutu=M_['kutu']['halka'], kucuk_sol_kutu=M_['kutu']['kucuk_sol'], kucuk_sag_kutu=M_['kutu']['kucuk_sag'],
+                              sembol_ust_y=M_['kutu']['sembol'][1], sembol_ust_y_cancer_libra=246, yasak_bolgeye_en_kisa_uzaklik_px=uzak,
+                              yerlesim_bilgi=M_['yerlesim']),
+                koyu={s: dict(kontrast_ortanca=M_['sonuc'][s]['kontrast_ortanca_en_kotu'], kati_koyu5_bilgi=M_['sonuc'][s]['kati_koyu5_en_kotu_bilgi'],
+                              dE00_ham_maks=max(M_['sonuc'][s]['dE00_son_ham'].values()), goruntu_yasak=M_['sonuc'][s]['goruntu_yasak'],
+                              halka_sureklilik_bilgi=M_['sonuc'][s]['halka_sureklilik']['oran'], kucuk_oge_artis=M_['sonuc'][s]['kucuk_oge_parlaklik_artisi'])
+                      for s in ('RUBY', 'SAPPHIRE', 'EMERALD')},
+                iou=M_['iou_954'], alfa_fark={k: v['ort_mutlak_fark_murekkep'] for k, v in M_['iou_954_bilgi'].items()},
+                kapi=dict(sert=SERT, bilgi=dict(M_['kapi_bilgi'], sade1_okunur=S_['okunur'], sade1_sembol_ust_y=S_.get('sembol_ust_y_bilgi')),
+                          kaynak='koyu: ornament_motor OLCUM kapi_sert / kapi_bilgi; sade1: ornament_sade OLCUM aday 1 kapi; fildisi: cikis kodu'),
+                kaynak_leke=M_.get('kaynak_leke_onarim_sonrasi'), kaynak_kenar_onarim=M_.get('kaynak_kenar_onarim'),
+                cikti_leke_a={s: sum(v['alfa_lt_09'] for k2, v in M_['sonuc'][s]['leke'].items() if k2 in o5.LEKE_KAPI_OGE) for s in ('RUBY', 'SAPPHIRE', 'EMERALD')},
+                sade=dict(kati_kontrast=SKK['kati'], kati_ham=SKK['kati_ham'], ortanca=SKK['ortanca'], ortanca_ham=SKK['ortanca_ham'], en_kotu_oge=SKK['en_kotu_oge'],
+                          dosya='SADE_1_ALTIN_TONU_954.png (O2 b: koyulastirma yok)', sade1_sha256=hashlib.sha256(sade1.read_bytes()).hexdigest(),
+                          sade1_piksel_sha=u78.piksel_sha(sade1), sade_altin_piksel_sha=u78.piksel_sha(O / f'{cift}_SADE_ALTIN_954.png'),
+                          goruntu_yasak=S_['goruntu_yasak'], leke_a=S_['leke_a'], zemin_seffaf=S_['zemin_seffaf']),
+                fildisi=dict(kontrast_bilgi=acik_kontrast(np.asarray(Image.open(O / f'{cift}_FILDISI_954.png').convert('RGB')), D),
+                             duzey=DUZEY['FILDISI'], girdi_sha256=hashlib.sha256(sade1.read_bytes()).hexdigest(), girdi_piksel_sha=u78.piksel_sha(sade1),
+                             yerlesim_yasak_px=yb, not_='fildisi girdisi aday 1 (koyulastirilmamis SADE) + krem zemin; yasak px yerlesimden'))
             R['cift'][cift] = r
-            log('FAIL', cift, r['not_'])
-            if tb:
-                print(tb, flush=True)
+            kenar_kayit(a, cift, w, M_, O, DE, KENAR, r, RP, UYARI)
+            r['kucultme'] = M_.get('kucultme')
+            if cift in ONAYLI_EK:                                                # E: onayli Kova 3 koyu stil kiyasi (sert; CL kontrolu ile ayni tolerans)
+                r['onayli_kiyas'] = onayli_kiyas(O, cift, ONAYLI_EK[cift])
+                for s_, v_ in r['onayli_kiyas'].items():
+                    r['kapi']['sert'][f'onayli_kiyas_{s_}'] = v_['tolerans_icinde']
+                    log('ONAYLI KIYAS', cift, s_, v_.get('en_buyuk_fark'), v_.get('farkli_piksel'), 'PASS' if v_['tolerans_icinde'] else 'FAIL')
+                SERT_ = r['kapi']['sert']
+                r['not_'] = 'sert kapilar: ' + ('gecti' if all(SERT_.values()) else 'FAIL ' + ', '.join(k for k, v in SERT_.items() if not v))
+            log(cift, 'yasak', yb, 'kontrast', {s: r['koyu'][s]['kontrast_ortanca'] for s in r['koyu']}, 'dE00', {s: r['koyu'][s]['dE00_ham_maks'] for s in r['koyu']},
+                'sembol', r['yerlesim']['sembol_kutu'], 'uzaklik', uzak, 'sert FAIL', [k for k, v in SERT.items() if not v], 'cikis', r['cikis_kodlari'])
             if cift == 'CANCER_LIBRA':
-                (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str)); return 3
-            continue
-        k2 = kos([_d / 'ornament_motor.py', '--kaynak', a.kaynak, '--motor', a.motor, '--cikti', w / 'dump', '--son', a.son, '--cift', cift],
-                 env={'ORN_DUMP': str(w / 'katman.pkl')}, log_dosya=w / 'log_dump.txt')
-        k3 = kos([_d / 'ornament_sade.py', '--katman', w / 'katman.pkl', '--cikti', w / 'sade', '--cift', cift], log_dosya=w / 'log_sade.txt') if k2 == 0 else 9
-        sade1 = w / 'sade' / 'SADE_1_ALTIN_TONU_954.png'                  # O2 b (Serdar 4 Kas): SADE ALTIN = aday 1, koyulastirma yok; FILDISI girdisi ayni dosya
-        k4 = kos([_d / 'ornament_fildisi.py', sade1, O / f'{cift}_FILDISI_954.png'], log_dosya=w / 'log_fildisi.txt') if sade1.exists() else 9
-        for s in ('RUBY', 'SAPPHIRE', 'EMERALD'):
-            shutil.copyfile(w / 'motor' / f'{cift}_{s}_954.png', O / f'{cift}_{s}_954.png')
-        if sade1.exists():
-            shutil.copyfile(sade1, O / f'{cift}_SADE_ALTIN_954.png')
-        r['cikis_kodlari'] = dict(motor=k1, dump=k2, sade=k3, fildisi=k4)
-        eksik = [s for s in STIL if not (O / f'{cift}_{s}_954.png').exists()]
-        r['eksik'] = eksik
-        if eksik:
-            r['not_'] = 'eksik dosya: ' + ', '.join(eksik) + ' (dump / sade / fildisi loglari: ' + \
-                        ' | '.join(((w / f).read_text().splitlines() or [''])[-1][:200] for f in ('log_dump.txt', 'log_sade.txt', 'log_fildisi.txt') if (w / f).exists()) + ')'
-            R['cift'][cift] = r
-            log('FAIL eksik', cift, r['not_'])
-            if cift == 'CANCER_LIBRA':
-                (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str)); return 3
-            continue
-        M_ = json.loads((w / 'motor' / 'OLCUM.json').read_text())
-        S_all = json.loads((w / 'sade' / 'OLCUM.json').read_text()); S_ = S_all['aday']['1']; SKK = sade_kontrast(S_)
-        D = pickle.load(open(w / 'katman.pkl', 'rb'))
-        _, yb, cak, ok = o4.kapi(D['E'])
-        cv2 = __import__('cv2')
-        ink = np.maximum.reduce([D['M'][k] for k in D['M'] if k != 'halka']) > 0.02     # halka haric (delikten gecer, muaf)
-        uzak = {}
-        for yk, ym in o4.YASAK.items():
-            dd = cv2.distanceTransform((~ym.astype(bool)).astype(np.uint8), cv2.DIST_L2, 5)
-            uzak[yk] = round(float(dd[ink].min()), 1) if ink.any() else None
-        SERT = dict({f'koyu_{k}': v for k, v in M_['kapi_sert'].items()}, **{f'sade1_{k}': bool(v) for k, v in S_['kapi'].items()},
-                    fildisi_cikis_0=bool(k4 == 0))                           # tek kaynak: motor kapi_sert + SADE_1 teknik kapi + fildisi cikisi
-        r['not_'] = 'sert kapilar: ' + ('gecti' if all(SERT.values()) else 'FAIL ' + ', '.join(k for k, v in SERT.items() if not v))
-        r.update(
-            yerlesim=dict(maske_yasak_px=yb, maske_yasak_not_='o4.kapi oge maskesinden olcum (kapi sonucu motor kapi_sert goruntu_yasak_0)', cakisma=cak[:4], bosluk_px=M_['sonuc']['RUBY']['bosluk_px'], sembol_kutu=M_['kutu']['sembol'],
-                          halka_kutu=M_['kutu']['halka'], kucuk_sol_kutu=M_['kutu']['kucuk_sol'], kucuk_sag_kutu=M_['kutu']['kucuk_sag'],
-                          sembol_ust_y=M_['kutu']['sembol'][1], sembol_ust_y_cancer_libra=246, yasak_bolgeye_en_kisa_uzaklik_px=uzak,
-                          yerlesim_bilgi=M_['yerlesim']),
-            koyu={s: dict(kontrast_ortanca=M_['sonuc'][s]['kontrast_ortanca_en_kotu'], kati_koyu5_bilgi=M_['sonuc'][s]['kati_koyu5_en_kotu_bilgi'],
-                          dE00_ham_maks=max(M_['sonuc'][s]['dE00_son_ham'].values()), goruntu_yasak=M_['sonuc'][s]['goruntu_yasak'],
-                          halka_sureklilik_bilgi=M_['sonuc'][s]['halka_sureklilik']['oran'], kucuk_oge_artis=M_['sonuc'][s]['kucuk_oge_parlaklik_artisi'])
-                  for s in ('RUBY', 'SAPPHIRE', 'EMERALD')},
-            iou=M_['iou_954'], alfa_fark={k: v['ort_mutlak_fark_murekkep'] for k, v in M_['iou_954_bilgi'].items()},
-            kapi=dict(sert=SERT, bilgi=dict(M_['kapi_bilgi'], sade1_okunur=S_['okunur'], sade1_sembol_ust_y=S_.get('sembol_ust_y_bilgi')),
-                      kaynak='koyu: ornament_motor OLCUM kapi_sert / kapi_bilgi; sade1: ornament_sade OLCUM aday 1 kapi; fildisi: cikis kodu'),
-            kaynak_leke=M_.get('kaynak_leke_onarim_sonrasi'), kaynak_kenar_onarim=M_.get('kaynak_kenar_onarim'),
-            cikti_leke_a={s: sum(v['alfa_lt_09'] for k2, v in M_['sonuc'][s]['leke'].items() if k2 in o5.LEKE_KAPI_OGE) for s in ('RUBY', 'SAPPHIRE', 'EMERALD')},
-            sade=dict(kati_kontrast=SKK['kati'], kati_ham=SKK['kati_ham'], ortanca=SKK['ortanca'], ortanca_ham=SKK['ortanca_ham'], en_kotu_oge=SKK['en_kotu_oge'],
-                      dosya='SADE_1_ALTIN_TONU_954.png (O2 b: koyulastirma yok)', sade1_sha256=hashlib.sha256(sade1.read_bytes()).hexdigest(),
-                      goruntu_yasak=S_['goruntu_yasak'], leke_a=S_['leke_a'], zemin_seffaf=S_['zemin_seffaf']),
-            fildisi=dict(kontrast_bilgi=acik_kontrast(np.asarray(Image.open(O / f'{cift}_FILDISI_954.png').convert('RGB')), D),
-                         duzey=DUZEY['FILDISI'], girdi_sha256=hashlib.sha256(sade1.read_bytes()).hexdigest(),
-                         yerlesim_yasak_px=yb, not_='fildisi girdisi aday 1 (koyulastirilmamis SADE) + krem zemin; yasak px yerlesimden'))
-        R['cift'][cift] = r
-        kenar_kayit(a, cift, w, M_, O, DE, KENAR, r, RP, UYARI)
-        r['kucultme'] = M_.get('kucultme')
-        if cift in ONAYLI_EK:                                                # E: onayli Kova 3 koyu stil kiyasi (sert; CL kontrolu ile ayni tolerans)
-            r['onayli_kiyas'] = onayli_kiyas(O, cift, ONAYLI_EK[cift])
-            for s_, v_ in r['onayli_kiyas'].items():
-                r['kapi']['sert'][f'onayli_kiyas_{s_}'] = v_['tolerans_icinde']
-                log('ONAYLI KIYAS', cift, s_, v_.get('en_buyuk_fark'), v_.get('farkli_piksel'), 'PASS' if v_['tolerans_icinde'] else 'FAIL')
-            SERT_ = r['kapi']['sert']
-            r['not_'] = 'sert kapilar: ' + ('gecti' if all(SERT_.values()) else 'FAIL ' + ', '.join(k for k, v in SERT_.items() if not v))
-        log(cift, 'yasak', yb, 'kontrast', {s: r['koyu'][s]['kontrast_ortanca'] for s in r['koyu']}, 'dE00', {s: r['koyu'][s]['dE00_ham_maks'] for s in r['koyu']},
-            'sembol', r['yerlesim']['sembol_kutu'], 'uzaklik', uzak, 'sert FAIL', [k for k, v in SERT.items() if not v], 'cikis', r['cikis_kodlari'])
-        if cift == 'CANCER_LIBRA':
-            hepsi = True
-            for s in STIL:
-                u = np.asarray(Image.open(O / f'{cift}_{s}_954.png')); on = np.asarray(Image.open(Path(a.onayli) / f'CANCER_LIBRA_{s}_954.png'))
-                ayni = u.shape == on.shape
-                fark = int(np.abs(u.astype(int) - on.astype(int)).max()) if ayni else None
-                n = int((u != on).any(-1).sum()) if ayni else None
-                ok_ = bool(ayni and fark <= TOL_SEVIYE and n <= TOL_PIKSEL)
-                hepsi &= ok_
-                R['kontrol'][s] = dict(en_buyuk_fark=fark, farkli_piksel=n, tolerans_icinde=ok_, uretim_ham=ham(u), onayli_ham=ham(on))
-                log('KONTROL', s, fark, n, 'PASS' if ok_ else 'FAIL')
-            R['kontrol_pass'] = bool(hepsi)
-            if not hepsi:
-                (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False)); log('DUR kontrol cifti FAIL'); return 3
+                hepsi = True
+                for s in STIL:
+                    u = np.asarray(Image.open(O / f'{cift}_{s}_954.png')); on = np.asarray(Image.open(Path(a.onayli) / f'CANCER_LIBRA_{s}_954.png'))
+                    ayni = u.shape == on.shape
+                    fark = int(np.abs(u.astype(int) - on.astype(int)).max()) if ayni else None
+                    n = int((u != on).any(-1).sum()) if ayni else None
+                    ok_ = bool(ayni and fark <= TOL_SEVIYE and n <= TOL_PIKSEL)
+                    hepsi &= ok_
+                    R['kontrol'][s] = dict(en_buyuk_fark=fark, farkli_piksel=n, tolerans_icinde=ok_, uretim_ham=ham(u), onayli_ham=ham(on))
+                    log('KONTROL', s, fark, n, 'PASS' if ok_ else 'FAIL')
+                R['kontrol_pass'] = bool(hepsi)
+                if not hepsi:
+                    (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False)); log('DUR kontrol cifti FAIL'); return 3
+        except Exception:                                                  # noqa: BLE001  (G 4 Kas: cift dayanikliligi; cokus cift FAIL, dongu devam, cikis sonda 2)
+            import traceback
+            tb = traceback.format_exc()
+            r = R['cift'].setdefault(cift, {})
+            r['cokus'] = tb; r.setdefault('cikis_kodlari', {})['cokus'] = 2
+            r['eksik'] = [s_ for s_ in STIL if not (O / f'{cift}_{s_}_954.png').exists()] or r.get('eksik') or ['cokus']   # onizleme / birlestirme atlar
+            r['not_'] = 'cokus (cift govdesi): ' + tb.strip().splitlines()[-1][:200]
+            log('COKUS', cift, r['not_']); print(tb, flush=True)
+            if cift == 'CANCER_LIBRA':                                       # F 4 Kas: kontrol cifti cokerse kontrol yapilmadi -> parca DUR (cikis 3)
+                R['kontrol_pass'] = False
+                (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str)); log('DUR kontrol cifti cokus'); return 3
+        finally:
+            if PARCA:
+                cift_sonu_calistir(cift, R, O, RP, DE, w, a, i_c)
+
     # onizleme: satir = cift, sutun = 5 stil
     font = ImageFont.truetype(a.font, 24)
     satir = []
-    for cift in CIFTLER:
+    for cift in (() if PARCA else CIFTLER):                                  # PARCA: onizleme cift basina (cift_sonu), tek buyuk dosya yok
         if R['cift'].get(cift, {}).get('eksik'):
             continue
         liste, et = [], []
@@ -403,11 +473,12 @@ def main():
                 print(f"::warning::{c}: kucultme {ku['toplam_px']} px > sinir {ku['sinir_px']} px, is durur, gorsel Serdar'a", flush=True)
     R['dusuk_kontrast'] = dusuk_kontrast_liste(dusuk_kontrast_girdi(R['cift']))
     R['gercek_boy'] = {}                                                       # gercek boy onizleme 5 stil (300 dpi; KARAR 6): liste + kucultme siniri FAIL ciftleri
-    gb_c = [x for x in os.environ.get('GERCEK_BOY_CIFTLER', 'AQUARIUS_PISCES').split(',') if x]
+    gb_c = [] if PARCA else [x for x in os.environ.get('GERCEK_BOY_CIFTLER', 'AQUARIUS_PISCES').split(',') if x]   # PARCA: cift_sonu'nda
     gb_c += [k['cift'] for k in R['kucultme'] if k.get('sinir_gecti') is False and k['cift'] not in gb_c]
     for c in gb_c:
         R['gercek_boy'][c] = gercek_boy(O, c, STIL, RP / f'GERCEK_BOY_{c}_5STIL_300dpi.png')
     R['png_sha256'] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(O.glob('*_954.png'))}
+    R['png_piksel_sha'] = {p.name: u78.piksel_sha(p) for p in sorted(O.glob('*_954.png'))}
     fail = {c: v.get('not_') for c, v in R['cift'].items() if v.get('eksik') or not all((v.get('kapi') or {}).get('sert', {'x': False}).values())}
     cokus = [c for c, v in R['cift'].items() if 2 in (v.get('cikis_kodlari') or {}).values()]
     R['cikis'] = dict(kod=2 if cokus else (1 if fail else 0),

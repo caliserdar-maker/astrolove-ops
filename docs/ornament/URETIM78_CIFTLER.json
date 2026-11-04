@@ -1,0 +1,119 @@
+{
+ "aciklama": "ornament 78 uretim cift listesi (Serdar 4 Kas, PLAN_78_URETIM.md 9f88868 + onaylar). aktif: hangi bolum kosar (\"ornek\" | \"78\"). Parcalar CANCER_LIBRA olmadan yazilir; uretim78.parcalar CL kontrolu her parcanin basina ekler. 78 bolumu = 75 cift (CANCER_LIBRA onayli 6daab364; AQUARIUS_PISCES ve GEMINI_VIRGO onayli 41839101824, Serdar 4 Kas \"A\"). 78 kosusunda yalniz aktif ve TETIK degisir.",
+ "aktif": "ornek",
+ "kontrol_cifti": "CANCER_LIBRA",
+ "onayli": {
+  "CANCER_LIBRA": "git 6daab364 docs/ornament/ornek/ORNAMENT_5STIL_20261103_1539",
+  "AQUARIUS_PISCES": "Drive 1o6XqbGpJacW3yQ6Kc2mFpC-okVgBwsOZ (kosu 41839101824)",
+  "GEMINI_VIRGO": "Drive 1o6XqbGpJacW3yQ6Kc2mFpC-okVgBwsOZ (kosu 41839101824)"
+ },
+ "ornek": {
+  "max_parallel": 2,
+  "parcalar": [
+   [
+    "TAURUS_TAURUS",
+    "CANCER_TAURUS",
+    "AQUARIUS_CANCER",
+    "LIBRA_LIBRA"
+   ],
+   [
+    "AQUARIUS_AQUARIUS",
+    "ARIES_SCORPIO",
+    "LEO_SAGITTARIUS",
+    "CAPRICORN_CAPRICORN"
+   ]
+  ]
+ },
+ "78": {
+  "max_parallel": 6,
+  "parcalar": [
+   [
+    "AQUARIUS_AQUARIUS",
+    "AQUARIUS_LIBRA",
+    "ARIES_CANCER",
+    "ARIES_SAGITTARIUS",
+    "CANCER_GEMINI",
+    "CANCER_VIRGO",
+    "CAPRICORN_SAGITTARIUS",
+    "GEMINI_LIBRA",
+    "LEO_LIBRA",
+    "LIBRA_LIBRA",
+    "PISCES_PISCES",
+    "SAGITTARIUS_SCORPIO",
+    "TAURUS_TAURUS"
+   ],
+   [
+    "AQUARIUS_ARIES",
+    "AQUARIUS_SAGITTARIUS",
+    "ARIES_CAPRICORN",
+    "ARIES_SCORPIO",
+    "CANCER_LEO",
+    "CAPRICORN_CAPRICORN",
+    "CAPRICORN_SCORPIO",
+    "GEMINI_PISCES",
+    "LEO_PISCES",
+    "LIBRA_PISCES",
+    "PISCES_SAGITTARIUS",
+    "SAGITTARIUS_TAURUS",
+    "TAURUS_VIRGO"
+   ],
+   [
+    "AQUARIUS_CANCER",
+    "AQUARIUS_SCORPIO",
+    "ARIES_GEMINI",
+    "ARIES_TAURUS",
+    "CANCER_PISCES",
+    "CAPRICORN_GEMINI",
+    "CAPRICORN_TAURUS",
+    "GEMINI_SAGITTARIUS",
+    "LEO_SAGITTARIUS",
+    "LIBRA_SAGITTARIUS",
+    "PISCES_SCORPIO",
+    "SAGITTARIUS_VIRGO",
+    "VIRGO_VIRGO"
+   ],
+   [
+    "AQUARIUS_CAPRICORN",
+    "AQUARIUS_TAURUS",
+    "ARIES_LEO",
+    "ARIES_VIRGO",
+    "CANCER_SAGITTARIUS",
+    "CAPRICORN_LEO",
+    "CAPRICORN_VIRGO",
+    "GEMINI_SCORPIO",
+    "LEO_SCORPIO",
+    "LIBRA_SCORPIO",
+    "PISCES_TAURUS",
+    "SCORPIO_SCORPIO"
+   ],
+   [
+    "AQUARIUS_GEMINI",
+    "AQUARIUS_VIRGO",
+    "ARIES_LIBRA",
+    "CANCER_CANCER",
+    "CANCER_SCORPIO",
+    "CAPRICORN_LIBRA",
+    "GEMINI_GEMINI",
+    "GEMINI_TAURUS",
+    "LEO_TAURUS",
+    "LIBRA_TAURUS",
+    "PISCES_VIRGO",
+    "SCORPIO_TAURUS"
+   ],
+   [
+    "AQUARIUS_LEO",
+    "ARIES_ARIES",
+    "ARIES_PISCES",
+    "CANCER_CAPRICORN",
+    "CANCER_TAURUS",
+    "CAPRICORN_PISCES",
+    "GEMINI_LEO",
+    "LEO_LEO",
+    "LEO_VIRGO",
+    "LIBRA_VIRGO",
+    "SAGITTARIUS_SAGITTARIUS",
+    "SCORPIO_VIRGO"
+   ]
+  ]
+ }
+}

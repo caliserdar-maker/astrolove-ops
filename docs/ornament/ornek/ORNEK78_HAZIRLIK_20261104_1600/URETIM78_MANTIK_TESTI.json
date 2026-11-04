@@ -1,0 +1,577 @@
+{
+ "vakalar": [
+  {
+   "grup": "parca",
+   "vaka": "ornek: 2 parca x 4, CL ilk",
+   "beklenen": [
+    2,
+    [
+     5,
+     5
+    ],
+    [
+     "CANCER_LIBRA",
+     "CANCER_LIBRA"
+    ]
+   ],
+   "sonuc": "[2, [5, 5], ['CANCER_LIBRA', 'CANCER_LIBRA']]",
+   "gecti": true
+  },
+  {
+   "grup": "parca",
+   "vaka": "ornek 8 cift yerlesim78 listesinde",
+   "beklenen": true,
+   "sonuc": "True",
+   "gecti": true
+  },
+  {
+   "grup": "parca",
+   "vaka": "78: 75 cift, tekil, CL / AQU_PIS / GV yok, CL her parcada ilk",
+   "beklenen": [
+    75,
+    75,
+    false,
+    true
+   ],
+   "sonuc": "[75, 75, False, True]",
+   "gecti": true
+  },
+  {
+   "grup": "parca",
+   "vaka": "bilinen FAIL: tekrar eden cift",
+   "beklenen": "HATA ValueError",
+   "sonuc": "HATA ValueError: tekrar eden cift: ['AQUARIUS_AQUARIUS']",
+   "gecti": true
+  },
+  {
+   "grup": "parca",
+   "vaka": "bilinen FAIL: 78 bolumunde eksik cift",
+   "beklenen": "HATA ValueError",
+   "sonuc": "HATA ValueError: '78' bolumu 75 cift olmali: eksik ['TAURUS_TAURUS'], fazla []",
+   "gecti": true
+  },
+  {
+   "grup": "parca",
+   "vaka": "bilinen FAIL: CL parcaya yazilmis",
+   "beklenen": "HATA ValueError",
+   "sonuc": "HATA ValueError: CANCER_LIBRA parcaya yazilmaz (kontrol cifti otomatik eklenir)",
+   "gecti": true
+  },
+  {
+   "grup": "parca",
+   "vaka": "bilinen FAIL: bilinmeyen cift",
+   "beklenen": "HATA ValueError",
+   "sonuc": "HATA ValueError: bilinmeyen cift: ['X_Y']",
+   "gecti": true
+  },
+  {
+   "grup": "kova",
+   "vaka": "ornek parca 1 kenar_zorunlu = AQUARIUS_CANCER; parca 2 = AQUARIUS_AQUARIUS",
+   "beklenen": [
+    [
+     "AQUARIUS_CANCER"
+    ],
+    [
+     "AQUARIUS_AQUARIUS"
+    ]
+   ],
+   "sonuc": "[['AQUARIUS_CANCER'], ['AQUARIUS_AQUARIUS']]",
+   "gecti": true
+  },
+  {
+   "grup": "kova",
+   "vaka": "78: tum Kova ciftleri (11) kenar listesinde",
+   "beklenen": 11,
+   "sonuc": "11",
+   "gecti": true
+  },
+  {
+   "grup": "kova",
+   "vaka": "bilinen FAIL: Kova cifti kenar listesinde yok",
+   "beklenen": "HATA ValueError",
+   "sonuc": "HATA ValueError: parca 1: Kova cifti kenar_zorunlu listesinde yok: ['AQUARIUS_CANCER']",
+   "gecti": true
+  },
+  {
+   "grup": "kova",
+   "vaka": "bilinen FAIL: CL ilk degil",
+   "beklenen": "HATA ValueError",
+   "sonuc": "HATA ValueError: parca 1: ilk ve tek kontrol cifti CANCER_LIBRA olmali",
+   "gecti": true
+  },
+  {
+   "grup": "siparis",
+   "vaka": "akis secimi (siparis|order)",
+   "beklenen": [
+    "kupa-siparis.yml",
+    "pod-order-router.yml",
+    "siparis-giris.yml"
+   ],
+   "sonuc": "['kupa-siparis.yml', 'pod-order-router.yml', 'siparis-giris.yml']",
+   "gecti": true
+  },
+  {
+   "grup": "siparis",
+   "vaka": "bilinen FAIL: kupa-siparis queued -> etkin",
+   "beklenen": [
+    1
+   ],
+   "sonuc": "[1]",
+   "gecti": true
+  },
+  {
+   "grup": "siparis",
+   "vaka": "bilinen PASS: ilgisiz akis ve biten siparis -> etkin yok",
+   "beklenen": [],
+   "sonuc": "[]",
+   "gecti": true
+  },
+  {
+   "grup": "printful",
+   "vaka": "bilinen PASS: RUBY RGB dpi 300",
+   "beklenen": true,
+   "sonuc": "True",
+   "gecti": true
+  },
+  {
+   "grup": "printful",
+   "vaka": "bilinen PASS: sRGB ICC",
+   "beklenen": true,
+   "sonuc": "True",
+   "gecti": true
+  },
+  {
+   "grup": "printful",
+   "vaka": "bilinen FAIL: SADE dpi yok (yazim oncesi)",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "dpi",
+   "vaka": "bilinen PASS: SADE dpi yazimi piksel ayni",
+   "beklenen": [
+    true,
+    true
+   ],
+   "sonuc": "[True, True]",
+   "gecti": true
+  },
+  {
+   "grup": "printful",
+   "vaka": "bilinen PASS: dpi yazilmis SADE RGBA",
+   "beklenen": true,
+   "sonuc": "True",
+   "gecti": true
+  },
+  {
+   "grup": "printful",
+   "vaka": "bilinen FAIL: FILDISI dpi yok",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "printful",
+   "vaka": "bilinen FAIL: 900 px",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "printful",
+   "vaka": "bilinen FAIL: RUBY RGBA",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "printful",
+   "vaka": "bilinen FAIL: RUBY P (paletli)",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "printful",
+   "vaka": "bilinen FAIL: SADE RGB",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "printful",
+   "vaka": "bilinen FAIL: sRGB olmayan ICC (LAB)",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "dpi",
+   "vaka": "zaten 300 dpi: yeniden kaydedilmez (bayt ayni)",
+   "beklenen": [
+    false,
+    true
+   ],
+   "sonuc": "[False, True]",
+   "gecti": true
+  },
+  {
+   "grup": "dpi",
+   "vaka": "bilinen FAIL: piksel degistiren yazim tespit edilir (RGBA -> RGB)",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "kanca",
+   "vaka": "bilinen PASS: PASS cift kokte 5 PNG + GERCEK_BOY + YAKIN + RAPOR/PARCA_1",
+   "beklenen": true,
+   "sonuc": "True",
+   "gecti": true
+  },
+  {
+   "grup": "kanca",
+   "vaka": "katman.pkl ve dump/ silindi",
+   "beklenen": [
+    false,
+    false
+   ],
+   "sonuc": "[False, False]",
+   "gecti": true
+  },
+  {
+   "grup": "kanca",
+   "vaka": "bilinen FAIL: FAIL cift FAIL/<CIFT>/ altinda, kokte PNG yok",
+   "beklenen": [
+    true,
+    false
+   ],
+   "sonuc": "[True, False]",
+   "gecti": true
+  },
+  {
+   "grup": "kanca",
+   "vaka": "bilinen FAIL: sahte rclone cikis 1 -> 3 deneme, yukleme_hata, cift FAIL",
+   "beklenen": [
+    false,
+    3,
+    false
+   ],
+   "sonuc": "[False, 3, False]",
+   "gecti": true
+  },
+  {
+   "grup": "kanca",
+   "vaka": "bilinen PASS: sahte rclone cikis 0 -> ok, 1 deneme",
+   "beklenen": [
+    true,
+    1
+   ],
+   "sonuc": "[True, 1]",
+   "gecti": true
+  },
+  {
+   "grup": "kanca",
+   "vaka": "kontrol cifti (CL) PNG yuklenmez, yalniz RAPOR",
+   "beklenen": true,
+   "sonuc": "True",
+   "gecti": true
+  },
+  {
+   "grup": "kanca",
+   "vaka": "bilinen FAIL: gercek boy None -> gercek_boy_var False",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "kanca",
+   "vaka": "F: gercek boy yoksa 5 PNG FAIL/<CIFT>/ altinda (kokte degil)",
+   "beklenen": [
+    5,
+    0
+   ],
+   "sonuc": "[5, 0]",
+   "gecti": true
+  },
+  {
+   "grup": "eta",
+   "vaka": "ETA satiri bicimi",
+   "beklenen": "ETA 3/9 gecen 300 sn kalan 600 sn yuzde 33.3",
+   "sonuc": "ETA 3/9 gecen 300 sn kalan 600 sn yuzde 33.3",
+   "gecti": true
+  },
+  {
+   "grup": "klasor",
+   "vaka": "bilinen PASS: tekil",
+   "beklenen": true,
+   "sonuc": "True",
+   "gecti": true
+  },
+  {
+   "grup": "klasor",
+   "vaka": "bilinen FAIL: ayni adli iki klasor",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "drive",
+   "vaka": "bilinen PASS: sayi ve sha esit",
+   "beklenen": true,
+   "sonuc": "True",
+   "gecti": true
+  },
+  {
+   "grup": "drive",
+   "vaka": "bilinen FAIL: sha farkli",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "drive",
+   "vaka": "bilinen FAIL: eksik dosya",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "drive",
+   "vaka": "bilinen FAIL: Drive icinde fazla dosya (RAPOR disi)",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "drive",
+   "vaka": "bilinen PASS: RAPOR/ altindaki fazla dosya sayilmaz",
+   "beklenen": true,
+   "sonuc": "True",
+   "gecti": true
+  },
+  {
+   "grup": "drive",
+   "vaka": "bilinen FAIL: Drive sha vermiyor (kiyas atlanmaz)",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "import",
+   "vaka": "F: uretim78 numpy / PIL olmadan yuklenir (hazirlik / birlestir pip oncesi)",
+   "beklenen": "OK",
+   "sonuc": "OK",
+   "gecti": true
+  },
+  {
+   "grup": "drive",
+   "vaka": "bilinen FAIL: ayni adli iki dosya",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "dal",
+   "vaka": "bilinen PASS: json/md/txt/log",
+   "beklenen": true,
+   "sonuc": "True",
+   "gecti": true
+  },
+  {
+   "grup": "dal",
+   "vaka": "bilinen FAIL: d/X_RUBY_954.png",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "dal",
+   "vaka": "bilinen FAIL: d/GERCEK_BOY_X_5STIL_300dpi.png",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "dal",
+   "vaka": "bilinen FAIL: d/ONIZLEME_X.png",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "dal",
+   "vaka": "bilinen FAIL: d/YAKIN_X.json",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "dal",
+   "vaka": "bilinen FAIL: d/aquarius_symbol_gold.json",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "dal",
+   "vaka": "bilinen FAIL: d/X.bin",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "birlestir",
+   "vaka": "bilinen PASS: CL tekillestirildi, 2 cift, gecti",
+   "beklenen": [
+    [
+     "LIBRA_LIBRA",
+     "TAURUS_TAURUS"
+    ],
+    2,
+    true
+   ],
+   "sonuc": "[['LIBRA_LIBRA', 'TAURUS_TAURUS'], 2, True]",
+   "gecti": true
+  },
+  {
+   "grup": "birlestir",
+   "vaka": "bilinen FAIL: eksik parca",
+   "beklenen": [
+    [
+     2
+    ],
+    false
+   ],
+   "sonuc": "[[2], False]",
+   "gecti": true
+  },
+  {
+   "grup": "birlestir",
+   "vaka": "bilinen FAIL: parca CL kontrolu FAIL",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "birlestir",
+   "vaka": "bilinen FAIL: cift FAIL",
+   "beklenen": [
+    "TAURUS_TAURUS"
+   ],
+   "sonuc": "['TAURUS_TAURUS']",
+   "gecti": true
+  },
+  {
+   "grup": "birlestir",
+   "vaka": "bilinen FAIL: ayni cift iki parcada",
+   "beklenen": "HATA ValueError",
+   "sonuc": "HATA ValueError: cift iki parcada: TAURUS_TAURUS",
+   "gecti": true
+  },
+  {
+   "grup": "kenar",
+   "vaka": "bilinen PASS: cancer / libra gercek kaynak = 41839101824 motor KENAR_ONARIM",
+   "beklenen": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "sonuc": "[[0, 0], [0, 0]]",
+   "gecti": true
+  },
+  {
+   "grup": "kenar",
+   "vaka": "sahte buyuk kaynak (kenara degen murekkep): motor yolunda n0 > 0",
+   "beklenen": true,
+   "sonuc": "True",
+   "gecti": true
+  },
+  {
+   "grup": "kenar",
+   "vaka": "bilinen FAIL: yolu atlayan ham olcum farkli sonuc verir",
+   "beklenen": true,
+   "sonuc": "True",
+   "gecti": true
+  },
+  {
+   "grup": "beklenen",
+   "vaka": "bilinen PASS: sahte tam veri",
+   "beklenen": true,
+   "sonuc": "True",
+   "gecti": true
+  },
+  {
+   "grup": "beklenen",
+   "vaka": "bilinen FAIL: parca 2 CL kontrolu FAIL",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "beklenen",
+   "vaka": "bilinen FAIL: dpi piksel degisti",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "beklenen",
+   "vaka": "bilinen FAIL: kenar on olcum farkli (aquarius 440)",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  },
+  {
+   "grup": "ornek78",
+   "vaka": "bilinen FAIL: PARCA modunda ilk cift CL degil -> cikis 4",
+   "beklenen": 4,
+   "sonuc": "4",
+   "gecti": true
+  },
+  {
+   "grup": "ornek78",
+   "vaka": "bilinen PASS: ilk cift CL -> cikis 4 degil (girdi yok: CL cokus -> 3)",
+   "beklenen": 3,
+   "sonuc": "3",
+   "gecti": true
+  },
+  {
+   "grup": "ornek78",
+   "vaka": "cift dayanikliligi: 2. ciftte hata, 3. cift islendi, cikis 2",
+   "beklenen": [
+    2,
+    true,
+    true
+   ],
+   "sonuc": "[2, True, True]",
+   "gecti": true
+  },
+  {
+   "grup": "ornek78",
+   "vaka": "F: CL govdesinde hata -> parca DUR (cikis 3), sonraki cift islenmez",
+   "beklenen": [
+    3,
+    false,
+    false
+   ],
+   "sonuc": "[3, False, False]",
+   "gecti": true
+  },
+  {
+   "grup": "ornek78",
+   "vaka": "bilinen PASS: hata yoksa cokus alani yok",
+   "beklenen": false,
+   "sonuc": "False",
+   "gecti": true
+  }
+ ],
+ "test_gecti": true,
+ "tur": "yerel mantik testi (sahte veri; motor girdisi yalniz Actions)"
+}
