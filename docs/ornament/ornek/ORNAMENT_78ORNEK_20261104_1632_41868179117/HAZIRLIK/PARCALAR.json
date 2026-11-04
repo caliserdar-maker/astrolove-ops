@@ -1,0 +1,58 @@
+{
+ "aktif": "ornek",
+ "max_parallel": 2,
+ "parca_sayisi": 2,
+ "parcalar": [
+  {
+   "parca": 1,
+   "ciftler": [
+    "CANCER_LIBRA",
+    "TAURUS_TAURUS",
+    "CANCER_TAURUS",
+    "AQUARIUS_CANCER",
+    "LIBRA_LIBRA"
+   ],
+   "uretim": [
+    "TAURUS_TAURUS",
+    "CANCER_TAURUS",
+    "AQUARIUS_CANCER",
+    "LIBRA_LIBRA"
+   ],
+   "kenar_zorunlu": [
+    "AQUARIUS_CANCER"
+   ],
+   "gercek_boy": [
+    "TAURUS_TAURUS",
+    "CANCER_TAURUS",
+    "AQUARIUS_CANCER",
+    "LIBRA_LIBRA"
+   ]
+  },
+  {
+   "parca": 2,
+   "ciftler": [
+    "CANCER_LIBRA",
+    "AQUARIUS_AQUARIUS",
+    "ARIES_SCORPIO",
+    "LEO_SAGITTARIUS",
+    "CAPRICORN_CAPRICORN"
+   ],
+   "uretim": [
+    "AQUARIUS_AQUARIUS",
+    "ARIES_SCORPIO",
+    "LEO_SAGITTARIUS",
+    "CAPRICORN_CAPRICORN"
+   ],
+   "kenar_zorunlu": [
+    "AQUARIUS_AQUARIUS"
+   ],
+   "gercek_boy": [
+    "AQUARIUS_AQUARIUS",
+    "ARIES_SCORPIO",
+    "LEO_SAGITTARIUS",
+    "CAPRICORN_CAPRICORN"
+   ]
+  }
+ ],
+ "cift_sayisi": 8
+}

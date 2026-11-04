@@ -1,0 +1,1 @@
+onarimsiz motor ciftleri ['AQUARIUS_AQUARIUS', 'AQUARIUS_CANCER']

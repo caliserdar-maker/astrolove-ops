@@ -1,0 +1,14 @@
+PASS cl_kontrol_her_parca | {"1": true, "2": true}
+PASS ornek_png_drive | {"png": {"TAURUS_TAURUS": 5, "CANCER_TAURUS": 5, "AQUARIUS_CANCER": 5, "LIBRA_LIBRA": 5, "AQUARIUS_AQUARIUS": 5, "ARIES_SCORPIO": 5, "LEO_SAGITTARIUS": 5, "CAPRICORN_CAPRICORN": 5}, "drive": true}
+PASS kova_tek_neden | {"AQUARIUS_CANCER": true, "AQUARIUS_AQUARIUS": true}
+PASS printful_dosya | {"TAURUS_TAURUS": {"RUBY": true, "SAPPHIRE": true, "EMERALD": true, "SADE_ALTIN": true, "FILDISI": true}, "CANCER_TAURUS": {"RUBY": true, "SAPPHIRE": true, "EMERALD": true, "SADE_ALTIN": true, "FILDIS
+PASS dpi_piksel_ayni | {"TAURUS_TAURUS": {"RUBY": true, "SAPPHIRE": true, "EMERALD": true, "SADE_ALTIN": true, "FILDISI": true}, "CANCER_TAURUS": {"RUBY": true, "SAPPHIRE": true, "EMERALD": true, "SADE_ALTIN": true, "FILDIS
+PASS o2_piksel | {"TAURUS_TAURUS": true, "CANCER_TAURUS": true, "AQUARIUS_CANCER": true, "LIBRA_LIBRA": true, "AQUARIUS_AQUARIUS": true, "ARIES_SCORPIO": true, "LEO_SAGITTARIUS": true, "CAPRICORN_CAPRICORN": true}
+PASS kenar_on_motor | {"eslesen": 20, "toplam": 20, "farkli": []}
+PASS aquarius_445_464 | {"on_olcum": [445, 464], "kapi_testi": [445, 464]}
+PASS eta_satirlari | {"PARCA_1": {"eta": 5, "cift": 5}, "PARCA_2": {"eta": 5, "cift": 5}}
+PASS katman_silindi | {"TAURUS_TAURUS": {"katman_pkl_var": false, "dump_var": false}, "CANCER_TAURUS": {"katman_pkl_var": false, "dump_var": false}, "AQUARIUS_CANCER": {"katman_pkl_var": false, "dump_var": false}, "LIBRA_L
+PASS siparis_kaydi | {"hazirlik": 14, "parca": {"PARCA_1": true, "PARCA_2": true}}
+PASS onarimsiz_ek_fail_listesi | {}
+PASS birlesik_gecti | {"eksik_parca": [], "fail": [], "cokus": []}
+BEKLENEN_ORNEK PASS

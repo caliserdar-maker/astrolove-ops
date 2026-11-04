@@ -1,0 +1,7 @@
+cancer_symbol_gold.png [1012, 1167] gecti True | kapi 0 | ic 113 | kenar 0 kenar bandi kor (ice 4 px); bilgi, FAIL degil | acik n0 0 degisen 0 gizlendi False
+libra_symbol_gold.png [1084, 1448] gecti True | kapi 0 | ic 113 | kenar 0 kenar bandi kor (ice 5 px); bilgi, FAIL degil | acik n0 0 degisen 0 gizlendi False
+aquarius_symbol_gold.png [4501, 10817] gecti True | kapi 445 | ic 1009 | kenar 107  | acik n0 445 degisen 464 gizlendi True
+pisces_symbol_gold.png [1206, 1296] gecti True | kapi 0 | ic 113 | kenar None kenara degen dolu murekkep yok, leke konamadi (bilgi; zorunlu degil) | acik n0 0 degisen 0 gizlendi None
+CANCER_LIBRA_ana.png [1514, 1600] gecti True | kapi 0 | ic 113 | kenar None kenara degen dolu murekkep yok, leke konamadi (bilgi; zorunlu degil) | acik n0 0 degisen 0 gizlendi None
+AQUARIUS_PISCES_ana.png [2073, 1600] gecti True | kapi 0 | ic 113 | kenar None kenara degen dolu murekkep yok, leke konamadi (bilgi; zorunlu degil) | acik n0 0 degisen 0 gizlendi None
+TEST PASS | eksik zorunlu []

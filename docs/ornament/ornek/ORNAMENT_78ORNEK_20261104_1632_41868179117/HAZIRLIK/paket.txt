@@ -1,0 +1,9 @@
+python 3.13.17 numpy 2.5.4 cv2 5.0.0 pillow 11.0.0
+4
+               total        used        free      shared  buff/cache   available
+Mem:           15983         962       13772          46        1591       15020
+Swap:           3071           0        3071
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       145G   58G   87G  40% /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       145G   58G   87G  40% /

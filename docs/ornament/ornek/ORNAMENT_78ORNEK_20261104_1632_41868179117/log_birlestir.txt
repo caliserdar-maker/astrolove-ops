@@ -1,0 +1,1 @@
+birlestir {'gecti': True, 'eksik_parca': [], 'fail': [], 'cokus': [], 'kontrol': True, 'drive': True}
