@@ -42,9 +42,10 @@ import poster_metin_kuru as P  # noqa: E402
 import p1_poster_kuru as K  # noqa: E402
 from beyan_marka_yaz import ru_gercek  # noqa: E402
 
-ISTEK_ILAN = 20          # ilan basi butce (Serdar P1-K "A": kalan >= 20 + KOTA_SINIRI). Tipik 9: 3 okuma + PATCH + 1 geri okuma + PUT +
-#                          1 geri okuma + son okuma 2. En kotu 18: 3 okuma + EN (PATCH + 3) + RU (PUT + 3) + RU basarisiz yolu (RU okuma 1
-#                          + EN geri PATCH + 3 = 5; o yolda RU geri okuma 3 yerine 0-3) + son okuma 2 -> 20 icinde. 5xx yeniden gonderimleri haric.
+ISTEK_ILAN = 20          # ilan basi butce (Serdar P1-K "A": kalan >= 20 + KOTA_SINIRI). Tipik 9 (sahte Etsy testi olcumu): 3 okuma + PATCH
+#                          + 1 geri okuma + PUT + 1 geri okuma + son okuma 2. En kotu 20: 3 okuma + EN (PATCH + 3) + RU (PUT + 3) + RU basarisiz
+#                          yolu (RU yeniden okuma en fazla 3 + EN geri PATCH + 3) + son okuma 2. etsy_common 5xx/429 yeniden gonderimleri
+#                          (x3) ve 401 yenilemesi haric. Not: p1_poster_kuru ISTEK_TIPIK 7 / FARK tahmini_istek 7 geri okuma + son okumayi saymaz.
 PARTI_BOYU = 20          # 77 ilan -> 20 / 20 / 20 / 17 (PLAN §3)
 BEKLE_SN = 3
 KURU_SHA = {"ONCE_SONRA.json": "56d86efaf7b32e7eec2ce7d1e44782eaac5d12cd3a36badf07e894af03843f9b",
@@ -123,8 +124,8 @@ def son_okuma(L, ru, kp, geri):
         sorun.append(f"EN {de}")
     if dr != "hedef":
         sorun.append(f"RU {dr}")
-    if R.onay_ozet(en_c, ru_c) != R.onay_ozet(he, hr):
-        sorun.append("onay ozeti farkli")
+    if R.onay_ozet(en_c, ru_c) != kp["once_ozet" if geri else "onay_ozet"]:   # PLAN §6: kuru (FARK) onay ozeti; geri-al: once_ozet
+        sorun.append("onay ozeti kuru plandan farkli")
     sorun += ust_ayni(L, ru, kp["yedek"])
     if L.get("state") != "active":
         sorun.append(f"state {L.get('state')}")
@@ -260,8 +261,10 @@ def ru_basarisiz(api, shop, lid, e, L, ru0, yeni_ru, eski_en):
     """RU yazimi hata verdi (plan §3.9). Canli RU okunur: yeni ise (PUT islenmis) EN'ye dokunulmaz (EN + RU yeni, tutarli);
     degilse EN yazimdan onceki metne geri yazilir. RU'ya ek yazim YOK. -> (neden, last_modified, geri_utc)"""
     hata = f"{type(e).__name__}: {str(e)[:150]}"
-    try:
-        c = ru_oku(api, shop, lid)
+    ru_ust0 = (norm(ru0.get("title")), sorted(ru0.get("tags") or []))
+    try:   # inceleme ORTA-2: Etsy geri okumasi gecikebilir; yeni RU en fazla 3 kez daha aranir (yanlislikla EN geri alinmasin)
+        c, _ = tekrar_oku(lambda: ru_oku(api, shop, lid), lambda x: norm(x.get("description")) == norm(yeni_ru)
+                          and (norm(x.get("title")), sorted(x.get("tags") or [])) == ru_ust0)
     except (SystemExit, Exception) as e1:   # noqa: BLE001
         return f"RU basarisiz ({hata}); RU yeniden okunamadi ({str(e1)[:80]}); EN'ye dokunulmadi, ELLE BAKILMALI", "", ""
     ru_ust = norm(c.get("title")) == norm(ru0.get("title")) and sorted(c.get("tags") or []) == sorted(ru0.get("tags") or [])
@@ -312,6 +315,10 @@ def onay_kontrol(onay, ids_metin, uygula, geri):
 
 
 def calis(api, shop, ids, kuru, out, uygula, geri):
+    eksik = [x for x in ids if x not in kuru]
+    if eksik or len(set(ids)) != len(ids):   # inceleme D2: Etsy isteginden ONCE (77'lik listede k. id hatasi k-1 yazim birakmasin)
+        raise SystemExit(f"DUR: ids kuru planda yok {eksik[:5]} ya da yinelenen id var; Etsy istegi yok")
+    t0 = time.time()
     out = pathlib.Path(out); out.mkdir(parents=True, exist_ok=True)
     yol = out / "DEGISIKLIK.csv"
     fh = open(yol, "w", newline="", encoding="utf-8")
@@ -349,7 +356,9 @@ def calis(api, shop, ids, kuru, out, uygula, geri):
                 raise
             kaydet(dict(r, parti=parti)); sayac["islenen"] += 1
             sayac["sonuc"][r["sonuc"]] = sayac["sonuc"].get(r["sonuc"], 0) + 1
-            print(f"[{n}/{len(ids)}] parti {parti} {lid} {r['sonuc']} | {r.get('son_okuma', '')} | kota {api.remaining}", flush=True)
+            gec = time.time() - t0; kal = gec / n * (len(ids) - n)
+            print(f"[{n}/{len(ids)} %{100 * n // len(ids)} gecen {gec:.0f} sn kalan ~{kal:.0f} sn] parti {parti} {lid} {r['sonuc']} | "
+                  f"{r.get('son_okuma', '')} | kota {api.remaining}", flush=True)
             if n % PARTI_BOYU == 0 or n == len(ids):
                 parti_rapor(parti)
     except Dur as e:

@@ -7,6 +7,7 @@ Kullanim: python3 scripts/etsy/test_poster_metin_yaz.py -> SONUC n/n PASS (cikis
 import copy
 import csv
 import hashlib
+import html
 import json
 import os
 import pathlib
@@ -48,9 +49,10 @@ RU0 = R.kur(EN0, {"boy": BOYKOD})[0]
 class Sahte:
     """Durumlu sahte Etsy: ilan (EN), RU ceviri, envanter. Yazmalar saklanir; bayraklar hata uretir."""
 
-    def __init__(self, kalan=500, en=None, ru=None):
-        self.calls, self.remaining, self.yaz = 0, kalan, []
-        self.L = dict(listing_id=int(LID), state="active", title=D["title"], description=EN0 if en is None else en, tags=list(D["tags"]),
+    def __init__(self, kalan=500, en=None, ru=None, lid=LID):
+        self.calls, self.remaining, self.yaz, self.lid = 0, kalan, [], lid
+        self.ru_gecikme = 0   # PUT'tan sonra kac GET boyunca eski RU donsun (Etsy geri okuma gecikmesi)
+        self.L = dict(listing_id=int(lid), state="active", title=D["title"], description=EN0 if en is None else en, tags=list(D["tags"]),
                       materials=["matte art paper", "ink"], last_modified_timestamp=1)
         self.ru = dict(title=D["ru"]["title"], description=RU0 if ru is None else ru, tags=list(D["ru"]["tags"]))
         self.inv = {"products": [{"property_values": [{"property_id": 513, "values": [b]}]} for b in BOY]}
@@ -69,14 +71,17 @@ class Sahte:
 
     def get(self, path, params=None, ok404=False):
         self._say()
-        if path == f"/listings/{LID}":
+        if path == f"/listings/{self.lid}":
             x = copy.deepcopy(self.L)
             if self.son_bozuk and self.put_n:   # yazimdan sonra baslik degismis gibi (son okuma FAIL)
                 x["title"] += " x"
             return x
-        if path == f"/listings/{LID}/inventory":
+        if path == f"/listings/{self.lid}/inventory":
             return copy.deepcopy(self.inv)
-        if path == f"/shops/{SHOP}/listings/{LID}/translations/ru":
+        if path == f"/shops/{SHOP}/listings/{self.lid}/translations/ru":
+            if self.put_n and self.ru_gecikme > 0:
+                self.ru_gecikme -= 1
+                return copy.deepcopy(self.ru_eski)
             return copy.deepcopy(self.ru)
         raise AssertionError(path)
 
@@ -94,6 +99,7 @@ class Sahte:
     def put(self, path, data):
         self._say(); self.yaz.append(("PUT", path, dict(data)))
         self.put_n += 1
+        self.ru_eski = copy.deepcopy(self.ru)
         if self.ru_put_hata:
             raise SystemExit("HTTP 500 PUT translations")
         self.ru = dict(title=data["title"], description=data["description"] + (" X" if self.ru_bozuk and self.put_n == 1 else ""),
@@ -125,7 +131,8 @@ def kos(api, kuru=None, uygula=True, geri=False, ids=None):
             s = Y.calis(api, SHOP, ids or [LID], kuru or KURU, d, uygula, geri); dur = None
         except SystemExit as e:
             s, dur = None, str(e)
-        rows = list(csv.DictReader(open(pathlib.Path(d) / "DEGISIKLIK.csv", encoding="utf-8")))
+        f_ = pathlib.Path(d) / "DEGISIKLIK.csv"
+        rows = list(csv.DictReader(open(f_, encoding="utf-8"))) if f_.is_file() else []
     return s, dur, rows
 
 
@@ -222,6 +229,26 @@ if (gercek / "ONCE_SONRA.json").is_file():   # yalniz dalda (docs/p1 main'e girm
     kk, hata = yukle_dene(gercek, None)
     k("PASS yukle gercek kuru plan (dal docs/p1): sabit sha256 esit, 78 ilan, pilot 4570165628 var",
       hata is None and len(kk) == 78 and "4570165628" in kk, hata)
+    # inceleme T1: gercek 78 kuru plan, canli = en_once / ru_once / yedek, Etsy gibi &#39; kacisli + \r\n; KURU + UYGULA + son okuma
+    say = {"KURU": 0, "PASS": 0, "son": 0, "patch_kacis": 0}
+    for lid, kp in kk.items():
+        def boz(t):
+            return html.escape(t, quote=True).replace("&#x27;", "&#39;").replace("\n", "\r\n")
+        for uyg in (False, True):
+            g = Sahte(en=boz(kp["en_once"]), ru=boz(kp["ru_once"]), lid=lid)
+            y = kp["yedek"]
+            g.L.update(title=y["title"], tags=list(y["tags"]), materials=list(y["materials"]))
+            g.ru.update(title=y["ru"]["title"], tags=list(y["ru"]["tags"]))
+            s, dur, rows = kos(g, kuru=kk, uygula=uyg, ids=[lid])
+            r1 = sonuc_satiri(rows)[0] if sonuc_satiri(rows) else {}
+            if not uyg and dur is None and r1.get("sonuc") == "KURU":
+                say["KURU"] += 1
+            if uyg and dur is None and r1.get("sonuc") == "PASS":
+                say["PASS"] += 1
+                say["son"] += r1.get("son_okuma") == "EN hedef / RU hedef | PASS"
+                say["patch_kacis"] += "&#39;" in g.yaz[0][2]["description"] or "\r" in g.yaz[0][2]["description"]
+    k("PASS gercek 78 (kacisli + \\r\\n canli): KURU 78, UYGULA PASS 78, son okuma PASS 78, gonderilen metinde kacis / \\r 0",
+      say == {"KURU": 78, "PASS": 78, "son": 78, "patch_kacis": 0}, say)
 
 
 # ---------- 4 onay sozcugu + ids (Python) ve yml bash kapisi
@@ -369,8 +396,18 @@ k("FAIL son_okuma: state draft", not ok_ and "state draft" in rap, rap)
 # ---------- 9 parti: 20 / 20 / 20 / 17 tanimi; DUR sonraki ilani yazmaz
 k("parti boyu 20 (77 -> 20/20/20/17)", Y.PARTI_BOYU == 20 and [min(20, 77 - i_) for i_ in range(0, 77, 20)] == [20, 20, 20, 17])
 pz = Sahte(); s, dur, rows = kos(pz, ids=[LID, "999"])
-k("FAIL kuru planda olmayan ikinci ilan: ilk PASS, ikinci DUR (kuru plan yok)", dur and "kuru plan yok" in dur
-  and [r["sonuc"] for r in rows] == ["EN_BASLADI", "PASS", "DUR"], (dur, rows))
+k("FAIL kuru planda olmayan id (2. sirada): Etsy isteginden ONCE DUR, istek 0", dur and "kuru planda yok" in dur and pz.calls == 0,
+  (dur, pz.calls))
+pz2 = Sahte(); s, dur, rows = kos(pz2, ids=[LID, LID])
+k("FAIL yinelenen id: Etsy isteginden ONCE DUR, istek 0", dur and "yinelenen" in dur and pz2.calls == 0, (dur, pz2.calls))
+# inceleme ORTA-2: RU PUT islendi ama geri okuma gecikiyor -> EN yanlislikla geri alinmaz
+gk = Sahte(); gk.ru_gecikme = 4; s, dur, rows = kos(gk)
+k("FAIL RU geri okuma 4 okuma gecikmeli (PUT islendi): EN geri ALINMAZ, TAMAM_HATALI, DUR",
+  dur and [w[0] for w in gk.yaz] == ["PATCH", "PUT"] and sonuc_satiri(rows)[0]["sonuc"] == "TAMAM_HATALI"
+  and Y.norm(gk.L["description"]) == Y.norm(KURU[LID]["en_sonra"]), (dur, rows))
+gk2 = Sahte(); gk2.ru_gecikme = 9; s, dur, rows = kos(gk2)
+k("FAIL RU 9 okuma boyunca eski (6 okuma sonrasi): EN geri yazilir, DUR (sinir: 3 + 3 okuma)",
+  dur and [w[0] for w in gk2.yaz] == ["PATCH", "PUT", "PATCH"] and sonuc_satiri(rows)[0]["sonuc"] == "FAIL", (dur, rows))
 
 # ---------- 10 RU kapisi gercek: izinsiz poster RU metni DUR
 E.RU_POSTER_IZIN.clear()
@@ -418,7 +455,9 @@ def gercek_api(sahte):
 
 gercek_req = requests.request
 try:
-    g1 = Sahte(); api = gercek_api(g1); E.METIN_UYARI.clear(); E.RU_POSTER_IZIN.clear()
+    g1 = Sahte(en=EN0.replace("'", "&#39;"), ru=RU0.replace("'", "&#39;"))   # canli Etsy GET kacisli doner (inceleme T2)
+    k("test kurgusu: canli EN'de &#39; var", "&#39;" in g1.L["description"])
+    api = gercek_api(g1); E.METIN_UYARI.clear(); E.RU_POSTER_IZIN.clear()
     s, dur, rows = kos(api)
     k("gercek _call: normal akis PASS (gercek kapilar), metin kapisi uyari 0, son okuma PASS", dur is None
       and sonuc_satiri(rows)[0]["sonuc"] == "PASS" and Y.norm(g1.ru["description"]) == Y.norm(KURU[LID]["ru_sonra"])
@@ -428,6 +467,10 @@ try:
     kb3 = copy.deepcopy(KURU); kb3[LID]["ru_sonra"] = kb3[LID]["ru_sonra"] + "\nEK SATIR"
     s, dur, _ = kos(api, kuru=kb3)
     k("gercek _call FAIL: kuru RU degistirilmis -> yazim yok", dur and not g2.yaz, dur)
+    g3 = Sahte(kalan=Y.ISTEK_ILAN + E.KOTA_SINIRI - 1); api = gercek_api(g3)   # gercek: ilk istekte kalan bilinmez (inceleme D7)
+    s, dur, _ = kos(api)
+    k("gercek _call FAIL: kalan 29 -> 1 GET sonra kota DUR, yazim yok", dur and "kota" in dur and g3.calls == 1 and not g3.yaz,
+      (dur, g3.calls))
 finally:
     requests.request = gercek_req
 print(f"SONUC: {sum(sonuc)}/{len(sonuc)} PASS")
