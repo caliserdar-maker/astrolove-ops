@@ -3,3 +3,4 @@ ORNAMENT_78_ORNEK6 tetik (Merkez / Serdar 3 Kas, karar 28): 6 cift x 5 stil, Act
 2. tetik: 2026-11-03T18:04Z (hafif checkout: depth 1, blobsuz, sparse)
 3. tetik: 2026-11-03T19:55Z DENEME 2 (SON): exit 0/1/2, SADE 246 bilgi (yeni cift), sembol sigmazsa kutu yuksekligi gereken px kucultulur, sert kapi tek kaynak (motor + SADE_1 + fildisi)
 4. tetik: 2026-11-03T22:00Z DENEME 3 (Serdar 4 Kas): Kova kapi testi + kaniti (EK 1-2), SADE >= 1.54, FILDISI kontrast bilgi, onizleme sinir, Drive her durumda
+5. tetik: 2026-11-04T10:58Z KOVA DUZELTME (Serdar 4 Kas O1 + a): CANCER_LIBRA + AQUARIUS_PISCES, kapi testi iki mod, KENAR_ONARIM, gercek boy 300 dpi; kod 0322ac7
