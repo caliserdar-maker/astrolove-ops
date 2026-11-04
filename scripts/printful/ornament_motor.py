@@ -60,6 +60,7 @@ P_VARSAYILAN = dict(pah=0.6, k=0.8, karisim=0.0, g=0.5, gs=60, golge_sigma=12, g
                     parilti=0.0, parilti_esik=2.3, isik_leke=0.0, mot_poz=0, mot_s2=5.0, harita='sira')   # uret_tam.py satir 10 (6da763a)
 
 
+YENI_DUZEN = os.environ.get('YENI_DUZEN') == '1'                              # Serdar 4 Kas aksam: yeni duzen (yeni_duzen.py); varsayilan ESKI davranis
 KUCULT_SINIR_PX = 2                                                          # Serdar 4 Kas O3 a: toplam kucultme > 2 px ise is durur, gorsel Serdar'a
 
 
@@ -239,6 +240,8 @@ def main():
     ana5 = kenar_onar('ana', ana5)
     ic_, _ = o5.leke_ic_kaynak(ana5[..., 3]); o5.KAYNAK_SONRA['ana'] = int((ic_ & (ana5[..., 3] < 0.9)).sum())
     lsrc = o4.logo_kaynak(K_ / 'LOGO_1.png')
+    _ys = importlib.util.spec_from_file_location('yeni_duzen', Path(__file__).resolve().parent / 'yeni_duzen.py'); yd = importlib.util.module_from_spec(_ys); _ys.loader.exec_module(yd)
+    TARIH_METIN = yd.TARIH_YENI if YENI_DUZEN else yd.TARIH_ESKI                 # engel e: motor 268 (cizim) ve 10x 377 birlikte
     cap = o4.CAP0
     G = int(math.ceil(o5.BOSLUK_ORAN * cap))
     kucuk_g = {}
@@ -262,7 +265,7 @@ def main():
         sz = (max(1, int(round(lsrc.shape[1] * kk))), max(1, int(round(cap * o4.LOGO_H * k))))
         return np.clip(cv2.resize(lsrc, sz, interpolation=cv2.INTER_AREA if kk <= 1 else cv2.INTER_CUBIC), 0, 1)
     T = dict(isim1=o1.metin_alfa('EMILY', K_ / 'Cinzel.ttf', cap, 500), isim2=o1.metin_alfa('JAMES', K_ / 'Cinzel.ttf', cap, 500),
-             tarih=o1.metin_alfa('14 JUNE 2025', K_ / 'EBGaramond-Italic.ttf', Pc['tagline_T'] / Pc['cap'] * cap, None, ref='T'), sonsuz=logo(), cap=cap)
+             tarih=o1.metin_alfa(TARIH_METIN, K_ / 'EBGaramond-Italic.ttf', Pc['tagline_T'] / Pc['cap'] * cap, None, ref='T'), sonsuz=logo(), cap=cap)
     def h_oran(b):
         if b == 'CANCER':
             return Pc['kucuk_sol_h'] / Pc['cap']
@@ -272,7 +275,7 @@ def main():
     kc = {'sol': kucuk(B1.lower(), h_oran(B1)), 'sag': kucuk(B2.lower(), h_oran(B2))}
     KUCUK_H = {'sol': (B1, round(h_oran(B1) * Pc['cap'], 2)), 'sag': (B2, round(h_oran(B2) * Pc['cap'], 2))}
     # karar 28: ana sembol CANCER_LIBRA kutusuna (genislik hedefi, yukseklik = CANCER_LIBRA en / boy) orani bozulmadan sigar; buyutme yok
-    if CIFT != 'CANCER_LIBRA':
+    if CIFT != 'CANCER_LIBRA' and not YENI_DUZEN:                             # yeni duzende CL kutusu kullanilmaz (karar 4; engel h)
         _cl = np.asarray(Image.open(K_ / 'CANCER_LIBRA_ana.png').convert('RGBA'), np.float32); _cl[..., 3] /= 255.0
         _cl = o1.kirp(_cl, _cl[..., 3], pad=2)
         if _cl.shape[1] > 1600:
@@ -297,31 +300,48 @@ def main():
         o5.o3.sembol_yerlestir = sembol_kutu
     KUTU_BILGI = {}
     KUCULT = [0]
-    ha, hb = o5.halka_T(pp, son.S0)
-    Y, bilgi = o5.yerlesim_V5(pp, ana5, T, kc, ha, hb, G)
     KUCULT_IZ = []
-    while CIFT != 'CANCER_LIBRA' and Y is None and bilgi.get('hata') == 'sembol sigmiyor' and len(KUCULT_IZ) < 10:
-        KUCULT_IZ.append(dict(kucultme_px=KUCULT[0], gereken_kucultme_px=bilgi.get('gereken_kucultme_px'), cakisma=bilgi.get('cakisma')))
-        KUCULT[0] += max(1, int(bilgi.get('gereken_kucultme_px') or 1))
-        log('sembol sigmiyor: kutu yuksekligi', KUCULT[0], 'px kucultulup yeniden', KUCULT_IZ[-1])
-        Y, bilgi = o5.yerlesim_V5(pp, ana5, T, kc, ha, hb, G)
-    KUTU_BILGI['kucultme_iz'] = KUCULT_IZ
-    if Y is None:
-        log('FAIL yerlesim', json.dumps(bilgi, default=str))
-        (O / 'OLCUM.json').write_text(json.dumps(dict(hata='yerlesim_V5', cift=CIFT, bilgi=bilgi, kucuk_burc_hedef_h_poster_px=KUCUK_H, kutu=KUTU_BILGI),
-                                                  indent=1, ensure_ascii=False, default=str))
-        return 1
-    if CIFT != 'CANCER_LIBRA':                                                # alt kenar kucuk burc satirinin G px ustu (bosluk 20/20/20)
-        E_ = Y['E']; k0 = o5.satir(E_, o5.KUCUK)[0]; s4 = o5.kutu(E_, 'sembol'); dy = (k0 - G) - s4[3]
-        o5.kaydir(E_, ('sembol',), dy)
+    YD = None
+    if YENI_DUZEN:                                                           # karar 1-4 (yeni_duzen.yeni_yerlesim; yataylar o3.yazi_blogu)
+        ha, hb = o5.halka_T(pp, son.S0)
+        h_max = yd.h_max_12(h_oran, cap, sorted(SPRITE_H))                    # karar 3: 12 kucuk isaretin en yuksegi (nominal h_oran x cap)
+        E_, cizgi_, d_, g_yd, olc_yd = yd.yeni_yerlesim(o3.yazi_blogu, o1.rgba_olcek, T, kc, ana5, h_max)
+        E_['halka'] = (None, ha, 0, 0)
         M_, yb_, cak_, ok_ = o4.kapi(E_)
-        bilgi.update(sembol_alt_hizalama_dy=int(dy), kapi_ok=bool(ok_), kutu=KUTU_BILGI)
+        YD = dict(cizgi=cizgi_, sembol=d_, kapi=g_yd, olcum=olc_yd, o4_kapi=bool(ok_))
+        bilgi = dict(yeni_duzen=YD, kutu=KUTU_BILGI)
         if not ok_:
-            log('FAIL yerlesim (alt hizalama sonrasi kapi)', yb_, cak_[:4])
-            (O / 'OLCUM.json').write_text(json.dumps(dict(hata='alt_hizalama_kapi', cift=CIFT, yasak=yb_, cakisma=cak_[:8], bilgi=bilgi),
+            log('FAIL yerlesim (yeni duzen o4.kapi)', yb_, cak_[:4])
+            (O / 'OLCUM.json').write_text(json.dumps(dict(hata='yeni_duzen_kapi', cift=CIFT, yasak=yb_, cakisma=cak_[:8], bilgi=bilgi),
                                                       indent=1, ensure_ascii=False, default=str))
             return 1
-        Y.update(M=M_, yasak=yb_, cak=cak_)
+        Y = dict(E=E_, M=M_, yasak=yb_, cak=cak_, halka=hb)
+    else:
+        ha, hb = o5.halka_T(pp, son.S0)
+        Y, bilgi = o5.yerlesim_V5(pp, ana5, T, kc, ha, hb, G)
+        KUCULT_IZ = []
+        while CIFT != 'CANCER_LIBRA' and Y is None and bilgi.get('hata') == 'sembol sigmiyor' and len(KUCULT_IZ) < 10:
+            KUCULT_IZ.append(dict(kucultme_px=KUCULT[0], gereken_kucultme_px=bilgi.get('gereken_kucultme_px'), cakisma=bilgi.get('cakisma')))
+            KUCULT[0] += max(1, int(bilgi.get('gereken_kucultme_px') or 1))
+            log('sembol sigmiyor: kutu yuksekligi', KUCULT[0], 'px kucultulup yeniden', KUCULT_IZ[-1])
+            Y, bilgi = o5.yerlesim_V5(pp, ana5, T, kc, ha, hb, G)
+        KUTU_BILGI['kucultme_iz'] = KUCULT_IZ
+        if Y is None:
+            log('FAIL yerlesim', json.dumps(bilgi, default=str))
+            (O / 'OLCUM.json').write_text(json.dumps(dict(hata='yerlesim_V5', cift=CIFT, bilgi=bilgi, kucuk_burc_hedef_h_poster_px=KUCUK_H, kutu=KUTU_BILGI),
+                                                      indent=1, ensure_ascii=False, default=str))
+            return 1
+        if CIFT != 'CANCER_LIBRA':                                                # alt kenar kucuk burc satirinin G px ustu (bosluk 20/20/20)
+            E_ = Y['E']; k0 = o5.satir(E_, o5.KUCUK)[0]; s4 = o5.kutu(E_, 'sembol'); dy = (k0 - G) - s4[3]
+            o5.kaydir(E_, ('sembol',), dy)
+            M_, yb_, cak_, ok_ = o4.kapi(E_)
+            bilgi.update(sembol_alt_hizalama_dy=int(dy), kapi_ok=bool(ok_), kutu=KUTU_BILGI)
+            if not ok_:
+                log('FAIL yerlesim (alt hizalama sonrasi kapi)', yb_, cak_[:4])
+                (O / 'OLCUM.json').write_text(json.dumps(dict(hata='alt_hizalama_kapi', cift=CIFT, yasak=yb_, cakisma=cak_[:8], bilgi=bilgi),
+                                                          indent=1, ensure_ascii=False, default=str))
+                return 1
+            Y.update(M=M_, yasak=yb_, cak=cak_)
     bilgi['kucuk_burc_hedef_h_poster_px'] = KUCUK_H
     log('yerlesim', CIFT, bilgi, 'sembol kutu', o5.kutu(Y['E'], 'sembol'))
     model = son.model_kur(td, Y)
@@ -354,7 +374,7 @@ def main():
     A10, hiz = {}, {}
     A10['isim1'], hiz['isim1'] = cerceve10(metin_alfa10('EMILY', K_ / 'Cinzel.ttf', cap, 500), Y['E']['isim1'][1], 'isim1')
     A10['isim2'], hiz['isim2'] = cerceve10(metin_alfa10('JAMES', K_ / 'Cinzel.ttf', cap, 500), Y['E']['isim2'][1], 'isim2')
-    A10['tarih'], hiz['tarih'] = cerceve10(metin_alfa10('14 JUNE 2025', K_ / 'EBGaramond-Italic.ttf', Pc['tagline_T'] / Pc['cap'] * cap, None, ref='T'),
+    A10['tarih'], hiz['tarih'] = cerceve10(metin_alfa10(TARIH_METIN, K_ / 'EBGaramond-Italic.ttf', Pc['tagline_T'] / Pc['cap'] * cap, None, ref='T'),
                                        Y['E']['tarih'][1], 'tarih')
     temiz_bilgi = {}
     def kucuk10(burc, ad):
@@ -726,8 +746,12 @@ def main():
              alfa_fark_metin_halka_le_0035=all(IOU_B[k]['ort_mutlak_fark_murekkep'] <= 0.035 for k in ('isim1', 'isim2', 'tarih', 'halka')),
              dE00_son_ham_le_2=all(max(r['dE00_son_ham'].values()) <= 2.0 for r in A_),
              artis_yalniz_ruby=all(R['sonuc'][r]['kucuk_oge_parlaklik_artisi'] == 1.0 for r in ('SAPPHIRE', 'EMERALD')))
-    if CIFT == 'CANCER_LIBRA':                                                 # onayli CL: sembol ust y 246 sert (kapi listesi)
+    if CIFT == 'CANCER_LIBRA' and not YENI_DUZEN:                              # onayli CL: sembol ust y 246 sert (kapi listesi; yalniz eski duzen)
         g['sembol_ust_246_cancer_libra'] = all(r['sembol_kutu'][1] == 246 for r in A_)
+    if YENI_DUZEN:                                                             # kapi tablosu (PLAN_YENI_DUZEN.md): 20/20/20 yerine yeni duzen kapilari
+        g.pop('bosluk_20_20_20')
+        g.update({f'yd_{k}': v for k, v in YD['kapi'].items()})
+        R['yeni_duzen'] = YD
     g['kucultme_le_sinir'] = KUCULT[0] <= SINIR_PX                             # O3 a: toplam kucultme (KUCULT toplamdir) <= sinir; FAIL ciftinde PNG yine kaydedildi
     R['kucultme'] = dict(toplam_px=int(KUCULT[0]), iz=KUCULT_IZ, sinir_px=int(SINIR_PX), sinir_kaynak=SINIR_KAYNAK,
                          not_='yerlesim 5 stilde ortak; 2 px asan kucultmede is durur, gorsel Serdar onayina')

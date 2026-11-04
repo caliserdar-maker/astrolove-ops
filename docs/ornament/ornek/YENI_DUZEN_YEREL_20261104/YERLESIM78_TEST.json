@@ -1,0 +1,6610 @@
+{
+ "not_": "YEREL BENZETIM: ana sembol = motor 6da763a girdi78 alfa maskesi (motor <CIFT>_ana.png kullanir; sinir kutusu esitligi dogrulanmadi). Kucuk isaretler: cancer/libra gercek, digerleri h_oran x cap dikdortgen. Kapi gevsetme yok.",
+ "sabitler": {
+  "halka_c": [
+   475.5,
+   504.0
+  ],
+  "halka_r": 336.0,
+  "pay": 30.0,
+  "tarih_alt": 795,
+  "bosluk": 32,
+  "ust_min": 230,
+  "b3": 0.85,
+  "y2": 0.75,
+  "h_max_12": 68.78,
+  "tarih": "JUNE 14, 2025"
+ },
+ "cift": {
+  "AQUARIUS_AQUARIUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     246,
+     391,
+     706,
+     508
+    ],
+    "sembol_ust": 391,
+    "sembol_alt": 508,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 243.03,
+    "halka_pay": 92.97,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 391.25
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1599,
+     403
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.340976,
+    "s": 0.28983,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 117,
+    "w": 460,
+    "bos_dikey": 215.0,
+    "ust_hedef": 391.25
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": [
+    474,
+    119,
+    402
+   ]
+  },
+  "AQUARIUS_ARIES": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     309,
+     272,
+     642,
+     548
+    ],
+    "sembol_ust": 272,
+    "sembol_alt": 548,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 261.8,
+    "halka_pay": 74.2,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 272.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1316
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.246333,
+    "s": 0.209383,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 276,
+    "w": 333,
+    "bos_dikey": 56.0,
+    "ust_hedef": 272.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "AQUARIUS_CANCER": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     308,
+     294,
+     644,
+     540
+    ],
+    "sembol_ust": 294,
+    "sembol_alt": 540,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 255.5,
+    "halka_pay": 80.5,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849998,
+    "ust_hedef_y2": 294.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1174
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.24677,
+    "s": 0.209754,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 246,
+    "w": 336,
+    "bos_dikey": 86.0,
+    "ust_hedef": 294.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": [
+    346,
+    254,
+    301
+   ]
+  },
+  "AQUARIUS_CAPRICORN": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     331,
+     268,
+     620,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 246.2,
+    "halka_pay": 89.8,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1550
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.214194,
+    "s": 0.182065,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 289,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "AQUARIUS_GEMINI": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     315,
+     286,
+     637,
+     544
+    ],
+    "sembol_ust": 286,
+    "sembol_alt": 544,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 255.44,
+    "halka_pay": 80.56,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 285.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1274
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.237853,
+    "s": 0.202175,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 258,
+    "w": 322,
+    "bos_dikey": 74.0,
+    "ust_hedef": 285.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "AQUARIUS_LEO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     301,
+     268,
+     650,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 237.66,
+    "halka_pay": 98.34,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850002,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1290
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.257364,
+    "s": 0.21876,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 349,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "AQUARIUS_LIBRA": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     234,
+     289,
+     718,
+     542
+    ],
+    "sembol_ust": 289,
+    "sembol_alt": 542,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 258.37,
+    "halka_pay": 77.63,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 289.25
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     837
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.355946,
+    "s": 0.302554,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 253,
+    "w": 484,
+    "bos_dikey": 79.0,
+    "ust_hedef": 289.25
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "AQUARIUS_PISCES": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     369,
+     269,
+     583,
+     549
+    ],
+    "sembol_ust": 269,
+    "sembol_alt": 549,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 254.54,
+    "halka_pay": 81.46,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849999,
+    "ust_hedef_y2": 269.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     2072
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.160232,
+    "s": 0.136197,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 280,
+    "w": 214,
+    "bos_dikey": 52.0,
+    "ust_hedef": 269.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": [
+    230,
+    297,
+    269
+   ]
+  },
+  "AQUARIUS_SAGITTARIUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     316,
+     309,
+     635,
+     536
+    ],
+    "sembol_ust": 309,
+    "sembol_alt": 536,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 251.22,
+    "halka_pay": 84.78,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849998,
+    "ust_hedef_y2": 308.75
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1138
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.234923,
+    "s": 0.199684,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 227,
+    "w": 319,
+    "bos_dikey": 105.0,
+    "ust_hedef": 308.75
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "AQUARIUS_SCORPIO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     299,
+     268,
+     654,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 251.13,
+    "halka_pay": 84.87,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849998,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1268
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.26183,
+    "s": 0.222555,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 355,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "AQUARIUS_TAURUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     327,
+     290,
+     625,
+     542
+    ],
+    "sembol_ust": 290,
+    "sembol_alt": 542,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 256.69,
+    "halka_pay": 79.31,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849998,
+    "ust_hedef_y2": 290.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1354
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.21927,
+    "s": 0.186379,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 252,
+    "w": 298,
+    "bos_dikey": 80.0,
+    "ust_hedef": 290.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "AQUARIUS_VIRGO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     315,
+     268,
+     637,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 248.76,
+    "halka_pay": 87.24,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850003,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1399
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.237312,
+    "s": 0.201716,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 322,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "ARIES_ARIES": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     332,
+     268,
+     620,
+     549
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 549,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 257.61,
+    "halka_pay": 78.39,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849998,
+    "ust_hedef_y2": 268.25
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1567
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.21187,
+    "s": 0.180089,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 281,
+    "w": 288,
+    "bos_dikey": 51.0,
+    "ust_hedef": 268.25
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "ARIES_CANCER": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     338,
+     268,
+     614,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 236.11,
+    "halka_pay": 99.89,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849999,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1635
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.203058,
+    "s": 0.172599,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 276,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "ARIES_CAPRICORN": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     379,
+     269,
+     573,
+     549
+    ],
+    "sembol_ust": 269,
+    "sembol_alt": 549,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 234.92,
+    "halka_pay": 101.08,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 269.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     2332
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.142367,
+    "s": 0.121012,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 280,
+    "w": 194,
+    "bos_dikey": 52.0,
+    "ust_hedef": 269.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "ARIES_GEMINI": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     332,
+     269,
+     619,
+     549
+    ],
+    "sembol_ust": 269,
+    "sembol_alt": 549,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 262.3,
+    "halka_pay": 73.7,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850002,
+    "ust_hedef_y2": 269.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1565
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.210776,
+    "s": 0.17916,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 280,
+    "w": 287,
+    "bos_dikey": 52.0,
+    "ust_hedef": 269.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "ARIES_LEO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     356,
+     268,
+     597,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 247.55,
+    "halka_pay": 88.45,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850002,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1506,
+     1761
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.188529,
+    "s": 0.16025,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 241,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "ARIES_LIBRA": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     324,
+     268,
+     629,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 259.5,
+    "halka_pay": 76.5,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1481
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.224173,
+    "s": 0.190547,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 305,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "ARIES_PISCES": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     335,
+     275,
+     617,
+     547
+    ],
+    "sembol_ust": 275,
+    "sembol_alt": 547,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 260.94,
+    "halka_pay": 75.06,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849999,
+    "ust_hedef_y2": 275.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1543
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.207339,
+    "s": 0.176238,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 272,
+    "w": 282,
+    "bos_dikey": 60.0,
+    "ust_hedef": 275.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "ARIES_SAGITTARIUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     341,
+     283,
+     611,
+     544
+    ],
+    "sembol_ust": 283,
+    "sembol_alt": 544,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 258.54,
+    "halka_pay": 77.46,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 283.25
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1550
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.198268,
+    "s": 0.168528,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 261,
+    "w": 270,
+    "bos_dikey": 71.0,
+    "ust_hedef": 283.25
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "ARIES_SCORPIO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     292,
+     297,
+     659,
+     540
+    ],
+    "sembol_ust": 297,
+    "sembol_alt": 540,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 254.95,
+    "halka_pay": 81.05,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849999,
+    "ust_hedef_y2": 296.75
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1059
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.269804,
+    "s": 0.229333,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 243,
+    "w": 367,
+    "bos_dikey": 89.0,
+    "ust_hedef": 296.75
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": [
+    378,
+    250,
+    305
+   ]
+  },
+  "ARIES_TAURUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     334,
+     268,
+     617,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 255.52,
+    "halka_pay": 80.48,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1594
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.208281,
+    "s": 0.177039,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 283,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "ARIES_VIRGO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     314,
+     281,
+     638,
+     545
+    ],
+    "sembol_ust": 281,
+    "sembol_alt": 545,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 259.21,
+    "halka_pay": 76.79,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 281.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1306
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.238095,
+    "s": 0.202381,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 264,
+    "w": 324,
+    "bos_dikey": 68.0,
+    "ust_hedef": 281.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CANCER_CANCER": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     255,
+     316,
+     697,
+     534
+    ],
+    "sembol_ust": 316,
+    "sembol_alt": 534,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 252.33,
+    "halka_pay": 83.67,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 315.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     789
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.324702,
+    "s": 0.275997,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 218,
+    "w": 442,
+    "bos_dikey": 114.0,
+    "ust_hedef": 315.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CANCER_CAPRICORN": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     308,
+     269,
+     644,
+     549
+    ],
+    "sembol_ust": 269,
+    "sembol_alt": 549,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 234.6,
+    "halka_pay": 101.4,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849998,
+    "ust_hedef_y2": 269.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1344
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.247024,
+    "s": 0.20997,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 280,
+    "w": 336,
+    "bos_dikey": 52.0,
+    "ust_hedef": 269.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CANCER_GEMINI": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     344,
+     268,
+     608,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 258.09,
+    "halka_pay": 77.91,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849999,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1713
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.193812,
+    "s": 0.16474,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 264,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CANCER_LEO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     346,
+     268,
+     607,
+     549
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 549,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 235.71,
+    "halka_pay": 100.29,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849996,
+    "ust_hedef_y2": 268.25
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1730
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.191908,
+    "s": 0.163121,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 281,
+    "w": 261,
+    "bos_dikey": 51.0,
+    "ust_hedef": 268.25
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CANCER_LIBRA": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     326,
+     268,
+     626,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 235.76,
+    "halka_pay": 100.24,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849999,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     1,
+     0,
+     1600,
+     1506
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.220452,
+    "s": 0.187384,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 300,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": [
+    316,
+    297,
+    269
+   ]
+  },
+  "CANCER_PISCES": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     362,
+     268,
+     589,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 236.19,
+    "halka_pay": 99.81,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850003,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1993
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.166583,
+    "s": 0.141596,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 227,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CANCER_SAGITTARIUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     320,
+     273,
+     633,
+     547
+    ],
+    "sembol_ust": 273,
+    "sembol_alt": 547,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 260.8,
+    "halka_pay": 75.2,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 273.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1408
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.23,
+    "s": 0.1955,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 274,
+    "w": 313,
+    "bos_dikey": 58.0,
+    "ust_hedef": 273.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CANCER_SCORPIO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     280,
+     268,
+     671,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 244.55,
+    "halka_pay": 91.45,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1155
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.287446,
+    "s": 0.244329,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 391,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CANCER_TAURUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     345,
+     281,
+     607,
+     545
+    ],
+    "sembol_ust": 281,
+    "sembol_alt": 545,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 258.2,
+    "halka_pay": 77.8,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849997,
+    "ust_hedef_y2": 281.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1600
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.19439,
+    "s": 0.165231,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 264,
+    "w": 262,
+    "bos_dikey": 68.0,
+    "ust_hedef": 281.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": [
+    274,
+    274,
+    287
+   ]
+  },
+  "CANCER_VIRGO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     316,
+     268,
+     635,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 235.98,
+    "halka_pay": 100.02,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850002,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1416
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.234463,
+    "s": 0.199294,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 319,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CAPRICORN_CAPRICORN": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     302,
+     324,
+     650,
+     530
+    ],
+    "sembol_ust": 324,
+    "sembol_alt": 530,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 249.28,
+    "halka_pay": 86.72,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 324.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     943
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.256615,
+    "s": 0.218123,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 206,
+    "w": 348,
+    "bos_dikey": 126.0,
+    "ust_hedef": 324.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": [
+    359,
+    211,
+    333
+   ]
+  },
+  "CAPRICORN_GEMINI": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     328,
+     293,
+     623,
+     541
+    ],
+    "sembol_ust": 293,
+    "sembol_alt": 541,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 255.93,
+    "halka_pay": 80.07,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849998,
+    "ust_hedef_y2": 293.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1346
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.216704,
+    "s": 0.184198,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 248,
+    "w": 295,
+    "bos_dikey": 84.0,
+    "ust_hedef": 293.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CAPRICORN_LEO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     302,
+     276,
+     650,
+     546
+    ],
+    "sembol_ust": 276,
+    "sembol_alt": 546,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 261.13,
+    "halka_pay": 74.87,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 276.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1599,
+     1233
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.257409,
+    "s": 0.218798,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 270,
+    "w": 348,
+    "bos_dikey": 62.0,
+    "ust_hedef": 276.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CAPRICORN_LIBRA": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     226,
+     282,
+     726,
+     545
+    ],
+    "sembol_ust": 282,
+    "sembol_alt": 545,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 259.53,
+    "halka_pay": 76.47,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849999,
+    "ust_hedef_y2": 281.75
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     840
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.367885,
+    "s": 0.312702,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 263,
+    "w": 500,
+    "bos_dikey": 69.0,
+    "ust_hedef": 281.75
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CAPRICORN_PISCES": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     302,
+     292,
+     651,
+     541
+    ],
+    "sembol_ust": 292,
+    "sembol_alt": 541,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 254.33,
+    "halka_pay": 81.67,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850003,
+    "ust_hedef_y2": 292.25
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1146
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.256859,
+    "s": 0.218331,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 249,
+    "w": 349,
+    "bos_dikey": 83.0,
+    "ust_hedef": 292.25
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CAPRICORN_SAGITTARIUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     365,
+     268,
+     587,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 257.64,
+    "halka_pay": 78.36,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     2030
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.163547,
+    "s": 0.139015,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 222,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CAPRICORN_SCORPIO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     308,
+     282,
+     645,
+     545
+    ],
+    "sembol_ust": 282,
+    "sembol_alt": 545,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 258.63,
+    "halka_pay": 77.37,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 281.75
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1251
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.247548,
+    "s": 0.210416,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 263,
+    "w": 337,
+    "bos_dikey": 69.0,
+    "ust_hedef": 281.75
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CAPRICORN_TAURUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     325,
+     268,
+     627,
+     549
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 549,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 254.56,
+    "halka_pay": 81.44,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 268.25
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1494
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.222222,
+    "s": 0.188889,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 281,
+    "w": 302,
+    "bos_dikey": 51.0,
+    "ust_hedef": 268.25
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "CAPRICORN_VIRGO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     318,
+     273,
+     635,
+     548
+    ],
+    "sembol_ust": 273,
+    "sembol_alt": 548,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 261.04,
+    "halka_pay": 74.96,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 272.75
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1387
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.233409,
+    "s": 0.198398,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 275,
+    "w": 317,
+    "bos_dikey": 57.0,
+    "ust_hedef": 272.75
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "GEMINI_GEMINI": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     361,
+     269,
+     591,
+     549
+    ],
+    "sembol_ust": 269,
+    "sembol_alt": 549,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 261.18,
+    "halka_pay": 74.82,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850004,
+    "ust_hedef_y2": 269.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1944
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.170551,
+    "s": 0.144969,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 280,
+    "w": 230,
+    "bos_dikey": 52.0,
+    "ust_hedef": 269.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "GEMINI_LEO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     347,
+     272,
+     605,
+     548
+    ],
+    "sembol_ust": 272,
+    "sembol_alt": 548,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 259.3,
+    "halka_pay": 76.7,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 272.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1700
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.191433,
+    "s": 0.162718,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 276,
+    "w": 258,
+    "bos_dikey": 56.0,
+    "ust_hedef": 272.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "GEMINI_LIBRA": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     354,
+     268,
+     598,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 235.67,
+    "halka_pay": 100.33,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849999,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     1,
+     0,
+     1600,
+     1806
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.183832,
+    "s": 0.156257,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 244,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "GEMINI_PISCES": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     344,
+     275,
+     608,
+     547
+    ],
+    "sembol_ust": 275,
+    "sembol_alt": 547,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 258.56,
+    "halka_pay": 77.44,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849997,
+    "ust_hedef_y2": 275.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     1,
+     0,
+     1599,
+     1637
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.197263,
+    "s": 0.167673,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 272,
+    "w": 264,
+    "bos_dikey": 60.0,
+    "ust_hedef": 275.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "GEMINI_SAGITTARIUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     319,
+     306,
+     632,
+     537
+    ],
+    "sembol_ust": 306,
+    "sembol_alt": 537,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 251.68,
+    "halka_pay": 84.32,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850002,
+    "ust_hedef_y2": 305.75
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1176
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.230909,
+    "s": 0.196273,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 231,
+    "w": 313,
+    "bos_dikey": 101.0,
+    "ust_hedef": 305.75
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "GEMINI_SCORPIO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     330,
+     294,
+     623,
+     541
+    ],
+    "sembol_ust": 294,
+    "sembol_alt": 541,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 254.78,
+    "halka_pay": 81.22,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849996,
+    "ust_hedef_y2": 293.75
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1351
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.215781,
+    "s": 0.183413,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 247,
+    "w": 293,
+    "bos_dikey": 85.0,
+    "ust_hedef": 293.75
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "GEMINI_TAURUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     359,
+     270,
+     594,
+     548
+    ],
+    "sembol_ust": 270,
+    "sembol_alt": 548,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 261.62,
+    "halka_pay": 74.38,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 270.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1873
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.175061,
+    "s": 0.148802,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 278,
+    "w": 235,
+    "bos_dikey": 54.0,
+    "ust_hedef": 270.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "GEMINI_VIRGO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     342,
+     285,
+     609,
+     544
+    ],
+    "sembol_ust": 285,
+    "sembol_alt": 544,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 255.8,
+    "halka_pay": 80.2,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 284.75
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1507,
+     1464
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.210048,
+    "s": 0.178541,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 259,
+    "w": 267,
+    "bos_dikey": 73.0,
+    "ust_hedef": 284.75
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": [
+    297,
+    272,
+    288
+   ]
+  },
+  "LEO_LEO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     354,
+     268,
+     597,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 247.09,
+    "halka_pay": 88.91,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1858
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.178687,
+    "s": 0.151884,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 243,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "LEO_LIBRA": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     296,
+     268,
+     656,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 249.83,
+    "halka_pay": 86.17,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849998,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1252
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.265176,
+    "s": 0.225399,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 360,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "LEO_PISCES": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     324,
+     268,
+     629,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 235.71,
+    "halka_pay": 100.29,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849998,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1599,
+     1469
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.226004,
+    "s": 0.192103,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 305,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "LEO_SAGITTARIUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     344,
+     268,
+     609,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 237.94,
+    "halka_pay": 98.06,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1700
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.195294,
+    "s": 0.166,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 265,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": [
+    280,
+    297,
+    269
+   ]
+  },
+  "LEO_SCORPIO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     348,
+     267,
+     604,
+     550
+    ],
+    "sembol_ust": 267,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 249.09,
+    "halka_pay": 86.91,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 266.75
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     84,
+     1600,
+     1850
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.187995,
+    "s": 0.159796,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 283,
+    "w": 256,
+    "bos_dikey": 49.0,
+    "ust_hedef": 266.75
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "LEO_TAURUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     313,
+     294,
+     639,
+     541
+    ],
+    "sembol_ust": 294,
+    "sembol_alt": 541,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 253.77,
+    "halka_pay": 82.23,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849998,
+    "ust_hedef_y2": 293.75
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1202
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.242236,
+    "s": 0.2059,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 247,
+    "w": 326,
+    "bos_dikey": 85.0,
+    "ust_hedef": 293.75
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "LEO_VIRGO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     328,
+     268,
+     625,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 243.61,
+    "halka_pay": 92.39,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1522
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.218134,
+    "s": 0.185414,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 297,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "LIBRA_LIBRA": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     226,
+     299,
+     726,
+     539
+    ],
+    "sembol_ust": 299,
+    "sembol_alt": 539,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 255.28,
+    "halka_pay": 80.72,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849999,
+    "ust_hedef_y2": 299.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     769
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.367365,
+    "s": 0.31226,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 240,
+    "w": 500,
+    "bos_dikey": 92.0,
+    "ust_hedef": 299.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": [
+    512,
+    246,
+    307
+   ]
+  },
+  "LIBRA_PISCES": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     344,
+     268,
+     608,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 236.19,
+    "halka_pay": 99.81,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849999,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1712
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.193925,
+    "s": 0.164836,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 264,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "LIBRA_SAGITTARIUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     362,
+     270,
+     589,
+     549
+    ],
+    "sembol_ust": 270,
+    "sembol_alt": 549,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 255.61,
+    "halka_pay": 80.39,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850004,
+    "ust_hedef_y2": 269.75
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1977
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.167931,
+    "s": 0.142742,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 279,
+    "w": 227,
+    "bos_dikey": 53.0,
+    "ust_hedef": 269.75
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "LIBRA_SCORPIO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     234,
+     277,
+     718,
+     546
+    ],
+    "sembol_ust": 277,
+    "sembol_alt": 546,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 258.72,
+    "halka_pay": 77.28,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 277.25
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     886
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.357567,
+    "s": 0.303932,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 269,
+    "w": 484,
+    "bos_dikey": 63.0,
+    "ust_hedef": 277.25
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "LIBRA_TAURUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     335,
+     282,
+     616,
+     544
+    ],
+    "sembol_ust": 282,
+    "sembol_alt": 544,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 258.02,
+    "halka_pay": 77.98,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849997,
+    "ust_hedef_y2": 282.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1486
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.207596,
+    "s": 0.176456,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 262,
+    "w": 281,
+    "bos_dikey": 70.0,
+    "ust_hedef": 282.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "LIBRA_VIRGO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     314,
+     268,
+     638,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 240.64,
+    "halka_pay": 95.36,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     1,
+     0,
+     1600,
+     1380
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.24058,
+    "s": 0.204493,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 324,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "PISCES_PISCES": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     377,
+     270,
+     574,
+     548
+    ],
+    "sembol_ust": 270,
+    "sembol_alt": 548,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 241.59,
+    "halka_pay": 94.41,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 270.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     2269
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.14632,
+    "s": 0.124372,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 278,
+    "w": 197,
+    "bos_dikey": 54.0,
+    "ust_hedef": 270.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "PISCES_SAGITTARIUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     357,
+     268,
+     596,
+     549
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 549,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 261.21,
+    "halka_pay": 74.79,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 268.25
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1858
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.178687,
+    "s": 0.151884,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 281,
+    "w": 239,
+    "bos_dikey": 51.0,
+    "ust_hedef": 268.25
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "PISCES_SCORPIO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     339,
+     285,
+     614,
+     544
+    ],
+    "sembol_ust": 285,
+    "sembol_alt": 544,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 257.37,
+    "halka_pay": 78.63,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 284.75
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1500
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.202986,
+    "s": 0.172538,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 259,
+    "w": 275,
+    "bos_dikey": 73.0,
+    "ust_hedef": 284.75
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "PISCES_TAURUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     340,
+     286,
+     611,
+     544
+    ],
+    "sembol_ust": 286,
+    "sembol_alt": 544,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 255.99,
+    "halka_pay": 80.01,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 285.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1501
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.202242,
+    "s": 0.171906,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 258,
+    "w": 271,
+    "bos_dikey": 74.0,
+    "ust_hedef": 285.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "PISCES_VIRGO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     337,
+     273,
+     614,
+     548
+    ],
+    "sembol_ust": 273,
+    "sembol_alt": 548,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 260.46,
+    "halka_pay": 75.54,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.85,
+    "ust_hedef_y2": 272.75
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1575
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.205354,
+    "s": 0.174551,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 275,
+    "w": 277,
+    "bos_dikey": 57.0,
+    "ust_hedef": 272.75
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "SAGITTARIUS_SAGITTARIUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     276,
+     337,
+     675,
+     526
+    ],
+    "sembol_ust": 337,
+    "sembol_alt": 526,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 245.93,
+    "halka_pay": 90.07,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849998,
+    "ust_hedef_y2": 337.25
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     757
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.293543,
+    "s": 0.249511,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 189,
+    "w": 399,
+    "bos_dikey": 143.0,
+    "ust_hedef": 337.25
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "SAGITTARIUS_SCORPIO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     314,
+     295,
+     639,
+     540
+    ],
+    "sembol_ust": 295,
+    "sembol_alt": 540,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 255.31,
+    "halka_pay": 80.69,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 295.25
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1206
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.239195,
+    "s": 0.203316,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 245,
+    "w": 325,
+    "bos_dikey": 87.0,
+    "ust_hedef": 295.25
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "SAGITTARIUS_TAURUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     330,
+     297,
+     623,
+     540
+    ],
+    "sembol_ust": 297,
+    "sembol_alt": 540,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 253.48,
+    "halka_pay": 82.52,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850002,
+    "ust_hedef_y2": 296.75
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1304
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.219303,
+    "s": 0.186408,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 243,
+    "w": 293,
+    "bos_dikey": 89.0,
+    "ust_hedef": 296.75
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "SAGITTARIUS_VIRGO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     371,
+     269,
+     580,
+     549
+    ],
+    "sembol_ust": 269,
+    "sembol_alt": 549,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 256.53,
+    "halka_pay": 79.47,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850002,
+    "ust_hedef_y2": 269.0
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     2148
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.154562,
+    "s": 0.131378,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 280,
+    "w": 209,
+    "bos_dikey": 52.0,
+    "ust_hedef": 269.0
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "SCORPIO_SCORPIO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     310,
+     298,
+     641,
+     540
+    ],
+    "sembol_ust": 298,
+    "sembol_alt": 540,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 254.04,
+    "halka_pay": 81.96,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849998,
+    "ust_hedef_y2": 297.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1171
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.243623,
+    "s": 0.207079,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 242,
+    "w": 331,
+    "bos_dikey": 90.0,
+    "ust_hedef": 297.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "SCORPIO_TAURUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     350,
+     277,
+     602,
+     546
+    ],
+    "sembol_ust": 277,
+    "sembol_alt": 546,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 259.19,
+    "halka_pay": 76.81,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849999,
+    "ust_hedef_y2": 277.25
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1599,
+     1704
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.186559,
+    "s": 0.158575,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 269,
+    "w": 252,
+    "bos_dikey": 63.0,
+    "ust_hedef": 277.25
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "SCORPIO_VIRGO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     315,
+     280,
+     637,
+     545
+    ],
+    "sembol_ust": 280,
+    "sembol_alt": 545,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 259.75,
+    "halka_pay": 76.25,
+    "yatay_merkez": 476.0,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850002,
+    "ust_hedef_y2": 280.25
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1318
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.23663,
+    "s": 0.201136,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 265,
+    "w": 322,
+    "bos_dikey": 67.0,
+    "ust_hedef": 280.25
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "TAURUS_TAURUS": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     329,
+     294,
+     624,
+     540
+    ],
+    "sembol_ust": 294,
+    "sembol_alt": 540,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 255.69,
+    "halka_pay": 80.31,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 294.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1317
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.219521,
+    "s": 0.186593,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 246,
+    "w": 295,
+    "bos_dikey": 86.0,
+    "ust_hedef": 294.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": [
+    308,
+    254,
+    302
+   ]
+  },
+  "TAURUS_VIRGO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     357,
+     268,
+     594,
+     550
+    ],
+    "sembol_ust": 268,
+    "sembol_alt": 550,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 258.95,
+    "halka_pay": 77.05,
+    "yatay_merkez": 475.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.850001,
+    "ust_hedef_y2": 267.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     1,
+     0,
+     1600,
+     1866
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.177921,
+    "s": 0.151233,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 282,
+    "w": 237,
+    "bos_dikey": 50.0,
+    "ust_hedef": 267.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  },
+  "VIRGO_VIRGO": {
+   "gecti": true,
+   "kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true,
+    "o4_kapi": true
+   },
+   "olcum": {
+    "sembol_kutu": [
+     295,
+     274,
+     658,
+     548
+    ],
+    "sembol_ust": 274,
+    "sembol_alt": 548,
+    "sembol_alt_sinir": 562,
+    "halka_r_max": 261.51,
+    "halka_pay": 74.49,
+    "yatay_merkez": 476.5,
+    "tarih_kutu": [
+     368,
+     764,
+     583,
+     795
+    ],
+    "tarih_alt": 795,
+    "bosluk_tarih_isim": 32,
+    "bosluk_isim_kucuk": 32,
+    "kucuk_alt": [
+     663,
+     663
+    ],
+    "kucuk_ust_sabit": 594,
+    "olcek_orani": 0.849998,
+    "ust_hedef_y2": 273.5
+   },
+   "cizgi": {
+    "tarih_alt": 795,
+    "tarih_ust": 764,
+    "isim_ust": 695,
+    "isim_alt": 732,
+    "kucuk_alt": 663,
+    "kucuk_ust_sabit": 594,
+    "sembol_alt_sinir": 562,
+    "h_max": 68
+   },
+   "sembol": {
+    "kaynak_kutu": [
+     0,
+     0,
+     1600,
+     1200
+    ],
+    "y3_merkez": 396.0,
+    "s_max": 0.268257,
+    "s": 0.228018,
+    "b3_kat": 0.85,
+    "y2_ust_oran": 0.75,
+    "h": 274,
+    "w": 363,
+    "bos_dikey": 58.0,
+    "ust_hedef": 273.5
+   },
+   "o4": {
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": []
+   },
+   "merkez_benzetim": null
+  }
+ },
+ "fail": [],
+ "gecen": 78,
+ "bilinen_fail": [
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "sembol ustu 229",
+   "beklenen": "ust_ge_230",
+   "fail": [
+    "ust_ge_230",
+    "b3_y2_oran"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "olcek x 1,2",
+   "beklenen": "halka_pay_ge_30 | ust_ge_230 | sembol_alt_le_sinir",
+   "fail": [
+    "sembol_alt_le_sinir",
+    "b3_y2_oran"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "olcek x 0,90 (B3 0,85 yerine)",
+   "beklenen": "b3_y2_oran",
+   "fail": [
+    "b3_y2_oran"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "tarih 5 px asagi",
+   "beklenen": "tarih_alt_795",
+   "fail": [
+    "tarih_alt_795",
+    "bosluk_32_32"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "sembol ustu 229",
+   "beklenen": "ust_ge_230",
+   "fail": [
+    "ust_ge_230",
+    "b3_y2_oran"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "olcek x 1,2",
+   "beklenen": "halka_pay_ge_30 | ust_ge_230 | sembol_alt_le_sinir",
+   "fail": [
+    "sembol_alt_le_sinir",
+    "b3_y2_oran"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "olcek x 0,90 (B3 0,85 yerine)",
+   "beklenen": "b3_y2_oran",
+   "fail": [
+    "b3_y2_oran"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "tarih 5 px asagi",
+   "beklenen": "tarih_alt_795",
+   "fail": [
+    "tarih_alt_795",
+    "bosluk_32_32"
+   ],
+   "gecti": true
+  }
+ ],
+ "bilinen_fail_hepsi": true,
+ "ozet_11": {
+  "TAURUS_TAURUS": {
+   "w": 295,
+   "h": 246,
+   "ust": 294,
+   "merkez": [
+    308,
+    254,
+    302
+   ],
+   "alt": 540,
+   "sinir": 562,
+   "pay": 80.31
+  },
+  "CANCER_TAURUS": {
+   "w": 262,
+   "h": 264,
+   "ust": 281,
+   "merkez": [
+    274,
+    274,
+    287
+   ],
+   "alt": 545,
+   "sinir": 562,
+   "pay": 77.8
+  },
+  "AQUARIUS_CANCER": {
+   "w": 336,
+   "h": 246,
+   "ust": 294,
+   "merkez": [
+    346,
+    254,
+    301
+   ],
+   "alt": 540,
+   "sinir": 562,
+   "pay": 80.5
+  },
+  "LIBRA_LIBRA": {
+   "w": 500,
+   "h": 240,
+   "ust": 299,
+   "merkez": [
+    512,
+    246,
+    307
+   ],
+   "alt": 539,
+   "sinir": 562,
+   "pay": 80.72
+  },
+  "AQUARIUS_AQUARIUS": {
+   "w": 460,
+   "h": 117,
+   "ust": 391,
+   "merkez": [
+    474,
+    119,
+    402
+   ],
+   "alt": 508,
+   "sinir": 562,
+   "pay": 92.97
+  },
+  "ARIES_SCORPIO": {
+   "w": 367,
+   "h": 243,
+   "ust": 297,
+   "merkez": [
+    378,
+    250,
+    305
+   ],
+   "alt": 540,
+   "sinir": 562,
+   "pay": 81.05
+  },
+  "LEO_SAGITTARIUS": {
+   "w": 265,
+   "h": 282,
+   "ust": 268,
+   "merkez": [
+    280,
+    297,
+    269
+   ],
+   "alt": 550,
+   "sinir": 562,
+   "pay": 98.06
+  },
+  "CAPRICORN_CAPRICORN": {
+   "w": 348,
+   "h": 206,
+   "ust": 324,
+   "merkez": [
+    359,
+    211,
+    333
+   ],
+   "alt": 530,
+   "sinir": 562,
+   "pay": 86.72
+  },
+  "CANCER_LIBRA": {
+   "w": 300,
+   "h": 282,
+   "ust": 268,
+   "merkez": [
+    316,
+    297,
+    269
+   ],
+   "alt": 550,
+   "sinir": 562,
+   "pay": 100.24
+  },
+  "AQUARIUS_PISCES": {
+   "w": 214,
+   "h": 280,
+   "ust": 269,
+   "merkez": [
+    230,
+    297,
+    269
+   ],
+   "alt": 549,
+   "sinir": 562,
+   "pay": 81.46
+  },
+  "GEMINI_VIRGO": {
+   "w": 267,
+   "h": 259,
+   "ust": 285,
+   "merkez": [
+    297,
+    272,
+    288
+   ],
+   "alt": 544,
+   "sinir": 562,
+   "pay": 80.2
+  }
+ }
+}

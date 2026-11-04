@@ -1,0 +1,435 @@
+{
+ "tarih": {
+  "aday_sayisi": 13392,
+  "tum_bilesim": true,
+  "en_genis": "SEPTEMBER 10, 2007",
+  "genislik_px": 328,
+  "genislik_mm": 27.8,
+  "ilk10": [
+   [
+    "SEPTEMBER 10, 2007",
+    328
+   ],
+   [
+    "SEPTEMBER 10, 2017",
+    328
+   ],
+   [
+    "SEPTEMBER 10, 2027",
+    328
+   ],
+   [
+    "SEPTEMBER 11, 2007",
+    328
+   ],
+   [
+    "SEPTEMBER 11, 2017",
+    328
+   ],
+   [
+    "SEPTEMBER 11, 2027",
+    328
+   ],
+   [
+    "SEPTEMBER 12, 2007",
+    328
+   ],
+   [
+    "SEPTEMBER 12, 2017",
+    328
+   ],
+   [
+    "SEPTEMBER 12, 2027",
+    328
+   ],
+   [
+    "SEPTEMBER 13, 2007",
+    328
+   ]
+  ],
+  "merkez_tahmini": {
+   "dizgi": "SEPTEMBER 10, 2026",
+   "px": 327
+  },
+  "ornek": {
+   "dizgi": "JUNE 14, 2025",
+   "px": 215
+  },
+  "sigar": {
+   "halka_ic_r_max": 328.75,
+   "halka_ic_icinde": true,
+   "o4_kapi": true,
+   "yasak": {
+    "guvenli_disi": 0,
+    "delik": 0,
+    "ust_cizgi": 0,
+    "tuval_disi": 0
+   },
+   "cakisma": [],
+   "tum_kapi": {
+    "ust_ge_230": true,
+    "halka_pay_ge_30": true,
+    "sembol_alt_le_sinir": true,
+    "yatay_orta": true,
+    "b3_y2_oran": true,
+    "tarih_alt_795": true,
+    "bosluk_32_32": true,
+    "kucuk_alta_yasli": true
+   },
+   "gecti": true
+  }
+ },
+ "isim": {
+  "W_testi": [
+   {
+    "isim1": "WWWW",
+    "isim2": "WWWW",
+    "halka_r_max": 327.8,
+    "o4_kapi": true,
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "satir_x": [
+     231,
+     721
+    ],
+    "gecti": true,
+    "harf": 4
+   },
+   {
+    "isim1": "WWWWW",
+    "isim2": "WWWWW",
+    "halka_r_max": 357.04,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 197,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     191,
+     761
+    ],
+    "gecti": false,
+    "harf": 5
+   },
+   {
+    "isim1": "WWWWWW",
+    "isim2": "WWWWWW",
+    "halka_r_max": 388.56,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 3188,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     152,
+     800
+    ],
+    "gecti": false,
+    "harf": 6
+   },
+   {
+    "isim1": "WWWWWWW",
+    "isim2": "WWWWWWW",
+    "halka_r_max": 421.1,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 6537,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     112,
+     840
+    ],
+    "gecti": false,
+    "harf": 7
+   },
+   {
+    "isim1": "WWWWWWWW",
+    "isim2": "WWWWWWWW",
+    "halka_r_max": 454.46,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 9799,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     73,
+     879
+    ],
+    "gecti": false,
+    "harf": 8
+   },
+   {
+    "isim1": "WWWWWWWWW",
+    "isim2": "WWWWWWWWW",
+    "halka_r_max": 489.13,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 13103,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2",
+     "halka/kucuk_sag"
+    ],
+    "satir_x": [
+     34,
+     918
+    ],
+    "gecti": false,
+    "harf": 9
+   },
+   {
+    "isim1": "WWWWWWWWWW",
+    "isim2": "WWWWWWWWWW",
+    "halka_r_max": 524.43,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 15793,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 84
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2",
+     "halka/kucuk_sol",
+     "halka/kucuk_sag"
+    ],
+    "satir_x": [
+     -6,
+     958
+    ],
+    "gecti": false,
+    "harf": 10
+   },
+   {
+    "isim1": "WWWWWWWWWWW",
+    "isim2": "WWWWWWWWWWW",
+    "halka_r_max": 560.78,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 16900,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 922
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2",
+     "halka/kucuk_sol",
+     "halka/kucuk_sag"
+    ],
+    "satir_x": [
+     -46,
+     998
+    ],
+    "gecti": false,
+    "harf": 11
+   },
+   {
+    "isim1": "WWWWWWWWWWWW",
+    "isim2": "WWWWWWWWWWWW",
+    "halka_r_max": 596.66,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 19096,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 1708
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2",
+     "halka/kucuk_sol",
+     "halka/kucuk_sag"
+    ],
+    "satir_x": [
+     -85,
+     1037
+    ],
+    "gecti": false,
+    "harf": 12
+   },
+   {
+    "isim1": "WWWWWWWWWWWWW",
+    "isim2": "WWWWWWWWWWWWW",
+    "halka_r_max": 633.28,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 21407,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 2556
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2",
+     "halka/kucuk_sol",
+     "halka/kucuk_sag"
+    ],
+    "satir_x": [
+     -124,
+     1076
+    ],
+    "gecti": false,
+    "harf": 13
+   },
+   {
+    "isim1": "WWWWWWWWWWWWWW",
+    "isim2": "WWWWWWWWWWWWWW",
+    "halka_r_max": 670.67,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 23906,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 3392
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     -164,
+     1116
+    ],
+    "gecti": false,
+    "harf": 14
+   }
+  ],
+  "verilen": [
+   {
+    "isim1": "MAXIMILIAN",
+    "isim2": "CHRISTOPHER",
+    "halka_r_max": 427.87,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 6860,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     113,
+     839
+    ],
+    "gecti": false,
+    "harf": [
+     10,
+     11
+    ]
+   },
+   {
+    "isim1": "ALEXANDRIA",
+    "isim2": "ANNA",
+    "halka_r_max": 363.11,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 477,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     193,
+     759
+    ],
+    "gecti": false,
+    "harf": [
+     10,
+     4
+    ]
+   },
+   {
+    "isim1": "MARY-JANE",
+    "isim2": "O'NEIL",
+    "halka_r_max": 346.42,
+    "o4_kapi": false,
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [
+     "halka/isim1",
+     "halka/isim2"
+    ],
+    "satir_x": [
+     207,
+     745
+    ],
+    "gecti": false,
+    "harf": [
+     8,
+     5
+    ]
+   },
+   {
+    "isim1": "EMILY",
+    "isim2": "JAMES",
+    "halka_r_max": 302.4,
+    "o4_kapi": true,
+    "yasak": {
+     "guvenli_disi": 0,
+     "delik": 0,
+     "ust_cizgi": 0,
+     "tuval_disi": 0
+    },
+    "cakisma": [],
+    "satir_x": [
+     267,
+     685
+    ],
+    "gecti": true,
+    "harf": [
+     5,
+     5
+    ]
+   }
+  ],
+  "not_": "harf sayisi tire / kesme isareti haric; sinir halka ic dairesi (r 336) + o4.kapi; W en genis buyuk harf (Cinzel)",
+  "N_W": 4
+ }
+}
