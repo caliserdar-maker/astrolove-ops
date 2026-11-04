@@ -1,0 +1,136 @@
+[
+ {
+  "dosya": "/tmp/claude-0/-home-user-astrolove-ops/a2ec2db6-8619-5e00-847b-b0eabdfafc2b/scratchpad/o78i/rapor/GERCEK_BOY_AQUARIUS_PISCES_SADE_3KOYU_300dpi.png",
+  "boyut": [
+   3906,
+   954
+  ],
+  "karo_sayisi": 4,
+  "karo_1e1_954": true,
+  "dpi": 299.999,
+  "tuval_mm": 80.77,
+  "kesim_cap_mm": 76.03,
+  "dpi_300": true,
+  "karo": [
+   {
+    "kesim_r449": true,
+    "kesim_yon": [
+     true,
+     true,
+     true,
+     true
+    ],
+    "eski_r476_5_yok": true
+   },
+   {
+    "kesim_r449": true,
+    "kesim_yon": [
+     true,
+     true,
+     true,
+     true
+    ],
+    "eski_r476_5_yok": true
+   },
+   {
+    "kesim_r449": true,
+    "kesim_yon": [
+     true,
+     true,
+     true,
+     true
+    ],
+    "eski_r476_5_yok": true
+   },
+   {
+    "kesim_r449": true,
+    "kesim_yon": [
+     true,
+     true,
+     true,
+     true
+    ],
+    "eski_r476_5_yok": true
+   }
+  ],
+  "kesim_r449": true,
+  "eski_r476_5_yok": true,
+  "gecti": true
+ },
+ {
+  "dosya": "docs/ornament/ornek/ORNAMENT_78_ORNEK6_20261103_2202/GEMINI_VIRGO_SADE_GERCEK_BOY_76mm.png",
+  "boyut": [
+   954,
+   954
+  ],
+  "karo_sayisi": 1,
+  "karo_1e1_954": true,
+  "dpi": 318.846,
+  "tuval_mm": 76.0,
+  "kesim_cap_mm": 71.54,
+  "dpi_300": false,
+  "karo": [
+   {
+    "kesim_r449": false,
+    "kesim_yon": [
+     false,
+     false,
+     false,
+     false
+    ],
+    "eski_r476_5_yok": false
+   }
+  ],
+  "kesim_r449": false,
+  "eski_r476_5_yok": false,
+  "gecti": false
+ },
+ {
+  "dosya": "/tmp/claude-0/-home-user-astrolove-ops/a2ec2db6-8619-5e00-847b-b0eabdfafc2b/scratchpad/gb/YENIDEN_ORNEK_95.png",
+  "boyut": [
+   3710,
+   906
+  ],
+  "karo_sayisi": 3,
+  "karo_1e1_954": false,
+  "dpi": 299.999,
+  "tuval_mm": 80.77,
+  "kesim_cap_mm": 76.03,
+  "dpi_300": true,
+  "karo": [
+   {
+    "kesim_r449": false,
+    "kesim_yon": [
+     false,
+     false,
+     false,
+     false
+    ],
+    "eski_r476_5_yok": true
+   },
+   {
+    "kesim_r449": false,
+    "kesim_yon": [
+     false,
+     false,
+     false,
+     false
+    ],
+    "eski_r476_5_yok": true
+   },
+   {
+    "kesim_r449": false,
+    "kesim_yon": [
+     false,
+     false,
+     false,
+     false
+    ],
+    "eski_r476_5_yok": true
+   }
+  ],
+  "kesim_r449": false,
+  "eski_r476_5_yok": true,
+  "gecti": false
+ }
+]

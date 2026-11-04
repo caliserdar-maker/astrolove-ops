@@ -1,0 +1,444 @@
+{
+ "satirlar": [
+  {
+   "cift": "CANCER_LIBRA",
+   "kaynak": "ana",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1514,
+    1600
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 25741
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "kaynak": "cancer",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1012,
+    1167
+   ],
+   "olcum": {
+    "kapanis": 7,
+    "ice_px": 4,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 12879
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "kaynak": "libra",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1084,
+    1448
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 16934
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "AQUARIUS_PISCES",
+   "kaynak": "ana",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1514,
+    1600
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 25741
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "AQUARIUS_PISCES",
+   "kaynak": "aquarius",
+   "n0": 38447,
+   "degisen_piksel": 42112,
+   "alfa_farki_en_buyuk": 1.0,
+   "tur": [
+    {
+     "onarilan": 38447,
+     "kalan": 0
+    }
+   ],
+   "bilesen": [
+    {
+     "x": 2930,
+     "y": 0,
+     "w": 37,
+     "h": 35,
+     "alan": 516
+    },
+    {
+     "x": 3051,
+     "y": 0,
+     "w": 42,
+     "h": 35,
+     "alan": 406
+    },
+    {
+     "x": 3077,
+     "y": 0,
+     "w": 44,
+     "h": 35,
+     "alan": 606
+    },
+    {
+     "x": 3175,
+     "y": 0,
+     "w": 8,
+     "h": 7,
+     "alan": 36
+    },
+    {
+     "x": 3251,
+     "y": 0,
+     "w": 30,
+     "h": 35,
+     "alan": 210
+    },
+    {
+     "x": 3335,
+     "y": 0,
+     "w": 32,
+     "h": 35,
+     "alan": 276
+    },
+    {
+     "x": 3357,
+     "y": 0,
+     "w": 28,
+     "h": 35,
+     "alan": 212
+    },
+    {
+     "x": 3437,
+     "y": 0,
+     "w": 28,
+     "h": 35,
+     "alan": 176
+    },
+    {
+     "x": 3617,
+     "y": 0,
+     "w": 6,
+     "h": 7,
+     "alan": 28
+    },
+    {
+     "x": 4441,
+     "y": 0,
+     "w": 8,
+     "h": 11,
+     "alan": 44
+    },
+    {
+     "x": 4597,
+     "y": 0,
+     "w": 30,
+     "h": 35,
+     "alan": 322
+    },
+    {
+     "x": 4669,
+     "y": 0,
+     "w": 30,
+     "h": 35,
+     "alan": 336
+    },
+    {
+     "x": 4689,
+     "y": 0,
+     "w": 36,
+     "h": 35,
+     "alan": 448
+    },
+    {
+     "x": 4765,
+     "y": 0,
+     "w": 36,
+     "h": 35,
+     "alan": 440
+    },
+    {
+     "x": 4789,
+     "y": 0,
+     "w": 42,
+     "h": 35,
+     "alan": 576
+    },
+    {
+     "x": 4871,
+     "y": 0,
+     "w": 40,
+     "h": 35,
+     "alan": 510
+    },
+    {
+     "x": 4925,
+     "y": 0,
+     "w": 4,
+     "h": 3,
+     "alan": 12
+    },
+    {
+     "x": 5055,
+     "y": 0,
+     "w": 36,
+     "h": 35,
+     "alan": 230
+    },
+    {
+     "x": 8396,
+     "y": 0,
+     "w": 58,
+     "h": 37,
+     "alan": 986
+    },
+    {
+     "x": 8440,
+     "y": 0,
+     "w": 6,
+     "h": 5,
+     "alan": 24
+    },
+    {
+     "x": 8560,
+     "y": 0,
+     "w": 20,
+     "h": 23,
+     "alan": 120
+    },
+    {
+     "x": 8646,
+     "y": 0,
+     "w": 40,
+     "h": 35,
+     "alan": 440
+    },
+    {
+     "x": 8672,
+     "y": 0,
+     "w": 6,
+     "h": 5,
+     "alan": 24
+    },
+    {
+     "x": 9006,
+     "y": 0,
+     "w": 20,
+     "h": 35,
+     "alan": 148
+    },
+    {
+     "x": 9928,
+     "y": 0,
+     "w": 26,
+     "h": 35,
+     "alan": 174
+    },
+    {
+     "x": 10000,
+     "y": 0,
+     "w": 24,
+     "h": 35,
+     "alan": 234
+    },
+    {
+     "x": 10064,
+     "y": 0,
+     "w": 26,
+     "h": 33,
+     "alan": 164
+    },
+    {
+     "x": 10142,
+     "y": 0,
+     "w": 30,
+     "h": 35,
+     "alan": 248
+    },
+    {
+     "x": 10160,
+     "y": 0,
+     "w": 30,
+     "h": 35,
+     "alan": 242
+    },
+    {
+     "x": 10246,
+     "y": 0,
+     "w": 30,
+     "h": 35,
+     "alan": 254
+    },
+    {
+     "x": 10264,
+     "y": 0,
+     "w": 36,
+     "h": 35,
+     "alan": 308
+    },
+    {
+     "x": 10356,
+     "y": 0,
+     "w": 36,
+     "h": 35,
+     "alan": 322
+    },
+    {
+     "x": 10378,
+     "y": 0,
+     "w": 46,
+     "h": 35,
+     "alan": 610
+    },
+    {
+     "x": 10528,
+     "y": 0,
+     "w": 48,
+     "h": 35,
+     "alan": 670
+    },
+    {
+     "x": 10560,
+     "y": 0,
+     "w": 34,
+     "h": 35,
+     "alan": 454
+    },
+    {
+     "x": 8336,
+     "y": 3,
+     "w": 34,
+     "h": 33,
+     "alan": 522
+    },
+    {
+     "x": 8678,
+     "y": 7,
+     "w": 6,
+     "h": 6,
+     "alan": 28
+    },
+    {
+     "x": 4915,
+     "y": 9,
+     "w": 6,
+     "h": 6,
+     "alan": 28
+    },
+    {
+     "x": 8448,
+     "y": 9,
+     "w": 12,
+     "h": 12,
+     "alan": 64
+    },
+    {
+     "x": 3187,
+     "y": 13,
+     "w": 6,
+     "h": 6,
+     "alan": 28
+    }
+   ],
+   "bilesen_sayisi": 166,
+   "kenara_uzaklik": {
+    "en_kucuk": 0,
+    "en_buyuk": 37,
+    "ortanca": 17.0
+   },
+   "kaynak_boyut": [
+    4501,
+    10817
+   ],
+   "olcum": {
+    "kapanis": 61,
+    "ice_px": 34,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 494248
+   },
+   "zayif_test": false,
+   "onarimsiz_motor_cikis": 1,
+   "yakin_954": {
+    "kucuk_sol": {
+     "kutu": [
+      281,
+      693,
+      371,
+      730
+     ],
+     "esleme_olcek": [
+      0.00832,
+      0.00822
+     ],
+     "ruby_farkli_piksel": 959,
+     "ruby_en_buyuk_fark": 33
+    }
+   }
+  },
+  {
+   "cift": "AQUARIUS_PISCES",
+   "kaynak": "pisces",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1084,
+    1448
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 16934
+   },
+   "zayif_test": true
+  }
+ ],
+ "not_": "her cift x kaynak (o5.kenar_onar cagrisi); n0 = 0 satirinda \"degisen piksel 0\" FAIL veremez: zayif test (KALITE 3). Yakin planlar (kaynak 1:1 ve 954 4x) yalniz Drive."
+}

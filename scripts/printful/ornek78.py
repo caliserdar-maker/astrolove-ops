@@ -45,17 +45,41 @@ def kos(arg, env=None, log_dosya=None):
 
 
 N_ = 954
-DPI_76 = N_ / (76 / 25.4)                                                    # 954 px = 76 mm
+DPI = 300                                                                    # ORNAMENT_KARAR 6: Printful 900 Circle, 954 px = 300 dpi = 80,8 mm tuval
+MM_PX = 25.4 / DPI
+KESIM = (476.0, 477.0, 449.0)                                                # urun kesim dairesi r 449 px = 76 mm (KARAR 6)
+DIS_R, GUVENLI_R = 474.0, 380.0                                              # dis daire r ~474, guvenli alan r ~380 (KARAR 6)
+DELIK_K = (476.0, 163.0, 34.0)                                               # delik merkez (476,163), dis r ~34 (KARAR 6)
+CIZGI = (150, 150, 150)
 
 
 def sinir_ciz(im):
-    """onizleme: ornament dis cizgisi (954 daire) ve delik (o4.DELIK) gri 2 px; yalniz onizleme, uretim PNG'sine dokunmaz."""
+    """onizleme (yalniz onizleme, uretim PNG'sine dokunmaz): kesim dairesi (gri 2 px), delik (gri 2 px), dis daire ve guvenli alan (acik gri 1 px)."""
     im = im.convert('RGB').copy(); d = ImageDraw.Draw(im)
-    d.ellipse((0, 0, N_ - 1, N_ - 1), outline=(150, 150, 150), width=2)
-    x, y, r = o4.DELIK                                                         # r 34 = delik halkasi dis, 25 = ic (o4.DELIK notu)
-    for r_ in (r, 25.0):
-        d.ellipse((x - r_, y - r_, x + r_, y + r_), outline=(150, 150, 150), width=2)
+    cx, cy, r = KESIM
+    for r_, renk, w in ((DIS_R, (205, 205, 205), 1), (GUVENLI_R, (205, 205, 225), 1), (r, CIZGI, 2)):
+        d.ellipse((cx - r_, cy - r_, cx + r_, cy + r_), outline=renk, width=w)
+    x, y, r = DELIK_K
+    d.ellipse((x - r, y - r, x + r, y + r), outline=CIZGI, width=2)
     return im
+
+
+def gercek_boy(O, cift, stiller, dosya):
+    """gercek boy onizleme: 954 px karolar yan yana (30 px ara), 300 dpi (1 px = 25,4/300 mm); karo basina sinir_ciz."""
+    kar = []
+    for s in stiller:
+        f = O / f'{cift}_{s}_954.png'
+        if not f.exists():
+            return None
+        im = Image.open(f)
+        if im.mode == 'RGBA':
+            b = Image.new('RGB', im.size, (255, 255, 255)); b.paste(im, (0, 0), im); im = b
+        kar.append(sinir_ciz(im))
+    T = Image.new('RGB', (len(kar) * N_ + (len(kar) - 1) * 30, N_), 'white')
+    for i, k in enumerate(kar):
+        T.paste(k, (i * (N_ + 30), 0))
+    T.save(dosya, dpi=(DPI, DPI))
+    return dict(dosya=Path(dosya).name, stiller=list(stiller), dpi=DPI, tuval_mm=round(N_ * MM_PX, 2), kesim_cap_mm=round(2 * KESIM[2] * MM_PX, 2))
 
 
 def acik_kontrast(rgb, D):
@@ -67,6 +91,47 @@ def acik_kontrast(rgb, D):
     kk = {k: v['deger'] for k, v in ok.items() if v.get('deger') is not None}
     oo = {k: v['ortanca_bilgi'] for k, v in ok.items() if v.get('ortanca_bilgi') is not None}
     return dict(kati=min(kk.values()), kati_en_kotu_oge=min(kk, key=kk.get), ortanca=min(oo.values()), oge=kk, oge_ortanca=oo)
+
+
+def kenar_kayit(a, cift, w, M_, O, DE, KENAR):
+    """C (Serdar 4 Kas O1): kenar_onar kaydi + degisen varsa onarimsiz motor (ORN_KENAR_ONARIM_KAPALI=1, yalniz test parametresi) ve
+    954 4x once / sonra yakin plani (RUBY; kova_kanit KOVA_954_YAKIN_4x yontemi: kaynak bilesen kutusu -> oge kutusu dogrusal esleme)."""
+    KO = M_.get('kaynak_kenar_onarim') or {}
+    b1, b2 = cift.lower().split('_')
+    degisen = [ad for ad, k_ in KO.items() if k_.get('degisen_piksel')]
+    k_on = None
+    if degisen:
+        k_on = kos([_d / 'ornament_motor.py', '--kaynak', a.kaynak, '--motor', a.motor, '--cikti', w / 'motor_onarimsiz', '--son', a.son, '--zemin', a.zemin,
+                    '--cift', cift], env={'ORN_KENAR_ONARIM_KAPALI': '1'}, log_dosya=w / 'log_motor_onarimsiz.txt')
+        log('onarimsiz motor', cift, 'cikis', k_on)
+    for ad, k_ in KO.items():
+        row = dict(cift=cift, kaynak=ad, n0=k_['n0'], degisen_piksel=k_['degisen_piksel'], alfa_farki_en_buyuk=k_['alfa_farki_en_buyuk'],
+                   tur=k_['tur'], bilesen=k_['bilesen'], bilesen_sayisi=k_.get('bilesen_sayisi', 0), kenara_uzaklik=k_['kenara_uzaklik'],
+                   kaynak_boyut=k_['boyut'], olcum=k_['olcum'], zayif_test=bool(k_['n0'] == 0))
+        if ad in degisen:
+            row['onarimsiz_motor_cikis'] = k_on
+            yerler = ['sembol'] if ad == 'ana' else [y for y, b in (('kucuk_sol', b1), ('kucuk_sag', b2)) if b == ad]
+            once_f, sonra_f = w / 'motor_onarimsiz' / f'{cift}_RUBY_954.png', O / f'{cift}_RUBY_954.png'
+            row['yakin_954'] = {}
+            if once_f.exists() and sonra_f.exists():
+                on_ = np.asarray(Image.open(once_f).convert('RGB')); so_ = np.asarray(Image.open(sonra_f).convert('RGB'))
+                for yer in yerler:
+                    kb = M_['kutu'][yer]; sb = k_['sb']
+                    fx = (kb[2] - kb[0]) / max(1, sb[2] - sb[0]); fy = (kb[3] - kb[1]) / max(1, sb[3] - sb[1])
+                    X0, Y0, X1, Y1 = kb[0] - 8, kb[1] - 8, kb[2] + 8, kb[3] + 8
+                    fark = np.abs(on_[Y0:Y1, X0:X1].astype(int) - so_[Y0:Y1, X0:X1].astype(int))
+                    row['yakin_954'][yer] = dict(kutu=kb, esleme_olcek=[round(fx, 6), round(fy, 6)], ruby_farkli_piksel=int((fark > 0).any(-1).sum()),
+                                                 ruby_en_buyuk_fark=int(fark.max()))
+                    for ad_s, arr in (('once', on_), ('sonra', so_)):
+                        cr = Image.fromarray(arr).crop((X0, Y0, X1, Y1)).resize(((X1 - X0) * 4, (Y1 - Y0) * 4), Image.NEAREST); dr = ImageDraw.Draw(cr)
+                        for b_ in k_['bilesen']:
+                            x0 = kb[0] + (b_['x'] - sb[0]) * fx; y0 = kb[1] + (b_['y'] - sb[1]) * fy
+                            x1 = kb[0] + (b_['x'] + b_['w'] - sb[0]) * fx; y1 = kb[1] + (b_['y'] + b_['h'] - sb[1]) * fy
+                            dr.rectangle(((x0 - X0) * 4 - 2, (y0 - Y0) * 4 - 2, (x1 - X0) * 4 + 2, (y1 - Y0) * 4 + 2), outline=(0, 255, 255))
+                        cr.save(DE / f'YAKIN_{cift}_{ad}_{ad_s}_954_4x.png')
+            else:
+                row['yakin_954'] = dict(eksik='onarimsiz ya da onarimli RUBY yok')
+        KENAR.append(row)
 
 
 def ham(a):
@@ -83,11 +148,13 @@ def main():
     o4.YASAK = o4.yasak_m(); o3.YASAK = o4.YASAK
     o4.GLOW_K = __import__('cv2').getStructuringElement(__import__('cv2').MORPH_ELLIPSE, (2 * o4.GLOW_R + 1,) * 2)
     R = dict(gorev='ORNAMENT_78_ORNEK6 (karar 28)', kapi_listesi='docs/ornament/ornek/ORNEK78_KAPI_LISTESI.md', cift={}, kontrol={})
+    DE = Path(os.environ.get('ORNEK78_DRIVE_EK', str(O / '_drive_ek'))); DE.mkdir(parents=True, exist_ok=True)   # kaynak kirpimlari: YALNIZ Drive
+    KENAR = []
     for cift in CIFTLER:
         w = W / cift; w.mkdir(exist_ok=True)
         log('cift', cift)
         k1 = kos([_d / 'ornament_motor.py', '--kaynak', a.kaynak, '--motor', a.motor, '--cikti', w / 'motor', '--son', a.son, '--zemin', a.zemin, '--cift', cift],
-                 log_dosya=w / 'log_motor.txt')
+                 env={'ORN_YAKIN_DIR': str(DE)}, log_dosya=w / 'log_motor.txt')
         motor_png = all((w / 'motor' / f'{cift}_{s}_954.png').exists() for s in ('RUBY', 'SAPPHIRE', 'EMERALD'))
         mlog = (w / 'log_motor.txt').read_text() if (w / 'log_motor.txt').exists() else ''
         r = dict(cikis_kodlari=dict(motor=k1))
@@ -160,6 +227,7 @@ def main():
                          merkez_istisna=2.53, merkez_not_='2.53 Merkez olcumu (yontem kayitli degil); bizim olcumde ortanca olcegine uyar, kati (en kotu) ayri',
                          yerlesim_yasak_px=yb, not_='fildisi girdisi aday 1 (koyulastirilmamis SADE) + krem zemin; yasak px yerlesimden'))
         R['cift'][cift] = r
+        kenar_kayit(a, cift, w, M_, O, DE, KENAR)
         log(cift, 'yasak', yb, 'kontrast', {s: r['koyu'][s]['kontrast_ortanca'] for s in r['koyu']}, 'dE00', {s: r['koyu'][s]['dE00_ham_maks'] for s in r['koyu']},
             'sembol', r['yerlesim']['sembol_kutu'], 'uzaklik', uzak, 'sert FAIL', [k for k, v in SERT.items() if not v], 'cikis', r['cikis_kodlari'])
         if cift == 'CANCER_LIBRA':
@@ -202,10 +270,14 @@ def main():
         for x in satir:
             u.paste(x, (0, y)); y += x.height + 16
         u.save(RP / 'ONIZLEME_76mm_6CIFT.png', dpi=(300, 300))
-    gv = O / 'GEMINI_VIRGO_SADE_ALTIN_954.png'                                # karar 4 Kas: GEMINI_VIRGO SADE tek gorsel, gercek boy (76 mm)
-    if gv.exists():
-        im = Image.open(gv); b = Image.new('RGB', im.size, (255, 255, 255)); b.paste(im, (0, 0), im)
-        sinir_ciz(b).save(RP / 'GEMINI_VIRGO_SADE_GERCEK_BOY_76mm.png', dpi=(DPI_76, DPI_76))
+    (RP / 'KENAR_ONARIM.json').write_text(json.dumps(dict(
+        satirlar=KENAR, not_='her cift x kaynak (o5.kenar_onar cagrisi); n0 = 0 satirinda "degisen piksel 0" FAIL veremez: zayif test (KALITE 3). '
+                            'Yakin planlar (kaynak 1:1 ve 954 4x) yalniz Drive.'), indent=1, ensure_ascii=False))
+    R['gercek_boy'] = {}                                                       # gercek boy onizleme (300 dpi; KARAR 6). GV SADE tek gorsel (O2 kaniti) + liste
+    if (O / 'GEMINI_VIRGO_SADE_ALTIN_954.png').exists():
+        R['gercek_boy']['GEMINI_VIRGO_SADE'] = gercek_boy(O, 'GEMINI_VIRGO', ('SADE_ALTIN',), RP / 'GEMINI_VIRGO_SADE_GERCEK_BOY_300dpi.png')
+    for c in [x for x in os.environ.get('GERCEK_BOY_CIFTLER', 'AQUARIUS_PISCES').split(',') if x]:
+        R['gercek_boy'][c] = gercek_boy(O, c, ('SADE_ALTIN', 'RUBY', 'SAPPHIRE', 'EMERALD'), RP / f'GERCEK_BOY_{c}_SADE_3KOYU_300dpi.png')
     R['png_sha256'] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(O.glob('*_954.png'))}
     fail = {c: v.get('not_') for c, v in R['cift'].items() if v.get('eksik') or not all((v.get('kapi') or {}).get('sert', {'x': False}).values())}
     cokus = [c for c, v in R['cift'].items() if 2 in (v.get('cikis_kodlari') or {}).values()]

@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
-"""DENEME 3 TESHIS ARACI (4 Kas): kapi payi Serdar talimatiyla 24 px'e dondu (kanit olcutu totolojik bulundu; bagimsiz inceleme). Is akisinda degil.
-Kova kaynak leke kapisi testi (Serdar 4 Kas, A maddesi). Kapi gevsetme yasagi (Serdar 1 Kas): kapi iki bilinen ornekle denenir.
-Kapi = ornament_motor.py ile ayni yol: kirp (pad 2) -> delik_kapat (onarim) -> leke_ic_kaynak(olcum=True) ic & alfa < 0.9 piksel sayisi.
-  bilinen PASS: mevcut kaynak (onarim sonrasi) -> 0 beklenir.
-  bilinen FAIL: ayni goruntuye (onarim sonrasi, motorun olctugu goruntu) yapay leke eklenir -> > 0 beklenir.
-    leke_ic: en kalin murekkep noktasinda yaricap r disk, alfa 0.5
-    leke_kenar: kenara degen murekkepte ust kenardan 40 px icerde ayni disk (kenar payi buyudu; kenar yakini kacirilmiyor mu)
-  kiyas: eski kenar payi (24 px) ile ayni olcum (445 px tekrar uretilir mi).
-Ayrica bilgi: ham kaynakta (onarim oncesi) yeni payla olcum.
-Kullanim: kova_kapi_testi.py --kaynak aquarius_symbol_gold.png --cikti DIR   |   --sahte (yerel sahte kaynak, gercek olcude)"""
+"""Kaynak leke kapisi testi (Serdar 4 Kas "A" + O1; KALITE 3: bilinen PASS + bilinen FAIL). Motorun yolu birebir (ornament_motor.py):
+  kirp (pad 2) -> (ana ise genislik > 1600 ise 1600'e olcek) -> o5.delik_kapat -> [o5.kenar_onar] -> o5.leke_ic_kaynak (olcum=False, pay 24)
+  kapi sayisi = ic & alfa < 0.9. Pay, esik, olcum bolgesi DEGISMEZ (KALITE 4).
+Mod KAPALI (kenar_onar kapali, delik_kapat acik; yalniz test parametresi):
+  bilinen PASS: --pass kaynaklari (CANCER_LIBRA sembol kaynaklari) -> 0 piksel.
+  bilinen FAIL (i): her kaynakta ic yapay leke (en kalin murekkep noktasi, yaricap r, alfa 0.5) -> disk icinde sayilan > 0.
+  bilinen FAIL (ii) kenar satiri: kenara degen murekkepte (dort kenar) merkez kenardan 1 px disk; sayim yalniz disk ve kenardan ilk 3 px (y 0-2).
+     --kenar_zorunlu kaynaklarinda (gercek Kova boyutu) > 0 olmali; digerlerinde 0 FAIL degildir, "kenar bandi kor (ice px)" bilgi.
+  Yapay leke delik_kapat SONRASINA (kapinin olctugu goruntuye) konur; delik_kapat ONCESINE konan ic leke onarilir (bilgi: ham_ic_onarildi).
+  Sayim disk maskesi icinde yapilir (kaynagin kendi lekesi sayilmaz). Leke konacak yer yoksa test FAIL (varsayilan deger yok).
+Mod ACIK (kenar_onar acik): kapi sonucu bilgi; olculenler n0, degisen piksel, en buyuk alfa farki, degisen piksellerin kenara uzakligi,
+  yapay kenar lekesinin kenar_onar ile gizlenip gizlenmedigi. Yeni esik yok, "kabul" yok.
+Gercek Kova'nin onarim kapaliyken lekesi ayri bilgi alani (gercek_kova_onarimsiz_leke_px), test FAIL'i degildir.
+Cikis: 0 test_gecti, 1 test FAIL, 2 cokus.
+Kullanim: kova_kapi_testi.py --pass cancer.png libra.png [--pass_ana CANCER_LIBRA_ana.png] [--kaynak aquarius.png] [--ana X_ana.png]
+  [--kenar_zorunlu aquarius] --cikti DIR"""
 import argparse
 import importlib.util
 import json
@@ -17,74 +23,168 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image
 
 _d = Path(__file__).resolve().parent
 _s = importlib.util.spec_from_file_location('altin', _d / 'ornament_altin.py'); al = importlib.util.module_from_spec(_s); _s.loader.exec_module(al)
 o5, o1 = al.o5, al.o1
 
 
-def olc(alfa, olcum):
-    ic, t = o5.leke_ic_kaynak(alfa, olcum=olcum)
-    m = ic & (alfa < 0.9)
-    n, lab, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
-    return dict(leke_px=int(m.sum()), bilesen=[dict(x=int(s[0]), y=int(s[1]), w=int(s[2]), h=int(s[3]), alan=int(s[4])) for s in st[1:]][:12],
-                tanim=t)
+def hazirla(yol, ana):
+    g = np.asarray(Image.open(yol).convert('RGBA'), np.float32); g[..., 3] /= 255.0
+    g = o1.kirp(g, g[..., 3], pad=2)
+    if ana and g.shape[1] > 1600:
+        r_, a_ = o1.rgba_olcek(g, 1600 / g.shape[1]); g = np.dstack([r_, a_])
+    return g
 
 
-def disk(alfa, cx, cy, r):
-    a = alfa.copy(); yy, xx = np.ogrid[:a.shape[0], :a.shape[1]]
-    a[(xx - cx) ** 2 + (yy - cy) ** 2 <= r * r] = 0.5
-    return a
+def say(g, disk=None):
+    ic, t = o5.leke_ic_kaynak(g[..., 3])
+    m = ic & (g[..., 3] < 0.9)
+    return int(m.sum()) if disk is None else int((m & disk).sum()), t
 
 
-def sahte():
-    """gercek olcu (kirpim 10817 x 4501), iki dalga seridi; serit ust ve alt kenara deger (kenar satirlari AA)."""
-    W, H, ss = 10817, 4501, 2
-    im = Image.new('L', (W // ss, H // ss), 0); d = ImageDraw.Draw(im)
-    x = np.linspace(-200, W // ss + 200, 400)
-    for y0 in (520, 1730):
-        y = y0 + 520 * np.sin(x / (W // ss) * 4 * np.pi)
-        d.line(list(zip(x, y)), fill=255, width=560, joint='curve')
-    a = np.asarray(im.resize((W, H), Image.BILINEAR), np.float32) / 255.0
-    rgb = np.zeros((H, W, 3), np.float32); rgb[:] = (212, 170, 90)
-    return np.dstack([rgb, a * 255.0])
+def disk_m(shape, cx, cy, r):
+    yy, xx = np.ogrid[:shape[0], :shape[1]]
+    return (xx - cx) ** 2 + (yy - cy) ** 2 <= r * r
+
+
+def leke_koy(g, d):
+    g2 = g.copy(); g2[..., 3][d] = 0.5
+    return g2
+
+
+def yer_ic(A, r):
+    dt = cv2.distanceTransform((A > 0.9).astype(np.uint8), cv2.DIST_L2, 5)
+    if dt.max() < r + 2:
+        return None
+    cy, cx = np.unravel_index(int(dt.argmax()), dt.shape)
+    return int(cx), int(cy)
+
+
+def yer_kenar(A, r):
+    """kenara degen murekkep (kapi esigi alfa > 0.5; kenar satiri kenar yumusatmasi olabilir): dort kenar (ust, alt, sol, sag) sirayla;
+    kenardan itibaren 2r+3 piksel murekkep olan en uzun araligin ortasi. Merkez kenardan 1 px icerde. Doner (cx, cy, kenar) ya da None."""
+    H, W = A.shape
+    for ad in ('ust', 'alt', 'sol', 'sag'):
+        if ad == 'ust':
+            dolu = (A[:2 * r + 3] > 0.5).all(0)
+        elif ad == 'alt':
+            dolu = (A[H - 2 * r - 3:] > 0.5).all(0)
+        elif ad == 'sol':
+            dolu = (A[:, :2 * r + 3] > 0.5).all(1)
+        else:
+            dolu = (A[:, W - 2 * r - 3:] > 0.5).all(1)
+        idx = np.nonzero(dolu)[0]
+        if not len(idx):
+            continue
+        br = np.split(idx, np.nonzero(np.diff(idx) > 1)[0] + 1); en = max(br, key=len)
+        if len(en) < 2 * r + 1:
+            continue
+        m = int(en[len(en) // 2])
+        return {'ust': (m, 1), 'alt': (m, H - 2), 'sol': (1, m), 'sag': (W - 2, m)}[ad] + (ad,)
+    return None
+
+
+def kenar_bant(shape, kenar):
+    """sayim bolgesi: gorev tanimi 'y 0-2' = kenardan ilk 3 piksel (ust/alt satir, sol/sag sutun)."""
+    b = np.zeros(shape, bool)
+    if kenar == 'ust':
+        b[:3] = True
+    elif kenar == 'alt':
+        b[-3:] = True
+    elif kenar == 'sol':
+        b[:, :3] = True
+    else:
+        b[:, -3:] = True
+    return b
+
+
+def kaynak_test(yol, ana, kenar_zorunlu, bilinen_pass):
+    ad = Path(yol).stem
+    g0 = hazirla(yol, ana)
+    gd, _ = o5.delik_kapat(g0)
+    A = gd[..., 3]; H, W = A.shape
+    r = max(6, int(round(W / 600)))
+    n_k, tanim = say(gd)
+    R = dict(kaynak=Path(yol).name, tur='ana' if ana else 'kucuk', boyut=[H, W], olcum=tanim, yaricap=r,
+             kenara_degen_murekkep=dict(ust=bool((A[0] > 0.5).any()), alt=bool((A[-1] > 0.5).any())))
+    K = dict(kapi_sayisi=n_k)
+    if bilinen_pass:
+        K['bilinen_pass'] = dict(beklenen=0, olculen=n_k, gecti=bool(n_k == 0))
+    else:
+        K['gercek_kaynak_onarimsiz_leke_px_bilgi'] = n_k
+    # (i) ic yapay leke
+    y = yer_ic(A, r)
+    if y is None:
+        K['bilinen_fail_ic'] = dict(gecti=False, not_='leke konacak yer yok (FAIL)')
+    else:
+        d = disk_m(A.shape, y[0], y[1], r); n_i, _ = say(leke_koy(gd, d), d)
+        K['bilinen_fail_ic'] = dict(merkez=list(y), yaricap=r, disk_px=int(d.sum()), disk_icinde_sayilan=n_i, gecti=bool(n_i > 0))
+        # bilgi: ayni leke delik_kapat ONCESINE konursa onarilir mi
+        g0b = g0.copy(); d0 = disk_m(g0.shape, y[0], y[1], r); g0b[..., 3][d0] = 0.5
+        gdb, _ = o5.delik_kapat(g0b); n_h, _ = say(gdb, d0)
+        K['bilgi_ham_ic_leke_delik_kapat_sonrasi'] = n_h
+    # (ii) kenar satiri
+    yk = yer_kenar(A, r)
+    if yk is None:
+        K['bilinen_fail_kenar'] = dict(gecti=not kenar_zorunlu, not_='kenara degen dolu murekkep yok, leke konamadi' +
+                                       (' (zorunlu kaynak: FAIL)' if kenar_zorunlu else ' (bilgi; zorunlu degil)'))
+    else:
+        d = disk_m(A.shape, yk[0], yk[1], r); bnt = d & kenar_bant(A.shape, yk[2]); n_e, _ = say(leke_koy(gd, d), bnt)
+        K['bilinen_fail_kenar'] = dict(merkez=[yk[0], yk[1]], kenar=yk[2], yaricap=r, disk_px=int(d.sum()), sayim_bolgesi='disk ve kenardan ilk 3 px',
+                                       bolge_px=int(bnt.sum()), disk_icinde_sayilan=n_e,
+                                       zorunlu=bool(kenar_zorunlu), gecti=bool(n_e > 0) if kenar_zorunlu else True,
+                                       not_=None if (kenar_zorunlu or n_e > 0) else f'kenar bandi kor (ice {tanim["ice_px"]} px); bilgi, FAIL degil')
+    R['mod_kapali'] = K
+    # Mod ACIK
+    g2, k_ = o5.kenar_onar(gd)
+    n_a, _ = say(g2)
+    Ac = dict(kenar_onar=k_, kapi_sayisi_onarim_sonrasi_bilgi=n_a)
+    if yk is not None:
+        d = disk_m(A.shape, yk[0], yk[1], r); bnt = d & kenar_bant(A.shape, yk[2]); gl = leke_koy(gd, d)
+        gl2, kl = o5.kenar_onar(gl); n_l, _ = say(gl2, bnt)
+        Ac['yapay_kenar_lekesi'] = dict(onarim_oncesi_bolgede=K['bilinen_fail_kenar']['disk_icinde_sayilan'], onarim_sonrasi_bolgede=n_l,
+                                        gizlendi=bool(K['bilinen_fail_kenar']['disk_icinde_sayilan'] > 0 and n_l == 0),
+                                        disk_icinde_alfa_farki_en_buyuk=round(float(np.abs(gl2[..., 3] - gl[..., 3])[d].max()), 4),
+                                        not_='kenar_onar sayi 0 olana kadar onarir: gizlendi yapisi geregi True beklenir (zayif; bilgi)')
+    R['mod_acik_bilgi'] = Ac
+    gec = [v['gecti'] for k, v in K.items() if isinstance(v, dict) and 'gecti' in v]
+    R['gecti'] = bool(all(gec))
+    return R
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument('--kaynak'); ap.add_argument('--sahte', action='store_true'); ap.add_argument('--cikti', required=True)
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--pass', dest='pas', nargs='+', required=True); ap.add_argument('--kaynak', nargs='*', default=[])
+    ap.add_argument('--ana', nargs='*', default=[]); ap.add_argument('--pass_ana', nargs='*', default=[]); ap.add_argument('--kenar_zorunlu', nargs='*', default=[])
+    ap.add_argument('--cikti', required=True)
     a = ap.parse_args(); O = Path(a.cikti); O.mkdir(parents=True, exist_ok=True)
-    g = sahte() if a.sahte else np.asarray(Image.open(a.kaynak).convert('RGBA'), np.float32)
-    g[..., 3] /= 255.0
-    ham = o1.kirp(g, g[..., 3], pad=2)
-    onar, _ = o5.delik_kapat(ham)
-    A = onar[..., 3]
-    R = dict(kaynak='sahte (yerel, gercek olcu)' if a.sahte else a.kaynak, boyut=list(A.shape),
-             kenara_degen_murekkep=dict(ust=bool((A[0] > 0.5).any()), alt=bool((A[-1] > 0.5).any())))
-    R['ham_onarim_oncesi_yeni_pay_bilgi'] = olc(ham[..., 3], True)['leke_px']
-    R['bilinen_pass_mevcut_kaynak'] = dict(yeni_pay=olc(A, True), eski_pay_24=olc(A, False))
-    # yapay leke: en kalin murekkep noktasi (mesafe donusumu en buyuk) ve ust kenara degen murekkepte kenardan 40 px icerde
-    dt = cv2.distanceTransform((A > 0.9).astype(np.uint8), cv2.DIST_L2, 5)
-    cy, cx = np.unravel_index(int(dt.argmax()), dt.shape); r = max(6, int(round(A.shape[1] / 600)))
-    sut = np.nonzero((A[:40 + 2 * r + 10] > 0.99).all(0))[0]            # ust kenardan itibaren murekkebi dolu sutunlar
-    ex = int(sut[np.argmax(dt[40 + r, sut])]) if len(sut) else None      # en kalin yer (disk murekkebin icinde kalsin)
-    L1 = disk(A, cx, cy, r)
-    R['bilinen_fail_leke_ic'] = dict(merkez=[int(cx), int(cy)], yaricap=r, yeni_pay=olc(L1, True))
-    if ex is not None:
-        L2 = disk(A, ex, 40, r)
-        R['bilinen_fail_leke_kenar_40px'] = dict(merkez=[ex, 40], yaricap=r, yeni_pay=olc(L2, True))
-    p = R['bilinen_pass_mevcut_kaynak']['yeni_pay']['leke_px'] == 0
-    f1 = R['bilinen_fail_leke_ic']['yeni_pay']['leke_px'] > 0
-    f2 = R.get('bilinen_fail_leke_kenar_40px', {}).get('yeni_pay', {}).get('leke_px', 1) > 0
-    R['sonuc'] = dict(bilinen_pass_PASS_verdi=bool(p), bilinen_fail_ic_FAIL_verdi=bool(f1), bilinen_fail_kenar_FAIL_verdi=bool(f2),
-                      test_gecti=bool(p and f1 and f2),
-                      not_='kapi sert degeri onarim (delik_kapat) sonrasi olculur; ham kaynaktaki ic leke onarimla kapanir (V5 davranisi, degismedi)')
+    zor = {z.lower() for z in a.kenar_zorunlu}
+    T = []
+    for y in a.pas:
+        T.append(kaynak_test(y, False, Path(y).stem.split('_')[0].lower() in zor, True))
+    for y in a.kaynak:
+        T.append(kaynak_test(y, False, Path(y).stem.split('_')[0].lower() in zor, False))
+    for y in a.pass_ana:                                                     # ana yolu (1600 olcek) bilinen PASS
+        T.append(kaynak_test(y, True, False, True))
+    for y in a.ana:
+        T.append(kaynak_test(y, True, False, False))
+    eksik = [z for z in zor if not any(t['kaynak'].lower().startswith(z) for t in T)]
+    R = dict(yol='kirp pad 2 -> (ana 1600) -> delik_kapat -> [kenar_onar] -> leke_ic_kaynak(olcum=False, pay 24)', kaynaklar=T,
+             kenar_zorunlu=sorted(zor), kenar_zorunlu_eksik=eksik)
+    R['gercek_kova_onarimsiz_leke_px'] = {t['kaynak']: t['mod_kapali']['kapi_sayisi'] for t in T if t['kaynak'].lower().startswith('aquarius')}
+    R['test_gecti'] = bool(all(t['gecti'] for t in T) and not eksik)
     (O / 'KOVA_KAPI_TESTI.json').write_text(json.dumps(R, indent=1, ensure_ascii=False))
-    print(json.dumps(dict(boyut=R['boyut'], pass_yeni=R['bilinen_pass_mevcut_kaynak']['yeni_pay']['leke_px'],
-                          pass_eski24=R['bilinen_pass_mevcut_kaynak']['eski_pay_24']['leke_px'], fail_ic=R['bilinen_fail_leke_ic']['yeni_pay']['leke_px'],
-                          fail_kenar=R.get('bilinen_fail_leke_kenar_40px', {}).get('yeni_pay', {}).get('leke_px'), ham_bilgi=R['ham_onarim_oncesi_yeni_pay_bilgi'],
-                          sonuc=R['sonuc']['test_gecti'])), flush=True)
-    return 0 if R['sonuc']['test_gecti'] else 1
+    for t in T:
+        K = t['mod_kapali']
+        print(t['kaynak'], t['boyut'], 'gecti', t['gecti'], '| kapi', K['kapi_sayisi'],
+              '| ic', K['bilinen_fail_ic'].get('disk_icinde_sayilan'), '| kenar', K['bilinen_fail_kenar'].get('disk_icinde_sayilan'),
+              K['bilinen_fail_kenar'].get('not_') or '', '| acik n0', t['mod_acik_bilgi']['kenar_onar']['n0'],
+              'degisen', t['mod_acik_bilgi']['kenar_onar']['degisen_piksel'], 'gizlendi', t['mod_acik_bilgi'].get('yapay_kenar_lekesi', {}).get('gizlendi'),
+              flush=True)
+    print('TEST', 'PASS' if R['test_gecti'] else 'FAIL', '| eksik zorunlu', eksik, flush=True)
+    return 0 if R['test_gecti'] else 1
 
 
 if __name__ == '__main__':

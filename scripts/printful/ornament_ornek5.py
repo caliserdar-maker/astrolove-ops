@@ -76,6 +76,34 @@ def _delik_kapat(rgba):
     return out, int((ic & (a < 0.9)).sum())
 
 
+def kenar_onar(g, kapali=False):
+    """Kaynak kenar onarimi (Serdar 4 Kas, Kova; motor ve kova_kapi_testi AYNI fonksiyonu cagirir). Kapi olcumu: leke_ic_kaynak (pay 24,
+    olcum=False) ic & alfa < 0.9 = n0. n0 > 0 ise _delik_kapat (dis pay yok, kapi olcumuyle ayni cerceve) en cok 3 tur: ic alan alfa 1, renk inpaint.
+    n0 = 0 ya da kapali=True (yalniz test parametresi) ise girdi aynen doner. Doner (g2, kayit). Kaynak dosyaya dokunmaz (bellekteki kopya)."""
+    a0 = g[..., 3]
+    ic0, t0 = leke_ic_kaynak(a0); m0 = ic0 & (a0 < 0.9); n0 = int(m0.sum())
+    H, W = a0.shape
+    kayit = dict(n0=n0, kapali=bool(kapali), boyut=[int(H), int(W)], olcum=t0, sb=[int(v) for v in o1.bbox(a0, 0.5)],
+                 tur=[], degisen_piksel=0, alfa_farki_en_buyuk=0.0, bilesen=[], kenara_uzaklik=None)
+    if n0 == 0 or kapali:
+        return g, kayit
+    g2 = g
+    for _ in range(3):                                                       # dolan pikseller kapanisi buyutebilir: sayi 0 olana kadar (en cok 3 tur)
+        g2, n_ = _delik_kapat(g2)
+        ic1, _ = leke_ic_kaynak(g2[..., 3]); n1 = int((ic1 & (g2[..., 3] < 0.9)).sum()); kayit['tur'].append(dict(onarilan=int(n_), kalan=n1))
+        if n1 == 0:
+            break
+    d = (np.abs(g2 - g) > 1e-6).any(-1)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(d.astype(np.uint8), 8)
+    ys, xs = np.nonzero(d)
+    ku = np.minimum.reduce([ys, H - 1 - ys, xs, W - 1 - xs]) if len(ys) else np.array([0])
+    kayit.update(degisen_piksel=int(d.sum()), alfa_farki_en_buyuk=round(float(np.abs(g2[..., 3] - a0).max()), 4),
+                 bilesen=sorted([dict(x=int(s_[0]), y=int(s_[1]), w=int(s_[2]), h=int(s_[3]), alan=int(s_[4])) for s_ in st[1:]], key=lambda q: -q['alan'])[:40],
+                 bilesen_sayisi=int(n - 1),
+                 kenara_uzaklik=dict(en_kucuk=int(ku.min()), en_buyuk=int(ku.max()), ortanca=float(np.median(ku))))
+    return g2, kayit
+
+
 def delik_say(a, k=9):
     """kapi (a) kaynak olcusu: alfa > 0.5 maskesi k x k kapanis, 1 px ice; icinde alfa < 0.9 piksel."""
     m = (a > 0.5).astype(np.uint8)

@@ -26,7 +26,7 @@ _d = Path(__file__).resolve().parent
 _s = importlib.util.spec_from_file_location('altin', _d / 'ornament_altin.py'); al = importlib.util.module_from_spec(_s); _s.loader.exec_module(al)
 o5, o4, o1 = al.o5, al.o4, al.o1
 STIL = ('RUBY', 'SAPPHIRE', 'EMERALD', 'SADE_ALTIN', 'FILDISI')
-MM_PX = 76 / 954
+MM_PX = 25.4 / 300                                                       # 1 px = 25,4/300 mm (KARAR 6; eski 76/954 hatali)
 
 
 def kaynak(K, burc):

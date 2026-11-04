@@ -193,23 +193,26 @@ def main():
     td = importlib.util.module_from_spec(spec); spec.loader.exec_module(td)
     pp = o4.poster_profil(K_ / 'HALKA_BLUE_16x20.png')
     KENAR_ONARIM = {}
+    KENAR_KAPALI = os.environ.get('ORN_KENAR_ONARIM_KAPALI') == '1'          # yalniz test parametresi (once / sonra yakin plani); varsayilan acik
+    YAKIN_DIR = os.environ.get('ORN_YAKIN_DIR')                              # kaynak 1:1 kirpimlari: yalniz Drive (depo public)
 
     def kenar_onar(ad, g):
-        """Serdar 4 Kas (Kova): olcum payi eski haline (24 px) dondu; kapinin leke saydigi pikseller (ic & alfa < 0.9) varsa goruntu duzeltilir:
-        delik_kapat ic onarimi kapi olcumuyle ayni cercevede (dis pay yok) bir kez daha uygulanir (alfa 1, renk inpaint). Sayi 0 ise dokunulmaz
-        (CANCER_LIBRA ve leke saymayan kaynaklar birebir). Kaynak dosyaya dokunulmaz; yalniz bellekteki kopya."""
-        ic0, _ = o5.leke_ic_kaynak(g[..., 3]); n0 = int((ic0 & (g[..., 3] < 0.9)).sum())
-        if n0 == 0:
-            return g
-        g2, tur = g, []
-        for _ in range(3):                                                   # dolan pikseller kapanisi buyutebilir: sayi 0 olana kadar (en cok 3 tur)
-            g2, n_ = o5._delik_kapat(g2)
-            ic1, _ = o5.leke_ic_kaynak(g2[..., 3]); n1 = int((ic1 & (g2[..., 3] < 0.9)).sum()); tur.append(dict(onarilan=int(n_), kalan=n1))
-            if n1 == 0:
-                break
-        KENAR_ONARIM[ad] = dict(onarim_oncesi_leke_px=n0, tur=tur, alfa_degisimi_en_buyuk=round(float(np.abs(g2[..., 3] - g[..., 3]).max()), 4),
-                                degisen_piksel=int((np.abs(g2 - g) > 1e-6).any(-1).sum()))
-        log('kenar onarim', ad, KENAR_ONARIM[ad])
+        """o5.kenar_onar (motor ve kova_kapi_testi ayni fonksiyon); her cagri KENAR_ONARIM'a yazilir. Degisen varsa kaynak 1:1 once / sonra kirpimi."""
+        g2, k_ = o5.kenar_onar(g, kapali=KENAR_KAPALI)
+        KENAR_ONARIM[ad] = k_
+        if k_['n0']:
+            log('kenar onarim', ad, {x: k_[x] for x in ('n0', 'kapali', 'tur', 'degisen_piksel', 'alfa_farki_en_buyuk', 'bilesen_sayisi', 'kenara_uzaklik') if x in k_})
+        if YAKIN_DIR and k_['degisen_piksel']:
+            Path(YAKIN_DIR).mkdir(parents=True, exist_ok=True)
+            for ad_s, gg in (('once', g), ('sonra', g2)):
+                zem = np.array([60, 60, 66], np.float32); par = []
+                for b_ in sorted(k_['bilesen'], key=lambda q: -q['alan'])[:6]:
+                    x0, y0 = max(0, b_['x'] - 40), max(0, b_['y'] - 40); x1, y1 = min(gg.shape[1], b_['x'] + b_['w'] + 40), min(gg.shape[0], b_['y'] + b_['h'] + 40)
+                    cr = gg[y0:y1, x0:x1]; par.append(np.clip(cr[..., :3] * cr[..., 3:] + zem * (1 - cr[..., 3:]), 0, 255).astype(np.uint8))
+                Wd = max(q.shape[1] for q in par); T = np.full((sum(q.shape[0] + 6 for q in par), Wd, 3), 255, np.uint8); y = 0
+                for q in par:
+                    T[y:y + q.shape[0], :q.shape[1]] = q; y += q.shape[0] + 6
+                Image.fromarray(T).save(Path(YAKIN_DIR) / f'YAKIN_{CIFT}_{ad}_{ad_s}_1x.png')
         return g2
     ANA_DOSYA = K_ / f'{CIFT}_ana.png'
     ana0 = np.asarray(Image.open(ANA_DOSYA).convert('RGBA'), np.float32); ana0[..., 3] /= 255.0
