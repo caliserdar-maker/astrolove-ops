@@ -26,7 +26,8 @@ HEDIYE = ("THE PERFECT GIFT\nA keepsake made for Aries and Leo couples. Short on
 YENI_URETIM = [k for k in P.SABIT if k.startswith("PRODUCTION AND DELIVERY") and "tracking" not in k][0]   # 26 Eki takipsiz paragraf
 YENI_ONIZLEME = [k for k in P.SABIT if k.startswith("YOUR PREVIEW\nWe send you")][0]   # 28 Eki onizleme paragrafi
 YENI_PRINT = [k for k in P.SABIT if k.startswith("PRINT\n- Printed on matte")][0]   # 3 Kas PRINT paragrafi (premium'suz)
-sabit = [k for k in P.SABIT if k not in (P.BEYAN, YENI_URETIM, YENI_ONIZLEME, YENI_PRINT)]
+YENI_ONIZLEME_P1 = [k for k in P.SABIT if k.startswith("YOUR PREVIEW\nWe send you") and "If we don't hear" not in k]   # 4 Kas P1
+sabit = [k for k in P.SABIT if k not in (P.BEYAN, YENI_URETIM, YENI_ONIZLEME, YENI_PRINT, *YENI_ONIZLEME_P1)]
 EN_CANLI = "\n\n".join([GIRIS, P.BEYAN, "Aries: March 21 to April 19. Leo: July 23 to August 22.", SIPARIS, sabit[0], DIJITAL] + sabit[1:3]
                  + [BOY] + sabit[3:] + [HEDIYE])
 EN = P.poster_en(EN_CANLI)   # Serdar 23 Eki madde 1-2: Latin harf notu

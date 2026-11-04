@@ -174,6 +174,13 @@ SABIT = {
         "файл сразу после того, как вы одобрите макет. Если в течение 24 часов после получения макета мы не получим от вас ответа, "
         "мы продолжим работу с дизайном в том виде, в каком он показан на макете: напечатаем постер или отправим цифровой файл "
         "в виде ссылки для скачивания в сообщениях Etsy.",
+    # Serdar 4 Kas P1 "A": onizlemeye yanit yoksa basilir/gonderilir sozu cikar (EN + RU birlikte); RU = canli RU paragrafindan
+    # " Если в течение 24 часов ..." parcasi silinmis hali (Serdar + Lena onayi bekler; yazima acilmasi ayri gorev).
+    # Eski iki paragraf geri alma icin kalir.
+    "YOUR PREVIEW\nWe send you a preview via Etsy Messages within 24 hours of your order. We print your poster or prepare your file "
+    "as soon as you approve it.":
+        "ВАШ МАКЕТ\nМы отправляем вам макет через сообщения Etsy в течение 24 часов после заказа. Мы печатаем постер или готовим "
+        "файл сразу после того, как вы одобрите макет.",
     "PRINT\n- Printed on premium matte art paper with long-lasting inks\nFrames shown in photos are for display only and are not "
     "included. Prints ship unframed.":
         "ПЕЧАТЬ\n- Печать на премиальной матовой художественной бумаге стойкими чернилами\nРамы на фото показаны только для "
