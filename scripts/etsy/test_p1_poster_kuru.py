@@ -37,6 +37,11 @@ def kayit(en, ru, state="active", ru_durum="var", ru_baslik=None):
                 ru_durum=ru_durum)
 
 
+# gercek canli veri parite kaniti (inceleme C-3): testdata = 3 Kas canli EN + canli RU (Etsy'den okunmus); sablon kur(EN) == canli RU
+EN_3KAS, RU_3KAS = P.norm(D["description"]), P.norm(D["ru"]["description"])
+ru_3kas, _k3 = R.kur(EN_3KAS, {"boy": BOYKOD})
+k("gercek canli veri: kur(3 Kas canli EN) == 3 Kas canli RU", _k3.get("pass_") and ru_3kas.strip() == RU_3KAS.strip(), _k3.get("hata"))
+k("gercek canli RU'da SIL_RU tam 1", RU_3KAS.count(K.SIL_RU) == 1)
 EN0 = canli_en()
 RU0, k0 = R.kur(EN0, {"boy": BOYKOD})
 k("canli bicim: EN'de go_ahead sozu tam 1", EN0.count(K.SIL_EN) == 1)
@@ -93,14 +98,69 @@ k("suslu parantez -> DUR", s["durum"] == "DUR", s["neden"])
 s, _ = K.plan_ilan(kayit(EN0 + "\n\n" + EN0, RU0))
 k("2+ eslesme -> DUR (neden FAIL)", s["durum"] == "DUR" and any(n.startswith("FAIL") for n in s["neden"]), s["neden"])
 k("istek butcesi 20 (poster_metin_yaz.py:33)", K.ISTEK_ILAN == 20)
-# main: HAM klasoru ile uc uca (1 ilan; digerleri 'ham dosya yok' -> DUR)
-with tempfile.TemporaryDirectory() as t:
-    t = pathlib.Path(t); (t / "HAM").mkdir()
-    (t / "HAM" / "4570143815.json").write_text(json.dumps(kayit(EN0, RU0), ensure_ascii=False))
-    (t / "AKTIF_SAYIM.csv").write_text("listing_id,grup,genel,go_ahead,eski\n4570143815,poster78,1,1,0\n111,yd78,1,1,0\n222,kupa,0,0,0\n")
-    rc = K.main(["--ham", str(t), "--out", str(t / "o")])
-    oz = json.loads((t / "o" / "OZET.json").read_text())
-    k("main: 1 PLAN, 77 DUR (ham yok), 1 diger urun", rc == 0 and oz["plan"] == 1 and oz["dur"] == 77 and oz["diger_urun_eslesen"] == 1, oz)
+# main: HAM klasoru ile uc uca + girdi kapisi + ag engeli (Serdar 4 Kas "B")
+IDS = [r.split(",")[0] for r in (pathlib.Path(__file__).resolve().parents[2] / "data" / "pod" / "pod78_ids.csv").read_text().split()[1:]]
+
+
+def klasor(n=78, sayim=True, okunan=None):
+    t = pathlib.Path(tempfile.mkdtemp()); (t / "HAM").mkdir()
+    for lid in IDS[:n]:
+        kk = kayit(EN0, RU0); kk["listing_id"] = lid
+        (t / "HAM" / f"{lid}.json").write_text(json.dumps(kk, ensure_ascii=False), encoding="utf-8")
+    (t / "OZET.json").write_text(json.dumps({"okunan": n if okunan is None else okunan}), encoding="utf-8")
+    if sayim:
+        (t / "AKTIF_SAYIM.csv").write_text("listing_id,grup,genel,go_ahead,eski\n4570143815,poster78,1,1,0\n111,yd78,1,1,0\n222,kupa,0,0,0\n",
+                                           encoding="utf-8")
+    return t
+
+
+t = klasor()
+rc = K.main(["--ham", str(t), "--out", str(t / "o")])
+oz = json.loads((t / "o" / "OZET.json").read_text(encoding="utf-8"))
+k("main: 78 PLAN, 0 DUR, 1 diger urun, ag denemesi 0", rc == 0 and oz["plan"] == 78 and oz["dur"] == 0 and oz["diger_urun_eslesen"] == 1
+  and oz["ag_deneme"] == 0, oz)
+# bilinen FAIL: bozuk HAM kaydi -> o ilan DUR, kosu cokmez (inceleme C-2)
+t = klasor(); (t / "HAM" / f"{IDS[0]}.json").write_text("{bozuk", encoding="utf-8")
+rc = K.main(["--ham", str(t), "--out", str(t / "o")]); oz = json.loads((t / "o" / "OZET.json").read_text(encoding="utf-8"))
+k("bozuk HAM kaydi -> 1 DUR (istisna), 77 PLAN, kosu tamam", rc == 0 and oz["dur"] == 1 and oz["plan"] == 77, oz)
+# bilinen FAIL: girdi kapisi
+t = klasor(n=0)
+k("bos HAM -> cikis 1", K.main(["--ham", str(t), "--out", str(t / "o")]) == 1)
+t = klasor(sayim=False)
+k("AKTIF_SAYIM yok -> cikis 1", K.main(["--ham", str(t), "--out", str(t / "o")]) == 1)
+t = klasor(okunan=77)
+k("OZET.okunan != HAM sayisi -> cikis 1", K.main(["--ham", str(t), "--out", str(t / "o")]) == 1)
+t = klasor(n=77, okunan=77)
+k("77 HAM (78 beklenir) -> cikis 1", K.main(["--ham", str(t), "--out", str(t / "o")]) == 1)
+# bilinen FAIL: ag denemesi (genis except ile yutulsa da) -> cikis 1
+import requests  # noqa: E402
+asil = K.plan_ilan
+
+
+def agli(kk, shop=K.SHOP):
+    try:
+        requests.get("https://example.com", timeout=2)
+    except Exception:   # noqa: BLE001  (yutulur; yine de kayitli)
+        pass
+    return asil(kk, shop)
+
+
+K.plan_ilan = agli
+t = klasor()
+rc = K.main(["--ham", str(t), "--out", str(t / "o")])
+K.plan_ilan = asil
+oz = json.loads((t / "o" / "OZET.json").read_text(encoding="utf-8"))
+k("ag kapali: requests.get denemesi -> cikis 1, ag_deneme > 0", rc == 1 and oz["ag_deneme"] > 0, (rc, oz.get("ag_deneme")))
+geri = K.ag_kapat(); once = len(K.AG_DENEME); engellendi = False
+try:
+    requests.get("https://example.com", timeout=2)
+except Exception:   # noqa: BLE001
+    engellendi = True
+finally:
+    geri()
+k("ag_kapat: istek engellenir ve kaydedilir", engellendi and len(K.AG_DENEME) > once)
+k("main sonrasi ag yamasi geri alindi", K.socket.create_connection.__name__ != "engel")
+k("RU_BEYANSIZ_DRIVE=0 (atexit Drive yazimi kapali)", K.os.environ.get("RU_BEYANSIZ_DRIVE") == "0")
 n = sum(1 for _, v in sonuc if v)
 print(f"SONUC {n}/{len(sonuc)}")
 sys.exit(0 if n == len(sonuc) else 1)

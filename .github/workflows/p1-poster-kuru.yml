@@ -1,0 +1,81 @@
+name: p1-poster-kuru
+# YALNIZ DAL p1-poster-yanitsiz (main'e ALINMAZ): P1 kuru islem (Serdar 4 Kas "B" + "A"). Etsy istegi YOK, Etsy secret / token /
+# kilit_bekle YOK (CLAUDE.md "isleme kilitsiz ayri is akisinda"). Girdi: Drive TEMP/P1_ENVANTER_20261104_1215/ (okuma kosusu
+# 41827729485; salt okuma). Islem: scripts/etsy/p1_poster_kuru.py (girdi kapisi + ag kapali). Cikti: Drive TEMP/P1_KURU_<damga>/
+# + dala docs/p1/P1_KURU_<damga>/ yalniz izin listesi (scripts/etsy/p1_dal_kapi.py). Tetik: docs/p1/P1_KURU_TETIK.txt push'u.
+on:
+  push:
+    branches: [p1-poster-yanitsiz]
+    paths: [docs/p1/P1_KURU_TETIK.txt]
+permissions:
+  contents: write
+jobs:
+  kuru:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M)" >> "$GITHUB_ENV"
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Girdi indir (Drive, salt okuma) + liste + sha256
+        run: |
+          set -euo pipefail
+          mkdir -p _ham _out
+          rclone copy "gdrive:ASTROLOVE/TEMP/P1_ENVANTER_20261104_1215" _ham -q
+          (cd _ham && find . -type f | sort | xargs sha256sum) | tee _out/GIRDI_SHA256.txt
+          echo "HAM json: $(ls _ham/HAM/*.json | wc -l)"
+      - name: Kuru (ag kapali, Etsy istegi yok)
+        id: kuru
+        run: |
+          set +e
+          set -o pipefail
+          RU_BEYANSIZ_DRIVE=0 python3 scripts/etsy/p1_poster_kuru.py --ham _ham --out _out 2>&1 | tee _out/LOG.txt
+          rc=${PIPESTATUS[0]}
+          echo "KURU_RC=$rc" >> "$GITHUB_ENV"
+          echo "kuru cikis kodu: $rc"
+          exit 0
+      - name: Cikti Drive'a (sir taramasi)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          python3 scripts/guvenlik/sir_koru.py tara _out
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/P1_KURU_${DAMGA:?}" --immutable -q
+          echo "::notice title=P1 KURU::TEMP/P1_KURU_${DAMGA}/"
+      - name: Dala yaz (yalniz izin listesi)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          D="docs/p1/P1_KURU_${DAMGA:?}"
+          mkdir -p "$D"
+          for f in FARK.csv DUR.csv ONCE_SONRA.json DIGER_URUNLER.csv OZET.json LOG.txt; do if [ -f "_out/$f" ]; then cp "_out/$f" "$D/"; fi; done
+          python3 scripts/guvenlik/sir_koru.py tara "$D"
+          git config user.name "p1-poster-kuru"; git config user.email "actions@users.noreply.github.com"
+          git add "$D"
+          git diff --cached --name-only > /tmp/staged.txt
+          python3 scripts/etsy/p1_dal_kapi.py "$D" --staged /tmp/staged.txt
+          git commit -q -m "P1 kuru cikti (kosu ${GITHUB_RUN_ID}): docs/p1/P1_KURU_${DAMGA}/ (izin listesi; Etsy istegi yok)"
+          git push origin "HEAD:p1-poster-yanitsiz"
+          echo "dala yazildi: $(git rev-parse HEAD)"
+      - name: Sonuc (kuru cikis kodu)
+        if: ${{ always() }}
+        run: |
+          rm -rf ~/.config/rclone _ham
+          echo "kuru cikis kodu: ${KURU_RC:-yok}"
+          [ "${KURU_RC:-1}" = "0" ]

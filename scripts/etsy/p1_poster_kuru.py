@@ -8,12 +8,15 @@ Ilan basina siniflama (EN, norm; inceleme 4 Kas D-1: esnek desen GENEL_EN kesme 
   GENEL_EN >= 1 ama tam SIL_EN ile ayni degil -> DUR (varyant)
 DUR (plana girmez): state != active; RU yok / okunamadi; RU baslik bos; kur(EN once) != canli RU; kur(EN yeni) FAIL; yeni RU !=
 canli RU eksi SIL_RU; EN / RU farki tam 1 paragraf degil; metin kapisi uyarisi; AI beyani eksik; suslu parantez.
-Kullanim: p1_poster_kuru.py --ham DIR (HAM/ + AKTIF_SAYIM.csv) --out DIR"""
+Girdi kapisi: HAM/*.json = 78 = OZET.okunan, AKTIF_SAYIM.csv var; degilse cikis 1. Ag: islem boyunca kapali (ag_kapat).
+Kullanim: p1_poster_kuru.py --ham DIR (HAM/ + AKTIF_SAYIM.csv + OZET.json) --out DIR"""
 import argparse
 import csv
 import json
+import os
 import pathlib
 import re
+import socket
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -50,6 +53,43 @@ def sinif(en):
     if gen == 0:
         return "ZATEN_ADAY"
     return "VARYANT"
+
+
+AG_DENEME = []
+
+
+def ag_kapat():
+    """Kuru islem ag'a cikmaz (Serdar 4 Kas "B"): socket baglanti / DNS / create_connection yamalanir; her deneme kaydedilir ve
+    main cikis 1 verir (genis except ile yutulsa bile). RU_BEYANSIZ_DRIVE=0: etsy_common atexit Drive yazimi (rclone) kapali
+    (etsy_common.py:574-577). Donen fonksiyon yamayi geri alir (test icin)."""
+    os.environ["RU_BEYANSIZ_DRIVE"] = "0"
+    eski = (socket.socket.connect, socket.socket.connect_ex, socket.create_connection, socket.getaddrinfo)
+
+    def engel(*a, **k):
+        AG_DENEME.append(1)
+        raise ConnectionError("AG KAPALI (p1_poster_kuru)")
+    socket.socket.connect = socket.socket.connect_ex = engel
+    socket.create_connection = socket.getaddrinfo = engel
+
+    def geri():
+        socket.socket.connect, socket.socket.connect_ex, socket.create_connection, socket.getaddrinfo = eski
+    return geri
+
+
+def girdi_kapisi(ham, beklenen=78):
+    """-> hata listesi. HAM/*.json sayisi = beklenen = OZET.okunan; AKTIF_SAYIM.csv var."""
+    h = []
+    n = len(list((ham / "HAM").glob("*.json"))) if (ham / "HAM").is_dir() else 0
+    oz = {}
+    try:
+        oz = json.loads((ham / "OZET.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        h.append("OZET.json yok / okunamadi")
+    if n != beklenen or n != oz.get("okunan"):
+        h.append(f"HAM json {n}, beklenen {beklenen}, OZET.okunan {oz.get('okunan')}")
+    if not (ham / "AKTIF_SAYIM.csv").is_file():
+        h.append("AKTIF_SAYIM.csv yok")
+    return h
 
 
 def paragraf_farki(a, b):
@@ -140,12 +180,28 @@ def main(argv=None):
     ham, out = pathlib.Path(a.ham), pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     kok = pathlib.Path(__file__).resolve().parents[2]
     ids = [r["listing_id"].strip() for r in csv.DictReader(open(kok / "data" / "pod" / "pod78_ids.csv", encoding="utf-8-sig"))]
+    gh = girdi_kapisi(ham, len(ids))
+    if gh:
+        print("P1 KURU GIRDI KAPISI FAIL: " + "; ".join(gh), flush=True)
+        return 1
+    AG_DENEME.clear()
+    geri = ag_kapat()
+    try:
+        return _isle(ham, out, ids)
+    finally:
+        geri()
+
+
+def _isle(ham, out, ids):
     satir, detay = [], {}
     for lid in ids:
         f = ham / "HAM" / f"{lid}.json"
         if not f.exists():
             satir.append(dict(listing_id=lid, durum="DUR", neden=["ham dosya yok (okunmadi / kota)"])); continue
-        s, d = plan_ilan(json.loads(f.read_text(encoding="utf-8")))
+        try:   # inceleme C-2: tek kayit kosuyu cokertmez; ilan DUR (yalniz istisna turu yazilir)
+            s, d = plan_ilan(json.loads(f.read_text(encoding="utf-8")))
+        except Exception as e:   # noqa: BLE001
+            satir.append(dict(listing_id=lid, durum="DUR", neden=[f"istisna: {type(e).__name__}"])); continue
         satir.append(s)
         if d:
             detay[lid] = d
@@ -160,10 +216,8 @@ def main(argv=None):
         w = csv.DictWriter(fh, fieldnames=alan, extrasaction="ignore", lineterminator="\n"); w.writeheader()
         w.writerows([s for s in satir if s["durum"] != "PLAN"])
     (out / "ONCE_SONRA.json").write_text(json.dumps(detay, ensure_ascii=False, indent=1), encoding="utf-8")
-    diger = []
-    sayim = ham / "AKTIF_SAYIM.csv"
-    if sayim.exists():
-        diger = [r for r in csv.DictReader(open(sayim, encoding="utf-8")) if r["grup"] != "poster78" and int(r["genel"] or 0) > 0]
+    diger = [r for r in csv.DictReader(open(ham / "AKTIF_SAYIM.csv", encoding="utf-8"))
+             if r["grup"] != "poster78" and int(r["genel"] or 0) > 0]
     with open(out / "DIGER_URUNLER.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=["listing_id", "grup", "genel", "go_ahead", "eski"], lineterminator="\n")
         w.writeheader(); w.writerows(diger)
@@ -173,7 +227,12 @@ def main(argv=None):
               tahmini_istek_yazim_tipik=ISTEK_TIPIK * sum(s["durum"] == "PLAN" for s in satir),
               istek_butce_yazim=ISTEK_ILAN * sum(s["durum"] == "PLAN" for s in satir))
     (out / "OZET.json").write_text(json.dumps(oz, indent=1), encoding="utf-8")
+    oz["ag_deneme"] = len(AG_DENEME)
+    (out / "OZET.json").write_text(json.dumps(oz, indent=1), encoding="utf-8")
     print("P1 KURU:", json.dumps(oz), flush=True)
+    if AG_DENEME:
+        print(f"P1 KURU FAIL: ag denemesi {len(AG_DENEME)}", flush=True)
+        return 1
     return 0 if oz["plan"] + oz["dur"] + oz["zaten_yeni"] == len(ids) else 1
 
 
