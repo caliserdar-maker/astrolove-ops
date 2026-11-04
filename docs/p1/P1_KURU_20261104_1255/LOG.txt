@@ -1,0 +1,1 @@
+P1 KURU: {"ilan": 78, "plan": 78, "dur": 0, "zaten_yeni": 0, "kur_yeni_pass": 78, "kapi_uyari_toplam": 0, "diger_urun_eslesen": 0, "tahmini_istek_yazim_tipik": 546, "istek_butce_yazim": 1560, "ag_deneme": 0}
