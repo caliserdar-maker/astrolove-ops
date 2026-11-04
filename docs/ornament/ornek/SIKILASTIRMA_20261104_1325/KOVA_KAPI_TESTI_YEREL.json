@@ -1,0 +1,43 @@
+{
+ "not_": "YEREL; aquarius SAHTE (gercek Kova yalniz Actions). b1 = tam dolu sahte (kenara degen, ic leke yok): FAIL yeni iddiadan. b2 = lekeli sahte (38447 px): iddia PASS.",
+ "b1_bilinen_fail": {
+  "ornek": "tam dolu sahte Kova",
+  "test_gecti": false,
+  "aquarius_boyut": [
+   4501,
+   10817
+  ],
+  "onarimsiz_kapi_iddia": {
+   "iddia": "onarim kapaliyken kapi sayisi > 0 (bilinen FAIL)",
+   "olculen": 0,
+   "gecti": false
+  },
+  "bilinen_fail_kenar_gecti": true,
+  "bilinen_fail_ic_gecti": true,
+  "pass_kaynaklar": {
+   "cancer_symbol_gold.png": 0,
+   "libra_symbol_gold.png": 0
+  },
+  "cikis": 1
+ },
+ "b2_bilinen_pass": {
+  "ornek": "lekeli sahte Kova",
+  "test_gecti": true,
+  "aquarius_boyut": [
+   4501,
+   10817
+  ],
+  "onarimsiz_kapi_iddia": {
+   "iddia": "onarim kapaliyken kapi sayisi > 0 (bilinen FAIL)",
+   "olculen": 38447,
+   "gecti": true
+  },
+  "bilinen_fail_kenar_gecti": true,
+  "bilinen_fail_ic_gecti": true,
+  "pass_kaynaklar": {
+   "cancer_symbol_gold.png": 0,
+   "libra_symbol_gold.png": 0
+  },
+  "cikis": 0
+ }
+}

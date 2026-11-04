@@ -1,0 +1,170 @@
+{
+ "vakalar": [
+  {
+   "vaka": "sinir bos -> 2 sabit",
+   "beklenen": [
+    2,
+    "sabit"
+   ],
+   "sonuc": [
+    2,
+    "sabit"
+   ],
+   "gecti": true
+  },
+  {
+   "vaka": "sinir 1",
+   "beklenen": 1,
+   "sonuc": 1,
+   "gecti": true
+  },
+  {
+   "vaka": "sinir -1 (yerel bilinen FAIL icin)",
+   "beklenen": -1,
+   "sonuc": -1,
+   "gecti": true
+  },
+  {
+   "vaka": "sinir 2",
+   "beklenen": 2,
+   "sonuc": 2,
+   "gecti": true
+  },
+  {
+   "vaka": "sinir 3 reddedilir (bilinen FAIL)",
+   "beklenen": "HATA ValueError",
+   "sonuc": "HATA ValueError",
+   "gecti": true
+  },
+  {
+   "vaka": "sinir x reddedilir",
+   "beklenen": "HATA ValueError",
+   "sonuc": "HATA ValueError",
+   "gecti": true
+  },
+  {
+   "vaka": "neden leke PASS",
+   "beklenen": true,
+   "sonuc": true,
+   "gecti": true
+  },
+  {
+   "vaka": "cikis 2 FAIL",
+   "beklenen": false,
+   "sonuc": false,
+   "gecti": true
+  },
+  {
+   "vaka": "cikis 0 FAIL",
+   "beklenen": false,
+   "sonuc": false,
+   "gecti": true
+  },
+  {
+   "vaka": "kosmadi FAIL",
+   "beklenen": false,
+   "sonuc": false,
+   "gecti": true
+  },
+  {
+   "vaka": "OLCUM yok FAIL",
+   "beklenen": false,
+   "sonuc": false,
+   "gecti": true
+  },
+  {
+   "vaka": "baska neden (ton) FAIL",
+   "beklenen": false,
+   "sonuc": false,
+   "gecti": true
+  },
+  {
+   "vaka": "leke + baska sert FAIL (tek neden degil) FAIL",
+   "beklenen": false,
+   "sonuc": false,
+   "gecti": true
+  },
+  {
+   "vaka": "onarilan kaynakta leke 0 FAIL",
+   "beklenen": false,
+   "sonuc": false,
+   "gecti": true
+  },
+  {
+   "vaka": "SADE listesi (kati alti; CL 1,5361 < 1,54 ham)",
+   "beklenen": [
+    "A",
+    "CANCER_LIBRA"
+   ],
+   "sonuc": [
+    "A",
+    "CANCER_LIBRA"
+   ],
+   "gecti": true
+  },
+  {
+   "vaka": "FILDISI listesi (kati alti A, ortanca alti B)",
+   "beklenen": [
+    "A",
+    "B"
+   ],
+   "sonuc": [
+    "A",
+    "B"
+   ],
+   "gecti": true
+  },
+  {
+   "vaka": "CL ayri bilgi alani",
+   "beklenen": true,
+   "sonuc": true,
+   "gecti": true
+  },
+  {
+   "vaka": "gercek r yapisi SADE + FILDISI listede",
+   "beklenen": [
+    [
+     "A"
+    ],
+    [
+     "A"
+    ]
+   ],
+   "sonuc": [
+    [
+     "A"
+    ],
+    [
+     "A"
+    ]
+   ],
+   "gecti": true
+  },
+  {
+   "vaka": "onayli kiyas ayni PASS",
+   "beklenen": true,
+   "sonuc": true,
+   "gecti": true
+  },
+  {
+   "vaka": "onayli kiyas 5 seviye FAIL",
+   "beklenen": false,
+   "sonuc": false,
+   "gecti": true
+  },
+  {
+   "vaka": "onayli kiyas 11 piksel FAIL",
+   "beklenen": false,
+   "sonuc": false,
+   "gecti": true
+  },
+  {
+   "vaka": "onayli kiyas eksik dosya FAIL",
+   "beklenen": false,
+   "sonuc": false,
+   "gecti": true
+  }
+ ],
+ "test_gecti": true,
+ "tur": "mantik testi (sahte OLCUM / deger; motor girdisi yalniz Actions)"
+}

@@ -60,7 +60,23 @@ P_VARSAYILAN = dict(pah=0.6, k=0.8, karisim=0.0, g=0.5, gs=60, golge_sigma=12, g
                     parilti=0.0, parilti_esik=2.3, isik_leke=0.0, mot_poz=0, mot_s2=5.0, harita='sira')   # uret_tam.py satir 10 (6da763a)
 
 
+KUCULT_SINIR_PX = 2                                                          # Serdar 4 Kas O3 a: toplam kucultme > 2 px ise is durur, gorsel Serdar'a
+
+
+def kucult_sinir_oku(env):
+    """O3: kucultme siniri. Varsayilan 2 px (sabit). Test parametresi ORN_KUCULT_SINIR_PX yalniz <= 2 deger kabul eder (gevsetme yasak, KALITE 4);
+    > 2 ya da tamsayi degilse ValueError (motor cikis 2). Doner (sinir, kaynak)."""
+    v = env.get('ORN_KUCULT_SINIR_PX')
+    if v is None or v == '':
+        return KUCULT_SINIR_PX, 'sabit'
+    s_ = int(v)
+    if s_ > KUCULT_SINIR_PX:
+        raise ValueError(f'ORN_KUCULT_SINIR_PX={s_} > {KUCULT_SINIR_PX}: gevsetme yasak (KALITE 4)')
+    return s_, 'test parametresi ORN_KUCULT_SINIR_PX'
+
+
 def main():
+    SINIR_PX, SINIR_KAYNAK = kucult_sinir_oku(os.environ)
     ap = argparse.ArgumentParser()
     ap.add_argument('--kaynak', required=True)
     ap.add_argument('--motor', required=True)
@@ -712,6 +728,9 @@ def main():
              artis_yalniz_ruby=all(R['sonuc'][r]['kucuk_oge_parlaklik_artisi'] == 1.0 for r in ('SAPPHIRE', 'EMERALD')))
     if CIFT == 'CANCER_LIBRA':                                                 # onayli CL: sembol ust y 246 sert (kapi listesi)
         g['sembol_ust_246_cancer_libra'] = all(r['sembol_kutu'][1] == 246 for r in A_)
+    g['kucultme_le_sinir'] = KUCULT[0] <= SINIR_PX                             # O3 a: toplam kucultme (KUCULT toplamdir) <= sinir; FAIL ciftinde PNG yine kaydedildi
+    R['kucultme'] = dict(toplam_px=int(KUCULT[0]), iz=KUCULT_IZ, sinir_px=int(SINIR_PX), sinir_kaynak=SINIR_KAYNAK,
+                         not_='yerlesim 5 stilde ortak; 2 px asan kucultmede is durur, gorsel Serdar onayina')
     g = {k: bool(v) for k, v in g.items()}
     s4b = o5.kutu(Y['E'], 'sembol')
     BILGI = dict(halka_govde_sureklilik=dict(gecti=bool(all(r['halka_sureklilik']['oran'] >= 0.70 for r in A_)),

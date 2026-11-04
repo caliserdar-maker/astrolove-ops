@@ -1,0 +1,18 @@
+{
+ "not_": "YEREL motor bilinen FAIL (kapi baglantisi): sahte Kova, ORN_KUCULT_SINIR_PX=-1",
+ "cikis": {
+  "kod": 1,
+  "aciklama": "0 = sert kapilar gecti, 1 = sert kapi FAIL, 2 = cokus; bilgi kapilari etkilemez",
+  "fail": [
+   "kucultme_le_sinir"
+  ]
+ },
+ "kucultme": {
+  "toplam_px": 0,
+  "iz": [],
+  "sinir_px": -1,
+  "sinir_kaynak": "test parametresi ORN_KUCULT_SINIR_PX",
+  "not_": "yerlesim 5 stilde ortak; 2 px asan kucultmede is durur, gorsel Serdar onayina"
+ },
+ "ayrica": "ORN_KUCULT_SINIR_PX=3 -> motor cikis 2 (ValueError, gevsetme yasak)"
+}

@@ -408,6 +408,16 @@ def yerlesim_V5(pp, ana, T, kucuk, halka_a, hb, G):
 
 
 # ----------------------------------------------------------------------------------------------- olcum
+def kontrast_ham(c1, c2):
+    """o1.kontrast (ornament_ornek.py) ile ayni formul, YUVARLAMASIZ (dusuk_kontrast kiyasi icin; o1.kontrast 2 haneye yuvarlar)."""
+    def L_(c):
+        c = np.asarray(c, np.float64) / 255
+        c = np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+    a, b = sorted([L_(c1), L_(c2)])
+    return float((b + 0.05) / (a + 0.05))
+
+
 def kontrast_yeni(rgb, m, tur, cekirdek=0.9):
     """Serdar 2 Kas: acik zemin -> zeminin KOYU %5'i / ogenin ACIK %5'i; koyu zemin -> zeminin ACIK %5'i / ogenin KOYU %5'i.
     Zemin: ogenin 6-12 px cevresi (son goruntu). Oge: alfa >= cekirdek murekkep (kenar yumusatmasi zemine karisir, disarida)."""
@@ -423,8 +433,10 @@ def kontrast_yeni(rgb, m, tur, cekirdek=0.9):
         z = np.median(za[Lz <= np.percentile(Lz, 5)], 0); e = np.median(ea[Le >= np.percentile(Le, 95)], 0)
     else:
         z = np.median(za[Lz >= np.percentile(Lz, 95)], 0); e = np.median(ea[Le <= np.percentile(Le, 5)], 0)
+    d_ham = kontrast_ham(e, z); o_ham = kontrast_ham(np.median(ea, 0), np.median(za, 0))
     return dict(deger=round(float(o1.kontrast(e, z)), 2), zemin_rgb=[int(v) for v in z], oge_rgb=[int(v) for v in e],
-                ortanca_bilgi=round(float(o1.kontrast(np.median(ea, 0), np.median(za, 0))), 2), cekirdek_piksel=int(ce.sum()))
+                ortanca_bilgi=round(float(o1.kontrast(np.median(ea, 0), np.median(za, 0))), 2), cekirdek_piksel=int(ce.sum()),
+                deger_ham=d_ham, ortanca_ham=o_ham)                          # 4 Kas: yuvarlamasiz (dusuk_kontrast kiyasi); deger / ortanca_bilgi degismez
 
 
 def okunurluk5(rgb, m, m_esik=0.5):

@@ -1,0 +1,269 @@
+{
+ "not_": "YEREL beklenti betigi denemesi: GV yok ve aquarius sahte oldugu icin gv_*, o2_sha_esit_GEMINI_VIRGO, o2_kati_aqu FAIL beklenir (betigin FAIL verebildigi). Asil sonuc Actions kosusunda.",
+ "beklentiler": [
+  {
+   "beklenti": "cl_kontrol",
+   "gecti": true,
+   "olculen": {
+    "RUBY": {
+     "en_buyuk_fark": 0,
+     "farkli_piksel": 0,
+     "tolerans_icinde": true,
+     "uretim_ham": "f76927b071579231bcfeb2223b6c6bc793420d029bfbdb1d54fd1578b9115d87",
+     "onayli_ham": "f76927b071579231bcfeb2223b6c6bc793420d029bfbdb1d54fd1578b9115d87"
+    },
+    "SAPPHIRE": {
+     "en_buyuk_fark": 0,
+     "farkli_piksel": 0,
+     "tolerans_icinde": true,
+     "uretim_ham": "68701718f7dc3107ea1921eeefbf69129dbfc4272d0cf832b5cd2f09e3ddadb7",
+     "onayli_ham": "68701718f7dc3107ea1921eeefbf69129dbfc4272d0cf832b5cd2f09e3ddadb7"
+    },
+    "EMERALD": {
+     "en_buyuk_fark": 0,
+     "farkli_piksel": 0,
+     "tolerans_icinde": true,
+     "uretim_ham": "4c2e3a513e0de882ac0e08f7c5d3a5ad28ce07dcc78386d75f3ef98fb356d6eb",
+     "onayli_ham": "4c2e3a513e0de882ac0e08f7c5d3a5ad28ce07dcc78386d75f3ef98fb356d6eb"
+    },
+    "SADE_ALTIN": {
+     "en_buyuk_fark": 0,
+     "farkli_piksel": 0,
+     "tolerans_icinde": true,
+     "uretim_ham": "f6a566ec0f04782deb36edb4b15636e3b9af5ba9bc00ac083077389259a7e9fb",
+     "onayli_ham": "f6a566ec0f04782deb36edb4b15636e3b9af5ba9bc00ac083077389259a7e9fb"
+    },
+    "FILDISI": {
+     "en_buyuk_fark": 0,
+     "farkli_piksel": 0,
+     "tolerans_icinde": true,
+     "uretim_ham": "ea47a57f49ec73af4b9606dd3c5636f97f0121f1ac10305630c76431409f952b",
+     "onayli_ham": "ea47a57f49ec73af4b9606dd3c5636f97f0121f1ac10305630c76431409f952b"
+    }
+   },
+   "kaynak": "OLCUM.json kontrol (onayli 6daab364 5 stil)",
+   "not_": null
+  },
+  {
+   "beklenti": "kova_onayli_kiyas",
+   "gecti": true,
+   "olculen": {
+    "RUBY": {
+     "en_buyuk_fark": 0,
+     "farkli_piksel": 0,
+     "tolerans_icinde": true,
+     "onayli_sha256": "7c4796d445c5747da755a1809c77bd2e94f1e29064223abf840566ee12027592"
+    },
+    "SAPPHIRE": {
+     "en_buyuk_fark": 0,
+     "farkli_piksel": 0,
+     "tolerans_icinde": true,
+     "onayli_sha256": "45fd7340d6e3f94fbf2917eca0df7a7bc42c2121f28f5efda973839fdf630cb9"
+    },
+    "EMERALD": {
+     "en_buyuk_fark": 0,
+     "farkli_piksel": 0,
+     "tolerans_icinde": true,
+     "onayli_sha256": "c8aeaaa6a7925127b02d2bbadd4f63f113a3610bc1775a838e377e3bafb215b8"
+    }
+   },
+   "kaynak": "OLCUM cift.AQUARIUS_PISCES.onayli_kiyas (onayli: Drive ORNAMENT_KOVA_DUZELTME_20261104_1058_41817771849)",
+   "not_": null
+  },
+  {
+   "beklenti": "o2_sha_esit_AQUARIUS_PISCES",
+   "gecti": true,
+   "olculen": {
+    "sade_altin": "4ee09e35c50fa97c5366f701532fb9e7855b4187aae843ac51600b93ce88c766",
+    "sade1": "4ee09e35c50fa97c5366f701532fb9e7855b4187aae843ac51600b93ce88c766",
+    "fildisi_girdi": "4ee09e35c50fa97c5366f701532fb9e7855b4187aae843ac51600b93ce88c766"
+   },
+   "kaynak": "OLCUM png_sha256 + sade.sade1_sha256 + fildisi.girdi_sha256",
+   "not_": null
+  },
+  {
+   "beklenti": "o2_sha_esit_GEMINI_VIRGO",
+   "gecti": false,
+   "olculen": {
+    "sade_altin": null,
+    "sade1": null,
+    "fildisi_girdi": null
+   },
+   "kaynak": "OLCUM png_sha256 + sade.sade1_sha256 + fildisi.girdi_sha256",
+   "not_": null
+  },
+  {
+   "beklenti": "o2_kati_aqu",
+   "gecti": false,
+   "olculen": 1.45,
+   "kaynak": "OLCUM sade.kati_ham; beklenen 1.35 (1f24d49 koyulasma_oncesi_kati)",
+   "not_": null
+  },
+  {
+   "beklenti": "o2_bilinen_fail",
+   "gecti": true,
+   "olculen": {
+    "yeni": "4ee09e35c50fa97c5366f701532fb9e7855b4187aae843ac51600b93ce88c766",
+    "eski": "b8dba3d7259fa00330101590513389eb09eb184c204f30c3d3a69a53decd9da8"
+   },
+   "kaynak": "eski koyulastirilmis dosya sha (1f24d49 OLCUM)",
+   "not_": null
+  },
+  {
+   "beklenti": "o2_cl_zayif",
+   "gecti": true,
+   "olculen": null,
+   "kaynak": "bilgi",
+   "not_": "CANCER_LIBRA SADE kiyasi O2 icin zayif test (CL carpan 1,0: eski SADE_KOYU = SADE_1); kanit AQUARIUS_PISCES ve GEMINI_VIRGO"
+  },
+  {
+   "beklenti": "kapi_onarimsiz_iddia",
+   "gecti": true,
+   "olculen": {
+    "iddia": "onarim kapaliyken kapi sayisi > 0 (bilinen FAIL)",
+    "olculen": 38447,
+    "gecti": true
+   },
+   "kaynak": "KOVA_KAPI_TESTI.json (gercek aquarius)",
+   "not_": null
+  },
+  {
+   "beklenti": "kova_onarimsiz_neden",
+   "gecti": true,
+   "olculen": {
+    "gecti": true,
+    "neden": "neden leke_a_kaynak_0 (aquarius 38447 px)",
+    "onarimsiz_motor_cikis": 1,
+    "onarilan_kaynak": [
+     "aquarius"
+    ]
+   },
+   "kaynak": "OLCUM cift.AQUARIUS_PISCES.kenar_onarimsiz_neden (onarimsiz motor OLCUM)",
+   "not_": null
+  },
+  {
+   "beklenti": "gv_varsayilan",
+   "gecti": false,
+   "olculen": {
+    "fail": [],
+    "kucultme": null
+   },
+   "kaynak": "OLCUM cift.GEMINI_VIRGO",
+   "not_": "beklenti 2202 olcumunden (2 px, gecer; kenar onarimi yok); kenar_onar oncesi olcum, dogrulanmadi"
+  },
+  {
+   "beklenti": "gv_sinir1",
+   "gecti": false,
+   "olculen": {
+    "cikis": "9",
+    "sert_fail": [],
+    "png": [],
+    "gercek_boy": false,
+    "kucultme": null
+   },
+   "kaynak": "GV_SINIR1 OLCUM.json + dosyalar (ORN_KUCULT_SINIR_PX=1)",
+   "not_": null
+  },
+  {
+   "beklenti": "genel_cikis",
+   "gecti": true,
+   "olculen": "0",
+   "kaynak": "ornek78 cikis (ana adim)",
+   "not_": null
+  },
+  {
+   "beklenti": "listeler",
+   "gecti": true,
+   "olculen": {
+    "dusuk_kontrast": {
+     "liste": {
+      "SADE_ALTIN": [
+       {
+        "cift": "AQUARIUS_PISCES",
+        "stil": "SADE_ALTIN",
+        "kati": 1.45,
+        "ortanca": 2.91,
+        "kati_ham": 1.45,
+        "ortanca_ham": 2.91,
+        "en_kotu_oge": "kucuk_sol",
+        "duzey": {
+         "kati": 1.54,
+         "ortanca": null
+        },
+        "duzey_kaynak": "3 Kas CL SADE kati 1,54 olcumu (O2 b karari listesi; sert kapi degil)"
+       }
+      ],
+      "FILDISI": [
+       {
+        "cift": "AQUARIUS_PISCES",
+        "stil": "FILDISI",
+        "kati": 1.22,
+        "ortanca": 2.51,
+        "kati_ham": 1.22,
+        "ortanca_ham": 2.51,
+        "en_kotu_oge": "kucuk_sol",
+        "duzey": {
+         "kati": 1.31,
+         "ortanca": 2.48
+        },
+        "duzey_kaynak": "ORNAMENT_KARAR 24 onayli istisna duzeyi CL kati 1,31 / ortanca 2,48 (O4 a)"
+       }
+      ]
+     },
+     "cancer_libra_bu_kosu_bilgi": {
+      "SADE_ALTIN": {
+       "kati_ham": 1.54,
+       "ortanca_ham": 2.9
+      },
+      "FILDISI": {
+       "kati_ham": 1.31,
+       "ortanca_ham": 2.48
+      }
+     },
+     "not_": "bilgi; FILDISI listesindeki ciftler 78 sonrasi Serdar goz onayina (O4 a)"
+    },
+    "kucultme": [
+     {
+      "cift": "CANCER_LIBRA",
+      "toplam_px": 0,
+      "sinir_px": 2,
+      "sinir_kaynak": "sabit",
+      "iz": [],
+      "sinir_gecti": true
+     },
+     {
+      "cift": "AQUARIUS_PISCES",
+      "toplam_px": 0,
+      "sinir_px": 2,
+      "sinir_kaynak": "sabit",
+      "iz": [],
+      "sinir_gecti": true
+     }
+    ],
+    "kenar_onarim_uyari": [
+     {
+      "cift": "AQUARIUS_PISCES",
+      "kaynak": "aquarius",
+      "degisen_piksel": 42112,
+      "alfa_farki_en_buyuk": 1.0
+     }
+    ]
+   },
+   "kaynak": "OLCUM.json",
+   "not_": null
+  },
+  {
+   "beklenti": "gercek_boy",
+   "gecti": true,
+   "olculen": [
+    [
+     "GERCEK_BOY_AQUARIUS_PISCES_5STIL_300dpi.png",
+     true
+    ]
+   ],
+   "kaynak": "GERCEK_BOY_KONTROL.json",
+   "not_": null
+  }
+ ],
+ "hepsi_gecti": false
+}

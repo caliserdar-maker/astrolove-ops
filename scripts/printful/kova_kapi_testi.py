@@ -11,7 +11,8 @@ Mod KAPALI (kenar_onar kapali, delik_kapat acik; yalniz test parametresi):
   Sayim disk maskesi icinde yapilir (kaynagin kendi lekesi sayilmaz). Leke konacak yer yoksa test FAIL (varsayilan deger yok).
 Mod ACIK (kenar_onar acik): kapi sonucu bilgi; olculenler n0, degisen piksel, en buyuk alfa farki, degisen piksellerin kenara uzakligi,
   yapay kenar lekesinin kenar_onar ile gizlenip gizlenmedigi. Yeni esik yok, "kabul" yok.
-Gercek Kova'nin onarim kapaliyken lekesi ayri bilgi alani (gercek_kova_onarimsiz_leke_px), test FAIL'i degildir.
+--kenar_zorunlu kaynaginda (gercek Kova) onarim kapaliyken kapi sayisi > 0 olmali: mod_kapali.onarimsiz_kapi_iddia (bilinen FAIL iddiasi;
+  0 ise test FAIL). Diger kaynaklarin onarimsiz sayisi bilgi (gercek_kova_onarimsiz_leke_px; AQUARIUS_PISCES_ana 0 FAIL sayilmaz).
 Cikis: 0 test_gecti, 1 test FAIL, 2 cokus.
 Kullanim: kova_kapi_testi.py --pass cancer.png libra.png [--pass_ana CANCER_LIBRA_ana.png] [--kaynak aquarius.png] [--ana X_ana.png]
   [--kenar_zorunlu aquarius] --cikti DIR"""
@@ -55,7 +56,7 @@ def leke_koy(g, d):
 
 
 def yer_ic(A, r):
-    dt = cv2.distanceTransform((A > 0.9).astype(np.uint8), cv2.DIST_L2, 5)
+    dt = cv2.distanceTransform(np.pad((A > 0.9).astype(np.uint8), 1), cv2.DIST_L2, 5)[1:-1, 1:-1]   # tuval siniri arka plan (tam dolu kaynakta kose secilmesin)
     if dt.max() < r + 2:
         return None
     cy, cx = np.unravel_index(int(dt.argmax()), dt.shape)
@@ -136,6 +137,8 @@ def kaynak_test(yol, ana, kenar_zorunlu, bilinen_pass):
                                        bolge_px=int(bnt.sum()), disk_icinde_sayilan=n_e,
                                        zorunlu=bool(kenar_zorunlu), gecti=bool(n_e > 0) if kenar_zorunlu else True,
                                        not_=None if (kenar_zorunlu or n_e > 0) else f'kenar bandi kor (ice {tanim["ice_px"]} px); bilgi, FAIL degil')
+    if kenar_zorunlu:                                                        # O1 (Serdar 4 Kas, sikilastirma): onarim KAPALIYKEN gercek Kova bilinen FAIL
+        K['onarimsiz_kapi_iddia'] = dict(iddia='onarim kapaliyken kapi sayisi > 0 (bilinen FAIL)', olculen=n_k, gecti=bool(n_k > 0))
     R['mod_kapali'] = K
     # Mod ACIK
     g2, k_ = o5.kenar_onar(gd)

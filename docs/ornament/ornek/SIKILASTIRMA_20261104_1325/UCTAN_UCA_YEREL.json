@@ -1,0 +1,184 @@
+{
+ "not_": "YEREL uctan uca deneme 2 (CL gercek + sahte Kova; deneme 1 KeyError ile cokmustu, duzeltildi). 954 / gercek boy PNG depoya girmez.",
+ "cikis": {
+  "kod": 0,
+  "aciklama": "0 tum ciftlerde sert kapilar gecti, 1 en az bir cift sert FAIL / eksik, 2 en az bir adim cokus (exception), 3 kontrol cifti DUR",
+  "fail": {},
+  "cokus_ciftler": []
+ },
+ "kontrol": {
+  "RUBY": {
+   "en_buyuk_fark": 0,
+   "farkli_piksel": 0,
+   "tolerans_icinde": true,
+   "uretim_ham": "f76927b071579231bcfeb2223b6c6bc793420d029bfbdb1d54fd1578b9115d87",
+   "onayli_ham": "f76927b071579231bcfeb2223b6c6bc793420d029bfbdb1d54fd1578b9115d87"
+  },
+  "SAPPHIRE": {
+   "en_buyuk_fark": 0,
+   "farkli_piksel": 0,
+   "tolerans_icinde": true,
+   "uretim_ham": "68701718f7dc3107ea1921eeefbf69129dbfc4272d0cf832b5cd2f09e3ddadb7",
+   "onayli_ham": "68701718f7dc3107ea1921eeefbf69129dbfc4272d0cf832b5cd2f09e3ddadb7"
+  },
+  "EMERALD": {
+   "en_buyuk_fark": 0,
+   "farkli_piksel": 0,
+   "tolerans_icinde": true,
+   "uretim_ham": "4c2e3a513e0de882ac0e08f7c5d3a5ad28ce07dcc78386d75f3ef98fb356d6eb",
+   "onayli_ham": "4c2e3a513e0de882ac0e08f7c5d3a5ad28ce07dcc78386d75f3ef98fb356d6eb"
+  },
+  "SADE_ALTIN": {
+   "en_buyuk_fark": 0,
+   "farkli_piksel": 0,
+   "tolerans_icinde": true,
+   "uretim_ham": "f6a566ec0f04782deb36edb4b15636e3b9af5ba9bc00ac083077389259a7e9fb",
+   "onayli_ham": "f6a566ec0f04782deb36edb4b15636e3b9af5ba9bc00ac083077389259a7e9fb"
+  },
+  "FILDISI": {
+   "en_buyuk_fark": 0,
+   "farkli_piksel": 0,
+   "tolerans_icinde": true,
+   "uretim_ham": "ea47a57f49ec73af4b9606dd3c5636f97f0121f1ac10305630c76431409f952b",
+   "onayli_ham": "ea47a57f49ec73af4b9606dd3c5636f97f0121f1ac10305630c76431409f952b"
+  }
+ },
+ "kenar_onarim_uyari": [
+  {
+   "cift": "AQUARIUS_PISCES",
+   "kaynak": "aquarius",
+   "degisen_piksel": 42112,
+   "alfa_farki_en_buyuk": 1.0
+  }
+ ],
+ "kucultme": [
+  {
+   "cift": "CANCER_LIBRA",
+   "toplam_px": 0,
+   "sinir_px": 2,
+   "sinir_kaynak": "sabit",
+   "iz": [],
+   "sinir_gecti": true
+  },
+  {
+   "cift": "AQUARIUS_PISCES",
+   "toplam_px": 0,
+   "sinir_px": 2,
+   "sinir_kaynak": "sabit",
+   "iz": [],
+   "sinir_gecti": true
+  }
+ ],
+ "dusuk_kontrast": {
+  "liste": {
+   "SADE_ALTIN": [
+    {
+     "cift": "AQUARIUS_PISCES",
+     "stil": "SADE_ALTIN",
+     "kati": 1.45,
+     "ortanca": 2.91,
+     "kati_ham": 1.45,
+     "ortanca_ham": 2.91,
+     "en_kotu_oge": "kucuk_sol",
+     "duzey": {
+      "kati": 1.54,
+      "ortanca": null
+     },
+     "duzey_kaynak": "3 Kas CL SADE kati 1,54 olcumu (O2 b karari listesi; sert kapi degil)"
+    }
+   ],
+   "FILDISI": [
+    {
+     "cift": "AQUARIUS_PISCES",
+     "stil": "FILDISI",
+     "kati": 1.22,
+     "ortanca": 2.51,
+     "kati_ham": 1.22,
+     "ortanca_ham": 2.51,
+     "en_kotu_oge": "kucuk_sol",
+     "duzey": {
+      "kati": 1.31,
+      "ortanca": 2.48
+     },
+     "duzey_kaynak": "ORNAMENT_KARAR 24 onayli istisna duzeyi CL kati 1,31 / ortanca 2,48 (O4 a)"
+    }
+   ]
+  },
+  "cancer_libra_bu_kosu_bilgi": {
+   "SADE_ALTIN": {
+    "kati_ham": 1.54,
+    "ortanca_ham": 2.9
+   },
+   "FILDISI": {
+    "kati_ham": 1.31,
+    "ortanca_ham": 2.48
+   }
+  },
+  "not_": "bilgi; FILDISI listesindeki ciftler 78 sonrasi Serdar goz onayina (O4 a)"
+ },
+ "ap_sert": {
+  "koyu_kontrast_ortanca": true,
+  "koyu_goruntu_yasak_0": true,
+  "koyu_leke_a_0": true,
+  "koyu_leke_a_kaynak_0": true,
+  "koyu_ton": true,
+  "koyu_bosluk_20_20_20": true,
+  "koyu_iou_kucuk_logo_ge_098": true,
+  "koyu_alfa_fark_metin_halka_le_0035": true,
+  "koyu_dE00_son_ham_le_2": true,
+  "koyu_artis_yalniz_ruby": true,
+  "koyu_kucultme_le_sinir": true,
+  "sade1_leke_0": true,
+  "sade1_tasma_ve_yasak_0": true,
+  "sade1_zemin_seffaf": true,
+  "sade1_yerlesim_ayni": true,
+  "fildisi_cikis_0": true,
+  "kenar_onarimsiz_neden_leke": true,
+  "onayli_kiyas_RUBY": true,
+  "onayli_kiyas_SAPPHIRE": true,
+  "onayli_kiyas_EMERALD": true
+ },
+ "ap_onarimsiz_neden": {
+  "gecti": true,
+  "neden": "neden leke_a_kaynak_0 (aquarius 38447 px)",
+  "onarimsiz_motor_cikis": 1,
+  "onarilan_kaynak": [
+   "aquarius"
+  ]
+ },
+ "ap_onayli_kiyas": {
+  "RUBY": {
+   "en_buyuk_fark": 0,
+   "farkli_piksel": 0,
+   "tolerans_icinde": true,
+   "onayli_sha256": "7c4796d445c5747da755a1809c77bd2e94f1e29064223abf840566ee12027592"
+  },
+  "SAPPHIRE": {
+   "en_buyuk_fark": 0,
+   "farkli_piksel": 0,
+   "tolerans_icinde": true,
+   "onayli_sha256": "45fd7340d6e3f94fbf2917eca0df7a7bc42c2121f28f5efda973839fdf630cb9"
+  },
+  "EMERALD": {
+   "en_buyuk_fark": 0,
+   "farkli_piksel": 0,
+   "tolerans_icinde": true,
+   "onayli_sha256": "c8aeaaa6a7925127b02d2bbadd4f63f113a3610bc1775a838e377e3bafb215b8"
+  }
+ },
+ "gercek_boy": {
+  "AQUARIUS_PISCES": {
+   "dosya": "GERCEK_BOY_AQUARIUS_PISCES_5STIL_300dpi.png",
+   "stiller": [
+    "RUBY",
+    "SAPPHIRE",
+    "EMERALD",
+    "SADE_ALTIN",
+    "FILDISI"
+   ],
+   "dpi": 300,
+   "tuval_mm": 80.77,
+   "kesim_cap_mm": 76.03
+  }
+ }
+}

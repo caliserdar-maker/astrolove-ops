@@ -101,10 +101,10 @@ jobs:
           K=/tmp/kay; MD=/tmp/mg; U=/tmp/uretim; mkdir -p $U /tmp/motor /tmp/motor_dump /tmp/sade
           SON=s/docs/ornament/ornek/ORNAMENT_ORNEK_20261103_SON/STIL3_SON
           cd s; SON=docs/ornament/ornek/ORNAMENT_ORNEK_20261103_SON/STIL3_SON
-          python3 -I scripts/printful/ornament_motor.py --kaynak $K --motor $MD --cikti /tmp/motor --son $SON --zemin /tmp/zemin 2>&1 | tee /tmp/log_motor.txt | tail -4 || true
+          python3 -I scripts/printful/ornament_motor.py --kaynak $K --motor $MD --cikti /tmp/motor --son $SON --zemin /tmp/zemin 2>&1 | tee /tmp/log_motor.txt | tail -4   # 4 Kas: || true kaldirildi (KALITE 2)
           ORN_DUMP=/tmp/katman.pkl python3 -I scripts/printful/ornament_motor.py --kaynak $K --motor $MD --cikti /tmp/motor_dump --son $SON 2>&1 | tee /tmp/log_dump.txt | tail -2
           sha256sum /tmp/katman.pkl | tee /tmp/katman_sha.txt
-          python3 -I scripts/printful/ornament_sade.py --katman /tmp/katman.pkl --cikti /tmp/sade 2>&1 | tee /tmp/log_sade.txt | tail -2 || true
+          python3 -I scripts/printful/ornament_sade.py --katman /tmp/katman.pkl --cikti /tmp/sade 2>&1 | tee /tmp/log_sade.txt | tail -2   # 4 Kas: || true kaldirildi (KALITE 2)
           python3 -I scripts/printful/ornament_fildisi.py /tmp/SADE_1.png $U/CANCER_LIBRA_FILDISI_954.png 2>&1 | tee /tmp/log_fildisi.txt
           for r in RUBY SAPPHIRE EMERALD; do cp /tmp/motor/CANCER_LIBRA_${r}_954.png $U/; done
           cp /tmp/sade/SADE_1_ALTIN_TONU_954.png $U/CANCER_LIBRA_SADE_ALTIN_954.png
