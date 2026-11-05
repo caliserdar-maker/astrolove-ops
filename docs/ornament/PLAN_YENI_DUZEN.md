@@ -329,3 +329,13 @@ Yeni bulgu (bağımsız inceleme, 5 Kas):
 - K-1b-16 ORTA (çöküş doğrulanmadı): ornament_motor.py:688-701 YAKIN_DOKU 'ana' kırpımı (s_[1]+150 .. +230) sembolün >= 230 px yüksek olduğunu varsayar; yeni düzende CANCER_CANCER benzetimde 219 px. Kutu sembol yüksekliğine oranlı yapılmalı, boşsa atlanmalı.
 
 Açık: K-1b-2 gerçek girdi, K-1b-3..9, 11..16.
+
+### 10b. Yerel duman testi (5 Kas; Serdar "a2 ok": yalnız çökme taraması, kanıt değil)
+- Girdi: Serdar'ın sohbete yüklediği kopyalar. Sohbet WebP'ye çevirip küçülttü. Farklı 4 dosya: 3 `_ana` + aquarius_symbol_gold (yarı boy 2250x5408; kenar kusuru n0 445 kayboldu). Küçük semboller ve zeminler gerçek dosyayla bayt bayt aynı. Motor kopyası /tmp'de, yalnız CL ana sha kapısı uyarıya çevrildi; depo kodu değişmedi.
+- ARIES_ARIES: yeni düzen tam boru (motor, dump, sade, fildisi) bitti, 5 PNG, sert kapılar 37/37, yd_* hepsi true.
+- CANCER_LIBRA: yeni düzen motoru tek başına çıkış 0, kapılar PASS; tepe bellek >= 6,1 GB (dmesg; 5,46 GB örneklenen alt sınır). dump/sade/fildisi koşulmadı.
+- AQUARIUS_PISCES: bu ortamın 6 GiB cgroup sınırında öldü, eski modda da (halka 10x adımı ~+4,2 GB). Actions public runner 16 GB (docs.github.com); AP eski mod gerçek girdiyle Actions'ta 3 kez geçti (ORNEK6_20261103_2202, KOVA_DUZELTME, SIKILASTIRMA). Yeni yolun bellek farkı ölçülmedi.
+- Motor sembol boyutu 1b benzetimine yakın: CL 298x283 / 300x283, ARIES 289x282 / 289x282.
+- K-1b-16 bu çiftlerde tetiklenmedi (h ~283); AQUARIUS_AQUARIUS (h 117), CAPRICORN_CAPRICORN (206) aşama 2 listesinde. Çökme beklenmez (boş dizi resize çökmüyor) ama YAKIN 'ana' paneli boş ya da yanlış bölge olur.
+- CL kontrol (eski mod, onaylı kıyas) kopya girdiyle FAIL (koyu stillerde 1 seviye, 119-159 px; SADE 8 / 1348); gerçek girdiyle değil.
+- Bilgi: ARIES SADE_ALTIN kati 1,45 (Actions eski mod 1,57).
