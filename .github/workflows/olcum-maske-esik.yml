@@ -1,0 +1,413 @@
+name: olcum-maske-esik
+# S1 2. bolum (Serdar 5 Kas karar 1 a): ::add-mask:: edilen kisa deger job output'unu bosaltiyor mu? SENTETIK; sir yok, Etsy yok.
+on:
+  push:
+    branches: [olcum/maske-esik]
+permissions:
+  contents: read
+jobs:
+  m0:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::1'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m1:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::0'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m2:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::x'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m3:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::A2'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m4:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::16'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m5:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::ab'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m6:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::abc'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m7:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::x20'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m8:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::Love'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m9:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::IVORY'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m10:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::Ivory'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m11:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::PISCES'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m12:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::Pisces'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m13:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::false'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m14:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::eski'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  m15:
+    runs-on: ubuntu-latest
+    outputs:
+      renk: ${{ steps.p.outputs.renk }}
+      sayfa: ${{ steps.p.outputs.sayfa }}
+      sayfa_var: ${{ steps.p.outputs.sayfa_var }}
+      wp: ${{ steps.p.outputs.wp }}
+      cift: ${{ steps.p.outputs.cift }}
+      normalize: ${{ steps.p.outputs.normalize }}
+      yol: ${{ steps.p.outputs.yol }}
+    steps:
+      - run: echo '::add-mask::Forever yours'
+      - id: p
+        run: |
+          echo 'renk=["CHAMPAGNE_IVORY"]' >> "$GITHUB_OUTPUT"
+          echo 'sayfa={"include":[{"renk":"CHAMPAGNE_IVORY","oran":"a_series"}]}' >> "$GITHUB_OUTPUT"
+          echo 'sayfa_var=1' >> "$GITHUB_OUTPUT"
+          echo 'wp=["A2","16x20"]' >> "$GITHUB_OUTPUT"
+          echo 'cift=PISCES_VIRGO' >> "$GITHUB_OUTPUT"
+          echo 'normalize={"yapildi": false, "girdi": "PISCES_VIRGO", "cift": "PISCES_VIRGO"}' >> "$GITHUB_OUTPUT"
+          echo 'yol=eski' >> "$GITHUB_OUTPUT"
+      - name: ayni is adim ciktisi
+        run: |
+          [ "${{ steps.p.outputs.sayfa_var }}" = "1" ] && echo ADIM_SAYFA_VAR_DOLU || echo ADIM_SAYFA_VAR_BOS
+  ozet:
+    needs: [m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15]
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "::notice title=OLCUM m0 uzunluk 1::$( [ -n '${{ needs.m0.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m0.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m0.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m0.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m0.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m0.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m0.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m1 uzunluk 1::$( [ -n '${{ needs.m1.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m1.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m1.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m1.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m1.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m1.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m1.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m2 uzunluk 1::$( [ -n '${{ needs.m2.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m2.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m2.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m2.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m2.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m2.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m2.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m3 uzunluk 2::$( [ -n '${{ needs.m3.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m3.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m3.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m3.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m3.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m3.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m3.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m4 uzunluk 2::$( [ -n '${{ needs.m4.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m4.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m4.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m4.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m4.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m4.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m4.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m5 uzunluk 2::$( [ -n '${{ needs.m5.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m5.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m5.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m5.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m5.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m5.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m5.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m6 uzunluk 3::$( [ -n '${{ needs.m6.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m6.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m6.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m6.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m6.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m6.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m6.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m7 uzunluk 3::$( [ -n '${{ needs.m7.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m7.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m7.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m7.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m7.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m7.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m7.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m8 uzunluk 4::$( [ -n '${{ needs.m8.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m8.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m8.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m8.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m8.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m8.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m8.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m9 uzunluk 5::$( [ -n '${{ needs.m9.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m9.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m9.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m9.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m9.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m9.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m9.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m10 uzunluk 5::$( [ -n '${{ needs.m10.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m10.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m10.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m10.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m10.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m10.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m10.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m11 uzunluk 6::$( [ -n '${{ needs.m11.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m11.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m11.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m11.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m11.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m11.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m11.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m12 uzunluk 6::$( [ -n '${{ needs.m12.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m12.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m12.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m12.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m12.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m12.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m12.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m13 uzunluk 5::$( [ -n '${{ needs.m13.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m13.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m13.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m13.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m13.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m13.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m13.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m14 uzunluk 4::$( [ -n '${{ needs.m14.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m14.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m14.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m14.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m14.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m14.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m14.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
+          echo "::notice title=OLCUM m15 uzunluk 13::$( [ -n '${{ needs.m15.outputs.renk }}' ] && echo renk:DOLU || echo renk:BOS ) $( [ -n '${{ needs.m15.outputs.sayfa }}' ] && echo sayfa:DOLU || echo sayfa:BOS ) $( [ -n '${{ needs.m15.outputs.sayfa_var }}' ] && echo sayfa_var:DOLU || echo sayfa_var:BOS ) $( [ -n '${{ needs.m15.outputs.wp }}' ] && echo wp:DOLU || echo wp:BOS ) $( [ -n '${{ needs.m15.outputs.cift }}' ] && echo cift:DOLU || echo cift:BOS ) $( [ -n '${{ needs.m15.outputs.normalize }}' ] && echo normalize:DOLU || echo normalize:BOS ) $( [ -n '${{ needs.m15.outputs.yol }}' ] && echo yol:DOLU || echo yol:BOS )"
