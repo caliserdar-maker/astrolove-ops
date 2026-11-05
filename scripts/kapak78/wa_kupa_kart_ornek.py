@@ -75,10 +75,13 @@ def wa_s3():
         ("14 Sizes", [BOYLAR])], "Every size as a print or a digital file")
 
 
-def wa_s4(ci):
+ONAY_METNI = "We make your print or file once you approve the preview"     # Serdar 5 Kas (P1-G); eski yanitsiz basim sozu kaldirildi
+
+
+def wa_s4(ci, onay=ONAY_METNI):
     return S.yan_kart("Made for You, Step by Step", [ci], [
         ("01", ["Your Preview"], "For every order, we send a preview via Etsy Messages within 24 hours of your order"),
-        ("02", ["Your Approval"], "We make your print or file once you approve, or as shown if there is no reply within 24 hours of the preview"),
+        ("02", ["Your Approval"], onay),
         ("03", ["Made to Order"], "Printed on matte art paper, gold tones are printed color, not metallic foil"),
         ("04", ["Free Shipping"], "Free shipping worldwide, see the listing for your delivery estimate")],
         "Digital files are checked by hand before sending", surec=True)
@@ -197,7 +200,7 @@ def beklenen(a, b):
                       "Every size as a print or a digital file"],
         "S4_SUREC": ["Made for You, Step by Step",
                      "01", "Your Preview", "For every order, we send a preview via Etsy Messages within 24 hours of your order",
-                     "02", "Your Approval", "We make your print or file once you approve, or as shown if there is no reply within 24 hours of the preview",
+                     "02", "Your Approval", ONAY_METNI,
                      "03", "Made to Order", "Printed on matte art paper, gold tones are printed color, not metallic foil",
                      "04", "Free Shipping", "Free shipping worldwide, see the listing for your delivery estimate",
                      "Digital files are checked by hand before sending"],
