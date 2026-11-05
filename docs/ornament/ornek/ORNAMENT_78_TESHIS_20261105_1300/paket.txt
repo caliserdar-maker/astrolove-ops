@@ -1,0 +1,2 @@
+python 3.13.18 numpy 2.5.4 cv2 5.0.0 pillow 11.0.0 scipy 1.18.1 skimage 0.26.0
+Model name:                              AMD EPYC 7763 64-Core Processor
