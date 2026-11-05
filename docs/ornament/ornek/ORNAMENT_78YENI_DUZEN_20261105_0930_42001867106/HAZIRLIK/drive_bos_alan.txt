@@ -1,0 +1,1 @@
+drive bos alan >= 2 GB: True

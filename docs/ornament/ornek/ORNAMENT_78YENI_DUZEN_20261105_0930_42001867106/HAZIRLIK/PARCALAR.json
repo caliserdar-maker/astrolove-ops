@@ -1,0 +1,95 @@
+{
+ "aktif": "yeni_duzen",
+ "max_parallel": 4,
+ "parca_sayisi": 4,
+ "parcalar": [
+  {
+   "parca": 1,
+   "ciftler": [
+    "CANCER_LIBRA",
+    "TAURUS_TAURUS",
+    "CANCER_TAURUS",
+    "LIBRA_LIBRA"
+   ],
+   "uretim": [
+    "TAURUS_TAURUS",
+    "CANCER_TAURUS",
+    "LIBRA_LIBRA"
+   ],
+   "cl_yeni": false,
+   "kenar_zorunlu": [],
+   "gercek_boy": [
+    "TAURUS_TAURUS",
+    "CANCER_TAURUS",
+    "LIBRA_LIBRA"
+   ]
+  },
+  {
+   "parca": 2,
+   "ciftler": [
+    "CANCER_LIBRA",
+    "AQUARIUS_CANCER",
+    "ARIES_SCORPIO",
+    "LEO_SAGITTARIUS"
+   ],
+   "uretim": [
+    "AQUARIUS_CANCER",
+    "ARIES_SCORPIO",
+    "LEO_SAGITTARIUS"
+   ],
+   "cl_yeni": false,
+   "kenar_zorunlu": [
+    "AQUARIUS_CANCER"
+   ],
+   "gercek_boy": [
+    "AQUARIUS_CANCER",
+    "ARIES_SCORPIO",
+    "LEO_SAGITTARIUS"
+   ]
+  },
+  {
+   "parca": 3,
+   "ciftler": [
+    "CANCER_LIBRA",
+    "AQUARIUS_AQUARIUS",
+    "CAPRICORN_CAPRICORN",
+    "CANCER_LIBRA"
+   ],
+   "uretim": [
+    "AQUARIUS_AQUARIUS",
+    "CAPRICORN_CAPRICORN",
+    "CANCER_LIBRA"
+   ],
+   "cl_yeni": true,
+   "kenar_zorunlu": [
+    "AQUARIUS_AQUARIUS"
+   ],
+   "gercek_boy": [
+    "AQUARIUS_AQUARIUS",
+    "CAPRICORN_CAPRICORN",
+    "CANCER_LIBRA"
+   ]
+  },
+  {
+   "parca": 4,
+   "ciftler": [
+    "CANCER_LIBRA",
+    "AQUARIUS_PISCES",
+    "GEMINI_VIRGO"
+   ],
+   "uretim": [
+    "AQUARIUS_PISCES",
+    "GEMINI_VIRGO"
+   ],
+   "cl_yeni": false,
+   "kenar_zorunlu": [
+    "AQUARIUS_PISCES"
+   ],
+   "gercek_boy": [
+    "AQUARIUS_PISCES",
+    "GEMINI_VIRGO"
+   ]
+  }
+ ],
+ "cift_sayisi": 10
+}

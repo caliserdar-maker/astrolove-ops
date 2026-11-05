@@ -1,0 +1,21 @@
+[    0.1s] cift CANCER_LIBRA
+[  232.8s] CANCER_LIBRA yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.19, 'SAPPHIRE': 5.88, 'EMERALD': 5.46} dE00 {'RUBY': 0.756, 'SAPPHIRE': 0.86, 'EMERALD': 0.854} sembol [264, 246, 689, 650] uzaklik {'guvenli_disi': 8.6, 'delik': 49.0, 'ust_cizgi': 25.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  232.9s] KONTROL RUBY 1 1 PASS
+[  233.0s] KONTROL SAPPHIRE 1 1 PASS
+[  233.0s] KONTROL EMERALD 1 1 PASS
+[  233.1s] KONTROL SADE_ALTIN 1 1 PASS
+[  233.2s] KONTROL FILDISI 1 1 PASS
+[  237.8s] ETA 1/4 gecen 238 sn kalan 713 sn yuzde 25.0
+[  237.8s] cift AQUARIUS_CANCER
+[  615.9s] onarimsiz motor AQUARIUS_CANCER cikis 1
+::warning::kenar onarimi AQUARIUS_CANCER aquarius: degisen piksel 464, en buyuk alfa farki 1.0
+[  615.9s] onarimsiz neden AQUARIUS_CANCER True tek neden leke_a_kaynak_0 (aquarius 445 px)
+[  616.1s] AQUARIUS_CANCER yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.19, 'SAPPHIRE': 5.96, 'EMERALD': 5.51} dE00 {'RUBY': 0.991, 'SAPPHIRE': 1.042, 'EMERALD': 0.995} sembol [307, 292, 645, 541] uzaklik {'guvenli_disi': 41.7, 'delik': 102.1, 'ust_cizgi': 71.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  626.2s] ETA 2/4 gecen 626 sn kalan 626 sn yuzde 50.0
+[  626.2s] cift ARIES_SCORPIO
+[  849.9s] ARIES_SCORPIO yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.28, 'SAPPHIRE': 6.16, 'EMERALD': 5.66} dE00 {'RUBY': 0.641, 'SAPPHIRE': 0.74, 'EMERALD': 0.716} sembol [292, 296, 660, 540] uzaklik {'guvenli_disi': 41.7, 'delik': 126.2, 'ust_cizgi': 75.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  857.3s] ETA 3/4 gecen 857 sn kalan 286 sn yuzde 75.0
+[  857.3s] cift LEO_SAGITTARIUS
+[ 1083.3s] LEO_SAGITTARIUS yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 4.87, 'SAPPHIRE': 5.65, 'EMERALD': 5.16} dE00 {'RUBY': 1.209, 'SAPPHIRE': 1.196, 'EMERALD': 1.198} sembol [343, 267, 608, 550] uzaklik {'guvenli_disi': 41.7, 'delik': 72.8, 'ust_cizgi': 46.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[ 1091.0s] ETA 4/4 gecen 1091 sn kalan 0 sn yuzde 100.0
+[ 1091.5s] BITTI 20 PNG | cikis 0 {}

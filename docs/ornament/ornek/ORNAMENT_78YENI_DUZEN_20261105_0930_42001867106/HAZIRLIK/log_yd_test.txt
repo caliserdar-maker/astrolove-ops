@@ -1,0 +1,7 @@
+ETA 13/78 gecen 64 sn kalan~319 sn
+ETA 26/78 gecen 134 sn kalan~268 sn
+ETA 39/78 gecen 199 sn kalan~199 sn
+ETA 52/78 gecen 264 sn kalan~132 sn
+ETA 65/78 gecen 332 sn kalan~66 sn
+ETA 78/78 gecen 396 sn kalan~0 sn
+ref = SABIT True | 78 cift 78 PASS | FAIL [] | bilinen FAIL 45 / 45

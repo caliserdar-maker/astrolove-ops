@@ -1,0 +1,21 @@
+[    0.1s] cift CANCER_LIBRA
+[  218.6s] CANCER_LIBRA yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.19, 'SAPPHIRE': 5.88, 'EMERALD': 5.46} dE00 {'RUBY': 0.756, 'SAPPHIRE': 0.86, 'EMERALD': 0.854} sembol [264, 246, 689, 650] uzaklik {'guvenli_disi': 8.6, 'delik': 49.0, 'ust_cizgi': 25.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  218.7s] KONTROL RUBY 1 1 PASS
+[  218.8s] KONTROL SAPPHIRE 1 1 PASS
+[  218.9s] KONTROL EMERALD 1 1 PASS
+[  218.9s] KONTROL SADE_ALTIN 1 1 PASS
+[  219.0s] KONTROL FILDISI 1 1 PASS
+[  224.6s] ETA 1/4 gecen 225 sn kalan 674 sn yuzde 25.0
+[  224.6s] cift AQUARIUS_AQUARIUS
+[  568.7s] onarimsiz motor AQUARIUS_AQUARIUS cikis 1
+::warning::kenar onarimi AQUARIUS_AQUARIUS aquarius: degisen piksel 464, en buyuk alfa farki 1.0
+[  568.7s] onarimsiz neden AQUARIUS_AQUARIUS True tek neden leke_a_kaynak_0 (aquarius 445 px)
+[  568.9s] AQUARIUS_AQUARIUS yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.4, 'SAPPHIRE': 6.28, 'EMERALD': 5.73} dE00 {'RUBY': 0.886, 'SAPPHIRE': 0.796, 'EMERALD': 0.791} sembol [242, 390, 708, 508] uzaklik {'guvenli_disi': 41.7, 'delik': 204.6, 'ust_cizgi': 169.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  582.0s] ETA 2/4 gecen 582 sn kalan 582 sn yuzde 50.0
+[  582.0s] cift CAPRICORN_CAPRICORN
+[  801.4s] CAPRICORN_CAPRICORN yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.15, 'SAPPHIRE': 6.02, 'EMERALD': 5.51} dE00 {'RUBY': 0.762, 'SAPPHIRE': 0.784, 'EMERALD': 0.791} sembol [301, 324, 649, 531] uzaklik {'guvenli_disi': 41.7, 'delik': 142.6, 'ust_cizgi': 103.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  810.6s] ETA 3/4 gecen 811 sn kalan 270 sn yuzde 75.0
+[  810.6s] cift CANCER_LIBRA
+[ 1033.0s] CANCER_LIBRA yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 4.95, 'SAPPHIRE': 5.77, 'EMERALD': 5.29} dE00 {'RUBY': 0.839, 'SAPPHIRE': 0.878, 'EMERALD': 0.874} sembol [326, 267, 624, 550] uzaklik {'guvenli_disi': 41.7, 'delik': 70.0, 'ust_cizgi': 46.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[ 1042.1s] ETA 4/4 gecen 1042 sn kalan 0 sn yuzde 100.0
+[ 1042.5s] BITTI 15 PNG | cikis 0 {}

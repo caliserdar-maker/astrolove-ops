@@ -1,0 +1,664 @@
+{
+ "not_": "yalniz kapi (is akisi hazirlik); yerel benzetim: alfa maskesi, kucuk isaretler cancer/libra gercek, digerleri dikdortgen",
+ "referans": {
+  "tarih_alt": 795,
+  "tarih_ust": 764,
+  "tarih_taban": 787.5,
+  "isim_ust": 695,
+  "isim_alt": 732,
+  "isim_taban": 724.0,
+  "isim_taban_esit": true,
+  "sonsuz_y": 696,
+  "kucuk_alt": 663,
+  "kucuk_ust_sabit": 594,
+  "sembol_alt_sinir": 562,
+  "h_max": 69
+ },
+ "sabit": {
+  "tarih_alt": 795,
+  "tarih_ust": 764,
+  "tarih_taban": 787.5,
+  "isim_ust": 695,
+  "isim_alt": 732,
+  "isim_taban": 724.0,
+  "isim_taban_esit": true,
+  "sonsuz_y": 696,
+  "kucuk_alt": 663,
+  "kucuk_ust_sabit": 594,
+  "sembol_alt_sinir": 562,
+  "h_max": 69
+ },
+ "ref_sabit_esit": true,
+ "fail": [],
+ "gecen": 78,
+ "bilinen_fail": [
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "sembol ustu 229",
+   "beklenen": [
+    "ust_ge_230"
+   ],
+   "fail": [
+    "ust_ge_230",
+    "y2_ust",
+    "o4_kapi"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "sembol alti sinir + 2",
+   "beklenen": [
+    "sembol_alt_le_sinir"
+   ],
+   "fail": [
+    "sembol_alt_le_sinir",
+    "y2_ust"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "sembol 3 px saga",
+   "beklenen": [
+    "yatay_orta"
+   ],
+   "fail": [
+    "yatay_orta"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "sembol 4 px kaydi (Y2)",
+   "beklenen": [
+    "y2_ust"
+   ],
+   "fail": [
+    "y2_ust"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "B3 0,90 cizildi",
+   "beklenen": [
+    "b3_olcek"
+   ],
+   "fail": [
+    "b3_olcek"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "B3 0,80 cizildi",
+   "beklenen": [
+    "b3_olcek"
+   ],
+   "fail": [
+    "b3_olcek"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "olcek x 1,25 ayni merkez",
+   "beklenen": [
+    "halka_pay_ge_30",
+    "ust_ge_230",
+    "sembol_alt_le_sinir"
+   ],
+   "fail": [
+    "sembol_alt_le_sinir",
+    "b3_olcek",
+    "y2_ust"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "tarih 5 px asagi",
+   "beklenen": [
+    "tarih_taban"
+   ],
+   "fail": [
+    "tarih_taban",
+    "tarih_alt_795",
+    "bosluk_32_32"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "tarih 5 px asagi (murekkep)",
+   "beklenen": [
+    "tarih_alt_795"
+   ],
+   "fail": [
+    "tarih_taban",
+    "tarih_alt_795",
+    "bosluk_32_32"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "isimler 3 px asagi",
+   "beklenen": [
+    "isim_taban"
+   ],
+   "fail": [
+    "isim_taban",
+    "bosluk_32_32"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "isim satiri 3 px asagi",
+   "beklenen": [
+    "bosluk_32_32"
+   ],
+   "fail": [
+    "isim_taban",
+    "sonsuz_y",
+    "bosluk_32_32"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "logo 3 px asagi",
+   "beklenen": [
+    "sonsuz_y"
+   ],
+   "fail": [
+    "sonsuz_y"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "sag kucuk 3 px yukari",
+   "beklenen": [
+    "kucuk_alta_yasli"
+   ],
+   "fail": [
+    "kucuk_alta_yasli"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "sag kucuk H_MAX + 3 px, alta yasli",
+   "beklenen": [
+    "kucuk_ust_ge_sabit"
+   ],
+   "fail": [
+    "kucuk_ust_ge_sabit"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "vaka": "tarih 60 px asagi (halka)",
+   "beklenen": [
+    "o4_kapi"
+   ],
+   "fail": [
+    "tarih_taban",
+    "tarih_alt_795",
+    "bosluk_32_32",
+    "o4_kapi"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "sembol ustu 229",
+   "beklenen": [
+    "ust_ge_230"
+   ],
+   "fail": [
+    "ust_ge_230",
+    "y2_ust",
+    "o4_kapi"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "sembol alti sinir + 2",
+   "beklenen": [
+    "sembol_alt_le_sinir"
+   ],
+   "fail": [
+    "sembol_alt_le_sinir",
+    "y2_ust"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "sembol 3 px saga",
+   "beklenen": [
+    "yatay_orta"
+   ],
+   "fail": [
+    "yatay_orta"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "sembol 4 px kaydi (Y2)",
+   "beklenen": [
+    "y2_ust"
+   ],
+   "fail": [
+    "y2_ust"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "B3 0,90 cizildi",
+   "beklenen": [
+    "b3_olcek"
+   ],
+   "fail": [
+    "b3_olcek"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "B3 0,80 cizildi",
+   "beklenen": [
+    "b3_olcek"
+   ],
+   "fail": [
+    "b3_olcek"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "olcek x 1,25 ayni merkez",
+   "beklenen": [
+    "halka_pay_ge_30",
+    "ust_ge_230",
+    "sembol_alt_le_sinir"
+   ],
+   "fail": [
+    "sembol_alt_le_sinir",
+    "b3_olcek",
+    "y2_ust"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "tarih 5 px asagi",
+   "beklenen": [
+    "tarih_taban"
+   ],
+   "fail": [
+    "tarih_taban",
+    "tarih_alt_795",
+    "bosluk_32_32"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "tarih 5 px asagi (murekkep)",
+   "beklenen": [
+    "tarih_alt_795"
+   ],
+   "fail": [
+    "tarih_taban",
+    "tarih_alt_795",
+    "bosluk_32_32"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "isimler 3 px asagi",
+   "beklenen": [
+    "isim_taban"
+   ],
+   "fail": [
+    "isim_taban",
+    "bosluk_32_32"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "isim satiri 3 px asagi",
+   "beklenen": [
+    "bosluk_32_32"
+   ],
+   "fail": [
+    "isim_taban",
+    "sonsuz_y",
+    "bosluk_32_32"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "logo 3 px asagi",
+   "beklenen": [
+    "sonsuz_y"
+   ],
+   "fail": [
+    "sonsuz_y"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "sag kucuk 3 px yukari",
+   "beklenen": [
+    "kucuk_alta_yasli"
+   ],
+   "fail": [
+    "kucuk_alta_yasli"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "sag kucuk H_MAX + 3 px, alta yasli",
+   "beklenen": [
+    "kucuk_ust_ge_sabit"
+   ],
+   "fail": [
+    "kucuk_ust_ge_sabit"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LEO_SAGITTARIUS",
+   "vaka": "tarih 60 px asagi (halka)",
+   "beklenen": [
+    "o4_kapi"
+   ],
+   "fail": [
+    "tarih_taban",
+    "tarih_alt_795",
+    "bosluk_32_32",
+    "o4_kapi"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "sembol ustu 229",
+   "beklenen": [
+    "ust_ge_230"
+   ],
+   "fail": [
+    "ust_ge_230",
+    "halka_pay_ge_30",
+    "y2_ust",
+    "o4_kapi"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "sembol alti sinir + 2",
+   "beklenen": [
+    "sembol_alt_le_sinir"
+   ],
+   "fail": [
+    "sembol_alt_le_sinir",
+    "y2_ust"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "sembol 3 px saga",
+   "beklenen": [
+    "yatay_orta"
+   ],
+   "fail": [
+    "yatay_orta"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "sembol 4 px kaydi (Y2)",
+   "beklenen": [
+    "y2_ust"
+   ],
+   "fail": [
+    "y2_ust"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "B3 0,90 cizildi",
+   "beklenen": [
+    "b3_olcek"
+   ],
+   "fail": [
+    "b3_olcek"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "B3 0,80 cizildi",
+   "beklenen": [
+    "b3_olcek"
+   ],
+   "fail": [
+    "b3_olcek"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "olcek x 1,25 ayni merkez",
+   "beklenen": [
+    "halka_pay_ge_30"
+   ],
+   "fail": [
+    "halka_pay_ge_30",
+    "sembol_alt_le_sinir",
+    "b3_olcek",
+    "y2_ust"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "tarih 5 px asagi",
+   "beklenen": [
+    "tarih_taban"
+   ],
+   "fail": [
+    "tarih_taban",
+    "tarih_alt_795",
+    "bosluk_32_32"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "tarih 5 px asagi (murekkep)",
+   "beklenen": [
+    "tarih_alt_795"
+   ],
+   "fail": [
+    "tarih_taban",
+    "tarih_alt_795",
+    "bosluk_32_32"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "isimler 3 px asagi",
+   "beklenen": [
+    "isim_taban"
+   ],
+   "fail": [
+    "isim_taban",
+    "bosluk_32_32"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "isim satiri 3 px asagi",
+   "beklenen": [
+    "bosluk_32_32"
+   ],
+   "fail": [
+    "isim_taban",
+    "sonsuz_y",
+    "bosluk_32_32"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "logo 3 px asagi",
+   "beklenen": [
+    "sonsuz_y"
+   ],
+   "fail": [
+    "sonsuz_y"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "sag kucuk 3 px yukari",
+   "beklenen": [
+    "kucuk_alta_yasli"
+   ],
+   "fail": [
+    "kucuk_alta_yasli"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "sag kucuk H_MAX + 3 px, alta yasli",
+   "beklenen": [
+    "kucuk_ust_ge_sabit"
+   ],
+   "fail": [
+    "kucuk_ust_ge_sabit"
+   ],
+   "gecti": true
+  },
+  {
+   "cift": "LIBRA_LIBRA",
+   "vaka": "tarih 60 px asagi (halka)",
+   "beklenen": [
+    "o4_kapi"
+   ],
+   "fail": [
+    "tarih_taban",
+    "tarih_alt_795",
+    "bosluk_32_32",
+    "o4_kapi"
+   ],
+   "gecti": true
+  }
+ ],
+ "bilinen_fail_hepsi": true,
+ "bilinen_fail_sayi": 45,
+ "kapi_ozet": {
+  "AQUARIUS_AQUARIUS": [],
+  "AQUARIUS_ARIES": [],
+  "AQUARIUS_CANCER": [],
+  "AQUARIUS_CAPRICORN": [],
+  "AQUARIUS_GEMINI": [],
+  "AQUARIUS_LEO": [],
+  "AQUARIUS_LIBRA": [],
+  "AQUARIUS_PISCES": [],
+  "AQUARIUS_SAGITTARIUS": [],
+  "AQUARIUS_SCORPIO": [],
+  "AQUARIUS_TAURUS": [],
+  "AQUARIUS_VIRGO": [],
+  "ARIES_ARIES": [],
+  "ARIES_CANCER": [],
+  "ARIES_CAPRICORN": [],
+  "ARIES_GEMINI": [],
+  "ARIES_LEO": [],
+  "ARIES_LIBRA": [],
+  "ARIES_PISCES": [],
+  "ARIES_SAGITTARIUS": [],
+  "ARIES_SCORPIO": [],
+  "ARIES_TAURUS": [],
+  "ARIES_VIRGO": [],
+  "CANCER_CANCER": [],
+  "CANCER_CAPRICORN": [],
+  "CANCER_GEMINI": [],
+  "CANCER_LEO": [],
+  "CANCER_LIBRA": [],
+  "CANCER_PISCES": [],
+  "CANCER_SAGITTARIUS": [],
+  "CANCER_SCORPIO": [],
+  "CANCER_TAURUS": [],
+  "CANCER_VIRGO": [],
+  "CAPRICORN_CAPRICORN": [],
+  "CAPRICORN_GEMINI": [],
+  "CAPRICORN_LEO": [],
+  "CAPRICORN_LIBRA": [],
+  "CAPRICORN_PISCES": [],
+  "CAPRICORN_SAGITTARIUS": [],
+  "CAPRICORN_SCORPIO": [],
+  "CAPRICORN_TAURUS": [],
+  "CAPRICORN_VIRGO": [],
+  "GEMINI_GEMINI": [],
+  "GEMINI_LEO": [],
+  "GEMINI_LIBRA": [],
+  "GEMINI_PISCES": [],
+  "GEMINI_SAGITTARIUS": [],
+  "GEMINI_SCORPIO": [],
+  "GEMINI_TAURUS": [],
+  "GEMINI_VIRGO": [],
+  "LEO_LEO": [],
+  "LEO_LIBRA": [],
+  "LEO_PISCES": [],
+  "LEO_SAGITTARIUS": [],
+  "LEO_SCORPIO": [],
+  "LEO_TAURUS": [],
+  "LEO_VIRGO": [],
+  "LIBRA_LIBRA": [],
+  "LIBRA_PISCES": [],
+  "LIBRA_SAGITTARIUS": [],
+  "LIBRA_SCORPIO": [],
+  "LIBRA_TAURUS": [],
+  "LIBRA_VIRGO": [],
+  "PISCES_PISCES": [],
+  "PISCES_SAGITTARIUS": [],
+  "PISCES_SCORPIO": [],
+  "PISCES_TAURUS": [],
+  "PISCES_VIRGO": [],
+  "SAGITTARIUS_SAGITTARIUS": [],
+  "SAGITTARIUS_SCORPIO": [],
+  "SAGITTARIUS_TAURUS": [],
+  "SAGITTARIUS_VIRGO": [],
+  "SCORPIO_SCORPIO": [],
+  "SCORPIO_TAURUS": [],
+  "SCORPIO_VIRGO": [],
+  "TAURUS_TAURUS": [],
+  "TAURUS_VIRGO": [],
+  "VIRGO_VIRGO": []
+ }
+}

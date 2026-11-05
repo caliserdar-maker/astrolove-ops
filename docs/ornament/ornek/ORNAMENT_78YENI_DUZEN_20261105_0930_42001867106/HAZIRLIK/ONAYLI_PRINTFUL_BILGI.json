@@ -1,0 +1,257 @@
+{
+ "bilgi": "onayli dosyalar DEGISMEZ (Serdar 4 Kas karar 4); olcum yalniz bilgi",
+ "dosya": {
+  "CANCER_LIBRA_EMERALD_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGB",
+   "mod_beklenen": "RGB",
+   "mod_ok": true,
+   "dpi": [
+    299.9994,
+    299.9994
+   ],
+   "dpi_300": true,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": true
+  },
+  "CANCER_LIBRA_FILDISI_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGB",
+   "mod_beklenen": "RGB",
+   "mod_ok": true,
+   "dpi": null,
+   "dpi_300": false,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": false
+  },
+  "CANCER_LIBRA_RUBY_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGB",
+   "mod_beklenen": "RGB",
+   "mod_ok": true,
+   "dpi": [
+    299.9994,
+    299.9994
+   ],
+   "dpi_300": true,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": true
+  },
+  "CANCER_LIBRA_SADE_ALTIN_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGBA",
+   "mod_beklenen": "RGBA",
+   "mod_ok": true,
+   "dpi": null,
+   "dpi_300": false,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": false
+  },
+  "CANCER_LIBRA_SAPPHIRE_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGB",
+   "mod_beklenen": "RGB",
+   "mod_ok": true,
+   "dpi": [
+    299.9994,
+    299.9994
+   ],
+   "dpi_300": true,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": true
+  },
+  "AQUARIUS_PISCES_EMERALD_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGB",
+   "mod_beklenen": "RGB",
+   "mod_ok": true,
+   "dpi": [
+    299.9994,
+    299.9994
+   ],
+   "dpi_300": true,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": true
+  },
+  "AQUARIUS_PISCES_FILDISI_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGB",
+   "mod_beklenen": "RGB",
+   "mod_ok": true,
+   "dpi": null,
+   "dpi_300": false,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": false
+  },
+  "AQUARIUS_PISCES_RUBY_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGB",
+   "mod_beklenen": "RGB",
+   "mod_ok": true,
+   "dpi": [
+    299.9994,
+    299.9994
+   ],
+   "dpi_300": true,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": true
+  },
+  "AQUARIUS_PISCES_SADE_ALTIN_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGBA",
+   "mod_beklenen": "RGBA",
+   "mod_ok": true,
+   "dpi": null,
+   "dpi_300": false,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": false
+  },
+  "AQUARIUS_PISCES_SAPPHIRE_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGB",
+   "mod_beklenen": "RGB",
+   "mod_ok": true,
+   "dpi": [
+    299.9994,
+    299.9994
+   ],
+   "dpi_300": true,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": true
+  },
+  "GEMINI_VIRGO_EMERALD_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGB",
+   "mod_beklenen": "RGB",
+   "mod_ok": true,
+   "dpi": [
+    299.9994,
+    299.9994
+   ],
+   "dpi_300": true,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": true
+  },
+  "GEMINI_VIRGO_FILDISI_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGB",
+   "mod_beklenen": "RGB",
+   "mod_ok": true,
+   "dpi": null,
+   "dpi_300": false,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": false
+  },
+  "GEMINI_VIRGO_RUBY_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGB",
+   "mod_beklenen": "RGB",
+   "mod_ok": true,
+   "dpi": [
+    299.9994,
+    299.9994
+   ],
+   "dpi_300": true,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": true
+  },
+  "GEMINI_VIRGO_SADE_ALTIN_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGBA",
+   "mod_beklenen": "RGBA",
+   "mod_ok": true,
+   "dpi": null,
+   "dpi_300": false,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": false
+  },
+  "GEMINI_VIRGO_SAPPHIRE_954.png": {
+   "boyut": [
+    954,
+    954
+   ],
+   "boyut_954": true,
+   "mod": "RGB",
+   "mod_beklenen": "RGB",
+   "mod_ok": true,
+   "dpi": [
+    299.9994,
+    299.9994
+   ],
+   "dpi_300": true,
+   "icc": null,
+   "icc_ok": true,
+   "gecti": true
+  }
+ }
+}

@@ -1,0 +1,18 @@
+[    0.1s] cift CANCER_LIBRA
+[  220.0s] CANCER_LIBRA yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.19, 'SAPPHIRE': 5.88, 'EMERALD': 5.46} dE00 {'RUBY': 0.756, 'SAPPHIRE': 0.86, 'EMERALD': 0.854} sembol [264, 246, 689, 650] uzaklik {'guvenli_disi': 8.6, 'delik': 49.0, 'ust_cizgi': 25.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  220.1s] KONTROL RUBY 1 1 PASS
+[  220.2s] KONTROL SAPPHIRE 1 1 PASS
+[  220.3s] KONTROL EMERALD 1 1 PASS
+[  220.3s] KONTROL SADE_ALTIN 1 1 PASS
+[  220.4s] KONTROL FILDISI 1 1 PASS
+[  225.7s] ETA 1/4 gecen 226 sn kalan 677 sn yuzde 25.0
+[  225.7s] cift TAURUS_TAURUS
+[  433.8s] TAURUS_TAURUS yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.98, 'SAPPHIRE': 6.97, 'EMERALD': 6.36} dE00 {'RUBY': 1.134, 'SAPPHIRE': 1.179, 'EMERALD': 1.133} sembol [328, 293, 623, 541] uzaklik {'guvenli_disi': 41.7, 'delik': 137.5, 'ust_cizgi': 72.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  444.5s] ETA 2/4 gecen 444 sn kalan 444 sn yuzde 50.0
+[  444.5s] cift CANCER_TAURUS
+[  663.6s] CANCER_TAURUS yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 4.89, 'SAPPHIRE': 5.67, 'EMERALD': 5.22} dE00 {'RUBY': 1.232, 'SAPPHIRE': 1.324, 'EMERALD': 1.232} sembol [343, 280, 607, 546] uzaklik {'guvenli_disi': 41.7, 'delik': 123.1, 'ust_cizgi': 59.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  672.3s] ETA 3/4 gecen 672 sn kalan 224 sn yuzde 75.0
+[  672.3s] cift LIBRA_LIBRA
+[  881.0s] LIBRA_LIBRA yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.0, 'SAPPHIRE': 5.86, 'EMERALD': 5.36} dE00 {'RUBY': 1.157, 'SAPPHIRE': 1.221, 'EMERALD': 1.28} sembol [226, 298, 725, 540] uzaklik {'guvenli_disi': 41.7, 'delik': 120.8, 'ust_cizgi': 77.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  890.7s] ETA 4/4 gecen 891 sn kalan 0 sn yuzde 100.0
+[  891.2s] BITTI 20 PNG | cikis 0 {}
