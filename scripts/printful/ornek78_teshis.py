@@ -48,6 +48,14 @@ def main():
     K = Path(a.kaynak); son = '/tmp/son_yok'; Path(son).mkdir(exist_ok=True)
     T = {}
     import traceback as _tb
+    if os.environ.get('TESHIS_GV_YD') == '1':                              # Merkez / Serdar 5 Kas: GV yeni duzen dE00 nedeni (yalniz olcum)
+        try:
+            bolum_gv_yd(a, K, W, O, son, T)
+        except Exception:                                                      # noqa: BLE001
+            T['gv_yd_hata'] = _tb.format_exc(); print(T['gv_yd_hata'], flush=True)
+        (O / 'TESHIS.json').write_text(json.dumps(T, indent=1, ensure_ascii=False, default=str))
+        print('TESHIS bitti', flush=True)
+        return 0
     if os.environ.get('TESHIS_YALNIZ_LEKE') != '1':
         try:
             bolum12(a, K, W, O, son, T)
@@ -60,6 +68,28 @@ def main():
     (O / 'TESHIS.json').write_text(json.dumps(T, indent=1, ensure_ascii=False, default=str))
     print('TESHIS bitti', flush=True)
     return 0
+
+
+OGE_TABLO = ('dE00_butunlesme_oncesi', 'dE00_son_ham', 'dE00_son_dusus_bolunmus_bilgi', 'L_dagilim_bilgi', 'sembol_kutu', 'kontrast_ortanca_en_kotu')
+
+
+def bolum_gv_yd(a, K, W, O, son, T):
+    """GEMINI_VIRGO: motor eski (YENI_DUZEN=0) ve yeni (YENI_DUZEN=1) duzende; oge basina dE00 tablolari (butunlesme oncesi, son ham,
+    dusus bolunmus), L dagilimi, renk_uyum satiri (log), sembol kutusu. Yalniz sayi: PNG dala yazilmaz (is akisi kapisi)."""
+    for mod in ('0', '1'):
+        ad = f'gv_yd{mod}'
+        k, t = kos([_d / 'ornament_motor.py', '--kaynak', K, '--motor', a.motor, '--cikti', W / ad, '--son', son, '--zemin', a.zemin, '--cift', 'GEMINI_VIRGO'],
+                   env={'YENI_DUZEN': mod}, log_dosya=O / f'log_motor_GEMINI_VIRGO_YD{mod}.txt')
+        f = W / ad / 'OLCUM.json'
+        mo = json.loads(f.read_text()) if f.exists() else {}
+        son_ = mo.get('sonuc') or {}
+        T[f'GEMINI_VIRGO_YD{mod}'] = dict(
+            cikis=k, traceback=t[t.find('Traceback'):] if 'Traceback' in t else None,
+            renk_uyum_log=[x for x in t.splitlines() if 'renk_uyum' in x][:3],
+            sert_fail=[x for x in t.splitlines() if 'FAIL' in x][:10],
+            kapi_sert=mo.get('kapi_sert'), sembol_kutu=(mo.get('kutu') or {}).get('sembol'),
+            oge={r: {kk: son_[r].get(kk) for kk in OGE_TABLO} for r in ('RUBY', 'SAPPHIRE', 'EMERALD') if r in son_})
+        print('GV YD', mod, 'cikis', k, json.dumps({r: (v or {}).get('dE00_son_ham') for r, v in T[f'GEMINI_VIRGO_YD{mod}']['oge'].items()}), flush=True)
 
 
 def bolum12(a, K, W, O, son, T):

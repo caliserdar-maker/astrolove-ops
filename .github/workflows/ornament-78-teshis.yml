@@ -115,6 +115,8 @@ jobs:
           cat /tmp/drive_md5.txt >> /tmp/girdi_sha.txt
       - name: Teshis
         id: teshis
+        env:
+          TESHIS_GV_YD: "1"   # Merkez / Serdar 5 Kas "Evet": yalniz GEMINI_VIRGO eski + yeni duzen oge dE00 tablolari (ornek78_teshis.bolum_gv_yd)
         run: |
           set -uo pipefail
           D=ORNAMENT_78_TESHIS_$(date -u +%Y%m%d_%H%M); echo "D=$D" >> "$GITHUB_ENV"; mkdir -p /tmp/teshis
