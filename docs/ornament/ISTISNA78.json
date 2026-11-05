@@ -1,0 +1,13 @@
+{
+ "aciklama": "Ornament 78 toplama kapi istisnalari (beklenti katmani; scripts/printful/toplama78.py). Her kayit: cift + kapi + onay tarihi + kosu + karar + dE00_azami (karardaki ust deger, yuvarlama payi 0,005; rapordaki koyu.<stil>.dE00_ham_maks bunu asarsa FAIL). Kapi tanimi ve esik (<= 2) DEGISMEZ; kapi kaynak raporda ve toplama raporunda FAIL olarak yazilir. Yeni kayit yalniz Serdar onayiyla eklenir; dosya ve toplama78.ISTISNA_ONAYLI ayni olmali (ikisi ayni depoda: bu kontrol tek tarafli degisikligi yakalar, ikisinin birlikte degisikligini YAKALAMAZ; o durum inceleme ve Serdar onayina kalir).",
+ "istisna": [
+  {"cift": "GEMINI_VIRGO", "kapi": "koyu_dE00_son_ham_le_2", "onay_tarihi": "2026-11-05", "kosu": "42001867106", "dE00_azami": 2.355,
+   "karar": "KARARLAR_20261104_2 [5 Kas] GEMINI_VIRGO KAPI ISTISNASI (Serdar Uygun; secenek a); koyu 3 stil dE00_son_ham 2,27-2,35"},
+  {"cift": "GEMINI_GEMINI", "kapi": "koyu_dE00_son_ham_le_2", "onay_tarihi": "2026-11-05", "kosu": "42063472397", "dE00_azami": 2.205,
+   "karar": "KARARLAR_20261104_2 [5 Kas aksam] yd67 3 FAIL CIFTI (Serdar 2si kabul 1i teshis); dE00_son_ham 2,13-2,20"},
+  {"cift": "PISCES_PISCES", "kapi": "koyu_dE00_son_ham_le_2", "onay_tarihi": "2026-11-05", "kosu": "42063472397", "dE00_azami": 2.085,
+   "karar": "KARARLAR_20261104_2 [5 Kas aksam] yd67 3 FAIL CIFTI (Serdar 2si kabul 1i teshis); dE00_son_ham 2,06-2,08"},
+  {"cift": "GEMINI_SAGITTARIUS", "kapi": "koyu_dE00_son_ham_le_2", "onay_tarihi": "2026-11-05", "kosu": "42063472397", "dE00_azami": 3.405,
+   "karar": "KARARLAR_20261104_2 [5 Kas aksam] GEMINI_SAGITTARIUS GOZ ONAYI (Serdar gorsellerin hepsi guzel); dE00_son_ham 3,21-3,40"}
+ ]
+}

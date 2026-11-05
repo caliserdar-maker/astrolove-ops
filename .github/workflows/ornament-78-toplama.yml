@@ -1,0 +1,221 @@
+name: ornament-78-toplama
+# Serdar 5 Kas (PLAN67 7. madde; "devam", "Basla"): 78 cift x 5 stil = 390 dosya tek Drive klasorune KOPYA (sunucu tarafi), sha listesi, istisna kaydi
+# (docs/ornament/ISTISNA78.json, 4 cift: GV, GG, PP, GS; kapi kaynak raporda ve toplama raporunda FAIL olarak yazilir), Printful dosya kontrolu.
+# Kaynaklar (adla, ID yok): docs/ornament/TOPLAMA78.json. Kaynak klasorlerde silme / tasima / yazma YOK; once / sonra ozeti esit olmali.
+# Plan: docs/ornament/PLAN_TOPLAMA78.md. Tetik: YALNIZ docs/ornament/TOPLAMA78_TETIK.txt (dal ornament-printful-katalog).
+# Etsy / Printful API yok. Depo public: PNG ve Drive ID dala girmez.
+on:
+  push:
+    branches: [ornament-printful-katalog]
+    paths: [docs/ornament/TOPLAMA78_TETIK.txt]
+permissions: {}
+concurrency:
+  group: ornament-78-toplama
+  cancel-in-progress: false
+env:
+  DAL: ornament-printful-katalog
+jobs:
+  toplama:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ornament-printful-katalog
+          fetch-depth: 1
+          lfs: false
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            scripts/printful/
+            docs/ornament/TOPLAMA78.json
+            docs/ornament/ISTISNA78.json
+            docs/ornament/ornek/ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106/BIRLESIK.json
+            docs/ornament/ornek/ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106/BEKLENEN_SONUC_YENI_DUZEN.json
+            docs/ornament/ornek/ORNAMENT_78URETIM_YD67_20261105_1629_42063472397/BIRLESIK.json
+            docs/ornament/ornek/ORNAMENT_78URETIM_YD67_20261105_1629_42063472397/BEKLENEN_SONUC_YD67.json
+          path: s
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Paketler (uretim ile ayni Pillow / numpy)
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/r /tmp/ozel
+          pip install -q pillow==11.0.0 numpy==2.5.4
+          python3 -c "import sys, numpy, PIL; print('python', sys.version.split()[0], 'numpy', numpy.__version__, 'pillow', PIL.__version__)" | tee /tmp/r/paket.txt
+      - name: Mantik testi (bilinen PASS + bilinen FAIL)
+        run: |
+          set +e
+          set -uo pipefail
+          cd s
+          python3 -I scripts/printful/toplama78_mantik_testi.py --kok . 2>&1 | tee /tmp/r/log_mantik.txt
+          k=${PIPESTATUS[0]}; echo "mantik testi cikis $k"; exit $k
+      - name: Siparis kosusu kontrolu (main siparis|order akislari; etkin varsa DUR)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -I s/scripts/printful/uretim78.py siparis --depo "$GITHUB_REPOSITORY" --cikti /tmp/r/SIPARIS.json --dur
+      - name: Manifest (390 dosya, istisna katmani, kaynak beklentileri)
+        run: |
+          set +e
+          set -uo pipefail
+          cd s
+          python3 -I scripts/printful/toplama78.py manifest --cfg docs/ornament/TOPLAMA78.json --istisna docs/ornament/ISTISNA78.json --kok . \
+            --cikti /tmp/r 2>&1 | tee /tmp/r/log_manifest.txt
+          k=${PIPESTATUS[0]}; echo "manifest cikis $k"; exit $k
+      - name: rclone kur + yapilandir
+        timeout-minutes: 5
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+          rclone version | head -1 | tee -a /tmp/r/paket.txt
+      - name: Kaynak klasorler (once; lsjson sha256, manifest kiyasi)
+        run: |
+          set -euo pipefail
+          A=""
+          for K in $(python3 -c "import json; print(' '.join(k['ad'] for k in json.load(open('s/docs/ornament/TOPLAMA78.json'))['kaynaklar']))"); do
+            rclone lsjson "gdrive:ASTROLOVE/TEMP/$K" -R --hash --files-only > "/tmp/ozel/once_$K.json" 2>>/tmp/ozel/rclone_err.txt   # Drive ID icerir
+            A="$A $K=/tmp/ozel/once_$K.json"; done
+          echo "$A" > /tmp/ozel/once_arg.txt
+          python3 -I s/scripts/printful/toplama78.py ozet --lsjson $A --cikti /tmp/r/KAYNAK_ONCE.json
+          python3 -I s/scripts/printful/toplama78.py kaynak --manifest /tmp/r/MANIFEST.json --lsjson $A --cikti /tmp/r
+      - name: Hedef klasor (yeni; ayni ad kontrolu)
+        id: hedef
+        run: |
+          set -euo pipefail
+          O=$(python3 -c "import json; print(json.load(open('s/docs/ornament/TOPLAMA78.json'))['hedef_onek'])")
+          D=${O}_$(date -u +%Y%m%d_%H%M)_${GITHUB_RUN_ID}; echo "D=$D" >> "$GITHUB_OUTPUT"
+          rclone lsjson gdrive:ASTROLOVE/TEMP --dirs-only > /tmp/ozel/temp_once.json
+          python3 -c "import json; m=[d for d in json.load(open('/tmp/ozel/temp_once.json')) if d['Name']=='$D']; assert not m, 'hedef zaten var'"
+          rclone mkdir "gdrive:ASTROLOVE/TEMP/$D"
+          rclone lsjson gdrive:ASTROLOVE/TEMP --dirs-only > /tmp/ozel/temp_sonra.json
+          python3 -c "import json; m=[d for d in json.load(open('/tmp/ozel/temp_sonra.json')) if d['Name']=='$D']; assert len(m)==1, ('ayni adli klasor', len(m))"
+          rclone lsjson "gdrive:ASTROLOVE/TEMP/$D" | python3 -c "import json,sys; assert json.load(sys.stdin)==[], 'hedef bos degil'"
+          echo "::notice::Drive TEMP/$D"
+      - name: Kopya (sunucu tarafi, --immutable; grup <= 40 dosya; ETA)
+        env:
+          D: ${{ steps.hedef.outputs.D }}
+        run: |
+          set -euo pipefail
+          n=$(ls /tmp/r/plan/*.txt | wc -l); i=0; t0=$(date +%s); top=0
+          for f in /tmp/r/plan/*.txt; do
+            i=$((i+1)); Y=$(cat "${f%.txt}.yol"); s=$(wc -l < "$f"); lg=/tmp/r/log_rclone_$(printf '%02d' $i).txt
+            ok=0; for d in 1 2 3; do
+              rclone copy "gdrive:ASTROLOVE/TEMP/$Y" "gdrive:ASTROLOVE/TEMP/$D" --files-from "$f" --no-traverse --immutable -v --log-file "$lg" && { ok=1; break; }
+              echo "::warning::kopya grup $i deneme $d"; sleep $((5*d)); done
+            [ "$ok" = 1 ] || { echo "::error::kopya grup $i basarisiz"; exit 1; }
+            top=$((top+s)); g=$(( $(date +%s)-t0 ))
+            python3 -c "g=$g; i=$top; n=390; k=g/i*(n-i) if i else 0; print(f'ETA {i}/{n} gecen {g} sn kalan {k:.0f} sn yuzde {100*i/n:.1f} (grup $i/$n)')" | tee -a /tmp/r/log_kopya.txt
+          done
+      - name: Sunucu tarafi kopya kaniti (rclone -v log)
+        run: |
+          set -euo pipefail
+          python3 -I s/scripts/printful/toplama78.py kopya_log --manifest /tmp/r/MANIFEST.json --log /tmp/r/log_rclone_*.txt --cikti /tmp/r
+      - name: Hedef dogrulama (lsjson sha256 = manifest, md5 = kaynak; sha gecikmesine 2 yeniden deneme)
+        env:
+          D: ${{ steps.hedef.outputs.D }}
+        run: |
+          set +e
+          set -uo pipefail
+          A=$(cat /tmp/ozel/once_arg.txt); k=1
+          for d in 1 2 3; do
+            rclone lsjson "gdrive:ASTROLOVE/TEMP/$D" -R --hash > /tmp/ozel/hedef.json 2>>/tmp/ozel/rclone_err.txt || { k=1; sleep 60; continue; }
+            python3 -I s/scripts/printful/toplama78.py hedef --manifest /tmp/r/MANIFEST.json --lsjson /tmp/ozel/hedef.json --kaynak_lsjson $A --cikti /tmp/r
+            k=$?; [ "$k" = 0 ] && break
+            python3 -c "import json; o=json.load(open('/tmp/r/B_hedef_drive.json'))['olculen']; import sys; sys.exit(0 if (o['sha_yok'] or o['md5_yok']) and not (o['eksik'] or o['fazla'] or o['sha_farkli'] or o['md5_farkli'] or o['tekrar']) else 1)" || break
+            echo "hedef: sha256 / md5 henuz yok, 60 sn sonra yeniden liste (deneme $d)" | tee -a /tmp/r/log_kopya.txt; sleep 60
+          done
+          exit $k
+      - name: Printful dosya kontrolu (indirilen kopya; sha + 954 / mod / dpi / ICC)
+        env:
+          D: ${{ steps.hedef.outputs.D }}
+        run: |
+          set -euo pipefail
+          rclone copy "gdrive:ASTROLOVE/TEMP/$D" /tmp/indir --max-depth 1 --include "*_954.png" -q
+          echo "indirilen $(ls /tmp/indir | wc -l) dosya $(du -sm /tmp/indir | cut -f1) MB" | tee -a /tmp/r/log_kopya.txt
+          python3 -I s/scripts/printful/toplama78.py printful --manifest /tmp/r/MANIFEST.json --dizin /tmp/indir --cikti /tmp/r
+      - name: Kaynak klasorler (sonra; degismedi)
+        if: always() && steps.hedef.outcome == 'success'
+        run: |
+          set -euo pipefail
+          A=""
+          for K in $(python3 -c "import json; print(' '.join(k['ad'] for k in json.load(open('s/docs/ornament/TOPLAMA78.json'))['kaynaklar']))"); do
+            rclone lsjson "gdrive:ASTROLOVE/TEMP/$K" -R --hash --files-only > "/tmp/ozel/sonra_$K.json" 2>>/tmp/ozel/rclone_err.txt
+            A="$A $K=/tmp/ozel/sonra_$K.json"; done
+          python3 -I s/scripts/printful/toplama78.py ozet --lsjson $A --cikti /tmp/r/KAYNAK_SONRA.json
+          python3 -I s/scripts/printful/toplama78.py degismedi --once /tmp/r/KAYNAK_ONCE.json --sonra /tmp/r/KAYNAK_SONRA.json --cikti /tmp/r
+      - name: Sonuc (10 beklenti; eksik beklenti FAIL; istisna satirlari)
+        id: sonuc
+        if: always()
+        run: |
+          set +e
+          set -uo pipefail
+          python3 -I s/scripts/printful/toplama78.py sonuc --cikti /tmp/r 2>&1 | tee /tmp/r/log_sonuc.txt
+          k=${PIPESTATUS[0]}; echo "k=$k" >> "$GITHUB_OUTPUT"
+          { echo "sonuc cikis $k"; grep '^ISTISNA ile kabul' /tmp/r/log_sonuc.txt || true; } | tee /tmp/r/SONUC.txt
+          [ "$k" = 0 ] && echo "PASS (istisna ile kabul edilen 4 ciftin kapisi FAIL; ayrinti SONUC.txt)" > /tmp/r/DURUM_PASS.txt \
+            || echo "FAIL: bu klasor kullanilmaz (TOPLAMA_SONUC.json)" > /tmp/r/DURUM_FAIL.txt
+          exit 0
+      - name: Rapor Drive'a (hedef RAPOR/)
+        if: always() && steps.hedef.outcome == 'success'
+        env:
+          D: ${{ steps.hedef.outputs.D }}
+        run: |
+          set -uo pipefail
+          ok=0; for i in 1 2 3; do
+            rclone copy /tmp/r "gdrive:ASTROLOVE/TEMP/$D/RAPOR" --include "*.json" --include "*.txt" --max-depth 1 -q 2>>/tmp/ozel/rclone_err.txt && { ok=1; break; }
+            sleep $((5*i)); done
+          [ "$ok" = 1 ] || { echo "::error::rapor Drive'a yuklenemedi"; exit 1; }
+      - name: Dal (yalniz JSON / TXT; PNG ve Drive ID yok)
+        if: always()
+        env:
+          D: ${{ steps.hedef.outputs.D }}
+        run: |
+          set -euo pipefail
+          G=docs/ornament/ornek/${D:-ORNAMENT_78_TOPLAMA_FAIL_${GITHUB_RUN_ID}}
+          mkdir -p s/$G
+          cp /tmp/r/*.json /tmp/r/*.txt s/$G/ 2>/dev/null || true
+          python3 - "s/$G" <<'PY'
+          # Drive ID'leri (/tmp/ozel lsjson) dal raporunda gecmemeli; okunamayan lsjson FAIL (yanlis negatif olmasin)
+          import glob, json, sys
+          from pathlib import Path
+          ids, bozuk = set(), []
+          for f in sorted(glob.glob('/tmp/ozel/*.json')):
+              try:
+                  ids |= {d['ID'] for d in json.load(open(f)) if d.get('ID')}
+              except Exception:                                                    # noqa: BLE001
+                  bozuk.append(Path(f).name)
+          metin = {p.name: p.read_text(errors='ignore') for p in Path(sys.argv[1]).iterdir() if p.is_file()}
+          bul = sorted({ad for ad, t in metin.items() for i in ids if i in t})
+          alan = sorted(ad for ad, t in metin.items() if '"ID"' in t)
+          print('Drive ID kontrolu: kimlik', len(ids), '| raporda', len(bul), '| ID alani', len(alan), '| okunamayan lsjson', bozuk)
+          sys.exit(1 if bul or alan or bozuk else 0)
+          PY
+          cd s && git config user.name "astrolove-bot" && git config user.email "astrolove-bot@users.noreply.github.com"
+          git add --sparse "$G"
+          python3 -I scripts/printful/uretim78.py dal_kapisi $(git diff --cached --name-only)
+          DIS=$(git diff --cached --name-only | grep -v "^docs/ornament/ornek/" || true)
+          [ -z "$DIS" ] || { echo "::error::izinli klasor disi: $DIS"; exit 1; }
+          git commit -qm "ornament 78 toplama (kosu ${GITHUB_RUN_ID}): sonuc ${{ steps.sonuc.outputs.k }}"
+          ok=0; for i in 1 2 3 4; do
+            git fetch -q --depth 20 --filter=blob:none origin "$DAL" && git rebase -q "origin/$DAL" && git push -q origin "HEAD:${DAL}" && { ok=1; break; }
+            git rebase --abort 2>/dev/null || true; echo "::warning::dal push deneme $i"; sleep $((4*i)); done
+          [ "$ok" = 1 ] || { echo "::error::dal push basarisiz"; exit 1; }
+      - if: always()
+        run: rm -rf ~/.config/rclone
+      - name: Sonuc kapisi
+        if: always()
+        run: '[ "${{ steps.sonuc.outputs.k }}" = "0" ]'
