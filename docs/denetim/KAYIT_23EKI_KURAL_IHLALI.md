@@ -52,7 +52,7 @@ Kural: "Test, birkac dakika once main'e giren DOGRULANMAMIS kodla baslatilmaz" (
 
 Onlem (23 Eki'den itibaren): push ile kosu arasinda bekleme; tetiklemeden once yerel test cikis kodu + push/kosu zaman farki rapora yazilir; kapi/yontem degisikligi Serdar onayi olmadan Etsy yazimina gitmez.
 
-## 5. 23 Eki 14:24 UTC: gercek siparis 4208728285 basladi, siparis baslangic kapisi gosterilmedi (Merkez 23 Eki: kayda gecsin)
+## 5. 23 Eki 14:24 UTC: gercek siparis <gercek fis no silindi> basladi, siparis baslangic kapisi gosterilmedi (Merkez 23 Eki: kayda gecsin)
 
 Kural: "Her test/siparis oncesi kapi madde madde isaretlenip Serdar'a gosterilir; bir madde HAYIR ise dispatch yok" (CLAUDE.md
 SIPARIS URETIMI; docs/SIPARIS_DERSLER.md "TEST 4 BASLANGIC KAPISI"). Merkez talimati "uretime basla" (yalniz dosya uretimi) ve
@@ -72,7 +72,7 @@ Sonuc: kapilar PASS, Merkez onizleme ve kesiti kontrol etti; musteriye gonderim 
 Onlem: yeni siparis gelirse uretimden ONCE DUR ve Merkez'e sor (Merkez 23 Eki); kapi listesi madde madde gosterilmeden dispatch yok;
 kisisellestirme okumasi yalniz ilgili receipt (maske acigi ve ham cekme duzeltmesi teslimden sonra ayri gorev).
 
-## 6. 23 Eki 16:34 UTC: siparis 4208728285 ters duzen yeniden uretimi, baslangic kapisi yine gosterilmedi (bagimsiz inceleme bulgusu)
+## 6. 23 Eki 16:34 UTC: siparis <gercek fis no silindi> ters duzen yeniden uretimi, baslangic kapisi yine gosterilmedi (bagimsiz inceleme bulgusu)
 
 Kural: "Her test/siparis oncesi kapi madde madde isaretlenip Serdar'a gosterilir" (CLAUDE.md SIPARIS URETIMI; docs/SIPARIS_DERSLER.md
 TEST BASLANGIC KAPISI). Merkez talimati (Serdar onayi: musteri talebi KABUL, sol/sag ters) uretimi istedi; kapi listesi isaretlenmedi.
@@ -81,7 +81,7 @@ TEST BASLANGIC KAPISI). Merkez talimati (Serdar onayi: musteri talebi KABUL, sol
 |---|---|---|
 | 23 Eki 16:25:13 | commit 395a5e85 | siparis-dijital `sira` girdisi + surucu takasi + siparis-kisisel-oku |
 | 23 Eki 16:29:00-16:33:33 | 39987143236 siparis-dijital (test fisi 9000000111, test isimleri) | tek prova, 12/12 kapi PASS |
-| 23 Eki 16:34:26 | 39987886687 siparis-dijital (receipt 4208728285, sira=ters) | gercek uretim; provadan 53 sn sonra |
+| 23 Eki 16:34:26 | 39987886687 siparis-dijital (receipt <gercek fis no silindi>, sira=ters) | gercek uretim; provadan 53 sn sonra |
 
 Eksik kalanlar: yeni kodla isim on testi (uzun / aksanli isimler) yapilmadi, yalniz tek prova; kapi listesi Serdar'a gosterilmedi.
 Sonradan eklenen olcum: scripts/siparis_dijital/sira_kapi.py (ilk ve ters dosya ciftinde PASS; negatif kontroller FAIL).

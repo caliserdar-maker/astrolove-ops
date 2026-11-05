@@ -155,7 +155,7 @@ def metin_coz(t):
     satirlar = [x.strip() for x in ham.split("\n")]
     while satirlar and not satirlar[-1]:
         satirlar.pop()
-    # Musteri satirlari ilandaki ornege uyup numaralayabilir ("1. isim", "2) isim", "3. mesaj"; siparis 4211980623, 27 Eki).
+    # Musteri satirlari ilandaki ornege uyup numaralayabilir ("1. isim", "2) isim", "3. mesaj"; siparis <gercek fis no silindi>, 27 Eki).
     # Denetim incelemesi (27 Eki): (a) isimler numarasizken "3. Hochzeitstag" -> "Hochzeitstag" olmamali; (b) yalniz "3." satiri
     # baskiya gitmemeli. Kural: yalniz kendi sira numarasindan olusan satir ("3", "3.", "3)") BOS sayilir; numara ancak 1. VE 2.
     # satirin ikisi de kendi numarasiyla basliyorsa atilir. Metnin icindeki rakam ve tarihlere dokunulmaz.

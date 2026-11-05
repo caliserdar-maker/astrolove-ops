@@ -43,7 +43,7 @@ SIRALAR = ('', 'ters')
 
 
 def sira_oku(g):
-    """Serdar 23 Eki (siparis 4208728285, musteri talebi KABUL): sira = '' (ilandaki duzen, varsayilan) | 'ters'.
+    """Serdar 23 Eki (siparis <gercek fis no silindi>, musteri talebi KABUL): sira = '' (ilandaki duzen, varsayilan) | 'ters'.
     ters: isim1 / isim2 yine cift adindaki 1. / 2. burcun ismidir; posterde 2. burc (sembol + isim) solda, 1. burc sagda.
     Yalniz WP isinde (wp:<boy>); baska is istenirse DUR."""
     s = (g.get('sira') or '').strip().lower()

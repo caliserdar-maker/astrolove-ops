@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SALT OKUMA (Serdar 23 Eki, siparis 4208728285): TEK receipt'in kisisellestirme alanlari. Etsy'ye yazma YOK, mesaj YOK.
+"""SALT OKUMA (Serdar 23 Eki, siparis <gercek fis no silindi>): TEK receipt'in kisisellestirme alanlari. Etsy'ye yazma YOK, mesaj YOK.
 Ham dokum YOK: yalniz kalem basina listing_id, sku ve varyasyonlar (formatted_name / formatted_value; isim ve mesaj
 alanlari dahil) <out>/KISISEL.json'a yazilir; alici adi, adres, e-posta, tutar yazilmaz. Loga deger yazilmaz (yalniz alan
 adlari ve sayilar). Kullanim: siparis_kisisel.py --receipt N --out DIR"""

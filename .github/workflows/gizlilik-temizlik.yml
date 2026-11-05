@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       mod:
-        description: "tara | sil | dakika (Actions kullanim olcumu, salt okuma)"
+        description: "tara | dakika (Actions kullanim olcumu, salt okuma). sil KAPALI (Serdar 5 Kas S1 karar 2 a; ayri onay)"
         required: true
         default: "tara"
 
@@ -60,7 +60,7 @@ jobs:
           MOD: ${{ inputs.mod }}
         run: |
           set -euo pipefail
-          case "$MOD" in tara|sil|dakika) : ;; *) echo "mod tara|sil|dakika olmali"; exit 1 ;; esac
+          case "$MOD" in tara|dakika) : ;; sil) echo "::error::sil modu KAPALI (Serdar 5 Kas S1 karar 2 a: yalniz tara; sil ayri Serdar onayi)"; exit 1 ;; *) echo "mod tara|dakika olmali"; exit 1 ;; esac
           if [ "$MOD" = "dakika" ]; then python scripts/ops/actions_dakika.py 30; exit 0; fi
           python scripts/ops/gizlilik_temizlik.py "$MOD" --terim-kok _gizli
       - if: ${{ always() }}

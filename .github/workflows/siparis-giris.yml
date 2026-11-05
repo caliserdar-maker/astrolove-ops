@@ -71,7 +71,7 @@ jobs:
           set -euo pipefail
           E="$GITHUB_EVENT_PATH"
           for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$E"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
-          m=$(jq -r '.inputs.mesaj_b64' "$E" | base64 -d); echo "::add-mask::$m"
+          m=$(jq -r '.inputs.mesaj_b64' "$E" | base64 -d); while IFS= read -r s || [ -n "$s" ]; do s="${s#"${s%%[![:space:]]*}"}"; s="${s%"${s##*[![:space:]]}"}"; if [ "$(printf %s "$s" | wc -c)" -ge 4 ]; then echo "::add-mask::$s"; fi; done <<< "${m//$'\r'/$'\n'}"
           jq -re '.inputs.receipt | test("^[0-9]+$")' "$E" >/dev/null || { echo "HATA: receipt rakam olmali" >&2; exit 1; }
           jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$E" >/dev/null || { echo "HATA: cift" >&2; exit 1; }
           R=$(jq -r '.inputs.renk' "$E"); O=$(jq -r '.inputs.olcu' "$E"); Y=$(jq -r '.inputs.yeni_yol' "$E"); KURU=$(jq -r '.inputs.kuru' "$E")
@@ -85,6 +85,18 @@ jobs:
           echo "::notice title=YONLENDIRME::renk=$R olcu=$O anahtar=$ACIK yeni_yol=$Y tagline_kerning=$TK -> $YOL ($Z) kod=$KOD"
           { echo "### Siparis yonlendirme"; echo "renk $R, olcu $O, anahtar $ACIK, yeni_yol $Y, tagline_kerning $TK -> **$YOL** ($Z)"; } >> "$GITHUB_STEP_SUMMARY"
           [ "$Z" = "kuru" ] && echo "yol=kuru-$YOL" >> "$GITHUB_OUTPUT" || echo "yol=$YOL" >> "$GITHUB_OUTPUT"
+
+  yol_kapisi:
+    # S1 (Serdar 5 Kas karar 1 a): maskeli deger 'yol' output'unda gecerse runner onu bosaltir; eski / yeni isleri HATASIZ atlanir.
+    needs: yonlendir
+    if: ${{ always() && needs.yonlendir.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sessiz atlama kapisi
+        env:
+          YOL: ${{ needs.yonlendir.outputs.yol }}
+        run: |
+          case "$YOL" in eski|yeni|kuru-eski|kuru-yeni) echo "yol dolu: $YOL";; *) echo "::error title=SESSIZ ATLAMA::yonlendir 'yol' output'u bos ya da beklenmeyen (maskeli deger output'ta geciyor olabilir)"; exit 1;; esac
 
   eski:
     needs: yonlendir
@@ -101,7 +113,7 @@ jobs:
           set -euo pipefail
           E="$GITHUB_EVENT_PATH"
           for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$E"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
-          m=$(jq -r '.inputs.mesaj_b64' "$E" | base64 -d); echo "::add-mask::$m"
+          m=$(jq -r '.inputs.mesaj_b64' "$E" | base64 -d); while IFS= read -r s || [ -n "$s" ]; do s="${s#"${s%%[![:space:]]*}"}"; s="${s%"${s##*[![:space:]]}"}"; if [ "$(printf %s "$s" | wc -c)" -ge 4 ]; then echo "::add-mask::$s"; fi; done <<< "${m//$'\r'/$'\n'}"
           R=$(jq -r .inputs.renk "$E"); O=$(jq -r .inputs.olcu "$E")
           # TEK JPG (Serdar 10 Eki, adim 4): CI ve WP siparisi PDF yerine secilen olcude tek JPG (aile sayfasindan, tek_jpg.py).
           AILE=$(python3 -c "import sys;a={'5x7':'A2','8x10':'16x20','16x20':'16x20','24x30':'16x20','11x14':'11x14','12x16':'18x24','18x24':'18x24','12x18':'24x36','16x24':'24x36','20x30':'24x36','24x36':'24x36','A4':'A2','A3':'A2','A2':'A2'};print(a[sys.argv[1]])" "$O")
@@ -131,7 +143,7 @@ jobs:
           E="$GITHUB_EVENT_PATH"
           jq '.inputs | {receipt, cift, isim1, isim2, mesaj_b64, renk, olcu}' "$E" > /tmp/istek.json
           for k in isim1 isim2; do v=$(jq -r ".$k" /tmp/istek.json); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
-          m=$(jq -r '.mesaj_b64' /tmp/istek.json | base64 -d); echo "::add-mask::$m"
+          m=$(jq -r '.mesaj_b64' /tmp/istek.json | base64 -d); while IFS= read -r s || [ -n "$s" ]; do s="${s#"${s%%[![:space:]]*}"}"; s="${s%"${s##*[![:space:]]}"}"; if [ "$(printf %s "$s" | wc -c)" -ge 4 ]; then echo "::add-mask::$s"; fi; done <<< "${m//$'\r'/$'\n'}"
           C=$(jq -r '.cift' /tmp/istek.json | tr '_' '\n' | sort | paste -sd_)
           echo "CIFT=$C" >> "$GITHUB_ENV"; echo "RECEIPT=$(jq -r .receipt /tmp/istek.json)" >> "$GITHUB_ENV"
           echo "RENK=$(jq -r .renk /tmp/istek.json)" >> "$GITHUB_ENV"; echo "OLCU=$(jq -r .olcu /tmp/istek.json)" >> "$GITHUB_ENV"

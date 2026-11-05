@@ -154,7 +154,7 @@ class FakeStore:
     def needs_refresh(self): return False
 class FakeProdigi:
     def siparisler(self, top=50):      # STATE disi gecmis siparisler (kanal siparisi + numune paketi; sahte kimlik)
-        return [{"id": "ord_KANAL", "merchantReference": "4099999901", "status": {"stage": "Complete"}, "items": []},
+        return [{"id": "ord_KANAL", "merchantReference": "4000000002", "status": {"stage": "Complete"}, "items": []},
                 {"id": "ord_NUMUNE", "merchantReference": "", "status": {"stage": "Complete"},
                  "items": [{"merchantReference": "0"}]}]
     def get_order(self, oid): return 200, {"order": {}}

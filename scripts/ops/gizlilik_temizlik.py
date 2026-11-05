@@ -28,7 +28,12 @@ S.headers.update({"Authorization": f"Bearer {os.environ['GH_TOKEN']}", "Accept":
                   "X-GitHub-Api-Version": "2022-11-28"})
 RISKLI_ARTIFACT = {"pod-order-router"}                 # _out/ (kart, adresli paket, rapor) + state.csv
 RISKLI_WF = ["pod-order-router.yml", "pod-sablon-v4.yml", "kisisel-pilot.yml", "takip-denetim.yml"]
-RECEIPT_DESEN = re.compile(rb"(?<!\d)4[01]\d{8}(?!\d)")   # Etsy receipt bicimi (ilan id'leri 45..., gorsel 8...)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "guvenlik"))
+import receipt_desen  # noqa: E402
+RECEIPT_DESEN = receipt_desen.TARAMA_B   # S1 (Serdar 4 Kas): onek yok, tam 10 hane; 11+ haneli kosu id'leri isaretlenmez
+RECEIPT_ESKI = re.compile(rb"(?<!\d)4[01]\d{8}(?!\d)")   # S1 oncesi desen: YALNIZ fazla isaretleme sayimi (Serdar 5 Kas karar 2 a)
+SON = {"yalniz_yeni": False}   # son taranan kosu: yalniz yeni desenle isaretlendi mi (eski desen ve terimler eslesmedi). UST SINIR:
+#   gercek 42'li fisler de buraya duser (yeni desen tam bunlar icin); fazla isaretleme bu sayidan buyuk olamaz.
 # 28 Eyl (Serdar): maskesiz kargo takip numarasi (USPS IMpb / 420+ZIP onekli, UPS 1Z, UPU S10, Spring PRO...NL)
 TAKIP_DESEN = re.compile(rb"""(?x)
     (?<![0-9])(?:420\d{5}(?:\d{4})?)?9[2-5]\d{20}(?:\d{4})?(?![0-9])
@@ -143,12 +148,15 @@ def zip_tara(icerik, T, TK=()):
         z = zipfile.ZipFile(io.BytesIO(icerik))
     except zipfile.BadZipFile:
         return "hata"
-    diger = False
+    diger = eski = False
     for n in z.namelist():
         b = z.read(n)
         if TAKIP_DESEN.search(b) or any(t in b for t in TK):
             return "takip"
-        diger = diger or bool(RECEIPT_DESEN.search(b) or any(t in b for t in T))
+        terim = any(t in b for t in T)
+        diger = diger or bool(RECEIPT_DESEN.search(b)) or terim
+        eski = eski or terim or bool(RECEIPT_ESKI.search(b))
+    SON["yalniz_yeni"] = bool(diger and not eski)
     return diger
 
 
@@ -157,6 +165,8 @@ def main():
     ap.add_argument("mod", choices=["tara", "sil"])
     ap.add_argument("--terim-kok", default="_gizli")
     a = ap.parse_args()
+    if a.mod == "sil":   # Serdar 5 Kas S1 karar 2 a: yalniz tara; sil ayri onay (yeni desen fazla isaretler, sayisi tara ile olculur)
+        raise SystemExit("DUR: sil modu KAPALI (Serdar 5 Kas S1 karar 2 a); once tara ile fazla isaretleme sayisi, sonra ayri onay")
     T = terimler(a.terim_kok)
     TK = takip_terimleri(a.terim_kok)
     print(f"arama terimi: {len(T)} adet (+ receipt deseni) | takip terimi: {len(TK)} adet (+ takip deseni)", flush=True)
@@ -174,10 +184,12 @@ def main():
     ozet = {}
     for wf in RISKLI_WF:
         K = [k for k in kosular(wf) if k.get("status") == "completed"]
-        var = takip_var = yok = logsuz = hata = sil = 0
+        var = takip_var = yok = logsuz = hata = sil = fazla = 0
         t0 = time.time()
         for i, k in enumerate(K, 1):
+            SON["yalniz_yeni"] = False
             v = log_var(k["id"], T, TK)
+            fazla += bool(v is True and SON["yalniz_yeni"])
             takip_var += v == "takip"
             if v is None:
                 logsuz += 1
@@ -193,7 +205,8 @@ def main():
             if i % 50 == 0 or i == len(K):
                 g = time.time() - t0
                 print(f"  {wf}: {i}/{len(K)} %{i * 100 // len(K)} | gecen {g / 60:.1f} dk | kalan {g / i * (len(K) - i) / 60:.1f} dk", flush=True)
-        ozet[wf] = {"kosu": len(K), "VAR": var, "VAR_takip": takip_var, "YOK": yok, "log_yok": logsuz, "okunamadi": hata, "log_silindi": sil}
+        ozet[wf] = {"kosu": len(K), "VAR": var, "VAR_takip": takip_var, "VAR_yalniz_yeni_desen_ust_sinir": fazla, "YOK": yok, "log_yok": logsuz,
+                    "okunamadi": hata, "log_silindi": sil}
         print(f"{wf}: {ozet[wf]}", flush=True)
     rapor = {"mod": a.mod, "artifact_toplam": len(A), "artifact_riskli": len(risk), "artifact_silindi": silinen_a, "log": ozet}
     with open(os.environ.get("GITHUB_STEP_SUMMARY", "/dev/null"), "a") as fh:

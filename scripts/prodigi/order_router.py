@@ -56,6 +56,7 @@ import takip  # noqa: E402
 import kisisel_siparis  # noqa: E402
 import siparis_onay  # noqa: E402
 import kargo_maske  # noqa: E402
+import receipt_desen  # noqa: E402
 
 PRODIGI = {"live": "https://api.prodigi.com/v4.0", "sandbox": "https://api.sandbox.prodigi.com/v4.0"}
 KEY_REMOTE = {"live": "gdrive:ASTROLOVE/TEMP/PRODIGI_TOKEN.json", "sandbox": "gdrive:ASTROLOVE/TEMP/PRODIGI_SANDBOX_TOKEN.json"}
@@ -695,7 +696,7 @@ def upd(st, path, rid, **kw):
 
 
 # ------------------------------------------------------------------ ana
-RECEIPT_DESEN = re.compile(r"(?<!\d)4[01]\d{8}(?!\d)")      # Etsy receipt bicimi (ilan 45..., gorsel 8...)
+RECEIPT_DESEN = receipt_desen.ROUTER   # S1 (Serdar 4 Kas): onek yok; tek basina 10-12 haneli her sayi (ilan id dahil) maskelenir
 
 
 def receipt_kod(rid):
@@ -707,20 +708,35 @@ def receipt_kod(rid):
 
 
 def maskele_metin(t):
-    return RECEIPT_DESEN.sub(lambda m: receipt_kod(m.group(0)), t)
+    """Satir satir; ::add-mask:: satirlari aynen kalir (receipt_desen.satir_satir)."""
+    return receipt_desen.satir_satir(t, lambda s: RECEIPT_DESEN.sub(lambda m: receipt_kod(m.group(0)), s))
 
 
 class _MaskeliCikti:
     """ACIL 25 Eyl: musteri verisi loga yazilmaz. stdout'a giden her satirda receipt -> opak kod;
     28 Eyl: kargo takip no ve Prodigi siparis kimligi son 4 hane (scripts/guvenlik/kargo_maske.py).
-    Drive'daki REPORT.md / DIKKAT.md / STATE tam kalir."""
+    Drive'daki REPORT.md / DIKKAT.md / STATE tam kalir.
+    S1 (4 Kas): satir tamponu; maske tam satira uygulanir (print("::add-mask::", x) gibi parcali yazimda muafiyet ve fis deseni
+    satir butunuyle calisir). Sira: once fis deseni (Merkez S1: tek basina 10-12 hane = S- kodu), sonra kargo_maske; ord_ onekli
+    sayi fis desenine girmez (receipt_desen ROUTER), kargo_maske son 4 haneyle maskeler (inceleme S1 madde 3)."""
     def __init__(self, akis):
         self._a = akis
+        self._t = ""
 
-    def write(self, t):
+    def _yaz(self, t):
         return self._a.write(kargo_maske.maskele(maskele_metin(t)))
 
+    def write(self, t):
+        self._t += t
+        if "\n" in self._t:
+            tam, _, self._t = self._t.rpartition("\n")
+            self._yaz(tam + "\n")
+        return len(t)
+
     def flush(self):
+        if self._t:
+            t, self._t = self._t, ""
+            self._yaz(t)
         return self._a.flush()
 
     def __getattr__(self, ad):

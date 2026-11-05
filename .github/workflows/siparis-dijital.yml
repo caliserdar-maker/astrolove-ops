@@ -94,7 +94,7 @@ jobs:
         run: |
           set -euo pipefail
           for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
-          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
+          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); while IFS= read -r s || [ -n "$s" ]; do s="${s#"${s%%[![:space:]]*}"}"; s="${s%"${s##*[![:space:]]}"}"; if [ "$(printf %s "$s" | wc -c)" -ge 4 ]; then echo "::add-mask::$s"; fi; done <<< "${m//$'\r'/$'\n'}"
           jq -re '.inputs.receipt | test("^[0-9]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: receipt rakam olmali" >&2; exit 1; }
           jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: cift" >&2; exit 1; }
           jq -re '(.inputs.wp_ref // "") | test("^([0-9a-f]{40})?$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: wp_ref tam 40 karakter SHA olmali" >&2; exit 1; }
@@ -154,7 +154,7 @@ jobs:
         run: |
           set -euo pipefail
           for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
-          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
+          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); while IFS= read -r s || [ -n "$s" ]; do s="${s#"${s%%[![:space:]]*}"}"; s="${s%"${s##*[![:space:]]}"}"; if [ "$(printf %s "$s" | wc -c)" -ge 4 ]; then echo "::add-mask::$s"; fi; done <<< "${m//$'\r'/$'\n'}"
           jq -re '.inputs.receipt | test("^[0-9]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: receipt rakam olmali" >&2; exit 1; }
           jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: cift" >&2; exit 1; }
           for k in isim1 isim2; do jq -re --arg k "$k" '.inputs[$k] | test("^[A-Za-z][A-Za-z -]{0,19}$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: $k bicimi" >&2; exit 1; }; done
@@ -221,7 +221,7 @@ jobs:
         run: |
           set -euo pipefail
           for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
-          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
+          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); while IFS= read -r s || [ -n "$s" ]; do s="${s#"${s%%[![:space:]]*}"}"; s="${s%"${s##*[![:space:]]}"}"; if [ "$(printf %s "$s" | wc -c)" -ge 4 ]; then echo "::add-mask::$s"; fi; done <<< "${m//$'\r'/$'\n'}"
           jq -re '.inputs.receipt | test("^[0-9]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: receipt rakam olmali" >&2; exit 1; }
           jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: cift" >&2; exit 1; }
           for k in isim1 isim2; do jq -re --arg k "$k" '.inputs[$k] | test("^[A-Za-z][A-Za-z -]{0,19}$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: $k bicimi" >&2; exit 1; }; done
@@ -287,7 +287,7 @@ jobs:
         run: |
           set -euo pipefail
           for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
-          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
+          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); while IFS= read -r s || [ -n "$s" ]; do s="${s#"${s%%[![:space:]]*}"}"; s="${s%"${s##*[![:space:]]}"}"; if [ "$(printf %s "$s" | wc -c)" -ge 4 ]; then echo "::add-mask::$s"; fi; done <<< "${m//$'\r'/$'\n'}"
           jq -re '.inputs.receipt | test("^[0-9]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: receipt rakam olmali" >&2; exit 1; }
           jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: cift" >&2; exit 1; }
       - uses: actions/checkout@v4
@@ -379,11 +379,25 @@ jobs:
       contents: read
       actions: read
     steps:
+      - name: Sessiz atlama kapisi (S1, Serdar 5 Kas karar 1 a)
+        # Olcum 41987043341: ::add-mask:: edilen deger bir job output'unun ICINDE geciyorsa (buyuk/kucuk harf duyarli) runner o
+        # output'u bosaltir; bos sayfa_var sayfa isini HATASIZ atlatir. Isler tarafindan OKUNAN 4 output (renk, sayfa, sayfa_var, wp)
+        # her zaman dolu olmali; bossa FAIL. cift / normalize hicbir iste okunmaz, denetlenmez (inceleme 5 Kas: yanlis FAIL olurdu).
+        env:
+          O_RENK: ${{ needs.plan.outputs.renk }}
+          O_SAYFA: ${{ needs.plan.outputs.sayfa }}
+          O_SAYFA_VAR: ${{ needs.plan.outputs.sayfa_var }}
+          O_WP: ${{ needs.plan.outputs.wp }}
+        run: |
+          bos=""
+          for k in O_RENK O_SAYFA O_SAYFA_VAR O_WP; do [ -n "${!k}" ] || bos="$bos ${k#O_}"; done
+          if [ -n "$bos" ]; then echo "::error title=SESSIZ ATLAMA::plan output bos:$bos (maskeli deger output'ta geciyor olabilir; sayfa/WP isi atlanmis olabilir)"; exit 1; fi
+          echo "plan output'lari dolu (4/4)"
       - name: Girdi + maske
         run: |
           set -euo pipefail
           for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
-          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
+          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); while IFS= read -r s || [ -n "$s" ]; do s="${s#"${s%%[![:space:]]*}"}"; s="${s%"${s##*[![:space:]]}"}"; if [ "$(printf %s "$s" | wc -c)" -ge 4 ]; then echo "::add-mask::$s"; fi; done <<< "${m//$'\r'/$'\n'}"
           r=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$r" =~ ^[0-9]+$ ]] || exit 1
           echo "REC=$r" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
@@ -520,7 +534,7 @@ jobs:
         run: |
           set -euo pipefail
           for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
-          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); echo "::add-mask::$m"
+          m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); while IFS= read -r s || [ -n "$s" ]; do s="${s#"${s%%[![:space:]]*}"}"; s="${s%"${s##*[![:space:]]}"}"; if [ "$(printf %s "$s" | wc -c)" -ge 4 ]; then echo "::add-mask::$s"; fi; done <<< "${m//$'\r'/$'\n'}"
           r=$(jq -r '.inputs.receipt' "$GITHUB_EVENT_PATH"); [[ "$r" =~ ^[0-9]+$ ]] || exit 1
           echo "REC=$r" >> "$GITHUB_ENV"
       - name: rclone (dogrudan ikili)
