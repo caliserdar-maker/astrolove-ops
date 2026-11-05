@@ -1,0 +1,12 @@
+{
+ "cift": "CANCER_LIBRA",
+ "stil": "RUBY",
+ "isim1": "MARY-JANE",
+ "isim2": "O'NEIL",
+ "tarih": "JUNE 14, 2025",
+ "_test": {
+  "kod": "T07",
+  "beklenen": "DUR_GIRDI",
+  "not_": "bilinen FAIL (r 346,4 BASIC, PLAN_YENI_DUZEN.md:236)"
+ }
+}

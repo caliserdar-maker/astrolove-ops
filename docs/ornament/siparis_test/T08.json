@@ -1,0 +1,12 @@
+{
+ "cift": "CANCER_LIBRA",
+ "stil": "RUBY",
+ "isim1": "WWWWWWWW",
+ "isim2": "WWWWWWWW",
+ "tarih": "JUNE 14, 2025",
+ "_test": {
+  "kod": "T08",
+  "beklenen": "DUR_GIRDI",
+  "not_": "bilinen FAIL (harf sayisi genisligi belirlemez)"
+ }
+}

@@ -1,0 +1,12 @@
+{
+ "cift": "CANCER_LIBRA",
+ "stil": "RUBY",
+ "isim1": "EMILY",
+ "isim2": "O’Neil",
+ "tarih": "JUNE 14, 2025",
+ "_test": {
+  "kod": "T13",
+  "beklenen": "DUR_SERDAR",
+  "not_": "kivrik kesme (K3)"
+ }
+}

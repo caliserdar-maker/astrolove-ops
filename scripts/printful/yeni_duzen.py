@@ -242,10 +242,27 @@ def sembol_yerlestir(ana_rgba, sinir_alt, olcekle, ust_min=UST_MIN, b3_kat=B3_KA
     return (rgb, a, x, y), d
 
 
-def kapilar(E, ana_rgba, olcekle, tabanlar, sabit, ref_metin, kapat=None):
+SIPARIS_MUREKKEP_OGE = ('isim1', 'isim2', 'sonsuz', 'kucuk_sol', 'kucuk_sag', 'tarih')   # siparis kipi: halka ic dairesi kapisi (KARARLAR_20261104_2 isim kapisi)
+
+
+def siparis_murekkep(E):
+    """siparis kipi kapisi: SIPARIS_MUREKKEP_OGE murekkebi (alfa > 0,5) halka ic dairesi (merkez 475,5 / 504, r 336) icinde mi.
+    Eksik oge FAIL (sessiz atlama yok). Doner (ok, {ad: r_max})."""
+    r_oge = {}
+    for ad in SIPARIS_MUREKKEP_OGE:
+        if ad not in E or E[ad][1] is None or not (E[ad][1] > 0.5).any():
+            r_oge[ad] = None
+            continue
+        r_oge[ad] = round(halka_max_r(E[ad][1], E[ad][2], E[ad][3]), 2)
+    return all(v is not None and v <= HALKA_R for v in r_oge.values()), r_oge
+
+
+def kapilar(E, ana_rgba, olcekle, tabanlar, sabit, ref_metin, kapat=None, siparis=False):
     """yeni duzen kapilari. K3: cizgiler 'sabit'ten (SABIT), yerlestirme sozlugunden degil. K1: B3 olcegi yeniden hesaplanir (sabit sinirla),
     beklenen sembol x 0,85'te yeniden cizilir (kapat dahil) ve CIZILEN sembolun kutusu (h, w) ile 1 px icinde karsilastirilir.
-    ref_metin True ise (motorun EMILY / JAMES / JUNE 14, 2025 ornegi) murekkep kutusu kapilari da (tarih alt 795, 32 / 32). Doner (kapi: bool, olcum)."""
+    ref_metin True ise (motorun EMILY / JAMES / JUNE 14, 2025 ornegi) murekkep kutusu kapilari da (tarih alt 795, 32 / 32). Doner (kapi: bool, olcum).
+    siparis True (Serdar 6 Kas gece N4; plan v2 2.1b): musteri metninde tarih_alt_le_795 (tarih murekkebi alti <= 795 + 1; plan tanimi),
+    bosluk_32_32 (32 / 32 +- 1) AYNEN (N4) + yeni siki kapi murekkep_r_le_336 (isim, logo, kucuk isaretler, tarih murekkebi halka ic dairesi r <= 336 icinde)."""
     s = kutu_E(E, 'sembol')
     _, a, x, y = E['sembol']
     r_max = halka_max_r(a, x, y)
@@ -282,12 +299,19 @@ def kapilar(E, ana_rgba, olcekle, tabanlar, sabit, ref_metin, kapat=None):
              sonsuz_y=int(E['sonsuz'][3]) == sabit['sonsuz_y'],
              kucuk_alta_yasli=all(abs(b[3] - sabit['kucuk_alt']) <= TOL_PX for b in k.values()),
              kucuk_ust_ge_sabit=all(b[1] >= sabit['kucuk_ust_sabit'] - TOL_PX for b in k.values()))
-    if ref_metin:
+    if siparis:
+        ok_r, r_oge = siparis_murekkep(E)
+        olc.update(siparis_murekkep_r=r_oge)
+        g['murekkep_r_le_336'] = ok_r
+    if ref_metin or siparis:
         t = kutu_E(E, 'tarih')
         i0, i1 = satir_E(E, ISIM_SATIRI)
         olc.update(tarih_kutu=list(t), tarih_alt=t[3], bosluk_tarih_isim=t[1] - i1, bosluk_isim_kucuk=i0 - max(b[3] for b in k.values()))
-        g.update(tarih_alt_795=abs(t[3] - TARIH_ALT) <= TOL_PX,
-                 bosluk_32_32=abs((t[1] - i1) - BOSLUK) <= TOL_PX and abs((i0 - max(b[3] for b in k.values())) - BOSLUK) <= TOL_PX)
+        bos_ok = abs((t[1] - i1) - BOSLUK) <= TOL_PX and abs((i0 - max(b[3] for b in k.values())) - BOSLUK) <= TOL_PX
+        if ref_metin:
+            g.update(tarih_alt_795=abs(t[3] - TARIH_ALT) <= TOL_PX, bosluk_32_32=bos_ok)
+        else:                                                                 # siparis kipi: plan v2 2.1b tarih_alt_le_795 (<= 795 + 1; ay J'siz olunca murekkep 792-793),
+            g.update(tarih_alt_le_795=t[3] <= TARIH_ALT + TOL_PX, bosluk_32_32=bos_ok)   # bosluk 32 +-1 esitligi AYNEN (KARARLAR_20261106 N4; alt sinir K8 karari)
     return {kk: bool(v) for kk, v in g.items()}, olc
 
 
@@ -306,8 +330,9 @@ def ref_esit(ref, sabit):
     return True
 
 
-def yeni_yerlesim(yazi_blogu, olcekle, T, kc, ana_rgba, h_max, T_ref=None, kapat=None, sabit=None):
+def yeni_yerlesim(yazi_blogu, olcekle, T, kc, ana_rgba, h_max, T_ref=None, kapat=None, sabit=None, siparis=False):
     """tam yeni yerlesim (motor ve yerel test ayni yol). T_ref None ise T referans metindir (motor ornegi).
+    siparis True: kapilar(siparis=True) (musteri metninde murekkep kapilari aynen + murekkep_r_le_336). Varsayilan davranis degismez.
     Doner (E, cizgi, d_sembol, kapi, olcum)."""
     ref_metin = T_ref is None
     ref = referans_cizgi(yazi_blogu, T if ref_metin else T_ref, kc, h_max)
@@ -315,7 +340,7 @@ def yeni_yerlesim(yazi_blogu, olcekle, T, kc, ana_rgba, h_max, T_ref=None, kapat
     E, tab = yazi_yerlestir(yazi_blogu, T, kc, ref)
     sem, d = sembol_yerlestir(ana_rgba, ref['sembol_alt_sinir'], olcekle, kapat=kapat)
     E['sembol'] = sem
-    g, olc = kapilar(E, ana_rgba, olcekle, tab, sabit_, ref_metin, kapat=kapat)
+    g, olc = kapilar(E, ana_rgba, olcekle, tab, sabit_, ref_metin, kapat=kapat, siparis=siparis)
     g['ref_cizgi_sabit'] = bool(ref_esit(ref, SABIT if sabit is None else sabit))
     olc['ref_cizgi'] = ref
     return E, ref, d, g, olc

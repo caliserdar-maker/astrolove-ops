@@ -1,0 +1,353 @@
+name: ornament-siparis
+# Ornament siparis hatti (Serdar 6 Kas gece "A"; plan claude/AstroLove_ORNAMENT_SIPARIS_PLAN_20261105.md v2; KARARLAR_20261106).
+# YALNIZ DOSYA uretir: Printful / Etsy / musteriye gonderim YOK, Printful API YOK, Etsy API YOK, cron YOK (Serdar 5 Kas aksam).
+# Tetik: YALNIZ dal ornament-printful-katalog'da docs/ornament/siparis_tetik/*.txt eklenmesi / degismesi. Her siparis ayri tetik dosyasi.
+#   Satir bicimi: "SIPARIS <opak 16 hex>" (gercek siparis; GIRDI.json Merkez'ce Drive ASTROLOVE/SIPARIS_IS/<opak>/'a yazilir)
+#                 "TEST <Tnn>" (sahte girdi docs/ornament/siparis_test/Tnn.json; is akisi Drive SIPARIS_IS/TEST_<run>_<Tnn>/'a kopyalar, ayni yoldan okur)
+# Checkout ref = tetikleyen commit (github.sha), dal ucu degil. Concurrency grubu commit basina; iptal yok.
+# Depo PUBLIC (ANA_2 7.3): musteri metni / siparis no loga, dala, artifact'a girmez. Drive klasor adi yalniz opak kod. rclone -q, hata ciktisi
+# yalniz /tmp/ozel. Alt surec ciktilari dosyaya; kamuya acik ozet gizlilik_tara.py PASS olmadan basilmaz. Artifact YOK.
+# Uretim zinciri onayli 78 uretimiyle AYNI (ornek78.py: motor + dump + sade + fildisi; pinler ve girdiler ornament-78-uretim.yml ile ayni).
+# Gece varsayimlari (KARARLAR_20261106 N4): ORN_BEKLENEN_RAQM=0 (BASIC, K1), istisna ciftleri DUR (K7), 32 +-1 aynen (K8), K3 / K9 DUR_SERDAR.
+on:
+  push:
+    branches: [ornament-printful-katalog]
+    paths: ['docs/ornament/siparis_tetik/*.txt']
+permissions: {}
+concurrency:
+  group: ornament-siparis-${{ github.sha }}
+  cancel-in-progress: false
+env:
+  DAL: ornament-printful-katalog
+  MOTOR_COMMIT: 6da763aa5b9820027420f73264fc69d30e120a33
+  TEK_DOKU_COMMIT: 2a08a78216ca19dd632e7dedda31c4c53c365c25
+  ACIK_COMMIT: 28774956a2561c9776dca0d1484c8a17b81f6aac
+  ONAY_COMMIT: 6daab364816e4c4b8602258b9b8d8bec28231cfc
+  O5: docs/ornament/ornek/ORNAMENT_5STIL_20261103_1539
+  ANA_KLASOR: 1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD
+  BURC_KLASOR: 1j9TBPj86_5njsmf_t0v6tczuwcDyLuXu
+  SIPARIS_KOK: ASTROLOVE/SIPARIS_IS
+  ONAYLI_TOPLAMA: ASTROLOVE/TEMP/ORNAMENT_78_TOPLAMA_20261105_1901_42089646647
+  ORN_BEKLENEN_RAQM: "0"
+jobs:
+  hazirlik:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    outputs:
+      kalemler: ${{ steps.tetik.outputs.kalemler }}
+      test_var: ${{ steps.tetik.outputs.test_var }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          lfs: false
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            scripts/printful/
+            docs/ornament/siparis_tetik/
+            docs/ornament/siparis_test/
+          path: s
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Birim testleri (girdi kurallari, siniflama, gizlilik bilinen FAIL, murekkep kapisi)
+        run: |
+          set -euo pipefail
+          pip install -q numpy==2.5.4
+          python3 -I s/scripts/printful/test_siparis_girdi.py > /tmp/t1.txt; tail -1 /tmp/t1.txt
+          python3 -I s/scripts/printful/test_siparis_kapi.py > /tmp/t2.txt; tail -1 /tmp/t2.txt
+          python3 -I s/scripts/printful/test_ornament_siparis.py > /tmp/t3.txt; tail -1 /tmp/t3.txt
+      - name: Tetik dosyalari (bu commit'te eklenen / degisen)
+        id: tetik
+        env:
+          RUN_ID: ${{ github.run_id }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          # tek push'ta birden cok commit olabilir: before..sha araligi (before yoksa ya da sifirsa HEAD~1)
+          if [ -n "${BEFORE:-}" ] && [ "$BEFORE" != 0000000000000000000000000000000000000000 ] && git -C s fetch -q --depth 1 --filter=blob:none origin "$BEFORE" 2>/dev/null; then
+            git -C s diff --name-only --diff-filter=AM "$BEFORE" HEAD -- docs/ornament/siparis_tetik/ > /tmp/tetik_dosya.txt
+          else
+            git -C s diff --name-only --diff-filter=AM HEAD~1 HEAD -- docs/ornament/siparis_tetik/ > /tmp/tetik_dosya.txt
+          fi
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, re
+          kal, hata = [], []
+          for f in [l.strip() for l in open('/tmp/tetik_dosya.txt') if l.strip()]:
+              for satir in open(os.path.join('s', f)).read().splitlines():
+                  p = satir.split()
+                  if not p:
+                      continue
+                  if len(p) == 2 and p[0] == 'SIPARIS' and re.fullmatch(r'[0-9a-f]{16}', p[1]):
+                      kal.append(dict(kod=p[1], tur='SIPARIS', klasor=p[1]))
+                  elif len(p) == 2 and p[0] == 'TEST' and re.fullmatch(r'T\d{2}', p[1]) and os.path.exists(f's/docs/ornament/siparis_test/{p[1]}.json'):
+                      kal.append(dict(kod=p[1], tur='TEST', klasor=f"TEST_{os.environ['RUN_ID']}_{p[1]}"))
+                  else:
+                      hata.append(f)
+          assert not hata, f'tetik satiri gecersiz: {sorted(set(hata))}'
+          assert kal, 'tetik dosyasinda kalem yok'
+          assert len({k['klasor'] for k in kal}) == len(kal), 'ayni kalem iki kez'
+          print('kalemler=' + json.dumps(kal, separators=(',', ':')))
+          print('test_var=' + ('1' if any(k['tur'] == 'TEST' for k in kal) else '0'))
+          PY
+          grep -c . /tmp/tetik_dosya.txt | sed 's/^/tetik dosya sayisi /'
+      - name: rclone (yalniz TEST girdilerini Drive'a koymak icin)
+        if: steps.tetik.outputs.test_var == '1'
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: TEST girdilerini Drive SIPARIS_IS altina kopyala (gercek siparisle ayni okuma yolu)
+        if: steps.tetik.outputs.test_var == '1'
+        env:
+          KALEMLER: ${{ steps.tetik.outputs.kalemler }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/ozel
+          python3 -c "import json,os; [print(k['kod'], k['klasor']) for k in json.loads(os.environ['KALEMLER']) if k['tur']=='TEST']" > /tmp/test_kalem.txt
+          while read -r kod kl; do
+            rclone copyto "s/docs/ornament/siparis_test/$kod.json" "gdrive:$SIPARIS_KOK/$kl/GIRDI.json" -q 2>>/tmp/ozel/rclone_err.txt
+          done < /tmp/test_kalem.txt
+          echo "TEST girdisi: $(grep -c . /tmp/test_kalem.txt) kalem"
+      - if: always()
+        run: rm -rf ~/.config/rclone /tmp/ozel
+
+  kalem:
+    needs: hazirlik
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include: ${{ fromJSON(needs.hazirlik.outputs.kalemler) }}
+    concurrency:
+      group: ornament-siparis-${{ github.sha }}-${{ matrix.klasor }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          lfs: false
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            scripts/printful/
+            docs/ornament/zemin3/V2/
+            docs/ornament/siparis_test/
+          path: s
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Commit'ler, paketler, rclone
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/ozel /tmp/rapor
+          for c in $MOTOR_COMMIT $TEK_DOKU_COMMIT $ACIK_COMMIT $ONAY_COMMIT; do git -C s fetch -q --depth 1 --filter=blob:none origin $c; done
+          pip install -q pillow==11.0.0 numpy==2.5.4 opencv-python-headless==5.0.0.93 scipy==1.18.1 scikit-image==0.26.0 potracer==0.0.4
+          python3 -c "import sys, numpy, cv2, PIL; from PIL import features; print('python', sys.version.split()[0], 'numpy', numpy.__version__, 'cv2', cv2.__version__, 'pillow', PIL.__version__, 'raqm', features.check('raqm'))"
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: GIRDI (Drive SIPARIS_IS/<klasor>/GIRDI.json) ve cift
+        env:
+          KL: ${{ matrix.klasor }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p /tmp/is
+          rclone copyto "gdrive:$SIPARIS_KOK/$KL/GIRDI.json" /tmp/is/GIRDI.json -q 2>>/tmp/ozel/rclone_err.txt || { echo "::error::GIRDI okunamadi (kalem ${{ matrix.kod }})"; exit 1; }
+          # cift adi musteri verisi degil (78 sabit anahtar); gecersizse CANCER_LIBRA indirilir, girdi kapisi zaten DUR verir
+          python3 - <<'PY'
+          import json, re
+          try:
+              c = str(json.load(open('/tmp/is/GIRDI.json')).get('cift') or '').strip().upper()
+          except Exception:
+              c = ''
+          c = c if re.fullmatch(r'[A-Z]+_[A-Z]+', c) else 'CANCER_LIBRA'
+          open('/tmp/is/CIFT.txt', 'w').write(c)
+          PY
+      - name: Girdiler (cift + CL; md5 ve sha kapisi; ornament-78-uretim.yml ile ayni)
+        run: |
+          set -euo pipefail
+          K=/tmp/kay; MD=/tmp/mg; ZE=/tmp/zemin; mkdir -p $K $MD/kure $MD/palet $MD/girdi78/ana $ZE /tmp/onayli
+          C=$(cat /tmp/is/CIFT.txt)
+          printf '/%s_ana.png\n/CANCER_LIBRA_ana.png\n' "$C" | sort -u > /tmp/inc_ana.txt
+          rclone copy "gdrive:" "$K/" --drive-root-folder-id "$ANA_KLASOR" --include-from /tmp/inc_ana.txt --max-depth 1 -q 2>>/tmp/ozel/rclone_err.txt
+          rclone copy "gdrive:" "$K/" --drive-root-folder-id "$BURC_KLASOR" --include "/*_symbol_gold.png" --max-depth 1 -q 2>>/tmp/ozel/rclone_err.txt
+          { rclone md5sum "gdrive:" --drive-root-folder-id "$ANA_KLASOR" --include "*_ana.png" --max-depth 1;
+            rclone md5sum "gdrive:" --drive-root-folder-id "$BURC_KLASOR" --include "*_symbol_gold.png" --max-depth 1; } > /tmp/drive_md5.txt 2>>/tmp/ozel/rclone_err.txt
+          (cd $K && md5sum *_ana.png *_symbol_gold.png) > /tmp/yerel_md5.txt
+          python3 - <<'PY'
+          d = {l.split()[1]: l.split()[0] for l in open('/tmp/drive_md5.txt') if l.strip()}
+          y = {l.split()[1]: l.split()[0] for l in open('/tmp/yerel_md5.txt') if l.strip()}
+          n_ana = sum(1 for l in open('/tmp/inc_ana.txt') if l.strip())
+          bad = [f for f in y if d.get(f) != y[f]]
+          print('drive md5', len(y), 'dosya, uyusmayan', len(bad), '| beklenen', n_ana + 12)
+          assert not bad and len(y) == n_ana + 12, 'DUR: Drive md5 uyusmuyor ya da dosya eksik'
+          PY
+          for f in motor/varlik/halka/HALKA_BLUE_16x20.png motor/font/Cinzel.ttf motor/font/EBGaramond-Italic.ttf motor/tek_doku.py; do
+            git -C s show "$TEK_DOKU_COMMIT:$f" > "$K/$(basename $f)"; done
+          for f in BEIGE_1264.png AGED_PAPYRUS_1264.png; do git -C s show $ACIK_COMMIT:zemin_acik/$f > $K/$f; done
+          cp s/docs/ornament/zemin3/V2/RUBY_1264.png s/docs/ornament/zemin3/V2/SAPPHIRE_1264.png s/docs/ornament/zemin3/V2/EMERALD_1264.png $K/
+          git -C s show $MOTOR_COMMIT:motor_gpt/girdi/LOGO_1.png > $K/LOGO_1.png
+          git -C s show $MOTOR_COMMIT:motor_gpt/girdi78/ana/cancer_libra_alfa.png > $K/cancer_libra_alfa.png
+          git -C s show $MOTOR_COMMIT:motor_gpt/alfa_ogeler.npz > $K/alfa_ogeler.npz
+          for f in KILIT_GPTGIRDI.json golge_motor.py vektor_yuzey.py alfa_temizle.py uret_tam.py renk_uyum.py olustur_alfa_sablon.py kure/k4.npy palet/chatgpt_altin.png yerlesim78.json cember.json; do
+            git -C s show $MOTOR_COMMIT:motor_gpt/$f > $MD/$f; done
+          for c in CANCER_LIBRA "$C"; do lc=$(echo "$c" | tr 'A-Z' 'a-z'); git -C s show $MOTOR_COMMIT:motor_gpt/girdi78/ana/${lc}_alfa.png > $MD/girdi78/ana/${lc}_alfa.png; done   # CL = kontrol cifti
+          for r in RUBY SAPPHIRE EMERALD; do git -C s show $ONAY_COMMIT:docs/ornament/ornek/ORNAMENT_KOYU_G1/ON_OLCUM_ELIPS/${r}_ELIPS_1264.png > $ZE/${r}_1264.png; done
+          for r in RUBY SAPPHIRE EMERALD SADE_ALTIN FILDISI; do git -C s show $ONAY_COMMIT:$O5/CANCER_LIBRA_${r}_954.png > /tmp/onayli/CANCER_LIBRA_${r}_954.png; done
+          cat > /tmp/beklenen.txt <<'EOF'
+          e86c2629629305fd90bbb66494238faef9b4ad1acb815eb7b3ed55e7f44fc2d2  /tmp/kay/CANCER_LIBRA_ana.png
+          2b5a32121ce8fa92ceef1a386f5ab1742a573681c30e742223be75005816cf28  /tmp/kay/cancer_symbol_gold.png
+          6fe2d0355ee56f8468eb637d3ca6445fd517983b00e51bce76cac218864f6a4b  /tmp/kay/libra_symbol_gold.png
+          e80d6d3fca82e2804865c887277c06bc8e958175e254b1f2d289eaeba03c9044  /tmp/zemin/RUBY_1264.png
+          0d3213f8b592392aa69a3cdcd127d893a6fd2ef3d94e5913cf94ee96f4afb941  /tmp/zemin/SAPPHIRE_1264.png
+          0c232cfc155ba2cbfd34cb92c6f72ffdb0fbbc54570ac9a8e987efdfdcd7f787  /tmp/zemin/EMERALD_1264.png
+          2a11ac819c611eaa84e60e469316f345eaa8eb48f6e9e6113d9a7831ab2fa410  /tmp/kay/HALKA_BLUE_16x20.png
+          62239238b25dbc5417dab4dc353fdbf15129599c9372737d5d8ddb86b3042061  /tmp/kay/LOGO_1.png
+          1889906fb29920e9294d5c343ace09b2295d81e4c49153d2badfb8d5101ddbad  /tmp/kay/tek_doku.py
+          f4d83d34d1f6c741193e4acf4b3dff9531e5a67b6aa65228d00a7db72a4e0f34  /tmp/kay/Cinzel.ttf
+          bba2c4499c93c9612b90b9825d32b07da52fce2fe57562a1eb6b833553f93c4e  /tmp/kay/EBGaramond-Italic.ttf
+          EOF
+          sed -i 's/^ *//' /tmp/beklenen.txt
+          sha256sum -c /tmp/beklenen.txt > /tmp/rapor/girdi_sha.txt
+          echo "girdi sha: $(grep -c ': OK' /tmp/rapor/girdi_sha.txt) / $(grep -c . /tmp/beklenen.txt) OK"
+      - name: Uretim (ornament_siparis.py; alt surec ciktisi yalniz is klasorune)
+        id: uretim
+        env:
+          RAQM_TERS: ${{ matrix.tur == 'TEST' && 'kontrol' || 'yok' }}
+          ORN_SIPARIS_IS: /tmp/is
+        run: |
+          set +e
+          set -uo pipefail
+          mkdir -p /tmp/son_yok /tmp/cikti
+          if [ "$RAQM_TERS" = kontrol ] && python3 -c "import json,sys; sys.exit(0 if json.load(open('/tmp/is/GIRDI.json')).get('_test',{}).get('raqm_ters') else 1)"; then
+            export ORN_BEKLENEN_RAQM=$([ "$ORN_BEKLENEN_RAQM" = 0 ] && echo 1 || echo 0); echo "TEST: beklenen raqm ters verildi (bilinen FAIL testi)"; fi
+          cd s
+          python3 -I scripts/printful/ornament_siparis.py --girdi /tmp/is/GIRDI.json --kaynak /tmp/kay --motor /tmp/mg --zemin /tmp/zemin \
+            --son /tmp/son_yok --onayli /tmp/onayli --font /tmp/kay/EBGaramond-Italic.ttf --cikti /tmp/cikti --is /tmp/is > /tmp/ozel/surucu_stdout.txt 2>&1
+          k=$?
+          echo "$k" > /tmp/cikti/CIKIS.txt
+          echo "k=$k" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Gizlilik kapisi ve kamuya acik ozet
+        run: |
+          set +e
+          set -uo pipefail
+          G=/tmp/is/NORMAL.json; [ -f "$G" ] || G=/tmp/is/GIRDI.json
+          python3 -I s/scripts/printful/gizlilik_tara.py "$G" /tmp/cikti/OZET_PUBLIC.txt /tmp/ozel/surucu_stdout.txt $(ls /tmp/cikti/DUR.json 2>/dev/null) > /tmp/ozel/gizlilik.txt 2>&1
+          g=$?
+          if [ $g -eq 0 ]; then cat /tmp/cikti/OZET_PUBLIC.txt; cat /tmp/ozel/surucu_stdout.txt; else echo "::error::gizlilik kapisi FAIL: ozet basilmadi (ayrinti Drive'da)"; fi
+          echo "kalem ${{ matrix.kod }} cikis $(cat /tmp/cikti/CIKIS.txt) (0 PASS, 3 DUR_GIRDI, 4 DUR_SERDAR, 6 MOTOR_KAPI_FAIL, 2 COKUS)"
+          cp /tmp/ozel/gizlilik.txt /tmp/cikti/GIZLILIK.txt
+          exit $g
+      - name: Drive'a yaz (SIPARIS_IS/<klasor>/; 3 deneme)
+        if: always()
+        env:
+          KL: ${{ matrix.klasor }}
+          TUR: ${{ matrix.tur }}
+        run: |
+          set +e
+          set -uo pipefail
+          mkdir -p /tmp/cikti/IS
+          for f in /tmp/is/log_ornek78.txt /tmp/is/rapor/OLCUM.json /tmp/is/traceback_siparis.txt /tmp/rapor/girdi_sha.txt /tmp/ozel/rclone_err.txt; do [ -f "$f" ] && cp "$f" /tmp/cikti/IS/; done
+          C=$(cat /tmp/is/CIFT.txt 2>/dev/null || echo yok)
+          [ -f "/tmp/is/png/_is/$C/motor/OLCUM.json" ] && cp "/tmp/is/png/_is/$C/motor/OLCUM.json" /tmp/cikti/IS/OLCUM_motor.json   # musteri ciftinin motoru (kontrol cifti ayri anahtarda)
+          if [ "$TUR" = TEST ]; then mkdir -p /tmp/cikti/IS/png; cp /tmp/is/png/*_954.png /tmp/cikti/IS/png/ 2>/dev/null; fi
+          ok=1
+          for i in 1 2 3; do rclone copy /tmp/cikti "gdrive:$SIPARIS_KOK/$KL" -q 2>>/tmp/ozel/rclone_err2.txt && { ok=0; break; }; sleep $((5*i)); done
+          [ $ok -eq 0 ] && echo "Drive: SIPARIS_IS/<klasor> yazildi" || { echo "::error::Drive yazimi basarisiz"; exit 1; }
+      - name: Sonuc (COKUS / MOTOR_KAPI_FAIL is kirmizi; DUR yesil, Merkez Drive'dan okur; TEST kaleminde karar test_ozet'te)
+        if: always()
+        env:
+          TUR: ${{ matrix.tur }}
+        run: |
+          k=$(cat /tmp/cikti/CIKIS.txt 2>/dev/null || echo 99)
+          if [ "$TUR" = TEST ]; then echo "TEST kalemi cikis $k (beklenti test_ozet'te)"; exit 0; fi
+          case "$k" in 0|3|4) echo "kalem cikis $k"; exit 0;; *) echo "::error::kalem cikis $k (2 COKUS, 6 MOTOR_KAPI_FAIL, 99 cikti yok)"; exit 1;; esac
+      - if: always()
+        run: rm -rf ~/.config/rclone /tmp/is /tmp/ozel /tmp/kay
+
+  test_ozet:
+    needs: [hazirlik, kalem]
+    if: always() && needs.hazirlik.outputs.test_var == '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          lfs: false
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            scripts/printful/
+            docs/ornament/siparis_test/
+            docs/ornament/ornek/ORNAMENT_78_TOPLAMA_20261105_1901_42089646647/SHA256SUMS.txt
+          path: s
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: rclone + paketler
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          pip install -q pillow==11.0.0 numpy==2.5.4
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Sonuclari topla, regresyon, beklenti
+        env:
+          KALEMLER: ${{ needs.hazirlik.outputs.kalemler }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set +e
+          set -uo pipefail
+          mkdir -p /tmp/ozel /tmp/t /tmp/onayli_top
+          python3 -c "import json,os; [print(k['kod'], k['klasor']) for k in json.loads(os.environ['KALEMLER']) if k['tur']=='TEST']" > /tmp/test_kalem.txt
+          : > /tmp/SONUC.tsv
+          while read -r kod kl; do
+            mkdir -p /tmp/t/$kod/cikti /tmp/t/$kod/is
+            rclone copy "gdrive:$SIPARIS_KOK/$kl" /tmp/t/$kod/cikti -q 2>>/tmp/ozel/rclone_err.txt
+            [ -d /tmp/t/$kod/cikti/IS/png ] && mv /tmp/t/$kod/cikti/IS/png /tmp/t/$kod/is/png
+            k=$(cat /tmp/t/$kod/cikti/CIKIS.txt 2>/dev/null || echo 99)
+            printf '%s\t%s\t%s\t%s\n' "$kod" "$k" "/tmp/t/$kod/cikti" "/tmp/t/$kod/is" >> /tmp/SONUC.tsv
+          done < /tmp/test_kalem.txt
+          for c in CANCER_LIBRA LEO_LEO AQUARIUS_AQUARIUS; do for s in RUBY SAPPHIRE EMERALD SADE_ALTIN FILDISI; do
+            rclone copyto "gdrive:$ONAYLI_TOPLAMA/${c}_${s}_954.png" /tmp/onayli_top/${c}_${s}_954.png -q 2>>/tmp/ozel/rclone_err.txt; done; done
+          python3 -I s/scripts/printful/siparis_test_ozet.py --sonuc /tmp/SONUC.tsv --fixture s/docs/ornament/siparis_test --onayli /tmp/onayli_top \
+            --sums s/docs/ornament/ornek/ORNAMENT_78_TOPLAMA_20261105_1901_42089646647/SHA256SUMS.txt --json /tmp/TEST_SONUC.json
+          k=$?
+          rclone copyto /tmp/TEST_SONUC.json "gdrive:$SIPARIS_KOK/TEST_${RUN_ID}_OZET/TEST_SONUC.json" -q 2>>/tmp/ozel/rclone_err.txt
+          echo "test ozeti cikis $k (Drive SIPARIS_IS/TEST_<run>_OZET)"; exit $k
+      - if: always()
+        run: rm -rf ~/.config/rclone /tmp/ozel /tmp/t

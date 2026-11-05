@@ -1,0 +1,13 @@
+{
+ "cift": "CANCER_LIBRA",
+ "stil": "RUBY",
+ "isim1": "EMILY",
+ "isim2": "JAMES",
+ "tarih": "JUNE 14, 2025",
+ "_test": {
+  "kod": "T19",
+  "beklenen": "COKUS",
+  "raqm_ters": true,
+  "not_": "bilinen FAIL: beklenen raqm ters verilir, motor siparis_oku ValueError"
+ }
+}

@@ -1,0 +1,13 @@
+{
+ "cift": "CANCER_LIBRA",
+ "stil": "RUBY",
+ "isim1": "EMILY",
+ "isim2": "JAMES",
+ "tarih": "JUNE 14, 2025",
+ "_test": {
+  "kod": "T01",
+  "beklenen": "PASS",
+  "regresyon": true,
+  "not_": "regresyon: onayli CL 5 stil ile piksel esitligi (yd yolu, 42001867106)"
+ }
+}

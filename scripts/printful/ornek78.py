@@ -29,7 +29,8 @@ CIFTLER = tuple(os.environ.get('ORNEK78_CIFTLER', 'CANCER_LIBRA,ARIES_ARIES,CAPR
 STIL = ('RUBY', 'SAPPHIRE', 'EMERALD', 'SADE_ALTIN', 'FILDISI')
 TOL_SEVIYE, TOL_PIKSEL = 1, 10
 KENAR_ZORUNLU = tuple(x for x in os.environ.get('ORNEK78_KENAR_ZORUNLU', '').split(',') if x)      # B: onarimsiz motorun nedeni leke olmali (sert)
-PARCA = os.environ.get('ORNEK78_PARCA', '')                                 # matrix parca no (ornament-78-uretim.yml); bos: eski davranis
+SIPARIS_KIP = bool(os.environ.get('ORN_SIPARIS_GIRDI'))                     # siparis kipi (Serdar 6 Kas gece; plan 2.1): ornament_siparis.py tek cift icin cagirir
+PARCA = os.environ.get('ORNEK78_PARCA', '')                                # matrix parca no (ornament-78-uretim.yml); bos: eski davranis
 YD = os.environ.get('YENI_DUZEN') == '1'                                     # yeni duzen kosusu (Serdar 4 Kas gece): ilk CL kontrolu ESKI modda (alt surece YENI_DUZEN=0),
                                                                              # sondaki CL (uretim78 cl_yeni_parca) yeni duzen uretimi; diger ciftler yeni duzen
 _s2 = importlib.util.spec_from_file_location('uretim78', _d / 'uretim78.py'); u78 = importlib.util.module_from_spec(_s2); _s2.loader.exec_module(u78)
@@ -180,8 +181,11 @@ def kenar_kayit(a, cift, w, M_, O, DE, KENAR, r, RP, UYARI):
     degisen = [ad for ad, k_ in KO.items() if k_.get('degisen_piksel')]
     k_on = None
     if degisen:
+        env_on = {'ORN_KENAR_ONARIM_KAPALI': '1'}
+        if SIPARIS_KIP:
+            env_on['ORN_SIPARIS_GIRDI'] = ''                                  # siparis kipi: onarimsiz motor referans metinle (kaynak lekesi metinden bagimsiz)
         k_on = kos([_d / 'ornament_motor.py', '--kaynak', a.kaynak, '--motor', a.motor, '--cikti', w / 'motor_onarimsiz', '--son', a.son, '--zemin', a.zemin,
-                    '--cift', cift], env={'ORN_KENAR_ONARIM_KAPALI': '1'}, log_dosya=w / 'log_motor_onarimsiz.txt')
+                    '--cift', cift], env=env_on, log_dosya=w / 'log_motor_onarimsiz.txt')
         log('onarimsiz motor', cift, 'cikis', k_on)
         for src, dst in ((w / 'log_motor_onarimsiz.txt', RP / f'log_motor_onarimsiz_{cift}.txt'), (w / 'motor_onarimsiz' / 'OLCUM.json', RP / f'OLCUM_onarimsiz_{cift}.json')):
             if src.exists():
@@ -308,10 +312,15 @@ def main():
         log('YAPILANDIRMA HATASI: ilk cift CANCER_LIBRA degil', CIFTLER); R['cikis'] = dict(kod=4, aciklama='yapilandirma hatasi: ilk cift CL degil')
         (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str)); return 4
     for i_c, cift in enumerate(CIFTLER):
-        kontrol_i = (i_c == 0 and cift == 'CANCER_LIBRA')                    # kontrol cifti: yalniz listenin ilki (eski davranista CL zaten yalniz ilk sirada)
+        kontrol_i = (i_c == 0 and cift == 'CANCER_LIBRA')                    # kontrol cifti: yalniz listenin ilki (siparis kipinde de; ortam dogrulamasi)
         anahtar = u78.KONTROL_ESKI if (YD and kontrol_i) else cift           # yeni duzen: kontrol kaydi ayri anahtarda; sondaki CL 'CANCER_LIBRA'
         ek_env = {'YENI_DUZEN': '0'} if (YD and kontrol_i) else {}            # kontrol her zaman eski mod (onayli 6daab364 kiyasi)
+        if kontrol_i and SIPARIS_KIP:
+            ek_env['ORN_SIPARIS_GIRDI'] = ''                                  # siparis kipi: kontrol cifti musteri metni OLMADAN (EMILY / JAMES), bos = siparis_oku None
         w = W / anahtar; w.mkdir(exist_ok=True)
+        if SIPARIS_KIP and not kontrol_i:                                     # siparis kipi CL + CL: kontrol ciftinin O ciktilari musteri dosyasi sayilmasin (3. inceleme bulgu 1)
+            for s_ in STIL:
+                (O / f'{cift}_{s_}_954.png').unlink(missing_ok=True)
         try:
             if os.environ.get('ORNEK78_TEST_HATA') == cift:                  # yalniz yerel test (cift dayanikliligi): bu ciftte sahte hata
                 raise RuntimeError(f'test hatasi {cift}')
@@ -333,6 +342,7 @@ def main():
                 if tb:
                     print(tb, flush=True)
                 if kontrol_i:
+                    R['kontrol_pass'] = False                                 # kontrol motoru cikti vermedi: ortam kontrolu FAIL (siparis siniflamasi)
                     (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str)); return 3
                 continue
             k2 = kos([_d / 'ornament_motor.py', '--kaynak', a.kaynak, '--motor', a.motor, '--cikti', w / 'dump', '--son', a.son, '--cift', cift],
@@ -354,6 +364,7 @@ def main():
                 R['cift'][anahtar] = r
                 log('FAIL eksik', cift, r['not_'])
                 if kontrol_i:
+                    R['kontrol_pass'] = False
                     (RP / 'OLCUM.json').write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str)); return 3
                 continue
             M_ = json.loads((w / 'motor' / 'OLCUM.json').read_text())
@@ -442,8 +453,8 @@ def main():
     # onizleme: satir = cift, sutun = 5 stil
     font = ImageFont.truetype(a.font, 24)
     satir = []
-    for cift in (() if PARCA else CIFTLER):                                  # PARCA: onizleme cift basina (cift_sonu), tek buyuk dosya yok
-        if R['cift'].get(cift, {}).get('eksik'):
+    for cift in (() if PARCA else dict.fromkeys(CIFTLER)):                   # PARCA: onizleme cift basina (cift_sonu), tek buyuk dosya yok; CL + CL tekrarsiz
+        if cift not in R['cift'] or R['cift'][cift].get('eksik'):            # yeni duzende kontrol kaydi KONTROL_ESKI anahtarinda (siparis kipi: CL + musteri cifti)
             continue
         liste, et = [], []
         for s in STIL:

@@ -1,0 +1,12 @@
+{
+ "cift": "CANCER_LIBRA",
+ "stil": "SADE_ALTIN",
+ "isim1": "ADAM",
+ "isim2": "LIAM",
+ "tarih": "JUNE 14, 2025",
+ "_test": {
+  "kod": "T09",
+  "beklenen": "DUR_SERDAR",
+  "not_": "J/Q yok: yd_bosluk_32_32 39 px (inceleme yerel olcumu) -> K8 (N4: esitlik aynen)"
+ }
+}

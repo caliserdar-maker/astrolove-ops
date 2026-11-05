@@ -1,0 +1,12 @@
+{
+ "cift": "CANCER_LIBRA",
+ "stil": "RUBY",
+ "isim1": "EMILY",
+ "isim2": "JAMES",
+ "tarih": "06/07/2025",
+ "_test": {
+  "kod": "T10",
+  "beklenen": "DUR_GIRDI",
+  "not_": "rakamla tarih (karar)"
+ }
+}

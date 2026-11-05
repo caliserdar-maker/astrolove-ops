@@ -1,0 +1,12 @@
+{
+ "cift": "CANCER_LIBRA",
+ "stil": "EMERALD",
+ "isim1": "EMILY",
+ "isim2": "JAMES",
+ "tarih": "SEPTEMBER 10, 2026",
+ "_test": {
+  "kod": "T03",
+  "beklenen": "PASS",
+  "not_": "en uzun ay; tarih_alt_le_795 (<= 796) ve JAMES J inisiyle bosluk 32 (inceleme yerel olcumu, Pillow 12.3.0)"
+ }
+}

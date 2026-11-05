@@ -1,0 +1,12 @@
+{
+ "cift": "CANCER_LIBRA",
+ "stil": "RUBY",
+ "isim1": "EMILY",
+ "isim2": "JAMES",
+ "tarih": "September 10, 2007",
+ "_test": {
+  "kod": "T04",
+  "beklenen": "PASS",
+  "not_": "en genis tarih 328 px (PLAN_YENI_DUZEN); <= 796 kapisi"
+ }
+}

@@ -1,0 +1,13 @@
+{
+ "cift": "AQUARIUS_AQUARIUS",
+ "stil": "EMERALD",
+ "isim1": "EMILY",
+ "isim2": "JAMES",
+ "tarih": "JUNE 14, 2025",
+ "_test": {
+  "kod": "T22",
+  "beklenen": "PASS",
+  "regresyon": true,
+  "not_": "Kova cifti: kenar kapisi (ORNEK78_KENAR_ZORUNLU) + regresyon onayli AQUARIUS_AQUARIUS (42001867106)"
+ }
+}

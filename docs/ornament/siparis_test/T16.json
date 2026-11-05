@@ -1,0 +1,12 @@
+{
+ "cift": "CANCER_LIBRA",
+ "stil": "RUBY",
+ "isim1": "EMILY",
+ "isim2": "JAMES",
+ "tarih": "June 2025",
+ "_test": {
+  "kod": "T16",
+  "beklenen": "DUR_SERDAR",
+  "not_": "gun yok (K9)"
+ }
+}

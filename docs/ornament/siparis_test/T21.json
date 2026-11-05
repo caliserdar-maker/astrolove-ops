@@ -1,0 +1,12 @@
+{
+ "cift": "CANCER_LIBRA",
+ "stil": "RUBY",
+ "isim1": "JOHN",
+ "isim2": "JULIA",
+ "tarih": "JULY 4, 2020",
+ "_test": {
+  "kod": "T21",
+  "beklenen": "PASS",
+  "not_": "musteri metniyle bilinen PASS: iki isimde J inisi, J ile baslayan ay (32 / 795 beklenir)"
+ }
+}

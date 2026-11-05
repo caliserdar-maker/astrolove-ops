@@ -1,0 +1,13 @@
+{
+ "cift": "LEO_LEO",
+ "stil": "SAPPHIRE",
+ "isim1": "EMILY",
+ "isim2": "JAMES",
+ "tarih": "JUNE 14, 2025",
+ "_test": {
+  "kod": "T02",
+  "beklenen": "PASS",
+  "regresyon": true,
+  "not_": "ayni burc; regresyon onayli LEO_LEO (42063472397)"
+ }
+}

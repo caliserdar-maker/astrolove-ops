@@ -1,0 +1,13 @@
+{
+ "cift": "CANCER_LIBRA",
+ "stil": "RUBY",
+ "isim1": "emily",
+ "isim2": "james",
+ "tarih": "june 14 2025",
+ "_test": {
+  "kod": "T15",
+  "beklenen": "PASS",
+  "esit": "T01",
+  "not_": "kucuk harf giris; cikti T01 ile piksel esit olmali"
+ }
+}

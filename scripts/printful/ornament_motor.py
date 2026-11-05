@@ -76,6 +76,33 @@ def kucult_sinir_oku(env):
     return s_, 'test parametresi ORN_KUCULT_SINIR_PX'
 
 
+def siparis_oku(env, cift):
+    """Siparis kipi girdisi (Serdar 6 Kas gece; plan 2.1, KARARLAR_20261106 N4). ORN_SIPARIS_GIRDI yoksa None (bugunku davranis, EMILY / JAMES).
+    Varsa: siparis_girdi.py CIKTI.json (durum PASS) yolu; ayni dogrulama YENIDEN kosulur (idempotent), cift motor --cift ile ayni olmali.
+    ORN_BEKLENEN_RAQM ('0' ya da '1') ZORUNLU; Pillow raqm durumu beklenenle ayni degilse ValueError (gece varsayimi BASIC = '0'; K1).
+    Musteri metni loga yazilmaz. Doner dict(isim1, isim2, tarih, stil, raqm)."""
+    yol = env.get('ORN_SIPARIS_GIRDI')
+    if not yol:
+        return None
+    _s = importlib.util.spec_from_file_location('siparis_girdi', Path(__file__).resolve().parent / 'siparis_girdi.py')
+    sg = importlib.util.module_from_spec(_s); _s.loader.exec_module(sg)
+    g = json.loads(Path(yol).read_text(encoding='utf-8'))
+    if g.get('durum') != 'PASS':
+        raise ValueError('siparis girdisi PASS degil')
+    r = sg.dogrula(g)                                                         # Dur firlatirsa motor cikis 2 (cokus): girdi kapisi atlanmis demektir
+    if r['cift'] != cift:
+        raise ValueError('siparis girdisi cifti motor --cift ile ayni degil')
+    from PIL import features
+    raqm = bool(features.check('raqm'))
+    bek = env.get('ORN_BEKLENEN_RAQM')
+    if bek not in ('0', '1'):
+        raise ValueError('ORN_BEKLENEN_RAQM zorunlu (0 / 1)')
+    if raqm != (bek == '1'):
+        raise ValueError(f'raqm durumu beklenen degil: gelen {int(raqm)}, beklenen {bek} (K1; onayli dosyalar BASIC varsayimi)')
+    r['raqm'] = raqm
+    return r
+
+
 def main():
     SINIR_PX, SINIR_KAYNAK = kucult_sinir_oku(os.environ)
     ap = argparse.ArgumentParser()
@@ -241,7 +268,11 @@ def main():
     ic_, _ = o5.leke_ic_kaynak(ana5[..., 3]); o5.KAYNAK_SONRA['ana'] = int((ic_ & (ana5[..., 3] < 0.9)).sum())
     lsrc = o4.logo_kaynak(K_ / 'LOGO_1.png')
     _ys = importlib.util.spec_from_file_location('yeni_duzen', Path(__file__).resolve().parent / 'yeni_duzen.py'); yd = importlib.util.module_from_spec(_ys); _ys.loader.exec_module(yd)
-    TARIH_METIN = yd.TARIH_YENI if YENI_DUZEN else yd.TARIH_ESKI                 # engel e: motor 268 (cizim) ve 10x 377 birlikte
+    SIP = siparis_oku(os.environ, CIFT)                                      # siparis kipi (Serdar 6 Kas gece; plan 2.1): None = bugunku davranis
+    if SIP is not None and not YENI_DUZEN:
+        raise ValueError('siparis kipi yalniz YENI_DUZEN=1 ile (plan 2.1; eski yol siparise kapali)')
+    ISIM1, ISIM2 = (SIP['isim1'], SIP['isim2']) if SIP else yd.REF_ISIM          # 954 (T) ve 10x (A10) yolu AYNI degiskenden
+    TARIH_METIN = SIP['tarih'] if SIP else (yd.TARIH_YENI if YENI_DUZEN else yd.TARIH_ESKI)   # engel e: motor 268 (cizim) ve 10x 377 birlikte
     cap = o4.CAP0
     G = int(math.ceil(o5.BOSLUK_ORAN * cap))
     kucuk_g = {}
@@ -264,8 +295,12 @@ def main():
         kk = cap * o4.LOGO_H * k / lsrc.shape[0]
         sz = (max(1, int(round(lsrc.shape[1] * kk))), max(1, int(round(cap * o4.LOGO_H * k))))
         return np.clip(cv2.resize(lsrc, sz, interpolation=cv2.INTER_AREA if kk <= 1 else cv2.INTER_CUBIC), 0, 1)
-    T = dict(isim1=o1.metin_alfa('EMILY', K_ / 'Cinzel.ttf', cap, 500), isim2=o1.metin_alfa('JAMES', K_ / 'Cinzel.ttf', cap, 500),
+    T = dict(isim1=o1.metin_alfa(ISIM1, K_ / 'Cinzel.ttf', cap, 500), isim2=o1.metin_alfa(ISIM2, K_ / 'Cinzel.ttf', cap, 500),
              tarih=o1.metin_alfa(TARIH_METIN, K_ / 'EBGaramond-Italic.ttf', Pc['tagline_T'] / Pc['cap'] * cap, None, ref='T'), sonsuz=logo(), cap=cap)
+    # siparis kipinde dikey cizgiler HER ZAMAN referans metinden (K2; plan 2.1): T_ref = EMILY / JAMES / JUNE 14, 2025, ayni cizim fonksiyonu
+    T_REF = (dict(isim1=o1.metin_alfa(yd.REF_ISIM[0], K_ / 'Cinzel.ttf', cap, 500), isim2=o1.metin_alfa(yd.REF_ISIM[1], K_ / 'Cinzel.ttf', cap, 500),
+                  tarih=o1.metin_alfa(yd.TARIH_YENI, K_ / 'EBGaramond-Italic.ttf', Pc['tagline_T'] / Pc['cap'] * cap, None, ref='T'), sonsuz=T['sonsuz'], cap=cap)
+             if SIP else None)
     def h_oran(b):
         if b == 'CANCER':
             return Pc['kucuk_sol_h'] / Pc['cap']
@@ -306,7 +341,8 @@ def main():
         ha, hb = o5.halka_T(pp, son.S0)
         h_max = yd.h_max_12(h_oran, cap, sorted(SPRITE_H))                    # karar 3 (O6): 12 kucuk isaretin nominal en yuksegi, yukari yuvarlanmis
         kapat_ = (lambda r_, a_: o5.hedef_kapat(r_, a_)) if o5.KAPAT_HEDEF else None   # O5: eski yolla ayni hedef boy kapanisi
-        E_, cizgi_, d_, g_yd, olc_yd = yd.yeni_yerlesim(o3.yazi_blogu, o1.rgba_olcek, T, kc, ana5, h_max, kapat=kapat_)
+        E_, cizgi_, d_, g_yd, olc_yd = yd.yeni_yerlesim(o3.yazi_blogu, o1.rgba_olcek, T, kc, ana5, h_max, T_ref=T_REF, kapat=kapat_,
+                                                        siparis=SIP is not None)
         if 'hedef_kapatilan' in d_:
             o5.HEDEF_KAPATILAN['sembol'] = d_['hedef_kapatilan']
         E_['halka'] = (None, ha, 0, 0)
@@ -350,7 +386,7 @@ def main():
     model = son.model_kur(td, Y)
 
     # --- 1 10x alfalar (kaynaktan) ---
-    def metin_alfa10(metin, font_yolu, cap_px, wght=None, ref='H', ss=4):
+    def metin_alfa10(metin, font_yolu, cap_px, wght=None, ref='H', ss=4, anahtar=None):
         """o1.metin_alfa ile ayni punto arama (954 cap). 954'un 4x tuvalinin TAM 10 kati tuval, ayni capa x 10, punto x 10;
         olcek 954'teki gibi (round(W/ss), round(H/ss)) x 10 cerceveye INTER_AREA (954 yuvarlamasi aynen). Hizalama yok."""
         def f_(pt):
@@ -367,7 +403,7 @@ def main():
         w9, h9 = max(1, round(W1 / ss)), max(1, round(H1 / ss))
         im = Image.new('L', (W1 * K10, H1 * K10), 0)
         ImageDraw.Draw(im).text(((pad - b1[0]) * K10, (pad - b1[1]) * K10), metin, font=f_(pt_i * K10), fill=255, anchor='ls')
-        PUNTO[metin] = dict(punto_954_ss4=pt_i, punto_10x_ss4=pt_i * K10)
+        PUNTO[anahtar or 'adsiz'] = dict(punto_954_ss4=pt_i, punto_10x_ss4=pt_i * K10)   # alan adiyla (musteri metni OLCUM.json'a girmez; plan 2.1)
         return cv2.resize(np.asarray(im, np.float32) / 255.0, (w9 * K10, h9 * K10), interpolation=cv2.INTER_AREA)
 
     def cerceve10(a10, a954, ad):
@@ -375,9 +411,9 @@ def main():
         return a10, (0, 0)
     PUNTO = {}
     A10, hiz = {}, {}
-    A10['isim1'], hiz['isim1'] = cerceve10(metin_alfa10('EMILY', K_ / 'Cinzel.ttf', cap, 500), Y['E']['isim1'][1], 'isim1')
-    A10['isim2'], hiz['isim2'] = cerceve10(metin_alfa10('JAMES', K_ / 'Cinzel.ttf', cap, 500), Y['E']['isim2'][1], 'isim2')
-    A10['tarih'], hiz['tarih'] = cerceve10(metin_alfa10(TARIH_METIN, K_ / 'EBGaramond-Italic.ttf', Pc['tagline_T'] / Pc['cap'] * cap, None, ref='T'),
+    A10['isim1'], hiz['isim1'] = cerceve10(metin_alfa10(ISIM1, K_ / 'Cinzel.ttf', cap, 500, anahtar='isim1'), Y['E']['isim1'][1], 'isim1')
+    A10['isim2'], hiz['isim2'] = cerceve10(metin_alfa10(ISIM2, K_ / 'Cinzel.ttf', cap, 500, anahtar='isim2'), Y['E']['isim2'][1], 'isim2')
+    A10['tarih'], hiz['tarih'] = cerceve10(metin_alfa10(TARIH_METIN, K_ / 'EBGaramond-Italic.ttf', Pc['tagline_T'] / Pc['cap'] * cap, None, ref='T', anahtar='tarih'),
                                        Y['E']['tarih'][1], 'tarih')
     temiz_bilgi = {}
     def kucuk10(burc, ad):
@@ -760,7 +796,10 @@ def main():
         g.pop('bosluk_20_20_20')
         g.update({f'yd_{k}': v for k, v in YD['kapi'].items()})
         R['yeni_duzen'] = YD
-    g['kucultme_le_sinir'] = KUCULT[0] <= SINIR_PX                             # O3 a: toplam kucultme (KUCULT toplamdir) <= sinir; FAIL ciftinde PNG yine kaydedildi
+    if SIP is not None:                                                        # siparis kipi bilgisi (metin yok): raqm durumu siparis_oku'da sert kontrol edildi
+        R['siparis'] = dict(kip=True, raqm=bool(SIP['raqm']), beklenen_raqm=os.environ.get('ORN_BEKLENEN_RAQM'), stil=SIP['stil'],
+                            t_ref='EMILY / JAMES / JUNE 14, 2025 (K2)', not_='musteri metni bu dosyada yok (plan 2.1, ANA_2 7.3)')
+    g['kucultme_le_sinir'] = KUCULT[0] <= SINIR_PX                            # O3 a: toplam kucultme (KUCULT toplamdir) <= sinir; FAIL ciftinde PNG yine kaydedildi
     R['kucultme'] = dict(toplam_px=int(KUCULT[0]), iz=KUCULT_IZ, sinir_px=int(SINIR_PX), sinir_kaynak=SINIR_KAYNAK,
                          not_='yerlesim 5 stilde ortak; 2 px asan kucultmede is durur, gorsel Serdar onayina')
     g = {k: bool(v) for k, v in g.items()}

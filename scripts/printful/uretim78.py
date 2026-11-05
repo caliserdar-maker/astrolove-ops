@@ -115,9 +115,14 @@ def gh_json(yol):
     return json.loads(r.stdout)
 
 
+SIPARIS_DALLARI = ('main', 'ornament-printful-katalog')                      # 6 Kas gece (plan 2.8): dal is akisi ornament-siparis.yml da gorulur (sikilastirma)
+
+
 def siparis_kontrol(depo):
-    adlar = [x['name'] for x in gh_json(f'repos/{depo}/contents/.github/workflows?ref=main')]
-    ak = siparis_akislari(adlar)
+    adlar = []
+    for dal in SIPARIS_DALLARI:
+        adlar += [x['name'] for x in gh_json(f'repos/{depo}/contents/.github/workflows?ref={dal}')]
+    ak = siparis_akislari(sorted(set(adlar)))
     kos = []
     for st in ETKIN:
         sayfa = 1
@@ -127,7 +132,7 @@ def siparis_kontrol(depo):
             if len(d.get('workflow_runs', [])) < 100:
                 break
             sayfa += 1
-    return dict(akislar=ak, akis_kaynagi='main: .github/workflows (siparis|order)', etkin=siparis_aktif(ak, kos), zaman=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()))
+    return dict(akislar=ak, akis_kaynagi='main + ornament-printful-katalog: .github/workflows (siparis|order)', etkin=siparis_aktif(ak, kos), zaman=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()))
 
 
 # ------------------------------------------------------------------------------------------------ kenar on olcumu

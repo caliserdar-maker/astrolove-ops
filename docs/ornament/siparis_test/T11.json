@@ -1,0 +1,12 @@
+{
+ "cift": "CANCER_LIBRA",
+ "stil": "RUBY",
+ "isim1": "ÇAĞLAYANGÜL",
+ "isim2": "JAMES",
+ "tarih": "JUNE 14, 2025",
+ "_test": {
+  "kod": "T11",
+  "beklenen": "DUR_SERDAR",
+  "not_": "ORNAMENT_KARAR 16 test adi; aksan"
+ }
+}

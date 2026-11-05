@@ -1,0 +1,12 @@
+{
+ "cift": "GEMINI_SAGITTARIUS",
+ "stil": "RUBY",
+ "isim1": "EMILY",
+ "isim2": "JAMES",
+ "tarih": "JUNE 14, 2025",
+ "_test": {
+  "kod": "T17",
+  "beklenen": "DUR_SERDAR",
+  "not_": "istisna cifti K7"
+ }
+}
