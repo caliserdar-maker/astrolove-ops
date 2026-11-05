@@ -32,6 +32,12 @@ on:
         type: choice
         default: anahtar
         options: [anahtar, ac]
+      tagline_kerning:
+        description: "Mesaj satiri font kerning'i (Serdar 5 Kas A, siparis basina; yalniz ESKI YOL CI/WP): kapali = eski davranis; raqm = font kerning'i"
+        required: false
+        type: choice
+        default: kapali
+        options: [kapali, raqm]
       kuru:
         description: "true = yalniz yonlendirme karari, uretim yok"
         required: true
@@ -71,10 +77,13 @@ jobs:
           R=$(jq -r '.inputs.renk' "$E"); O=$(jq -r '.inputs.olcu' "$E"); Y=$(jq -r '.inputs.yeni_yol' "$E"); KURU=$(jq -r '.inputs.kuru' "$E")
           if { [ "$R" = "MIDNIGHT_BLUE" ] || [ "$R" = "DEEP_BLACK" ] || [ "$R" = "PURE_WHITE" ]; } && { [ "$Y" = "ac" ] || [ "$ACIK" = "1" ]; }; then YOL=yeni
           else YOL=eski; fi
+          TK=$(jq -r '.inputs.tagline_kerning // "kapali"' "$E"); [ "$TK" = "null" ] && TK=kapali
+          case "$TK" in kapali|raqm) ;; *) echo "HATA: tagline_kerning" >&2; exit 1;; esac
+          if [ "$TK" = "raqm" ] && { [ "$YOL" != "eski" ] || { [ "$R" != "CHAMPAGNE_IVORY" ] && [ "$R" != "WARM_PARCHMENT" ]; }; }; then echo "HATA: tagline_kerning=raqm yalniz ESKI YOL CI/WP (renk $R, yol $YOL)" >&2; exit 1; fi
           [ "$KURU" = "true" ] && Z=kuru || Z=uret
           case "$YOL" in yeni) KOD="siparis-gpt $GPT_REF";; eski) if [ "$R" = "WARM_PARCHMENT" ]; then KOD="siparis-dijital wp_ref $WP_REF"; else KOD="siparis-dijital renk_ref $ESKI_RENK_REF"; fi;; *) KOD="yok";; esac
-          echo "::notice title=YONLENDIRME::renk=$R olcu=$O anahtar=$ACIK yeni_yol=$Y -> $YOL ($Z) kod=$KOD"
-          { echo "### Siparis yonlendirme"; echo "renk $R, olcu $O, anahtar $ACIK, yeni_yol $Y -> **$YOL** ($Z)"; } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=YONLENDIRME::renk=$R olcu=$O anahtar=$ACIK yeni_yol=$Y tagline_kerning=$TK -> $YOL ($Z) kod=$KOD"
+          { echo "### Siparis yonlendirme"; echo "renk $R, olcu $O, anahtar $ACIK, yeni_yol $Y, tagline_kerning $TK -> **$YOL** ($Z)"; } >> "$GITHUB_STEP_SUMMARY"
           [ "$Z" = "kuru" ] && echo "yol=kuru-$YOL" >> "$GITHUB_OUTPUT" || echo "yol=$YOL" >> "$GITHUB_OUTPUT"
 
   eski:
@@ -102,7 +111,8 @@ jobs:
           gh workflow run siparis-dijital.yml -R "$GITHUB_REPOSITORY" --ref main \
             -f receipt="$(jq -r .inputs.receipt "$E")" -f cift="$(jq -r .inputs.cift "$E")" \
             -f isim1="$(jq -r .inputs.isim1 "$E")" -f isim2="$(jq -r .inputs.isim2 "$E")" -f mesaj_b64="$(jq -r .inputs.mesaj_b64 "$E")" \
-            -f isler="$ISLER" -f renk_ref="$ESKI_RENK_REF" -f wp_pod_kod=v1 "${EK[@]}" > /dev/null
+            -f isler="$ISLER" -f renk_ref="$ESKI_RENK_REF" -f wp_pod_kod=v1 \
+            -f tagline_kerning="$(jq -r '.inputs.tagline_kerning // "kapali"' "$E" | sed 's/^null$/kapali/')" "${EK[@]}" > /dev/null
           echo "::notice title=ESKI YOL::siparis-dijital tetiklendi (isler $ISLER, renk_ref $ESKI_RENK_REF$([ "$R" = WARM_PARCHMENT ] && echo ", wp_ref $WP_REF")$([ "$R" = WARM_PARCHMENT ] || [ "$R" = CHAMPAGNE_IVORY ] && echo ", TEK JPG $O"))"
 
   yeni:

@@ -58,6 +58,10 @@ on:
         description: "Tagline & (Serdar 10 Eki B2): bos/yeni = onayli ChatGPT & (varsayilan); glif = fontun & glifi (YALNIZ bilinen FAIL testi)"
         required: false
         default: ""
+      tagline_kerning:
+        description: "Mesaj satiri font kerning'i (Serdar 5 Kas A, siparis basina): bos/kapali = eski davranis (varsayilan); raqm = font kerning'i (tag_kerning.py). Isim satiri degismez"
+        required: false
+        default: ""
       sira:
         description: "Sol/sag duzen (Serdar 23 Eki, siparis basina): bos = ilandaki gibi (varsayilan); ters = 2. burc (sembol + isim) solda. Yalniz isler=wp:<boy>. isim1/isim2 yine 1./2. burcun ismi"
         required: false
@@ -70,6 +74,7 @@ env:
   RENK_REF: ${{ github.event.inputs.renk_ref || '8a8b370edb74cb52402b4939d38ba14d2d2105fd' }}
   WP_REF: ${{ github.event.inputs.wp_ref || '360cbef947994c7d4b3c9ae95275f778a18af716' }}   # 9 Eki: giris WP icin 360cbef (tagline cift baski duzeltmesi) verir
   AMP_MOD: ${{ github.event.inputs.amp == 'glif' && 'glif' || 'yeni' }}   # B2: tagline & (glif yalniz bilinen FAIL testi)
+  TAG_KERNING: ${{ github.event.inputs.tagline_kerning || 'kapali' }}   # 5 Kas A: kapali | raqm; baska deger surucu'de HATA
 
 jobs:
   plan:
@@ -93,6 +98,8 @@ jobs:
           jq -re '.inputs.receipt | test("^[0-9]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: receipt rakam olmali" >&2; exit 1; }
           jq -re '.inputs.cift | test("^[A-Z]+_[A-Z]+$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: cift" >&2; exit 1; }
           jq -re '(.inputs.wp_ref // "") | test("^([0-9a-f]{40})?$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: wp_ref tam 40 karakter SHA olmali" >&2; exit 1; }
+          jq -re '(.inputs.tagline_kerning // "") | test("^(|kapali|raqm)$")' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: tagline_kerning (bos | kapali | raqm)" >&2; exit 1; }
+          if [ "$(jq -r '.inputs.tagline_kerning // ""' "$GITHUB_EVENT_PATH")" = "raqm" ] && [ -n "$(jq -r '.inputs.onceki_kosu // ""' "$GITHUB_EVENT_PATH")" ]; then echo "HATA: tagline_kerning=raqm ile onceki_kosu birlikte olmaz (karisik kerning'li / kerning'siz sayfa)" >&2; exit 1; fi
           jq -re '(.inputs.sira // "") as $s | ($s == "") or ($s == "ters" and ((.inputs.isler // "") | test("^wp:[0-9A-Za-z]+(,wp:[0-9A-Za-z]+)*$")))' "$GITHUB_EVENT_PATH" >/dev/null || { echo "HATA: sira bos | ters (ters yalniz isler=wp:<boy>)" >&2; exit 1; }
           echo "::notice title=WP_REF::$WP_REF"
       - uses: actions/checkout@v4
@@ -167,6 +174,7 @@ jobs:
           set -euo pipefail
           python -m pip install --quiet --upgrade pip
           python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+          if [ "$TAG_KERNING" = "raqm" ]; then python -c "import PIL; from PIL import features as f; import sys; print('Pillow', PIL.__version__, 'raqm', f.version('raqm')); sys.exit(0 if f.check('raqm') else 'HATA: Pillow RAQM yok (tagline_kerning=raqm); apt kurulmaz (isim motoru degismesin)')"; fi
       - name: rclone kur
         run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
@@ -233,6 +241,7 @@ jobs:
           set -euo pipefail
           python -m pip install --quiet --upgrade pip
           python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+          if [ "$TAG_KERNING" = "raqm" ]; then python -c "import PIL; from PIL import features as f; import sys; print('Pillow', PIL.__version__, 'raqm', f.version('raqm')); sys.exit(0 if f.check('raqm') else 'HATA: Pillow RAQM yok (tagline_kerning=raqm); apt kurulmaz (isim motoru degismesin)')"; fi
       - name: rclone kur
         run: curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
       - name: rclone.conf olustur
@@ -297,6 +306,7 @@ jobs:
           set -euo pipefail
           python -m pip install --quiet --upgrade pip
           python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+          if [ "$TAG_KERNING" = "raqm" ]; then python -c "import PIL; from PIL import features as f; import sys; print('Pillow', PIL.__version__, 'raqm', f.version('raqm')); sys.exit(0 if f.check('raqm') else 'HATA: Pillow RAQM yok (tagline_kerning=raqm); apt kurulmaz (isim motoru degismesin)')"; fi
       - name: Kod (siparis-baski-v1; yalniz wp_pod_kod=v1)
         if: ${{ (github.event.inputs.wp_pod_kod || 'v1') == 'v1' }}
         uses: actions/checkout@v4
@@ -387,7 +397,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+      - run: |
+          python -m pip install --quiet pillow opencv-python-headless numpy fonttools img2pdf pikepdf
+          if [ "$TAG_KERNING" = "raqm" ]; then python -c "import PIL; from PIL import features as f; import sys; print('Pillow', PIL.__version__, 'raqm', f.version('raqm')); sys.exit(0 if f.check('raqm') else 'HATA: Pillow RAQM yok (tagline_kerning=raqm); apt kurulmaz (isim motoru degismesin)')"; fi
       - name: rclone (dogrudan ikili)
         run: |
           set -euo pipefail

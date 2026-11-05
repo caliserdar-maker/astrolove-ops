@@ -227,9 +227,31 @@ def kod_yukle(kod):
 
 
 
+KERNING_MOD = None     # 5 Kas: 'raqm' iken OZET / SAYFA / OZET_WP / tek_jpg kayitlarina 'tag_kerning' yazilir (kapali: alan YOK)
+
+
+def kerning_kur():
+    """Serdar 5 Kas "A" (siparis basina): TAG_KERNING=raqm -> mesaj satiri font kerning'i (tag_kerning.kur: pilot12.ciz_cap
+    RAQM). Varsayilan 'kapali': HICBIR sey degismez. kisisel_hazirla'dan SONRA, amp_eski.kur'dan ONCE (amp bunu sarar)."""
+    m = os.environ.get('TAG_KERNING') or 'kapali'
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import tag_kerning
+    if m not in tag_kerning.MODLAR:
+        raise SystemExit(f'HATA TAG_KERNING={m!r} (kapali | raqm)')
+    if m == 'kapali':
+        return None
+    global KERNING_MOD
+    import pilot12
+    tag_kerning.kur(pilot12)
+    KERNING_MOD = dict(mod='raqm', **tag_kerning.surum())
+    print('TAG_KERNING', json.dumps(KERNING_MOD), '| mesaj satiri yalniz font kerning (ligatur kapali); isim satiri degismez', flush=True)
+    return 'raqm'
+
+
 def amp_kur(g):
     """B2 (Serdar 10 Eki): tagline'da '&' varsa onayli ChatGPT & (amp_eski.kur: pilot12.ciz_cap sarmasi). AMP_MOD=glif yalniz
-    bilinen FAIL testi (fontun & glifi, eski davranis). kisisel_hazirla'dan SONRA cagrilir."""
+    bilinen FAIL testi (fontun & glifi, eski davranis). kisisel_hazirla'dan SONRA cagrilir. Once kerning_kur (5 Kas)."""
+    kerning_kur()
     if '&' not in (g.get('mesaj') or ''):
         return None
     if os.environ.get('AMP_MOD', 'yeni') == 'glif':
@@ -286,6 +308,8 @@ def renk_asamasi(a, g):
                                 'baski_px': v.get('baski_px'), 'hata': v.get('hata'), 'iz': v.get('iz'), 'olcek': v.get('olcek_kapisi')}
                             for o, v in rk['oranlar'].items()},
           'kapilar_gecti': r.get('kapilar_gecti'), 'kod': a.kod_ref, 'amp': amp_cizim(amp)}
+    if KERNING_MOD:
+        oz['tag_kerning'] = KERNING_MOD
     (cik / f'OZET_{a.renk}.json').write_text(json.dumps(oz, ensure_ascii=False, indent=1, default=str))
     (cik / f'KAPI_RAPORU_{a.renk}.json').write_text(json.dumps(
         {q: v for q, v in r.items() if q not in ('isim1', 'isim2', 'mesaj')}, ensure_ascii=False, indent=1, default=str))
@@ -318,6 +342,8 @@ def sayfa_asamasi(a, g):
     klas.mkdir(parents=True, exist_ok=True); kon.mkdir(parents=True, exist_ok=True)
     renk, oran, kayit, _ = sd._dijital_is((a.renk, a.oran, x, klas, kon))
     kayit['amp'] = amp_cizim(amp)
+    if KERNING_MOD:
+        kayit['tag_kerning'] = KERNING_MOD
     (cik / f'SAYFA_{a.renk}_{oran}.json').write_text(json.dumps(kayit, ensure_ascii=False, indent=1, default=str))
     if oran == '11x14':
         inc = cik / 'inceleme'; inc.mkdir(exist_ok=True)
@@ -488,6 +514,8 @@ def wp_asamasi(a, g):
           'jpeg_kalite': kalite.get(f'BASKI_{a.boy}.jpg'), 'kapi_sayilari': r.get('kapi_sayilari'),
           'wp_bakir': r.get('wp_bakir'), 'kod': a.kod_ref,
           'wp_kilit': 'TAMAM', 'amp': amp_cizim(amp)}
+    if KERNING_MOD:
+        oz['tag_kerning'] = KERNING_MOD
     if sira is not None:                              # kapi: siparis baskisinda takas oldu (2400 + hedef), kimlikte olmadi
         oz['sira'] = {'sira': 'ters', 'takas': sira['takas'], 'takassiz': sira['takassiz'],
                       'gecti': sira['takas'] >= 2 and sira['takassiz'] >= 2}
@@ -700,6 +728,8 @@ def tek_asamasi(a, g, sd, kok):
         kesit(hedef, kok / 'inceleme' / f'KESIT_TEK_{renk}_{olcu}.jpg', kok / 'inceleme' / f'ONIZLEME_TEK_{renk}_{olcu}.jpg')
         if '&' in (g.get('mesaj') or ''):                 # B2: & kapisi (f, d, renk, leke) son JPG'de bagimsiz
             sd.kisisel_hazirla()
+            if kerning_kur():                             # 5 Kas: & kapisi uretimle ayni cizimi beklesin (kapali: dokunulmaz)
+                tek['tag_kerning'] = KERNING_MOD
             import amp_eski, pilot12, numpy as np
             from PIL import Image
             Image.MAX_IMAGE_PIXELS = None
@@ -707,6 +737,13 @@ def tek_asamasi(a, g, sd, kok):
             rgb = np.asarray(Image.open(hedef).convert('RGB'))
             tek['amp'] = amp_eski.kapi_amp(rgb, g['mesaj'], ciz, pilot12.FONT_DIR / pilot12.TAG_FONT, pilot12.TAG_W,
                                            y_bant=(0.70, 0.97), kesit=kok / 'inceleme' / f'AMP_KESIT_{renk}_{olcu}.jpg')
+            if KERNING_MOD:                               # 5 Kas: RAPOR (kapi degil) - kelime ici harf araliklari, son JPG
+                import tag_kerning
+                try:
+                    tek['harf_aralari_px'] = tag_kerning.harf_aralari(rgb, tek['amp'].get('elemanlar'))
+                except Exception as e:                    # noqa: BLE001  olcum hatasi uretimi durdurmaz (yalniz rapor)
+                    tek['harf_aralari_px'] = f'olculemedi: {type(e).__name__}'
+                print('HARF_ARALARI', json.dumps(tek['harf_aralari_px']), flush=True)
             del rgb
             print('AMP_KAPI', json.dumps({q: tek['amp'].get(q) for q in ('PASS', 'f', 'd', 'renk', 'f_gecti', 'd_gecti',
                                                                            'renk_gecti', 'leke_gecti', 'eslesme')}), flush=True)
