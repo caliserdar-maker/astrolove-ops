@@ -1,6 +1,6 @@
 {
  "aciklama": "ornament 78 uretim cift listesi (Serdar 4 Kas, PLAN_78_URETIM.md 9f88868 + onaylar). aktif: hangi bolum kosar (\"ornek\" | \"78\"). Parcalar CANCER_LIBRA olmadan yazilir; uretim78.parcalar CL kontrolu her parcanin basina ekler. 78 bolumu = 75 cift (CANCER_LIBRA onayli 6daab364; AQUARIUS_PISCES ve GEMINI_VIRGO onayli 41839101824, Serdar 4 Kas \"A\"). 78 kosusunda yalniz aktif ve TETIK degisir. aktif \"yeni_duzen\": yeni duzen ornek kosusu (Serdar 4 Kas gece); kosudan sonra aktif \"ornek\"e geri alinir.",
- "aktif": "ornek",
+ "aktif": "yeni_duzen",
  "kontrol_cifti": "CANCER_LIBRA",
  "onayli": {
   "CANCER_LIBRA": "git 6daab364 docs/ornament/ornek/ORNAMENT_5STIL_20261103_1539",

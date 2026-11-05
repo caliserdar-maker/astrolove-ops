@@ -1,2 +1,3 @@
 ornament-78-uretim TETIK (yalniz bilgi; bolum URETIM78_CIFTLER.json "aktif" alanindan)
 2026-11-04T16:31Z ornek kod f3842a62 (Serdar 4 Kas onayi: ornek kosusu)
+2026-11-05T09:22Z yeni_duzen kod 2d99ee6b (Serdar 5 Kas onayi: asama 2 ornek kosusu, 11 cift)
