@@ -345,3 +345,8 @@ Açık: K-1b-2 gerçek girdi, K-1b-3..9, 11..15. K-1b-16 KAPANDI (10c).
 - Bağımsız inceleme: tetiklemeye engel yok. Şartlar: koşu bitene kadar dala push yok (iş akışı dal ucunu alır); `aktif` koşu bittikten sonra geri alınır.
 - Planda yazıp kodda OLMAYAN beklentiler (bilgi, bu koşuda yok): eski_dosya_degismedi (eski klasörlere yalnız okuma var), parça başı yd_bilinen_fail (yalnız hazırlıkta benzetim), en_uzun_sigar.
 - K-1b-4 açık: sondaki CL düşerse kontrolün eski düzen PNG'leri FAIL/CANCER_LIBRA altına gidebilir (yanlış PASS değil; görsel onayda Merkez CL'nin yeni düzen olduğunu kontrol eder).
+
+### 10d. Aşama 2 sonucu ve kararlar (5 Kas)
+- Koşu 42001867106: 10/11 PASS; Serdar görsel onayı "İkisi de güzel" (10 çift tamam; AQUARIUS_AQUARIUS yeri böyle kalır).
+- GEMINI_VIRGO: koyu_dE00_son_ham_le_2 FAIL (2,27-2,35). Teşhis 42031725634 (ORNAMENT_78_TESHIS_20261105_1300): bütünleşme öncesi <= 0,15; son ham eski 1,383 / yeni 2,274 (halka), sonsuz 2,059. Neden: küçük öğelere sabit düşüş = sembol çekirdeği ortanca düşüşü (ornament_motor.py:650); küçülen sembolde ortanca kayıyor.
+- Serdar "Uygun": GV için kapı istisnası (GEVŞETME, Serdar onayı, yalnız bu çift); kapı ve eşik değişmez. 78 çift üretiminde istisna açık dosyayla beklenti katmanında işlenir, FAIL raporda kalır.
