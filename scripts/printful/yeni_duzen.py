@@ -192,6 +192,33 @@ def b3_olcek_render(ana_rgba, sinir_alt, olcekle, s0, ust_min=UST_MIN, adim=REND
     return lo, dict(kenar=bool(hi >= 1.5 * s0 * (1 - 1e-6)), aralik=[round(0.5 * s0, 6), round(1.5 * s0, 6)])
 
 
+def yakin_ana_kutu(a, x, y, w0=100, h0=80, dx0=20, dy0=150, adim=4):
+    """YAKIN_DOKU 'ana' kirpimi (K-1b-16, 5 Kas). Eski sabit kutu (sembol sol ust + (20, 150), 100 x 80; CL 425 x 404 icin) sembolun
+    alfa kutusuna sigiyor ve icinde altin varsa AYNEN kullanilir (eski mod CL ciktisi degismez). Sigmiyorsa ya da bossa: boy sembolle
+    sinirli, konum alfa toplami en buyuk pencere (adim px; esitlikte ust-sol). a: sembol alfasi (0-1), x, y: tuvaldeki yeri.
+    Doner (kutu (x0, y0, x1, y1) tuval koordinati, ayrinti)."""
+    b = kutu(a)
+    bw, bh = b[2] - b[0], b[3] - b[1]
+    m = (np.asarray(a, np.float32) > 0.5).astype(np.float64)
+    eski = (b[0] + dx0, b[1] + dy0, b[0] + dx0 + w0, b[1] + dy0 + h0)
+    if eski[2] <= b[2] and eski[3] <= b[3] and m[eski[1]:eski[3], eski[0]:eski[2]].sum() > 0:
+        k = eski; yol = 'eski'
+    else:
+        w, h = max(1, min(w0, bw)), max(1, min(h0, bh))
+        ii = np.pad(m, ((1, 0), (1, 0))).cumsum(0).cumsum(1)
+        en, k = -1.0, None
+        for y0 in range(b[1], b[3] - h + 1, adim):
+            for x0 in range(b[0], b[2] - w + 1, adim):
+                t = ii[y0 + h, x0 + w] - ii[y0, x0 + w] - ii[y0 + h, x0] + ii[y0, x0]
+                if t > en:
+                    en, k = t, (x0, y0, x0 + w, y0 + h)
+        if k is None:
+            k = (b[0], b[1], b[0] + w, b[1] + h)
+        yol = 'en_dolu'
+    dolu = float(m[k[1]:k[3], k[0]:k[2]].mean()) if k[3] > k[1] and k[2] > k[0] else 0.0
+    return (k[0] + x, k[1] + y, k[2] + x, k[3] + y), dict(yol=yol, sembol_kutu=[int(v) for v in b], kutu=[int(v) for v in k], dolu_oran=round(dolu, 4))
+
+
 def sembol_yerlestir(ana_rgba, sinir_alt, olcekle, ust_min=UST_MIN, b3_kat=B3_KAT, y2=Y2_UST_ORAN, kapat=None):
     """karar 4: B3 + Y2. olcekle(rgba, s) -> (rgb, a) (motor: o1.rgba_olcek). kapat(rgb, a) -> (rgb, a, n) (O5; motor: o5.hedef_kapat, n dict: alfa_lt_09, degisen_alfa_gt_002, degisen_alfa_gt_03).
     Doner ((rgb, a, x, y), ayrinti)."""

@@ -328,7 +328,7 @@ Yapılan (yerel, Pillow 11.0.0, Actions yok):
 Yeni bulgu (bağımsız inceleme, 5 Kas):
 - K-1b-16 ORTA (çöküş doğrulanmadı): ornament_motor.py:688-701 YAKIN_DOKU 'ana' kırpımı (s_[1]+150 .. +230) sembolün >= 230 px yüksek olduğunu varsayar; yeni düzende CANCER_CANCER benzetimde 219 px. Kutu sembol yüksekliğine oranlı yapılmalı, boşsa atlanmalı.
 
-Açık: K-1b-2 gerçek girdi, K-1b-3..9, 11..16.
+Açık: K-1b-2 gerçek girdi, K-1b-3..9, 11..15. K-1b-16 KAPANDI (10c).
 
 ### 10b. Yerel duman testi (5 Kas; Serdar "a2 ok": yalnız çökme taraması, kanıt değil)
 - Girdi: Serdar'ın sohbete yüklediği kopyalar. Sohbet WebP'ye çevirip küçülttü. Farklı 4 dosya: 3 `_ana` + aquarius_symbol_gold (yarı boy 2250x5408; kenar kusuru n0 445 kayboldu). Küçük semboller ve zeminler gerçek dosyayla bayt bayt aynı. Motor kopyası /tmp'de, yalnız CL ana sha kapısı uyarıya çevrildi; depo kodu değişmedi.
@@ -339,3 +339,9 @@ Açık: K-1b-2 gerçek girdi, K-1b-3..9, 11..16.
 - K-1b-16 bu çiftlerde tetiklenmedi (h ~283); AQUARIUS_AQUARIUS (h 117), CAPRICORN_CAPRICORN (206) aşama 2 listesinde. Çökme beklenmez (boş dizi resize çökmüyor) ama YAKIN 'ana' paneli boş ya da yanlış bölge olur.
 - CL kontrol (eski mod, onaylı kıyas) kopya girdiyle FAIL (koyu stillerde 1 seviye, 119-159 px; SADE 8 / 1348); gerçek girdiyle değil.
 - Bilgi: ARIES SADE_ALTIN kati 1,45 (Actions eski mod 1,57).
+
+### 10c. K-1b-16 düzeltmesi ve aşama 2 öncesi inceleme (5 Kas; Serdar "ok": düzelt + aşama 2 koşusu)
+- `yeni_duzen.yakin_ana_kutu`: eski kutu sembole sığıyor ve altın varsa aynen (eski mod CL YAKIN_DOKU önceki koşuyla max fark 0), yoksa sembole sınırlı en dolu pencere; poster kırpımı negatif dizinde 0'a sınırlı. Bilgi motor OLCUM `yakin_ana` (ornek78 dışarı aktarmaz). Test: yakin_ana_testi.py 4/4.
+- Bağımsız inceleme: tetiklemeye engel yok. Şartlar: koşu bitene kadar dala push yok (iş akışı dal ucunu alır); `aktif` koşu bittikten sonra geri alınır.
+- Planda yazıp kodda OLMAYAN beklentiler (bilgi, bu koşuda yok): eski_dosya_degismedi (eski klasörlere yalnız okuma var), parça başı yd_bilinen_fail (yalnız hazırlıkta benzetim), en_uzun_sigar.
+- K-1b-4 açık: sondaki CL düşerse kontrolün eski düzen PNG'leri FAIL/CANCER_LIBRA altına gidebilir (yanlış PASS değil; görsel onayda Merkez CL'nin yeni düzen olduğunu kontrol eder).

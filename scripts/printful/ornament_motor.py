@@ -687,7 +687,9 @@ def main():
     zem_g = np.array([28, 30, 36], np.float32)
     s_ = o5.kutu(Y['E'], 'sembol')
     t45 = math.radians(-35); hx_, hy_ = int(CX + ax * math.cos(t45)), int(cyh + by * math.sin(t45))
-    kut = {'ana': (s_[0] + 20, s_[1] + 150, s_[0] + 120, s_[1] + 230), 'kucuk_sol': o5.kutu(Y['E'], 'kucuk_sol'), 'isim1': o5.kutu(Y['E'], 'isim1'),
+    _sr, _sa, _sx, _sy = Y['E']['sembol']
+    _ka, YAKIN_ANA = yd.yakin_ana_kutu(_sa, _sx, _sy)                    # K-1b-16: kucuk sembolde kirpim sembol icinde kalir (eski CL kutusu aynen)
+    kut = {'ana': _ka, 'kucuk_sol': o5.kutu(Y['E'], 'kucuk_sol'), 'isim1': o5.kutu(Y['E'], 'isim1'),
            'sonsuz': o5.kutu(Y['E'], 'sonsuz'), 'halka': (hx_ - 30, hy_ - 30, hx_ + 30, hy_ + 30)}
     satirlar = []
     for ad, bx in kut.items():
@@ -698,7 +700,7 @@ def main():
             g0 = np.asarray(Image.open(ANA_DOSYA).convert('RGBA'), np.float32)
             g0 = o1.kirp(g0, g0[..., 3] / 255, pad=2)
             fx = g0.shape[1] / aS.shape[1]
-            x0_, y0_ = int((bx[0] - xS) * fx), int((bx[1] - yS) * fx)
+            x0_, y0_ = max(0, int((bx[0] - xS) * fx)), max(0, int((bx[1] - yS) * fx))   # K-1b-16: kenardaki pencere negatif dizinle bos kalmasin
             cr = g0[y0_:y0_ + int((bx[3] - bx[1]) * fx), x0_:x0_ + int((bx[2] - bx[0]) * fx)]
             pst = cr[..., :3] * (cr[..., 3:] / 255) + zem_g * (1 - cr[..., 3:] / 255)
         elif ad == 'halka':
@@ -735,6 +737,9 @@ def main():
     for s in satirlar:
         u.paste(s, (0, yy0)); yy0 += s.height + 24
     u.save(O / 'YAKIN_DOKU.png')
+    R['yakin_ana'] = YAKIN_ANA                                              # K-1b-16 bilgi: kirpim yolu (eski / en_dolu) ve altin orani
+    if YAKIN_ANA['dolu_oran'] <= 0:
+        log('UYARI YAKIN_DOKU ana kirpimi bos', YAKIN_ANA)
     for f in O.glob('_poster10x_*.npy'):
         f.unlink()
     A_ = list(R['sonuc'].values())
