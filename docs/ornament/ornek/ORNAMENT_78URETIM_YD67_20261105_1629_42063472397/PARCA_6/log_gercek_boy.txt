@@ -1,0 +1,8 @@
+PASS /tmp/rapor/GERCEK_BOY_AQUARIUS_GEMINI_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_AQUARIUS_TAURUS_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_LIBRA_PISCES_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_LIBRA_SAGITTARIUS_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_LIBRA_SCORPIO_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_LIBRA_TAURUS_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_LIBRA_VIRGO_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_PISCES_PISCES_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True

@@ -1,0 +1,635 @@
+{
+ "satirlar": [
+  {
+   "cift": "CANCER_LIBRA",
+   "kaynak": "ana",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1514,
+    1600
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 25741
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "kaynak": "cancer",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1012,
+    1167
+   ],
+   "olcum": {
+    "kapanis": 7,
+    "ice_px": 4,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 12879
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "CANCER_LIBRA",
+   "kaynak": "libra",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1084,
+    1448
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 16934
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "AQUARIUS_LIBRA",
+   "kaynak": "ana",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    829,
+    1600
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 14452
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "AQUARIUS_LIBRA",
+   "kaynak": "aquarius",
+   "n0": 445,
+   "degisen_piksel": 464,
+   "alfa_farki_en_buyuk": 1.0,
+   "tur": [
+    {
+     "onarilan": 445,
+     "kalan": 0
+    }
+   ],
+   "bilesen": [
+    {
+     "x": 5122,
+     "y": 4499,
+     "w": 323,
+     "h": 2,
+     "alan": 324
+    },
+    {
+     "x": 8348,
+     "y": 0,
+     "w": 57,
+     "h": 2,
+     "alan": 82
+    },
+    {
+     "x": 8449,
+     "y": 0,
+     "w": 42,
+     "h": 2,
+     "alan": 58
+    }
+   ],
+   "bilesen_sayisi": 3,
+   "kenara_uzaklik": {
+    "en_kucuk": 0,
+    "en_buyuk": 1,
+    "ortanca": 0.0
+   },
+   "kaynak_boyut": [
+    4501,
+    10817
+   ],
+   "olcum": {
+    "kapanis": 61,
+    "ice_px": 34,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 494248
+   },
+   "zayif_test": false,
+   "onarimsiz_motor_cikis": 1,
+   "yakin_954": {
+    "RUBY/kucuk_sol": {
+     "kutu": [
+      282,
+      626,
+      370,
+      663
+     ],
+     "esleme_olcek": [
+      0.008135,
+      0.00822
+     ],
+     "farkli_piksel": 3,
+     "en_buyuk_fark": 1
+    },
+    "SAPPHIRE/kucuk_sol": {
+     "kutu": [
+      282,
+      626,
+      370,
+      663
+     ],
+     "esleme_olcek": [
+      0.008135,
+      0.00822
+     ],
+     "farkli_piksel": 5,
+     "en_buyuk_fark": 1
+    },
+    "EMERALD/kucuk_sol": {
+     "kutu": [
+      282,
+      626,
+      370,
+      663
+     ],
+     "esleme_olcek": [
+      0.008135,
+      0.00822
+     ],
+     "farkli_piksel": 3,
+     "en_buyuk_fark": 1
+    }
+   },
+   "yakin_954_yapilmadi": {
+    "SADE_ALTIN": "yapilmadi: onarimsiz motor ORN_DUMP / ornament_sade kosmaz, onarimsiz SADE katmani yok",
+    "FILDISI": "yapilmadi: girdisi onarimsiz SADE_1, uretilmedi"
+   }
+  },
+  {
+   "cift": "AQUARIUS_LIBRA",
+   "kaynak": "libra",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1084,
+    1448
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 16934
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "SAGITTARIUS_TAURUS",
+   "kaynak": "ana",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1303,
+    1600
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 22264
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "SAGITTARIUS_TAURUS",
+   "kaynak": "sagittarius",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1374,
+    1057
+   ],
+   "olcum": {
+    "kapanis": 7,
+    "ice_px": 3,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 15713
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "SAGITTARIUS_TAURUS",
+   "kaynak": "taurus",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1248,
+    1251
+   ],
+   "olcum": {
+    "kapanis": 7,
+    "ice_px": 4,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 16835
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "SAGITTARIUS_VIRGO",
+   "kaynak": "ana",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    2158,
+    1600
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 36354
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "SAGITTARIUS_VIRGO",
+   "kaynak": "sagittarius",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1374,
+    1057
+   ],
+   "olcum": {
+    "kapanis": 7,
+    "ice_px": 3,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 15713
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "SAGITTARIUS_VIRGO",
+   "kaynak": "virgo",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1192,
+    1189
+   ],
+   "olcum": {
+    "kapanis": 7,
+    "ice_px": 4,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 15338
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "SCORPIO_SCORPIO",
+   "kaynak": "ana",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1171,
+    1600
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 20089
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "SCORPIO_SCORPIO",
+   "kaynak": "scorpio",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1123,
+    1361
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 4,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 16499
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "SCORPIO_TAURUS",
+   "kaynak": "ana",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1694,
+    1600
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 28708
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "SCORPIO_TAURUS",
+   "kaynak": "scorpio",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1123,
+    1361
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 4,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 16499
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "SCORPIO_TAURUS",
+   "kaynak": "taurus",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1248,
+    1251
+   ],
+   "olcum": {
+    "kapanis": 7,
+    "ice_px": 4,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 16835
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "SCORPIO_VIRGO",
+   "kaynak": "ana",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1316,
+    1600
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 22478
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "SCORPIO_VIRGO",
+   "kaynak": "scorpio",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1123,
+    1361
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 4,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 16499
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "SCORPIO_VIRGO",
+   "kaynak": "virgo",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1192,
+    1189
+   ],
+   "olcum": {
+    "kapanis": 7,
+    "ice_px": 4,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 15338
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "TAURUS_VIRGO",
+   "kaynak": "ana",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1864,
+    1600
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 31509
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "TAURUS_VIRGO",
+   "kaynak": "taurus",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1248,
+    1251
+   ],
+   "olcum": {
+    "kapanis": 7,
+    "ice_px": 4,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 16835
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "TAURUS_VIRGO",
+   "kaynak": "virgo",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1192,
+    1189
+   ],
+   "olcum": {
+    "kapanis": 7,
+    "ice_px": 4,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 15338
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "VIRGO_VIRGO",
+   "kaynak": "ana",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1202,
+    1600
+   ],
+   "olcum": {
+    "kapanis": 9,
+    "ice_px": 5,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 20600
+   },
+   "zayif_test": true
+  },
+  {
+   "cift": "VIRGO_VIRGO",
+   "kaynak": "virgo",
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "tur": [],
+   "bilesen": [],
+   "bilesen_sayisi": 0,
+   "kenara_uzaklik": null,
+   "kaynak_boyut": [
+    1192,
+    1189
+   ],
+   "olcum": {
+    "kapanis": 7,
+    "ice_px": 4,
+    "kenar_payi": 24,
+    "kucuk_delik_alan_esigi": 15338
+   },
+   "zayif_test": true
+  }
+ ],
+ "not_": "her cift x kaynak (o5.kenar_onar cagrisi); n0 = 0 satirinda \"degisen piksel 0\" FAIL veremez: zayif test (KALITE 3). Yakin planlar (kaynak 1:1 ve 954 4x) yalniz Drive."
+}

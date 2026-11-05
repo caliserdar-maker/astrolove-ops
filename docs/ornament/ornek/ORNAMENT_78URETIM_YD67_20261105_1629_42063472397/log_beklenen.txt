@@ -1,0 +1,16 @@
+PASS cl_kontrol_her_parca | {"1": true, "2": true, "3": true, "4": true, "5": true, "6": true, "7": true, "8": true}
+PASS ornek_png_drive | {"png": {"ARIES_ARIES": 5, "ARIES_CANCER": 5, "ARIES_CAPRICORN": 5, "ARIES_GEMINI": 5, "ARIES_LEO": 5, "ARIES_LIBRA": 5, "ARIES_PISCES": 5, "ARIES_SAGITTARIUS": 5, "ARIES_TAURUS": 5, "ARIES_VIRGO": 5,
+PASS kova_tek_neden | {"AQUARIUS_ARIES": true, "AQUARIUS_SAGITTARIUS": true, "AQUARIUS_CAPRICORN": true, "AQUARIUS_SCORPIO": true, "AQUARIUS_GEMINI": true, "AQUARIUS_TAURUS": true, "AQUARIUS_LEO": true, "AQUARIUS_VIRGO": t
+PASS printful_dosya | {"ARIES_ARIES": {"RUBY": true, "SAPPHIRE": true, "EMERALD": true, "SADE_ALTIN": true, "FILDISI": true}, "ARIES_CANCER": {"RUBY": true, "SAPPHIRE": true, "EMERALD": true, "SADE_ALTIN": true, "FILDISI":
+PASS dpi_piksel_ayni | {"ARIES_ARIES": {"RUBY": true, "SAPPHIRE": true, "EMERALD": true, "SADE_ALTIN": true, "FILDISI": true}, "ARIES_CANCER": {"RUBY": true, "SAPPHIRE": true, "EMERALD": true, "SADE_ALTIN": true, "FILDISI":
+PASS o2_piksel | {"ARIES_ARIES": true, "ARIES_CANCER": true, "ARIES_CAPRICORN": true, "ARIES_GEMINI": true, "ARIES_LEO": true, "ARIES_LIBRA": true, "ARIES_PISCES": true, "ARIES_SAGITTARIUS": true, "ARIES_TAURUS": true
+PASS kenar_on_motor | {"eslesen": 193, "toplam": 193, "farkli": []}
+PASS aquarius_445_464 | {"on_olcum": [445, 464], "kapi_testi": [445, 464]}
+PASS eta_satirlari | {"PARCA_1": {"eta": 10, "cift": 10}, "PARCA_2": {"eta": 10, "cift": 10}, "PARCA_3": {"eta": 10, "cift": 10}, "PARCA_4": {"eta": 9, "cift": 9}, "PARCA_5": {"eta": 9, "cift": 9}, "PARCA_6": {"eta": 9, "
+PASS katman_silindi | {"ARIES_ARIES": {"katman_pkl_var": false, "dump_var": false}, "ARIES_CANCER": {"katman_pkl_var": false, "dump_var": false}, "ARIES_CAPRICORN": {"katman_pkl_var": false, "dump_var": false}, "ARIES_GEMI
+PASS siparis_kaydi | {"hazirlik": 14, "parca": {"PARCA_1": true, "PARCA_2": true, "PARCA_3": true, "PARCA_4": true, "PARCA_5": true, "PARCA_6": true, "PARCA_7": true, "PARCA_8": true}}
+PASS onarimsiz_ek_fail_listesi | {}
+FAIL birlesik_gecti | {"eksik_parca": [], "fail": ["GEMINI_GEMINI", "GEMINI_SAGITTARIUS", "PISCES_PISCES"], "cokus": []}
+PASS yeni_duzen_modu | {"ARIES_ARIES": true, "ARIES_CANCER": true, "ARIES_CAPRICORN": true, "ARIES_GEMINI": true, "ARIES_LEO": true, "ARIES_LIBRA": true, "ARIES_PISCES": true, "ARIES_SAGITTARIUS": true, "ARIES_TAURUS": true
+PASS yd_yerel_test | {"ref_sabit": true, "gecen": 78, "fail": [], "bilinen_fail": [true, 45]}
+BEKLENEN_YD67 FAIL

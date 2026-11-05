@@ -1,0 +1,319 @@
+{
+ "aktif": "yd67",
+ "max_parallel": 8,
+ "parca_sayisi": 8,
+ "parcalar": [
+  {
+   "parca": 1,
+   "ciftler": [
+    "CANCER_LIBRA",
+    "ARIES_ARIES",
+    "ARIES_CANCER",
+    "ARIES_CAPRICORN",
+    "ARIES_GEMINI",
+    "ARIES_LEO",
+    "ARIES_LIBRA",
+    "ARIES_PISCES",
+    "ARIES_SAGITTARIUS",
+    "ARIES_TAURUS"
+   ],
+   "uretim": [
+    "ARIES_ARIES",
+    "ARIES_CANCER",
+    "ARIES_CAPRICORN",
+    "ARIES_GEMINI",
+    "ARIES_LEO",
+    "ARIES_LIBRA",
+    "ARIES_PISCES",
+    "ARIES_SAGITTARIUS",
+    "ARIES_TAURUS"
+   ],
+   "cl_yeni": false,
+   "kenar_zorunlu": [],
+   "gercek_boy": [
+    "ARIES_ARIES",
+    "ARIES_CANCER",
+    "ARIES_CAPRICORN",
+    "ARIES_GEMINI",
+    "ARIES_LEO",
+    "ARIES_LIBRA",
+    "ARIES_PISCES",
+    "ARIES_SAGITTARIUS",
+    "ARIES_TAURUS"
+   ]
+  },
+  {
+   "parca": 2,
+   "ciftler": [
+    "CANCER_LIBRA",
+    "ARIES_VIRGO",
+    "CANCER_CANCER",
+    "CANCER_CAPRICORN",
+    "CANCER_GEMINI",
+    "CANCER_LEO",
+    "CANCER_PISCES",
+    "CANCER_SAGITTARIUS",
+    "CANCER_SCORPIO",
+    "CANCER_VIRGO"
+   ],
+   "uretim": [
+    "ARIES_VIRGO",
+    "CANCER_CANCER",
+    "CANCER_CAPRICORN",
+    "CANCER_GEMINI",
+    "CANCER_LEO",
+    "CANCER_PISCES",
+    "CANCER_SAGITTARIUS",
+    "CANCER_SCORPIO",
+    "CANCER_VIRGO"
+   ],
+   "cl_yeni": false,
+   "kenar_zorunlu": [],
+   "gercek_boy": [
+    "ARIES_VIRGO",
+    "CANCER_CANCER",
+    "CANCER_CAPRICORN",
+    "CANCER_GEMINI",
+    "CANCER_LEO",
+    "CANCER_PISCES",
+    "CANCER_SAGITTARIUS",
+    "CANCER_SCORPIO",
+    "CANCER_VIRGO"
+   ]
+  },
+  {
+   "parca": 3,
+   "ciftler": [
+    "CANCER_LIBRA",
+    "CAPRICORN_GEMINI",
+    "CAPRICORN_LEO",
+    "CAPRICORN_LIBRA",
+    "CAPRICORN_PISCES",
+    "CAPRICORN_SAGITTARIUS",
+    "CAPRICORN_SCORPIO",
+    "CAPRICORN_TAURUS",
+    "CAPRICORN_VIRGO",
+    "GEMINI_GEMINI"
+   ],
+   "uretim": [
+    "CAPRICORN_GEMINI",
+    "CAPRICORN_LEO",
+    "CAPRICORN_LIBRA",
+    "CAPRICORN_PISCES",
+    "CAPRICORN_SAGITTARIUS",
+    "CAPRICORN_SCORPIO",
+    "CAPRICORN_TAURUS",
+    "CAPRICORN_VIRGO",
+    "GEMINI_GEMINI"
+   ],
+   "cl_yeni": false,
+   "kenar_zorunlu": [],
+   "gercek_boy": [
+    "CAPRICORN_GEMINI",
+    "CAPRICORN_LEO",
+    "CAPRICORN_LIBRA",
+    "CAPRICORN_PISCES",
+    "CAPRICORN_SAGITTARIUS",
+    "CAPRICORN_SCORPIO",
+    "CAPRICORN_TAURUS",
+    "CAPRICORN_VIRGO",
+    "GEMINI_GEMINI"
+   ]
+  },
+  {
+   "parca": 4,
+   "ciftler": [
+    "CANCER_LIBRA",
+    "AQUARIUS_ARIES",
+    "AQUARIUS_SAGITTARIUS",
+    "GEMINI_LEO",
+    "GEMINI_LIBRA",
+    "GEMINI_PISCES",
+    "GEMINI_SAGITTARIUS",
+    "GEMINI_SCORPIO",
+    "GEMINI_TAURUS"
+   ],
+   "uretim": [
+    "AQUARIUS_ARIES",
+    "AQUARIUS_SAGITTARIUS",
+    "GEMINI_LEO",
+    "GEMINI_LIBRA",
+    "GEMINI_PISCES",
+    "GEMINI_SAGITTARIUS",
+    "GEMINI_SCORPIO",
+    "GEMINI_TAURUS"
+   ],
+   "cl_yeni": false,
+   "kenar_zorunlu": [
+    "AQUARIUS_ARIES",
+    "AQUARIUS_SAGITTARIUS"
+   ],
+   "gercek_boy": [
+    "AQUARIUS_ARIES",
+    "AQUARIUS_SAGITTARIUS",
+    "GEMINI_LEO",
+    "GEMINI_LIBRA",
+    "GEMINI_PISCES",
+    "GEMINI_SAGITTARIUS",
+    "GEMINI_SCORPIO",
+    "GEMINI_TAURUS"
+   ]
+  },
+  {
+   "parca": 5,
+   "ciftler": [
+    "CANCER_LIBRA",
+    "AQUARIUS_CAPRICORN",
+    "AQUARIUS_SCORPIO",
+    "LEO_LEO",
+    "LEO_LIBRA",
+    "LEO_PISCES",
+    "LEO_SCORPIO",
+    "LEO_TAURUS",
+    "LEO_VIRGO"
+   ],
+   "uretim": [
+    "AQUARIUS_CAPRICORN",
+    "AQUARIUS_SCORPIO",
+    "LEO_LEO",
+    "LEO_LIBRA",
+    "LEO_PISCES",
+    "LEO_SCORPIO",
+    "LEO_TAURUS",
+    "LEO_VIRGO"
+   ],
+   "cl_yeni": false,
+   "kenar_zorunlu": [
+    "AQUARIUS_CAPRICORN",
+    "AQUARIUS_SCORPIO"
+   ],
+   "gercek_boy": [
+    "AQUARIUS_CAPRICORN",
+    "AQUARIUS_SCORPIO",
+    "LEO_LEO",
+    "LEO_LIBRA",
+    "LEO_PISCES",
+    "LEO_SCORPIO",
+    "LEO_TAURUS",
+    "LEO_VIRGO"
+   ]
+  },
+  {
+   "parca": 6,
+   "ciftler": [
+    "CANCER_LIBRA",
+    "AQUARIUS_GEMINI",
+    "AQUARIUS_TAURUS",
+    "LIBRA_PISCES",
+    "LIBRA_SAGITTARIUS",
+    "LIBRA_SCORPIO",
+    "LIBRA_TAURUS",
+    "LIBRA_VIRGO",
+    "PISCES_PISCES"
+   ],
+   "uretim": [
+    "AQUARIUS_GEMINI",
+    "AQUARIUS_TAURUS",
+    "LIBRA_PISCES",
+    "LIBRA_SAGITTARIUS",
+    "LIBRA_SCORPIO",
+    "LIBRA_TAURUS",
+    "LIBRA_VIRGO",
+    "PISCES_PISCES"
+   ],
+   "cl_yeni": false,
+   "kenar_zorunlu": [
+    "AQUARIUS_GEMINI",
+    "AQUARIUS_TAURUS"
+   ],
+   "gercek_boy": [
+    "AQUARIUS_GEMINI",
+    "AQUARIUS_TAURUS",
+    "LIBRA_PISCES",
+    "LIBRA_SAGITTARIUS",
+    "LIBRA_SCORPIO",
+    "LIBRA_TAURUS",
+    "LIBRA_VIRGO",
+    "PISCES_PISCES"
+   ]
+  },
+  {
+   "parca": 7,
+   "ciftler": [
+    "CANCER_LIBRA",
+    "AQUARIUS_LEO",
+    "AQUARIUS_VIRGO",
+    "PISCES_SAGITTARIUS",
+    "PISCES_SCORPIO",
+    "PISCES_TAURUS",
+    "PISCES_VIRGO",
+    "SAGITTARIUS_SAGITTARIUS",
+    "SAGITTARIUS_SCORPIO"
+   ],
+   "uretim": [
+    "AQUARIUS_LEO",
+    "AQUARIUS_VIRGO",
+    "PISCES_SAGITTARIUS",
+    "PISCES_SCORPIO",
+    "PISCES_TAURUS",
+    "PISCES_VIRGO",
+    "SAGITTARIUS_SAGITTARIUS",
+    "SAGITTARIUS_SCORPIO"
+   ],
+   "cl_yeni": false,
+   "kenar_zorunlu": [
+    "AQUARIUS_LEO",
+    "AQUARIUS_VIRGO"
+   ],
+   "gercek_boy": [
+    "AQUARIUS_LEO",
+    "AQUARIUS_VIRGO",
+    "PISCES_SAGITTARIUS",
+    "PISCES_SCORPIO",
+    "PISCES_TAURUS",
+    "PISCES_VIRGO",
+    "SAGITTARIUS_SAGITTARIUS",
+    "SAGITTARIUS_SCORPIO"
+   ]
+  },
+  {
+   "parca": 8,
+   "ciftler": [
+    "CANCER_LIBRA",
+    "AQUARIUS_LIBRA",
+    "SAGITTARIUS_TAURUS",
+    "SAGITTARIUS_VIRGO",
+    "SCORPIO_SCORPIO",
+    "SCORPIO_TAURUS",
+    "SCORPIO_VIRGO",
+    "TAURUS_VIRGO",
+    "VIRGO_VIRGO"
+   ],
+   "uretim": [
+    "AQUARIUS_LIBRA",
+    "SAGITTARIUS_TAURUS",
+    "SAGITTARIUS_VIRGO",
+    "SCORPIO_SCORPIO",
+    "SCORPIO_TAURUS",
+    "SCORPIO_VIRGO",
+    "TAURUS_VIRGO",
+    "VIRGO_VIRGO"
+   ],
+   "cl_yeni": false,
+   "kenar_zorunlu": [
+    "AQUARIUS_LIBRA"
+   ],
+   "gercek_boy": [
+    "AQUARIUS_LIBRA",
+    "SAGITTARIUS_TAURUS",
+    "SAGITTARIUS_VIRGO",
+    "SCORPIO_SCORPIO",
+    "SCORPIO_TAURUS",
+    "SCORPIO_VIRGO",
+    "TAURUS_VIRGO",
+    "VIRGO_VIRGO"
+   ]
+  }
+ ],
+ "cift_sayisi": 67
+}

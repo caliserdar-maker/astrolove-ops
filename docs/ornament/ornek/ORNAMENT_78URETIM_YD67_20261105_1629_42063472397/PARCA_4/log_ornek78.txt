@@ -1,0 +1,39 @@
+[    0.0s] cift CANCER_LIBRA
+[  166.3s] CANCER_LIBRA yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.19, 'SAPPHIRE': 5.88, 'EMERALD': 5.46} dE00 {'RUBY': 0.756, 'SAPPHIRE': 0.86, 'EMERALD': 0.854} sembol [264, 246, 689, 650] uzaklik {'guvenli_disi': 8.6, 'delik': 49.0, 'ust_cizgi': 25.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  166.4s] KONTROL RUBY 0 0 PASS
+[  166.5s] KONTROL SAPPHIRE 0 0 PASS
+[  166.5s] KONTROL EMERALD 0 0 PASS
+[  166.6s] KONTROL SADE_ALTIN 0 0 PASS
+[  166.6s] KONTROL FILDISI 0 0 PASS
+[  170.5s] ETA 1/9 gecen 170 sn kalan 1364 sn yuzde 11.1
+[  170.5s] cift AQUARIUS_ARIES
+[  445.5s] onarimsiz motor AQUARIUS_ARIES cikis 1
+::warning::kenar onarimi AQUARIUS_ARIES aquarius: degisen piksel 464, en buyuk alfa farki 1.0
+[  445.5s] onarimsiz neden AQUARIUS_ARIES True tek neden leke_a_kaynak_0 (aquarius 445 px)
+[  445.6s] AQUARIUS_ARIES yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.42, 'SAPPHIRE': 6.28, 'EMERALD': 5.73} dE00 {'RUBY': 0.62, 'SAPPHIRE': 0.612, 'EMERALD': 0.608} sembol [309, 271, 642, 548] uzaklik {'guvenli_disi': 41.7, 'delik': 95.9, 'ust_cizgi': 50.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  456.3s] ETA 2/9 gecen 456 sn kalan 1597 sn yuzde 22.2
+[  456.3s] cift AQUARIUS_SAGITTARIUS
+[  734.0s] onarimsiz motor AQUARIUS_SAGITTARIUS cikis 1
+::warning::kenar onarimi AQUARIUS_SAGITTARIUS aquarius: degisen piksel 464, en buyuk alfa farki 1.0
+[  734.0s] onarimsiz neden AQUARIUS_SAGITTARIUS True tek neden leke_a_kaynak_0 (aquarius 445 px)
+[  734.1s] AQUARIUS_SAGITTARIUS yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.43, 'SAPPHIRE': 6.36, 'EMERALD': 5.87} dE00 {'RUBY': 0.463, 'SAPPHIRE': 0.493, 'EMERALD': 0.558} sembol [315, 309, 636, 536] uzaklik {'guvenli_disi': 41.7, 'delik': 167.2, 'ust_cizgi': 87.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  744.5s] ETA 3/9 gecen 744 sn kalan 1489 sn yuzde 33.3
+[  744.5s] cift GEMINI_LEO
+[  900.1s] GEMINI_LEO yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.6, 'SAPPHIRE': 6.6, 'EMERALD': 6.06} dE00 {'RUBY': 0.805, 'SAPPHIRE': 0.927, 'EMERALD': 0.928} sembol [345, 270, 606, 548] uzaklik {'guvenli_disi': 41.7, 'delik': 78.1, 'ust_cizgi': 49.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[  906.7s] ETA 4/9 gecen 907 sn kalan 1133 sn yuzde 44.4
+[  906.7s] cift GEMINI_LIBRA
+[ 1065.4s] GEMINI_LIBRA yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 6.45, 'SAPPHIRE': 7.61, 'EMERALD': 6.96} dE00 {'RUBY': 1.286, 'SAPPHIRE': 1.329, 'EMERALD': 1.321} sembol [354, 267, 596, 550] uzaklik {'guvenli_disi': 41.7, 'delik': 70.0, 'ust_cizgi': 46.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[ 1072.5s] ETA 5/9 gecen 1073 sn kalan 858 sn yuzde 55.6
+[ 1072.5s] cift GEMINI_PISCES
+[ 1229.4s] GEMINI_PISCES yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.92, 'SAPPHIRE': 6.97, 'EMERALD': 6.38} dE00 {'RUBY': 0.929, 'SAPPHIRE': 1.026, 'EMERALD': 0.984} sembol [340, 273, 612, 548] uzaklik {'guvenli_disi': 41.7, 'delik': 104.0, 'ust_cizgi': 51.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[ 1236.9s] ETA 6/9 gecen 1237 sn kalan 618 sn yuzde 66.7
+[ 1236.9s] cift GEMINI_SAGITTARIUS
+[ 1393.7s] GEMINI_SAGITTARIUS yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 6.79, 'SAPPHIRE': 7.95, 'EMERALD': 7.34} dE00 {'RUBY': 3.213, 'SAPPHIRE': 3.396, 'EMERALD': 3.347} sembol [318, 306, 633, 537] uzaklik {'guvenli_disi': 41.7, 'delik': 129.5, 'ust_cizgi': 84.0} sert FAIL ['koyu_dE00_son_ham_le_2'] cikis {'motor': 1, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[ 1403.4s] ETA 7/9 gecen 1403 sn kalan 401 sn yuzde 77.8
+[ 1403.4s] cift GEMINI_SCORPIO
+[ 1564.7s] GEMINI_SCORPIO yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.05, 'SAPPHIRE': 5.95, 'EMERALD': 5.44} dE00 {'RUBY': 0.443, 'SAPPHIRE': 0.503, 'EMERALD': 0.551} sembol [329, 293, 623, 541] uzaklik {'guvenli_disi': 41.7, 'delik': 141.2, 'ust_cizgi': 71.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[ 1571.4s] ETA 8/9 gecen 1571 sn kalan 196 sn yuzde 88.9
+[ 1571.4s] cift GEMINI_TAURUS
+[ 1728.6s] GEMINI_TAURUS yasak {'guvenli_disi': 0, 'delik': 0, 'ust_cizgi': 0, 'tuval_disi': 0} kontrast {'RUBY': 5.98, 'SAPPHIRE': 7.05, 'EMERALD': 6.45} dE00 {'RUBY': 0.961, 'SAPPHIRE': 1.062, 'EMERALD': 1.036} sembol [358, 268, 594, 549] uzaklik {'guvenli_disi': 41.7, 'delik': 113.0, 'ust_cizgi': 47.0} sert FAIL [] cikis {'motor': 0, 'dump': 0, 'sade': 0, 'fildisi': 0}
+[ 1736.1s] ETA 9/9 gecen 1736 sn kalan 0 sn yuzde 100.0
+[ 1737.0s] BITTI 45 PNG | cikis 1 {'GEMINI_SAGITTARIUS': 'sert kapilar: FAIL koyu_dE00_son_ham_le_2'}

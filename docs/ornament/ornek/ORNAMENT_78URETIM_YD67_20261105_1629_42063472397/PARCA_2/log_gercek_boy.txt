@@ -1,0 +1,9 @@
+PASS /tmp/rapor/GERCEK_BOY_ARIES_VIRGO_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_CANCER_CANCER_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_CANCER_CAPRICORN_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_CANCER_GEMINI_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_CANCER_LEO_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_CANCER_PISCES_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_CANCER_SAGITTARIUS_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_CANCER_SCORPIO_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True
+PASS /tmp/rapor/GERCEK_BOY_CANCER_VIRGO_5STIL_300dpi.png | dpi 299.999 | tuval 80.77 mm | kesim cap 76.03 mm | r449 True | r476.5 yok True

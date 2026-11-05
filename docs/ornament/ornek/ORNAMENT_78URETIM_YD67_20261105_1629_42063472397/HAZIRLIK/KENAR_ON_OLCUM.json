@@ -1,0 +1,727 @@
+{
+ "kaynak": {
+  "aquarius": {
+   "n0": 445,
+   "degisen_piksel": 464,
+   "alfa_farki_en_buyuk": 1.0,
+   "boyut": [
+    4501,
+    10817
+   ]
+  },
+  "aries": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1211,
+    1299
+   ]
+  },
+  "cancer": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1012,
+    1167
+   ]
+  },
+  "capricorn": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1162,
+    1171
+   ]
+  },
+  "gemini": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1232,
+    1213
+   ]
+  },
+  "leo": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1201,
+    1031
+   ]
+  },
+  "libra": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1084,
+    1448
+   ]
+  },
+  "pisces": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1206,
+    1296
+   ]
+  },
+  "sagittarius": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1374,
+    1057
+   ]
+  },
+  "scorpio": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1123,
+    1361
+   ]
+  },
+  "taurus": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1248,
+    1251
+   ]
+  },
+  "virgo": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1192,
+    1189
+   ]
+  },
+  "AQUARIUS_ARIES_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1320,
+    1600
+   ]
+  },
+  "AQUARIUS_CAPRICORN_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1548,
+    1600
+   ]
+  },
+  "AQUARIUS_GEMINI_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1278,
+    1600
+   ]
+  },
+  "AQUARIUS_LEO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1289,
+    1600
+   ]
+  },
+  "AQUARIUS_LIBRA_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    829,
+    1600
+   ]
+  },
+  "AQUARIUS_SAGITTARIUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1139,
+    1600
+   ]
+  },
+  "AQUARIUS_SCORPIO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1272,
+    1600
+   ]
+  },
+  "AQUARIUS_TAURUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1362,
+    1600
+   ]
+  },
+  "AQUARIUS_VIRGO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1412,
+    1600
+   ]
+  },
+  "ARIES_ARIES_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1571,
+    1600
+   ]
+  },
+  "ARIES_CANCER_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1635,
+    1600
+   ]
+  },
+  "ARIES_CAPRICORN_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    2335,
+    1600
+   ]
+  },
+  "ARIES_GEMINI_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1572,
+    1600
+   ]
+  },
+  "ARIES_LEO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1860,
+    1600
+   ]
+  },
+  "ARIES_LIBRA_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1481,
+    1600
+   ]
+  },
+  "ARIES_PISCES_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1547,
+    1600
+   ]
+  },
+  "ARIES_SAGITTARIUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1547,
+    1600
+   ]
+  },
+  "ARIES_TAURUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1598,
+    1600
+   ]
+  },
+  "ARIES_VIRGO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1313,
+    1600
+   ]
+  },
+  "CANCER_CANCER_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    791,
+    1600
+   ]
+  },
+  "CANCER_CAPRICORN_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1349,
+    1600
+   ]
+  },
+  "CANCER_GEMINI_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1714,
+    1600
+   ]
+  },
+  "CANCER_LEO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1728,
+    1600
+   ]
+  },
+  "CANCER_PISCES_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1994,
+    1600
+   ]
+  },
+  "CANCER_SAGITTARIUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1407,
+    1600
+   ]
+  },
+  "CANCER_SCORPIO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1153,
+    1600
+   ]
+  },
+  "CANCER_VIRGO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1414,
+    1600
+   ]
+  },
+  "CAPRICORN_GEMINI_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1337,
+    1600
+   ]
+  },
+  "CAPRICORN_LEO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1236,
+    1600
+   ]
+  },
+  "CAPRICORN_LIBRA_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    835,
+    1600
+   ]
+  },
+  "CAPRICORN_PISCES_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1146,
+    1600
+   ]
+  },
+  "CAPRICORN_SAGITTARIUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    2008,
+    1600
+   ]
+  },
+  "CAPRICORN_SCORPIO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1257,
+    1600
+   ]
+  },
+  "CAPRICORN_TAURUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1494,
+    1600
+   ]
+  },
+  "CAPRICORN_VIRGO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1390,
+    1600
+   ]
+  },
+  "GEMINI_GEMINI_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1951,
+    1600
+   ]
+  },
+  "GEMINI_LEO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1701,
+    1600
+   ]
+  },
+  "GEMINI_LIBRA_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1831,
+    1600
+   ]
+  },
+  "GEMINI_PISCES_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1607,
+    1600
+   ]
+  },
+  "GEMINI_SAGITTARIUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1177,
+    1600
+   ]
+  },
+  "GEMINI_SCORPIO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1348,
+    1600
+   ]
+  },
+  "GEMINI_TAURUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1884,
+    1600
+   ]
+  },
+  "LEO_LEO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1858,
+    1600
+   ]
+  },
+  "LEO_LIBRA_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1249,
+    1600
+   ]
+  },
+  "LEO_PISCES_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1467,
+    1600
+   ]
+  },
+  "LEO_SCORPIO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1763,
+    1600
+   ]
+  },
+  "LEO_TAURUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1204,
+    1600
+   ]
+  },
+  "LEO_VIRGO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1526,
+    1600
+   ]
+  },
+  "LIBRA_PISCES_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1709,
+    1600
+   ]
+  },
+  "LIBRA_SAGITTARIUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1943,
+    1600
+   ]
+  },
+  "LIBRA_SCORPIO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    887,
+    1600
+   ]
+  },
+  "LIBRA_TAURUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1483,
+    1600
+   ]
+  },
+  "LIBRA_VIRGO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1379,
+    1600
+   ]
+  },
+  "PISCES_PISCES_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    2270,
+    1600
+   ]
+  },
+  "PISCES_SAGITTARIUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1865,
+    1600
+   ]
+  },
+  "PISCES_SCORPIO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1499,
+    1600
+   ]
+  },
+  "PISCES_TAURUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1508,
+    1600
+   ]
+  },
+  "PISCES_VIRGO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1569,
+    1600
+   ]
+  },
+  "SAGITTARIUS_SAGITTARIUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    759,
+    1600
+   ]
+  },
+  "SAGITTARIUS_SCORPIO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1210,
+    1600
+   ]
+  },
+  "SAGITTARIUS_TAURUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1303,
+    1600
+   ]
+  },
+  "SAGITTARIUS_VIRGO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    2158,
+    1600
+   ]
+  },
+  "SCORPIO_SCORPIO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1171,
+    1600
+   ]
+  },
+  "SCORPIO_TAURUS_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1694,
+    1600
+   ]
+  },
+  "SCORPIO_VIRGO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1316,
+    1600
+   ]
+  },
+  "TAURUS_VIRGO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1864,
+    1600
+   ]
+  },
+  "VIRGO_VIRGO_ana": {
+   "n0": 0,
+   "degisen_piksel": 0,
+   "alfa_farki_en_buyuk": 0.0,
+   "boyut": [
+    1202,
+    1600
+   ]
+  }
+ },
+ "onarimsiz_motor_ciftleri": [
+  "AQUARIUS_ARIES",
+  "AQUARIUS_CAPRICORN",
+  "AQUARIUS_GEMINI",
+  "AQUARIUS_LEO",
+  "AQUARIUS_LIBRA",
+  "AQUARIUS_SAGITTARIUS",
+  "AQUARIUS_SCORPIO",
+  "AQUARIUS_TAURUS",
+  "AQUARIUS_VIRGO"
+ ],
+ "yol": "kirp pad 2 -> ana > 1600 ise 1600 -> delik_kapat -> kenar_onar (ornament_motor ile ayni)"
+}

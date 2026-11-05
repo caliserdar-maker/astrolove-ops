@@ -1,0 +1,21 @@
+{
+ "akislar": [
+  "by-siparis-ornek.yml",
+  "etsy-siparis-ozet.yml",
+  "kupa-siparis.yml",
+  "olcek-tani-siparis.yml",
+  "pod-order-router.yml",
+  "siparis-baski-kontrol.yml",
+  "siparis-dijital.yml",
+  "siparis-giris.yml",
+  "siparis-kesit-birlesik.yml",
+  "siparis-kesit-son.yml",
+  "siparis-kisisel-oku.yml",
+  "siparis-onay-yaz.yml",
+  "siparis-pdf-test.yml",
+  "siparis-test-topla.yml"
+ ],
+ "akis_kaynagi": "main: .github/workflows (siparis|order)",
+ "etkin": [],
+ "zaman": "2026-11-05T16:21:03Z"
+}

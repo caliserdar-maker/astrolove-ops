@@ -1,0 +1,1 @@
+birlestir {'gecti': False, 'eksik_parca': [], 'fail': ['GEMINI_GEMINI', 'GEMINI_SAGITTARIUS', 'PISCES_PISCES'], 'cokus': [], 'kontrol': True, 'drive': True}
