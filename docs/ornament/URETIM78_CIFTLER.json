@@ -114,7 +114,8 @@
     "SAGITTARIUS_SAGITTARIUS",
     "SCORPIO_VIRGO"
    ]
-  ]
+  ],
+  "aciklama": "KAPALI (Serdar 5 Kas): eski duzen; parcalar() ValueError verir, yerine yd67."
  },
  "yeni_duzen": {
   "max_parallel": 4,
@@ -140,5 +141,94 @@
    ]
   ],
   "aciklama": "Serdar 4 Kas gece (KARARLAR_20261104_2): yeni duzen asama 2 ornek kosusu, 11 cift x 5 stil. CL parca 3 sonunda yeni duzende uretilir (cl_yeni_parca); her parcanin ilk CL kontrolu eski modda. 75 cift uretimi bu kosunun Serdar gorsel onayindan sonra ayri."
+ },
+ "yd67": {
+  "max_parallel": 8,
+  "parcalar": [
+   [
+    "ARIES_ARIES",
+    "ARIES_CANCER",
+    "ARIES_CAPRICORN",
+    "ARIES_GEMINI",
+    "ARIES_LEO",
+    "ARIES_LIBRA",
+    "ARIES_PISCES",
+    "ARIES_SAGITTARIUS",
+    "ARIES_TAURUS"
+   ],
+   [
+    "ARIES_VIRGO",
+    "CANCER_CANCER",
+    "CANCER_CAPRICORN",
+    "CANCER_GEMINI",
+    "CANCER_LEO",
+    "CANCER_PISCES",
+    "CANCER_SAGITTARIUS",
+    "CANCER_SCORPIO",
+    "CANCER_VIRGO"
+   ],
+   [
+    "CAPRICORN_GEMINI",
+    "CAPRICORN_LEO",
+    "CAPRICORN_LIBRA",
+    "CAPRICORN_PISCES",
+    "CAPRICORN_SAGITTARIUS",
+    "CAPRICORN_SCORPIO",
+    "CAPRICORN_TAURUS",
+    "CAPRICORN_VIRGO",
+    "GEMINI_GEMINI"
+   ],
+   [
+    "AQUARIUS_ARIES",
+    "AQUARIUS_SAGITTARIUS",
+    "GEMINI_LEO",
+    "GEMINI_LIBRA",
+    "GEMINI_PISCES",
+    "GEMINI_SAGITTARIUS",
+    "GEMINI_SCORPIO",
+    "GEMINI_TAURUS"
+   ],
+   [
+    "AQUARIUS_CAPRICORN",
+    "AQUARIUS_SCORPIO",
+    "LEO_LEO",
+    "LEO_LIBRA",
+    "LEO_PISCES",
+    "LEO_SCORPIO",
+    "LEO_TAURUS",
+    "LEO_VIRGO"
+   ],
+   [
+    "AQUARIUS_GEMINI",
+    "AQUARIUS_TAURUS",
+    "LIBRA_PISCES",
+    "LIBRA_SAGITTARIUS",
+    "LIBRA_SCORPIO",
+    "LIBRA_TAURUS",
+    "LIBRA_VIRGO",
+    "PISCES_PISCES"
+   ],
+   [
+    "AQUARIUS_LEO",
+    "AQUARIUS_VIRGO",
+    "PISCES_SAGITTARIUS",
+    "PISCES_SCORPIO",
+    "PISCES_TAURUS",
+    "PISCES_VIRGO",
+    "SAGITTARIUS_SAGITTARIUS",
+    "SAGITTARIUS_SCORPIO"
+   ],
+   [
+    "AQUARIUS_LIBRA",
+    "SAGITTARIUS_TAURUS",
+    "SAGITTARIUS_VIRGO",
+    "SCORPIO_SCORPIO",
+    "SCORPIO_TAURUS",
+    "SCORPIO_VIRGO",
+    "TAURUS_VIRGO",
+    "VIRGO_VIRGO"
+   ]
+  ],
+  "aciklama": "Serdar 5 Kas (KARARLAR_20261104_2, PLAN67): yeni duzen 67 cift x 5 stil (78 - YD11). 8 parca, parca basina en cok 2 Kova, cift farki en cok 1. Her parcanin ilk CL kontrolu eski modda. Onayli 11 cift uretilmez."
  }
 }

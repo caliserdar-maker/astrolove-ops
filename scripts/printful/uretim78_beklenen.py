@@ -14,7 +14,7 @@ Her beklenti PASS/FAIL + kaynak:
   siparis_kaydi            hazirlik ve her parca siparis kontrol kaydi var
   onarimsiz_ek_fail_listesi BIRLESIK kenar_onarimsiz_ek_fail alani var (bilgi)
   birlesik_gecti           BIRLESIK gecti (eksik parca yok, cift FAIL yok, cokus yok, kontrol, Drive)
-  --bolum yeni_duzen (Serdar 4 Kas gece; asama 2) ek beklentiler:
+  --bolum yeni_duzen | yd67 (Serdar 4 Kas gece asama 2; 5 Kas PLAN67) ek beklentiler:
   yeni_duzen_modu          her ciftte kapi.sert yeni_duzen_kapilari_var True (motor yd_* kapilari var, 20/20/20 yok)
   yd_yerel_test            hazirlik YD_YERLESIM78_TEST.json: ref = SABIT, 78/78 PASS, bilinen FAIL hepsi beklenen kapidan
 Cikis: 0 hepsi PASS, 1 en az biri FAIL, 2 cokus."""
@@ -92,7 +92,7 @@ def beklenti(B, kapi, kenar, siparis, parca_dir, ornek, bolum='ornek', yd_test=N
       'SIPARIS_HAZIRLIK.json + PARCA_*/SIPARIS.json')
     b('onarimsiz_ek_fail_listesi', 'kenar_onarimsiz_ek_fail' in B, B.get('kenar_onarimsiz_ek_fail'), 'BIRLESIK (bilgi)')
     b('birlesik_gecti', B.get('gecti') is True, dict(eksik_parca=B.get('eksik_parca'), fail=B.get('fail'), cokus=B.get('cokus')), 'BIRLESIK')
-    if bolum == 'yeni_duzen':
+    if bolum in ('yeni_duzen', 'yd67'):                                     # yeni duzen bolumleri (uretim78.YD_BOLUMLER; Serdar 5 Kas PLAN67)
         ym = {c: ((C.get(c) or {}).get('kapi') or {}).get('sert', {}).get('yeni_duzen_kapilari_var') for c in ornek}
         b('yeni_duzen_modu', bool(ym) and all(v is True for v in ym.values()), ym, 'BIRLESIK cift.kapi.sert.yeni_duzen_kapilari_var')
         T = yd_test or {}
@@ -103,14 +103,19 @@ def beklenti(B, kapi, kenar, siparis, parca_dir, ornek, bolum='ornek', yd_test=N
     return dict(beklentiler=out, hepsi_gecti=all(x['gecti'] for x in out))
 
 
+def ornek_listesi(J, bolum):
+    """bolumun uretim ciftleri (beklenen PNG listesi): parcalar + (cl_yeni_parca varsa) CL. yd67: 67 cift, CL yok (PLAN67)."""
+    return [c for p in J[bolum]['parcalar'] for c in p] + (['CANCER_LIBRA'] if J[bolum].get('cl_yeni_parca') else [])
+
+
 def main():
     ap = argparse.ArgumentParser()
     for k in ('birlesik', 'kapi', 'kenar_on', 'siparis', 'parca_dir', 'ciftler_json', 'cikti'):
         ap.add_argument('--' + k, required=True)
-    ap.add_argument('--bolum', default='ornek', choices=('ornek', 'yeni_duzen')); ap.add_argument('--yd_test')
+    ap.add_argument('--bolum', default='ornek', choices=('ornek', 'yeni_duzen', 'yd67')); ap.add_argument('--yd_test')
     a = ap.parse_args()
     J = json.loads(Path(a.ciftler_json).read_text())
-    ornek = [c for p in J[a.bolum]['parcalar'] for c in p] + (['CANCER_LIBRA'] if J[a.bolum].get('cl_yeni_parca') else [])
+    ornek = ornek_listesi(J, a.bolum)
     R = beklenti(oku(a.birlesik), oku(a.kapi), oku(a.kenar_on), oku(a.siparis), a.parca_dir, ornek, a.bolum, oku(a.yd_test) if a.yd_test else None)
     Path(a.cikti).write_text(json.dumps(R, indent=1, ensure_ascii=False, default=str))
     for x in R['beklentiler']:

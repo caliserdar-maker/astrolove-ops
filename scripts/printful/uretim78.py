@@ -31,6 +31,8 @@ ONAYLI = ('CANCER_LIBRA', 'AQUARIUS_PISCES', 'GEMINI_VIRGO')       # Serdar 4 Ka
 YD11 = ('TAURUS_TAURUS', 'CANCER_TAURUS', 'AQUARIUS_CANCER', 'LIBRA_LIBRA', 'AQUARIUS_AQUARIUS', 'ARIES_SCORPIO', 'LEO_SAGITTARIUS',
         'CAPRICORN_CAPRICORN', 'CANCER_LIBRA', 'AQUARIUS_PISCES', 'GEMINI_VIRGO')   # yeni duzen asama 2 ornek ciftleri (Serdar 4 Kas gece)
 KONTROL_ESKI = 'CANCER_LIBRA_KONTROL_ESKI'                           # yeni duzen kosusunda eski mod CL kontrolunun OLCUM anahtari
+YD_BOLUMLER = ('yeni_duzen', 'yd67')                                  # yeni duzen (YENI_DUZEN=1) bolumleri (Serdar 5 Kas, PLAN67)
+KOVA_PARCA_MAX = 2                                                    # yd67: parca basina en cok 2 Kova'li cift (PLAN67 parca dagilim kurali)
 ETKIN = ('queued', 'in_progress', 'waiting', 'pending', 'requested')
 SIPARIS_DESEN = re.compile(r'siparis|order', re.I)
 DPI, DPI_TOL = 300.0, 0.5
@@ -39,7 +41,7 @@ DPI, DPI_TOL = 300.0, 0.5
 # ------------------------------------------------------------------------------------------------ parcalar
 def parcalar(J, aktif=None):
     """URETIM78_CIFTLER.json -> dict(aktif, max_parallel, parcalar=[dict(parca, ciftler (CL ilk), uretim, kenar_zorunlu, gercek_boy)]).
-    Dogrulama (ValueError): bilinmeyen cift, tekrar, CL parcada yazili, '78' bolumu tam 75 cift (78 - onayli 3)."""
+    Dogrulama (ValueError): bilinmeyen cift, tekrar, CL parcada yazili, '78' KAPALI (Serdar 5 Kas), 'yd67' tam 67 cift (78 - YD11), parca farki <= 1, parca basina Kova <= 2."""
     aktif = aktif or J['aktif']
     B = J[aktif]
     tum = [c for p in B['parcalar'] for c in p]
@@ -58,10 +60,18 @@ def parcalar(J, aktif=None):
     if aktif == 'yeni_duzen':
         if sorted(tum + [KONTROL]) != sorted(YD11) or cl_yeni is None:
             raise ValueError(f"'yeni_duzen' bolumu 10 cift + cl_yeni_parca (CL) olmali: eksik {sorted(set(YD11) - set(tum) - {KONTROL})}, fazla {sorted(set(tum) - set(YD11))}")
-    if aktif == '78':
-        bek = sorted(c for c in CIFT78 if c not in ONAYLI)
-        if sorted(tum) != bek:
-            raise ValueError(f"'78' bolumu 75 cift olmali: eksik {sorted(set(bek) - set(tum))}, fazla {sorted(set(tum) - set(bek))}")
+    if aktif == '78':                                                        # Serdar 5 Kas (PLAN67 soru 3): eski duzen 75 cift bolumu KAPALI
+        raise ValueError("'78' bolumu kapali (eski duzen; Serdar 5 Kas): yerine 'yd67'")
+    if aktif == 'yd67':                                                      # Serdar 5 Kas (PLAN67): 78 - YD11 = 67, yeni duzen
+        bek = sorted(c for c in CIFT78 if c not in YD11)
+        if sorted(tum) != bek or cl_yeni is not None:
+            raise ValueError(f"'yd67' bolumu 67 cift olmali (78 - YD11), cl_yeni yok: eksik {sorted(set(bek) - set(tum))}, fazla {sorted(set(tum) - set(bek))}")
+        n_ = [len(p) for p in B['parcalar']]
+        if max(n_) - min(n_) > 1:
+            raise ValueError(f"'yd67' parca cift sayisi farki en cok 1 olmali: {n_}")
+        ak_ = [sum('AQUARIUS' in c.split('_') for c in p) for p in B['parcalar']]
+        if max(ak_) > KOVA_PARCA_MAX:
+            raise ValueError(f"'yd67' parca basina en cok {KOVA_PARCA_MAX} Kova'li cift: {ak_}")
     P = []
     for i, p in enumerate(B['parcalar']):
         ek = [KONTROL] if cl_yeni == i + 1 else []

@@ -43,17 +43,32 @@ def main():
 
     J = json.loads((_k / 'docs/ornament/URETIM78_CIFTLER.json').read_text())
     # 1 parca listesi
-    Po = u.parcalar(J, 'ornek'); P7 = u.parcalar(J, '78')
+    Po = u.parcalar(J, 'ornek'); P7 = u.parcalar(J, 'yd67')
     vaka('parca', 'ornek: 2 parca x 4, CL ilk', [2, [5, 5], ['CANCER_LIBRA'] * 2],
          lambda: [Po['parca_sayisi'], [len(p['ciftler']) for p in Po['parcalar']], [p['ciftler'][0] for p in Po['parcalar']]])
     vaka('parca', 'ornek 8 cift yerlesim78 listesinde', True, lambda: all(c in u.CIFT78 for p in Po['parcalar'] for c in p['uretim']))
     tum = [c for p in P7['parcalar'] for c in p['uretim']]
-    vaka('parca', "78: 75 cift, tekil, CL / AQU_PIS / GV yok, CL her parcada ilk", [75, 75, False, True],
-         lambda: [len(tum), len(set(tum)), any(c in tum for c in u.ONAYLI), all(p['ciftler'][0] == 'CANCER_LIBRA' for p in P7['parcalar'])])
-    J2 = copy.deepcopy(J); J2['78']['parcalar'][1].append(J2['78']['parcalar'][0][0])
-    vaka('parca', 'bilinen FAIL: tekrar eden cift', 'HATA ValueError', lambda: u.parcalar(J2, '78'))
-    J3 = copy.deepcopy(J); J3['78']['parcalar'][0].pop()
-    vaka('parca', 'bilinen FAIL: 78 bolumunde eksik cift', 'HATA ValueError', lambda: u.parcalar(J3, '78'))
+    vaka('parca', "yd67: 8 parca, 67 tekil cift, YD11 yok, CL her parcada ilk ve tek, cl_yeni yok", [8, 67, 67, False, True, True],
+         lambda: [P7['parca_sayisi'], len(tum), len(set(tum)), any(c in tum for c in u.YD11), all(p['ciftler'][0] == 'CANCER_LIBRA' and p['ciftler'].count('CANCER_LIBRA') == 1 for p in P7['parcalar']),
+                  not any(p['cl_yeni'] for p in P7['parcalar'])])
+    vaka('parca', 'yd67: parca cift farki <= 1, parca basina Kova <= 2, Kova toplam 9', [True, True, 9],
+         lambda: [max(len(p['uretim']) for p in P7['parcalar']) - min(len(p['uretim']) for p in P7['parcalar']) <= 1,
+                  max(sum('AQUARIUS' in c.split('_') for c in p['uretim']) for p in P7['parcalar']) <= u.KOVA_PARCA_MAX,
+                  sum('AQUARIUS' in c.split('_') for c in tum)])
+    vaka('parca', 'bilinen FAIL: eski 78 bolumu kapali (Serdar 5 Kas)', 'HATA ValueError', lambda: u.parcalar(J, '78'))
+    J2 = copy.deepcopy(J); J2['yd67']['parcalar'][1].append(J2['yd67']['parcalar'][0][0])
+    vaka('parca', 'bilinen FAIL: tekrar eden cift', 'HATA ValueError', lambda: u.parcalar(J2, 'yd67'))
+    J3 = copy.deepcopy(J); J3['yd67']['parcalar'][0].pop()
+    vaka('parca', 'bilinen FAIL: yd67 bolumunde eksik cift (66)', 'HATA ValueError', lambda: u.parcalar(J3, 'yd67'))
+    J3b = copy.deepcopy(J); J3b['yd67']['parcalar'][7].append('GEMINI_VIRGO')
+    vaka('parca', 'bilinen FAIL: yd67 bolumune onayli GEMINI_VIRGO eklenmis (68)', 'HATA ValueError', lambda: u.parcalar(J3b, 'yd67'))
+    J3c = copy.deepcopy(J); _k3 = [c for c in J3c['yd67']['parcalar'][3] if 'AQUARIUS' in c.split('_')][0]
+    _n0 = J3c['yd67']['parcalar'][0].pop(); J3c['yd67']['parcalar'][3].remove(_k3); J3c['yd67']['parcalar'][3].append(_n0); J3c['yd67']['parcalar'][4].append(_k3)
+    J3c['yd67']['parcalar'][4].remove([c for c in J3c['yd67']['parcalar'][4] if 'AQUARIUS' not in c.split('_')][0]); J3c['yd67']['parcalar'][0].append(
+        [c for c in u.CIFT78 if c not in u.YD11 and c not in [x for p in J3c['yd67']['parcalar'] for x in p]][0])
+    vaka('parca', 'bilinen FAIL: yd67 parcada 3 Kova', 'HATA ValueError', lambda: u.parcalar(J3c, 'yd67'))
+    J3d = copy.deepcopy(J); J3d['yd67']['parcalar'][3].append(J3d['yd67']['parcalar'][0].pop()); J3d['yd67']['parcalar'][3].append(J3d['yd67']['parcalar'][1].pop())
+    vaka('parca', 'bilinen FAIL: yd67 parca cift farki > 1', 'HATA ValueError', lambda: u.parcalar(J3d, 'yd67'))
     J4 = copy.deepcopy(J); J4['ornek']['parcalar'][0].append('CANCER_LIBRA')
     vaka('parca', 'bilinen FAIL: CL parcaya yazilmis', 'HATA ValueError', lambda: u.parcalar(J4, 'ornek'))
     J5 = copy.deepcopy(J); J5['ornek']['parcalar'][0].append('X_Y')
@@ -61,7 +76,7 @@ def main():
     # 2 Kova kapisi listesi
     vaka('kova', 'ornek parca 1 kenar_zorunlu = AQUARIUS_CANCER; parca 2 = AQUARIUS_AQUARIUS', [['AQUARIUS_CANCER'], ['AQUARIUS_AQUARIUS']],
          lambda: [p['kenar_zorunlu'] for p in Po['parcalar']])
-    vaka('kova', '78: tum Kova ciftleri (11) kenar listesinde', 11, lambda: sum(len(p['kenar_zorunlu']) for p in P7['parcalar']))
+    vaka('kova', 'yd67: tum Kova ciftleri (9) kenar listesinde', 9, lambda: sum(len(p['kenar_zorunlu']) for p in P7['parcalar']))
     pk = copy.deepcopy(Po['parcalar'][0]); pk['kenar_zorunlu'] = []
     vaka('kova', 'bilinen FAIL: Kova cifti kenar listesinde yok', 'HATA ValueError', lambda: u.kenar_dogrula(pk))
     pc = copy.deepcopy(Po['parcalar'][0]); pc['ciftler'] = pc['ciftler'][1:] + ['CANCER_LIBRA']
@@ -297,6 +312,30 @@ def main():
          lambda: bk.beklenti(Bsy, kapi, kenar, sip, pdy, orn_y, 'yeni_duzen', dict(ydt, ref_sabit_esit=False))['hepsi_gecti'])
     vaka('yeni_duzen', 'beklenen bilinen FAIL: bilinen FAIL vaka sayisi 44 (K-1b-10)', False,
          lambda: bk.beklenti(Bsy, kapi, kenar, sip, pdy, orn_y, 'yeni_duzen', dict(ydt, bilinen_fail_sayi=44))['hepsi_gecti'])
+    ol67 = bk.ornek_listesi(J, 'yd67')
+    vaka('yd67', 'beklenen ornek_listesi yd67: 67 cift, CL yok, YD11 yok', [67, False, False],
+         lambda: [len(ol67), 'CANCER_LIBRA' in ol67, any(c in u.YD11 for c in ol67)])
+    vaka('yd67', 'beklenen ornek_listesi yeni_duzen: 11 cift, CL sonda', [11, 'CANCER_LIBRA'], lambda: [len(bk.ornek_listesi(J, 'yeni_duzen')), bk.ornek_listesi(J, 'yeni_duzen')[-1]])
+    _yml = (_k / '.github/workflows/ornament-78-uretim.yml').read_text()
+    _ydl = [l for l in _yml.splitlines() if l.strip().startswith('YENI_DUZEN:')]
+    vaka('yd67', 'yml: parca YENI_DUZEN ifadesi yd67 ve yeni_duzen icin 1', [1, True, True],
+         lambda: [len(_ydl), '"yd67"' in _ydl[0] and '"yeni_duzen"' in _ydl[0] and "&& '1' || '0'" in _ydl[0], 'contains(fromJSON' in _ydl[0]])
+    vaka('yd67', 'yml: beklenen her bolumde zorunlu, sonuc dosyasi yoksa FAIL, yd67 dali var', [True, True, True],
+         lambda: ['be=1; BS=""' in _yml, '[ -s "$BS" ]' in _yml, 'yeni_duzen|yd67) BS=' in _yml])
+    _blk = _yml[_yml.index('be=1; BS=""'):_yml.index('[ -s "$BS" ]') + 120]
+    def _bash(aktif, yaz):
+        import subprocess as _sp
+        kod = 'set +e\nAKTIF=%s\n' % aktif + _blk.replace('python3 -I scripts/printful/uretim78_beklenen.py', ('echo {} >' if yaz else 'true') + ' /dev/null; ' + ('echo x > "$BS"; true' if yaz else 'true')) + '\necho "be=$be"\n'
+        return _sp.run(['bash', '-c', kod], capture_output=True, text=True, cwd='/tmp').stdout.strip().splitlines()[-1]
+    Path('/tmp/bir').mkdir(exist_ok=True); Path('/tmp/bir/BEKLENEN_SONUC_YD67.json').unlink(missing_ok=True)
+    vaka('yd67', 'yml beklenen blogu (bash benzetimi): yd67 dosya yok -> be=1 (bilinen FAIL)', 'be=1', lambda: _bash('yd67', False))
+    vaka('yd67', 'yml beklenen blogu (bash benzetimi): yd67 dosya yazildi -> be=0 (bilinen PASS)', 'be=0', lambda: _bash('yd67', True))
+    vaka('yd67', 'yml beklenen blogu (bash benzetimi): tanimsiz bolum -> be=1 (bilinen FAIL)', 'be=1', lambda: _bash('x78', False))
+    vaka('yd67', 'beklenen bilinen PASS: yd67 bolumu yeni duzen beklentilerini ekler', [True, True, True],
+         lambda: (lambda R: [R['hepsi_gecti'], any(x['beklenti'] == 'yeni_duzen_modu' for x in R['beklentiler']), any(x['beklenti'] == 'yd_yerel_test' for x in R['beklentiler'])])(
+             bk.beklenti(Bsy, kapi, kenar, sip, pdy, orn_y, 'yd67', ydt)))
+    vaka('yd67', 'beklenen bilinen FAIL: yd67 eski duzen uretimi (yeni_duzen_kapilari_var yok)', False, lambda: bk.beklenti(Bsy2, kapi, kenar, sip, pdy, orn_y, 'yd67', ydt)['hepsi_gecti'])
+    vaka('yd67', 'beklenen bilinen FAIL: yd67 hazirlik yerel testi yok', False, lambda: bk.beklenti(Bsy, kapi, kenar, sip, pdy, orn_y, 'yd67', None)['hepsi_gecti'])
     vaka('yeni_duzen', 'eski bolum (ornek) beklentisi yeni_duzen kapilarini istemez', True, lambda: bk.beklenti(Bs, kapi, kenar, sip, pd, ornek)['hepsi_gecti'])
     # 10 ornek78 alt surec vakalari
     if a.ornek78_hizli:
