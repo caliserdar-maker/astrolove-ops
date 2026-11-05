@@ -1,0 +1,74 @@
+{
+ "beklenti": "istisna_kayitli",
+ "gecti": true,
+ "olculen": {
+  "dosya_kod_ayni": true,
+  "fail_cift": {
+   "GEMINI_VIRGO": {
+    "dusen_kapilar": [
+     "koyu_dE00_son_ham_le_2"
+    ],
+    "eksik": [],
+    "cokus": null,
+    "istisna": "koyu_dE00_son_ham_le_2",
+    "dE00_ham_maks": {
+     "RUBY": 2.274,
+     "SAPPHIRE": 2.353,
+     "EMERALD": 2.309
+    },
+    "dE00_azami": 2.355,
+    "gecti": true,
+    "kaynak": "ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106"
+   },
+   "GEMINI_GEMINI": {
+    "dusen_kapilar": [
+     "koyu_dE00_son_ham_le_2"
+    ],
+    "eksik": [],
+    "cokus": null,
+    "istisna": "koyu_dE00_son_ham_le_2",
+    "dE00_ham_maks": {
+     "RUBY": 2.134,
+     "SAPPHIRE": 2.196,
+     "EMERALD": 2.137
+    },
+    "dE00_azami": 2.205,
+    "gecti": true,
+    "kaynak": "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397"
+   },
+   "GEMINI_SAGITTARIUS": {
+    "dusen_kapilar": [
+     "koyu_dE00_son_ham_le_2"
+    ],
+    "eksik": [],
+    "cokus": null,
+    "istisna": "koyu_dE00_son_ham_le_2",
+    "dE00_ham_maks": {
+     "RUBY": 3.213,
+     "SAPPHIRE": 3.396,
+     "EMERALD": 3.347
+    },
+    "dE00_azami": 3.405,
+    "gecti": true,
+    "kaynak": "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397"
+   },
+   "PISCES_PISCES": {
+    "dusen_kapilar": [
+     "koyu_dE00_son_ham_le_2"
+    ],
+    "eksik": [],
+    "cokus": null,
+    "istisna": "koyu_dE00_son_ham_le_2",
+    "dE00_ham_maks": {
+     "RUBY": 2.064,
+     "SAPPHIRE": 2.077,
+     "EMERALD": 2.08
+    },
+    "dE00_azami": 2.085,
+    "gecti": true,
+    "kaynak": "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397"
+   }
+  }
+ },
+ "kaynak": "ISTISNA78.json + toplama78.ISTISNA_ONAYLI + BIRLESIK fail / kapi.sert / koyu dE00_ham_maks"
+}

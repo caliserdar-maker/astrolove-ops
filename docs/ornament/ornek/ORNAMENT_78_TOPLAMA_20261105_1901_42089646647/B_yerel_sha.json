@@ -1,0 +1,11 @@
+{
+ "beklenti": "yerel_sha",
+ "gecti": true,
+ "olculen": {
+  "dosya": 390,
+  "sha_farkli": [],
+  "eksik": [],
+  "fazla": []
+ },
+ "kaynak": "indirilen hedef dosyalar sha256 = MANIFEST"
+}

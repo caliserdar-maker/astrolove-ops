@@ -1,0 +1,65 @@
+OK  PASS gercek manifest (4 beklenti) | olculen True beklenen True
+OK  PASS 390 dosya | olculen 390 beklenen 390
+OK  PASS kopya gruplari <= 40 dosya, toplam 390 | olculen (40, 390) beklenen (40, 390)
+OK  PASS FAIL ciftleri FAIL/<CIFT>/ yolundan | olculen ['GEMINI_GEMINI', 'GEMINI_SAGITTARIUS', 'GEMINI_VIRGO', 'PISCES_PISCES'] beklenen ['GEMINI_GEMINI', 'GEMINI_SAGITTARIUS', 'GEMINI_VIRGO', 'PISCES_PISCES']
+OK  PASS istisna_kapi yalniz 4 ciftte | olculen ['GEMINI_GEMINI', 'GEMINI_SAGITTARIUS', 'GEMINI_VIRGO', 'PISCES_PISCES'] beklenen ['GEMINI_GEMINI', 'GEMINI_SAGITTARIUS', 'GEMINI_VIRGO', 'PISCES_PISCES']
+OK  PASS istisna satirlari 4, hepsi "kapi ... FAIL" | olculen (4, True) beklenen (4, True)
+OK  PASS CSV: 20 satir FAIL (istisna ile kabul) | olculen 20 beklenen 20
+OK  FAIL istisna dosyasinda GS yok | olculen False beklenen False
+OK  FAIL istisna kapi adi yanlis | olculen False beklenen False
+OK  FAIL dosyada fazla istisna (koddan farkli) | olculen False beklenen False
+OK  FAIL onay tarihi koddan farkli | olculen False beklenen False
+OK  FAIL azami dosyada koddan farkli | olculen False beklenen False
+OK  FAIL karar alani bos | olculen False beklenen False
+OK  FAIL istisna kosusu kaynak kosusundan farkli | olculen False beklenen False
+OK  FAIL istisna PASS cifte (kullanilmayan; dosya + kod birlikte) | olculen False beklenen False
+OK  FAIL istisna ciftinde dE00 azami ustunde | olculen False beklenen False
+OK  FAIL istisna ciftinde dE00 degeri yok | olculen False beklenen False
+OK  FAIL istisna ciftinde ek kapi FAIL | olculen False beklenen False
+OK  FAIL istisnasiz yeni FAIL cifti | olculen False beklenen False
+OK  FAIL fail listesi kapi.sert ile tutarsiz | olculen False beklenen False
+OK  FAIL kaynakta 1 cift eksik (manifest + kume) | olculen (False, False) beklenen (False, False)
+OK  FAIL bir ciftte stil eksik | olculen False beklenen False
+OK  FAIL cift iki kaynakta | olculen False beklenen False
+OK  FAIL iki dosyada ayni sha256 | olculen False beklenen False
+OK  FAIL kaynak BIRLESIK drive.gecti False | olculen False beklenen False
+OK  FAIL kaynak BIRLESIK kontrol_hepsi False | olculen False beklenen False
+OK  FAIL kaynak yukleme.ok False | olculen False beklenen False
+OK  PASS kontrol kaydi atlanir | olculen True beklenen True
+OK  FAIL kaynak beklentide printful_dosya FAIL | olculen False beklenen False
+OK  FAIL birlesik_gecti nedeni cokus | olculen False beklenen False
+OK  FAIL kaynak beklenti listesi eksik | olculen False beklenen False
+OK  PASS kaynak lsjson | olculen True beklenen True
+OK  FAIL kaynakta dosya eksik | olculen False beklenen False
+OK  FAIL kaynakta ayni adli iki dosya | olculen False beklenen False
+OK  FAIL kaynak sha farkli | olculen False beklenen False
+OK  FAIL kaynak sha256 yok | olculen False beklenen False
+OK  FAIL kaynak lsjson yok | olculen False beklenen False
+OK  PASS hedef lsjson (RAPOR/ haric, md5 kiyasli) | olculen True beklenen True
+OK  FAIL hedef kaynak lsjson verilmemis | olculen False beklenen False
+OK  FAIL hedef 389 dosya | olculen False beklenen False
+OK  FAIL hedef fazla dosya | olculen False beklenen False
+OK  FAIL hedef sha farkli | olculen False beklenen False
+OK  FAIL hedef sha256 yok | olculen False beklenen False
+OK  FAIL hedef md5 kaynaktan farkli | olculen False beklenen False
+OK  FAIL hedef ayni adli iki dosya | olculen False beklenen False
+OK  FAIL hedefte dosya alt klasorde | olculen False beklenen False
+OK  PASS kopya logu 390 sunucu tarafi | olculen True beklenen True
+OK  FAIL kopya logu 389 | olculen False beklenen False
+OK  FAIL kopya logunda indir-yukle (Copied (new)) | olculen False beklenen False
+OK  FAIL kopya logunda tekrar | olculen False beklenen False
+OK  PASS printful 390 + yerel sha | olculen (True, True) beklenen (True, True)
+OK  FAIL indirilen klasorde fazla dosya | olculen False beklenen False
+OK  FAIL yerel sha farkli | olculen False beklenen False
+OK  FAIL yerel dosya eksik | olculen False beklenen False
+OK  FAIL indirme klasoru yok | olculen False beklenen False
+OK  FAIL printful boy | olculen False beklenen False
+OK  FAIL printful mod | olculen False beklenen False
+OK  FAIL printful dpi | olculen False beklenen False
+OK  PASS kaynak degismedi | olculen True beklenen True
+OK  FAIL kaynakta dosya silinmis | olculen False beklenen False
+OK  FAIL kaynakta dosya degismis | olculen False beklenen False
+OK  FAIL once bos | olculen False beklenen False
+OK  FAIL sonuc: kaynak_degismedi beklentisi yok | olculen False beklenen False
+OK  PASS sonuc: 10 beklenti + 4 istisna (kapi FAIL) satiri | olculen (True, 4, 4) beklenen (True, 4, 4)
+TOPLAMA78 MANTIK PASS | vaka 64 | tutmayan []

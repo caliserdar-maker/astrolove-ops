@@ -1,0 +1,9 @@
+PASS manifest_78x5 | {"dosya": 390, "cift": 78, "eksik_cift": [], "bes_degil": [], "sha_tekil": 390}
+PASS kaynak_rapor_kume | {"ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106": {"rapor": 11, "beklenen": 11, "eksik": [], "fazla": [], "drive_gecti": true, "kontrol_hepsi": true, "eksik_parca": [], "cokus": []}, "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397": {"rapor": 67, "beklenen": 67, "eksik": [], "fazla": [], "drive_
+PASS istisna_kayitli | {"dosya_kod_ayni": true, "fail_cift": {"GEMINI_VIRGO": {"dusen_kapilar": ["koyu_dE00_son_ham_le_2"], "eksik": [], "cokus": null, "istisna": "koyu_dE00_son_ham_le_2", "dE00_ham_maks": {"RUBY": 2.274, "SAPPHIRE": 2.353, "EMERALD": 2.309}, "dE00_azami": 2.355, "gecti": true, "kaynak": "ORNAMENT_78YENI_
+PASS kaynak_beklenen | {"ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106": {"dosya": "docs/ornament/ornek/ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106/BEKLENEN_SONUC_YENI_DUZEN.json", "dusen": ["birlesik_gecti"], "ad_tam": true, "birlesik_fail": ["GEMINI_VIRGO"]}, "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397": {"d
+manifest dosya 390 | plan grubu 14 | istisna ['GEMINI_GEMINI', 'GEMINI_SAGITTARIUS', 'GEMINI_VIRGO', 'PISCES_PISCES']
+ISTISNA ile kabul (kapi FAIL): GEMINI_GEMINI | kapi koyu_dE00_son_ham_le_2 FAIL | dE00_ham_maks 2.134-2.196 (esik 2, azami 2.205) | onay 2026-11-05 | kosu 42063472397
+ISTISNA ile kabul (kapi FAIL): GEMINI_SAGITTARIUS | kapi koyu_dE00_son_ham_le_2 FAIL | dE00_ham_maks 3.213-3.396 (esik 2, azami 3.405) | onay 2026-11-05 | kosu 42063472397
+ISTISNA ile kabul (kapi FAIL): GEMINI_VIRGO | kapi koyu_dE00_son_ham_le_2 FAIL | dE00_ham_maks 2.274-2.353 (esik 2, azami 2.355) | onay 2026-11-05 | kosu 42001867106
+ISTISNA ile kabul (kapi FAIL): PISCES_PISCES | kapi koyu_dE00_son_ham_le_2 FAIL | dE00_ham_maks 2.064-2.080 (esik 2, azami 2.085) | onay 2026-11-05 | kosu 42063472397

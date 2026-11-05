@@ -1,0 +1,23 @@
+{
+ "beklenti": "kaynak_drive",
+ "gecti": true,
+ "olculen": {
+  "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397": {
+   "eksik": [],
+   "tekrar": [],
+   "sha_farkli": [],
+   "sha_yok": [],
+   "lsjson_var": true,
+   "gecti": true
+  },
+  "ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106": {
+   "eksik": [],
+   "tekrar": [],
+   "sha_farkli": [],
+   "sha_yok": [],
+   "lsjson_var": true,
+   "gecti": true
+  }
+ },
+ "kaynak": "rclone lsjson -R --hash (kaynak klasorler) = MANIFEST"
+}

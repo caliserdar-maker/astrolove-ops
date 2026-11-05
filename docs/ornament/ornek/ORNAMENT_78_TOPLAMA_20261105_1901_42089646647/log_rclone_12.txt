@@ -1,0 +1,12 @@
+2026/11/05 19:05:00 INFO  : GEMINI_GEMINI_SADE_ALTIN_954.png: Copied (server-side copy)
+2026/11/05 19:05:00 INFO  : GEMINI_GEMINI_FILDISI_954.png: Copied (server-side copy)
+2026/11/05 19:05:00 INFO  : GEMINI_GEMINI_RUBY_954.png: Copied (server-side copy)
+2026/11/05 19:05:00 INFO  : GEMINI_GEMINI_EMERALD_954.png: Copied (server-side copy)
+2026/11/05 19:05:01 INFO  : GEMINI_GEMINI_SAPPHIRE_954.png: Copied (server-side copy)
+2026/11/05 19:05:01 INFO  : 
+Transferred:   	    3.195 MiB / 3.195 MiB, 100%, 0 B/s, ETA -
+Checks:                 0 / 0, -, Listed 5
+Transferred:            5 / 5, 100%
+Server Side Copies:     5 @ 3.195 MiB
+Elapsed time:         4.0s
+

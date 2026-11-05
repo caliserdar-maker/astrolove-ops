@@ -1,0 +1,27 @@
+{
+ "beklenti": "kaynak_rapor_kume",
+ "gecti": true,
+ "olculen": {
+  "ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106": {
+   "rapor": 11,
+   "beklenen": 11,
+   "eksik": [],
+   "fazla": [],
+   "drive_gecti": true,
+   "kontrol_hepsi": true,
+   "eksik_parca": [],
+   "cokus": []
+  },
+  "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397": {
+   "rapor": 67,
+   "beklenen": 67,
+   "eksik": [],
+   "fazla": [],
+   "drive_gecti": true,
+   "kontrol_hepsi": true,
+   "eksik_parca": [],
+   "cokus": []
+  }
+ },
+ "kaynak": "BIRLESIK yukleme cift kumesi = YD11 / YD67; drive.gecti, kontrol_hepsi, yukleme.ok, eksik parca / cokus yok"
+}

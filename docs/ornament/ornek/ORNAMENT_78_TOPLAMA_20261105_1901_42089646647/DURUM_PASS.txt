@@ -1,0 +1,1 @@
+PASS (istisna ile kabul edilen 4 ciftin kapisi FAIL; ayrinti SONUC.txt)

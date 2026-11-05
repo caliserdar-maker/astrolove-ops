@@ -1,0 +1,17 @@
+2026/11/05 19:01:43 INFO  : LIBRA_LIBRA_FILDISI_954.png: Copied (server-side copy)
+2026/11/05 19:01:43 INFO  : LIBRA_LIBRA_RUBY_954.png: Copied (server-side copy)
+2026/11/05 19:01:43 INFO  : LIBRA_LIBRA_EMERALD_954.png: Copied (server-side copy)
+2026/11/05 19:01:43 INFO  : LIBRA_LIBRA_SADE_ALTIN_954.png: Copied (server-side copy)
+2026/11/05 19:01:45 INFO  : LIBRA_LIBRA_SAPPHIRE_954.png: Copied (server-side copy)
+2026/11/05 19:01:45 INFO  : TAURUS_TAURUS_EMERALD_954.png: Copied (server-side copy)
+2026/11/05 19:01:45 INFO  : TAURUS_TAURUS_FILDISI_954.png: Copied (server-side copy)
+2026/11/05 19:01:45 INFO  : TAURUS_TAURUS_RUBY_954.png: Copied (server-side copy)
+2026/11/05 19:01:47 INFO  : TAURUS_TAURUS_SADE_ALTIN_954.png: Copied (server-side copy)
+2026/11/05 19:01:47 INFO  : TAURUS_TAURUS_SAPPHIRE_954.png: Copied (server-side copy)
+2026/11/05 19:01:47 INFO  : 
+Transferred:   	    6.463 MiB / 6.463 MiB, 100%, 0 B/s, ETA -
+Checks:                 0 / 0, -, Listed 10
+Transferred:           10 / 10, 100%
+Server Side Copies:    10 @ 6.463 MiB
+Elapsed time:         6.0s
+

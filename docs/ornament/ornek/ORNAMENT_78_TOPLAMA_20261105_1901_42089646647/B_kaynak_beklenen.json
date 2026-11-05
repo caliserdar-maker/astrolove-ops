@@ -1,0 +1,29 @@
+{
+ "beklenti": "kaynak_beklenen",
+ "gecti": true,
+ "olculen": {
+  "ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106": {
+   "dosya": "docs/ornament/ornek/ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106/BEKLENEN_SONUC_YENI_DUZEN.json",
+   "dusen": [
+    "birlesik_gecti"
+   ],
+   "ad_tam": true,
+   "birlesik_fail": [
+    "GEMINI_VIRGO"
+   ]
+  },
+  "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397": {
+   "dosya": "docs/ornament/ornek/ORNAMENT_78URETIM_YD67_20261105_1629_42063472397/BEKLENEN_SONUC_YD67.json",
+   "dusen": [
+    "birlesik_gecti"
+   ],
+   "ad_tam": true,
+   "birlesik_fail": [
+    "GEMINI_GEMINI",
+    "GEMINI_SAGITTARIUS",
+    "PISCES_PISCES"
+   ]
+  }
+ },
+ "kaynak": "kaynak BEKLENEN_SONUC: 15 beklenti adi tam; yalniz birlesik_gecti dusebilir, nedeni yalniz istisna ciftleri"
+}

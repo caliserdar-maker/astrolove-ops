@@ -1,0 +1,17 @@
+{
+ "beklenti": "hedef_drive",
+ "gecti": true,
+ "olculen": {
+  "beklenen": 390,
+  "kok_dosya": 390,
+  "eksik": [],
+  "fazla": [],
+  "tekrar": [],
+  "sha_farkli": [],
+  "sha_yok": [],
+  "md5_kiyas": true,
+  "md5_farkli": [],
+  "md5_yok": []
+ },
+ "kaynak": "rclone lsjson -R --hash (hedef klasor) sha256 = MANIFEST, md5 = kaynak lsjson md5"
+}

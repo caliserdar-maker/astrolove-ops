@@ -1,0 +1,12 @@
+{
+ "beklenti": "sunucu_kopya",
+ "gecti": true,
+ "olculen": {
+  "sunucu_tarafi": 390,
+  "beklenen": 390,
+  "eksik": [],
+  "tekrar": [],
+  "sunucu_disi": 0
+ },
+ "kaynak": "rclone copy -v log (Copied (server-side copy)) = MANIFEST"
+}

@@ -1,0 +1,298 @@
+{
+ "beklentiler": [
+  {
+   "beklenti": "manifest_78x5",
+   "gecti": true,
+   "olculen": {
+    "dosya": 390,
+    "cift": 78,
+    "eksik_cift": [],
+    "bes_degil": [],
+    "sha_tekil": 390
+   },
+   "kaynak": "kaynak BIRLESIK yukleme kayitlari (_954.png); 390 ad ve 390 tekil sha256"
+  },
+  {
+   "beklenti": "kaynak_rapor_kume",
+   "gecti": true,
+   "olculen": {
+    "ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106": {
+     "rapor": 11,
+     "beklenen": 11,
+     "eksik": [],
+     "fazla": [],
+     "drive_gecti": true,
+     "kontrol_hepsi": true,
+     "eksik_parca": [],
+     "cokus": []
+    },
+    "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397": {
+     "rapor": 67,
+     "beklenen": 67,
+     "eksik": [],
+     "fazla": [],
+     "drive_gecti": true,
+     "kontrol_hepsi": true,
+     "eksik_parca": [],
+     "cokus": []
+    }
+   },
+   "kaynak": "BIRLESIK yukleme cift kumesi = YD11 / YD67; drive.gecti, kontrol_hepsi, yukleme.ok, eksik parca / cokus yok"
+  },
+  {
+   "beklenti": "istisna_kayitli",
+   "gecti": true,
+   "olculen": {
+    "dosya_kod_ayni": true,
+    "fail_cift": {
+     "GEMINI_VIRGO": {
+      "dusen_kapilar": [
+       "koyu_dE00_son_ham_le_2"
+      ],
+      "eksik": [],
+      "cokus": null,
+      "istisna": "koyu_dE00_son_ham_le_2",
+      "dE00_ham_maks": {
+       "RUBY": 2.274,
+       "SAPPHIRE": 2.353,
+       "EMERALD": 2.309
+      },
+      "dE00_azami": 2.355,
+      "gecti": true,
+      "kaynak": "ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106"
+     },
+     "GEMINI_GEMINI": {
+      "dusen_kapilar": [
+       "koyu_dE00_son_ham_le_2"
+      ],
+      "eksik": [],
+      "cokus": null,
+      "istisna": "koyu_dE00_son_ham_le_2",
+      "dE00_ham_maks": {
+       "RUBY": 2.134,
+       "SAPPHIRE": 2.196,
+       "EMERALD": 2.137
+      },
+      "dE00_azami": 2.205,
+      "gecti": true,
+      "kaynak": "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397"
+     },
+     "GEMINI_SAGITTARIUS": {
+      "dusen_kapilar": [
+       "koyu_dE00_son_ham_le_2"
+      ],
+      "eksik": [],
+      "cokus": null,
+      "istisna": "koyu_dE00_son_ham_le_2",
+      "dE00_ham_maks": {
+       "RUBY": 3.213,
+       "SAPPHIRE": 3.396,
+       "EMERALD": 3.347
+      },
+      "dE00_azami": 3.405,
+      "gecti": true,
+      "kaynak": "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397"
+     },
+     "PISCES_PISCES": {
+      "dusen_kapilar": [
+       "koyu_dE00_son_ham_le_2"
+      ],
+      "eksik": [],
+      "cokus": null,
+      "istisna": "koyu_dE00_son_ham_le_2",
+      "dE00_ham_maks": {
+       "RUBY": 2.064,
+       "SAPPHIRE": 2.077,
+       "EMERALD": 2.08
+      },
+      "dE00_azami": 2.085,
+      "gecti": true,
+      "kaynak": "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397"
+     }
+    }
+   },
+   "kaynak": "ISTISNA78.json + toplama78.ISTISNA_ONAYLI + BIRLESIK fail / kapi.sert / koyu dE00_ham_maks"
+  },
+  {
+   "beklenti": "kaynak_beklenen",
+   "gecti": true,
+   "olculen": {
+    "ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106": {
+     "dosya": "docs/ornament/ornek/ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106/BEKLENEN_SONUC_YENI_DUZEN.json",
+     "dusen": [
+      "birlesik_gecti"
+     ],
+     "ad_tam": true,
+     "birlesik_fail": [
+      "GEMINI_VIRGO"
+     ]
+    },
+    "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397": {
+     "dosya": "docs/ornament/ornek/ORNAMENT_78URETIM_YD67_20261105_1629_42063472397/BEKLENEN_SONUC_YD67.json",
+     "dusen": [
+      "birlesik_gecti"
+     ],
+     "ad_tam": true,
+     "birlesik_fail": [
+      "GEMINI_GEMINI",
+      "GEMINI_SAGITTARIUS",
+      "PISCES_PISCES"
+     ]
+    }
+   },
+   "kaynak": "kaynak BEKLENEN_SONUC: 15 beklenti adi tam; yalniz birlesik_gecti dusebilir, nedeni yalniz istisna ciftleri"
+  },
+  {
+   "beklenti": "kaynak_drive",
+   "gecti": true,
+   "olculen": {
+    "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397": {
+     "eksik": [],
+     "tekrar": [],
+     "sha_farkli": [],
+     "sha_yok": [],
+     "lsjson_var": true,
+     "gecti": true
+    },
+    "ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106": {
+     "eksik": [],
+     "tekrar": [],
+     "sha_farkli": [],
+     "sha_yok": [],
+     "lsjson_var": true,
+     "gecti": true
+    }
+   },
+   "kaynak": "rclone lsjson -R --hash (kaynak klasorler) = MANIFEST"
+  },
+  {
+   "beklenti": "hedef_drive",
+   "gecti": true,
+   "olculen": {
+    "beklenen": 390,
+    "kok_dosya": 390,
+    "eksik": [],
+    "fazla": [],
+    "tekrar": [],
+    "sha_farkli": [],
+    "sha_yok": [],
+    "md5_kiyas": true,
+    "md5_farkli": [],
+    "md5_yok": []
+   },
+   "kaynak": "rclone lsjson -R --hash (hedef klasor) sha256 = MANIFEST, md5 = kaynak lsjson md5"
+  },
+  {
+   "beklenti": "sunucu_kopya",
+   "gecti": true,
+   "olculen": {
+    "sunucu_tarafi": 390,
+    "beklenen": 390,
+    "eksik": [],
+    "tekrar": [],
+    "sunucu_disi": 0
+   },
+   "kaynak": "rclone copy -v log (Copied (server-side copy)) = MANIFEST"
+  },
+  {
+   "beklenti": "printful_dosya",
+   "gecti": true,
+   "olculen": {
+    "gecti": 390,
+    "toplam": 390,
+    "dusen": {}
+   },
+   "kaynak": "uretim78.printful_dosya (954x954; RGB, SADE_ALTIN RGBA; 300 dpi +- 0,5; ICC yok ya da sRGB; PRINTFUL_ORNAMENT.md 900 Circle)"
+  },
+  {
+   "beklenti": "yerel_sha",
+   "gecti": true,
+   "olculen": {
+    "dosya": 390,
+    "sha_farkli": [],
+    "eksik": [],
+    "fazla": []
+   },
+   "kaynak": "indirilen hedef dosyalar sha256 = MANIFEST"
+  },
+  {
+   "beklenti": "kaynak_degismedi",
+   "gecti": true,
+   "olculen": {
+    "ORNAMENT_78URETIM_YD67_20261105_1629_42063472397": {
+     "once": 655,
+     "sonra": 655,
+     "ayni": true
+    },
+    "ORNAMENT_78YENI_DUZEN_20261105_0930_42001867106": {
+     "once": 165,
+     "sonra": 165,
+     "ayni": true
+    }
+   },
+   "kaynak": "kaynak klasor ozeti (yol, boyut, sha256) kopyadan once = sonra"
+  }
+ ],
+ "eksik": [],
+ "hepsi_gecti": true,
+ "istisna_kapi_fail": [
+  {
+   "cift": "GEMINI_GEMINI",
+   "kapi": "koyu_dE00_son_ham_le_2",
+   "kapi_durumu": "FAIL",
+   "dE00_ham_maks": {
+    "RUBY": 2.134,
+    "SAPPHIRE": 2.196,
+    "EMERALD": 2.137
+   },
+   "dE00_azami": 2.205,
+   "onay_tarihi": "2026-11-05",
+   "kosu": "42063472397"
+  },
+  {
+   "cift": "GEMINI_SAGITTARIUS",
+   "kapi": "koyu_dE00_son_ham_le_2",
+   "kapi_durumu": "FAIL",
+   "dE00_ham_maks": {
+    "RUBY": 3.213,
+    "SAPPHIRE": 3.396,
+    "EMERALD": 3.347
+   },
+   "dE00_azami": 3.405,
+   "onay_tarihi": "2026-11-05",
+   "kosu": "42063472397"
+  },
+  {
+   "cift": "GEMINI_VIRGO",
+   "kapi": "koyu_dE00_son_ham_le_2",
+   "kapi_durumu": "FAIL",
+   "dE00_ham_maks": {
+    "RUBY": 2.274,
+    "SAPPHIRE": 2.353,
+    "EMERALD": 2.309
+   },
+   "dE00_azami": 2.355,
+   "onay_tarihi": "2026-11-05",
+   "kosu": "42001867106"
+  },
+  {
+   "cift": "PISCES_PISCES",
+   "kapi": "koyu_dE00_son_ham_le_2",
+   "kapi_durumu": "FAIL",
+   "dE00_ham_maks": {
+    "RUBY": 2.064,
+    "SAPPHIRE": 2.077,
+    "EMERALD": 2.08
+   },
+   "dE00_azami": 2.085,
+   "onay_tarihi": "2026-11-05",
+   "kosu": "42063472397"
+  }
+ ],
+ "istisna_satirlari": [
+  "ISTISNA ile kabul (kapi FAIL): GEMINI_GEMINI | kapi koyu_dE00_son_ham_le_2 FAIL | dE00_ham_maks 2.134-2.196 (esik 2, azami 2.205) | onay 2026-11-05 | kosu 42063472397",
+  "ISTISNA ile kabul (kapi FAIL): GEMINI_SAGITTARIUS | kapi koyu_dE00_son_ham_le_2 FAIL | dE00_ham_maks 3.213-3.396 (esik 2, azami 3.405) | onay 2026-11-05 | kosu 42063472397",
+  "ISTISNA ile kabul (kapi FAIL): GEMINI_VIRGO | kapi koyu_dE00_son_ham_le_2 FAIL | dE00_ham_maks 2.274-2.353 (esik 2, azami 2.355) | onay 2026-11-05 | kosu 42001867106",
+  "ISTISNA ile kabul (kapi FAIL): PISCES_PISCES | kapi koyu_dE00_son_ham_le_2 FAIL | dE00_ham_maks 2.064-2.080 (esik 2, azami 2.085) | onay 2026-11-05 | kosu 42063472397"
+ ]
+}

@@ -1,0 +1,15 @@
+PASS manifest_78x5
+PASS kaynak_rapor_kume
+PASS istisna_kayitli
+PASS kaynak_beklenen
+PASS kaynak_drive
+PASS hedef_drive
+PASS sunucu_kopya
+PASS printful_dosya
+PASS yerel_sha
+PASS kaynak_degismedi
+ISTISNA ile kabul (kapi FAIL): GEMINI_GEMINI | kapi koyu_dE00_son_ham_le_2 FAIL | dE00_ham_maks 2.134-2.196 (esik 2, azami 2.205) | onay 2026-11-05 | kosu 42063472397
+ISTISNA ile kabul (kapi FAIL): GEMINI_SAGITTARIUS | kapi koyu_dE00_son_ham_le_2 FAIL | dE00_ham_maks 3.213-3.396 (esik 2, azami 3.405) | onay 2026-11-05 | kosu 42063472397
+ISTISNA ile kabul (kapi FAIL): GEMINI_VIRGO | kapi koyu_dE00_son_ham_le_2 FAIL | dE00_ham_maks 2.274-2.353 (esik 2, azami 2.355) | onay 2026-11-05 | kosu 42001867106
+ISTISNA ile kabul (kapi FAIL): PISCES_PISCES | kapi koyu_dE00_son_ham_le_2 FAIL | dE00_ham_maks 2.064-2.080 (esik 2, azami 2.085) | onay 2026-11-05 | kosu 42063472397
+TOPLAMA78 PASS | eksik [] | istisna ile kabul (kapi FAIL) 4
