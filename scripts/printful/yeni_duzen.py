@@ -193,7 +193,7 @@ def b3_olcek_render(ana_rgba, sinir_alt, olcekle, s0, ust_min=UST_MIN, adim=REND
 
 
 def sembol_yerlestir(ana_rgba, sinir_alt, olcekle, ust_min=UST_MIN, b3_kat=B3_KAT, y2=Y2_UST_ORAN, kapat=None):
-    """karar 4: B3 + Y2. olcekle(rgba, s) -> (rgb, a) (motor: o1.rgba_olcek). kapat(rgb, a) -> (rgb, a, n) (O5; motor: o5.hedef_kapat).
+    """karar 4: B3 + Y2. olcekle(rgba, s) -> (rgb, a) (motor: o1.rgba_olcek). kapat(rgb, a) -> (rgb, a, n) (O5; motor: o5.hedef_kapat, n dict: alfa_lt_09, degisen_alfa_gt_002, degisen_alfa_gt_03).
     Doner ((rgb, a, x, y), ayrinti)."""
     a0 = ana_rgba[..., 3]
     s_p, d = b3_olcek(a0, sinir_alt, ust_min)
@@ -203,7 +203,7 @@ def sembol_yerlestir(ana_rgba, sinir_alt, olcekle, ust_min=UST_MIN, b3_kat=B3_KA
     rgb, a = olcekle(ana_rgba, s)
     if kapat is not None:
         rgb, a, n_ = kapat(rgb, a)
-        d['hedef_kapatilan'] = int(n_)
+        d['hedef_kapatilan'] = n_ if isinstance(n_, dict) else int(n_)   # o5.hedef_kapat dict doner (eski yol da dict yazar: ornament_ornek5.py:384)
     b = kutu(a)
     h, w = b[3] - b[1], b[2] - b[0]
     bos = (sinir_alt - ust_min) - h

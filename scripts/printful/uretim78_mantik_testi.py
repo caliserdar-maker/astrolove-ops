@@ -288,13 +288,15 @@ def main():
     Bsy['cift'] = {c: dict(kapi=dict(sert=dict({f'printful_dosya_{s}': True for s in u.STIL}, yeni_duzen_kapilari_var=True)), dpi_yazim={s: dict(piksel_ayni=True) for s in u.STIL},
                            sade=sd, fildisi=dict(girdi_piksel_sha='p'), kaynak_kenar_onarim=dict(aquarius=dict(n0=445, degisen_piksel=464)) if 'AQUARIUS' in c else {},
                            **(dict(kenar_onarimsiz_neden=dict(gecti=True)) if 'AQUARIUS' in c else {})) for c in orn_y}
-    ydt = dict(ref_sabit_esit=True, gecen=78, fail=[], bilinen_fail_hepsi=True, bilinen_fail_sayi=48)
+    ydt = dict(ref_sabit_esit=True, gecen=78, fail=[], bilinen_fail_hepsi=True, bilinen_fail_sayi=45)
     vaka('yeni_duzen', 'beklenen bilinen PASS: yeni_duzen sahte tam veri', True, lambda: bk.beklenti(Bsy, kapi, kenar, sip, pdy, orn_y, 'yeni_duzen', ydt)['hepsi_gecti'])
     Bsy2 = copy.deepcopy(Bsy); del Bsy2['cift']['CANCER_LIBRA']['kapi']['sert']['yeni_duzen_kapilari_var']
     vaka('yeni_duzen', 'beklenen bilinen FAIL: CL yeni duzen modunda degil', False, lambda: bk.beklenti(Bsy2, kapi, kenar, sip, pdy, orn_y, 'yeni_duzen', ydt)['hepsi_gecti'])
     vaka('yeni_duzen', 'beklenen bilinen FAIL: hazirlik yerel testi yok', False, lambda: bk.beklenti(Bsy, kapi, kenar, sip, pdy, orn_y, 'yeni_duzen', None)['hepsi_gecti'])
     vaka('yeni_duzen', 'beklenen bilinen FAIL: yerel test ref != SABIT', False,
          lambda: bk.beklenti(Bsy, kapi, kenar, sip, pdy, orn_y, 'yeni_duzen', dict(ydt, ref_sabit_esit=False))['hepsi_gecti'])
+    vaka('yeni_duzen', 'beklenen bilinen FAIL: bilinen FAIL vaka sayisi 44 (K-1b-10)', False,
+         lambda: bk.beklenti(Bsy, kapi, kenar, sip, pdy, orn_y, 'yeni_duzen', dict(ydt, bilinen_fail_sayi=44))['hepsi_gecti'])
     vaka('yeni_duzen', 'eski bolum (ornek) beklentisi yeni_duzen kapilarini istemez', True, lambda: bk.beklenti(Bs, kapi, kenar, sip, pd, ornek)['hepsi_gecti'])
     # 10 ornek78 alt surec vakalari
     if a.ornek78_hizli:

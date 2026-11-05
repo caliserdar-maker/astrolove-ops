@@ -316,3 +316,16 @@ DUR (HIZ VE KALİTE 4: 2 yerel iterasyon). Aşama 2 Actions koşusu YAPILMADI. B
 - K-1b-13 DÜŞÜK: `yeni_duzen_kapilari_var` tarih metnini denetlemiyor.
 - K-1b-14 DÜŞÜK: PARCA dışı eski çağrıda CL ilk sırada değilse kontrol sayılmıyor (bugünkü çağıranlar etkilenmez).
 - K-1b-15 DÜŞÜK: hazırlık yerel testinin süresi ve belleği Actions'ta ölçülmedi (yerelde 15-18 dk; tüm maskeler önbellekte tutulunca 8 GB'ta OOM, düzeltildi).
+
+## 10. Aşama 1c (Merkez, 5 Kas; Serdar "hepsi ok")
+
+Yapılan (yerel, Pillow 11.0.0, Actions yok):
+- K-1b-1 KAPANDI: `sembol_yerlestir` `kapat`ın döndürdüğü dict'i aynen saklar (eski yol da dict: ornament_ornek5.py:384). Bilinen FAIL: eski kod + kapat'lı test çıkış 2, `TypeError int(dict)` yeni_duzen.py:206.
+- K-1b-2 KISMEN: yerel test artık motorla aynı `kapat` yolunu kullanır (ana döngü, bilinen FAIL `kapilar` ve B3 0,90 / 0,80 vakaları, tarih denemesi). Benzetimde kapat etkisiz (alfa_lt_09 = 0, 3 çift ölçüldü; alfa maskesi zaten delik_kapat'tan geçiyor), yani kapat'ın gerçek girdide değiştirdiği pikseller sınanmıyor. Motor YENI_DUZEN=1 gerçek `<CIFT>_ana.png` ile KOŞULMADI: Drive bağlayıcısı 8-12 MB dosyaları indiremedi. İncelemenin sahte `_ana` denemesinde (3 çift, 31 sn) yeni_yerlesim, o4.kapi ve json.dumps(YD) çökmedi; model_kur, 10x alfalar, boyama ve OLCUM koşulmadı.
+- K-1b-10 KAPANDI: bilinen FAIL `len(BF) == BF_VAKA (15) x 3`; uretim78_beklenen `bilinen_fail_sayi == 45`; mantık testine 44 vakası bilinen FAIL olarak eklendi.
+- Sonuç: yeni_duzen_yerel_test --yalniz_kapi: ref = SABIT, 78/78 PASS, bilinen FAIL 45/45, çıkış 0 (kapat'lı, son hâl ~12 dk yerel, 8 GB; mantık testiyle eşzamanlı koşu bellek yetmezliğiyle 137 verdi); uretim78_mantik_testi 87/87 PASS.
+
+Yeni bulgu (bağımsız inceleme, 5 Kas):
+- K-1b-16 ORTA (çöküş doğrulanmadı): ornament_motor.py:688-701 YAKIN_DOKU 'ana' kırpımı (s_[1]+150 .. +230) sembolün >= 230 px yüksek olduğunu varsayar; yeni düzende CANCER_CANCER benzetimde 219 px. Kutu sembol yüksekliğine oranlı yapılmalı, boşsa atlanmalı.
+
+Açık: K-1b-2 gerçek girdi, K-1b-3..9, 11..16.

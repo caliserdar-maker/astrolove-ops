@@ -34,6 +34,7 @@ TEK_C = '2a08a78216ca19dd632e7dedda31c4c53c365c25'
 ORNEK11 = ['TAURUS_TAURUS', 'CANCER_TAURUS', 'AQUARIUS_CANCER', 'LIBRA_LIBRA', 'AQUARIUS_AQUARIUS', 'ARIES_SCORPIO', 'LEO_SAGITTARIUS',
            'CAPRICORN_CAPRICORN', 'CANCER_LIBRA', 'AQUARIUS_PISCES', 'GEMINI_VIRGO']
 BF_CIFT = ('CANCER_LIBRA', 'LEO_SAGITTARIUS', 'LIBRA_LIBRA')              # O3: dikeyde ve halkada sinirlanan ciftler
+BF_VAKA = 15                                                              # cift basina bilinen FAIL vakasi (K-1b-10; uretim78_beklenen 45 ile ayni)
 AYLAR = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER']
 SSA = _k / 'data/ornament/ssa_century_top100.csv'                          # resmi kaynak: ssa.gov/oact/babynames/decades/century.html (1926-2025)
 
@@ -60,6 +61,7 @@ def main():
     al = yukle('altin', 'ornament_altin.py'); o1, o3, o4, o5, son = al.o1, al.o3, al.o4, al.o5, al.son
     mo = yukle('motor', 'ornament_motor.py'); yd = yukle('yd', 'yeni_duzen.py')
     o4.YASAK = o4.yasak_m(); o3.YASAK = o4.YASAK
+    KAPAT = (lambda r_, a_: o5.hedef_kapat(r_, a_)) if o5.KAPAT_HEDEF else None   # K-1b-2: motorla ayni yol (ornament_motor.py kapat_); eskiden test kapatsiz kosuyordu
     o4.GLOW_K = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * o4.GLOW_R + 1,) * 2)
     Pc, cap = o5.P, o4.CAP0
     lsrc = o4.logo_kaynak(W / 'LOGO_1.png')
@@ -134,7 +136,7 @@ def main():
     for i, c in enumerate(CIFT78):
         b1, b2 = c.split('_')
         kc = {'sol': kucuk(b1), 'sag': kucuk(b2)}
-        E, cizgi, d, g, olc = yd.yeni_yerlesim(o3.yazi_blogu, o1.rgba_olcek, T0, kc, ana(c), h_max)
+        E, cizgi, d, g, olc = yd.yeni_yerlesim(o3.yazi_blogu, o1.rgba_olcek, T0, kc, ana(c), h_max, kapat=KAPAT)
         ok, yb, cak = o4_kapi(E)
         g['o4_kapi'] = ok
         SONUC[c] = dict(gecti=all(g.values()), kapi=g, olcum=olc, sembol=d, o4=dict(yasak=yb, cakisma=cak))
@@ -149,7 +151,7 @@ def main():
     def tum(E):
         """kapi + o4 (cizim degismis E icin; tabanlar E'nin kendisinden)."""
         tab_ = {ad: E[ad][3] + T0[ad][1] for ad in ('tarih', 'isim1', 'isim2')}
-        g, _ = yd.kapilar(E, A, o1.rgba_olcek, tab_, yd.SABIT, True)
+        g, _ = yd.kapilar(E, A, o1.rgba_olcek, tab_, yd.SABIT, True, kapat=KAPAT)
         g['o4_kapi'] = o4_kapi(E)[0]
         return g
 
@@ -161,14 +163,14 @@ def main():
         BF.append(dict(cift=cift, vaka=ad, beklenen=list(bk_), fail=fl, gecti=any(x in fl for x in bk_)))
     for c in BF_CIFT:
         b1, b2 = c.split('_'); kc = {'sol': kucuk(b1), 'sag': kucuk(b2)}; A = ana(c)
-        E, cizgi, d, g, olc = yd.yeni_yerlesim(o3.yazi_blogu, o1.rgba_olcek, T0, kc, A, h_max)
+        E, cizgi, d, g, olc = yd.yeni_yerlesim(o3.yazi_blogu, o1.rgba_olcek, T0, kc, A, h_max, kapat=KAPAT)
         s = yd.kutu_E(E, 'sembol')
         e = dict(E); yd.kaydir(e, ('sembol',), 229 - s[1]); vaka(c, 'sembol ustu 229', 'ust_ge_230', e)
         e = dict(E); yd.kaydir(e, ('sembol',), (yd.SABIT['sembol_alt_sinir'] + 2) - s[3]); vaka(c, 'sembol alti sinir + 2', 'sembol_alt_le_sinir', e)
         e = dict(E); yd.kaydir_x(e, ('sembol',), 3); vaka(c, 'sembol 3 px saga', 'yatay_orta', e)
         e = dict(E); yd.kaydir(e, ('sembol',), -4 if s[1] - 4 >= yd.UST_MIN else 4); vaka(c, 'sembol 4 px kaydi (Y2)', 'y2_ust', e)
         for kat, ad in ((0.90, 'B3 0,90 cizildi'), (0.80, 'B3 0,80 cizildi')):
-            sem, _ = yd.sembol_yerlestir(A, yd.SABIT['sembol_alt_sinir'], o1.rgba_olcek, b3_kat=kat)
+            sem, _ = yd.sembol_yerlestir(A, yd.SABIT['sembol_alt_sinir'], o1.rgba_olcek, b3_kat=kat, kapat=KAPAT)
             e = dict(E); e['sembol'] = sem; vaka(c, ad, 'b3_olcek', e)
         rgb_, a_ = o1.rgba_olcek(A, d['s'] * 1.25); bb = yd.kutu(a_)
         e = dict(E); e['sembol'] = (rgb_, a_, int(round((s[0] + s[2]) / 2 - (bb[0] + bb[2]) / 2)), int(round((s[1] + s[3]) / 2 - (bb[1] + bb[3]) / 2)))
@@ -183,7 +185,7 @@ def main():
         e['kucuk_sag'] = (rgb_, a_, int(round((kb[0] + kb[2]) / 2 - (nb[0] + nb[2]) / 2)), int(kb[3] - nb[3]))
         vaka(c, 'sag kucuk H_MAX + 3 px, alta yasli', 'kucuk_ust_ge_sabit', e)
         e = dict(E); yd.kaydir(e, ('tarih',), 60); vaka(c, 'tarih 60 px asagi (halka)', 'o4_kapi', e)
-    bf_hepsi = all(x['gecti'] for x in BF)
+    bf_hepsi = all(x['gecti'] for x in BF) and len(BF) == BF_VAKA * len(BF_CIFT)   # K-1b-10: eksik ya da fazla vaka da FAIL
     if a.yalniz_kapi:
         R = dict(not_='yalniz kapi (is akisi hazirlik); yerel benzetim: alfa maskesi, kucuk isaretler cancer/libra gercek, digerleri dikdortgen',
                  referans=REF, sabit=yd.SABIT, ref_sabit_esit=ref_sabit, fail=fail, gecen=78 - len(fail), bilinen_fail=BF, bilinen_fail_hepsi=bf_hepsi,
@@ -203,7 +205,7 @@ def main():
 
     def dene(T, c='CANCER_LIBRA'):
         b1, b2 = c.split('_'); kc = {'sol': kucuk(b1), 'sag': kucuk(b2)}
-        E, cizgi, d, g, olc = yd.yeni_yerlesim(o3.yazi_blogu, o1.rgba_olcek, T, kc, ana(c), h_max, T_ref=T0)
+        E, cizgi, d, g, olc = yd.yeni_yerlesim(o3.yazi_blogu, o1.rgba_olcek, T, kc, ana(c), h_max, T_ref=T0, kapat=KAPAT)
         ok, yb, cak = o4_kapi(E)
         r = max(yd.halka_max_r(E[ad][1], E[ad][2], E[ad][3]) for ad in ('isim1', 'isim2', 'sonsuz', 'kucuk_sol', 'kucuk_sag', 'tarih'))
         return E, g, ok, yb, cak, r

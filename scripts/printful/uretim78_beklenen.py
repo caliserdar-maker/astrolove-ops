@@ -97,7 +97,7 @@ def beklenti(B, kapi, kenar, siparis, parca_dir, ornek, bolum='ornek', yd_test=N
         b('yeni_duzen_modu', bool(ym) and all(v is True for v in ym.values()), ym, 'BIRLESIK cift.kapi.sert.yeni_duzen_kapilari_var')
         T = yd_test or {}
         b('yd_yerel_test', T.get('ref_sabit_esit') is True and T.get('gecen') == 78 and not T.get('fail') and T.get('bilinen_fail_hepsi') is True
-          and (T.get('bilinen_fail_sayi') or 0) > 0,
+          and T.get('bilinen_fail_sayi') == 45,                                      # K-1b-10: 3 cift x 15 vaka (yeni_duzen_yerel_test BF_VAKA)
           dict(ref_sabit=T.get('ref_sabit_esit'), gecen=T.get('gecen'), fail=T.get('fail'), bilinen_fail=[T.get('bilinen_fail_hepsi'), T.get('bilinen_fail_sayi')]),
           'hazirlik YD_YERLESIM78_TEST.json (yeni_duzen_yerel_test.py, is akisi Pillow 11.0.0)')
     return dict(beklentiler=out, hepsi_gecti=all(x['gecti'] for x in out))
