@@ -1,2 +1,2 @@
-2026-11-06 19:44 UTC
-Serdar 6 Kas gece: 78 toplu uretim basla, yol A. 2. tetik: kontrol cifti baskisi indirme duzeltmesi (42281766702 iptal).
+2026-11-06 20:04 UTC
+3. tetik: kart fontlari commit'e eklendi (.gitignore fonts/; 42282343035 iptal). Temiz git archive testi LEO_LEO PASS.
