@@ -38,6 +38,10 @@ KENAR_ESIK = 20
 ORAN = 4 / 5                 # Serdar 29 Eki (W03 kaynagi 4:5; S2 karti 1140x1425, kapilar PASS yerel olcumu)
 ORAN_TOL = 0.002
 ALAN = ["cift", "ad", "dosya", "sha256", "boyut", "kaynak", "durum"]
+# W05 "02 Your Approval" metni (P1-G, Serdar 6 Kas koruma): ZORUNLU secim, varsayilan YOK. wa_kupa_kart_ornek.wa_s4 varsayilani yeni
+# metin (5 Kas); eski metin 29 Eki onayli referansin (wa_kart_v11_kapi.py, kosu 40874497709) metnidir. Kapi ve MANIFEST DEGISMEZ.
+W05_METIN = {"eski": "We make your print or file once you approve, or as shown if there is no reply within 24 hours of the preview",
+             "yeni": WA.ONAY_METNI}
 
 
 def kenar_kapisi(im, ad):
@@ -109,6 +113,7 @@ def main(argv=None):
         ap.add_argument(k, required=True)
     ap.add_argument("--ortak", action="store_true", help="ORTAK_W04_FORMAT de uret")
     ap.add_argument("--kaynak", default="", help="MANIFEST kaynak sutunu (kart_sablon@<commit>)")
+    ap.add_argument("--w05-metin", required=True, choices=sorted(W05_METIN), help="W05 02 metni: eski (29 Eki onayli) | yeni (5 Kas); varsayilan yok")
     a = ap.parse_args(argv)
     c, out = a.cift, Path(a.out); out.mkdir(parents=True, exist_ok=True)
     sem, kes, gal = Path(a.sembol), Path(a.kesim), Path(a.galeri)
@@ -148,9 +153,12 @@ def main(argv=None):
              (f"{c}_W03_KISISEL.jpg", "S2_KISISEL", yok(lambda: WA.wa_s2(a.a, a.b, mb.convert("RGB"))))]
     if a.ortak:
         islem.append(("ORTAK_W04_FORMAT.jpg", "S3_FORMAT", yok(WA.wa_s3)))
-    islem += [(f"{c}_W05_SUREC.jpg", "S4_SUREC", yok(lambda: WA.wa_s4(ci))),
+    w05 = W05_METIN[a.w05_metin]
+    islem += [(f"{c}_W05_SUREC.jpg", "S4_SUREC", yok(lambda: WA.wa_s4(ci, w05))),
               (f"{c}_W06_GENEL.jpg", "S5_GENEL", yok(lambda: WA.wa_s5(renkler)))]
-    sonuc, rapor, jb = WA.kart_isle(islem, WA.beklenen(a.a, a.b))
+    bek = WA.beklenen(a.a, a.b)
+    bek["S4_SUREC"] = [w05 if x == WA.ONAY_METNI else x for x in bek["S4_SUREC"]]
+    sonuc, rapor, jb = WA.kart_isle(islem, bek)
     satirlar = []
     for ad, b in jb.items():
         (out / ad).write_bytes(b)
@@ -158,7 +166,7 @@ def main(argv=None):
         satirlar.append(dict(cift=sahip, ad=ad[len(sahip) + 1:-4], dosya=ad, sha256=hashlib.sha256(b).hexdigest(), boyut=len(b),
                              kaynak=a.kaynak, durum="PASS"))
     girdi = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in gerek}
-    ozet.update(kartlar=rapor, girdi_sha256=girdi, surum=K.SURUM)
+    ozet.update(kartlar=rapor, girdi_sha256=girdi, surum=K.SURUM, w05_metin=a.w05_metin)
     (out / f"KART_OZET_V11_{c}.json").write_text(json.dumps(ozet, indent=1, ensure_ascii=False, default=str), encoding="utf-8")
     m = out / "MANIFEST_W02_W06.csv"; yeni = not m.exists()
     with open(m, "a", newline="", encoding="utf-8") as f:

@@ -12,6 +12,7 @@ on:
       ciftler: {description: "virgullu cift anahtari ya da HEPSI (78)", required: true, default: "CANCER_LIBRA"}
       galeri_damga: {description: "TEMP/POSTER_GALERI_V11/<damga> (W01 / W07-W10)", required: true, default: "20261029_103607"}
       onayli_kosu: {description: "onayli CANCER_LIBRA ornegi W02_W06/<kosu> (Serdar 29 Eki ok)", required: true, default: "40874497709"}
+      w05_metin: {description: "W05 02 metni ZORUNLU, varsayilan yok: eski (29 Eki onayli; kapi referansi) | yeni (5 Kas, P1-G)", required: true}
 jobs:
   kart:
     runs-on: ubuntu-latest
@@ -22,8 +23,8 @@ jobs:
         parca: [0, 1, 2, 3, 4, 5, 6, 7]
     steps:
       - name: Girdi kapisi
-        env: {C: "${{ inputs.ciftler }}", G: "${{ inputs.galeri_damga }}"}
-        run: '[[ "$C" =~ ^(HEPSI|[A-Z]+_[A-Z]+(,[A-Z]+_[A-Z]+)*)$ && "$G" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
+        env: {C: "${{ inputs.ciftler }}", G: "${{ inputs.galeri_damga }}", M: "${{ inputs.w05_metin }}"}
+        run: '[[ "$C" =~ ^(HEPSI|[A-Z]+_[A-Z]+(,[A-Z]+_[A-Z]+)*)$ && "$G" =~ ^[0-9]{8}_[0-9]{6}$ && "$M" =~ ^(eski|yeni)$ ]] || { echo "::error::girdi (w05_metin eski|yeni zorunlu)"; exit 1; }'
       - uses: actions/checkout@v4
       - name: Bu parcanin ciftleri
         env: {C: "${{ inputs.ciftler }}", P: "${{ matrix.parca }}"}
@@ -73,9 +74,10 @@ jobs:
             grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
       - name: Kartlar
         if: env.N != '0'
-        env: {G: "${{ inputs.galeri_damga }}", P: "${{ matrix.parca }}", C: "${{ inputs.ciftler }}"}
+        env: {G: "${{ inputs.galeri_damga }}", P: "${{ matrix.parca }}", C: "${{ inputs.ciftler }}", M: "${{ inputs.w05_metin }}"}
         run: |
           set -euo pipefail
+          [[ "$M" =~ ^(eski|yeni)$ ]] || { echo "::error::w05_metin eski|yeni zorunlu"; exit 1; }
           mkdir -p _g _mb _out
           ORT=""; [ "$P" = 0 ] && ORT="--ortak"          # ORTAK_W04 yalniz parca 0'da
           i=0; n=$N; t0=$(date +%s); F=""
@@ -88,7 +90,7 @@ jobs:
             read -r A B <<< "$L"
             python3 scripts/kapak78/wa_kart_v11.py --cift "$CF" --a "$A" --b "$B" --sembol "_kupa/kupa_uretim/sembol/$CF" \
               --mb-poster "_mb/${CF}.png" --isim-csv data/sosyal/instagram/IG_78_ORNEK_ISIM_TAGLINE.csv --kesim _kes/ref/kapak_ci \
-              --galeri _g --out _out --kaynak "kart_sablon@${GITHUB_SHA::8}" $ORT \
+              --galeri _g --out _out --kaynak "kart_sablon@${GITHUB_SHA::8}" --w05-metin "$M" $ORT \
               || { echo "::error::$CF FAIL (ayrinti yukarida, DUR satiri)"; F="$F $CF"; continue; }
             ORT=""                                       # ORTAK ilk BASARILI ciftte uretilir (FAIL cift dosya yazmaz)
             [ "$C" = "HEPSI" ] || python3 scripts/kapak78/wa_kart_v11.py kontak _g _out "$CF" "_out/KONTAK_V11_${CF}.jpg"

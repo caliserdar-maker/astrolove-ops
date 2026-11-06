@@ -9,6 +9,9 @@ tara  --in <yedek> --out <dir>
     Metin bosluk normalize, buyuk / kucuk harf duyarsiz DESENLER aranir. OKUNAMADI: dosya yok, OCR hata / zaman asimi, rank 5'te
     "Your Approval" capasi okunmadi. Cikti TARAMA.csv (ilan, cift, rank, image_id, kaynak, desen; METIN YOK) + OZET.md. ETA 50 gorselde bir.
     Cikis 0 (bulgu raporu); girdi yapisi bozuksa 1.
+uret  --yedek <yedek> --kaynak <W02_W06> --sonra <KOSU> --ci <ref/kapak_ci> --out <dir> (Serdar 6 Kas, yontem b; GALERI istisnasi
+    yalniz W05_SUREC, yalniz bu gorev): 78 cift (data/pod/pod78_ids.csv) icin ornek b ile BIREBIR kapilar (kimlik zinciri, canli OCR,
+    bilinen PASS, kart kapilari). Cikti <CIFT>_W05_SUREC.jpg, ONCE_SONRA_<CIFT>.jpg, MANIFEST_W05.csv, RAPOR.json. Cikis 0 = 78/78 PASS.
 ornek --yedek <yedek> --kaynak <W02_W06 kosu klasorleri> --sonra <POSTER_GALERI_V11_YUKLE/KOSU> --ci <ref/kapak_ci> --out <dir>
     3 cift (ORNEK) x iki yontem, gercek oran 3000x2250:
       a  bant duzenleme: taban kartta eski 02 govde murekkep kutusu (olculur) + 6 px ZEMIN ile doldurulur, yeni metin K.yaz ile ESKI
@@ -425,7 +428,8 @@ def canli_ocr(p):
     return dict(eski_desen=ds, capa=capa, PASS=bool(ds) and capa)
 
 
-def ornek_cift(r, cift, lid, yedek, kaynak, sonra_kok, ci_kok, out):
+def ornek_cift(r, cift, lid, yedek, kaynak, sonra_kok, ci_kok, out, yontemler=("a", "b"), uretim=False):
+    """uretim=True (uret, Serdar 6 Kas yontem b): yalniz b; dosya <CIFT>_W05_SUREC.jpg, ONCE_SONRA_<CIFT>.jpg; ::notice:: yok (ozet)."""
     dd = Path(yedek) / f"{lid}_{cift}"
     j = json.loads((dd / "GALERI.json").read_text(encoding="utf-8"))
     g5 = [g for g in j["gorseller"] if g["rank"] == CAPA_RANK]
@@ -454,10 +458,13 @@ def ornek_cift(r, cift, lid, yedek, kaynak, sonra_kok, ci_kok, out):
                              PASS=hashlib.sha256(eski_b).hexdigest() == sec["manifest"])
     if eski_s[eski_s.index("Your Approval") + 1:eski_s.index("03")] != ESKI_SATIR:
         raise SystemExit(f"DUR: {cift} eski 02 satirlari canli kart kirilimindan farkli")
-    a_b, kutu_a, ink, a_s, a_k = yontem_a(taban_b, eski_k, eski_cagri)
-    ka = kart_kapilari(a_b, taban_a, kutu_a, tuple(kutu_a), a_s)
-    r["a"] = dict(kutu=list(kutu_a), murekkep=ink, yeni_satir_kutu=a_k, kapilar=ka, not_="3. satirin yeri bos kalir (eski metin 3 satir, yeni 2)")
-    kartlar = {"a": a_b}
+    kartlar = {}
+    if "a" in yontemler:
+        a_b, kutu_a, ink, a_s, a_k = yontem_a(taban_b, eski_k, eski_cagri)
+        ka = kart_kapilari(a_b, taban_a, kutu_a, tuple(kutu_a), a_s)
+        r["a"] = dict(kutu=list(kutu_a), murekkep=ink, yeni_satir_kutu=a_k, kapilar=ka,
+                      not_="3. satirin yeri bos kalir (eski metin 3 satir, yeni 2)")
+        kartlar["a"] = a_b
     if not r["bilinen_pass"]["PASS"]:
         r["b"] = dict(uretilmedi="DUR: wa_s4 ESKI metin cizimi MANIFEST sha256'sini vermedi (bilinen PASS FAIL)")
     else:
@@ -474,15 +481,19 @@ def ornek_cift(r, cift, lid, yedek, kaynak, sonra_kok, ci_kok, out):
         kartlar["b"] = b_b
     ok = r["bilinen_pass"]["PASS"]
     for y, bb in kartlar.items():
-        ad = f"{lid}_{cift}_W05_{y}.jpg"
+        ad = f"{cift}_W05_SUREC.jpg" if uretim else f"{lid}_{cift}_W05_{y}.jpg"
         (out / ad).write_bytes(bb)
-        (out / f"ONCE_SONRA_{cift}_{y}.jpg").write_bytes(once_sonra(taban_b, bb, r[y]["kutu"], y))
-        r[y].update(dosya=ad, sha256=hashlib.sha256(bb).hexdigest())
+        (out / (f"ONCE_SONRA_{cift}.jpg" if uretim else f"ONCE_SONRA_{cift}_{y}.jpg")).write_bytes(once_sonra(taban_b, bb, r[y]["kutu"], y))
+        r[y].update(dosya=ad, sha256=hashlib.sha256(bb).hexdigest(), boyut=len(bb))
         k = r[y]["kapilar"]; ok &= k["PASS"]
+        if uretim:
+            continue
         print(f"::notice::P1-G ornek {cift} {y}: {'PASS' if k['PASS'] else 'FAIL'} | bant p99.9 {k['bant']['p999']} max {k['bant']['max']} | "
               f"OCR eski desen {len(k['ocr'].get('eski_desen') or [])} capa {k['ocr'].get('capa')} difflib {k['ocr'].get('difflib')} | "
               f"metin {'PASS' if k['metin']['PASS'] else 'FAIL'} | jpeg {'PASS' if k['jpeg']['PASS'] else 'FAIL'}")
     f = r["bilgi_canli_kaynak_fark"]
+    if uretim:
+        return ok
     print(f"::notice::P1-G ornek {cift}: kimlik PASS, canli OCR eski desen {len(r['canli_ocr']['eski_desen'])}; bilgi: canli-kaynak fark "
           f"p99.9 {f['p999']} max {f['max']}, NCC {r['bilgi_ncc']}, canli subsampling {r['canli']['subsampling']}; bilinen PASS {r['bilinen_pass']['PASS']}")
     return ok
@@ -509,6 +520,73 @@ def ornek(yedek, kaynak, sonra_kok, ci_kok, out):
     return 0 if sonuc else 1
 
 
+MANIFEST_ALAN = ["cift", "ilan", "dosya", "sha256", "boyut", "kaynak_kosu", "kimlik", "canli_ocr", "bilinen_pass", "bant_p999", "bant_max",
+                 "ocr_eski_desen", "capa", "difflib", "metin", "jpeg", "durum", "neden"]
+
+
+def _uret_is(x):
+    """ProcessPool isi: tek cift (b). -> (cift, ilan, r, durum, neden)"""
+    cift, lid, yedek, kaynak, sonra_kok, ci_kok, out = x
+    r = dict(ilan=lid)
+    try:
+        ok = ornek_cift(r, cift, lid, yedek, kaynak, sonra_kok, ci_kok, Path(out), yontemler=("b",), uretim=True)
+        if "kapilar" not in r.get("b", {}):
+            return cift, lid, r, "DUR", r.get("b", {}).get("uretilmedi", "b uretilmedi")
+        return cift, lid, r, "PASS" if ok else "FAIL", "" if ok else "kart kapisi FAIL (RAPOR.json)"
+    except SystemExit as e:
+        return cift, lid, dict(r, DUR=str(e)), "DUR", str(e)[:300]
+    except Exception as e:  # noqa: BLE001
+        return cift, lid, dict(r, DUR=repr(e)[:300]), "DUR", f"hata {type(e).__name__}: {str(e)[:200]}"
+
+
+def manifest_satir(cift, lid, r, durum, neden):
+    b = r.get("b") or {}; k = b.get("kapilar") or {}
+    ev = lambda d: "" if d is None else ("PASS" if d.get("PASS") else "FAIL")  # noqa: E731
+    return dict(cift=cift, ilan=lid, dosya=b.get("dosya", ""), sha256=b.get("sha256", ""), boyut=b.get("boyut", ""),
+                kaynak_kosu=r.get("kaynak_kosu", ""), kimlik=ev(r.get("kimlik")), canli_ocr=ev(r.get("canli_ocr")),
+                bilinen_pass=ev(r.get("bilinen_pass")), bant_p999=(k.get("bant") or {}).get("p999", ""),
+                bant_max=(k.get("bant") or {}).get("max", ""), ocr_eski_desen=len((k.get("ocr") or {}).get("eski_desen") or []) if k else "",
+                capa=(k.get("ocr") or {}).get("capa", ""), difflib=(k.get("ocr") or {}).get("difflib", ""), metin=ev(k.get("metin")),
+                jpeg=ev(k.get("jpeg")), durum=durum, neden=(neden or "")[:300])
+
+
+def uret(yedek, kaynak, sonra_kok, ci_kok, out, ciftler_csv, isci=None, sadece=""):
+    """78 cift (data/pod/pod78_ids.csv) W05 b (Serdar 6 Kas; GALERI istisnasi yalniz W05_SUREC). Kapilar ornek b ile birebir.
+    -> 0 = tum ciftler PASS; MANIFEST_W05.csv + RAPOR.json + kartlar + ONCE_SONRA"""
+    from concurrent.futures import ProcessPoolExecutor
+    out = Path(out); out.mkdir(parents=True, exist_ok=True)
+    R = [r for r in csv.DictReader(open(ciftler_csv, encoding="utf-8-sig")) if r.get("listing_id", "").strip()]
+    sa = {x for x in (sadece or "").split(",") if x}
+    if sa - {r["cift"] for r in R}:
+        raise SystemExit(f"DUR: sadece listesinde 78 disi cift: {sorted(sa - {r['cift'] for r in R})}")
+    R = [r for r in R if not sa or r["cift"] in sa]
+    isler = [(r["cift"], r["listing_id"].strip(), str(yedek), str(kaynak), str(sonra_kok), str(ci_kok), str(out)) for r in R]
+    rapor = dict(yeni_metin=YENI, yontem="b (wa_s4 yeniden cizim; Serdar 5 Kas secim, 6 Kas uretim)", esik=dict(p999=P999_ESIK, max=MAX_ESIK,
+                 difflib=DIFFLIB_ESIK), kutu_b=list(KUTU_B), istisna="CLAUDE.md GALERI kuralina Serdar onayli istisna: yalniz W05_SUREC, yalniz P1-G",
+                 sapma=("Bant disi fark tabani Drive kaynagi (sha = MANIFEST = yukleme_kaydi); kaynak-canli fark kapisi yok (Serdar 5 Kas A); "
+                        "kimlik zinciri + canli OCR kapi; canli-kaynak fark ve NCC yalniz bilgi."), ciftler={})
+    satir, t0 = [], time.time()
+    with ProcessPoolExecutor(isci or os.cpu_count() or 2) as ex:
+        for n, (cift, lid, r, durum, neden) in enumerate(ex.map(_uret_is, isler), 1):
+            rapor["ciftler"][cift] = dict(r, durum=durum)
+            satir.append(manifest_satir(cift, lid, r, durum, neden))
+            e = time.time() - t0
+            print(f"{cift} {durum}" + (f" | {neden[:120]}" if neden else ""), flush=True)
+            print(f"ETA uret: {n}/{len(isler)} cift, gecen {e:.0f}s, kalan {e * (len(isler) - n) / n:.0f}s, %{100 * n // len(isler)}", flush=True)
+    satir.sort(key=lambda s: s["cift"])
+    with open(out / "MANIFEST_W05.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=MANIFEST_ALAN); w.writeheader(); w.writerows(satir)
+    say = {}
+    for s_ in satir:
+        say[s_["durum"]] = say.get(s_["durum"], 0) + 1
+    rapor.update(sayilar=say, SONUC="PASS" if say.get("PASS", 0) == len(satir) == len(isler) else "FAIL")
+    (out / "RAPOR.json").write_text(json.dumps(rapor, indent=1, ensure_ascii=False, default=str), encoding="utf-8")
+    kotu = [s_["cift"] for s_ in satir if s_["durum"] != "PASS"]
+    print(f"::notice::P1-G W05 uretim: {len(satir)} cift | " + " ".join(f"{k} {v}" for k, v in sorted(say.items()))
+          + (f" | PASS disi: {' '.join(kotu[:20])}" if kotu else ""))
+    return 0 if rapor["SONUC"] == "PASS" else 1
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     alt = ap.add_subparsers(dest="komut", required=True)
@@ -517,7 +595,14 @@ def main(argv=None):
     o = alt.add_parser("ornek")
     for x in ("--yedek", "--kaynak", "--sonra", "--ci", "--out"):
         o.add_argument(x, required=True)
+    u = alt.add_parser("uret")
+    for x in ("--yedek", "--kaynak", "--sonra", "--ci", "--out"):
+        u.add_argument(x, required=True)
+    u.add_argument("--ciftler", default=str(BURA.parents[1] / "data" / "pod" / "pod78_ids.csv"))
+    u.add_argument("--is", dest="is_", type=int, default=0); u.add_argument("--sadece", default="")
     a = ap.parse_args(argv)
+    if a.komut == "uret":
+        return uret(a.yedek, a.kaynak, a.sonra, a.ci, a.out, a.ciftler, a.is_ or None, a.sadece)
     if a.komut == "tara":
         return tara(a.kok, a.out, a.is_ or None)
     return ornek(a.yedek, a.kaynak, a.sonra, a.ci, a.out)

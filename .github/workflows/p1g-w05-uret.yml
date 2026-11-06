@@ -1,0 +1,85 @@
+name: p1g-w05-uret
+# P1-G AŞAMA 1 (Serdar 6 Kas): 78 poster ilaninda rank 5 W05_SUREC yeni metinli kart uretimi (yontem b) + yukleme PLANI. ETSY API YOK,
+# token YOK, Etsy kilidi YOK; Etsy'ye yazim YOK. GALERI istisnasi (CLAUDE.md "canli galeriden"): yalniz W05_SUREC, yalniz bu gorev.
+# Girdi (yalniz okunur; yedek klasorune YAZILMAZ, ders #61): TEMP/POSTER_GALERI_V11_YEDEK/<damga>/ (galeri-v11-yedek-oku + -indir),
+# W05 kaynagi TEMP/POSTER_GALERI_V11/<GALERI_DAMGA>/W02_W06/<kosu>/, SONRA kayitlari TEMP/POSTER_GALERI_V11_YUKLE/KOSU/<kosu>/ilanlar/,
+# CI_<CIFT>.png kapak-ci-ref-20261029 ref/kapak_ci. Kod scripts/kapak78/p1g_kart.py uret + scripts/kapak78/w05_degistir.py plan.
+# Cikti TEMP/P1G_W05_<damga>/ (--immutable): <CIFT>_W05_SUREC.jpg, ONCE_SONRA_<CIFT>.jpg, MANIFEST_W05.csv, RAPOR.json, PLAN/PLAN_W05.json|md.
+# Gorsel artifact / loga girmez; Drive ID loga yazilmaz.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      damga: {description: "TEMP/POSTER_GALERI_V11_YEDEK/<damga> (YYYYMMDD_HHMMSS; yedek-oku + yedek-indir tamam)", required: true}
+env:
+  GALERI_DAMGA: "20261029_103607"
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Girdi kapisi
+        env: {D: "${{ inputs.damga }}"}
+        run: '[[ "$D" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::girdi"; exit 1; }'
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {ref: kapak-ci-ref-20261029, path: _kes, sparse-checkout: ref/kapak_ci}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Ortam (Pillow 11.0.0 + raqm, tesseract, rclone)
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          sudo apt-get install -y -qq libfribidi0 tesseract-ocr >/dev/null
+          pip install -q pillow==11.0.0 numpy==2.1.3 requests==2.34.2
+          python3 -c "from PIL import features, __version__; assert __version__ == '11.0.0' and features.check('raqm'); print('pillow', __version__, 'raqm')"
+          tesseract --version | head -1
+          sudo apt-get install -y -qq rclone >/dev/null 2>&1 || timeout 240 bash -c 'curl -fsSL --max-time 120 --retry 2 https://rclone.org/install.sh | sudo bash >/dev/null 2>&1'
+          rclone version | head -1
+      - name: Testler (bilinen PASS + bilinen FAIL)
+        env: {CI_KOK: _kes/ref/kapak_ci}
+        run: |
+          set -euo pipefail
+          python3 scripts/kapak78/test_p1g_kart.py
+          python3 scripts/kapak78/test_w05_degistir.py
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Girdiler (Drive, yalniz okuma)
+        timeout-minutes: 20
+        env: {D: "${{ inputs.damga }}"}
+        run: |
+          set -euo pipefail
+          T="gdrive:ASTROLOVE/TEMP"
+          rclone copy "$T/POSTER_GALERI_V11_YEDEK/$D" _y --exclude "*.mp4" --transfers 8 -q
+          N=$(find _y -name 'r*.jpg' | wc -l); J=$(find _y -name GALERI.json | wc -l)
+          B=$(python3 -c "import csv; print(sum(int(r['gorsel']) for r in csv.DictReader(open('_y/OKUMA.csv'))))")
+          echo "::notice::P1-G W05 girdi: GALERI.json $J, gorsel dosyasi $N, OKUMA.csv gorsel toplami $B"
+          [ "$J" = 78 ] && [ "$N" = "$B" ] || { echo "::error::yedek eksik (GALERI.json $J / 78, dosya $N / $B); yedek-indir tamam degil, DUR"; exit 1; }
+          rclone copy "$T/POSTER_GALERI_V11/${GALERI_DAMGA}/W02_W06" _k --max-depth 2 --transfers 8 -q \
+            --include "*/*_W05_SUREC.jpg" --include "*/MANIFEST_W02_W06*.csv"
+          rclone copy "$T/POSTER_GALERI_V11_YUKLE/KOSU" _s --transfers 8 -q --include "*/ilanlar/SONRA_*.json"
+          echo "W05 kaynak $(find _k -name '*_W05_SUREC.jpg' | wc -l) dosya / $(find _k -name 'MANIFEST_W02_W06*.csv' | wc -l) manifest | SONRA $(find _s -name 'SONRA_*.json' | wc -l) dosya, $(ls _s | wc -l) kosu"
+      - name: Uret (78 cift, b) + yukleme plani
+        timeout-minutes: 30
+        env: {D: "${{ inputs.damga }}"}
+        run: |
+          set -euo pipefail
+          set +e
+          python3 scripts/kapak78/p1g_kart.py uret --yedek _y --kaynak _k --sonra _s --ci _kes/ref/kapak_ci --out _o; RC=$?
+          python3 scripts/kapak78/w05_degistir.py plan --canli-dir _y --manifest _o/MANIFEST_W05.csv --out _o/PLAN; RC2=$?
+          set -e
+          rclone copy _o "gdrive:ASTROLOVE/TEMP/P1G_W05_${D}" --immutable --transfers 8 -q
+          echo "Cikti: TEMP/P1G_W05_$D ($(ls _o/*_W05_SUREC.jpg 2>/dev/null | wc -l) kart; uret RC $RC, plan RC $RC2)" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$RC" = 0 ] && [ "$RC2" = 0 ] || { echo "::error::uretim / plan kapilari PASS degil (RAPOR.json, MANIFEST_W05.csv, PLAN_W05.md)"; exit 1; }
+      - if: always()
+        run: rm -rf _y _k _s _o _kes ~/.config/rclone
