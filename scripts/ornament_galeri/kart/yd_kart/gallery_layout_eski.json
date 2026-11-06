@@ -1,0 +1,3233 @@
+{
+  "schema_version": "1.0",
+  "project": "AstroLoveArt / Our Year / Cancer & Libra",
+  "canvas": {
+    "width_px": 3200,
+    "height_px": 2400,
+    "aspect_ratio": "4:3",
+    "color_space": "sRGB"
+  },
+  "coordinate_system": {
+    "origin": "top-left",
+    "unit": "percent of canvas width for x/width; percent of canvas height for y/height",
+    "rotation": "degrees clockwise around element center",
+    "pixel_formula": "x_px = x_pct * 3200 / 100; y_px = y_pct * 2400 / 100",
+    "text_boxes": "logical layout boxes, with explicit line breaks and centered vertical alignment"
+  },
+  "immutable_assets": {
+    "posters": "All five source JPGs are used intact. Their embedded lettering, symbols and textures are atomic parts of each poster element, not separately recreated.",
+    "symbols": "Original supplied RGBA files, shape and color unchanged.",
+    "source_files": [
+      {
+        "file": "source_assets/Poster_Stil1_Starlit_EMMA_JAMES.jpg",
+        "sha256": "85ba7ea4a0b89c4fd2bc22e90b2a46349c18c18895f21e387c4e79e6aff63c38"
+      },
+      {
+        "file": "source_assets/Poster_Stil2_Timeless_EMMA_JAMES.jpg",
+        "sha256": "4a6805e79d153398164b18b89b43354ec2cb08f06d19cfbe8fc4b08c5b7ccd2c"
+      },
+      {
+        "file": "source_assets/Poster_Stil3_FirstPage_EMMA_JAMES.jpg",
+        "sha256": "7cca5d1eba5c74b2035440e921be8335c3a70c81f7cd3dea1cda575803ee7506"
+      },
+      {
+        "file": "source_assets/Poster_Stil4_Layers_EMMA_JAMES.jpg",
+        "sha256": "e17eeae199d73439c26adaef22ac7ae4363946085ed38c2454e3646099d7c906"
+      },
+      {
+        "file": "source_assets/Poster_Stil5_Botanical_EMMA_JAMES.jpg",
+        "sha256": "13b290cad4737f07a31398353ddfb376c91137d730b060d129cf2468253369b2"
+      },
+      {
+        "file": "source_assets/Sembol_Cancer.png",
+        "sha256": "c4edb8a1529f280f438038c0480d82b45e375236312661a145a96994cc46592f"
+      },
+      {
+        "file": "source_assets/Sembol_Libra.png",
+        "sha256": "46eb213e148fcabb3c320b63a2dfffaf1c7421d1b112503b0098883b7e58becd"
+      },
+      {
+        "file": "source_assets/Sembol_Ortak_Cancer_Libra.png",
+        "sha256": "cf676de7b3508ce031caf2c0fedbc6155a7e9986805948cd57c5f10e5953b46b"
+      }
+    ]
+  },
+  "reproduction": {
+    "start_with": "The matching B PNG at 3200x2400.",
+    "draw_order": "elements array order, except line and text elements need no extra background; original poster shadows and blank paper are already baked into B.",
+    "do_not_reapply_shadows": true,
+    "poster_resampling": "Lanczos",
+    "images": "fit contain, preserve aspect ratio, no distortion; use original alpha for symbols",
+    "text_engine": "Pillow FreeType with supplied Google Fonts files, weight axis explicitly set",
+    "A_files": "High quality JPEG visual previews. B files are lossless PNG. JPEG compression means A is not intended as a pixel-difference test target."
+  },
+  "pair_template": {
+    "variables": [
+      "pair_label",
+      "sign_1_name",
+      "sign_2_name",
+      "sign_1_symbol",
+      "sign_2_symbol",
+      "shared_symbol",
+      "poster_Starlit",
+      "poster_Timeless",
+      "poster_First_Page",
+      "poster_Layers",
+      "poster_Botanical",
+      "sample_name_1",
+      "sample_name_2",
+      "sample_date"
+    ],
+    "ordering": "English alphabetical sign order; for same-sign pairs preserve left/right name labels.",
+    "replacement_rules": [
+      "Keep layout boxes unchanged. Fit each original symbol inside its allocated maximum box without stretching.",
+      "Use optical scale adjustments within the box only; preserve every symbol shape.",
+      "For longer pair names, reduce only that label font size by up to 15 percent, then use a deliberate two-line label if required.",
+      "Change preview names and date only by supplying a newly prepared original poster; do not paint over the supplied poster."
+    ]
+  },
+  "fonts": [
+    {
+      "family": "Cormorant Garamond",
+      "google_fonts_url": "https://fonts.google.com/specimen/Cormorant+Garamond",
+      "files": [
+        "fonts/CormorantGaramond.ttf",
+        "fonts/CormorantGaramond-Italic.ttf"
+      ],
+      "license": "fonts/CormorantGaramond_OFL.txt"
+    },
+    {
+      "family": "Manrope",
+      "google_fonts_url": "https://fonts.google.com/specimen/Manrope",
+      "files": [
+        "fonts/Manrope.ttf"
+      ],
+      "license": "fonts/Manrope_OFL.txt"
+    }
+  ],
+  "card_proxy_note": "The supplied package contains 4:5 posters but no 5:7 card artwork. A card previews preserve the complete source poster and contain it inside a 5:7 card with neutral top/bottom margins. Replace the card asset with the approved 5:7 design for publication. No poster stretching or cropping has been used.",
+  "alternative_wording_note": "Our First Year and Always us are shown as typography examples outside the unchanged poster on slide 04. Apply these through the existing poster personalization system, not by redrawing supplied artwork.",
+  "generated_scene_note": "Only the stone and wood scene backgrounds are generated with the built-in image tool. Native files are 1448x1086 and included. They are resampled to 3200x2400; typography and overlays render natively at final size. Scene props are illustrative, not a photograph of an actual fulfilled product.",
+  "slides": [
+    {
+      "number": 1,
+      "name": "Cover",
+      "purpose_tr": "İlk yıl hediyesi, kişiselleştirme ve Cancer-Libra çiftini ilk bakışta anlatır.",
+      "preview_file": "A_Previews/01_Cover_A.jpg",
+      "clean_background_file": "B_Clean_Backgrounds/01_Cover_B.png",
+      "canvas_px": [
+        3200,
+        2400
+      ],
+      "background_layers": [
+        {
+          "type": "photographic_scene",
+          "file": "scene_sources/stone_native.png",
+          "native_size_px": [
+            1448,
+            1086
+          ],
+          "resize": "Lanczos to 3200x2400, no crop"
+        },
+        {
+          "name": "hero_poster_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 69.375,
+          "center_y_pct": 50,
+          "width_pct": 55.0,
+          "height_pct": 91.6667,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        }
+      ],
+      "elements": [
+        {
+          "id": "hero_poster",
+          "type": "poster",
+          "content": {
+            "style": "Layers",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil4_Layers_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 69.375,
+          "center_y_pct": 50,
+          "width_pct": 55.0,
+          "height_pct": 91.6667,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            1376,
+            120,
+            3104,
+            2280
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "hero_poster",
+          "asset_binding": "posters.Layers"
+        },
+        {
+          "id": "collection",
+          "type": "text",
+          "content": "FIRST ANNIVERSARY",
+          "center_x_pct": 26,
+          "center_y_pct": 12,
+          "width_pct": 40,
+          "height_pct": 4,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 92,
+            "size_pct_of_canvas_height": 4.25
+          },
+          "color_hex": "#7B343B",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 10.22,
+          "letter_spacing_em": 0.1111111111111111,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "collection"
+        },
+        {
+          "id": "headline",
+          "type": "text",
+          "content": "A first year,\nmade yours.",
+          "center_x_pct": 26,
+          "center_y_pct": 43,
+          "width_pct": 40,
+          "height_pct": 16,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 180,
+            "size_pct_of_canvas_height": 7.5
+          },
+          "color_hex": "#281E1E",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0.0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 0.98,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "headline"
+        },
+        {
+          "id": "product",
+          "type": "text",
+          "content": "Personalized\nanniversary art",
+          "center_x_pct": 26,
+          "center_y_pct": 60,
+          "width_pct": 40,
+          "height_pct": 12,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 115,
+            "size_pct_of_canvas_height": 4.791667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0.0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.25,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "product"
+        },
+        {
+          "id": "pair",
+          "type": "text",
+          "content": "Cancer & Libra",
+          "center_x_pct": 28,
+          "center_y_pct": 24,
+          "width_pct": 44,
+          "height_pct": 11,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 205,
+            "size_pct_of_canvas_height": 4.666667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "pair",
+          "template_content": "{{sign_1_name}} &\n{{sign_2_name}}",
+          "layout_note": "Takip 14 Eki: HER ZAMAN iki satir; punto 78 ciftte ayni (12 burcun en genis satiri sutuna sigar, en fazla 280); dikey dizilim by_galeri.kapak_yerlesim hesaplar"
+        },
+        {
+          "id": "personalization",
+          "type": "text",
+          "content": "Your names. Your date.",
+          "center_x_pct": 26,
+          "center_y_pct": 72,
+          "width_pct": 40,
+          "height_pct": 4,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 92,
+            "size_pct_of_canvas_height": 3.833333
+          },
+          "color_hex": "#281E1E",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0.0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "personalization"
+        },
+        {
+          "id": "formats",
+          "type": "text",
+          "content": "DIGITAL CARD  /  FILE  /  PRINT",
+          "center_x_pct": 26,
+          "center_y_pct": 79,
+          "width_pct": 40,
+          "height_pct": 4,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 64,
+            "size_pct_of_canvas_height": 2.666667
+          },
+          "color_hex": "#645751",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 2.84,
+          "letter_spacing_em": 0.044444444444444446,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "formats"
+        },
+        {
+          "id": "brand",
+          "type": "text",
+          "content": "ASTROLOVEART",
+          "center_x_pct": 50,
+          "center_y_pct": 96,
+          "width_pct": 88,
+          "height_pct": 2.5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 46,
+            "size_pct_of_canvas_height": 1.916667
+          },
+          "color_hex": "#645751",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 8.47,
+          "letter_spacing_em": 0.18421052631578946,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "brand"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "name": "Shared_Symbol",
+      "purpose_tr": "İki orijinal burç işaretinin mevcut ortak sembolde birleşmesi görsel olarak açıklanır.",
+      "preview_file": "A_Previews/02_Shared_Symbol_A.jpg",
+      "clean_background_file": "B_Clean_Backgrounds/02_Shared_Symbol_B.png",
+      "canvas_px": [
+        3200,
+        2400
+      ],
+      "background_layers": [
+        {
+          "type": "solid",
+          "color_hex": "#F5F0E7"
+        }
+      ],
+      "elements": [
+        {
+          "id": "headline",
+          "type": "text",
+          "content": "Your two signs, one shared symbol.",
+          "center_x_pct": 50,
+          "center_y_pct": 17,
+          "width_pct": 90,
+          "height_pct": 10,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 154,
+            "size_pct_of_canvas_height": 6.416667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "headline"
+        },
+        {
+          "id": "cancer_symbol",
+          "type": "symbol",
+          "content": {
+            "source_file": "source_assets/Sembol_Cancer.png"
+          },
+          "center_x_pct": 18,
+          "center_y_pct": 52,
+          "width_pct": 14,
+          "height_pct": 16.208393632416787,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "color": "original RGBA pixels, no recoloring",
+          "name": "cancer_symbol",
+          "asset_binding": "symbols.sign_1"
+        },
+        {
+          "id": "libra_symbol",
+          "type": "symbol",
+          "content": {
+            "source_file": "source_assets/Sembol_Libra.png"
+          },
+          "center_x_pct": 43,
+          "center_y_pct": 52,
+          "width_pct": 15.5,
+          "height_pct": 15.480649188514358,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "color": "original RGBA pixels, no recoloring",
+          "name": "libra_symbol",
+          "asset_binding": "symbols.sign_2"
+        },
+        {
+          "id": "shared_symbol",
+          "type": "symbol",
+          "content": {
+            "source_file": "source_assets/Sembol_Ortak_Cancer_Libra.png"
+          },
+          "center_x_pct": 78,
+          "center_y_pct": 51,
+          "width_pct": 27,
+          "height_pct": 33.87096774193548,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "color": "original RGBA pixels, no recoloring",
+          "name": "shared_symbol",
+          "asset_binding": "symbols.shared"
+        },
+        {
+          "id": "plus",
+          "type": "text",
+          "content": "+",
+          "center_x_pct": 30.5,
+          "center_y_pct": 52,
+          "width_pct": 6,
+          "height_pct": 7,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 118,
+            "size_pct_of_canvas_height": 4.916667
+          },
+          "color_hex": "#977342",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "plus"
+        },
+        {
+          "id": "merge_arrow",
+          "type": "line",
+          "points_pct": [
+            [
+              55,
+              52
+            ],
+            [
+              60,
+              52
+            ]
+          ],
+          "stroke_hex": "#977342",
+          "stroke_width_px": 6,
+          "arrow_at_end": true,
+          "rotation_deg": 0,
+          "name": "merge_arrow"
+        },
+        {
+          "id": "cancer_label",
+          "type": "text",
+          "content": "Cancer",
+          "center_x_pct": 18,
+          "center_y_pct": 70,
+          "width_pct": 22,
+          "height_pct": 6,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 99,
+            "size_pct_of_canvas_height": 4.125
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "cancer_label",
+          "template_content": "{{sign_1_name}}"
+        },
+        {
+          "id": "libra_label",
+          "type": "text",
+          "content": "Libra",
+          "center_x_pct": 43,
+          "center_y_pct": 70,
+          "width_pct": 22,
+          "height_pct": 6,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 99,
+            "size_pct_of_canvas_height": 4.125
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "libra_label",
+          "template_content": "{{sign_2_name}}"
+        },
+        {
+          "id": "pair_label",
+          "type": "text",
+          "content": "Cancer & Libra",
+          "center_x_pct": 78,
+          "center_y_pct": 77,
+          "width_pct": 34,
+          "height_pct": 6,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 104,
+            "size_pct_of_canvas_height": 4.333333
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "pair_label",
+          "template_content": "{{sign_1_name}} & {{sign_2_name}}"
+        },
+        {
+          "id": "meaning",
+          "type": "text",
+          "content": "An original symbol for your zodiac pairing.",
+          "center_x_pct": 50,
+          "center_y_pct": 88,
+          "width_pct": 88,
+          "height_pct": 5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 76,
+            "size_pct_of_canvas_height": 3.166667
+          },
+          "color_hex": "#6E625B",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "meaning"
+        },
+        {
+          "id": "brand",
+          "type": "text",
+          "content": "ASTROLOVEART",
+          "center_x_pct": 50,
+          "center_y_pct": 96,
+          "width_pct": 88,
+          "height_pct": 2.5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 38,
+            "size_pct_of_canvas_height": 1.583333
+          },
+          "color_hex": "#6E625B",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 7,
+          "letter_spacing_em": 0.18421052631578946,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "brand"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "name": "Five_Styles",
+      "purpose_tr": "Beş stil aynı içerik ve aynı ölçekte karşılaştırılır; büyük detaylar 05-07 görsellerde verilir.",
+      "preview_file": "A_Previews/03_Five_Styles_A.jpg",
+      "clean_background_file": "B_Clean_Backgrounds/03_Five_Styles_B.png",
+      "canvas_px": [
+        3200,
+        2400
+      ],
+      "background_layers": [
+        {
+          "type": "solid",
+          "color_hex": "#101E30"
+        },
+        {
+          "name": "poster_starlit_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 12,
+          "center_y_pct": 53,
+          "width_pct": 17.4,
+          "height_pct": 28.999999999999993,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        },
+        {
+          "name": "poster_timeless_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 31,
+          "center_y_pct": 53,
+          "width_pct": 17.4,
+          "height_pct": 28.999999999999993,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        },
+        {
+          "name": "poster_first_page_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 50,
+          "center_y_pct": 53,
+          "width_pct": 17.4,
+          "height_pct": 28.999999999999993,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        },
+        {
+          "name": "poster_layers_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 69,
+          "center_y_pct": 53,
+          "width_pct": 17.4,
+          "height_pct": 28.999999999999993,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        },
+        {
+          "name": "poster_botanical_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 88,
+          "center_y_pct": 53,
+          "width_pct": 17.4,
+          "height_pct": 28.999999999999993,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        }
+      ],
+      "elements": [
+        {
+          "id": "headline",
+          "type": "text",
+          "content": "Find your style.",
+          "center_x_pct": 50,
+          "center_y_pct": 13,
+          "width_pct": 88,
+          "height_pct": 9,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 174,
+            "size_pct_of_canvas_height": 7.25
+          },
+          "color_hex": "#F5F0E7",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "headline"
+        },
+        {
+          "id": "subtitle",
+          "type": "text",
+          "content": "One shared symbol. Five different moods.",
+          "center_x_pct": 50,
+          "center_y_pct": 25,
+          "width_pct": 88,
+          "height_pct": 5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 75,
+            "size_pct_of_canvas_height": 3.125
+          },
+          "color_hex": "#D7CABC",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "subtitle"
+        },
+        {
+          "id": "poster_starlit",
+          "type": "poster",
+          "content": {
+            "style": "Starlit",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil1_Starlit_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 12,
+          "center_y_pct": 53,
+          "width_pct": 17.4,
+          "height_pct": 28.999999999999993,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            106,
+            924,
+            662,
+            1619
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "poster_starlit",
+          "asset_binding": "posters.Starlit"
+        },
+        {
+          "id": "label_starlit",
+          "type": "text",
+          "content": "Starlit",
+          "center_x_pct": 12,
+          "center_y_pct": 75,
+          "width_pct": 18.2,
+          "height_pct": 5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 76,
+            "size_pct_of_canvas_height": 3.166667
+          },
+          "color_hex": "#F5F0E7",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "label_starlit"
+        },
+        {
+          "id": "poster_timeless",
+          "type": "poster",
+          "content": {
+            "style": "Timeless",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil2_Timeless_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 31,
+          "center_y_pct": 53,
+          "width_pct": 17.4,
+          "height_pct": 28.999999999999993,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            714,
+            924,
+            1270,
+            1619
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "poster_timeless",
+          "asset_binding": "posters.Timeless"
+        },
+        {
+          "id": "label_timeless",
+          "type": "text",
+          "content": "Timeless",
+          "center_x_pct": 31,
+          "center_y_pct": 75,
+          "width_pct": 18.2,
+          "height_pct": 5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 76,
+            "size_pct_of_canvas_height": 3.166667
+          },
+          "color_hex": "#F5F0E7",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "label_timeless"
+        },
+        {
+          "id": "poster_first_page",
+          "type": "poster",
+          "content": {
+            "style": "First Page",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil3_FirstPage_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 50,
+          "center_y_pct": 53,
+          "width_pct": 17.4,
+          "height_pct": 28.999999999999993,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            1322,
+            924,
+            1878,
+            1619
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "poster_first_page",
+          "asset_binding": "posters.First_Page"
+        },
+        {
+          "id": "label_first_page",
+          "type": "text",
+          "content": "First Page",
+          "center_x_pct": 50,
+          "center_y_pct": 75,
+          "width_pct": 18.2,
+          "height_pct": 5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 76,
+            "size_pct_of_canvas_height": 3.166667
+          },
+          "color_hex": "#F5F0E7",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "label_first_page"
+        },
+        {
+          "id": "poster_layers",
+          "type": "poster",
+          "content": {
+            "style": "Layers",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil4_Layers_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 69,
+          "center_y_pct": 53,
+          "width_pct": 17.4,
+          "height_pct": 28.999999999999993,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            1930,
+            924,
+            2486,
+            1619
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "poster_layers",
+          "asset_binding": "posters.Layers"
+        },
+        {
+          "id": "label_layers",
+          "type": "text",
+          "content": "Layers",
+          "center_x_pct": 69,
+          "center_y_pct": 75,
+          "width_pct": 18.2,
+          "height_pct": 5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 76,
+            "size_pct_of_canvas_height": 3.166667
+          },
+          "color_hex": "#F5F0E7",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "label_layers"
+        },
+        {
+          "id": "poster_botanical",
+          "type": "poster",
+          "content": {
+            "style": "Botanical",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil5_Botanical_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 88,
+          "center_y_pct": 53,
+          "width_pct": 17.4,
+          "height_pct": 28.999999999999993,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            2538,
+            924,
+            3094,
+            1619
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "poster_botanical",
+          "asset_binding": "posters.Botanical"
+        },
+        {
+          "id": "label_botanical",
+          "type": "text",
+          "content": "Botanical",
+          "center_x_pct": 88,
+          "center_y_pct": 75,
+          "width_pct": 18.2,
+          "height_pct": 5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 76,
+            "size_pct_of_canvas_height": 3.166667
+          },
+          "color_hex": "#F5F0E7",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "label_botanical"
+        },
+        {
+          "id": "choose",
+          "type": "text",
+          "content": "Choose one style from the menu.",
+          "center_x_pct": 50,
+          "center_y_pct": 87,
+          "width_pct": 88,
+          "height_pct": 5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 75,
+            "size_pct_of_canvas_height": 3.125
+          },
+          "color_hex": "#D7CABC",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "choose"
+        },
+        {
+          "id": "brand",
+          "type": "text",
+          "content": "ASTROLOVEART",
+          "center_x_pct": 50,
+          "center_y_pct": 96,
+          "width_pct": 88,
+          "height_pct": 2.5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 38,
+            "size_pct_of_canvas_height": 1.583333
+          },
+          "color_hex": "#CBBBA6",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 7,
+          "letter_spacing_em": 0.18421052631578946,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "brand"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "name": "Personalization",
+      "purpose_tr": "İsim-burç eşleşmesi, tarih, Our First Year seçeneği ve Always us kısa satır örneği açıkça gösterilir.",
+      "preview_file": "A_Previews/04_Personalization_A.jpg",
+      "clean_background_file": "B_Clean_Backgrounds/04_Personalization_B.png",
+      "canvas_px": [
+        3200,
+        2400
+      ],
+      "background_layers": [
+        {
+          "type": "solid",
+          "color_hex": "#F5F0E7"
+        },
+        {
+          "name": "details_panel",
+          "type": "panel",
+          "center_x_pct": 73,
+          "center_y_pct": 60,
+          "width_pct": 45,
+          "height_pct": 67,
+          "rotation_deg": 0,
+          "fill_hex": "#EDE4D8",
+          "outline_hex": null,
+          "radius_px": 0
+        },
+        {
+          "name": "sample_poster_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 26,
+          "center_y_pct": 57,
+          "width_pct": 31.2,
+          "height_pct": 52.0,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        }
+      ],
+      "elements": [
+        {
+          "id": "headline",
+          "type": "text",
+          "content": "Make it your story.",
+          "center_x_pct": 50,
+          "center_y_pct": 13,
+          "width_pct": 88,
+          "height_pct": 9,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 172,
+            "size_pct_of_canvas_height": 7.166667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "headline"
+        },
+        {
+          "id": "sample_poster",
+          "type": "poster",
+          "content": {
+            "style": "First Page",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil3_FirstPage_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 26,
+          "center_y_pct": 57,
+          "width_pct": 31.2,
+          "height_pct": 52.0,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            333,
+            744,
+            1331,
+            1992
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "sample_poster",
+          "asset_binding": "posters.First_Page"
+        },
+        {
+          "id": "names_label",
+          "type": "text",
+          "content": "YOUR NAMES + DATE",
+          "center_x_pct": 73,
+          "center_y_pct": 31,
+          "width_pct": 38,
+          "height_pct": 3.5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 650,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 55,
+            "size_pct_of_canvas_height": 2.291667
+          },
+          "color_hex": "#713244",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 4,
+          "letter_spacing_em": 0.07272727272727272,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "names_label"
+        },
+        {
+          "id": "names_example",
+          "type": "text",
+          "content": "EMMA (Cancer)\nJAMES (Libra)\n14 JUNE 2025",
+          "center_x_pct": 73,
+          "center_y_pct": 41.5,
+          "width_pct": 38,
+          "height_pct": 14,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 450,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 73,
+            "size_pct_of_canvas_height": 3.041667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.32,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "names_example",
+          "template_content": "{{sample_name_1}} ({{sign_1_name}})\n{{sample_name_2}} ({{sign_2_name}})\n{{sample_date}}"
+        },
+        {
+          "id": "detail_rule",
+          "type": "line",
+          "points_pct": [
+            [
+              54,
+              51
+            ],
+            [
+              92,
+              51
+            ]
+          ],
+          "stroke_hex": "#C7B7A7",
+          "stroke_width_px": 2,
+          "arrow_at_end": false,
+          "rotation_deg": 0,
+          "name": "detail_rule"
+        },
+        {
+          "id": "heading_label",
+          "type": "text",
+          "content": "CHOOSE YOUR HEADING",
+          "center_x_pct": 73,
+          "center_y_pct": 56,
+          "width_pct": 38,
+          "height_pct": 3.5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 650,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 55,
+            "size_pct_of_canvas_height": 2.291667
+          },
+          "color_hex": "#713244",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 4,
+          "letter_spacing_em": 0.07272727272727272,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "heading_label"
+        },
+        {
+          "id": "heading_options",
+          "type": "text",
+          "content": "Paper Anniversary\nor Our First Year",
+          "center_x_pct": 73,
+          "center_y_pct": 65,
+          "width_pct": 38,
+          "height_pct": 12,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 98,
+            "size_pct_of_canvas_height": 4.083333
+          },
+          "color_hex": "#281E1E",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.1,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "heading_options"
+        },
+        {
+          "id": "shortline_label",
+          "type": "text",
+          "content": "OPTIONAL SHORT LINE",
+          "center_x_pct": 73,
+          "center_y_pct": 77,
+          "width_pct": 38,
+          "height_pct": 3.5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 650,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 55,
+            "size_pct_of_canvas_height": 2.291667
+          },
+          "color_hex": "#713244",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 4,
+          "letter_spacing_em": 0.07272727272727272,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "shortline_label"
+        },
+        {
+          "id": "shortline_example",
+          "type": "text",
+          "content": "Always us",
+          "center_x_pct": 73,
+          "center_y_pct": 83,
+          "width_pct": 38,
+          "height_pct": 7,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 400,
+            "italic": true,
+            "file": "fonts/CormorantGaramond-Italic.ttf",
+            "size_px": 112,
+            "size_pct_of_canvas_height": 4.666667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "shortline_example"
+        },
+        {
+          "id": "shortline_limit",
+          "type": "text",
+          "content": "Up to 20 characters.\nReplaces Year One.",
+          "center_x_pct": 73,
+          "center_y_pct": 90,
+          "width_pct": 38,
+          "height_pct": 6,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 62,
+            "size_pct_of_canvas_height": 2.583333
+          },
+          "color_hex": "#6E625B",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.12,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "shortline_limit"
+        },
+        {
+          "id": "brand",
+          "type": "text",
+          "content": "ASTROLOVEART",
+          "center_x_pct": 50,
+          "center_y_pct": 96,
+          "width_pct": 88,
+          "height_pct": 2.5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 38,
+            "size_pct_of_canvas_height": 1.583333
+          },
+          "color_hex": "#6E625B",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 7,
+          "letter_spacing_em": 0.18421052631578946,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "brand"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "name": "Starlit_Timeless",
+      "purpose_tr": "Starlit ve Timeless posterlerini değiştirmeden büyük ve eşit ölçekte gösterir.",
+      "preview_file": "A_Previews/05_Starlit_Timeless_A.jpg",
+      "clean_background_file": "B_Clean_Backgrounds/05_Starlit_Timeless_B.png",
+      "canvas_px": [
+        3200,
+        2400
+      ],
+      "background_layers": [
+        {
+          "type": "solid",
+          "color_hex": "#E9E0D3"
+        },
+        {
+          "name": "starlit_poster_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 28,
+          "center_y_pct": 55,
+          "width_pct": 33.6,
+          "height_pct": 55.99999999999999,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        },
+        {
+          "name": "timeless_poster_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 72,
+          "center_y_pct": 55,
+          "width_pct": 33.6,
+          "height_pct": 55.99999999999999,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        }
+      ],
+      "elements": [
+        {
+          "id": "headline",
+          "type": "text",
+          "content": "Celestial or classic.",
+          "center_x_pct": 50,
+          "center_y_pct": 12.5,
+          "width_pct": 90,
+          "height_pct": 9,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 167,
+            "size_pct_of_canvas_height": 6.958333
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "headline"
+        },
+        {
+          "id": "starlit_poster",
+          "type": "poster",
+          "content": {
+            "style": "Starlit",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil1_Starlit_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 28,
+          "center_y_pct": 55,
+          "width_pct": 33.6,
+          "height_pct": 55.99999999999999,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            358,
+            648,
+            1433,
+            1992
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "starlit_poster",
+          "asset_binding": "posters.Starlit"
+        },
+        {
+          "id": "timeless_poster",
+          "type": "poster",
+          "content": {
+            "style": "Timeless",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil2_Timeless_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 72,
+          "center_y_pct": 55,
+          "width_pct": 33.6,
+          "height_pct": 55.99999999999999,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            1766,
+            648,
+            2841,
+            1992
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "timeless_poster",
+          "asset_binding": "posters.Timeless"
+        },
+        {
+          "id": "starlit_label",
+          "type": "text",
+          "content": "Starlit",
+          "center_x_pct": 28,
+          "center_y_pct": 89,
+          "width_pct": 38,
+          "height_pct": 6,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 105,
+            "size_pct_of_canvas_height": 4.375
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "starlit_label"
+        },
+        {
+          "id": "timeless_label",
+          "type": "text",
+          "content": "Timeless",
+          "center_x_pct": 72,
+          "center_y_pct": 89,
+          "width_pct": 38,
+          "height_pct": 6,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 105,
+            "size_pct_of_canvas_height": 4.375
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "timeless_label"
+        },
+        {
+          "id": "brand",
+          "type": "text",
+          "content": "ASTROLOVEART",
+          "center_x_pct": 50,
+          "center_y_pct": 96,
+          "width_pct": 88,
+          "height_pct": 2.5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 38,
+            "size_pct_of_canvas_height": 1.583333
+          },
+          "color_hex": "#6E625B",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 7,
+          "letter_spacing_em": 0.18421052631578946,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "brand"
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "name": "FirstPage_Botanical",
+      "purpose_tr": "First Page ve Botanical tasarımlarını büyük gösterir; bordo dış zemin krem posterleri ayrıştırır.",
+      "preview_file": "A_Previews/06_FirstPage_Botanical_A.jpg",
+      "clean_background_file": "B_Clean_Backgrounds/06_FirstPage_Botanical_B.png",
+      "canvas_px": [
+        3200,
+        2400
+      ],
+      "background_layers": [
+        {
+          "type": "solid",
+          "color_hex": "#642E3B"
+        },
+        {
+          "name": "firstpage_poster_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 28,
+          "center_y_pct": 55,
+          "width_pct": 33.6,
+          "height_pct": 55.99999999999999,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        },
+        {
+          "name": "botanical_poster_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 72,
+          "center_y_pct": 55,
+          "width_pct": 33.6,
+          "height_pct": 55.99999999999999,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        }
+      ],
+      "elements": [
+        {
+          "id": "headline",
+          "type": "text",
+          "content": "Warmth, in two styles.",
+          "center_x_pct": 50,
+          "center_y_pct": 12.5,
+          "width_pct": 90,
+          "height_pct": 9,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 165,
+            "size_pct_of_canvas_height": 6.875
+          },
+          "color_hex": "#F5F0E7",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "headline"
+        },
+        {
+          "id": "firstpage_poster",
+          "type": "poster",
+          "content": {
+            "style": "First Page",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil3_FirstPage_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 28,
+          "center_y_pct": 55,
+          "width_pct": 33.6,
+          "height_pct": 55.99999999999999,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            358,
+            648,
+            1433,
+            1992
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "firstpage_poster",
+          "asset_binding": "posters.First_Page"
+        },
+        {
+          "id": "botanical_poster",
+          "type": "poster",
+          "content": {
+            "style": "Botanical",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil5_Botanical_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 72,
+          "center_y_pct": 55,
+          "width_pct": 33.6,
+          "height_pct": 55.99999999999999,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            1766,
+            648,
+            2841,
+            1992
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "botanical_poster",
+          "asset_binding": "posters.Botanical"
+        },
+        {
+          "id": "firstpage_label",
+          "type": "text",
+          "content": "First Page",
+          "center_x_pct": 28,
+          "center_y_pct": 89,
+          "width_pct": 38,
+          "height_pct": 6,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 105,
+            "size_pct_of_canvas_height": 4.375
+          },
+          "color_hex": "#F5F0E7",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "firstpage_label"
+        },
+        {
+          "id": "botanical_label",
+          "type": "text",
+          "content": "Botanical",
+          "center_x_pct": 72,
+          "center_y_pct": 89,
+          "width_pct": 38,
+          "height_pct": 6,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 105,
+            "size_pct_of_canvas_height": 4.375
+          },
+          "color_hex": "#F5F0E7",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "botanical_label"
+        },
+        {
+          "id": "brand",
+          "type": "text",
+          "content": "ASTROLOVEART",
+          "center_x_pct": 50,
+          "center_y_pct": 96,
+          "width_pct": 88,
+          "height_pct": 2.5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 38,
+            "size_pct_of_canvas_height": 1.583333
+          },
+          "color_hex": "#DBC4C2",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 7,
+          "letter_spacing_em": 0.18421052631578946,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "brand"
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "name": "Layers_Material",
+      "purpose_tr": "Layers stilini gösterir; bütün stillerde varak, kabartma ve katmanların düz baskı efektleri olduğunu açıklar.",
+      "preview_file": "A_Previews/07_Layers_Material_A.jpg",
+      "clean_background_file": "B_Clean_Backgrounds/07_Layers_Material_B.png",
+      "canvas_px": [
+        3200,
+        2400
+      ],
+      "background_layers": [
+        {
+          "type": "solid",
+          "color_hex": "#EFE0D2"
+        },
+        {
+          "name": "layers_poster_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 26,
+          "center_y_pct": 52,
+          "width_pct": 38.4,
+          "height_pct": 64.0,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        }
+      ],
+      "elements": [
+        {
+          "id": "layers_poster",
+          "type": "poster",
+          "content": {
+            "style": "Layers",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil4_Layers_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 26,
+          "center_y_pct": 52,
+          "width_pct": 38.4,
+          "height_pct": 64.0,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            218,
+            480,
+            1446,
+            2015
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "layers_poster",
+          "asset_binding": "posters.Layers"
+        },
+        {
+          "id": "eyebrow",
+          "type": "text",
+          "content": "THE FINISH",
+          "center_x_pct": 74,
+          "center_y_pct": 17,
+          "width_pct": 40,
+          "height_pct": 4,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 650,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 51,
+            "size_pct_of_canvas_height": 2.125
+          },
+          "color_hex": "#713244",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 5,
+          "letter_spacing_em": 0.09803921568627451,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "eyebrow"
+        },
+        {
+          "id": "headline",
+          "type": "text",
+          "content": "Artful texture.\nFlat matte print.",
+          "center_x_pct": 74,
+          "center_y_pct": 32,
+          "width_pct": 40,
+          "height_pct": 18,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 145,
+            "size_pct_of_canvas_height": 6.041667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.02,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "headline"
+        },
+        {
+          "id": "material_explanation",
+          "type": "text",
+          "content": "Gold, relief and paper layers\nare printed visual effects.",
+          "center_x_pct": 74,
+          "center_y_pct": 52,
+          "width_pct": 40,
+          "height_pct": 10,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 73,
+            "size_pct_of_canvas_height": 3.041667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.35,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "material_explanation"
+        },
+        {
+          "id": "material_rule",
+          "type": "line",
+          "points_pct": [
+            [
+              54,
+              61
+            ],
+            [
+              94,
+              61
+            ]
+          ],
+          "stroke_hex": "#C3AA93",
+          "stroke_width_px": 3,
+          "arrow_at_end": false,
+          "rotation_deg": 0,
+          "name": "material_rule"
+        },
+        {
+          "id": "material_clarity",
+          "type": "text",
+          "content": "No foil. No raised layers.\nNo cut-paper pieces.",
+          "center_x_pct": 74,
+          "center_y_pct": 70,
+          "width_pct": 40,
+          "height_pct": 10,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 550,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 73,
+            "size_pct_of_canvas_height": 3.041667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.35,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "material_clarity"
+        },
+        {
+          "id": "all_styles",
+          "type": "text",
+          "content": "Applies to all five styles\nand all formats.",
+          "center_x_pct": 74,
+          "center_y_pct": 83,
+          "width_pct": 40,
+          "height_pct": 8,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 61,
+            "size_pct_of_canvas_height": 2.541667
+          },
+          "color_hex": "#6E625B",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.35,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "all_styles"
+        },
+        {
+          "id": "layers_label",
+          "type": "text",
+          "content": "Layers",
+          "center_x_pct": 26,
+          "center_y_pct": 90,
+          "width_pct": 38,
+          "height_pct": 6,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 106,
+            "size_pct_of_canvas_height": 4.416667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "layers_label"
+        },
+        {
+          "id": "brand",
+          "type": "text",
+          "content": "ASTROLOVEART",
+          "center_x_pct": 50,
+          "center_y_pct": 96,
+          "width_pct": 88,
+          "height_pct": 2.5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 38,
+            "size_pct_of_canvas_height": 1.583333
+          },
+          "color_hex": "#6E625B",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 7,
+          "letter_spacing_em": 0.18421052631578946,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "brand"
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "name": "Formats",
+      "purpose_tr": "İki dijital seçenek ile kargolanan baskıyı görsel ve kısa metinlerle ayırır; çerçevesiz bilgisi görünürdür.",
+      "preview_file": "A_Previews/08_Formats_A.jpg",
+      "clean_background_file": "B_Clean_Backgrounds/08_Formats_B.png",
+      "canvas_px": [
+        3200,
+        2400
+      ],
+      "background_layers": [
+        {
+          "type": "solid",
+          "color_hex": "#F5F0E7"
+        },
+        {
+          "name": "format_panel_18",
+          "type": "panel",
+          "center_x_pct": 18,
+          "center_y_pct": 60,
+          "width_pct": 29,
+          "height_pct": 61,
+          "rotation_deg": 0,
+          "fill_hex": "#EDE4D8",
+          "outline_hex": null,
+          "radius_px": 0
+        },
+        {
+          "name": "format_panel_50",
+          "type": "panel",
+          "center_x_pct": 50,
+          "center_y_pct": 60,
+          "width_pct": 29,
+          "height_pct": 61,
+          "rotation_deg": 0,
+          "fill_hex": "#EDE4D8",
+          "outline_hex": null,
+          "radius_px": 0
+        },
+        {
+          "name": "format_panel_82",
+          "type": "panel",
+          "center_x_pct": 82,
+          "center_y_pct": 60,
+          "width_pct": 29,
+          "height_pct": 61,
+          "rotation_deg": 0,
+          "fill_hex": "#EDE4D8",
+          "outline_hex": null,
+          "radius_px": 0
+        },
+        {
+          "name": "card_preview_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 18,
+          "center_y_pct": 53,
+          "width_pct": 14.5,
+          "height_pct": 27.066666666666663,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        },
+        {
+          "name": "digital_preview_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 50,
+          "center_y_pct": 53,
+          "width_pct": 17.2,
+          "height_pct": 28.666666666666664,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        },
+        {
+          "name": "print_preview_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 82,
+          "center_y_pct": 53,
+          "width_pct": 17.2,
+          "height_pct": 28.666666666666664,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        }
+      ],
+      "elements": [
+        {
+          "id": "headline",
+          "type": "text",
+          "content": "Choose your format.",
+          "center_x_pct": 50,
+          "center_y_pct": 12,
+          "width_pct": 90,
+          "height_pct": 9,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 169,
+            "size_pct_of_canvas_height": 7.041667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "headline"
+        },
+        {
+          "id": "subtitle",
+          "type": "text",
+          "content": "Your chosen style, in the format you need.",
+          "center_x_pct": 50,
+          "center_y_pct": 23,
+          "width_pct": 90,
+          "height_pct": 5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 71,
+            "size_pct_of_canvas_height": 2.958333
+          },
+          "color_hex": "#6E625B",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "subtitle"
+        },
+        {
+          "id": "card_heading",
+          "type": "text",
+          "content": "Digital card",
+          "center_x_pct": 18,
+          "center_y_pct": 33,
+          "width_pct": 27,
+          "height_pct": 5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 88,
+            "size_pct_of_canvas_height": 3.666667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "card_heading"
+        },
+        {
+          "id": "digital_heading",
+          "type": "text",
+          "content": "Digital file",
+          "center_x_pct": 50,
+          "center_y_pct": 33,
+          "width_pct": 27,
+          "height_pct": 5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 88,
+            "size_pct_of_canvas_height": 3.666667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "digital_heading"
+        },
+        {
+          "id": "print_heading",
+          "type": "text",
+          "content": "Shipped print",
+          "center_x_pct": 82,
+          "center_y_pct": 33,
+          "width_pct": 27,
+          "height_pct": 5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 88,
+            "size_pct_of_canvas_height": 3.666667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "print_heading"
+        },
+        {
+          "id": "card_preview",
+          "type": "poster",
+          "content": {
+            "style": "First Page",
+            "format": "5x7 single-sided flat card",
+            "source_file": "source_assets/Kart_Stil3_FirstPage_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 18,
+          "center_y_pct": 53,
+          "width_pct": 14.5,
+          "height_pct": 27.066666666666663,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            344,
+            982,
+            808,
+            1562
+          ],
+          "card_preview_proxy": true,
+          "replacement_note": "For the final card, supply a prepared 5:7 card file; this concept uses the unchanged 4:5 poster centered within a 5:7 blank card.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "card_preview",
+          "asset_binding": "posters.First_Page"
+        },
+        {
+          "id": "digital_preview",
+          "type": "poster",
+          "content": {
+            "style": "First Page",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil3_FirstPage_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 50,
+          "center_y_pct": 53,
+          "width_pct": 17.2,
+          "height_pct": 28.666666666666664,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            1325,
+            928,
+            1875,
+            1616
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "digital_preview",
+          "asset_binding": "posters.First_Page"
+        },
+        {
+          "id": "print_preview",
+          "type": "poster",
+          "content": {
+            "style": "First Page",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil3_FirstPage_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 82,
+          "center_y_pct": 53,
+          "width_pct": 17.2,
+          "height_pct": 28.666666666666664,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            2349,
+            928,
+            2899,
+            1616
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "print_preview",
+          "asset_binding": "posters.First_Page"
+        },
+        {
+          "id": "card_details",
+          "type": "text",
+          "content": "5 x 7 in flat card\nSingle-sided\nDigital file to print",
+          "center_x_pct": 18,
+          "center_y_pct": 80,
+          "width_pct": 27,
+          "height_pct": 14,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 73,
+            "size_pct_of_canvas_height": 3.041667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.35,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "card_details"
+        },
+        {
+          "id": "digital_details",
+          "type": "text",
+          "content": "8 x 10 in JPG\n300 dpi\nPrint it yourself",
+          "center_x_pct": 50,
+          "center_y_pct": 80,
+          "width_pct": 27,
+          "height_pct": 14,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 73,
+            "size_pct_of_canvas_height": 3.041667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.35,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "digital_details"
+        },
+        {
+          "id": "print_details",
+          "type": "text",
+          "content": "8 x 10 in\nMatte paper\nShipped unframed",
+          "center_x_pct": 82,
+          "center_y_pct": 80,
+          "width_pct": 27,
+          "height_pct": 14,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 73,
+            "size_pct_of_canvas_height": 3.041667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.35,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "print_details"
+        },
+        {
+          "id": "brand",
+          "type": "text",
+          "content": "ASTROLOVEART",
+          "center_x_pct": 50,
+          "center_y_pct": 96,
+          "width_pct": 88,
+          "height_pct": 2.5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 38,
+            "size_pct_of_canvas_height": 1.583333
+          },
+          "color_hex": "#6E625B",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 7,
+          "letter_spacing_em": 0.18421052631578946,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "brand"
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "name": "Size_Gift_Scene",
+      "purpose_tr": "5x7 düz kartı ve 8x10 posteri aynı fiziksel ölçekte karşılaştırır; sıcak hediye sahnesi kullanır.",
+      "preview_file": "A_Previews/09_Size_Gift_Scene_A.jpg",
+      "clean_background_file": "B_Clean_Backgrounds/09_Size_Gift_Scene_B.png",
+      "canvas_px": [
+        3200,
+        2400
+      ],
+      "background_layers": [
+        {
+          "type": "photographic_scene",
+          "file": "scene_sources/wood_native.png",
+          "native_size_px": [
+            1448,
+            1086
+          ],
+          "resize": "Lanczos to 3200x2400, no crop"
+        },
+        {
+          "name": "card_to_scale_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 22.5,
+          "center_y_pct": 61.58333333333333,
+          "width_pct": 21.875,
+          "height_pct": 40.833333333333336,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        },
+        {
+          "name": "print_to_scale_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 61,
+          "center_y_pct": 52.83333333333333,
+          "width_pct": 35.0,
+          "height_pct": 58.333333333333336,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        }
+      ],
+      "elements": [
+        {
+          "id": "headline",
+          "type": "text",
+          "content": "A little note. A lasting keepsake.",
+          "center_x_pct": 45,
+          "center_y_pct": 11,
+          "width_pct": 80,
+          "height_pct": 9,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 141,
+            "size_pct_of_canvas_height": 5.875
+          },
+          "color_hex": "#281E1E",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "headline"
+        },
+        {
+          "id": "scale_label",
+          "type": "text",
+          "content": "5 x 7 and 8 x 10, shown to scale.",
+          "center_x_pct": 45,
+          "center_y_pct": 20,
+          "width_pct": 80,
+          "height_pct": 4,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 450,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 66,
+            "size_pct_of_canvas_height": 2.75
+          },
+          "color_hex": "#6E625B",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "scale_label"
+        },
+        {
+          "id": "card_to_scale",
+          "type": "poster",
+          "content": {
+            "style": "First Page",
+            "format": "5x7 single-sided flat card",
+            "source_file": "source_assets/Kart_Stil3_FirstPage_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 22.5,
+          "center_y_pct": 61.58333333333333,
+          "width_pct": 21.875,
+          "height_pct": 40.833333333333336,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            370,
+            1040,
+            1070,
+            1915
+          ],
+          "card_preview_proxy": true,
+          "replacement_note": "For the final card, supply a prepared 5:7 card file; this concept uses the unchanged 4:5 poster centered within a 5:7 blank card.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "card_to_scale",
+          "asset_binding": "posters.First_Page"
+        },
+        {
+          "id": "print_to_scale",
+          "type": "poster",
+          "content": {
+            "style": "First Page",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil3_FirstPage_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 61,
+          "center_y_pct": 52.83333333333333,
+          "width_pct": 35.0,
+          "height_pct": 58.333333333333336,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            1392,
+            568,
+            2512,
+            1968
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "print_to_scale",
+          "asset_binding": "posters.First_Page"
+        },
+        {
+          "id": "card_label",
+          "type": "text",
+          "content": "5 x 7 in digital card",
+          "center_x_pct": 22.5,
+          "center_y_pct": 88,
+          "width_pct": 31,
+          "height_pct": 5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 82,
+            "size_pct_of_canvas_height": 3.416667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "card_label"
+        },
+        {
+          "id": "print_label",
+          "type": "text",
+          "content": "8 x 10 in print",
+          "center_x_pct": 61,
+          "center_y_pct": 88,
+          "width_pct": 39,
+          "height_pct": 5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 82,
+            "size_pct_of_canvas_height": 3.416667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "print_label"
+        },
+        {
+          "id": "card_digital_note",
+          "type": "text",
+          "content": "Card shown printed. Card purchase is a digital file.",
+          "center_x_pct": 45,
+          "center_y_pct": 95,
+          "width_pct": 80,
+          "height_pct": 3.5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 54,
+            "size_pct_of_canvas_height": 2.25
+          },
+          "color_hex": "#281E1E",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "card_digital_note"
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "name": "Free_Preview",
+      "purpose_tr": "Ücretsiz önizlemeyi isteğe bağlı sunar; sipariş sonrası 24 saat ve onay sürecini ayrı anlatır; Lena ve Serdar bilgisini ekler.",
+      "preview_file": "A_Previews/10_Free_Preview_A.jpg",
+      "clean_background_file": "B_Clean_Backgrounds/10_Free_Preview_B.png",
+      "canvas_px": [
+        3200,
+        2400
+      ],
+      "background_layers": [
+        {
+          "type": "solid",
+          "color_hex": "#EDE5D9"
+        },
+        {
+          "name": "preview_poster_blank_paper",
+          "type": "blank_paper",
+          "center_x_pct": 25,
+          "center_y_pct": 56,
+          "width_pct": 30,
+          "height_pct": 50.0,
+          "rotation_deg": 0,
+          "fill_hex": "#FCFAF4",
+          "shadow_baked_into_B": true
+        }
+      ],
+      "elements": [
+        {
+          "id": "headline",
+          "type": "text",
+          "content": "See yours before you order.",
+          "center_x_pct": 50,
+          "center_y_pct": 12.5,
+          "width_pct": 90,
+          "height_pct": 9,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Cormorant Garamond",
+            "weight": 500,
+            "italic": false,
+            "file": "fonts/CormorantGaramond.ttf",
+            "size_px": 159,
+            "size_pct_of_canvas_height": 6.625
+          },
+          "color_hex": "#281E1E",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "headline"
+        },
+        {
+          "id": "preview_poster",
+          "type": "poster",
+          "content": {
+            "style": "Timeless",
+            "format": "8x10 artwork",
+            "source_file": "source_assets/Poster_Stil2_Timeless_EMMA_JAMES.jpg"
+          },
+          "center_x_pct": 25,
+          "center_y_pct": 56,
+          "width_pct": 30,
+          "height_pct": 50.0,
+          "rotation_deg": 0,
+          "fit": "contain",
+          "preserve_aspect_ratio": true,
+          "source_modified": false,
+          "rendered_asset_bounds_px": [
+            320,
+            744,
+            1280,
+            1944
+          ],
+          "card_preview_proxy": false,
+          "replacement_note": "Replace only with the matching original poster for the new zodiac pair. No crop, no redraw, no distortion.",
+          "shadow": {
+            "direction": "down and right, light from upper left",
+            "offset_x_px": 10,
+            "offset_y_px": 20,
+            "softness_blur_px": 24,
+            "color_hex": "#39271E",
+            "opacity": 0.1412,
+            "contact_shadow_blur_px": 3,
+            "contact_shadow_opacity": 0.1098,
+            "baked_into_B": true,
+            "apply_again": false
+          },
+          "name": "preview_poster",
+          "asset_binding": "posters.Timeless"
+        },
+        {
+          "id": "free_preview_label",
+          "type": "text",
+          "content": "FREE PREVIEW, IF YOU WOULD LIKE",
+          "center_x_pct": 72,
+          "center_y_pct": 29,
+          "width_pct": 44,
+          "height_pct": 4,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 650,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 46,
+            "size_pct_of_canvas_height": 1.916667
+          },
+          "color_hex": "#713244",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 2.5,
+          "letter_spacing_em": 0.05434782608695652,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "free_preview_label"
+        },
+        {
+          "id": "free_preview_copy",
+          "type": "text",
+          "content": "Message us your names,\ndate and chosen style.",
+          "center_x_pct": 72,
+          "center_y_pct": 40,
+          "width_pct": 44,
+          "height_pct": 12,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 85,
+            "size_pct_of_canvas_height": 3.541667
+          },
+          "color_hex": "#281E1E",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.28,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "free_preview_copy"
+        },
+        {
+          "id": "preview_rule",
+          "type": "line",
+          "points_pct": [
+            [
+              50,
+              51
+            ],
+            [
+              94,
+              51
+            ]
+          ],
+          "stroke_hex": "#C5B3A1",
+          "stroke_width_px": 3,
+          "arrow_at_end": false,
+          "rotation_deg": 0,
+          "name": "preview_rule"
+        },
+        {
+          "id": "after_order_label",
+          "type": "text",
+          "content": "AFTER YOU ORDER",
+          "center_x_pct": 72,
+          "center_y_pct": 57,
+          "width_pct": 44,
+          "height_pct": 4,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 650,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 49,
+            "size_pct_of_canvas_height": 2.041667
+          },
+          "color_hex": "#713244",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 4,
+          "letter_spacing_em": 0.08163265306122448,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "after_order_label"
+        },
+        {
+          "id": "after_order_copy",
+          "type": "text",
+          "content": "Final preview within 24 hours.\nYou approve the design.\nWe prepare your file or print.",
+          "center_x_pct": 72,
+          "center_y_pct": 69,
+          "width_pct": 44,
+          "height_pct": 17,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 74,
+            "size_pct_of_canvas_height": 3.083333
+          },
+          "color_hex": "#281E1E",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.4,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "after_order_copy"
+        },
+        {
+          "id": "quality_check",
+          "type": "text",
+          "content": "Every file personally checked.",
+          "center_x_pct": 72,
+          "center_y_pct": 85,
+          "width_pct": 44,
+          "height_pct": 4,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 400,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 60,
+            "size_pct_of_canvas_height": 2.5
+          },
+          "color_hex": "#6E625B",
+          "alignment": "left",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 0,
+          "letter_spacing_em": 0.0,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "quality_check"
+        },
+        {
+          "id": "brand",
+          "type": "text",
+          "content": "ASTROLOVEART",
+          "center_x_pct": 50,
+          "center_y_pct": 96,
+          "width_pct": 88,
+          "height_pct": 2.5,
+          "rotation_deg": 0,
+          "font": {
+            "google_fonts_family": "Manrope",
+            "weight": 600,
+            "italic": false,
+            "file": "fonts/Manrope.ttf",
+            "size_px": 38,
+            "size_pct_of_canvas_height": 1.583333
+          },
+          "color_hex": "#6E625B",
+          "alignment": "center",
+          "vertical_alignment": "center",
+          "letter_spacing_px": 7,
+          "letter_spacing_em": 0.18421052631578946,
+          "line_height_em": 1.15,
+          "line_breaks": "explicit; preserve newlines",
+          "rendering": "Each line occupies an em-sized slot; visible glyph ink is vertically centered in that slot.",
+          "name": "brand"
+        }
+      ]
+    }
+  ]
+}
