@@ -278,6 +278,12 @@ def metin_kontrol(row):
     for ad, *_ in STILLER:
         if ad not in desc:
             hata.append(f"stil {ad} yok")
+    try:                                      # tum alanlar (baslik, aciklama, etiket, alt metin, kutular) KESIN yasakta ENGEL, ag oncesi
+        metin_yasak_kapisi("POST", "/shops/0/listings", data=dict(title=title, description=desc, tags=",".join(tags),
+                                                                 **{f"alt_{i}": a for i, a in enumerate(alt, 1)}),
+                           json_body={"personalization_questions": Q}, mod="ENGEL")
+    except SystemExit as e:
+        hata.append(str(e.code)[:200])
     return title, desc, tags, alt, Q, hata
 
 
@@ -319,6 +325,18 @@ class Kilitli(Etsy):
         r = super().post_file(path, files, data, tekrar=1)       # tekrar yok: hata yanitinda cift yukleme riski; cagiran galeriyi okur
         self.kota()
         return r
+
+    def taslak_kapi(self, shop, body):
+        """createDraftListing kapilari (izin, AI beyan, metin yasak ENGEL, kota): istek YOK. yaz() BELIRSIZ isaretinden ONCE cagirir."""
+        self._olustur = True
+        try:
+            self._izin("POST", f"/shops/{shop}/listings")
+        finally:
+            self._olustur = False
+        ai_beyan_kapisi("POST", f"/shops/{shop}/listings", data=body)
+        metin_yasak_kapisi("POST", f"/shops/{shop}/listings", data=body, mod="ENGEL"); self.kota()
+        if not getattr(self, "kuru", False):
+            self._istek_oncesi()
 
     def taslak_olustur(self, shop, body):
         """createDraftListing: TEK gonderim (5xx / zaman asiminda yeniden GONDERILMEZ). Kapilar (AI beyan, metin yasak ENGEL, kota) istekten
@@ -379,10 +397,10 @@ def yaz(api, shop, out, pair):
         kaydet(); raise SystemExit(f"DUR-ON: medya {mhata}")
     api.get(f"/shops/{shop}")
     R["kota_bas"] = api.remaining
-    api.kota(KOTA_ILAN)                        # tahmini istek + 10: yarim ilan acilmaz
+    api.kota(KOTA_ILAN + (0 if getattr(api, "_harita", None) is not None else 30))   # tahmini istek + 10 (+ ilk tam tarama): yarim ilan acilmaz
     NIT = [(n["property_id"], n["ad"], n["value_ids"], n["values"], n.get("scale_id")) for n in A["nitelik"]]
 
-    def state_oku(adim):
+    def state_oku(adim, acil=True):
         L = None
         for i in range(6):
             L = api.get(f"/listings/{api.lid}", ok404=True)
@@ -394,13 +412,16 @@ def yaz(api, shop, out, pair):
         st = L.get("state")
         R["adimlar"].append((adim, st, api.remaining))
         print(f"{pair} {adim}: state={st} kota={api.remaining}", flush=True)
+        if st == "active" and not acil:            # var olan ilan (Serdar yayina almis olabilir): dokunulmaz
+            kaydet(); raise SystemExit(f"DUR: var olan {api.lid} active ({adim}); dokunulmadi")
         if st == "active":
-            st2 = "?"
+            st2, gitti = "?", False
             try:
                 api.patch(f"/shops/{shop}/listings/{api.lid}", {"state": "inactive"})
+                gitti = True
                 st2 = (api.get(f"/listings/{api.lid}") or {}).get("state")
             except BaseException as e:  # noqa: BLE001 PATCH/okuma hatasi da DUR (kod 2); dongu asla sonraki cifte gecmez
-                st2 = f"PATCH/okuma hatasi {type(e).__name__}: {str(e)[:200]}"
+                st2 = f"{'PATCH gitti, okuma' if gitti else 'PATCH gonderilemedi'} hatasi {type(e).__name__}: {str(e)[:200]}"
             finally:
                 R["adimlar"].append((adim + " ACIL inactive", st2, api.remaining)); kaydet()
                 print(f"::error::ACIL: {pair} {adim} sonrasi active -> inactive (simdi {st2}). DUR.", flush=True)
@@ -411,19 +432,27 @@ def yaz(api, shop, out, pair):
             kaydet(); raise SystemExit(f"DUR: beklenmeyen state {st} ({adim})")
         return L
 
-    def ayni_baslik():
-        """draft + inactive + active ilanlarda ayni baslik (html varliklari cozulur). Birden fazla -> DUR."""
-        bul = set()
-        for st in ("draft", "inactive", "active"):
-            off = 0
-            while True:
-                r_ = api.get(f"/shops/{shop}/listings", params={"state": st, "limit": 100, "offset": off}) or {}
-                for x in r_.get("results") or []:
-                    if html.unescape(x.get("title") or "") == title:
-                        bul.add(x["listing_id"])
-                off += 100
-                if off >= (r_.get("count") or 0) or off > 2000:
-                    break
+    def ayni_baslik(taze=False):
+        """draft + inactive + active ilanlarda ayni baslik (html varliklari cozulur). Tam tarama kosuda bir kez (api._harita); sonraki
+        ciftlerde yalniz ilk draft sayfasi tazelenir (kota). taze=True (BELIRSIZ): tam tarama. Birden fazla -> DUR."""
+        H = getattr(api, "_harita", None)
+        if H is None or taze:
+            H = {}
+            for st in ("draft", "inactive", "active"):
+                off = 0
+                while True:
+                    r_ = api.get(f"/shops/{shop}/listings", params={"state": st, "limit": 100, "offset": off}) or {}
+                    for x in r_.get("results") or []:
+                        H.setdefault(html.unescape(x.get("title") or ""), set()).add(x["listing_id"])
+                    off += 100
+                    if off >= (r_.get("count") or 0) or off > 2000:
+                        break
+            api._harita = H
+        else:
+            r_ = api.get(f"/shops/{shop}/listings", params={"state": "draft", "limit": 100, "offset": 0}) or {}
+            for x in r_.get("results") or []:
+                H.setdefault(html.unescape(x.get("title") or ""), set()).add(x["listing_id"])
+        bul = set(H.get(title, set()))
         if len(bul) > 1:
             kaydet(); raise SystemExit(f"DUR: ayni baslikli {len(bul)} ilan {sorted(bul)}")
         return next(iter(bul), None)
@@ -431,7 +460,7 @@ def yaz(api, shop, out, pair):
     lid = D["ciftler"].get(pair)
     if lid == "BELIRSIZ":                      # onceki kosuda createDraftListing yaniti belirsiz kaldi: 3 kez ara, bulunamazsa DUR
         for i in range(3):
-            lid = ayni_baslik()
+            lid = ayni_baslik(taze=True)
             if lid:
                 break
             time.sleep(30)
@@ -455,20 +484,24 @@ def yaz(api, shop, out, pair):
                 "return_policy_id": A["return_policy_id"], "readiness_state_id": A["readiness_state_id"], "shop_section_id": A["shop_section_id"],
                 "tags": ",".join(tags), "materials": ",".join(MALZEME), "should_auto_renew": "true",
                 "production_partner_ids": str(A["production_partner_id"])}
+        api.taslak_kapi(shop, body)            # kapilar once (istek yok); gecemezse BELIRSIZ yazilmaz
+        D["ciftler"][pair] = "BELIRSIZ"; kaydet()   # POST'tan ONCE: iptal / zaman asimi / kopma -> yeniden kosu once arar, yeni ilan acmaz
         kod, js, metin = api.taslak_olustur(shop, body)
         if kod in (200, 201) and (js or {}).get("listing_id"):
             lid = js["listing_id"]
             R["olusturma"] = "yeni taslak (tek POST)"
         else:
-            if kod == "BELIRSIZ" or (isinstance(kod, int) and (kod >= 500 or kod in (200, 201))):
-                D["ciftler"][pair] = "BELIRSIZ"   # ilan acilmis olabilir: yeniden kosu once arar, yeni ilan acmaz
+            if isinstance(kod, int) and 400 <= kod < 500:
+                D["ciftler"].pop(pair, None)    # Etsy reddetti: ilan acilmadi (kesin)
             kaydet()
             raise SystemExit(f"DUR: createDraftListing {kod}: {metin}")
     api.lid = lid
     D["ciftler"][pair] = lid; kaydet()
+    if getattr(api, "_harita", None) is not None:
+        api._harita.setdefault(title, set()).add(lid)
     api.kota()
     print(f"::warning::{pair} listing_id {lid}")
-    state_oku("1 olusturma")
+    state_oku("1 olusturma", acil=R["olusturma"].startswith("yeni"))
 
     # envanter: Style x 5, fiyat ayni
     inv = api.get(f"/listings/{lid}/inventory") or {}
@@ -502,10 +535,10 @@ def yaz(api, shop, out, pair):
         if not vids:
             kaydet(); raise SystemExit(f"DUR: {pair} video onceki kosuda yuklendi ama gorunmuyor (ikinci video yuklenmedi)")
     if not vids:
+        D.setdefault("video", {})[pair] = lid; kaydet()   # yuklemeden ONCE: 5xx / kopma sonrasi yeniden kosuda ikinci video yok
         with open(video, "rb") as fh:
             api.post_file(f"/shops/{shop}/listings/{lid}/videos", files={"video": ("video.mp4", fh, "video/mp4")},
                           data={"name": f"AstroLoveArt_{pair}_ornament_video.mp4"})
-        D.setdefault("video", {})[pair] = lid; kaydet()
     state_oku("4 video")
 
     # stil -> gorsel
@@ -725,7 +758,11 @@ def yaz_dongu(api, shop, out, ciftler, parti_max=PARTI_MAX, sure_dk=SURE_DK, on_
             print(f"::warning::{c} ATLANDI: tamam ({D.get('ciftler', {}).get(c)})")
             continue
         if yeni >= parti_max or (time.time() - t_kilit) / 60 >= sure_dk:
-            print(f"::warning::PARTI SINIRI: {yeni} cift / {(time.time() - t_kilit) / 60:.0f} dk; {c} ve sonrasi yeniden kosuda (DURUM tamamlari atlar)")
+            kalan = [x for x in ciftler[i - 1:] if x not in D.get("tamam", [])]
+            msg = f"PARTI SINIRI: {yeni} cift / {(time.time() - t_kilit) / 60:.0f} dk; KALAN {len(kalan)} cift yeniden kosuda (DURUM tamamlari atlar)"
+            print(f"::warning::{msg}")
+            if os.environ.get("GITHUB_STEP_SUMMARY"):
+                open(os.environ["GITHUB_STEP_SUMMARY"], "a").write(msg + "\n")
             break
         yeni += 1
         try:
@@ -745,7 +782,8 @@ def yaz_dongu(api, shop, out, ciftler, parti_max=PARTI_MAX, sure_dk=SURE_DK, on_
                 raise
         D = json.load(open(out / "DURUM.json")) if (out / "DURUM.json").exists() else D
         g = time.time() - t0
-        print(f"ETA cift [{i}/{len(ciftler)}] {c} | gecen {g / 60:.1f} dk | kalan ~{g / i * (len(ciftler) - i) / 60:.1f} dk | %{100 * i // len(ciftler)} | kota {api.remaining}", flush=True)
+        hedef = min(parti_max, len([x for x in ciftler if x not in D.get("tamam", [])]) + yeni)
+        print(f"ETA parti [{yeni}/{hedef}] {c} | gecen {g / 60:.1f} dk | kalan ~{g / max(yeni, 1) * max(hedef - yeni, 0) / 60:.1f} dk | %{100 * yeni // max(hedef, 1)} | kota {api.remaining}", flush=True)
 
 
 def liste_yaz(out):

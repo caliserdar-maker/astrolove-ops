@@ -87,8 +87,8 @@ def kos(sinif, ciftler, durum=None, eksik=(), **kw):
     hata = None
     try:
         T.yaz_dongu(api, SHOP, out, ciftler, **kw)
-    except SystemExit as e:
-        hata = e
+    except BaseException as e:  # noqa: BLE001 (TypeError vb. de o testin FAIL'i olur, paket dusmez)
+        hata = e if isinstance(e, SystemExit) else SystemExit(f"BEKLENMEYEN {type(e).__name__}: {e}")
     D = json.load(open(out / "DURUM.json")) if (out / "DURUM.json").exists() else {}
     return api, hata, D, out
 
@@ -213,6 +213,56 @@ def testler():
     finally:
         T.requests.post = gercek
     s.append(("Baglanti hatasi -> BELIRSIZ (tek gonderim)", kod == "BELIRSIZ" and js is None))
+    # 16 sure siniri (KILIT_T0'dan 61 dk sonra yeni cift yok)
+    os.environ["KILIT_T0"] = str(T.time.time() - 61 * 60)
+    try:
+        api, h, D, _ = kos(Sahte, ["ARIES_ARIES"])
+    finally:
+        os.environ.pop("KILIT_T0", None)
+    s.append(("Sure siniri: 61 dk sonra yeni cift acilmadi", h is None and api.olusturma == 0 and not D.get("tamam")))
+
+    # 17 ayni baslikli 2 ilan -> DUR, PATCH yok
+    class Iki(Sahte):
+        shop_listeler = [dict(listing_id=1, state="draft", title=baslik("ARIES_ARIES")),
+                         dict(listing_id=2, state="inactive", title=baslik("ARIES_ARIES"))]
+    api, h, D, _ = kos(Iki, ["ARIES_ARIES"])
+    s.append(("FAIL: ayni baslikli 2 ilan -> DUR", h is not None and "ayni baslikli 2" in str(h.code) and api.olusturma == 0 and api.patchler == []))
+
+    # 18 yeni cift icin active ilan bulunur -> dokunmadan DUR
+    class ActBul(Sahte):
+        shop_listeler = [dict(listing_id=5, state="active", title=baslik("ARIES_ARIES"))]
+        var_olan = dict(listing_id=5, state="active", title=baslik("ARIES_ARIES"), taxonomy_id=T.ayar()["taxonomy_id"])
+    api, h, D, _ = kos(ActBul, ["ARIES_ARIES"])
+    s.append(("FAIL: yayindaki ayni baslik -> DUR, PATCH yok, ilan acilmadi", h is not None and "draft degil" in str(h.code)
+              and api.patchler == [] and api.olusturma == 0))
+
+    # 19 POST sirasinda iptal (KeyboardInterrupt) -> DURUM'da BELIRSIZ kalir
+    class Iptal(Sahte):
+        def taslak_olustur(self, shop, body):
+            self.olusturma += 1
+            raise KeyboardInterrupt
+    api, h, D, _ = kos(Iptal, ["ARIES_ARIES"])
+    s.append(("Iptal: POST oncesi BELIRSIZ isareti kalir", D.get("ciftler", {}).get("ARIES_ARIES") == "BELIRSIZ"))
+
+    # 20 video yuklemesi koparsa isaret yine yazili (ikinci video yok)
+    class VidKop(Sahte):
+        def post_file(self, path, files, data=None):
+            if path.endswith("/videos"):
+                raise SystemExit("HATA: POST(file) videos -> 503")
+            return super().post_file(path, files, data)
+    api, h, D, _ = kos(VidKop, ["ARIES_ARIES"])
+    s.append(("Video 503: video isareti yuklemeden once yazili", h is not None and D.get("video", {}).get("ARIES_ARIES") == 9000000001))
+
+    # 21 Kilitli.post_file tekrar=1 (5xx'te yeniden gondermez)
+    yakala = {}
+    gercek_pf = T.Etsy.post_file
+    T.Etsy.post_file = lambda self, path, files, data=None, tekrar=3: yakala.setdefault("tekrar", tekrar) and {}
+    try:
+        k2 = object.__new__(T.Kilitli); k2.lid = 42; k2.remaining = None
+        k2.post_file(f"/shops/{SHOP}/listings/42/images", files={}, data={})
+    finally:
+        T.Etsy.post_file = gercek_pf
+    s.append(("Kilitli.post_file tekrar=1", yakala.get("tekrar") == 1))
     return s
 
 
