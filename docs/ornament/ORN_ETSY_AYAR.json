@@ -1,0 +1,21 @@
+{
+ "aciklama": "Ornament Etsy taslak ayarlari (scripts/etsy/ornament_taslak.py). Kaynak: oku 42283678997, kur 42284700628 (6 Kas gece, Serdar kararlari KARARLAR_20261106_2).",
+ "taxonomy_id": 1857,
+ "taxonomy_yol": "Home & Living > Home Decor > Seasonal Decor > Ornaments",
+ "readiness_state_id": 1530862376601,
+ "hazirlik": "made_to_order 3-5 days (kur 42284700628)",
+ "shipping_profile_id": 319194887351,
+ "kargo": "Ornament Free Worldwide, cikis LV, ucretsiz, US CA GB AU EU diger 5-20 gun (Printful resmi uluslararasi 5-20 is gunu)",
+ "shop_section_id": 61319672,
+ "bolum": "Zodiac Couple Ornaments",
+ "return_policy_id": 1513990287785,
+ "iade": "iade yok, degisim yok (kupa ile ayni)",
+ "production_partner_id": 5817638,
+ "ortak": "Printing and Fulfillment Partner, United States (mevcut tek kayit)",
+ "nitelik": [
+  {"property_id": 148789511893, "ad": "Material", "value_ids": [83], "values": ["Ceramic"]},
+  {"property_id": 570246213613, "ad": "Indoor/Outdoor", "value_ids": [5129], "values": ["Indoor"]},
+  {"property_id": 406291158417, "ad": "Season", "value_ids": [3454], "values": ["All seasons"]}
+ ],
+ "nitelik_bos": ["Primary/Secondary color (stile gore degisir)", "Holiday (yil boyu urun, ANA_1 1.8)", "Width/Height/Depth (olcek alani, sonra)", "Material features (Upcycled degil)"]
+}

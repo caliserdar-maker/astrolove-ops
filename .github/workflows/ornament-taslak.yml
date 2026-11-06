@@ -27,14 +27,9 @@ jobs:
         run: |
           [[ "$M" =~ ^(oku|kur|kuru|yaz)$ ]] || { echo "::error::mod"; exit 1; }
           [[ "$C" =~ ^[A-Z_,\ ]+$ ]] || { echo "::error::ciftler"; exit 1; }
-          [[ "$G" =~ ^[A-Za-z0-9_]*$ ]] || { echo "::error::galeri"; exit 1; }
+          [[ -z "$G" || "$G" =~ ^ORNAMENT_GALERI78_[A-Za-z0-9_]+$ ]] || { echo "::error::galeri (ORNAMENT_GALERI78_...)"; exit 1; }
           if [[ "$M" =~ ^(kuru|yaz)$ && -z "$G" ]]; then echo "::error::galeri gerekli"; exit 1; fi
       - uses: actions/checkout@v4
-      - name: Etsy kilidi (sira bekle, iptal yok)
-        if: ${{ inputs.mod != 'kuru' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/etsy/kilit_bekle.py
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - name: Kurulum
@@ -52,14 +47,7 @@ jobs:
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "::add-mask::$GOOGLE_CLIENT_SECRET"; echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - name: Token + DURUM
-        run: |
-          set -euo pipefail
-          umask 077; mkdir -p _work _out _img
-          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
-          if [ "${{ inputs.mod }}" != "kuru" ]; then rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json; fi
-          rclone copyto "$O/DURUM.json" _out/DURUM.json 2>/dev/null || echo "DURUM.json yok (ilk kosu)"
-      - name: Galeri + video (kuru, yaz)
+      - name: Galeri + video (kuru, yaz; KILITSIZ, CLAUDE.md KILIT SURESI)
         if: ${{ inputs.mod == 'kuru' || inputs.mod == 'yaz' }}
         env:
           C: ${{ inputs.ciftler }}
@@ -68,11 +56,35 @@ jobs:
           set -euo pipefail
           L=$(cd scripts/etsy && python3 -c 'import os, ornament_taslak as k; print(" ".join(k.cift_listesi(os.environ["C"])))')
           echo "CIFT_LISTE=$L" >> "$GITHUB_ENV"; n=0; t0=$(date +%s); top=$(echo $L | wc -w)
+          mkdir -p _img _olcum
           for c in $L; do
             rclone copy "gdrive:ASTROLOVE/TEMP/$G/$c" "_img/$c" --include "*_[01][0-9]_*.jpg" --include "*_VIDEO.mp4" --transfers 8 -q
+            rclone copyto "gdrive:ASTROLOVE/TEMP/$G/$c/${c}_OLCUM.json" "_olcum/${c}_OLCUM.json" -q
             n=$((n+1)); g=$(( $(date +%s)-t0 )); echo "indir [$n/$top] $c $(ls _img/$c | wc -l) dosya | gecen $g sn | kalan ~$(( g*(top-n)/n )) sn | %$((100*n/top))"
             [ "$(ls _img/$c | wc -l)" = 12 ] || { echo "::error::$c medya $(ls _img/$c | wc -l) (12 olmali)"; exit 1; }
+            python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d.get("sonuc")=="PASS" and (d.get("dosya") or {}).get("ok") is True else 1)' "_olcum/${c}_OLCUM.json" \
+              || { echo "::error::$c galeri OLCUM sonuc PASS degil"; exit 1; }
           done
+      - name: Etsy kilidi (sira bekle, iptal yok; token indirmeden ONCE)
+        if: ${{ inputs.mod != 'kuru' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/etsy/kilit_bekle.py
+          echo "KILIT_T0=$(date +%s)" >> "$GITHUB_ENV"
+      - name: Token + DURUM
+        env: { M: "${{ inputs.mod }}" }
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+          if [ "$M" != "kuru" ]; then rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json; fi
+          if [ "$M" = "yaz" ]; then
+            V=$(rclone lsf "$O" --include DURUM.json) || { echo "::error::Drive $O okunamadi (DURUM varligi bilinmiyor)"; exit 1; }
+            if [ "$V" = "DURUM.json" ]; then rclone copyto "$O/DURUM.json" _out/DURUM.json || { echo "::error::DURUM.json var ama inmedi"; exit 1; }
+              python3 -c 'import json; json.load(open("_out/DURUM.json"))' || { echo "::error::DURUM.json bozuk"; exit 1; }
+            else echo "DURUM.json yok (ilk yaz kosusu)"; fi
+          fi
       - name: Kos
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
@@ -82,18 +94,27 @@ jobs:
           OUT: _out
           IMG_ROOT: _img
           C: ${{ inputs.ciftler }}
-        run: python3 scripts/etsy/ornament_taslak.py --mod "${{ inputs.mod }}" --ciftler "$C"
-      - name: Token geri yaz + cikti Drive'a
+          M: ${{ inputs.mod }}
+        run: python3 scripts/etsy/ornament_taslak.py --mod "$M" --ciftler "$C"
+      - name: Token geri yaz + DURUM + cikti Drive'a
         if: ${{ always() }}
+        env: { M: "${{ inputs.mod }}" }
         run: |
-          TOKEN_RC=0; OUT_RC=0
+          set +e
+          TOKEN_RC=0; OUT_RC=0; DURUM_RC=0
           if [ -f _work/ETSY_TOKEN.json ]; then bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1; fi
-          if ls _out/* >/dev/null 2>&1; then
-            if [ -f _work/ETSY_TOKEN.json ]; then python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }; fi
-            rclone copy _out "$O/${{ inputs.mod }}_${DAMGA:?}" -q || OUT_RC=1
-            if [ "${{ inputs.mod }}" = "yaz" ] && [ -f _out/DURUM.json ]; then rclone copyto _out/DURUM.json "$O/DURUM.json" -q || OUT_RC=1; fi
-            echo "Cikti: TEMP/ORNAMENT_TASLAK/${{ inputs.mod }}_$DAMGA" | tee -a "$GITHUB_STEP_SUMMARY"
+          # DURUM (yalniz listing id'ler) sir taramasindan BAGIMSIZ ve once: kosu ne olursa olsun kalici
+          if [ "$M" = "yaz" ] && [ -f _out/DURUM.json ]; then
+            python3 -c 'import json,re,sys; d=json.load(open("_out/DURUM.json")); t=json.dumps(d); sys.exit(0 if set(d)<={"ciftler","tamam","video"} and not re.search(r"(token|secret|Bearer)",t,re.I) else 1)' \
+              && rclone copyto _out/DURUM.json "$O/DURUM.json" -q || DURUM_RC=1
           fi
-          [ "$TOKEN_RC" = 0 ] && [ "$OUT_RC" = 0 ] || exit 1
+          if ls _out/* >/dev/null 2>&1; then
+            SIR_OK=1
+            if [ -f _work/ETSY_TOKEN.json ]; then python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; SIR_OK=0; OUT_RC=1; }; fi
+            if [ "$SIR_OK" = 1 ]; then rclone copy _out "$O/${M}_${DAMGA:?}" -q || OUT_RC=1
+              echo "Cikti: TEMP/ORNAMENT_TASLAK/${M}_$DAMGA" | tee -a "$GITHUB_STEP_SUMMARY"; fi
+          fi
+          [ "$DURUM_RC" = 0 ] || echo "::error::DURUM.json Drive'a yazilamadi"
+          [ "$TOKEN_RC" = 0 ] && [ "$OUT_RC" = 0 ] && [ "$DURUM_RC" = 0 ] || exit 1
       - if: always()
-        run: rm -rf _work _out _img ~/.config/rclone
+        run: rm -rf _work _out _img _olcum ~/.config/rclone
