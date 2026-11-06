@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Ornament siparis hatti TEST degerlendirmesi (plan 2.6; yalniz sahte girdiler, docs/ornament/siparis_test/Txx.json; kisi verisi yok).
 - Beklenen durum (fixture _test.beklenen) ile gelen durum (ornament_siparis cikis kodu). OLCUM: COKUS disinda her sonuc kabul, sonuc rapora.
-- Regresyon (_test.regresyon): uretilen 5 stil, onayli toplama dosyalariyla PIKSEL esit mi (mod + piksel dizisi; dosya sha bilgi).
+- Regresyon (_test.regresyon): uretilen 5 stil, onayli toplama dosyalariyla uretim kontrol toleransinda mi (<= 1 seviye, <= 10 piksel; Serdar 6 Kas 3a).
   Onayli dosyanin sha256'si dal SHA256SUMS ile ayni olmali (yanlis dosya kiyaslanmasin).
 - Esitlik (_test.esit = Tnn): secilen stil baski dosyasinin piksel sha'si diger testinkiyle ayni (ornek: kucuk harf giris = T01).
 Kullanim: siparis_test_ozet.py --sonuc SONUC.tsv --fixture DIR --onayli DIR --sums SHA256SUMS.txt --json CIKTI.json
@@ -14,6 +14,7 @@ from pathlib import Path
 
 DURUM = {0: 'PASS', 3: 'DUR_GIRDI', 4: 'DUR_SERDAR', 6: 'MOTOR_KAPI_FAIL', 2: 'COKUS'}
 STIL = ('RUBY', 'SAPPHIRE', 'EMERALD', 'SADE_ALTIN', 'FILDISI')
+TOL_SEVIYE, TOL_PIKSEL = 1, 10                                                # ornek78.py:30 kontrol cifti toleransi ile ayni (Serdar 6 Kas "3a")
 
 
 def piksel(yol):
@@ -37,7 +38,7 @@ def regresyon(is_dir, cift, onayli, sums):
         ayni_boy = au.shape == ao.shape and mu == mo
         fark = int(np.abs(au.astype(int) - ao.astype(int)).max()) if ayni_boy else None
         n = int((au != ao).reshape(au.shape[0], au.shape[1], -1).any(-1).sum()) if ayni_boy else None
-        e = bool(ayni_boy and pu == po and sums.get(f) == o_sha)
+        e = bool(ayni_boy and fark <= TOL_SEVIYE and n <= TOL_PIKSEL and sums.get(f) == o_sha)   # Serdar 6 Kas "3a": uretim kontrol toleransi (ornek78.py TOL)
         r[s] = dict(piksel_esit=pu == po, en_buyuk_fark=fark, farkli_piksel=n, onayli_sha_sums_ile_ayni=sums.get(f) == o_sha, gecti=e)
         ok &= e
     return ok, r

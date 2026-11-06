@@ -9,7 +9,7 @@ name: ornament-siparis
 # yalniz /tmp/ozel. Alt surec ciktilari dosyaya; kamuya acik ozet gizlilik_tara.py PASS olmadan basilmaz. Artifact YOK.
 # Uretim zinciri onayli 78 uretimiyle AYNI (ornek78.py: motor + dump + sade + fildisi; pinler ve girdiler ornament-78-uretim.yml ile ayni).
 # Varsayimlar: ORN_BEKLENEN_RAQM=1 (RAQM; test kosusu 42168338555 T19 ciktisi onayli CL RUBY ile bayt bayt ayni, Serdar onayi 6 Kas; gece N4 BASIC varsayimi yanlisti),
-#   istisna ciftleri DUR (K7), 32 +-1 aynen (K8), K3 / K9 DUR_SERDAR (KARARLAR_20261106 N4).
+#   istisna ciftleri DUR (K7), K8 1c (isim-tarih 25-45, diger bosluklar 32 +-1; Serdar 6 Kas), murekkep r 330-336 DUR_SERDAR, K3 / K9 DUR_SERDAR (KARARLAR_20261106).
 on:
   push:
     branches: [ornament-printful-katalog]

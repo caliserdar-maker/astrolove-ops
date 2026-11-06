@@ -1,0 +1,12 @@
+{
+ "cift": "CANCER_LIBRA",
+ "stil": "RUBY",
+ "isim1": "QUINN",
+ "isim2": "LIAM",
+ "tarih": "JUNE 14, 2025",
+ "_test": {
+  "kod": "T23",
+  "beklenen": "OLCUM",
+  "not_": "Q kuyrugu: isim alti J inisinden asagi olabilir (isim_alt_le_733 -> DUR_SERDAR isim_alt_inis beklenir; olcum)"
+ }
+}

@@ -27,7 +27,9 @@ _d = Path(__file__).resolve().parent
 PY = sys.executable
 STIL_DOSYA_AD = {'RUBY': 'Ruby', 'SAPPHIRE': 'Sapphire', 'EMERALD': 'Emerald', 'SADE_ALTIN': 'Sade_Altin', 'FILDISI': 'Fildisi'}
 ISIM_KAPILARI = ('koyu_yd_murekkep_r_le_336',)                               # musterinin isim / tarih uzunluguna bagli sert kapi (plan 2.1b)
-K8_KAPILARI = ('koyu_yd_bosluk_32_32', 'sade1_yerlesim_ayni')                 # 32 +-1 esitligi (N4): J / Q'suz isimde FAIL; musteri kusuru degil, Merkez de duzeltemez -> Serdar (K8)
+INIS_KAPILARI = ('koyu_yd_isim_alt_le_733',)                                # K8 1c: isim murekkebi J inisinden asagi (Q kuyrugu ~735): musteri kusuru degil -> Serdar gorseli
+GORSELLI_DUR = ('halka_yakin_330', 'isim_alt_inis')                         # bu DUR_SERDAR'larda baski / onizleme / KONTROL_1e1 TASLAK uretilir (Serdar gorselle karar verir)
+HALKA_YAKIN = 330                                                             # Serdar 6 Kas "2 evet": murekkep r 330-336 PASS degil DUR_SERDAR (gorsel); 330 tahmin, olculmedi
 KONTROL_SATIR = (584, 806)                                                    # KONTROL_1e1: kucuk isaret ustu (SABIT 594) - 10 ile tarih alti (795) + 11
 
 
@@ -49,18 +51,6 @@ class Ozet:
     def __call__(self, *a):
         with self.yol.open('a') as f:
             f.write(f'[{time.time() - self.t0:7.1f}s] ' + ' '.join(str(x) for x in a) + '\n')
-
-
-def k8_deseni(bt, bk, bp=None):
-    """K8 (32 +-1 esitligi, N4) yalniz isim / tarih harf inisinden dogan desende: kucuk-isim boslugu 32 +-1 (isim ustu harf boyundan sabit),
-    isim-tarih boslugu 25-45 arasi ama 32 +-1 disinda (J'siz isim buyutur ~39, Q'lu isim kucultur ~29; inceleme yerel olcumu).
-    bp (SADE / RUBY bosluk_px [sembol-kucuk, kucuk-isim, isim-tarih]) verilirse sembol-kucuk >= 31 de sart. Desen disi = motor / yerlesim kusuru."""
-    if bt is None or bk is None:
-        return False
-    ok = abs(bk - 32) <= 1 and 25 <= bt <= 45 and abs(bt - 32) > 1
-    if bp is not None:
-        ok = ok and len(bp) == 3 and bp[0] >= 31 and abs(bp[1] - 32) <= 1 and 25 <= bp[2] <= 45 and abs(bp[2] - 32) > 1
-    return ok
 
 
 KONTROL_ESKI = 'CANCER_LIBRA_KONTROL_ESKI'                               # uretim78.KONTROL_ESKI ile ayni (yeni duzen kosusunda eski mod CL kontrol kaydi)
@@ -90,23 +80,21 @@ def siniflama(R, cift, mo=None):
     ks = ((R.get('cift') or {}).get(KONTROL_ESKI) or {}).get('kapi', {}).get('sert')
     if not ks or not all(ks.values()):                                       # kontrol kaydinin sert kapilari da sart (3. inceleme bulgu 3; sikilastirma)
         return 'MOTOR_KAPI_FAIL', 'ortam_kontrol_CL_sert', fail
+    yo = ((mo or {}).get('yeni_duzen') or {}).get('olcum') or {}
     if not fail:
+        rr = yo.get('siparis_murekkep_r')
+        if not rr:
+            return 'MOTOR_KAPI_FAIL', 'murekkep_r_olcum_yok', []
+        if max(rr.values()) > HALKA_YAKIN:                                    # halkaya yakin (Serdar 6 Kas "2 evet"): kimse bakmadan gecmez
+            return 'DUR_SERDAR', 'halka_yakin_330', []
         return 'PASS', None, []
     fs = set(fail)
     if fs <= set(ISIM_KAPILARI):                                               # yalniz isim kapisi: musteriye soru (T1)
         return 'DUR_GIRDI', 'isim_sigmadi_murekkep_r', fail
-    if fs <= set(ISIM_KAPILARI) | set(K8_KAPILARI):                           # K8 (varsa isimle birlikte): once Serdar karari, YALNIZ olculen desen tutarsa
-        yo = ((mo or {}).get('yeni_duzen') or {}).get('olcum') or {}
-        bp = (r.get('yerlesim') or {}).get('bosluk_px')
-        bt, bk = yo.get('bosluk_tarih_isim'), yo.get('bosluk_isim_kucuk')
-        des = True
-        if 'koyu_yd_bosluk_32_32' in fs:
-            des = des and k8_deseni(bt, bk)
-        if 'sade1_yerlesim_ayni' in fs:
-            des = des and bp is not None and k8_deseni(bt, bk, bp)            # bp yoksa desen dogrulanamaz: K8 degil (3. inceleme bulgu 4)
-        if des:
-            return 'DUR_SERDAR', 'K8_yerlesim_esitlik', fail
-        return 'MOTOR_KAPI_FAIL', 'yerlesim_bosluk_desen_disi', fail
+    if fs <= set(INIS_KAPILARI):                                               # yalniz isim alti (Q kuyrugu; kucuk-isim ve isim-tarih kapilari gecmis): Serdar gorseli
+        return 'DUR_SERDAR', 'isim_alt_inis', fail
+    if fs <= set(ISIM_KAPILARI) | set(INIS_KAPILARI):                          # uzun isim + Q kuyrugu: once musteriye kisaltma sorusu (yeni isimde Q kalirsa sonra Serdar)
+        return 'DUR_GIRDI', 'isim_sigmadi_murekkep_r_ve_inis', fail
     return 'MOTOR_KAPI_FAIL', 'sert_kapi_fail', fail
 
 
@@ -160,7 +148,7 @@ def main():
     sg = yukle('siparis_girdi', 'siparis_girdi.py')
     RAPOR = dict(hat='ornament_siparis (plan v2)', zaman=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
                  pinler={k: os.environ.get(k) for k in ('MOTOR_COMMIT', 'TEK_DOKU_COMMIT', 'ACIK_COMMIT', 'ONAY_COMMIT', 'GITHUB_SHA')},
-                 beklenen_raqm=bek, gece_varsayimlari='K1 RAQM (onayli dosyalarla ayni, Serdar 6 Kas), K7 istisna ciftleri DUR, K8 32 +-1 aynen, K3 / K9 DUR_SERDAR (KARARLAR_20261106)')
+                 beklenen_raqm=bek, gece_varsayimlari='K1 RAQM (onayli dosyalarla ayni, Serdar 6 Kas), K7 istisna ciftleri DUR, K8 1c (isim-tarih 25-45), r 330-336 DUR_SERDAR, K3 / K9 DUR_SERDAR (KARARLAR_20261106)')
     # 1. girdi
     try:
         ham = json.loads(Path(a.girdi).read_text(encoding='utf-8'))
@@ -201,7 +189,8 @@ def main():
     mo_c = W / 'png' / '_is' / cift / 'motor' / 'OLCUM.json'
     mo = json.loads(mo_c.read_text()) if mo_c.exists() else {}
     durum, neden, fail = siniflama(R, cift, mo)
-    if durum == 'PASS' and gbk != 0:                                           # sert (siparis kipinde sikilastirma): gercek boy dosyasi yoksa ya da FAIL ise PASS yok
+    gorselli = durum == 'DUR_SERDAR' and neden in GORSELLI_DUR                 # Serdar'a gorselle giden DUR (halka yakin, Q kuyrugu): ciktilar TASLAK uretilir
+    if (durum == 'PASS' or gorselli) and gbk != 0:                             # sert (siparis kipinde sikilastirma): gercek boy dosyasi yoksa ya da FAIL ise PASS / gorselli DUR yok
         durum, neden, fail = 'MOTOR_KAPI_FAIL', 'gercek_boy_kontrol', ['gercek_boy_kontrol']
     RAPOR['gercek_boy_kontrol_cikis'] = gbk
     rc = (R.get('cift') or {}).get(cift) or {}
@@ -211,7 +200,7 @@ def main():
                  yerlesim_cakisma=(mo.get('cakisma') or [])[:8], yerlesim_yasak=mo.get('yasak'))
     RAPOR['kontrol_pass'] = R.get('kontrol_pass'); RAPOR['kontrol'] = R.get('kontrol')
     oz('SINIF', durum, neden or '', 'fail', ','.join(fail), 'kontrol_CL', R.get('kontrol_pass'))
-    if durum != 'PASS':
+    if durum != 'PASS' and not (durum == 'DUR_SERDAR' and neden in GORSELLI_DUR):
         (O / 'DUR.json').write_text(json.dumps(dict(durum=durum, neden=neden, fail=fail), indent=1))
         (O / 'RAPOR.json').write_text(json.dumps(RAPOR, indent=1, ensure_ascii=False, default=str))
         return {'DUR_GIRDI': 3, 'DUR_SERDAR': 4, 'MOTOR_KAPI_FAIL': 6}.get(durum, 2)
@@ -219,20 +208,26 @@ def main():
     o4 = yukle('o4', 'ornament_ornek4.py')
     ornek78 = yukle('ornek78_mod', 'ornek78.py')
     b1, b2 = (b.capitalize() for b in cift.split('_'))
-    taban = f'AstroLoveArt_{b1}_{b2}_{STIL_DOSYA_AD[stil]}_Ornament'
+    taban = f'AstroLoveArt_{b1}_{b2}_{STIL_DOSYA_AD[stil]}_Ornament' + ('' if durum == 'PASS' else '_SERDAR_ONAYI_BEKLER')
     kaynak_png = o_png / f'{cift}_{stil}_954.png'
     baski = O / f'{taban}.png'
     shutil.copyfile(kaynak_png, baski)
     onizleme_yap(baski, stil, O / f'{taban}_Preview_TASLAK.jpg', o4, ornek78)
-    kontrol_yap(baski, O / 'KONTROL_1e1.png')
+    ek = '' if durum == 'PASS' else '_SERDAR_ONAYI_BEKLER'
+    kontrol_yap(baski, O / f'KONTROL_1e1{ek}.png')
     for gb in rp.glob('GERCEK_BOY_*_300dpi.png'):
-        shutil.copyfile(gb, O / 'GERCEK_BOY_5STIL_300dpi.png')
+        shutil.copyfile(gb, O / f'GERCEK_BOY_5STIL_300dpi{ek}.png')
     u78 = yukle('u78', 'uretim78.py')
     RAPOR['cikti'] = dict(baski=baski.name, baski_sha256=sha(baski), baski_piksel_sha=u78.piksel_sha(baski),
                           printful=(rc.get('printful_dosya') or {}).get(stil), onizleme=f'{taban}_Preview_TASLAK.jpg',
                           dosya_adi_not='stil adi ic kod (Sade_Altin, Fildisi); ilandaki Ingilizce stil adiyla eslenmesi dogrulanmadi',
                           onizleme_not='K4 karari bekliyor: tek karo, 76 mm kesim + delik (o4.onizleme); urun gorunumu degil, gercek oranda ornek Serdar onayindan once kullanilmaz',
                           diger_stiller_piksel_sha={s: u78.piksel_sha(o_png / f'{cift}_{s}_954.png') for s in STIL_DOSYA_AD if (o_png / f'{cift}_{s}_954.png').exists()})
+    if durum != 'PASS':                                                        # gorselli DUR_SERDAR: ELLE_SIPARIS YOK; Serdar onayindan sonra Merkez ayrica isler
+        (O / 'DUR.json').write_text(json.dumps(dict(durum=durum, neden=neden, fail=fail, gorsel_var=True), indent=1))   # dosya adi yok: burc / stil adi gizlilik taramasinda yanlis alarm (5. inceleme)
+        (O / 'RAPOR.json').write_text(json.dumps(RAPOR, indent=1, ensure_ascii=False, default=str))
+        oz('DUR_SERDAR gorsel yazildi')
+        return 4
     (O / 'ELLE_SIPARIS.txt').write_text(ELLE.format(dosya=baski.name))
     (O / 'RAPOR.json').write_text(json.dumps(RAPOR, indent=1, ensure_ascii=False, default=str))
     oz('PASS cikti yazildi')

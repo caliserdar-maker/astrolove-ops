@@ -6,7 +6,7 @@
  "tarih": "JUNE 14, 2025",
  "_test": {
   "kod": "T05",
-  "beklenen": "OLCUM",
-  "not_": "asimetrik isim; gorsel Serdar onayina"
+  "beklenen": "DUR_SERDAR",
+  "not_": "asimetrik isim; isim murekkep r 335,7 (2. test kosusu 42172468474) > 330 -> halka_yakin_330 (Serdar 6 Kas \"2 evet\")"
  }
 }

@@ -6,7 +6,7 @@
  "tarih": "JUNE 14, 2025",
  "_test": {
   "kod": "T09",
-  "beklenen": "DUR_SERDAR",
-  "not_": "J/Q yok: yd_bosluk_32_32 39 px (inceleme yerel olcumu) -> K8 (N4: esitlik aynen)"
+  "beklenen": "PASS",
+  "not_": "J/Q yok: isim-tarih 39 px (2. test kosusu) -> K8 1c ile PASS (Serdar 6 Kas)"
  }
 }

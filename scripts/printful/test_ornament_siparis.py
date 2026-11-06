@@ -18,7 +18,8 @@ def yukle(ad, dosya):
 osp = yukle('osp', 'ornament_siparis.py')
 gt = yukle('gt', 'gizlilik_tara.py')
 C = 'CANCER_LIBRA'
-SERT_OK = {'koyu_kontrast_ortanca': True, 'koyu_yd_murekkep_r_le_336': True, 'koyu_yd_bosluk_32_32': True, 'sade1_yerlesim_ayni': True}
+SERT_OK = {'koyu_kontrast_ortanca': True, 'koyu_yd_murekkep_r_le_336': True, 'koyu_yd_isim_ust_695': True, 'koyu_yd_bosluk_isim_kucuk_32': True,
+           'koyu_yd_isim_alt_le_733': True, 'koyu_yd_bosluk_tarih_isim_25_45': True, 'sade1_yerlesim_ayni': True}
 
 
 KONTROL_OK = {'kapi': {'sert': {'koyu_kontrast_ortanca': True, 'fildisi_cikis_0': True}}}
@@ -31,35 +32,40 @@ def R_(kontrol=True, kontrol_kayit=KONTROL_OK, **r):
     return {'cift': c, 'kontrol_pass': kontrol}
 
 
-def MO(bt, bk):
-    return {'yeni_duzen': {'olcum': {'bosluk_tarih_isim': bt, 'bosluk_isim_kucuk': bk}}}
+def MO(bt=32, bk=32, r=308.9):
+    rr = None if r is None else {'isim1': r, 'isim2': 290.0, 'sonsuz': 221.8, 'kucuk_sol': 232.2, 'kucuk_sag': 243.1, 'tarih': 300.0}
+    return {'yeni_duzen': {'olcum': {'bosluk_tarih_isim': bt, 'bosluk_isim_kucuk': bk, 'siparis_murekkep_r': rr}}}
 
 
 def main():
     hata = 0
+    S = lambda **k: {'sert': dict(SERT_OK, **k)}
     vakalar = [
-        ('pass', R_(kapi={'sert': dict(SERT_OK)}, cikis_kodlari={'motor': 0}), 'PASS'),
+        ('pass_Jli', R_(kapi=S(), cikis_kodlari={'motor': 0}), 'PASS', MO(32, 32)),
+        ('pass_Jsiz_K8_1c', R_(kapi=S(), cikis_kodlari={'motor': 0}), 'PASS', MO(39, 33)),
+        ('pass_r_330_sinir', R_(kapi=S(), cikis_kodlari={'motor': 0}), 'PASS', MO(39, 33, 330.0)),
+        ('halka_yakin_330', R_(kapi=S(), cikis_kodlari={'motor': 0}), 'DUR_SERDAR', MO(39, 33, 335.7)),
+        ('r_olcum_yok', R_(kapi=S(), cikis_kodlari={'motor': 0}), 'MOTOR_KAPI_FAIL', MO(32, 32, None)),
+        ('mo_yok', R_(kapi=S(), cikis_kodlari={'motor': 0}), 'MOTOR_KAPI_FAIL'),
         ('o4_yerlesim', R_(motor_olcum={'hata': 'yeni_duzen_kapi'}, eksik=['RUBY'], cikis_kodlari={'motor': 1}), 'DUR_GIRDI'),
-        ('murekkep_r', R_(kapi={'sert': dict(SERT_OK, koyu_yd_murekkep_r_le_336=False)}, cikis_kodlari={'motor': 1}), 'DUR_GIRDI'),
-        ('bosluk_K8_Jsiz', R_(kapi={'sert': dict(SERT_OK, koyu_yd_bosluk_32_32=False)}, cikis_kodlari={'motor': 1}), 'DUR_SERDAR', MO(39, 32)),
-        ('bosluk_K8_Qlu', R_(kapi={'sert': dict(SERT_OK, koyu_yd_bosluk_32_32=False)}, cikis_kodlari={'motor': 1}), 'DUR_SERDAR', MO(29, 32)),
-        ('bosluk_desen_disi_sikisma', R_(kapi={'sert': dict(SERT_OK, koyu_yd_bosluk_32_32=False)}, cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL', MO(18, 32)),
-        ('bosluk_desen_disi_kucuk', R_(kapi={'sert': dict(SERT_OK, koyu_yd_bosluk_32_32=False)}, cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL', MO(39, 27)),
-        ('bosluk_olcum_yok', R_(kapi={'sert': dict(SERT_OK, koyu_yd_bosluk_32_32=False)}, cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL', {}),
-        ('sade_K8', R_(kapi={'sert': dict(SERT_OK, sade1_yerlesim_ayni=False)}, yerlesim={'bosluk_px': [40, 32, 39]}, cikis_kodlari={'motor': 0}), 'DUR_SERDAR', MO(39, 32)),
-        ('sade_sembol_kucuk_dar', R_(kapi={'sert': dict(SERT_OK, sade1_yerlesim_ayni=False)}, yerlesim={'bosluk_px': [25, 32, 39]}, cikis_kodlari={'motor': 0}), 'MOTOR_KAPI_FAIL', MO(39, 32)),
-        ('isim_ve_K8', R_(kapi={'sert': dict(SERT_OK, koyu_yd_murekkep_r_le_336=False, koyu_yd_bosluk_32_32=False)}, cikis_kodlari={'motor': 1}), 'DUR_SERDAR', MO(39, 32)),
-        ('isim_ve_kontrast', R_(kapi={'sert': dict(SERT_OK, koyu_yd_murekkep_r_le_336=False, koyu_kontrast_ortanca=False)}, cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL'),
+        ('murekkep_r', R_(kapi=S(koyu_yd_murekkep_r_le_336=False), cikis_kodlari={'motor': 1}), 'DUR_GIRDI', MO()),
+        ('Q_inis', R_(kapi=S(koyu_yd_isim_alt_le_733=False), cikis_kodlari={'motor': 1}), 'DUR_SERDAR', MO(29, 32)),
+        ('Q_inis_ve_tarih_bosluk', R_(kapi=S(koyu_yd_isim_alt_le_733=False, koyu_yd_bosluk_tarih_isim_25_45=False), cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL', MO(20, 32)),
+        ('isim_ust_kayma', R_(kapi=S(koyu_yd_isim_ust_695=False), cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL', MO()),
+        ('kucuk_isim_bosluk', R_(kapi=S(koyu_yd_bosluk_isim_kucuk_32=False), cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL', MO(32, 36)),
+        ('tarih_isim_45_ustu', R_(kapi=S(koyu_yd_bosluk_tarih_isim_25_45=False), cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL', MO(50, 32)),
+        ('sade_yerlesim', R_(kapi=S(sade1_yerlesim_ayni=False), cikis_kodlari={'motor': 0}), 'MOTOR_KAPI_FAIL', MO()),
+        ('isim_ve_inis', R_(kapi=S(koyu_yd_murekkep_r_le_336=False, koyu_yd_isim_alt_le_733=False), cikis_kodlari={'motor': 1}), 'DUR_GIRDI', MO(29, 32)),
+        ('isim_ve_kontrast', R_(kapi=S(koyu_yd_murekkep_r_le_336=False, koyu_kontrast_ortanca=False), cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL'),
         ('kontrol_CL_fail', {'cift': {}, 'kontrol_pass': False}, 'MOTOR_KAPI_FAIL'),
-        ('kontrol_yok', R_(kontrol=None, kapi={'sert': dict(SERT_OK)}, cikis_kodlari={'motor': 0}), 'MOTOR_KAPI_FAIL'),
-        ('kontrast', R_(kapi={'sert': dict(SERT_OK, koyu_kontrast_ortanca=False)}, cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL'),
+        ('kontrol_yok', R_(kontrol=None, kapi=S(), cikis_kodlari={'motor': 0}), 'MOTOR_KAPI_FAIL', MO()),
+        ('kontrast', R_(kapi=S(koyu_kontrast_ortanca=False), cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL'),
         ('cokus', R_(cokus='tb', cikis_kodlari={'cokus': 2}), 'COKUS'),
         ('kayit_yok', {'cift': {}}, 'COKUS'),
         ('sert_yok', R_(cikis_kodlari={'motor': 0}), 'COKUS'),
         ('eksik', R_(eksik=['FILDISI'], cikis_kodlari={'motor': 0, 'fildisi': 9}), 'MOTOR_KAPI_FAIL'),
-        ('kontrol_kayit_sert_fail', R_(kontrol_kayit={'kapi': {'sert': {'koyu_kontrast_ortanca': False}}}, kapi={'sert': dict(SERT_OK)}, cikis_kodlari={'motor': 0}), 'MOTOR_KAPI_FAIL'),
-        ('kontrol_kayit_yok', R_(kontrol_kayit=None, kapi={'sert': dict(SERT_OK)}, cikis_kodlari={'motor': 0}), 'MOTOR_KAPI_FAIL'),
-        ('sade_K8_bp_yok', R_(kapi={'sert': dict(SERT_OK, sade1_yerlesim_ayni=False)}, cikis_kodlari={'motor': 0}), 'MOTOR_KAPI_FAIL', MO(39, 32)),
+        ('kontrol_kayit_sert_fail', R_(kontrol_kayit={'kapi': {'sert': {'koyu_kontrast_ortanca': False}}}, kapi=S(), cikis_kodlari={'motor': 0}), 'MOTOR_KAPI_FAIL', MO()),
+        ('kontrol_kayit_yok', R_(kontrol_kayit=None, kapi=S(), cikis_kodlari={'motor': 0}), 'MOTOR_KAPI_FAIL', MO()),
     ]
     for v in vakalar:
         ad, R, bek = v[:3]
