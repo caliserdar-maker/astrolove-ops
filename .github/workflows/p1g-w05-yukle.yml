@@ -1,0 +1,147 @@
+name: p1g-w05-yukle
+# P1-G AŞAMA 2 (Serdar 6 Kas "Once 1, sonra 77"; YALNIZ pilot 4570143815 CANCER_LIBRA). Etsy'ye YAZAR (kip yaz): galeri rank 5 W05_SUREC
+# (yeni kart yukle, eski W05'i sil) + renk baglarini plandaki AYNI haliyle yeniden yazma. Baska alan YOK; updateListing / PATCH YOK.
+# GALERI istisnasi (Serdar 5 Kas yontem b): yalniz W05_SUREC, yalniz P1-G. Kod scripts/kapak78/w05_degistir.py (etsy alt komutu).
+# Kart + MANIFEST: TEMP/P1G_W05_20261106_090016 (p1g-w05-uret 42194064189). Canli okuma: TEMP/POSTER_GALERI_V11_YEDEK/20261106_090016.
+#   kuru: plan YALNIZ bu ilan icin kurulur (plan_damga = <bu kosu>_<sha12>), sonra Etsy SALT OKUMA (3 GET) + kart sha256 = plan.
+#   yaz : plan yeniden KURULMAZ; PLAN_W05.json + RAPOR.json, plan_damga'nin "_" oncesindeki kuru kosusunun PILOT/kuru_<kosu>/ klasorunden
+#         okunur (kuru RAPOR: mod kuru, ayni damga, HAZIR 1, ayni ilan; degilse token oncesi DUR). Kuru YENIDEN DENENMEZ (yeniden deneme
+#         kaydi kuru_<kosu>_a<N>'e gider, yaz onu okumaz): yeni kuru dispatch.
+# Kilit: kilit_bekle.py checkout'tan hemen sonra, token indirmeden ONCE (iki kipte). Kayit: TEMP/P1G_W05_20261106_090016/PILOT/<kip>_<run>/
+# (PLAN, RAPOR, SONUC, ilanlar/YEDEK|ARA|SONRA|TANI, LOG.txt sir taramasindan gecmis), --immutable. Kalan 77 ilan: AYRI onay + AYRI commit.
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      kip:
+        description: "kuru (Etsy salt okuma) | yaz (Etsy'ye yazar)"
+        type: choice
+        options: [kuru, yaz]
+        default: kuru
+      sadece:
+        description: "ilan (bu asamada yalniz 4570143815)"
+        required: true
+        default: ""
+      onay:
+        description: "W05-KURU-<sadece> ya da W05-YAZ-<sadece> (kip + ilan birebir)"
+        required: true
+        default: ""
+      plan_damga:
+        description: "yaz kipinde ZORUNLU: kuru kosusunun plan_damga'si (<kuru_kosu>_<sha12>)"
+        required: false
+        default: ""
+env:
+  P1G: "ASTROLOVE/TEMP/P1G_W05_20261106_090016"
+  YEDEK: "ASTROLOVE/TEMP/POSTER_GALERI_V11_YEDEK/20261106_090016"
+jobs:
+  yukle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - name: Onay kapisi
+        env:
+          KIP: ${{ inputs.kip }}
+          SADECE: ${{ inputs.sadece }}
+          ONAY: ${{ inputs.onay }}
+          DAMGA: ${{ inputs.plan_damga }}
+        run: |
+          [ "$SADECE" = "4570143815" ] || { echo "::error::bu asamada yalniz 4570143815 (pilot); 77 ilan ayri onay + ayri commit"; exit 1; }
+          case "$KIP" in kuru) K=KURU ;; yaz) K=YAZ ;; *) echo "::error::kip"; exit 1 ;; esac
+          [ "$ONAY" = "W05-$K-$SADECE" ] || { echo "::error::onay girdisi W05-$K-<sadece> degil"; exit 1; }
+          if [ "$KIP" = yaz ]; then [[ "$DAMGA" =~ ^[0-9]+_[0-9a-f]{12}$ ]] || { echo "::error::yaz kipinde plan_damga <kuru_kosu>_<sha12>"; exit 1; }; fi
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kurulum
+        env:
+          KIP: ${{ inputs.kip }}
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || { sudo apt-get install -y -qq rclone >/dev/null; }
+          E=""; [ "${GITHUB_RUN_ATTEMPT:-1}" = 1 ] || E="_a${GITHUB_RUN_ATTEMPT}"   # yeniden denemede kayit kaybolmasin (--immutable)
+          echo "CIKTI=$P1G/PILOT/${KIP}_${GITHUB_RUN_ID}${E}" >> "$GITHUB_ENV"
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"; echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Token + girdiler (kart, plan)
+        env:
+          KIP: ${{ inputs.kip }}
+          SADECE: ${{ inputs.sadece }}
+          DAMGA: ${{ inputs.plan_damga }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out _kart _plan
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          CIFT=$(python3 -c "import csv,sys; print(next(r['cift'] for r in csv.DictReader(open('data/pod/pod78_ids.csv')) if r['listing_id']==sys.argv[1]))" "$SADECE")
+          [ "$CIFT" = CANCER_LIBRA ] || { echo "::error::ilan / cift eslesmesi beklenmedik"; exit 1; }
+          rclone copyto "gdrive:$P1G/${CIFT}_W05_SUREC.jpg" "_kart/${CIFT}_W05_SUREC.jpg"
+          [ -s "_kart/${CIFT}_W05_SUREC.jpg" ] || { echo "::error::kart yok"; exit 1; }
+          if [ "$KIP" = kuru ]; then
+            mkdir -p "_canli/${SADECE}_${CIFT}"
+            rclone copyto "gdrive:$YEDEK/${SADECE}_${CIFT}/GALERI.json" "_canli/${SADECE}_${CIFT}/GALERI.json"
+            rclone copyto "gdrive:$P1G/MANIFEST_W05.csv" _work/MANIFEST_W05.csv
+            python3 -c "import csv,sys; r=[x for x in csv.DictReader(open('data/pod/pod78_ids.csv')) if x['listing_id']==sys.argv[1]]; w=csv.DictWriter(open('_work/cift.csv','w',newline=''),fieldnames=list(r[0])); w.writeheader(); w.writerows(r)" "$SADECE"
+            python3 scripts/kapak78/w05_degistir.py plan --canli-dir _canli --manifest _work/MANIFEST_W05.csv --ciftler _work/cift.csv --out _out
+            D=$(python3 -c "import json; print(json.load(open('_out/PLAN_W05.json'))['plan_damga'])")
+            cp _out/PLAN_W05.json _plan/PLAN_W05.json
+          else
+            K="${DAMGA%%_*}"
+            rclone copyto "gdrive:$P1G/PILOT/kuru_${K}/PLAN_W05.json" _plan/PLAN_W05.json
+            rclone copyto "gdrive:$P1G/PILOT/kuru_${K}/RAPOR.json" _plan/KURU_RAPOR.json
+            [ -s _plan/PLAN_W05.json ] && [ -s _plan/KURU_RAPOR.json ] || { echo "::error::kuru plani / raporu yok (PILOT/kuru_$K)"; exit 1; }
+            python3 - "$DAMGA" "$SADECE" <<'PY'
+          import json, sys
+          r = json.load(open("_plan/KURU_RAPOR.json"))
+          ok = r.get("mod") == "kuru" and r.get("plan_damga") == sys.argv[1] and r.get("sayilar") == {"HAZIR": 1} \
+              and [x.get("ilan") for x in r.get("ilanlar") or []] == [sys.argv[2]]
+          json.dump(dict(kuru_kapisi="PASS" if ok else "FAIL", mod=r.get("mod"), plan_damga=r.get("plan_damga"), sayilar=r.get("sayilar")),
+                    open("_out/KURU_KAPI.json", "w"))
+          if not ok:
+              raise SystemExit(f"::error::kuru kosusu PASS degil ya da damga / ilan farkli (mod {r.get('mod')}, sayilar {r.get('sayilar')}); yazim yok")
+          PY
+            cp _plan/PLAN_W05.json _out/PLAN_W05_KULLANILAN.json
+            D="$DAMGA"
+          fi
+          echo "PLAN_DAMGA=$D" >> "$GITHUB_ENV"; echo "::notice title=W05 plan_damga::$D"
+      - name: W05 degisim (betik)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          KIP: ${{ inputs.kip }}
+          SADECE: ${{ inputs.sadece }}
+          ONAY: ${{ inputs.onay }}
+        run: |
+          set -o pipefail
+          if [ "$KIP" = yaz ]; then A=(--confirm W05_DEGISTIR --onay "$ONAY"); export W05_KILIT=1; else A=(--kuru); fi
+          python3 scripts/kapak78/w05_degistir.py etsy "${A[@]}" --plan _plan/PLAN_W05.json --plan-damga "${PLAN_DAMGA:?}" \
+            --dosya-dir _kart --sadece "$SADECE" --out _out 2>&1 \
+            | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/ETSY_TOKEN.json _out/LOG.txt
+      - name: Token geri yaz + kayit Drive'a
+        if: ${{ always() }}
+        run: |
+          [ -f scripts/etsy/token_geri_yaz.sh ] || { echo "checkout yok (onay kapisinda durdu); kayit yok"; exit 0; }
+          TOKEN_RC=0; OUT_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
+          if ls _out/* >/dev/null 2>&1; then
+            python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; exit 1; }
+            rclone copy _out "gdrive:${CIKTI:?}" --immutable -q && echo "::notice title=W05 kayit::${CIKTI#ASTROLOVE/}/" || OUT_RC=1
+          fi
+          [ "$TOKEN_RC" = 0 ] && [ "$OUT_RC" = 0 ] || exit 1
+      - if: always()
+        run: rm -rf _work _kart _plan _canli ~/.config/rclone
