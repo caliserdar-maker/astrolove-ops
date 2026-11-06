@@ -12,14 +12,16 @@ Modlar:
           canli == plan -> HAZIR | ZATEN (--onceki SONRA kaydiyla) | YARIM (--onceki ARA kaydiyla) | BLOK.
   yazim : --confirm W05_DEGISTIR + --plan + --plan-damga + --dosya-dir + --sadece <acik listing_id listesi> + ortam W05_KILIT=1 (is akisi
           kilit_bekle.py adimindan SONRA koyar; kilit kumesi main'deki kilit_bekle.py). Ilan basina sira:
-    1 kota: kalan >= en kotu + KOTA_SINIRI (ilan baslamadan) ve api.kota_kapisi
+    1 kota: kalan >= en kotu + KOTA_SINIRI (ilan baslamadan, ve ilk ilanda kalan bilinmiyorsa 3 GET sonrasi yeniden; bilinmezse KALAN)
     2 canli okuma (3 GET) == plan: galeri kimlik / sira / alt metin, renk baglari, state active; rank 5 = plan eski_id; W05'e bag yok;
       galeri + 1 <= 20; yerel dosya sha256 = plan sha256 (= MANIFEST_W05)
     3 YEDEK_<ilan>.json (plan girdisi + zaman)
     4 YUKLEME: yeni kart rank 5'e, ESKI W05 alt metniyle (eski78_gorsel_yukle.yukle_guvenli: cift yukleme yok); ARA_<ilan>.json (yeni id)
     5 YUKLEME SONRASI KAPILARI (stabil geri okuma): n+1 gorsel; rank 1-4 ayni; rank 5 = yeni id ve alt metni = eski W05 alt metni;
       rank 6 = eski W05; 7.. = eski 6..; yuklenen dosya sha256 = MANIFEST sha256 (yukleme boyunca degismedi)
-    6 SILME: eski W05 (sil_guvenli: yalniz 5 dogrulandiysa; yeni gorsel yokken silme denemesi FAIL)
+    5b renk baglari geri okunur = plan (degistiyse silme yok, DUR)
+    6 SILME: eski W05 (sil_guvenli: yalniz 5 dogrulandiysa; yeni gorsel yokken silme denemesi FAIL). Sira kontrolleri rank NUMARASI degil
+      kimlik SIRASI (Etsy silmeden sonra rank'lari sikistirmayabilir)
     7 son geri okuma (stabil): n gorsel, kimlikler = eski liste (eski_id yerine yeni id), alt metinler ayni; baglar aynen; state active
     8 SONRA_<ilan>.json (yeni id, sha256, alt metin)
   OTOMATIK KURTARMA YOK: herhangi bir adim tutmazsa ilan DUR (yeni / eski kimlikler ARA kaydinda), kosu durur (sonrakiler KALAN).
@@ -68,13 +70,13 @@ class Hata(Exception):
 def istek_tahmini():
     """O = cl_galeri_degistir.OKUMA_TEKRAR. Yazim istekleri en kotu 3 gonderim (5xx) + 1 (401); post_file tekrar=1 + 401 = 2 / deneme.
       kuru      : 3 GET.
-      yaz en az : 3 + yukleme 1 + gorunur 1 + stabil 2 + silme 1 + son (silindi gorunur 1 + stabil 2) + var_img 1 + ilan 1 = 13.
-      yaz en kotu: 3 + yukleme (2 + 1 [429 okumasi]) + (2 + O) + gorunur O + stabil O + silme 4 + son (O + O) + 1 + 1.
-      kurtar    : 3 + stabil O + silme 4 + son (O + O) + 1 + 1 (en az 11)."""
+      yaz en az : 3 + yukleme 1 + gorunur 1 + stabil 2 + bag 1 + silme 1 + son (silindi gorunur 1 + stabil 2) + var_img 1 + ilan 1 = 14.
+      yaz en kotu: 3 + yukleme (2 + 1 [429 okumasi]) + (2 + O) + gorunur O + stabil O + bag 1 + silme 4 + son (O + O) + 1 + 1.
+      kurtar    : 3 + stabil O + bag 1 + silme 4 + son (O + O) + 1 + 1 (en az 12)."""
     O = G.OKUMA_TEKRAR
-    en_kotu = OKUMA + (2 + 1) + (2 + O) + O + O + 4 + O + O + 1 + 1
-    return dict(kuru=OKUMA, yaz_en_az=OKUMA + 1 + 1 + 2 + 1 + 1 + 2 + 1 + 1, yaz_en_kotu=en_kotu,
-                kurtar_en_az=OKUMA + 2 + 1 + 1 + 2 + 1 + 1, kurtar_en_kotu=OKUMA + O + 4 + O + O + 1 + 1, okuma_tekrar=O,
+    en_kotu = OKUMA + (2 + 1) + (2 + O) + O + O + 1 + 4 + O + O + 1 + 1
+    return dict(kuru=OKUMA, yaz_en_az=OKUMA + 1 + 1 + 2 + 1 + 1 + 1 + 2 + 1 + 1, yaz_en_kotu=en_kotu,
+                kurtar_en_az=OKUMA + 2 + 1 + 1 + 1 + 2 + 1 + 1, kurtar_en_kotu=OKUMA + O + 1 + 4 + O + O + 1 + 1, okuma_tekrar=O,
                 kota_ihtiyac=en_kotu + KOTA_SINIRI)
 
 
@@ -98,6 +100,8 @@ def plan_ilan(lid, cift, j, m):
                      f"canli OCR {m.get('canli_ocr')})")
     if str(j.get("listing_id")) != lid or j.get("cift") != cift:
         neden.append("GALERI.json ilan / cift farkli")
+    if m.get("cift") != cift or m.get("dosya") != f"{cift}_W05_SUREC.jpg":
+        neden.append(f"MANIFEST_W05 satiri cift / dosya ilanla eslesmiyor ({m.get('cift')}, {m.get('dosya')})")
     g = galeri_ozet(j.get("gorseller") or [])
     if [r for r, _, _ in g] != list(range(1, len(g) + 1)):
         neden.append(f"galeri rank 1..n degil {[r for r, _, _ in g]}")
@@ -174,21 +178,32 @@ def canli_durum(api, shop, lid):
     return dict(state=L.get("state"), galeri=G.galeri(api, lid), baglar=G.var_img(api, shop, lid))
 
 
+def sira(oz):
+    """galeri ozeti -> [(kimlik, alt metin)] rank sirasinda; rank'lar kesin artan ve tekil degilse None. Etsy silmeden sonra rank'lari
+    sikistirmayabilir (28 Eyl 4570110641, 30 Eyl 4570110121; kapak_yukle_78.py:296, cl_galeri_degistir.py:207): rank NUMARASI degil SIRA."""
+    r = [x[0] for x in oz]
+    if r != sorted(r) or len(set(r)) != len(r):
+        return None
+    return [(x[1], x[2]) for x in oz]
+
+
 def kayma(gd, yid):
-    """yukleme sonrasi beklenen: 1-4 ayni, 5 = yeni (eski alt metin), 6.. = eski 5.. (rank +1)"""
-    return [[r if r < W05_RANK else r + 1, i, a] for r, i, a in gd["galeri"]] + [[W05_RANK, yid, gd["alt"]]]
+    """yukleme sonrasi beklenen sira: 1-4 ayni, 5 = yeni (eski W05 alt metni), 6 = eski W05, 7.. = eski 6.."""
+    q = [(i, a) for _, i, a in gd["galeri"]]
+    return q[:W05_RANK - 1] + [(yid, gd["alt"])] + q[W05_RANK - 1:]
 
 
 def son_beklenen(gd, yid):
-    return [[r, yid if i == gd["eski_id"] else i, a] for r, i, a in gd["galeri"]]
+    return [(yid if i == gd["eski_id"] else i, a) for _, i, a in gd["galeri"]]
 
 
 def kapi_once(c, gd):
     s = []
     if c["state"] != "active":
         s.append(f"state {c['state']} (active degil)")
-    if galeri_ozet(c["galeri"]) != gd["galeri"]:
-        s.append("canli galeri (kimlik / sira / alt metin) plandan farkli")
+    oz = galeri_ozet(c["galeri"])
+    if sira(oz) != [(i, a) for _, i, a in gd["galeri"]] or len(oz) < W05_RANK or oz[W05_RANK - 1][1] != gd["eski_id"]:
+        s.append("canli galeri (kimlik sirasi / alt metin / rank 5 = eski W05) plandan farkli")
     if bag_imza(c["baglar"]) != gd["baglar"]:
         s.append("canli renk baglari plandan farkli")
     if any(b[2] == gd["eski_id"] for b in bag_imza(c["baglar"])):
@@ -199,35 +214,44 @@ def kapi_once(c, gd):
 
 
 def durum_tur(c, gd, onceki):
-    """ZATEN (onceki SONRA yeni id rank 5'te, eski id yok) | YARIM (onceki ARA yeni id rank 5, eski rank 6) | None"""
-    g = galeri_ozet(c["galeri"])
-    son, ara = (onceki or {}).get("SONRA"), (onceki or {}).get("ARA")
-    if son and g == son_beklenen(gd, son["yeni_id"]):
-        return "ZATEN"
-    if ara and sorted(g) == sorted(kayma(gd, ara["yeni_id"])):
+    """ZATEN (onceki SONRA ya da ARA yeni id 5. sirada, eski id yok, digerleri ayni) | YARIM (ARA yeni id 5., eski W05 6.) | None"""
+    q = sira(galeri_ozet(c["galeri"]))
+    for ad in ("SONRA", "ARA"):
+        x = (onceki or {}).get(ad)
+        if x and q is not None and q == son_beklenen(gd, x["yeni_id"]):
+            return "ZATEN"
+    ara = (onceki or {}).get("ARA")
+    if ara and q is not None and q == kayma(gd, ara["yeni_id"]):
         return "YARIM"
     return None
 
 
 def sonrasi_sorun(g, gd, yid, yol):
     s = []
-    if sorted(galeri_ozet(g)) != sorted(kayma(gd, yid)):
-        s.append("yukleme sonrasi galeri beklenen kaymadan farkli (1-4 ayni, 5 yeni, 6 eski W05, 7.. eski 6..)")
-    r5 = [x for x in galeri_ozet(g) if x[0] == W05_RANK]
-    if not r5 or r5[0][1] != yid:
-        s.append(f"rank 5 yeni gorsel {yid} degil ({r5[:1]})")
-    elif r5[0][2] != gd["alt"]:
-        s.append("rank 5 yeni gorselin alt metni eski W05 alt metni degil")
+    q = sira(galeri_ozet(g))
+    if q is None:
+        s.append("yukleme sonrasi rank'lar kesin artan / tekil degil")
+    elif q != kayma(gd, yid):
+        s.append("yukleme sonrasi sira beklenenden farkli (1-4 ayni, 5 yeni + eski W05 alt metni, 6 eski W05, 7.. eski 6..)")
+    yeni = [x for x in g if x.get("listing_image_id") == yid]
+    if yeni and (yeni[0].get("full_width"), yeni[0].get("full_height")) not in ((3000, 2250), (None, None)):
+        s.append(f"yeni gorsel boyutu {yeni[0].get('full_width')}x{yeni[0].get('full_height')} (3000x2250 beklenir)")
     if Y.sha256(yol) != gd["sha256"]:
         s.append("yuklenen dosya sha256 MANIFEST_W05 sha256 ile ayni degil")
     return s
 
 
+def bag_kapisi(api, shop, lid, gd):
+    """silmeden ONCE: renk baglari plandaki ile ayni (rank yazimi bag silebilir, 19 Eyl olcumu eski78_gorsel_yukle.py:110)"""
+    if bag_imza(G.var_img(api, shop, lid)) != gd["baglar"]:
+        raise Hata("yukleme sonrasi renk baglari plandan farkli; eski W05 silinmedi")
+
+
 def sil_guvenli(api, shop, lid, gd, yid, g):
-    """eski W05'i YALNIZ yeni gorsel rank 5'te ve eski W05 rank 6'da dogrulandiysa siler (ilan gorselsiz / eksik kalmaz)."""
-    o = {x[0]: x for x in galeri_ozet(g)}
-    if not yid or (o.get(W05_RANK) or [None, None])[1] != yid or (o.get(W05_RANK + 1) or [None, None])[1] != gd["eski_id"]:
-        raise Hata(f"silme kapisi: yeni gorsel rank 5'te dogrulanmadi (yeni {yid}, rank 5 {o.get(W05_RANK)}, rank 6 {o.get(W05_RANK + 1)}); "
+    """eski W05'i YALNIZ yeni gorsel 5. sirada ve eski W05 6. sirada dogrulandiysa siler (ilan gorselsiz / eksik kalmaz)."""
+    q = sira(galeri_ozet(g)) or []
+    if not yid or len(q) <= W05_RANK or q[W05_RANK - 1][0] != yid or q[W05_RANK][0] != gd["eski_id"]:
+        raise Hata(f"silme kapisi: yeni gorsel 5. sirada / eski W05 6. sirada dogrulanmadi (yeni {yid}, sira {[x[0] for x in q][:7]}); "
                    "eski W05 silinmedi")
     G.gorsel_sil(api, shop, lid, gd["eski_id"])
 
@@ -238,8 +262,8 @@ def son_okuma(api, shop, lid, gd, yid):
     vi = G.var_img(api, shop, lid)
     L = api.get(f"/listings/{lid}") or {}
     s = []
-    if galeri_ozet(g) != son_beklenen(gd, yid):
-        s.append("son geri okuma: galeri (eski W05 yerine yeni, digerleri ayni) beklenenden farkli")
+    if sira(galeri_ozet(g)) != son_beklenen(gd, yid):
+        s.append("son geri okuma: galeri sirasi (eski W05 yerine yeni, digerleri ayni) beklenenden farkli")
     if bag_imza(vi) != gd["baglar"]:
         s.append("son geri okuma: renk baglari degisti")
     if L.get("state") != "active":
@@ -267,6 +291,7 @@ def yaz_ilan(api, shop, lid, gd, yol, out):
         s = sonrasi_sorun(g, gd, yid, yol)
         if s:
             raise Hata("; ".join(s))
+        bag_kapisi(api, shop, lid, gd)
         sil_guvenli(api, shop, lid, gd, yid, g)
         g, s = son_okuma(api, shop, lid, gd, yid)
         if s:
@@ -284,8 +309,9 @@ def kurtar_ilan(api, shop, lid, gd, yid, out):
     """YARIM ilan: yalniz silme + son geri okuma (yeni gorsel rank 5'te ve eski W05 rank 6'da dogrulanarak)."""
     try:
         g = Y.stabil_galeri(api, lid)
-        if sorted(galeri_ozet(g)) != sorted(kayma(gd, yid)):
+        if sira(galeri_ozet(g)) != kayma(gd, yid):
             raise Hata("kurtar: canli galeri YARIM beklenen durumda degil; yazma yok")
+        bag_kapisi(api, shop, lid, gd)
         sil_guvenli(api, shop, lid, gd, yid, g)
         g, s = son_okuma(api, shop, lid, gd, yid)
         if s:
@@ -338,10 +364,14 @@ def calistir(api, shop, a):
                 s.update(durum="KALAN", neden=[dur]); continue
             api.kota_kapisi(f"ilan {lid}")
             c = canli_durum(api, shop, lid)
+            if yazim and (api.remaining is None or int(api.remaining) < gerek - OKUMA):   # ilk ilanda kalan 3 GET'ten sonra bilinir
+                dur = f"kota: okuma sonrasi kalan {api.remaining} < {gerek - OKUMA}; yazim baslamadi"
+                s.update(durum="KALAN", neden=[dur]); continue
             onc = onceki_oku(a.onceki, lid) if a.onceki else {}
             tur = durum_tur(c, gd, onc)
             if tur == "ZATEN":
-                s.update(durum="ZATEN", neden=["rank 5 = onceki kosunun yeni gorseli; eski W05 yok"], yeni_id=onc["SONRA"]["yeni_id"])
+                s.update(durum="ZATEN", neden=["5. sira = onceki kosunun yeni gorseli; eski W05 yok"],
+                         yeni_id=(onc.get("SONRA") or onc.get("ARA"))["yeni_id"])
                 if yazim and not (a.devam or a.kurtar):
                     s["neden"].append("--devam verilmedi"); s["durum"] = "BLOK"
                 continue

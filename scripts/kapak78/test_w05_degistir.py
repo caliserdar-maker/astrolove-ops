@@ -39,19 +39,22 @@ def k(ad, ok, ayr=""):
 class Sahte:
     """Etsy v3 alt kumesi: getListing, getListingImages, getListingVariationImages, uploadListingImage (rank), deleteListingImage.
     Ayarlar: rank_yok (yukleme rank'i yok sayilir, sona oturur), alt_bozuk (alt metin degisir), dosya_boz (yukleme sirasinda yerel dosya
-    degisir: yuklenen dosya sha256 != MANIFEST), sil_hata (ilk silme 500)."""
-    def __init__(self, L, kalan=5000):
-        self.L, self.calls, self.remaining, self.yazimlar, self._n = L, 0, kalan, [], 7_000_000
-        self.rank_yok = self.alt_bozuk = self.sil_hata = False; self.dosya_boz = None
+    degisir: yuklenen dosya sha256 != MANIFEST), sil_hata (ilk silme 500), sikistirmaz (silmeden sonra rank'lar sikistirilmaz: canli
+    Etsy 28 / 30 Eyl), bag_dus (yukleme renk baglarini siler: 19 Eyl olcumu), boyut_boz (yeni gorsel 1500x1125), bilinmiyor (kalan
+    kota ilk istege kadar None: gercek etsy_common)."""
+    def __init__(self, L, kalan=5000, bilinmiyor=False):
+        self.L, self.calls, self._kalan, self.yazimlar, self._n = L, 0, kalan, [], 7_000_000
+        self.remaining = None if bilinmiyor else kalan
+        self.rank_yok = self.alt_bozuk = self.sil_hata = self.sikistirmaz = self.bag_dus = self.boyut_boz = False; self.dosya_boz = None
 
     def kota_kapisi(self, ne="is"):
         if self.remaining is not None and self.remaining < 10:
             raise SystemExit(f"DUR: kota esigi: kalan {self.remaining} < 10 ({ne} baslamadi)")
 
     def _say(self):
-        if self.remaining < 10:
-            raise SystemExit(f"DUR: kota sert tabani: kalan {self.remaining} < 10")
-        self.calls += 1; self.remaining -= 1
+        if self._kalan < 10:
+            raise SystemExit(f"DUR: kota sert tabani: kalan {self._kalan} < 10")
+        self.calls += 1; self._kalan -= 1; self.remaining = self._kalan
 
     def _lid(self, p):
         return re.search(r"/listings/(\d+)", p).group(1)
@@ -78,7 +81,10 @@ class Sahte:
             if i["rank"] >= rank:
                 i["rank"] += 1
         alt = (data or {}).get("alt_text") + (" X" if self.alt_bozuk else "")
-        x["images"].append(dict(listing_image_id=yid, rank=min(rank, n + 1), alt_text=alt, url_fullxfull=f"u/{yid}"))
+        x["images"].append(dict(listing_image_id=yid, rank=min(rank, n + 1), alt_text=alt, url_fullxfull=f"u/{yid}",
+                                full_width=1500 if self.boyut_boz else 3000, full_height=1125 if self.boyut_boz else 2250))
+        if self.bag_dus:
+            x["var"] = []
         if self.dosya_boz:
             Path(self.dosya_boz).write_bytes(b"bozuk")
         self.yazimlar.append(("upload", lid, yid))
@@ -92,8 +98,9 @@ class Sahte:
             raise SystemExit(f"DELETE {path} -> 500")
         self.yazimlar.append(("sil", lid, iid))
         x["images"] = [i for i in x["images"] if i["listing_image_id"] != iid]
-        for n, i in enumerate(sorted(x["images"], key=lambda i: i["rank"]), 1):
-            i["rank"] = n
+        if not self.sikistirmaz:
+            for n, i in enumerate(sorted(x["images"], key=lambda i: i["rank"]), 1):
+                i["rank"] = n
         return {}
 
     def _yasak(self, *a, **kw):
@@ -129,7 +136,7 @@ def kur(td, ayar=None):
         b = io.BytesIO(); Image.new("RGB", (64, 48), (int(lid[-1]) * 40, 10, 10)).save(b, "JPEG", quality=95)
         (dd / f"{cift}_W05_SUREC.jpg").write_bytes(b.getvalue())
         kim = ayar.get(lid, {}).get("kimlik", "PASS")
-        rows.append(dict(cift=cift, ilan=lid, dosya=f"{cift}_W05_SUREC.jpg", sha256=Y.sha256(dd / f"{cift}_W05_SUREC.jpg"), kimlik=kim,
+        rows.append(dict(cift=ayar.get(lid, {}).get("m_cift", cift), ilan=lid, dosya=f"{cift}_W05_SUREC.jpg", sha256=Y.sha256(dd / f"{cift}_W05_SUREC.jpg"), kimlik=kim,
                          canli_ocr="PASS", bilinen_pass="PASS", durum="PASS" if kim == "PASS" else "DUR"))
     with open(td / "MANIFEST_W05.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
@@ -155,13 +162,14 @@ def ids(x):
 
 
 t = W.istek_tahmini()
-k(f"istek tahmini: kuru 3, en az 13, en kotu {t['yaz_en_kotu']} (O={t['okuma_tekrar']}), kota ihtiyaci en kotu + 10",
-  t["kuru"] == 3 and t["yaz_en_az"] == 13 and t["kota_ihtiyac"] == t["yaz_en_kotu"] + 10)
+k(f"istek tahmini: kuru 3, en az 14, en kotu {t['yaz_en_kotu']} (O={t['okuma_tekrar']}), kota ihtiyaci en kotu + 10",
+  t["kuru"] == 3 and t["yaz_en_az"] == 14 and t["kota_ihtiyac"] == t["yaz_en_kotu"] + 10)
 
 # ---------- plan
 with tempfile.TemporaryDirectory() as td:
     td = Path(td)
     L, dd, P, rc = kur(td, {"9100000002": dict(bag=True), "9100000003": dict(kimlik="FAIL"), "9100000004": dict(n=20)})
+    st = {s["ilan"]: s for s in P["satirlar"]}
     st = {s["ilan"]: s for s in P["satirlar"]}
     k("plan: normal ilan PLAN (eski r5 id, eski W05 alt metni, sha)", st["9100000001"]["durum"] == "PLAN"
       and P["girdiler"]["9100000001"]["eski_id"] == 1005 and P["girdiler"]["9100000001"]["alt"].startswith("How your order works"))
@@ -169,6 +177,9 @@ with tempfile.TemporaryDirectory() as td:
     k("bilinen FAIL: taban kimlik zinciri tutmaz (MANIFEST kimlik FAIL) -> plan BLOK", st["9100000003"]["durum"] == "BLOK", st["9100000003"])
     k("bilinen FAIL: galeri 20 (+1 > 20) -> plan BLOK", st["9100000004"]["durum"] == "BLOK", st["9100000004"])
     k("plan: BLOK varsa cikis 1", rc == 1)
+    L, dd, P, rc = kur(td / "m", {"9100000001": dict(m_cift="LEO_LEO")})
+    k("bilinen FAIL: MANIFEST satiri baska ciftin (cift / dosya ilanla eslesmez) -> plan BLOK",
+      {s["ilan"]: s for s in P["satirlar"]}["9100000001"]["durum"] == "BLOK")
 
 # ---------- yazim yollari
 with tempfile.TemporaryDirectory() as td:
@@ -275,6 +286,35 @@ with tempfile.TemporaryDirectory() as td:
     k(f"--kurtar: istek {durum(R, '9100000004')['istek']} = kurtar en az {t['kurtar_en_az']}", durum(R, "9100000004")["istek"] == t["kurtar_en_az"])
     k("--kurtar: YARIM ilan -> yalniz silme, PASS, galeri 11 (eski W05 yerine yeni)", durum(R, "9100000004")["durum"] == "PASS"
       and [w[0] for w in api.yazimlar] == ["sil"] and len(ids(L["9100000004"])) == 11 and 4005 not in ids(L["9100000004"]), (R["ilanlar"], api.yazimlar))
+    # Etsy silmeden sonra rank sikistirmaz -> yine PASS (sira kontrolu)
+    L3, dd3, P3, _ = kur(td / "s")
+    api = Sahte(L3); api.sikistirmaz = True
+    rc, R = kos(api, td / "s", P3, "--confirm", W.ONAY, "--dosya-dir", str(dd3), "--sadece", "9100000001", out="sik")
+    s = durum(R, "9100000001")
+    k("silme sonrasi rank sikistirilmaz (5 bos) -> PASS, sira dogru", s["durum"] == "PASS"
+      and [i["rank"] for i in sorted(L3["9100000001"]["images"], key=lambda i: i["rank"])][4:6] == [5, 7], (s, L3["9100000001"]["images"][:2]))
+    rc, R = kos(api := Sahte(L3), td / "s", P3, "--confirm", W.ONAY, "--dosya-dir", str(dd3), "--sadece", "9100000001", "--devam",
+                "--onceki", str(td / "s" / "sik"), out="sik2")
+    k("rank bosluklu ilan --devam -> ZATEN, yazim yok", durum(R, "9100000001")["durum"] == "ZATEN" and not api.yazimlar)
+    # yukleme renk baglarini dusurur -> silme yok
+    api = Sahte(L3); api.bag_dus = True
+    rc, R = kos(api, td / "s", P3, "--confirm", W.ONAY, "--dosya-dir", str(dd3), "--sadece", "9100000002", out="bag")
+    s = durum(R, "9100000002")
+    k("bilinen FAIL: yukleme sonrasi renk baglari degisti -> DUR, eski W05 silinmedi", s["durum"] == "DUR" and "bag" in s["neden"][0]
+      and [w[0] for w in api.yazimlar] == ["upload"], s)
+    api = Sahte(L3); api.boyut_boz = True
+    rc, R = kos(api, td / "s", P3, "--confirm", W.ONAY, "--dosya-dir", str(dd3), "--sadece", "9100000003", out="boyut")
+    s = durum(R, "9100000003")
+    k("bilinen FAIL: yeni gorsel 3000x2250 degil -> DUR, silme yok", s["durum"] == "DUR" and "boyutu" in s["neden"][0]
+      and [w[0] for w in api.yazimlar] == ["upload"], s)
+    # kalan kota ilk istege kadar bilinmiyor (gercek istemci): dusuk kalan -> 3 GET sonra KALAN, yukleme yok
+    L4, dd4, P4, _ = kur(td / "n")
+    api = Sahte(L4, kalan=t["yaz_en_kotu"] + 9, bilinmiyor=True)
+    rc, R = kos(api, td / "n", P4, "--confirm", W.ONAY, "--dosya-dir", str(dd4), "--sadece", "9100000001", out="bilinmiyor")
+    k("bilinen FAIL: ilk ilanda kalan bilinmiyor + dusuk -> okuma sonrasi KALAN, yukleme yok (inceleme 6 Kas YUKSEK 1)",
+      durum(R, "9100000001")["durum"] == "KALAN" and not api.yazimlar and api.calls == W.OKUMA, (R["ilanlar"], api.calls))
+    rc, R = kos(api := Sahte(L4, bilinmiyor=True), td / "n", P4, "--confirm", W.ONAY, "--dosya-dir", str(dd4), "--sadece", "9100000001", out="bilinmiyor2")
+    k("ilk ilanda kalan bilinmiyor + yeterli -> PASS", durum(R, "9100000001")["durum"] == "PASS")
     # kota
     L2, dd2, P2, _ = kur(td / "k")
     rc, R = kos(api := Sahte(L2, kalan=t["yaz_en_kotu"] + 9), td / "k", P2, "--confirm", W.ONAY, "--dosya-dir", str(dd2), "--sadece", "9100000001", out="kota")
