@@ -160,7 +160,7 @@ def main():
     sg = yukle('siparis_girdi', 'siparis_girdi.py')
     RAPOR = dict(hat='ornament_siparis (plan v2)', zaman=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
                  pinler={k: os.environ.get(k) for k in ('MOTOR_COMMIT', 'TEK_DOKU_COMMIT', 'ACIK_COMMIT', 'ONAY_COMMIT', 'GITHUB_SHA')},
-                 beklenen_raqm=bek, gece_varsayimlari='K1 BASIC, K7 istisna ciftleri DUR, K8 32 +-1 aynen, K3 / K9 DUR_SERDAR (KARARLAR_20261106 N4)')
+                 beklenen_raqm=bek, gece_varsayimlari='K1 RAQM (onayli dosyalarla ayni, Serdar 6 Kas), K7 istisna ciftleri DUR, K8 32 +-1 aynen, K3 / K9 DUR_SERDAR (KARARLAR_20261106)')
     # 1. girdi
     try:
         ham = json.loads(Path(a.girdi).read_text(encoding='utf-8'))

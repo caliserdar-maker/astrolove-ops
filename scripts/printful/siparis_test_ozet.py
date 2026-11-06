@@ -64,6 +64,10 @@ def main():
                  bosluk=dict(tarih_isim=(R.get('yeni_duzen_olcum') or {}).get('bosluk_tarih_isim'),
                              isim_kucuk=(R.get('yeni_duzen_olcum') or {}).get('bosluk_isim_kucuk')),
                  not_=t.get('not_'))
+        if t.get('raqm_ters'):                                               # bilinen FAIL testi: COKUS nedeni raqm olmali (baska cokus yanlis PASS vermesin; inceleme 6 Kas)
+            lg = Path(cdir) / 'IS' / 'log_ornek78.txt'
+            d['raqm_nedeni'] = lg.exists() and 'raqm durumu beklenen degil' in lg.read_text(errors='replace')
+            ok = ok and d['raqm_nedeni']
         if t.get('regresyon') and gelen == 'PASS':
             rok, rr = regresyon(idir, fx['cift'], a.onayli, sums)
             d['regresyon'] = rr; d['regresyon_gecti'] = rok; ok = ok and rok
@@ -80,7 +84,7 @@ def main():
     for kod, d in T.items():
         if not d['tuttu']:
             tutmayan.append(kod)
-        print('TEST', kod, '| beklenen', d['beklenen'], '| gelen', d['gelen'], '| tuttu', d['tuttu'], '|', d.get('neden') or '', flush=True)
+        print('TEST', kod, '| beklenen', d['beklenen'], '| gelen', d['gelen'], '| tuttu', d['tuttu'], '|', d.get('neden') or '', ('| raqm_nedeni ' + str(d['raqm_nedeni'])) if 'raqm_nedeni' in d else '', flush=True)
     sonuc = dict(test=T, tutmayan=tutmayan, toplam=len(T), not_='sahte girdiler; kisi verisi yok (ANA_2 7.3)')
     Path(a.json).write_text(json.dumps(sonuc, indent=1, ensure_ascii=False, default=str))
     print('TEST OZET', len(T), 'vaka, tutmayan', tutmayan, flush=True)

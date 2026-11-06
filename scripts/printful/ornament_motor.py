@@ -79,7 +79,7 @@ def kucult_sinir_oku(env):
 def siparis_oku(env, cift):
     """Siparis kipi girdisi (Serdar 6 Kas gece; plan 2.1, KARARLAR_20261106 N4). ORN_SIPARIS_GIRDI yoksa None (bugunku davranis, EMILY / JAMES).
     Varsa: siparis_girdi.py CIKTI.json (durum PASS) yolu; ayni dogrulama YENIDEN kosulur (idempotent), cift motor --cift ile ayni olmali.
-    ORN_BEKLENEN_RAQM ('0' ya da '1') ZORUNLU; Pillow raqm durumu beklenenle ayni degilse ValueError (gece varsayimi BASIC = '0'; K1).
+    ORN_BEKLENEN_RAQM ('0' ya da '1') ZORUNLU; Pillow raqm durumu beklenenle ayni degilse ValueError (onayli dosyalar RAQM ile: test kosusu 42168338555 T19 bayt esitligi; is akisi '1').
     Musteri metni loga yazilmaz. Doner dict(isim1, isim2, tarih, stil, raqm)."""
     yol = env.get('ORN_SIPARIS_GIRDI')
     if not yol:
@@ -98,7 +98,7 @@ def siparis_oku(env, cift):
     if bek not in ('0', '1'):
         raise ValueError('ORN_BEKLENEN_RAQM zorunlu (0 / 1)')
     if raqm != (bek == '1'):
-        raise ValueError(f'raqm durumu beklenen degil: gelen {int(raqm)}, beklenen {bek} (K1; onayli dosyalar BASIC varsayimi)')
+        raise ValueError(f'raqm durumu beklenen degil: gelen {int(raqm)}, beklenen {bek} (onayli dosyalar RAQM ile uretildi; ortam degisti mi?)')
     r['raqm'] = raqm
     return r
 

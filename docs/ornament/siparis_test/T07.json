@@ -7,6 +7,6 @@
  "_test": {
   "kod": "T07",
   "beklenen": "DUR_GIRDI",
-  "not_": "bilinen FAIL (r 346,4 BASIC, PLAN_YENI_DUZEN.md:236)"
+  "not_": "bilinen FAIL (r 346,4 PLAN_YENI_DUZEN.md:236; olcum motoru etiketi dogrulanmadi)"
  }
 }

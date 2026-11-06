@@ -8,7 +8,8 @@ name: ornament-siparis
 # Depo PUBLIC (ANA_2 7.3): musteri metni / siparis no loga, dala, artifact'a girmez. Drive klasor adi yalniz opak kod. rclone -q, hata ciktisi
 # yalniz /tmp/ozel. Alt surec ciktilari dosyaya; kamuya acik ozet gizlilik_tara.py PASS olmadan basilmaz. Artifact YOK.
 # Uretim zinciri onayli 78 uretimiyle AYNI (ornek78.py: motor + dump + sade + fildisi; pinler ve girdiler ornament-78-uretim.yml ile ayni).
-# Gece varsayimlari (KARARLAR_20261106 N4): ORN_BEKLENEN_RAQM=0 (BASIC, K1), istisna ciftleri DUR (K7), 32 +-1 aynen (K8), K3 / K9 DUR_SERDAR.
+# Varsayimlar: ORN_BEKLENEN_RAQM=1 (RAQM; test kosusu 42168338555 T19 ciktisi onayli CL RUBY ile bayt bayt ayni, Serdar onayi 6 Kas; gece N4 BASIC varsayimi yanlisti),
+#   istisna ciftleri DUR (K7), 32 +-1 aynen (K8), K3 / K9 DUR_SERDAR (KARARLAR_20261106 N4).
 on:
   push:
     branches: [ornament-printful-katalog]
@@ -28,7 +29,7 @@ env:
   BURC_KLASOR: 1j9TBPj86_5njsmf_t0v6tczuwcDyLuXu
   SIPARIS_KOK: ASTROLOVE/SIPARIS_IS
   ONAYLI_TOPLAMA: ASTROLOVE/TEMP/ORNAMENT_78_TOPLAMA_20261105_1901_42089646647
-  ORN_BEKLENEN_RAQM: "0"
+  ORN_BEKLENEN_RAQM: "1"
 jobs:
   hazirlik:
     runs-on: ubuntu-latest
@@ -161,6 +162,7 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/ozel /tmp/rapor
           for c in $MOTOR_COMMIT $TEK_DOKU_COMMIT $ACIK_COMMIT $ONAY_COMMIT; do git -C s fetch -q --depth 1 --filter=blob:none origin $c; done
+          dpkg -s libfribidi0 >/dev/null 2>&1 || { sudo apt-get update -qq && sudo apt-get install -y -qq libfribidi0; } >/dev/null   # Pillow 11.0.0 tekerleginde fribidi yok, raqm sistemden yukler; kuruluysa dokunulmaz (kart-determinizm.yml deseni)
           pip install -q pillow==11.0.0 numpy==2.5.4 opencv-python-headless==5.0.0.93 scipy==1.18.1 scikit-image==0.26.0 potracer==0.0.4
           python3 -c "import sys, numpy, cv2, PIL; from PIL import features; print('python', sys.version.split()[0], 'numpy', numpy.__version__, 'cv2', cv2.__version__, 'pillow', PIL.__version__, 'raqm', features.check('raqm'))"
           curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
