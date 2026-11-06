@@ -1,5 +1,7 @@
 name: p1g-w05-yukle
-# P1-G AŞAMA 2 (Serdar 6 Kas "Once 1, sonra 77"; YALNIZ pilot 4570143815 CANCER_LIBRA). Etsy'ye YAZAR (kip yaz): galeri rank 5 W05_SUREC
+# P1-G (Serdar 6 Kas). BU COMMIT: YALNIZ kip kuru, YALNIZ 4570155846 ARIES_VIRGO (Serdar 6 Kas "kod + kuru"; kip yaz HICBIR ilan icin
+# kabul edilmez: gercek yazim ayri onay + ayri commit). 4570143815 CANCER_LIBRA pilotu 6 Kas yazildi (42210656786 DUR, eski kart panelden
+# silindi, 42213841977 dogrulama). Yazim kipi (ileride, ayri onayla) Etsy'ye YAZAR: galeri rank 5 W05_SUREC
 # (yeni kart yukle, eski W05'i sil) + renk baglarini plandaki AYNI haliyle yeniden yazma. Baska alan YOK; updateListing / PATCH YOK.
 # GALERI istisnasi (Serdar 5 Kas yontem b): yalniz W05_SUREC, yalniz P1-G. Kod scripts/kapak78/w05_degistir.py (etsy alt komutu).
 # Kart + MANIFEST: TEMP/P1G_W05_20261106_090016 (p1g-w05-uret 42194064189). Canli okuma: TEMP/POSTER_GALERI_V11_YEDEK/20261106_090016.
@@ -21,7 +23,7 @@ on:
         options: [kuru, yaz]
         default: kuru
       sadece:
-        description: "ilan (bu asamada yalniz 4570143815)"
+        description: "ilan (bu commit: yalniz 4570155846, yalniz kip kuru)"
         required: true
         default: ""
       onay:
@@ -47,7 +49,8 @@ jobs:
           ONAY: ${{ inputs.onay }}
           DAMGA: ${{ inputs.plan_damga }}
         run: |
-          [ "$SADECE" = "4570143815" ] || { echo "::error::bu asamada yalniz 4570143815 (pilot); 77 ilan ayri onay + ayri commit"; exit 1; }
+          [ "$KIP" = kuru ] || { echo "::error::kip yaz bu commit'te kapali (yazim ayri onay); yalniz kuru"; exit 1; }
+          [ "$SADECE" = "4570155846" ] || { echo "::error::bu commit'te yalniz 4570155846 ARIES_VIRGO (kuru); diger ilanlar ayri onay + ayri commit"; exit 1; }
           case "$KIP" in kuru) K=KURU ;; yaz) K=YAZ ;; *) echo "::error::kip"; exit 1 ;; esac
           [ "$ONAY" = "W05-$K-$SADECE" ] || { echo "::error::onay girdisi W05-$K-<sadece> degil"; exit 1; }
           if [ "$KIP" = yaz ]; then [[ "$DAMGA" =~ ^[0-9]+_[0-9a-f]{12}$ ]] || { echo "::error::yaz kipinde plan_damga <kuru_kosu>_<sha12>"; exit 1; }; fi
@@ -88,7 +91,7 @@ jobs:
           umask 077; mkdir -p _work _out _kart _plan
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
           CIFT=$(python3 -c "import csv,sys; print(next(r['cift'] for r in csv.DictReader(open('data/pod/pod78_ids.csv')) if r['listing_id']==sys.argv[1]))" "$SADECE")
-          [ "$CIFT" = CANCER_LIBRA ] || { echo "::error::ilan / cift eslesmesi beklenmedik"; exit 1; }
+          [ "$CIFT" = ARIES_VIRGO ] && [ "$KIP" = kuru ] || { echo "::error::ilan / cift eslesmesi beklenmedik ya da kip kuru degil"; exit 1; }
           rclone copyto "gdrive:$P1G/${CIFT}_W05_SUREC.jpg" "_kart/${CIFT}_W05_SUREC.jpg"
           [ -s "_kart/${CIFT}_W05_SUREC.jpg" ] || { echo "::error::kart yok"; exit 1; }
           if [ "$KIP" = kuru ]; then
