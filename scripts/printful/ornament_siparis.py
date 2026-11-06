@@ -27,8 +27,7 @@ _d = Path(__file__).resolve().parent
 PY = sys.executable
 STIL_DOSYA_AD = {'RUBY': 'Ruby', 'SAPPHIRE': 'Sapphire', 'EMERALD': 'Emerald', 'SADE_ALTIN': 'Sade_Altin', 'FILDISI': 'Fildisi'}
 ISIM_KAPILARI = ('koyu_yd_murekkep_r_le_336',)                               # musterinin isim / tarih uzunluguna bagli sert kapi (plan 2.1b)
-INIS_KAPILARI = ('koyu_yd_isim_alt_le_733',)                                # K8 1c: isim murekkebi J inisinden asagi (Q kuyrugu ~735): musteri kusuru degil -> Serdar gorseli
-GORSELLI_DUR = ('halka_yakin_330', 'isim_alt_inis')                         # bu DUR_SERDAR'larda baski / onizleme / KONTROL_1e1 TASLAK uretilir (Serdar gorselle karar verir)
+GORSELLI_DUR = ('halka_yakin_330',)                         # bu DUR_SERDAR'larda baski / onizleme / KONTROL_1e1 TASLAK uretilir (Serdar gorselle karar verir)
 HALKA_YAKIN = 330                                                             # Serdar 6 Kas "2 evet": murekkep r 330-336 PASS degil DUR_SERDAR (gorsel); 330 tahmin, olculmedi
 KONTROL_SATIR = (584, 806)                                                    # KONTROL_1e1: kucuk isaret ustu (SABIT 594) - 10 ile tarih alti (795) + 11
 
@@ -91,10 +90,6 @@ def siniflama(R, cift, mo=None):
     fs = set(fail)
     if fs <= set(ISIM_KAPILARI):                                               # yalniz isim kapisi: musteriye soru (T1)
         return 'DUR_GIRDI', 'isim_sigmadi_murekkep_r', fail
-    if fs <= set(INIS_KAPILARI):                                               # yalniz isim alti (Q kuyrugu; kucuk-isim ve isim-tarih kapilari gecmis): Serdar gorseli
-        return 'DUR_SERDAR', 'isim_alt_inis', fail
-    if fs <= set(ISIM_KAPILARI) | set(INIS_KAPILARI):                          # uzun isim + Q kuyrugu: once musteriye kisaltma sorusu (yeni isimde Q kalirsa sonra Serdar)
-        return 'DUR_GIRDI', 'isim_sigmadi_murekkep_r_ve_inis', fail
     return 'MOTOR_KAPI_FAIL', 'sert_kapi_fail', fail
 
 
@@ -189,7 +184,7 @@ def main():
     mo_c = W / 'png' / '_is' / cift / 'motor' / 'OLCUM.json'
     mo = json.loads(mo_c.read_text()) if mo_c.exists() else {}
     durum, neden, fail = siniflama(R, cift, mo)
-    gorselli = durum == 'DUR_SERDAR' and neden in GORSELLI_DUR                 # Serdar'a gorselle giden DUR (halka yakin, Q kuyrugu): ciktilar TASLAK uretilir
+    gorselli = durum == 'DUR_SERDAR' and neden in GORSELLI_DUR                 # Serdar'a gorselle giden DUR (halka yakin): ciktilar TASLAK uretilir
     if (durum == 'PASS' or gorselli) and gbk != 0:                             # sert (siparis kipinde sikilastirma): gercek boy dosyasi yoksa ya da FAIL ise PASS / gorselli DUR yok
         durum, neden, fail = 'MOTOR_KAPI_FAIL', 'gercek_boy_kontrol', ['gercek_boy_kontrol']
     RAPOR['gercek_boy_kontrol_cikis'] = gbk

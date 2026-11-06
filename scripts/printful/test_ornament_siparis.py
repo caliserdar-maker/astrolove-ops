@@ -19,7 +19,7 @@ osp = yukle('osp', 'ornament_siparis.py')
 gt = yukle('gt', 'gizlilik_tara.py')
 C = 'CANCER_LIBRA'
 SERT_OK = {'koyu_kontrast_ortanca': True, 'koyu_yd_murekkep_r_le_336': True, 'koyu_yd_isim_ust_695': True, 'koyu_yd_bosluk_isim_kucuk_32': True,
-           'koyu_yd_isim_alt_le_733': True, 'koyu_yd_bosluk_tarih_isim_25_45': True, 'sade1_yerlesim_ayni': True}
+           'koyu_yd_bosluk_tarih_isim_25_45': True, 'sade1_yerlesim_ayni': True}
 
 
 KONTROL_OK = {'kapi': {'sert': {'koyu_kontrast_ortanca': True, 'fildisi_cikis_0': True}}}
@@ -49,13 +49,10 @@ def main():
         ('mo_yok', R_(kapi=S(), cikis_kodlari={'motor': 0}), 'MOTOR_KAPI_FAIL'),
         ('o4_yerlesim', R_(motor_olcum={'hata': 'yeni_duzen_kapi'}, eksik=['RUBY'], cikis_kodlari={'motor': 1}), 'DUR_GIRDI'),
         ('murekkep_r', R_(kapi=S(koyu_yd_murekkep_r_le_336=False), cikis_kodlari={'motor': 1}), 'DUR_GIRDI', MO()),
-        ('Q_inis', R_(kapi=S(koyu_yd_isim_alt_le_733=False), cikis_kodlari={'motor': 1}), 'DUR_SERDAR', MO(29, 32)),
-        ('Q_inis_ve_tarih_bosluk', R_(kapi=S(koyu_yd_isim_alt_le_733=False, koyu_yd_bosluk_tarih_isim_25_45=False), cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL', MO(20, 32)),
         ('isim_ust_kayma', R_(kapi=S(koyu_yd_isim_ust_695=False), cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL', MO()),
         ('kucuk_isim_bosluk', R_(kapi=S(koyu_yd_bosluk_isim_kucuk_32=False), cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL', MO(32, 36)),
         ('tarih_isim_45_ustu', R_(kapi=S(koyu_yd_bosluk_tarih_isim_25_45=False), cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL', MO(50, 32)),
         ('sade_yerlesim', R_(kapi=S(sade1_yerlesim_ayni=False), cikis_kodlari={'motor': 0}), 'MOTOR_KAPI_FAIL', MO()),
-        ('isim_ve_inis', R_(kapi=S(koyu_yd_murekkep_r_le_336=False, koyu_yd_isim_alt_le_733=False), cikis_kodlari={'motor': 1}), 'DUR_GIRDI', MO(29, 32)),
         ('isim_ve_kontrast', R_(kapi=S(koyu_yd_murekkep_r_le_336=False, koyu_kontrast_ortanca=False), cikis_kodlari={'motor': 1}), 'MOTOR_KAPI_FAIL'),
         ('kontrol_CL_fail', {'cift': {}, 'kontrol_pass': False}, 'MOTOR_KAPI_FAIL'),
         ('kontrol_yok', R_(kontrol=None, kapi=S(), cikis_kodlari={'motor': 0}), 'MOTOR_KAPI_FAIL', MO()),

@@ -263,8 +263,8 @@ def kapilar(E, ana_rgba, olcekle, tabanlar, sabit, ref_metin, kapat=None, sipari
     ref_metin True ise (motorun EMILY / JAMES / JUNE 14, 2025 ornegi) murekkep kutusu kapilari da (tarih alt 795, 32 / 32). Doner (kapi: bool, olcum).
     siparis True (plan v2 2.1b; K8 Serdar 6 Kas "1c"): musteri metninde tarih_alt_le_795 (tarih murekkebi alti <= 795 + 1; plan tanimi),
     murekkep_r_le_336 (isim, logo, kucuk isaretler, tarih murekkebi halka ic dairesi r <= 336 icinde) ve 32 / 32 esitligi yerine:
-    isim_ust_695 (isimlerin murekkep ustu, sonsuz haric, SABIT 695 +- 1), bosluk_isim_kucuk_32 (isimler; 32 +- 1), isim_alt_le_733
-    (isim murekkep alti <= SABIT 732 + 1; J inisinden asagi inmez), bosluk_tarih_isim_25_45 (J'siz isim ~39, Q'lu ~29)."""
+    isim_ust_695 (isimlerin murekkep ustu, sonsuz haric, SABIT 695 +- 1), bosluk_isim_kucuk_32 (isimler; 32 +- 1),
+    bosluk_tarih_isim_25_45 (J'siz isim ~39, Q'lu ~29). Isim alti (Q kuyrugu) yalniz bilgi (Serdar 6 Kas "Otomatik gecsin")."""
     s = kutu_E(E, 'sembol')
     _, a, x, y = E['sembol']
     r_max = halka_max_r(a, x, y)
@@ -315,10 +315,10 @@ def kapilar(E, ana_rgba, olcekle, tabanlar, sabit, ref_metin, kapat=None, sipari
         else:                                                                 # siparis kipi: plan v2 2.1b tarih_alt_le_795 (<= 795 + 1; ay J'siz olunca murekkep 792-793),
             n0, n1 = satir_E(E, ('isim1', 'isim2'))                           # K8 (Serdar 6 Kas "1c"): YALNIZ isimler (sonsuz sabit 696'da, satira katilirsa asagi kaymayi gizler; 4. inceleme)
             bk_ = n0 - max(b[3] for b in k.values())
-            olc.update(isim_ust_isimler=n0, isim_alt_isimler=n1, bosluk_isim_kucuk_isimler=bk_)
+            olc.update(isim_ust_isimler=n0, isim_alt_isimler=n1, bosluk_isim_kucuk_isimler=bk_,
+                       isim_alt_le_733_bilgi=n1 <= sabit['isim_alt'] + TOL_PX)   # Q kuyrugu (~734): yalniz bilgi (Serdar 6 Kas "Otomatik gecsin"; asagi kayma isim_ust_695 ile yakalanir)
             g.update(tarih_alt_le_795=t[3] <= TARIH_ALT + TOL_PX, isim_ust_695=abs(n0 - sabit['isim_ust']) <= TOL_PX,
-                     bosluk_isim_kucuk_32=abs(bk_ - BOSLUK) <= TOL_PX, isim_alt_le_733=n1 <= sabit['isim_alt'] + TOL_PX,
-                     bosluk_tarih_isim_25_45=25 <= t[1] - n1 <= 45)
+                     bosluk_isim_kucuk_32=abs(bk_ - BOSLUK) <= TOL_PX, bosluk_tarih_isim_25_45=25 <= t[1] - n1 <= 45)
     return {kk: bool(v) for kk, v in g.items()}, olc
 
 

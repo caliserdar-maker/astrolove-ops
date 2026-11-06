@@ -6,7 +6,7 @@
  "tarih": "JUNE 14, 2025",
  "_test": {
   "kod": "T23",
-  "beklenen": "OLCUM",
-  "not_": "Q kuyrugu: isim alti J inisinden asagi olabilir (isim_alt_le_733 -> DUR_SERDAR isim_alt_inis beklenir; olcum)"
+  "beklenen": "PASS",
+  "not_": "Q kuyrugu: isim-tarih 29-30 px (3. test kosusu); Serdar 6 Kas \"Otomatik gecsin\": PASS"
  }
 }
