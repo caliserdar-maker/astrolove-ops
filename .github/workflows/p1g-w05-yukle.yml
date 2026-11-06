@@ -1,15 +1,19 @@
 name: p1g-w05-yukle
-# P1-G (Serdar 6 Kas). BU COMMIT: YALNIZ 4570155846 ARIES_VIRGO (kuru da yaz da); kip yaz YALNIZ plan_damga 42223863686_0e95c567bc1b
-# (kuru 42223863686, HAZIR 1) ile: Serdar 6 Kas "Ok" (ARIES_VIRGO ilk gercek yazim, TEK yazim kosusu). Baska ilan / damga: token oncesi
-# DUR (Onay kapisi) ve token sonrasi ikinci kapi (ayni kural). Kurtarma girdileri (kurtar / geri_al / devam) YOK. 4570143815 CANCER_LIBRA
-# pilotu 6 Kas yazildi (42210656786 DUR, eski kart panelden silindi, 42213841977 dogrulama). Yazim kipi Etsy'ye YAZAR: galeri rank 5 W05_SUREC
+# P1-G (Serdar 6 Kas, kalan 77: gruplar 5, 20, 25, 26). BU COMMIT: GRUP 1 YALNIZ KURU. sadece = GRUP 1 dizesi BIREBIR
+# "4570110121,4570110641,4570125580,4570126104,4570112095" (eksik / fazla / sira / tekrar ayni kontrolde kapanir), onay W05-KURU-GRUP1.
+# kip yaz bu commit'te HICBIR girdiyle kabul edilmez (GRUP 1 yazimi ayri onay + ayri commit). Baska ilan / liste: token oncesi DUR (Onay
+# kapisi) ve ayni adimda ikinci kapi (KAPI2, ayni kural). Kurtarma girdileri (kurtar / geri_al / devam) YOK. Yazilan pilotlar: 4570143815
+# CANCER_LIBRA (42210656786 DUR, panel silmesi, 42213841977; Drive PILOT/yaz_42210656786) ve 4570155846 ARIES_VIRGO (42233642909 PASS,
+# Drive PILOT/yaz_42233642909; 42234074980 UYGUN, POSTER_GALERI_V11_YEDEK/20261106_142750); ikisi kapi
+# disinda. Yazim kipi (ayri commit'te acilinca) Etsy'ye YAZAR: galeri rank 5 W05_SUREC
 # (yeni kart yukle, eski W05'i sil) + renk baglarini plandaki AYNI haliyle yeniden yazma. Baska alan YOK; updateListing / PATCH YOK.
 # GALERI istisnasi (Serdar 5 Kas yontem b): yalniz W05_SUREC, yalniz P1-G. Kod scripts/kapak78/w05_degistir.py (etsy alt komutu).
 # Kart + MANIFEST: TEMP/P1G_W05_20261106_090016 (p1g-w05-uret 42194064189). Canli okuma: TEMP/POSTER_GALERI_V11_YEDEK/20261106_090016.
-#   kuru: plan YALNIZ bu ilan icin kurulur (plan_damga = <bu kosu>_<sha12>), sonra Etsy SALT OKUMA (3 GET) + kart sha256 = plan.
+#   kuru: plan YALNIZ listedeki ilanlar icin (liste sirasiyla) kurulur (plan_damga = <bu kosu>_<sha12>), sonra Etsy SALT OKUMA (ilan basina
+#         3 GET) + kart sha256 = plan. Kart / canli GALERI.json eksikse Etsy cagrisi ve token ONCESI DUR.
 #   yaz : plan yeniden KURULMAZ; PLAN_W05.json + RAPOR.json, plan_damga'nin "_" oncesindeki kuru kosusunun PILOT/kuru_<kosu>/ klasorunden
-#         okunur (kuru RAPOR: mod kuru, ayni damga, HAZIR 1, ayni ilan; degilse Etsy cagrisi ONCESI DUR: token bu adimda indirilmis olur
-#         ama kullanilmaz, Etsy istegi yok). Kuru YENIDEN DENENMEZ (yeniden deneme
+#         okunur (kuru RAPOR: mod kuru, ayni damga, HAZIR = liste uzunlugu, ilanlar = liste ayni sirayla; degilse token ve Etsy cagrisi
+#         ONCESI DUR). Kuru YENIDEN DENENMEZ (yeniden deneme
 #         kaydi kuru_<kosu>_a<N>'e gider, yaz onu okumaz): yeni kuru dispatch.
 # Kilit: kilit_bekle.py checkout'tan hemen sonra, token indirmeden ONCE (iki kipte). Kayit: TEMP/P1G_W05_20261106_090016/PILOT/<kip>_<run>/
 # (PLAN, RAPOR, SONUC, ilanlar/YEDEK|ARA|SONRA|TANI, LOG.txt sir taramasindan gecmis), --immutable. Kalan 77 ilan: AYRI onay + AYRI commit.
@@ -25,15 +29,15 @@ on:
         options: [kuru, yaz]
         default: kuru
       sadece:
-        description: "ilan (bu commit: yalniz 4570155846; yaz yalniz plan_damga 42223863686_0e95c567bc1b)"
+        description: "virgullu ilan listesi (bu commit: yalniz GRUP 1 dizesi 4570110121,4570110641,4570125580,4570126104,4570112095; yalniz kuru)"
         required: true
         default: ""
       onay:
-        description: "W05-KURU-<sadece> ya da W05-YAZ-<sadece> (kip + ilan birebir)"
+        description: "bu commit: W05-KURU-GRUP1 (kip yaz kapali)"
         required: true
         default: ""
       plan_damga:
-        description: "yaz kipinde ZORUNLU: kuru kosusunun plan_damga'si (<kuru_kosu>_<sha12>)"
+        description: "yaz kipinde ZORUNLU: kuru kosusunun plan_damga'si (<kuru_kosu>_<sha12>). NOT (yaz commit'i): iki kapida plan_damga SABIT + betige giden onay W05-YAZ-<tam liste> olmali (betik W05-YAZ-GRUP1'i reddeder)"
         required: false
         default: ""
 env:
@@ -51,10 +55,10 @@ jobs:
           ONAY: ${{ inputs.onay }}
           DAMGA: ${{ inputs.plan_damga }}
         run: |
-          case "$KIP" in kuru) K=KURU ;; yaz) K=YAZ ;; *) echo "::error::kip"; exit 1 ;; esac
-          [ "$SADECE" = "4570155846" ] || { echo "::error::bu commit'te yalniz 4570155846 ARIES_VIRGO; diger ilanlar ayri onay + ayri commit"; exit 1; }
-          [ "$ONAY" = "W05-$K-$SADECE" ] || { echo "::error::onay girdisi W05-$K-<sadece> degil"; exit 1; }
-          if [ "$KIP" = yaz ]; then [ "$DAMGA" = "42223863686_0e95c567bc1b" ] || { echo "::error::kip yaz yalniz plan_damga 42223863686_0e95c567bc1b (kuru 42223863686; Serdar 6 Kas)"; exit 1; }; fi
+          G1="4570110121,4570110641,4570125580,4570126104,4570112095"
+          [ "$KIP" = kuru ] || { echo "::error::kip yaz bu commit'te kapali (GRUP 1 yazimi ayri onay + ayri commit); yalniz kuru"; exit 1; }
+          [ "$SADECE" = "$G1" ] || { echo "::error::sadece GRUP 1 dizesiyle birebir ayni degil ($G1)"; exit 1; }
+          [ "$ONAY" = "W05-KURU-GRUP1" ] || { echo "::error::onay girdisi W05-KURU-GRUP1 degil"; exit 1; }
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
@@ -90,18 +94,33 @@ jobs:
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work _out _kart _plan
-          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-          CIFT=$(python3 -c "import csv,sys; print(next(r['cift'] for r in csv.DictReader(open('data/pod/pod78_ids.csv')) if r['listing_id']==sys.argv[1]))" "$SADECE")  # KAPI2
-          [ "$SADECE" = "4570155846" ] && [ "$CIFT" = ARIES_VIRGO ] || { echo "::error::ilan / cift eslesmesi beklenmedik (yalniz 4570155846 ARIES_VIRGO)"; exit 1; }  # KAPI2
-          case "$KIP" in kuru) ;; yaz) [ "$DAMGA" = "42223863686_0e95c567bc1b" ] || { echo "::error::kip yaz yalniz plan_damga 42223863686_0e95c567bc1b"; exit 1; } ;; *) echo "::error::kip"; exit 1 ;; esac  # KAPI2
-          rclone copyto "gdrive:$P1G/${CIFT}_W05_SUREC.jpg" "_kart/${CIFT}_W05_SUREC.jpg"
-          [ -s "_kart/${CIFT}_W05_SUREC.jpg" ] || { echo "::error::kart yok"; exit 1; }
+          G1="4570110121,4570110641,4570125580,4570126104,4570112095"  # KAPI2
+          [ "$KIP" = kuru ] && [ "$SADECE" = "$G1" ] || { echo "::error::KAPI2: yalniz kip kuru + GRUP 1 dizesi (yaz ayri commit)"; exit 1; }  # KAPI2
+          python3 - "$SADECE" > _work/ilan_cift.txt <<'PY'
+          import csv, sys
+          m = {r["listing_id"]: r["cift"] for r in csv.DictReader(open("data/pod/pod78_ids.csv"))}
+          ids = sys.argv[1].split(",")
+          if not ids or not all(ids) or len(set(ids)) != len(ids) or any(i not in m for i in ids):
+              raise SystemExit(f"::error::ilan listesi pod78_ids.csv ile eslesmiyor / tekrar / bos ({sys.argv[1]})")
+          for i in ids:
+              print(i, m[i])
+          PY
+          while read -r -u 3 ID CIFT; do   # liste fd 3'ten: dongu govdesi stdin'i tuketemez
+            rclone copyto "gdrive:$P1G/${CIFT}_W05_SUREC.jpg" "_kart/${CIFT}_W05_SUREC.jpg" < /dev/null \
+              || { echo "::error::kart indirilemedi ($ID $CIFT); token ve Etsy cagrisi yok"; exit 1; }
+            [ -s "_kart/${CIFT}_W05_SUREC.jpg" ] || { echo "::error::kart bos ($ID $CIFT); token ve Etsy cagrisi yok"; exit 1; }
+            if [ "$KIP" = kuru ]; then
+              mkdir -p "_canli/${ID}_${CIFT}"
+              rclone copyto "gdrive:$YEDEK/${ID}_${CIFT}/GALERI.json" "_canli/${ID}_${CIFT}/GALERI.json" < /dev/null \
+                || { echo "::error::canli GALERI.json indirilemedi ($ID $CIFT); token ve Etsy cagrisi yok"; exit 1; }
+              [ -s "_canli/${ID}_${CIFT}/GALERI.json" ] || { echo "::error::canli GALERI.json bos ($ID $CIFT); token ve Etsy cagrisi yok"; exit 1; }
+            fi
+          done 3< _work/ilan_cift.txt
           if [ "$KIP" = kuru ]; then
-            mkdir -p "_canli/${SADECE}_${CIFT}"
-            rclone copyto "gdrive:$YEDEK/${SADECE}_${CIFT}/GALERI.json" "_canli/${SADECE}_${CIFT}/GALERI.json"
             rclone copyto "gdrive:$P1G/MANIFEST_W05.csv" _work/MANIFEST_W05.csv
-            python3 -c "import csv,sys; r=[x for x in csv.DictReader(open('data/pod/pod78_ids.csv')) if x['listing_id']==sys.argv[1]]; w=csv.DictWriter(open('_work/cift.csv','w',newline=''),fieldnames=list(r[0])); w.writeheader(); w.writerows(r)" "$SADECE"
-            python3 scripts/kapak78/w05_degistir.py plan --canli-dir _canli --manifest _work/MANIFEST_W05.csv --ciftler _work/cift.csv --out _out
+            python3 -c "import csv,sys; R={x['listing_id']: x for x in csv.DictReader(open('data/pod/pod78_ids.csv'))}; ids=sys.argv[1].split(','); w=csv.DictWriter(open('_work/cift.csv','w',newline=''),fieldnames=list(R[ids[0]])); w.writeheader(); w.writerows(R[i] for i in ids)" "$SADECE"
+            python3 scripts/kapak78/w05_degistir.py plan --canli-dir _canli --manifest _work/MANIFEST_W05.csv --ciftler _work/cift.csv --out _out \
+              || { echo "::error::plan BLOK (ilan basina neden: PILOT/<kosu>/PLAN_W05.md); token ve Etsy cagrisi yok"; exit 1; }
             D=$(python3 -c "import json; print(json.load(open('_out/PLAN_W05.json'))['plan_damga'])")
             cp _out/PLAN_W05.json _plan/PLAN_W05.json
           else
@@ -112,8 +131,9 @@ jobs:
             python3 - "$DAMGA" "$SADECE" <<'PY'
           import json, sys
           r = json.load(open("_plan/KURU_RAPOR.json"))
-          ok = r.get("mod") == "kuru" and r.get("plan_damga") == sys.argv[1] and r.get("sayilar") == {"HAZIR": 1} \
-              and [x.get("ilan") for x in r.get("ilanlar") or []] == [sys.argv[2]]
+          ids = sys.argv[2].split(",")
+          ok = r.get("mod") == "kuru" and r.get("plan_damga") == sys.argv[1] and r.get("sayilar") == {"HAZIR": len(ids)} \
+              and [x.get("ilan") for x in r.get("ilanlar") or []] == ids
           json.dump(dict(kuru_kapisi="PASS" if ok else "FAIL", mod=r.get("mod"), plan_damga=r.get("plan_damga"), sayilar=r.get("sayilar")),
                     open("_out/KURU_KAPI.json", "w"))
           if not ok:
@@ -122,6 +142,7 @@ jobs:
             cp _plan/PLAN_W05.json _out/PLAN_W05_KULLANILAN.json
             D="$DAMGA"
           fi
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json   # token: kapilar + girdiler tamamlandiktan SONRA
           echo "PLAN_DAMGA=$D" >> "$GITHUB_ENV"; echo "::notice title=W05 plan_damga::$D"
       - name: W05 degisim (betik)
         env:
