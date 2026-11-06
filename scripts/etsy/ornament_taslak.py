@@ -178,7 +178,7 @@ def kur(api, shop, out, oku_R):
         R["readiness_state_id"] = var[0]["readiness_state_id"]; R["olaylar"].append(f"hazirlik var {R['readiness_state_id']}")
     else:
         x = api.post(f"/shops/{shop}/readiness-state-definitions", {"readiness_state": "made_to_order", "min_processing_time": HAZIRLIK[0],
-                                                                    "max_processing_time": HAZIRLIK[1], "processing_time_unit": "business_days"}) or {}
+                                                                    "max_processing_time": HAZIRLIK[1], "processing_time_unit": "days"}) or {}   # Etsy enum (days, weeks); 6 Kas 400
         R["readiness_state_id"] = x.get("readiness_state_id"); R["olaylar"].append(f"hazirlik olusturuldu {R['readiness_state_id']} {x}")
     # 2) bolum
     secs = (api.get(f"/shops/{shop}/sections") or {}).get("results") or []
