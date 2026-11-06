@@ -1,2 +1,2 @@
-2026-11-06 19:40 UTC
-Serdar 6 Kas gece: 78 toplu uretim basla, yol A (GitHub paralel). Merkez tetik.
+2026-11-06 19:44 UTC
+Serdar 6 Kas gece: 78 toplu uretim basla, yol A. 2. tetik: kontrol cifti baskisi indirme duzeltmesi (42281766702 iptal).

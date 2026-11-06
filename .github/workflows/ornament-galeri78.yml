@@ -173,7 +173,8 @@ jobs:
         run: |
           set -euo pipefail
           K=$(python3 -c "import json; print(json.load(open('s/docs/ornament/GALERI78.json'))['kaynak_klasor'])")
-          python3 -c "import json, os; s = json.load(open('s/docs/ornament/GALERI78.json'))['stil_dosya']; print('\n'.join(f'{c}_{t}_954.png' for c in os.environ['CIFTLER'].split(',') for t in s))" > /tmp/liste.txt
+          # kontrol cifti (LEO_LEO) her parcada once uretilir: baskilari da indirilir (42281766702'de eksikti, kontrol kapisi DUR verdi)
+          python3 -c "import json, os; s = json.load(open('s/docs/ornament/GALERI78.json'))['stil_dosya']; c_ = sorted(set(os.environ['CIFTLER'].split(',') + ['LEO_LEO'])); print('\n'.join(f'{c}_{t}_954.png' for c in c_ for t in s))" > /tmp/liste.txt
           ok=0; for d in 1 2 3; do rclone copy "gdrive:ASTROLOVE/TEMP/$K" /tmp/kaynak --files-from /tmp/liste.txt --no-traverse -q 2>>/tmp/rclone_err.txt && { ok=1; break; }; sleep $((10*d)); done
           [ "$ok" = 1 ]
           n=$(ls /tmp/kaynak | wc -l); b=$(wc -l < /tmp/liste.txt); echo "indirilen $n / $b"; [ "$n" = "$b" ]
