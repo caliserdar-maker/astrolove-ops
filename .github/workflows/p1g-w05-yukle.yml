@@ -1,13 +1,15 @@
 name: p1g-w05-yukle
-# P1-G (Serdar 6 Kas). BU COMMIT: YALNIZ kip kuru, YALNIZ 4570155846 ARIES_VIRGO (Serdar 6 Kas "kod + kuru"; kip yaz HICBIR ilan icin
-# kabul edilmez: gercek yazim ayri onay + ayri commit). 4570143815 CANCER_LIBRA pilotu 6 Kas yazildi (42210656786 DUR, eski kart panelden
-# silindi, 42213841977 dogrulama). Yazim kipi (ileride, ayri onayla) Etsy'ye YAZAR: galeri rank 5 W05_SUREC
+# P1-G (Serdar 6 Kas). BU COMMIT: YALNIZ 4570155846 ARIES_VIRGO (kuru da yaz da); kip yaz YALNIZ plan_damga 42223863686_0e95c567bc1b
+# (kuru 42223863686, HAZIR 1) ile: Serdar 6 Kas "Ok" (ARIES_VIRGO ilk gercek yazim, TEK yazim kosusu). Baska ilan / damga: token oncesi
+# DUR (Onay kapisi) ve token sonrasi ikinci kapi (ayni kural). Kurtarma girdileri (kurtar / geri_al / devam) YOK. 4570143815 CANCER_LIBRA
+# pilotu 6 Kas yazildi (42210656786 DUR, eski kart panelden silindi, 42213841977 dogrulama). Yazim kipi Etsy'ye YAZAR: galeri rank 5 W05_SUREC
 # (yeni kart yukle, eski W05'i sil) + renk baglarini plandaki AYNI haliyle yeniden yazma. Baska alan YOK; updateListing / PATCH YOK.
 # GALERI istisnasi (Serdar 5 Kas yontem b): yalniz W05_SUREC, yalniz P1-G. Kod scripts/kapak78/w05_degistir.py (etsy alt komutu).
 # Kart + MANIFEST: TEMP/P1G_W05_20261106_090016 (p1g-w05-uret 42194064189). Canli okuma: TEMP/POSTER_GALERI_V11_YEDEK/20261106_090016.
 #   kuru: plan YALNIZ bu ilan icin kurulur (plan_damga = <bu kosu>_<sha12>), sonra Etsy SALT OKUMA (3 GET) + kart sha256 = plan.
 #   yaz : plan yeniden KURULMAZ; PLAN_W05.json + RAPOR.json, plan_damga'nin "_" oncesindeki kuru kosusunun PILOT/kuru_<kosu>/ klasorunden
-#         okunur (kuru RAPOR: mod kuru, ayni damga, HAZIR 1, ayni ilan; degilse token oncesi DUR). Kuru YENIDEN DENENMEZ (yeniden deneme
+#         okunur (kuru RAPOR: mod kuru, ayni damga, HAZIR 1, ayni ilan; degilse Etsy cagrisi ONCESI DUR: token bu adimda indirilmis olur
+#         ama kullanilmaz, Etsy istegi yok). Kuru YENIDEN DENENMEZ (yeniden deneme
 #         kaydi kuru_<kosu>_a<N>'e gider, yaz onu okumaz): yeni kuru dispatch.
 # Kilit: kilit_bekle.py checkout'tan hemen sonra, token indirmeden ONCE (iki kipte). Kayit: TEMP/P1G_W05_20261106_090016/PILOT/<kip>_<run>/
 # (PLAN, RAPOR, SONUC, ilanlar/YEDEK|ARA|SONRA|TANI, LOG.txt sir taramasindan gecmis), --immutable. Kalan 77 ilan: AYRI onay + AYRI commit.
@@ -23,7 +25,7 @@ on:
         options: [kuru, yaz]
         default: kuru
       sadece:
-        description: "ilan (bu commit: yalniz 4570155846, yalniz kip kuru)"
+        description: "ilan (bu commit: yalniz 4570155846; yaz yalniz plan_damga 42223863686_0e95c567bc1b)"
         required: true
         default: ""
       onay:
@@ -49,11 +51,10 @@ jobs:
           ONAY: ${{ inputs.onay }}
           DAMGA: ${{ inputs.plan_damga }}
         run: |
-          [ "$KIP" = kuru ] || { echo "::error::kip yaz bu commit'te kapali (yazim ayri onay); yalniz kuru"; exit 1; }
-          [ "$SADECE" = "4570155846" ] || { echo "::error::bu commit'te yalniz 4570155846 ARIES_VIRGO (kuru); diger ilanlar ayri onay + ayri commit"; exit 1; }
           case "$KIP" in kuru) K=KURU ;; yaz) K=YAZ ;; *) echo "::error::kip"; exit 1 ;; esac
+          [ "$SADECE" = "4570155846" ] || { echo "::error::bu commit'te yalniz 4570155846 ARIES_VIRGO; diger ilanlar ayri onay + ayri commit"; exit 1; }
           [ "$ONAY" = "W05-$K-$SADECE" ] || { echo "::error::onay girdisi W05-$K-<sadece> degil"; exit 1; }
-          if [ "$KIP" = yaz ]; then [[ "$DAMGA" =~ ^[0-9]+_[0-9a-f]{12}$ ]] || { echo "::error::yaz kipinde plan_damga <kuru_kosu>_<sha12>"; exit 1; }; fi
+          if [ "$KIP" = yaz ]; then [ "$DAMGA" = "42223863686_0e95c567bc1b" ] || { echo "::error::kip yaz yalniz plan_damga 42223863686_0e95c567bc1b (kuru 42223863686; Serdar 6 Kas)"; exit 1; }; fi
       - uses: actions/checkout@v4
       - name: Etsy kilidi (sira bekle, iptal yok)
         env:
@@ -90,8 +91,9 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work _out _kart _plan
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-          CIFT=$(python3 -c "import csv,sys; print(next(r['cift'] for r in csv.DictReader(open('data/pod/pod78_ids.csv')) if r['listing_id']==sys.argv[1]))" "$SADECE")
-          [ "$CIFT" = ARIES_VIRGO ] && [ "$KIP" = kuru ] || { echo "::error::ilan / cift eslesmesi beklenmedik ya da kip kuru degil"; exit 1; }
+          CIFT=$(python3 -c "import csv,sys; print(next(r['cift'] for r in csv.DictReader(open('data/pod/pod78_ids.csv')) if r['listing_id']==sys.argv[1]))" "$SADECE")  # KAPI2
+          [ "$SADECE" = "4570155846" ] && [ "$CIFT" = ARIES_VIRGO ] || { echo "::error::ilan / cift eslesmesi beklenmedik (yalniz 4570155846 ARIES_VIRGO)"; exit 1; }  # KAPI2
+          case "$KIP" in kuru) ;; yaz) [ "$DAMGA" = "42223863686_0e95c567bc1b" ] || { echo "::error::kip yaz yalniz plan_damga 42223863686_0e95c567bc1b"; exit 1; } ;; *) echo "::error::kip"; exit 1 ;; esac  # KAPI2
           rclone copyto "gdrive:$P1G/${CIFT}_W05_SUREC.jpg" "_kart/${CIFT}_W05_SUREC.jpg"
           [ -s "_kart/${CIFT}_W05_SUREC.jpg" ] || { echo "::error::kart yok"; exit 1; }
           if [ "$KIP" = kuru ]; then

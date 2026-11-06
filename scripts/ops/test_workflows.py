@@ -167,6 +167,58 @@ def main() -> int:
                 hedef.append(a[1])
     uzak = [h for h in hedef if h.startswith(("$T/", "gdrive:"))]
     assert uzak == ["$T/POSTER_GALERI_V11_YUKLE/DOGRULA/${GITHUB_RUN_ID}"], f"galeri-v11-dogrula: rapor klasoru disina yazim {uzak}"
+    # 6 Kas (Serdar "Ok", ARIES_VIRGO ilk gercek yazim): p1g-w05-yukle iki kapi (Onay kapisi token oncesi + token adiminda KAPI2) ayni kural:
+    # yalniz 4570155846; kip yaz yalniz plan_damga 42223863686_0e95c567bc1b + onay W05-YAZ-4570155846; kip kuru onay W05-KURU-4570155846
+    pw = (WORKFLOWS / "p1g-w05-yukle.yml").read_text(encoding="utf-8")   # yaml modulu olmadan (yerel Ruby yolu) da calisir
+    ps = pw.splitlines(); i0 = ps.index("      - name: Onay kapisi"); i1 = next(i for i in range(i0, len(ps)) if ps[i].strip() == "run: |")
+    i2 = next(i for i in range(i1 + 1, len(ps)) if ps[i].startswith("      - "))
+    k1 = "\n".join(x[10:] for x in ps[i1 + 1:i2])
+    k2 = "\n".join(x.strip() for x in ps if x.rstrip().endswith("# KAPI2"))
+    assert k2.count("# KAPI2") == 3, "p1g-w05-yukle: KAPI2 satirlari"
+    assert pw.index("name: Onay kapisi") < pw.index("uses: actions/checkout@v4") < pw.index("ETSY_TOKEN.json"), "p1g-w05-yukle: kapi token oncesi"
+    D = "42223863686_0e95c567bc1b"
+    durum = (("yaz", "4570155846", "W05-YAZ-4570155846", D, 0), ("kuru", "4570155846", "W05-KURU-4570155846", "", 0),
+             ("yaz", "4570143815", "W05-YAZ-4570143815", D, 1), ("kuru", "4570143815", "W05-KURU-4570143815", "", 1),
+             ("yaz", "4570155846", "W05-YAZ-4570155846", "42223863686_0e95c567bc1c", 1),
+             ("yaz", "4570155846", "W05-YAZ-4570155846", "42210418010_3b9f9139dc9e", 1),
+             ("yaz", "4570155846", "W05-YAZ-4570155846", "", 1), ("yaz", "4570155846", "W05-KURU-4570155846", D, 1),
+             ("yaz", "4570155846", "W05-YAZ-4570143815", D, 1), ("kuru", "4570155846", "W05-YAZ-4570155846", "", 1),
+             ("sil", "4570155846", "W05-SIL-4570155846", D, 1), ("yaz", "4570155846,4570143815", "W05-YAZ-4570155846,4570143815", D, 1))
+    for kip, sad, onay, dam, bek in durum:
+        e = {"KIP": kip, "SADECE": sad, "ONAY": onay, "DAMGA": dam, "PATH": os.environ.get("PATH", "")}
+        r1 = subprocess.run(["bash", "-c", k1], capture_output=True, text=True, env=e)
+        assert (r1.returncode == 0) == (bek == 0), f"p1g-w05-yukle Onay kapisi {kip} {sad} {onay} {dam!r}: rc {r1.returncode} {r1.stdout}"
+        if onay == f"W05-{kip.upper()}-{sad}" and kip in ("kuru", "yaz"):   # onay metnini gecen her durumda ikinci kapi da ayni karari verir
+            r2 = subprocess.run(["bash", "-c", "set -euo pipefail\n" + k2], capture_output=True, text=True, env=e, cwd=str(ROOT))
+            assert (r2.returncode == 0) == (bek == 0), f"p1g-w05-yukle KAPI2 {kip} {sad} {dam!r}: rc {r2.returncode} {r2.stdout} {r2.stderr}"
+    # inceleme 6 Kas: KAPI2 kart indirme ve plan / RAPOR'dan once; betik adimi ayni inputs.sadece / kip / onay'i env ile alir
+    tk = next(i for i, x in enumerate(ps) if x.strip() == "- name: Token + girdiler (kart, plan)")
+    bt = next(i for i, x in enumerate(ps) if x.strip() == "- name: W05 degisim (betik)")
+    k2s = [i for i, x in enumerate(ps) if x.rstrip().endswith("# KAPI2")]
+    kart = next(i for i, x in enumerate(ps) if "rclone copyto \"gdrive:$P1G/${CIFT}_W05_SUREC.jpg\"" in x)
+    assert tk < min(k2s) and max(k2s) < kart < bt, "p1g-w05-yukle: KAPI2 token adiminda, kart indirmeden once"
+    benv = "\n".join(ps[bt:bt + 12])
+    for x in ("KIP: ${{ inputs.kip }}", "SADECE: ${{ inputs.sadece }}", "ONAY: ${{ inputs.onay }}"):
+        assert x in benv, f"p1g-w05-yukle betik adimi env: {x}"
+    assert '--sadece "$SADECE"' in pw and '--onay "$ONAY"' in pw and "--plan-damga \"${PLAN_DAMGA:?}\"" in pw, "p1g-w05-yukle betik argumanlari"
+    assert "${{ inputs." not in "\n".join(x for x in ps if not x.strip().startswith(("KIP:", "SADECE:", "ONAY:", "DAMGA:", "GH_TOKEN:"))), \
+        "p1g-w05-yukle: inputs run icine gomulu (yalniz env ile)"
+    # kuru RAPOR Python kapisi (yaz kipi): sahte KURU_RAPOR.json ile bilinen PASS / FAIL
+    import json as _j, tempfile as _tf
+    py0 = next(i for i, x in enumerate(ps) if "python3 - \"$DAMGA\" \"$SADECE\" <<'PY'" in x)
+    py1 = next(i for i in range(py0 + 1, len(ps)) if ps[i].strip() == "PY")
+    kod = "\n".join(x[10:] for x in ps[py0 + 1:py1])
+    iyi = dict(mod="kuru", plan_damga=D, sayilar={"HAZIR": 1}, ilanlar=[{"ilan": "4570155846"}])
+    for ad, rap, bek in (("iyi", iyi, 0), ("mod yazim", dict(iyi, mod="yazim"), 1), ("baska damga", dict(iyi, plan_damga=D[:-1] + "c"), 1),
+                         ("BLOK", dict(iyi, sayilar={"BLOK": 1}), 1), ("HAZIR + BLOK", dict(iyi, sayilar={"HAZIR": 1, "BLOK": 1}), 1),
+                         ("baska ilan", dict(iyi, ilanlar=[{"ilan": "4570143815"}]), 1),
+                         ("iki ilan", dict(iyi, ilanlar=[{"ilan": "4570155846"}, {"ilan": "4570143815"}]), 1)):
+        with _tf.TemporaryDirectory() as td:
+            Path(td, "_plan").mkdir(); Path(td, "_out").mkdir()
+            Path(td, "_plan", "KURU_RAPOR.json").write_text(_j.dumps(rap))
+            r3 = subprocess.run(["python3", "-", D, "4570155846"], input=kod, capture_output=True, text=True, cwd=td)
+            kk = _j.loads(Path(td, "_out", "KURU_KAPI.json").read_text())["kuru_kapisi"]
+            assert (r3.returncode == 0) == (bek == 0) and kk == ("PASS" if bek == 0 else "FAIL"), f"p1g-w05-yukle kuru kapisi {ad}: {r3.returncode} {kk}"
     print(f"PASS: {len(files)} workflow YAML, {len(PUBLIC_AUDITS)} public denetim sozlesmesi")
     return 0
 
