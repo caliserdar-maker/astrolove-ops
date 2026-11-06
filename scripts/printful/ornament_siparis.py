@@ -119,10 +119,10 @@ def kontrol_yap(png, cikti):
 
 
 ELLE = """AstroLoveArt ornament siparisi: Printful'a ELLE siparis adimlari (Serdar verir; otomatik gonderim yok)
-1. Onizleme dosyasi TASLAK: Serdar'in K4 (onizleme yontemi) onayina kadar musteriye GONDERILMEZ. Onaydan sonra onizleme Etsy Messages ile gider; musteri onayi gelmeden baski siparisi verilmez.
+1. Musteri onizlemesi (K4, Serdar 6 Kas "C" + "dosyalari ben yuklerim"): Serdar baski dosyasini Printful'a KENDISI yukler ve Printful'un urun gorselini (mockup) indirir; onizleme Etsy Messages ile o gorselle gider. _Preview_TASLAK.jpg yalniz ic kontroldur, musteriye gitmez. Musteri onayi gelmeden baski siparisi verilmez.
 2. Printful > Orders > New order > manual. Urun: Ceramic Ornament (double-sided, 900), sekil Circle.
 3. Baski dosyasi: {dosya} (954 x 954 px, 300 dpi). Iki yuze AYNI dosya (ORNAMENT_KARAR 6).
-4. Printful onizlemesinde isim satiri ve tarih tam gorunuyor mu bak; kesim dairesinin disina tasan oge olmamali.
+4. Printful onizlemesinde isim satiri ve tarih tam gorunuyor mu bak; kesim dairesinin disina tasan oge olmamali. Musteriye giden urun gorseli bu ekrandan.
 5. Kargo adresi Etsy siparisinden; ad ve adreste duz kesme isareti yaz (Etsy HTML kodu &#039; kopyalanmaz), posta kodu 5 hane (ANA_3 10).
 6. Siparis verildikten sonra: Etsy'de "shipped" ve takip numarasi Printful kargo e-postasindan; Complete order (astrolove-siparis).
 """
@@ -216,7 +216,7 @@ def main():
     RAPOR['cikti'] = dict(baski=baski.name, baski_sha256=sha(baski), baski_piksel_sha=u78.piksel_sha(baski),
                           printful=(rc.get('printful_dosya') or {}).get(stil), onizleme=f'{taban}_Preview_TASLAK.jpg',
                           dosya_adi_not='stil adi ic kod (Sade_Altin, Fildisi); ilandaki Ingilizce stil adiyla eslenmesi dogrulanmadi',
-                          onizleme_not='K4 karari bekliyor: tek karo, 76 mm kesim + delik (o4.onizleme); urun gorunumu degil, gercek oranda ornek Serdar onayindan once kullanilmaz',
+                          onizleme_not='ic kontrol: tek karo, 76 mm kesim + delik (o4.onizleme); musteri onizlemesi Printful urun gorseli, Serdar yukler (K4, Serdar 6 Kas)',
                           diger_stiller_piksel_sha={s: u78.piksel_sha(o_png / f'{cift}_{s}_954.png') for s in STIL_DOSYA_AD if (o_png / f'{cift}_{s}_954.png').exists()})
     if durum != 'PASS':                                                        # gorselli DUR_SERDAR: ELLE_SIPARIS YOK; Serdar onayindan sonra Merkez ayrica isler
         (O / 'DUR.json').write_text(json.dumps(dict(durum=durum, neden=neden, fail=fail, gorsel_var=True), indent=1))   # dosya adi yok: burc / stil adi gizlilik taramasinda yanlis alarm (5. inceleme)
