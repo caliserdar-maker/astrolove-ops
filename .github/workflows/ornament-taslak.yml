@@ -80,7 +80,7 @@ jobs:
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
           if [ "$M" != "kuru" ]; then rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json; fi
           if [ "$M" = "yaz" ]; then
-            V=$(rclone lsf "$O" --include DURUM.json) || { echo "::error::Drive $O okunamadi (DURUM varligi bilinmiyor)"; exit 1; }
+            V=$(rclone lsf "$O" --files-only --include DURUM.json) || { echo "::error::Drive $O okunamadi (DURUM varligi bilinmiyor)"; exit 1; }
             case "$V" in
               "") echo "DURUM.json yok (ilk yaz kosusu)";;
               DURUM.json) rclone copyto "$O/DURUM.json" _out/DURUM.json || { echo "::error::DURUM.json var ama inmedi"; exit 1; }
