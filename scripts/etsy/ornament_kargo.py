@@ -32,7 +32,7 @@ from pathlib import Path
 import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from etsy_common import API, Etsy, TokenStore, mask  # noqa: E402
+from etsy_common import API, Etsy, TokenStore, ai_beyan_kapisi, mask  # noqa: E402
 import ornament_taslak as OT  # noqa: E402
 
 KOK = Path(__file__).resolve().parents[2]
@@ -125,6 +125,7 @@ class Ag(Etsy):
 
     def _tek(self, path, body):
         """TEK gonderim POST (form). -> (kod, json|None, metin). kod 'BELIRSIZ': istek gitti mi bilinmiyor."""
+        ai_beyan_kapisi("POST", path, data=body)
         self._istek_oncesi()
         sira = self._bekle()
         try:

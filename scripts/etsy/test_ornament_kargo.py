@@ -788,6 +788,43 @@ def t_free_regex():
     assert not K.FREE.search("You can see the shipping cost and estimated delivery time for your country on this page and at checkout.")
 
 
+def t_tek_gercek_ai_beyan_kapisi():
+    """Gercek Ag._tek calisir (KuruProfil degil); taklit yalniz _istek_oncesi / _bekle / _headers / _kalan_yaz ve requests.post.
+    Bilinen PASS: profil yollari (ilan yolu degil) kapidan gecer, post her cagrida 1 kez. Bilinen FAIL: ilan yolunda beyansiz aciklama
+    _tek'e DOGRUDAN verilir (tek_post'un IZIN kontrolu kapidan once YASAK verirdi) -> BeyanYok, post 0 kez."""
+    import etsy_common as EC
+    p = K.ProfilIzin(None)
+    hazir = []   # _istek_oncesi / _bekle cagrilari: kapi hata verirse bekleme ve kota harcanmaz
+    p._istek_oncesi = lambda: hazir.append("once")
+    p._bekle = lambda: hazir.append("bekle") or 0
+    p._headers = lambda token=None: {}
+    p._kalan_yaz = lambda rem, sira=None: None
+    sayac = []
+
+    class Y:
+        status_code, headers, text = 201, {}, "{}"
+
+        def json(self):
+            return {}
+
+    orj = K.requests.post
+    K.requests.post = lambda url, **kw: (sayac.append(url), Y())[1]
+    try:
+        assert p.tek_post("/shops/1/shipping-profiles", {"title": "t"})[0] == 201 and len(sayac) == 1, sayac
+        assert p.tek_post("/shops/1/shipping-profiles/45/destinations", {"destination_country_iso": "DE"})[0] == 201 and len(sayac) == 2, sayac
+        try:
+            p._tek("/shops/1/listings/2", {"description": "no disclosure"})
+        except EC.BeyanYok:
+            pass
+        else:
+            raise AssertionError("ilan yolu + beyansiz aciklama: BeyanYok bekleniyordu, gecti")
+        assert len(sayac) == 2, f"BeyanYok'ta post cagrilmamali: {sayac}"
+        assert hazir == ["once", "bekle"] * 2, f"BeyanYok'ta _istek_oncesi / _bekle cagrilmamali: {hazir}"
+    finally:
+        K.requests.post = orj
+        EC.BEYAN_HATA.clear()
+
+
 for ad, f in list(globals().items()):
     if ad.startswith("t_") and callable(f):
         t(ad, f)
