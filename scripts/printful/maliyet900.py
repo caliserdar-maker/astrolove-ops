@@ -55,6 +55,11 @@ ADRES = {
     'KR': dict(country_code='KR', city='Seoul', zip='03154', address1='209 Sejong-daero'),
     'AE': dict(country_code='AE', city='Dubai', zip='00000', address1='Sheikh Mohammed bin Rashid Blvd'),
     'IL': dict(country_code='IL', city='Jerusalem', zip='9195016', address1='Ruppin Blvd 11'),
+    # ABD eyaletleri (inceleme 7 Kas: tum ulke sorgusunda ABD 'AA' askeri eyaletiyle alinmisti)
+    'US_CA': dict(country_code='US', state_code='CA', city='Los Angeles', zip='90012', address1='200 N Spring St'),
+    'US_HI': dict(country_code='US', state_code='HI', city='Honolulu', zip='96813', address1='415 S Beretania St'),
+    'US_AK': dict(country_code='US', state_code='AK', city='Juneau', zip='99801', address1='120 4th St'),
+    'US_PR_YOK': dict(country_code='PR', city='San Juan', zip='00901', address1='Calle Fortaleza 63'),
 }
 IZIN = (('GET', re.compile(r'^/oauth/scopes$')), ('GET', re.compile(r'^/orders\?limit=5$')), ('POST', re.compile(r'^/orders/estimate-costs$')),
         ('POST', re.compile(r'^/shipping/rates$')), ('GET', re.compile(r'^/products/variant/23133$')), ('GET', re.compile(r'^/countries$')))
