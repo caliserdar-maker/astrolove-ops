@@ -2,6 +2,7 @@
 """ornament_kargo testleri (ag yok). Bilinen PASS + bilinen FAIL (CLAUDE.md KALITE 3). Taklit YALNIZ ag katmani (_ag, _tek); izin
 kontrolleri gercek FiyatIzin / ProfilIzin / SaltOkur siniflarindan gecer. Kullanim: python3 scripts/etsy/test_ornament_kargo.py"""
 import json
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -9,6 +10,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import ornament_kargo as K  # noqa: E402
 import ornament_taslak as OT  # noqa: E402
+
+os.environ.pop("GITHUB_STEP_SUMMARY", None)   # testler Actions ozetine sahte "Etsy reddetti" satiri yazmasin
 
 SONUC = []
 
@@ -236,6 +239,145 @@ def t_profil_izinli_ret_atlanir():
     with tmp() as d:
         R = K.profil(p, "1", Path(d))
     assert R["kontrol"] == {"hedef_beklenen": 127, "profilde": 125, "reddedilen": 2}, R["kontrol"]
+
+
+def _iso(cc):
+    return '{"error":"Value for destination_country_iso must be a valid ISO Country Code: %s."}' % cc
+
+
+def t_profil_iso_ret_atlanir():
+    p = K.KuruProfil()
+    p.ret, p.ret_metin = {"CI": 400}, {"CI": _iso("CI")}
+    with tmp() as d:
+        R = K.profil(p, "1", Path(d))
+    assert R["kontrol"] == {"hedef_beklenen": 127, "profilde": 126, "reddedilen": 1}, R["kontrol"]
+    assert [c for c, _ in R["reddedilen"]] == ["CI"], R["reddedilen"]
+
+
+def t_profil_iso_ret_baska_kod_dur():
+    p = K.KuruProfil()
+    p.ret, p.ret_metin = {"CI": 400}, {"CI": _iso("XX")}
+    with tmp() as d:
+        dur_bekle(lambda: K.profil(p, "1", Path(d)), "DUR: hedef CI")
+
+
+def _metin_ulkeleri(n):
+    return [cc for cc, *_ in K.hedef_listesi()[0] if cc not in K.KORUNAN and cc not in K.RET_IZINLI][:n]
+
+
+def t_profil_iso_ret_sinir_dur():
+    p = K.KuruProfil()
+    ulkeler = _metin_ulkeleri(K.METIN_SINIR + 1)
+    p.ret = {cc: 400 for cc in ulkeler}
+    p.ret_metin = {cc: _iso(cc) for cc in ulkeler}
+    with tmp() as d:
+        dur_bekle(lambda: K.profil(p, "1", Path(d)), "DUR: Etsy'nin tanimadigi ulke")
+
+
+def t_profil_iso_ret_sinirda_gecer_karisik():
+    p = K.KuruProfil()
+    ulkeler = _metin_ulkeleri(K.METIN_SINIR)
+    p.ret = {cc: 400 for cc in ulkeler + sorted(K.RET_IZINLI)}
+    p.ret_metin = {cc: _iso(cc) for cc in ulkeler}
+    with tmp() as d:
+        R = K.profil(p, "1", Path(d))
+    assert R["kontrol"]["reddedilen"] == K.METIN_SINIR + len(K.RET_IZINLI), R["kontrol"]
+    assert R["metin_ret"] == ulkeler, R["metin_ret"]
+
+
+def t_profil_iso_ret_korunan_dur():
+    for cc in ("DE", "GB", "CA", "AU", "FR"):
+        p = K.KuruProfil()
+        p.ret, p.ret_metin = {cc: 400}, {cc: _iso(cc)}
+        with tmp() as d:
+            dur_bekle(lambda: K.profil(p, "1", Path(d)), f"DUR: hedef {cc}")
+
+
+def t_profil_iso_ret_origin_alani_dur():
+    p = K.KuruProfil()
+    p.ret = {"CI": 400}
+    p.ret_metin = {"CI": '{"error":"Value for origin_country_iso must be a valid ISO Country Code: CI."}'}
+    with tmp() as d:
+        dur_bekle(lambda: K.profil(p, "1", Path(d)), "DUR: hedef CI")
+
+
+def t_profil_iso_ret_422_dur():
+    p = K.KuruProfil()
+    p.ret, p.ret_metin = {"CI": 422}, {"CI": _iso("CI")}
+    with tmp() as d:
+        dur_bekle(lambda: K.profil(p, "1", Path(d)), "DUR: hedef CI -> 422")
+
+
+def t_profil_iso_ret_json_degil_dur():
+    p = K.KuruProfil()
+    p.ret, p.ret_metin = {"CI": 400}, {"CI": "Value for destination_country_iso must be a valid ISO Country Code: CI."}
+    with tmp() as d:
+        dur_bekle(lambda: K.profil(p, "1", Path(d)), "DUR: hedef CI")
+
+
+def t_profil_abd_eksik_metin_ret_dur():
+    p, pr = _tam_profil()
+    pr["shipping_profile_destinations"] = [x for x in pr["shipping_profile_destinations"] if x["destination_country_iso"] != "US"]
+    p.ret, p.ret_metin = {"US": 400}, {"US": _iso("US")}
+    with tmp() as d:
+        dur_bekle(lambda: K.profil(p, "1", Path(d)), "DUR: hedef US")
+
+
+def t_profil_abd_korunan_disinda_da_dur():
+    eski = K.KORUNAN
+    K.KORUNAN = set()            # ABD korumasi KORUNAN listesinden bagimsiz olmali
+    try:
+        t_profil_abd_eksik_metin_ret_dur()
+    finally:
+        K.KORUNAN = eski
+
+
+def t_profil_iso_ret_yeniden_kosu():
+    p = K.KuruProfil()
+    p.ret, p.ret_metin = {"CI": 400}, {"CI": _iso("CI")}
+    with tmp() as d:
+        K.profil(p, "1", Path(d))
+        R = K.profil(p, "1", Path(d))
+    assert R["kontrol"] == {"hedef_beklenen": 127, "profilde": 126, "reddedilen": 1}, R["kontrol"]
+    assert [c for c, _ in R["reddedilen"]] == ["CI"]
+
+
+def t_ozet_hata_kaydi_engellemez():
+    with tmp() as d:
+        eski = os.environ.get("GITHUB_STEP_SUMMARY")
+        os.environ["GITHUB_STEP_SUMMARY"] = str(Path(d) / "yok" / "ozet.md")    # yazilamaz yol
+        try:
+            p = K.KuruProfil()
+            p.ret, p.ret_metin = {"CI": 400}, {"CI": _iso("CI")}
+            K.profil(p, "1", Path(d))
+        finally:
+            if eski is None:
+                os.environ.pop("GITHUB_STEP_SUMMARY", None)
+            else:
+                os.environ["GITHUB_STEP_SUMMARY"] = eski
+        assert (Path(d) / "KARGO_PROFIL.json").exists()
+
+
+def t_iso_ret_satir_sonu_reddedilir():
+    assert K.iso_ret(_iso("CI"), "CI")
+    assert not K.iso_ret('{"error":"Value for destination_country_iso must be a valid ISO Country Code: CI.\\n"}', "CI")
+
+
+def t_ozet_yaz_dosyaya():
+    with tmp() as d:
+        yol = Path(d) / "ozet.md"
+        eski = os.environ.get("GITHUB_STEP_SUMMARY")
+        os.environ["GITHUB_STEP_SUMMARY"] = str(yol)
+        try:
+            p = K.KuruProfil()
+            p.ret, p.ret_metin = {"CI": 400}, {"CI": _iso("CI")}
+            K.profil(p, "1", Path(d))
+        finally:
+            if eski is None:
+                os.environ.pop("GITHUB_STEP_SUMMARY", None)
+            else:
+                os.environ["GITHUB_STEP_SUMMARY"] = eski
+        assert "profilde YOK: CI" in yol.read_text(), yol.read_text()
 
 
 def t_profil_izinli_ama_500_dur():

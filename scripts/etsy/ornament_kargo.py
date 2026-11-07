@@ -13,7 +13,9 @@ UYARI: fiyat adimindan sonra taslaklar 19.90 + eski ucretsiz profilde kalir; yay
 --mod profil_kuru: SALT OKUMA. Profil plani: mevcut profil / hedefler okunur, gonderilecek tum POST govdeleri OUT/KARGO_PROFIL_PLAN.json
 --mod profil    : "Ornament Shipping" profili (cikis LV, hazirlik 3-5 is gunu) + ulke hedefleri. Ilan YAZMAZ. Her POST TEK gonderim
                   (5xx / kopmada yeniden gonderilmez; geri okunur). Yalniz HTTP 400 + beklenen ret listesi (Etsy'nin tanimadigi bolgeler)
-                  atlanir; baska her hata DUR. Kota butcesi yazimdan ONCE. Cikti OUT/KARGO_PROFIL.json (finally)
+                  ya da HTTP 400 + JSON error TAM "Value for destination_country_iso must be a valid ISO Country Code: <ayni kod>."
+                  (KORUNAN pazarlarda hic, en fazla METIN_SINIR ulke; Serdar onayi) atlanir; baska her hata DUR. Atlananlar
+                  ::warning:: + GITHUB_STEP_SUMMARY. ABD asla atlanmaz, profilde yoksa DUR. Kota butcesi yazimdan ONCE. Cikti OUT/KARGO_PROFIL.json (finally)
 --mod fiyat_kuru: SALT OKUMA. Gercek envanter okunur, PUT govdesi kurulur, OUT/fiyat_kuru/<CIFT>.json; PUT YOK.
 --mod fiyat     : --ciftler taslaklari: state "draft" degilse DUR; envanter PUT (yalniz fiyat 19.90); once/sonra dosyaya; PUT sonrasi
                   state + envanter + *_on_property geri okunur. TUMU icin PILOT_CIFT zorunlu ve once onun 19.90 oldugu dogrulanir.
@@ -44,7 +46,32 @@ CIKIS = ("LV", "LV-1004")
 KOTA_MIN = 10
 ILAN_ISTEK = 21                          # fiyat: GET listing, GET inv, GET varimg, PUT (5xx ile en fazla 3), GET listing, GET inv, GET varimg, acil PATCH + GET
 RET_IZINLI = {"BV", "HM", "TF", "UM", "CC", "CX", "NF", "SJ", "TK", "XK"}   # Etsy'nin tanimayabilecegi bolgeler (400 ise atlanir)
+ISO_RET = re.compile(r"^Value for destination_country_iso must be a valid ISO Country Code: ([A-Z]{2})\.$")   # 7 Kas kosu 42358294077: CI
+METIN_SINIR = 5                          # metinle atlanan ulke sayisi siniri (Merkez onerisi, tahmin; Serdar onayi); fazlasi DUR
+KORUNAN = {"US", "CA", "GB", "AU", "NZ", "IE", "DE", "FR", "IT", "ES", "NL", "BE", "AT", "CH", "SE", "DK", "NO", "FI", "PL",
+           "PT", "CZ", "GR", "LU"}       # buyuk pazarlar (Merkez onerisi, tahmin; Serdar onayi): metinle ATLANMAZ (red = sistematik hata, DUR)
 FREE = re.compile(r"free\s+shipping|ships?\s+free|free\s+delivery", re.I)
+
+
+def iso_ret(metin, cc):
+    """Etsy'nin ulke listesinde olmayan kod: JSON error alani TAM kalip ve kod gonderilenle ayni; KORUNAN pazarda asla."""
+    if cc in KORUNAN:
+        return False
+    try:
+        hata = (json.loads(metin or "") or {}).get("error")
+    except (ValueError, AttributeError):
+        return False
+    m = ISO_RET.fullmatch(hata) if isinstance(hata, str) else None
+    return bool(m) and m.group(1) == cc
+
+
+def ozet_yaz(satirlar):
+    yol = os.environ.get("GITHUB_STEP_SUMMARY")      # yalniz Actions gercek kosusu (testler bu degiskeni siler)
+    for x in satirlar:
+        print(f"::warning::{x}" if yol else f"UYARI {x}", flush=True)
+    if yol:
+        with open(yol, "a") as f:
+            f.write("\n".join(f"- {x}" for x in satirlar) + "\n")
 
 
 def durum_oku(out):
@@ -252,7 +279,7 @@ def _profil_dogrula(sp):
 def profil(api, shop, out, kuru=False):
     hedef, disari = hedef_listesi()
     beklenen = {h[0]: h for h in hedef}
-    R = dict(olaylar=[], reddedilen=[], disari_printful_ucret_farkli=disari, hedef_sayisi=len(hedef), kuru=kuru, plan=[])
+    R = dict(olaylar=[], reddedilen=[], metin_ret=[], disari_printful_ucret_farkli=disari, hedef_sayisi=len(hedef), kuru=kuru, plan=[])
     try:
         magaza_kapisi(api, shop)
         sps = (api.get(f"/shops/{shop}/shipping-profiles") or {}).get("results") or []
@@ -302,8 +329,12 @@ def profil(api, shop, out, kuru=False):
             kod, js, metin = api.tek_post(f"/shops/{shop}/shipping-profiles/{pid}/destinations", body)
             if kod in (200, 201):
                 R["olaylar"].append(f"hedef {cc}")
-            elif kod == 400 and cc in RET_IZINLI:
+            elif kod == 400 and cc != "US" and cc in RET_IZINLI:
                 R["reddedilen"].append((cc, metin[:200]))
+            elif kod == 400 and cc != "US" and iso_ret(metin, cc):
+                R["reddedilen"].append((cc, metin[:200])); R["metin_ret"].append(cc)
+                if len(R["metin_ret"]) > METIN_SINIR:
+                    raise SystemExit(f"DUR: Etsy'nin tanimadigi ulke {len(R['metin_ret'])} > {METIN_SINIR} {R['metin_ret']}")
             else:
                 raise SystemExit(f"DUR: hedef {cc} -> {kod} {metin[:200]} (yeniden kosu geri okuyup devam eder)")
             if i % 20 == 0 or i == len(eksik):
@@ -324,6 +355,8 @@ def profil(api, shop, out, kuru=False):
             if gercek != h[1:]:
                 yanlis.append(f"{k}: {gercek} != {h[1:]}")
         ret = {c for c, _ in R["reddedilen"]}
+        if "US" not in have:                       # ek guvence (eksik_son da yakalar); test: t_profil_abd_korunan_disinda_da_dur
+            yanlis.append("US hedefi profilde yok")
         eksik_son = sorted(set(beklenen) - set(have) - ret)
         if eksik_son:
             yanlis.append(f"eksik hedef {eksik_son[:10]} ({len(eksik_son)})")
@@ -337,6 +370,11 @@ def profil(api, shop, out, kuru=False):
     finally:
         ad = "KARGO_PROFIL_PLAN.json" if kuru else "KARGO_PROFIL.json"
         json.dump(R, open(out / ad, "w"), indent=1, ensure_ascii=False, default=str)
+        if R["reddedilen"]:
+            try:
+                ozet_yaz([f"Etsy reddetti, profilde YOK: {c} ({m[:120]})" for c, m in R["reddedilen"]])
+            except OSError as e:
+                print(f"::warning::ozet yazilamadi: {e}", flush=True)
 
 
 def put_govdesi(inv):
@@ -459,7 +497,7 @@ class KuruAg:
     def kuru_kur(self, lids):
         self.remaining, self.calls, self.istek, self._kapi_bakildi = "5000", 0, [], False
         self.sert_taban = None
-        self.db, self.profiller, self.ret = {}, {}, {}
+        self.db, self.profiller, self.ret, self.ret_metin = {}, {}, {}, {}
         for c, lid in lids.items():
             self.db[str(lid)] = dict(state="draft", inv=dict(products=[dict(
                 sku=OT.sku(c, kd), property_values=[dict(property_id=OT.P_STYLE, property_name="Style", value_ids=[1000 + n], values=[ad])],
@@ -518,7 +556,7 @@ class KuruAg:
         pid = path.split("/")[-2]
         cc = body["destination_country_iso"]
         if cc in self.ret:
-            return self.ret[cc], None, f"{self.ret[cc]} reddedildi"
+            return self.ret[cc], None, self.ret_metin.get(cc, f"{self.ret[cc]} reddedildi")
         self.profiller[pid]["shipping_profile_destinations"].append(self._hedef(body))
         return 201, {}, ""
 
