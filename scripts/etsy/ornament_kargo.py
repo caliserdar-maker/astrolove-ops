@@ -239,6 +239,33 @@ def oku(api, shop, out, lids):
     return R
 
 
+def teshis(api, shop, out):
+    """SALT OKUMA: 'Ornament Shipping' profilinin ham yanitlari (profil GET + destinations GET, parametreli/parametresiz)."""
+    R = dict(kota_bas=api.remaining)
+    sps = (api.get(f"/shops/{shop}/shipping-profiles") or {}).get("results") or []
+    v = [x for x in sps if x.get("title") == PROFIL_AD]
+    R["ayni_ad"] = len(v)
+    for x in v:
+        pid = x["shipping_profile_id"]
+        prof = api.get(f"/shops/{shop}/shipping-profiles/{pid}") or {}
+        d_param = api.get(f"/shops/{shop}/shipping-profiles/{pid}/destinations", params={"limit": 100, "offset": 0}) or {}
+        d_yalin = api.get(f"/shops/{shop}/shipping-profiles/{pid}/destinations") or {}
+        def say(lst):
+            cc = [(d.get("destination_country_iso") or d.get("destination_region") or "?") for d in lst]
+            kop = sorted({c for c in cc if cc.count(c) > 1})
+            return dict(adet=len(cc), tekil=len(set(cc)), kopya=kop)
+        R[str(pid)] = dict(liste_yaniti=say(x.get("shipping_profile_destinations") or []),
+                           profil_yaniti=say(prof.get("shipping_profile_destinations") or []),
+                           dest_param=dict(count=d_param.get("count"), **say(d_param.get("results") or [])),
+                           dest_yalin=dict(count=d_yalin.get("count"), **say(d_yalin.get("results") or [])),
+                           ham_dest_param=d_param, ham_dest_yalin=d_yalin, ham_profil=prof)
+    R["kota_son"] = api.remaining
+    json.dump(R, open(out / "KARGO_TESHIS.json", "w"), indent=1, ensure_ascii=False, default=str)
+    print(json.dumps({k: ({kk: vv for kk, vv in v.items() if not kk.startswith("ham_")} if isinstance(v, dict) else v)
+                      for k, v in R.items()}, ensure_ascii=False))
+    return R
+
+
 def hedefler(api, shop, pid):
     """Profil hedefleri SAYFALI (getShopShippingProfileDestinationsByShippingProfile): profil yanitindaki liste kesik olabilir (inceleme)."""
     out, off = [], 0
@@ -580,7 +607,7 @@ class KuruProfil(KuruAg, ProfilIzin):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mod", required=True, choices=["oku", "profil_kuru", "profil", "fiyat_kuru", "fiyat", "kuru"])
+    ap.add_argument("--mod", required=True, choices=["oku", "profil_kuru", "profil", "profil_teshis", "fiyat_kuru", "fiyat", "kuru"])
     ap.add_argument("--ciftler", default="CANCER_LIBRA")
     a = ap.parse_args()
     out = Path(os.environ.get("OUT", "_out")); out.mkdir(parents=True, exist_ok=True)
@@ -605,6 +632,8 @@ def main():
         profil(SaltOkur(store), shop, out, kuru=True); return
     if a.mod == "profil":
         profil(ProfilIzin(store), shop, out); return
+    if a.mod == "profil_teshis":
+        teshis(SaltOkur(store), shop, out); return
     lids = durum_oku(out)
     if a.mod == "oku":
         oku(SaltOkur(store), shop, out, lids); return

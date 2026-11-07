@@ -13,7 +13,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: { description: "oku | profil_kuru | profil | fiyat_kuru | fiyat | kuru", required: true, default: "oku" }
+      mod: { description: "oku | profil_kuru | profil | profil_teshis | fiyat_kuru | fiyat | kuru", required: true, default: "oku" }
       ciftler: { description: "TUMU ya da virgul/bosluk ayrimli CIFT (yalniz fiyat)", required: true, default: "CANCER_LIBRA" }
       pilot: { description: "fiyat birden fazla cift: once yazilmis pilot CIFT (19.90 olmali)", required: false, default: "" }
 env:
@@ -26,7 +26,7 @@ jobs:
       - name: Girdi kapisi
         env: { M: "${{ inputs.mod }}", C: "${{ inputs.ciftler }}", P: "${{ inputs.pilot }}" }
         run: |
-          [[ "$M" =~ ^(oku|profil_kuru|profil|fiyat_kuru|fiyat|kuru)$ ]] || { echo "::error::mod"; exit 1; }
+          [[ "$M" =~ ^(oku|profil_kuru|profil|profil_teshis|fiyat_kuru|fiyat|kuru)$ ]] || { echo "::error::mod"; exit 1; }
           [[ "$C" =~ ^[A-Z_,\ ]+$ ]] || { echo "::error::ciftler"; exit 1; }
           [[ -z "$P" || "$P" =~ ^[A-Z]+_[A-Z]+$ ]] || { echo "::error::pilot"; exit 1; }
       - uses: actions/checkout@v4
