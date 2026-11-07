@@ -41,7 +41,7 @@ DIGER = (13.90, 2.90)
 PF_ABD, PF_DIGER = 5.89, 9.89            # Printful 1 adet kargo; farkli ucretli ulke profile GIRMEZ (Serdar'a sorulur)
 CIKIS = ("LV", "LV-1004")
 KOTA_MIN = 10
-ILAN_ISTEK = 5                           # fiyat: GET listing, GET inv, PUT, GET listing, GET inv
+ILAN_ISTEK = 11                          # fiyat: GET listing, GET inv, GET varimg, PUT (5xx ile en fazla 3), GET listing, GET inv, GET varimg, acil PATCH + GET
 RET_IZINLI = {"BV", "HM", "TF", "UM", "CC", "CX", "NF", "SJ", "TK", "XK"}   # Etsy'nin tanimayabilecegi bolgeler (400 ise atlanir)
 FREE = re.compile(r"free\s+shipping|ships?\s+free|free\s+delivery", re.I)
 
@@ -144,13 +144,17 @@ class ProfilIzin(Ag):
 
 
 class FiyatIzin(Ag):
-    """Yalniz izinli taslaklarin envanter PUT'u. PATCH / DELETE / POST yok. Kota butcesi cagiranda (ilan basinda)."""
+    """Yalniz izinli taslaklarin envanter PUT'u + yalniz ACIL {"state": "inactive"} PATCH (taslak yayina duserse). DELETE / POST yok.
+    Kota butcesi cagiranda (ilan basinda)."""
     izinli = frozenset()
 
     def _call(self, method, path, **kw):
         if method != "GET":
             m = re.match(r"^/listings/(\d+)/inventory$", path)
-            if not (method == "PUT" and m and m.group(1) in self.izinli):
+            a = re.match(r"^/shops/\d+/listings/(\d+)$", path)
+            ok = (method == "PUT" and m and m.group(1) in self.izinli) or \
+                 (method == "PATCH" and a and a.group(1) in self.izinli and kw.get("data") == {"state": "inactive"})
+            if not ok:
                 raise SystemExit(f"YASAK (fiyat): {method} {path}")
         return self._ag(method, path, **kw)
 
@@ -170,7 +174,8 @@ def urun_ozet(inv):
     for p in inv.get("products") or []:
         o = (p.get("offerings") or [{}])[0]
         stil = [v for pv in p.get("property_values") or [] for v in (pv.get("values") or [])]
-        out.append(dict(sku=p.get("sku"), stil=stil, fiyat=OT.para(o.get("price")), stok=o.get("quantity"),
+        vid = [i for pv in p.get("property_values") or [] for i in (pv.get("value_ids") or [])]
+        out.append(dict(sku=p.get("sku"), stil=stil, value_id=vid, fiyat=OT.para(o.get("price")), stok=o.get("quantity"),
                         acik=o.get("is_enabled"), hazirlik=o.get("readiness_state_id")))
     return out
 
@@ -205,10 +210,21 @@ def oku(api, shop, out, lids):
     return R
 
 
+def hedefler(api, shop, pid):
+    """Profil hedefleri SAYFALI (getShopShippingProfileDestinationsByShippingProfile): profil yanitindaki liste kesik olabilir (inceleme)."""
+    out, off = [], 0
+    while True:
+        r = api.get(f"/shops/{shop}/shipping-profiles/{pid}/destinations", params={"limit": 100, "offset": off}) or {}
+        out += r.get("results") or []
+        off += 100
+        if off >= (r.get("count") or 0) or off > 1000:
+            return out
+
+
 def _hedef_haritasi(prof):
     """Profil hedefleri -> {ulke: hedef}; ayni ulke iki kez ya da ulke disi (bolge / everywhere) hedef -> DUR listesi."""
     harita, sorun = {}, []
-    for d in prof.get("shipping_profile_destinations") or []:
+    for d in (prof if isinstance(prof, list) else prof.get("shipping_profile_destinations") or []):
         cc = (d.get("destination_country_iso") or "").upper()
         if not cc:
             sorun.append(f"ulke disi hedef ({d.get('destination_region')})"); continue
@@ -242,12 +258,11 @@ def profil(api, shop, out, kuru=False):
         if var:
             pid = var[0]["shipping_profile_id"]; R["olaylar"].append(f"profil var {pid}")
             s = _profil_dogrula(var[0])
-            prof = api.get(f"/shops/{shop}/shipping-profiles/{pid}") or {}
-            have, s2 = _hedef_haritasi(prof)
+            have, s2 = _hedef_haritasi(hedefler(api, shop, pid))
             if s or s2:
                 raise SystemExit(f"DUR: var olan profil onayli yapida degil: {s + s2}")
         eksik = [h for h in hedef if h[0] not in have]
-        butce = len(eksik) + (0 if pid else 1) + 4 + KOTA_MIN + 5     # yazimlar + geri okumalar + taban + pay
+        butce = len(eksik) + (0 if pid else 1) + 8 + KOTA_MIN + 5     # yazimlar + geri okumalar (sayfali) + taban + pay
         R["butce"] = dict(gerekli=butce, kalan=api.remaining, eksik_hedef=len(eksik))
         if not kuru and api.remaining is not None and str(api.remaining).isdigit() and int(api.remaining) < butce:
             raise SystemExit(f"DUR: kota {api.remaining} < profil butcesi {butce} (hic yazilmadi)")
@@ -268,8 +283,7 @@ def profil(api, shop, out, kuru=False):
                     raise SystemExit(f"DUR: profil olusturma {kod} {metin[:200]} | geri okuma ayni adla {len(v2)} profil "
                                      f"(1 ise yeniden kosu devam eder)")
                 pid = js["shipping_profile_id"]; R["olaylar"].append(f"profil olusturuldu {pid}")
-                prof = api.get(f"/shops/{shop}/shipping-profiles/{pid}") or {}
-                have, s2 = _hedef_haritasi(prof)
+                have, s2 = _hedef_haritasi(hedefler(api, shop, pid))
                 if s2:
                     raise SystemExit(f"DUR: yeni profil hedefleri {s2}")
         R["shipping_profile_id"] = pid
@@ -295,7 +309,7 @@ def profil(api, shop, out, kuru=False):
             R["kontrol"] = dict(plan_istek=len(R["plan"]), hedef=len(hedef))
             return R
         prof = api.get(f"/shops/{shop}/shipping-profiles/{pid}") or {}
-        have, sorun = _hedef_haritasi(prof)
+        have, sorun = _hedef_haritasi(hedefler(api, shop, pid))
         yanlis = list(sorun) + _profil_dogrula(prof)
         for k, d in have.items():
             h = beklenen.get(k)
@@ -333,8 +347,17 @@ def put_govdesi(inv):
                                                                        "readiness_state_on_property")})
 
 
-def fiyat_tek(api, pair, lid, out, kuru=False):
-    """Tek taslak: draft kontrol, envanter PUT (yalniz fiyat), geri okuma. -> dict"""
+def varimg(api, shop, lid):
+    return sorted((v.get("property_id"), v.get("value_id"), v.get("image_id"))
+                  for v in ((api.get(f"/shops/{shop}/listings/{lid}/variation-images") or {}).get("results") or []))
+
+
+def _ozet_anahtar(u, fiyat=None):
+    return (u["sku"], fiyat if fiyat is not None else u["fiyat"], u["stok"], u["acik"], u["hazirlik"], tuple(u["stil"]), tuple(u["value_id"]))
+
+
+def fiyat_tek(api, shop, pair, lid, out, kuru=False):
+    """Tek taslak: draft kontrol, envanter PUT (yalniz fiyat), geri okuma (envanter, value_id, *_on_property, stil gorselleri). -> dict"""
     L = api.get(f"/listings/{lid}") or {}
     if L.get("state") != "draft":
         raise SystemExit(f"DUR: {pair} {lid} state {L.get('state')} (draft degil)")
@@ -346,24 +369,38 @@ def fiyat_tek(api, pair, lid, out, kuru=False):
     beklenen_sku = {OT.sku(pair, kd) for _, kd, _, _ in OT.STILLER}
     if {u["sku"] for u in once} != beklenen_sku:
         raise SystemExit(f"DUR: {pair} sku farkli {sorted(u['sku'] for u in once)}")
+    if any(len(u["value_id"]) != 1 for u in once):
+        raise SystemExit(f"DUR: {pair} Style value_id eksik {once}")
     if all(u["fiyat"] == YENI_FIYAT for u in once):
         return dict(cift=pair, lid=lid, sonuc="ZATEN", once=once)
+    vi_once = varimg(api, shop, lid)
+    if len(vi_once) != len(OT.STILLER):
+        raise SystemExit(f"DUR: {pair} stil gorseli {len(vi_once)} != {len(OT.STILLER)}")
     govde = put_govdesi(inv)
     d = out / ("fiyat_kuru" if kuru else "fiyat_once")
     d.mkdir(exist_ok=True)
-    json.dump(dict(cift=pair, lid=lid, ham_envanter=inv, put=govde), open(d / f"{pair}.json", "w"), indent=1, ensure_ascii=False)
+    json.dump(dict(cift=pair, lid=lid, ham_envanter=inv, stil_gorsel=vi_once, put=govde), open(d / f"{pair}.json", "w"), indent=1, ensure_ascii=False)
     if kuru:
         return dict(cift=pair, lid=lid, sonuc="KURU", once=once)
     api.put_json(f"/listings/{lid}/inventory", govde)
     L2 = api.get(f"/listings/{lid}") or {}
+    if L2.get("state") == "active":                 # taslak yayina dustu: aninda inactive (ornament_taslak acil yolu), sonra DUR
+        st2 = "?"
+        try:
+            api.patch(f"/shops/{shop}/listings/{lid}", {"state": "inactive"})
+            st2 = (api.get(f"/listings/{lid}") or {}).get("state")
+        finally:
+            raise SystemExit(f"DUR: {pair} {lid} PUT sonrasi active oldu; acil inactive -> {st2} (Serdar'a bildir)")
     inv2 = api.get(f"/listings/{lid}/inventory") or {}
     sonra = urun_ozet(inv2)
     hatalar = []
     if L2.get("state") != "draft":
-        hatalar.append(f"state {L2.get('state')} (ACIL: panelden ilan {lid} inactive yapilmali)")
-    if sorted((u["sku"], u["fiyat"], u["stok"], u["acik"], u["hazirlik"], tuple(u["stil"])) for u in sonra) != \
-            sorted((u["sku"], YENI_FIYAT, u["stok"], u["acik"], u["hazirlik"], tuple(u["stil"])) for u in once):
+        hatalar.append(f"state {L2.get('state')}")
+    if sorted(_ozet_anahtar(u) for u in sonra) != sorted(_ozet_anahtar(u, YENI_FIYAT) for u in once):
         hatalar.append("envanter geri okuma farkli")
+    vi_sonra = varimg(api, shop, lid)
+    if vi_sonra != vi_once:
+        hatalar.append(f"stil gorselleri farkli {vi_once} -> {vi_sonra}")
     if on_property(inv2) != on_property(inv):
         hatalar.append(f"on_property farkli {on_property(inv)} -> {on_property(inv2)}")
     if hatalar:
@@ -379,14 +416,17 @@ def fiyat(api, shop, out, lids, ciftler, kuru=False, pilot=None):
         ciftler = [pilot] + [c for c in ciftler if c != pilot]
     api.izinli = frozenset(str(lids[c]) for c in ciftler)
     magaza_kapisi(api, shop)
+    if hepsi and not kuru:                          # pilot SALT OKUMA ile: draft + 5 urun 19.90 degilse hic yazmadan DUR
+        Lp = api.get(f"/listings/{lids[pilot]}") or {}
+        up = urun_ozet(api.get(f"/listings/{lids[pilot]}/inventory") or {})
+        if Lp.get("state") != "draft" or len(up) != len(OT.STILLER) or any(u["fiyat"] != YENI_FIYAT for u in up):
+            raise SystemExit(f"DUR: pilot {pilot} once yazilmali (state {Lp.get('state')}, fiyat {[u['fiyat'] for u in up]}); PUT yok")
     R = dict(sonuc=[], kota_bas=api.remaining, uyari="Taslaklar eski ucretsiz profilde; yayin kapisi: shipping_profile_id == Ornament Shipping")
     t0 = time.time()
     try:
         for i, c in enumerate(ciftler, 1):
             kota(api, KOTA_MIN + ILAN_ISTEK + 1)       # ilan butcesi yazimdan ONCE: ilan yarim kalmaz
-            s = fiyat_tek(api, c, lids[c], out, kuru=kuru)
-            if hepsi and not kuru and i == 1 and s["sonuc"] != "ZATEN":
-                raise SystemExit(f"DUR: pilot {c} once 19.90 olmali (sonuc {s['sonuc']}; pilot ayri kosuda yazilir ve Serdar bakar)")
+            s = fiyat_tek(api, shop, c, lids[c], out, kuru=kuru)
             R["sonuc"].append(s)
             g = time.time() - t0
             print(f"fiyat [{i}/{len(ciftler)}] {c} {s['sonuc']} | gecen {g:.0f} sn | kalan ~{g / i * (len(ciftler) - i):.0f} sn | "
@@ -413,7 +453,8 @@ class KuruAg:
                 sku=OT.sku(c, kd), property_values=[dict(property_id=OT.P_STYLE, property_name="Style", value_ids=[1000 + n], values=[ad])],
                 offerings=[dict(price=dict(amount=2990, divisor=100), quantity=OT.STOK, is_enabled=True, readiness_state_id=111)])
                 for n, (ad, kd, _, _) in enumerate(OT.STILLER)], price_on_property=[], quantity_on_property=[],
-                sku_on_property=[OT.P_STYLE], readiness_state_on_property=[]))
+                sku_on_property=[OT.P_STYLE], readiness_state_on_property=[]),
+                vi=[dict(property_id=OT.P_STYLE, value_id=1000 + n, image_id=5000 + n) for n in range(len(OT.STILLER))])
         return self
 
     def _ag(self, method, path, **kw):
@@ -424,9 +465,21 @@ class KuruAg:
             return {"currency_code": "USD"}
         if re.match(r"^/shops/\d+/shipping-profiles$", path):
             return {"results": list(self.profiller.values())}
+        m = re.match(r"^/shops/\d+/shipping-profiles/(\d+)/destinations$", path)
+        if m:
+            h = self.profiller[m.group(1)]["shipping_profile_destinations"]
+            off = int((kw.get("params") or {}).get("offset", 0))
+            return {"count": len(h), "results": h[off:off + 100]}
         m = re.match(r"^/shops/\d+/shipping-profiles/(\d+)$", path)
         if m:
             return self.profiller[m.group(1)]
+        m = re.match(r"^/shops/\d+/listings/(\d+)/variation-images$", path)
+        if m:
+            return {"results": [dict(v) for v in self.db[m.group(1)]["vi"]]}
+        m = re.match(r"^/shops/\d+/listings/(\d+)$", path)
+        if m and method == "PATCH":
+            self.db[m.group(1)]["state"] = kw.get("data", {}).get("state")
+            return {}
         m = re.match(r"^/listings/(\d+)(/inventory)?$", path)
         d = self.db[m.group(1)]
         if method == "GET":

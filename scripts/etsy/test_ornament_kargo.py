@@ -18,6 +18,8 @@ def t(ad, f):
         f(); SONUC.append((ad, "PASS", ""))
     except AssertionError as e:
         SONUC.append((ad, "FAIL", str(e)[:200]))
+    except SystemExit as e:
+        SONUC.append((ad, "FAIL", f"beklenmeyen DUR: {str(e.code)[:200]}"))
     except Exception as e:  # noqa: BLE001
         SONUC.append((ad, "FAIL", f"{type(e).__name__}: {str(e)[:200]}"))
 
@@ -62,6 +64,7 @@ def t_fiyat_coklu_pilot_yazilmamis_dur():
     api, lids = kf(3)
     with tmp() as d:
         dur_bekle(lambda: K.fiyat(api, "1", Path(d), lids, list(lids), pilot=list(lids)[1]), "pilot")
+    assert "PUT" not in [x[0] for x in api.istek], "pilot yazilmamisken PUT gitti"
 
 
 def t_fiyat_coklu_pilot_ok():
@@ -94,7 +97,8 @@ def t_fiyat_put_sonrasi_state_dur():
         return r
     api._ag = bozuk
     with tmp() as d:
-        dur_bekle(lambda: K.fiyat(api, "1", Path(d), lids, list(lids)), "inactive yapilmali")
+        dur_bekle(lambda: K.fiyat(api, "1", Path(d), lids, list(lids)), "acil inactive -> inactive")
+    assert api.db[lid]["state"] == "inactive"
 
 
 def t_fiyat_stok_degisirse_dur():
@@ -300,6 +304,125 @@ def t_profil_kuru_yazmaz():
         R = K.profil(p, "1", Path(d), kuru=True)
         assert (Path(d) / "KARGO_PROFIL_PLAN.json").exists()
     assert len(R["plan"]) == 127 and not [x for x in p.istek if x[0] == "POST"]
+
+
+def t_fiyat_value_id_degisirse_dur():
+    api, lids = kf(1)
+    lid = next(iter(lids.values())); orj = api._ag
+
+    def bozuk(method, path, **kw):
+        r = orj(method, path, **kw)
+        if method == "PUT":
+            api.db[lid]["inv"]["products"][0]["property_values"][0]["value_ids"] = [1]
+        return r
+    api._ag = bozuk
+    with tmp() as d:
+        dur_bekle(lambda: K.fiyat(api, "1", Path(d), lids, list(lids)), "envanter geri okuma farkli")
+
+
+def t_fiyat_stil_gorsel_degisirse_dur():
+    api, lids = kf(1)
+    lid = next(iter(lids.values())); orj = api._ag
+
+    def bozuk(method, path, **kw):
+        r = orj(method, path, **kw)
+        if method == "PUT":
+            api.db[lid]["vi"] = api.db[lid]["vi"][:3]
+        return r
+    api._ag = bozuk
+    with tmp() as d:
+        dur_bekle(lambda: K.fiyat(api, "1", Path(d), lids, list(lids)), "stil gorselleri farkli")
+
+
+def t_fiyat_stil_gorsel_eksik_once_dur():
+    api, lids = kf(1)
+    api.db[next(iter(lids.values()))]["vi"].pop()
+    with tmp() as d:
+        dur_bekle(lambda: K.fiyat(api, "1", Path(d), lids, list(lids)), "stil gorseli")
+    assert "PUT" not in [x[0] for x in api.istek]
+
+
+def t_izin_patch_yalniz_inactive():
+    api, lids = kf(1)
+    a = next(iter(lids.values())); api.izinli = frozenset([a])
+    dur_bekle(lambda: api.patch(f"/shops/1/listings/{a}", {"state": "active"}), "YASAK (fiyat)")
+    dur_bekle(lambda: api.patch(f"/shops/1/listings/{a}", {"description": "x"}), "YASAK (fiyat)")
+    dur_bekle(lambda: api.patch("/shops/1/listings/999", {"state": "inactive"}), "YASAK (fiyat)")
+
+
+def t_profil_tek_post_kota_dur():
+    p = K.KuruProfil(); p.remaining = "9"
+    dur_bekle(lambda: p.tek_post("/shops/1/shipping-profiles", {}), "kota 9")
+    assert not [x for x in p.istek if x[0] == "POST"]
+
+
+def _tam_profil():
+    p = K.KuruProfil()
+    with tmp() as d:
+        K.profil(p, "1", Path(d))
+    return p, next(iter(p.profiller.values()))
+
+
+def t_profil_var_eksik_ve_yanlis_cikis_post_yok():
+    p, prof = _tam_profil()
+    prof["shipping_profile_destinations"] = prof["shipping_profile_destinations"][:50]
+    prof["origin_country_iso"] = "US"
+    p.istek.clear()
+    with tmp() as d:
+        dur_bekle(lambda: K.profil(p, "1", Path(d)), "onayli yapida degil")
+    assert not [x for x in p.istek if x[0] == "POST"]
+
+
+def t_profil_var_hazirlik_yanlis_dur():
+    p, prof = _tam_profil()
+    prof["min_processing_days"], prof["max_processing_days"] = 1, 2
+    with tmp() as d:
+        dur_bekle(lambda: K.profil(p, "1", Path(d)), "hazirlik 1-2")
+
+
+def t_profil_201_ama_eklenmedi_dur():
+    p = K.KuruProfil(); orj = p._tek
+
+    def sessiz(path, body):
+        if body.get("destination_country_iso") == "FR":
+            return 201, {}, ""
+        return orj(path, body)
+    p._tek = sessiz
+    with tmp() as d:
+        dur_bekle(lambda: K.profil(p, "1", Path(d)), "eksik hedef")
+
+
+def t_profil_gun_farki_dur():
+    p = K.KuruProfil(); orj = p._tek
+
+    def kotu(path, body):
+        if body.get("destination_country_iso") == "DE":
+            body = dict(body, max_delivery_days=30)
+        return orj(path, body)
+    p._tek = kotu
+    with tmp() as d:
+        dur_bekle(lambda: K.profil(p, "1", Path(d)), "DE")
+
+
+def t_profil_fazla_ulke_dur():
+    p, prof = _tam_profil()
+    prof["shipping_profile_destinations"].append(dict(destination_country_iso="IN", primary_cost=dict(amount=1390, divisor=100),
+                                                      secondary_cost=dict(amount=290, divisor=100), min_delivery_days=5, max_delivery_days=10))
+    with tmp() as d:
+        dur_bekle(lambda: K.profil(p, "1", Path(d)), "beklenmeyen hedef")
+
+
+def t_profil_olusturma_500_tek_post():
+    p = K.KuruProfil()
+    p._tek = lambda path, body: (p.istek.append(("POST", path, body)) or (500, None, "sunucu"))
+    with tmp() as d:
+        dur_bekle(lambda: K.profil(p, "1", Path(d)), "profil olusturma 500")
+    assert len([x for x in p.istek if x[0] == "POST"]) == 1
+
+
+def t_profil_sayfali_okuma():
+    p, prof = _tam_profil()
+    assert len(K.hedefler(p, "1", prof["shipping_profile_id"])) == 127
 
 
 # ---------------- veri ----------------
