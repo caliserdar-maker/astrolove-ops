@@ -1,16 +1,17 @@
 name: p1g-w05-yukle
-# P1-G (Serdar 6 Kas, kalan 77: gruplar 5, 20, 25, 26). BU COMMIT: GRUP 1 YALNIZ YAZ, TEK KOSU (Serdar 6 Kas GRUP 1 yazim onayi).
-# kip yaz YALNIZ: sadece = GRUP 1 dizesi BIREBIR "4570110121,4570110641,4570125580,4570126104,4570112095" + plan_damga SABIT
-# 42256985849_491eaad0c110 (GRUP 1 kurusu, HAZIR 5) + onay W05-YAZ-GRUP1 + GITHUB_RUN_ATTEMPT 1 (Re-run yok) + ref main. kip kuru KAPALI
-# (kuru dallari bu commit'te olu kod). Tek kullanimlik kilit (fail-closed): Drive PILOT/yaz_*/{KURU_KAPI,RAPOR}.json'da ayni damga varsa ya
-# da okunamazsa token oncesi DUR. Kilit isareti (KURU_KAPI.json) kuru kapisi PASS olur olmaz, token ONCESI Drive'a yazilir (yazilamazsa DUR):
-# kilit "denemeyi" kilitler; yazim olmasa bile (orn. token / kota, kuru kapisi FAIL ya da isaret hatasi: always() KURU_KAPI.json'u yine
-# yukler) GRUP 1 tekrar icin yeni commit + onay gerekir. Bilinen sinir: ref main sarti yalniz bu dosyanin aynisini tasiyan baska dali engeller. Betige giden onay SADECE'den turetilir
-# (--onay "W05-YAZ-$SADECE"); is akisi onay girdisi betige gecmez (guvence iki kapida). Baska liste / damga / onay / kip: token oncesi DUR
-# (Onay kapisi) ve ayni kural token adiminda (KAPI2). Kurtarma girdileri (kurtar / geri_al / devam) YOK. Yazilan pilotlar: 4570143815
-# CANCER_LIBRA (42210656786 DUR, panel silmesi, 42213841977; Drive PILOT/yaz_42210656786) ve 4570155846 ARIES_VIRGO (42233642909 PASS,
-# Drive PILOT/yaz_42233642909; 42234074980 UYGUN, POSTER_GALERI_V11_YEDEK/20261106_142750); ikisi kapi
-# disinda. Yazim kipi (bu commit'te yalniz GRUP 1) Etsy'ye YAZAR: galeri rank 5 W05_SUREC
+# P1-G (Serdar 6 Kas, kalan 77 = 4570155846 + gruplar 5, 20, 25, 26). BU COMMIT: GRUP 2 (20 ilan) YALNIZ KURU (Serdar 7 Kas "GRUP 2 evet, Ga evet,
+# Gb evet"). kip kuru YALNIZ: sadece = GRUP 2 dizesi BIREBIR (eksik / fazla / sira / tekrar ayni kontrolde kapanir) + onay W05-KURU-GRUP2
+# + plan_damga BOS + GITHUB_RUN_ATTEMPT 1 + ref main. kip yaz bu commit'te HICBIR girdiyle kabul edilmez (GRUP 2 yazimi ayri onay + ayri
+# commit). GRUP 1 dizesi, 4570155846, 4570143815 ve liste disi her ilan: token oncesi DUR (Onay kapisi) ve ayni kural token adiminda (KAPI2).
+# GRUP 2 dizesi: 4570127160,4570113157,4570113675,4570128546,4570114301,4570150148,4570136319,4570151370,4570151950,4570152410,4570152820,4570031205,4570153208,4570138967,4570154042,4570139913,4570140539,4570141945,4570157258,4570157716
+# Kapi degisiklikleri (Serdar 7 Kas): gevseyen (a) kip kuru yeniden acik (yalniz GRUP 2 + W05-KURU-GRUP2 + bos damga; kuru'da betik yalniz
+# --kuru alir, salt_okur GET disini kapatir, --confirm / W05_KILIT yok), (b) tek kullanimlik kilit (KILIT1) yalniz kip yaz'da calisir (kuru
+# Etsy'ye yazmaz, her kuru kendi plan_damga'sini uretir; bos damgada KILIT1 deseni "" iceren her JSON'a eslesirdi). Sikilasan: GRUP 1 yazim
+# yolu kapali; kuru'da plan_damga bos olmak zorunda. Yaz yolu (KILIT1, ISARET, kuru RAPOR kapisi) olu kod olarak durur ve testlidir.
+# Yazilanlar (kosu no: Actions gecmisi): 4570143815 CANCER_LIBRA (42210656786 DUR, panel silmesi, 42213841977; Drive PILOT/yaz_42210656786), 4570155846 ARIES_VIRGO
+# (42233642909 PASS, PILOT/yaz_42233642909; 42234074980 UYGUN), GRUP 1 5 ilan (kuru 42256985849, yazim 42264647009 PASS=5,
+# PILOT/yaz_42264647009; 42265188608 UYGUN 5). Kalan gruplar: 25, 26 (her biri ayri kod + kuru + onay + yazim).
+# Yazim kipi (ayri commit'te acilinca) Etsy'ye YAZAR: galeri rank 5 W05_SUREC
 # (yeni kart yukle, eski W05'i sil) + renk baglarini plandaki AYNI haliyle yeniden yazma. Baska alan YOK; updateListing / PATCH YOK.
 # GALERI istisnasi (Serdar 5 Kas yontem b): yalniz W05_SUREC, yalniz P1-G. Kod scripts/kapak78/w05_degistir.py (etsy alt komutu).
 # Kart + MANIFEST: TEMP/P1G_W05_20261106_090016 (p1g-w05-uret 42194064189). Canli okuma: TEMP/POSTER_GALERI_V11_YEDEK/20261106_090016.
@@ -34,15 +35,15 @@ on:
         options: [kuru, yaz]
         default: kuru
       sadece:
-        description: "virgullu ilan listesi (bu commit: yalniz GRUP 1 dizesi 4570110121,4570110641,4570125580,4570126104,4570112095; yalniz yaz)"
+        description: "virgullu ilan listesi (bu commit: yalniz GRUP 2 dizesi, 20 ilan, basliktaki sirayla; yalniz kuru)"
         required: true
         default: ""
       onay:
-        description: "bu commit: W05-YAZ-GRUP1 (kip kuru kapali)"
+        description: "bu commit: W05-KURU-GRUP2 (kip yaz kapali)"
         required: true
         default: ""
       plan_damga:
-        description: "yaz kipinde ZORUNLU: bu commit'te yalniz 42256985849_491eaad0c110 (GRUP 1 kurusu; iki kapida sabit)"
+        description: "bu commit'te BOS olmali (kip kuru; plan_damga kurunun kendisinde uretilir)"
         required: false
         default: ""
 env:
@@ -60,11 +61,11 @@ jobs:
           ONAY: ${{ inputs.onay }}
           DAMGA: ${{ inputs.plan_damga }}
         run: |
-          G1="4570110121,4570110641,4570125580,4570126104,4570112095"
-          [ "$KIP" = yaz ] || { echo "::error::bu commit'te yalniz kip yaz (GRUP 1 kurusu yapildi: 42256985849)"; exit 1; }
-          [ "$SADECE" = "$G1" ] || { echo "::error::sadece GRUP 1 dizesiyle birebir ayni degil ($G1)"; exit 1; }
-          [ "$DAMGA" = "42256985849_491eaad0c110" ] || { echo "::error::plan_damga 42256985849_491eaad0c110 degil"; exit 1; }
-          [ "$ONAY" = "W05-YAZ-GRUP1" ] || { echo "::error::onay girdisi W05-YAZ-GRUP1 degil"; exit 1; }
+          G2="4570127160,4570113157,4570113675,4570128546,4570114301,4570150148,4570136319,4570151370,4570151950,4570152410,4570152820,4570031205,4570153208,4570138967,4570154042,4570139913,4570140539,4570141945,4570157258,4570157716"
+          [ "$KIP" = kuru ] || { echo "::error::bu commit'te yalniz kip kuru (GRUP 2 yazimi ayri onay + ayri commit)"; exit 1; }
+          [ "$SADECE" = "$G2" ] || { echo "::error::sadece GRUP 2 dizesiyle birebir ayni degil"; exit 1; }
+          [ -z "$DAMGA" ] || { echo "::error::kip kuru'da plan_damga bos olmali"; exit 1; }
+          [ "$ONAY" = "W05-KURU-GRUP2" ] || { echo "::error::onay girdisi W05-KURU-GRUP2 degil"; exit 1; }
           [ "${GITHUB_RUN_ATTEMPT:-}" = 1 ] || { echo "::error::yeniden deneme (Re-run) yok: GITHUB_RUN_ATTEMPT ${GITHUB_RUN_ATTEMPT:-bos}"; exit 1; }
           [ "${GITHUB_REF:-}" = refs/heads/main ] || { echo "::error::yalniz main'den (GITHUB_REF ${GITHUB_REF:-bos})"; exit 1; }
       - uses: actions/checkout@v4
@@ -103,10 +104,11 @@ jobs:
         run: |
           set -euo pipefail
           umask 077; mkdir -p _work _out _kart _plan
-          G1="4570110121,4570110641,4570125580,4570126104,4570112095"  # KAPI2
-          [ "$KIP" = yaz ] && [ "$SADECE" = "$G1" ] && [ "$DAMGA" = "42256985849_491eaad0c110" ] && [ "$ONAY" = "W05-YAZ-GRUP1" ] && [ "${GITHUB_RUN_ATTEMPT:-}" = 1 ] && [ "${GITHUB_REF:-}" = refs/heads/main ] || { echo "::error::KAPI2: yalniz kip yaz + GRUP 1 + sabit damga + W05-YAZ-GRUP1 + deneme 1 + main"; exit 1; }  # KAPI2
+          G2="4570127160,4570113157,4570113675,4570128546,4570114301,4570150148,4570136319,4570151370,4570151950,4570152410,4570152820,4570031205,4570153208,4570138967,4570154042,4570139913,4570140539,4570141945,4570157258,4570157716"  # KAPI2
+          [ "$KIP" = kuru ] && [ "$SADECE" = "$G2" ] && [ -z "$DAMGA" ] && [ "$ONAY" = "W05-KURU-GRUP2" ] && [ "${GITHUB_RUN_ATTEMPT:-}" = 1 ] && [ "${GITHUB_REF:-}" = refs/heads/main ] || { echo "::error::KAPI2: yalniz kip kuru + GRUP 2 + bos damga + W05-KURU-GRUP2 + deneme 1 + main"; exit 1; }  # KAPI2
           # tek kullanimlik kilit (fail-closed): ayni damgayla onceki yazim kosusu (PILOT/yaz_*/KURU_KAPI.json ya da RAPOR.json) varsa DUR;
-          # liste ya da var olan dosya okunamazsa da DUR
+          # liste ya da var olan dosya okunamazsa da DUR. YALNIZ kip yaz'da (Serdar 7 Kas Gb): kuru'da damga bos, desen "" iceren her JSON'a eslesirdi
+          if [ "$KIP" = yaz ]; then  # KILIT1
           rclone lsf --dirs-only "gdrive:$P1G/PILOT/" < /dev/null > _work/pilot_dirs.txt || { echo "::error::PILOT listesi okunamadi; kilit denetlenemedi"; exit 1; }  # KILIT1
           while read -r -u 4 d; do case "$d" in yaz_*) ;; *) continue ;; esac  # KILIT1
             DD="gdrive:$P1G/PILOT/${d%/}"  # KILIT1
@@ -116,6 +118,7 @@ jobs:
               case "$KK" in *"\"$DAMGA\""*) echo "::error::tek kullanimlik kilit: ${d%/} ayni damgayla yazim kosusu; yeni yazim yok"; exit 1 ;; esac  # KILIT1
             done  # KILIT1
           done 4< _work/pilot_dirs.txt  # KILIT1
+          fi  # KILIT1
           python3 - "$SADECE" > _work/ilan_cift.txt <<'PY'
           import csv, sys
           m = {r["listing_id"]: r["cift"] for r in csv.DictReader(open("data/pod/pod78_ids.csv"))}
@@ -137,7 +140,7 @@ jobs:
             fi
           done 3< _work/ilan_cift.txt
           if [ "$KIP" = kuru ]; then
-            rclone copyto "gdrive:$P1G/MANIFEST_W05.csv" _work/MANIFEST_W05.csv
+            rclone copyto "gdrive:$P1G/MANIFEST_W05.csv" _work/MANIFEST_W05.csv < /dev/null || { echo "::error::MANIFEST_W05.csv indirilemedi; token ve Etsy cagrisi yok"; exit 1; }
             python3 -c "import csv,sys; R={x['listing_id']: x for x in csv.DictReader(open('data/pod/pod78_ids.csv'))}; ids=sys.argv[1].split(','); w=csv.DictWriter(open('_work/cift.csv','w',newline=''),fieldnames=list(R[ids[0]])); w.writeheader(); w.writerows(R[i] for i in ids)" "$SADECE"
             python3 scripts/kapak78/w05_degistir.py plan --canli-dir _canli --manifest _work/MANIFEST_W05.csv --ciftler _work/cift.csv --out _out \
               || { echo "::error::plan BLOK (ilan basina neden: PILOT/<kosu>/PLAN_W05.md); token ve Etsy cagrisi yok"; exit 1; }

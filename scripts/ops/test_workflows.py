@@ -168,9 +168,10 @@ def main() -> int:
     uzak = [h for h in hedef if h.startswith(("$T/", "gdrive:"))]
     assert uzak == ["$T/POSTER_GALERI_V11_YUKLE/DOGRULA/${GITHUB_RUN_ID}"], f"galeri-v11-dogrula: rapor klasoru disina yazim {uzak}"
     import json as _j, tempfile as _tf
-    # 6 Kas (Serdar GRUP 1 yazim onayi; kalan 77 gruplar 5/20/25/26): p1g-w05-yukle GRUP 1 YALNIZ YAZ, TEK KOSU. Iki kapi (Onay kapisi
-    # checkout oncesi + token adiminda KAPI2) ayni kural: kip yaz + sadece = GRUP 1 dizesi birebir + plan_damga sabit + onay W05-YAZ-GRUP1 +
-    # GITHUB_RUN_ATTEMPT 1; kip kuru KAPALI. Tek kullanimlik kilit (KILIT1): PILOT/yaz_*/KURU_KAPI.json'da ayni damga -> DUR.
+    # 7 Kas (Serdar "GRUP 2 evet, Ga evet, Gb evet"; kalan 77 gruplar 5/20/25/26): p1g-w05-yukle GRUP 2 YALNIZ KURU. Iki kapi (Onay kapisi
+    # checkout oncesi + token adiminda KAPI2) ayni kural: kip kuru + sadece = GRUP 2 dizesi birebir + onay W05-KURU-GRUP2 + plan_damga BOS +
+    # GITHUB_RUN_ATTEMPT 1 + ref main; kip yaz KAPALI. Tek kullanimlik kilit (KILIT1) yalniz kip yaz'da; yaz yolu (KILIT1, ISARET, kuru RAPOR
+    # kapisi) olu kod, KAPI2 satirlari cikarilmis adim metniyle testli kalir.
     pw = (WORKFLOWS / "p1g-w05-yukle.yml").read_text(encoding="utf-8")   # yaml modulu olmadan (yerel Ruby yolu) da calisir
     ps = pw.splitlines(); i0 = ps.index("      - name: Onay kapisi"); i1 = next(i for i in range(i0, len(ps)) if ps[i].strip() == "run: |")
     i2 = next(i for i in range(i1 + 1, len(ps)) if ps[i].startswith("      - "))
@@ -180,18 +181,24 @@ def main() -> int:
     G1 = "4570110121,4570110641,4570125580,4570126104,4570112095"
     D = "42256985849_491eaad0c110"
     Y = "W05-YAZ-GRUP1"
-    durum = (("yaz", G1, Y, D, "1", 0),
-             ("kuru", G1, "W05-KURU-GRUP1", "", "1", 1), ("kuru", G1, Y, D, "1", 1), ("kuru", G1, "W05-KURU-GRUP1", D, "1", 1),
-             ("yaz", G1, Y, D[:-1] + "c", "1", 1), ("yaz", G1, Y, "42223863686_0e95c567bc1b", "1", 1), ("yaz", G1, Y, "", "1", 1),
-             ("yaz", G1, Y, D + " ", "1", 1),
-             ("yaz", ",".join(G1.split(",")[:4]), Y, D, "1", 1), ("yaz", G1 + ",4570155846", Y, D, "1", 1),
-             ("yaz", ",".join(reversed(G1.split(","))), Y, D, "1", 1), ("yaz", G1 + ",4570112095", Y, D, "1", 1),
-             ("yaz", "4570155846", Y, D, "1", 1), ("yaz", "4570143815", Y, D, "1", 1), ("yaz", "", Y, D, "1", 1),
-             ("yaz", G1 + " ", Y, D, "1", 1), ("yaz", G1.replace(",", ", "), Y, D, "1", 1),
-             ("yaz", G1, "W05-KURU-GRUP1", D, "1", 1), ("yaz", G1, f"W05-YAZ-{G1}", D, "1", 1), ("yaz", G1, "W05-YAZ-GRUP2", D, "1", 1),
-             ("yaz", G1, "", D, "1", 1), ("yaz", G1, Y + " ", D, "1", 1),
-             ("yaz", G1, Y, D, "2", 1), ("yaz", G1, Y, D, "", 1), ("sil", G1, Y, D, "1", 1), ("", G1, Y, D, "1", 1),
-             ("yaz", G1, Y, D, "1R", 1))   # 1R: deneme 1 ama ref main degil
+    G2 = ("4570127160,4570113157,4570113675,4570128546,4570114301,4570150148,4570136319,4570151370,4570151950,4570152410,4570152820,"
+          "4570031205,4570153208,4570138967,4570154042,4570139913,4570140539,4570141945,4570157258,4570157716")
+    Y2 = "W05-KURU-GRUP2"
+    g2l = G2.split(",")
+    durum = (("kuru", G2, Y2, "", "1", 0),
+             ("yaz", G2, Y2, "", "1", 1), ("yaz", G2, "W05-YAZ-GRUP2", D, "1", 1), ("yaz", G2, "W05-YAZ-GRUP2", "", "1", 1),
+             ("yaz", G2, f"W05-YAZ-{G2}", D, "1", 1), ("yaz", G1, Y, D, "1", 1), ("yaz", G1, Y, "", "1", 1),
+             ("kuru", G2, Y2, D, "1", 1), ("kuru", G2, Y2, "42223863686_0e95c567bc1b", "1", 1), ("kuru", G2, Y2, " ", "1", 1),
+             ("kuru", ",".join(g2l[:19]), Y2, "", "1", 1), ("kuru", G2 + ",4570155846", Y2, "", "1", 1),
+             ("kuru", ",".join(reversed(g2l)), Y2, "", "1", 1), ("kuru", G2 + "," + g2l[-1], Y2, "", "1", 1),
+             ("kuru", ",".join([g2l[0]] + g2l[:19]), Y2, "", "1", 1),
+             ("kuru", G1, Y2, "", "1", 1), ("kuru", G1, "W05-KURU-GRUP1", "", "1", 1), ("kuru", "4570155846", Y2, "", "1", 1),
+             ("kuru", "4570143815", Y2, "", "1", 1), ("kuru", "", Y2, "", "1", 1),
+             ("kuru", G2 + " ", Y2, "", "1", 1), ("kuru", G2.replace(",", ", "), Y2, "", "1", 1),
+             ("kuru", G2, "W05-KURU-GRUP1", "", "1", 1), ("kuru", G2, "W05-YAZ-GRUP2", "", "1", 1), ("kuru", G2, "", "", "1", 1),
+             ("kuru", G2, f"W05-KURU-{G2}", "", "1", 1), ("kuru", G2, Y2 + " ", "", "1", 1),
+             ("kuru", G2, Y2, "", "2", 1), ("kuru", G2, Y2, "", "", 1), ("sil", G2, Y2, "", "1", 1), ("", G2, Y2, "", "1", 1),
+             ("kuru", G2, Y2, "", "1R", 1))   # 1R: deneme 1 ama ref main degil
     for kip, sad, onay, dam, den, bek in durum:
         e = {"KIP": kip, "SADECE": sad, "ONAY": onay, "DAMGA": dam, "GITHUB_RUN_ATTEMPT": den.rstrip("R"),
              "GITHUB_REF": "refs/heads/baska" if den.endswith("R") else "refs/heads/main", "PATH": os.environ.get("PATH", "")}
@@ -210,7 +217,9 @@ def main() -> int:
     tok = [i for i, x in enumerate(ps) if "rclone copyto \"gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json\" _work/ETSY_TOKEN.json" in x]
     ck = next(i for i, x in enumerate(ps) if x.strip() == "- uses: actions/checkout@v4")
     isr = [i for i, x in enumerate(ps) if x.rstrip().endswith("# ISARET")]
-    assert len(tok) == 1 and len(kls) >= 6 and len(isr) == 1, "p1g-w05-yukle: token tek yerde; KILIT1 satirlari; kilit isareti tek yerde"
+    assert len(tok) == 1 and len(kls) >= 8 and len(isr) == 1, "p1g-w05-yukle: token tek yerde; KILIT1 satirlari; kilit isareti tek yerde"
+    assert ps[kls[0]].strip() == 'if [ "$KIP" = yaz ]; then  # KILIT1' and ps[kls[-1]].strip() == "fi  # KILIT1", \
+        "p1g-w05-yukle: KILIT1 bloku yalniz kip yaz'da (if / fi)"
     assert i0 < ck < tk < min(k2s) and max(k2s) < min(kls) and max(kls) < eslem < kart < plan < isr[0] < tok[0] < bt, \
         "p1g-w05-yukle: kapi / kilit / girdi / kilit isareti / token sirasi"
     assert 'echo "CIKTI=$P1G/PILOT/${KIP}_${GITHUB_RUN_ID}${E}"' in pw and '"gdrive:${CIKTI:?}/KURU_KAPI.json"' in ps[isr[0]] and \
@@ -220,6 +229,30 @@ def main() -> int:
         assert x in benv, f"p1g-w05-yukle betik adimi env: {x}"
     assert "ONAY:" not in benv and '--onay "$ONAY"' not in pw and '--onay "W05-YAZ-$SADECE"' in pw, "p1g-w05-yukle: betik onayi SADECE'den, ONAY env yok"
     assert '--sadece "$SADECE"' in pw and "--plan-damga \"${PLAN_DAMGA:?}\"" in pw, "p1g-w05-yukle betik argumanlari"
+    # betik adimi davranisi (son savunma hatti): sahte python3 argv + W05_KILIT kaydeder. kuru (ve yaz disi her kip): yalniz --kuru,
+    # --confirm / --onay / W05_KILIT YOK; yaz: --confirm W05_DEGISTIR --onay W05-YAZ-<SADECE> + W05_KILIT=1
+    import tempfile as _tf0
+    br = next(i for i in range(bt, len(ps)) if ps[i].strip() == "run: |")
+    bs = next(i for i in range(br, len(ps)) if ps[i].strip().startswith("- name:"))
+    badim = "\n".join(x[10:] for x in ps[br + 1:bs])
+    with _tf0.TemporaryDirectory() as td0:
+        td0 = Path(td0); (td0 / "python3").write_text('#!/bin/bash\ncase "$1" in *w05_degistir.py) printf "%s\\n" "$@" > "$BLOG"; '
+                                                         'echo "KILIT=${W05_KILIT:-YOK}" >> "$BLOG" ;; *) cat > /dev/null ;; esac\n')
+        (td0 / "python3").chmod(0o755)
+        for kp in ("kuru", "yaz", "", "sil", "Kuru"):
+            bl = td0 / "b.log"
+            if bl.exists():
+                bl.unlink()
+            eb = {"PATH": f"{td0}:{os.environ.get('PATH', '')}", "KIP": kp, "SADECE": G2, "PLAN_DAMGA": "43000000003_abc", "BLOG": str(bl)}
+            r8 = subprocess.run(["bash", "-e", "-c", badim], capture_output=True, text=True, env=eb)
+            av = bl.read_text().splitlines() if bl.exists() else []
+            assert r8.returncode == 0 and av[:2] == ["scripts/kapak78/w05_degistir.py", "etsy"], f"p1g-w05-yukle betik {kp!r}: {r8.stderr} {av}"
+            if kp == "yaz":
+                assert av[2:6] == ["--confirm", "W05_DEGISTIR", "--onay", f"W05-YAZ-{G2}"] and "--kuru" not in av and av[-1] == "KILIT=1", \
+                    f"p1g-w05-yukle betik yaz argv: {av}"
+            else:
+                assert av[2] == "--kuru" and "--confirm" not in av and "--onay" not in av and av[-1] == "KILIT=YOK", \
+                    f"p1g-w05-yukle betik {kp!r}: yalniz --kuru, onay / kilit yok: {av}"
     tenv = "\n".join(ps[tk:next(i for i in range(tk, len(ps)) if ps[i].strip() == "run: |")])
     assert "ONAY: ${{ inputs.onay }}" in tenv and "DAMGA: ${{ inputs.plan_damga }}" in tenv, "p1g-w05-yukle token adimi env (ONAY, DAMGA)"
     assert "${{ inputs." not in "\n".join(x for x in ps if not x.strip().startswith(("KIP:", "SADECE:", "ONAY:", "DAMGA:", "GH_TOKEN:"))), \
@@ -232,6 +265,9 @@ def main() -> int:
     es = _yigin("python3 - \"$SADECE\" > _work/ilan_cift.txt <<'PY'")
     r4 = subprocess.run(["python3", "-", G1], input=es, capture_output=True, text=True, cwd=str(ROOT))
     assert r4.returncode == 0 and [x.split()[0] for x in r4.stdout.splitlines()] == G1.split(","), f"p1g-w05-yukle eslesme GRUP 1: {r4.stdout}"
+    r4 = subprocess.run(["python3", "-", G2], input=es, capture_output=True, text=True, cwd=str(ROOT))
+    g2c = [x.split()[1] for x in r4.stdout.splitlines()]
+    assert r4.returncode == 0 and [x.split()[0] for x in r4.stdout.splitlines()] == g2l and len(g2c) == 20, f"p1g-w05-yukle eslesme GRUP 2: {r4.stdout}"
     for kotu in ("4570110121,9999999999", "4570110121,4570110121", "", "4570110121,,4570110641"):
         r5 = subprocess.run(["python3", "-", kotu], input=es, capture_output=True, text=True, cwd=str(ROOT))
         assert r5.returncode != 0, f"p1g-w05-yukle eslesme bilinen FAIL {kotu!r}: {r5.stdout}"
@@ -251,10 +287,12 @@ def main() -> int:
             assert (r3.returncode == 0) == (bek == 0) and kk == ("PASS" if bek == 0 else "FAIL"), f"p1g-w05-yukle kuru kapisi {ad}: {r3.returncode} {kk}"
     # token adimi uctan uca, sahte rclone ile (ag yok): copyto / lsf --dirs-only / cat
     a0 = tk; a1 = next(i for i in range(a0, len(ps)) if ps[i].strip() == "run: |"); a2 = next(i for i in range(a1 + 1, len(ps)) if ps[i].startswith("      - "))
-    adim = "\n".join(x[10:] for x in ps[a1 + 1:a2])
+    adim_tam = "\n".join(x[10:] for x in ps[a1 + 1:a2])
+    adim = "\n".join(x[10:] for x in ps[a1 + 1:a2] if not x.rstrip().endswith("# KAPI2"))   # yaz yolu testleri: KAPI2 cikarilmis
+    assert adim_tam.count("# KAPI2") == 2 and "# KAPI2" not in adim
     ciftler = ["AQUARIUS_AQUARIUS", "AQUARIUS_ARIES", "AQUARIUS_CANCER", "AQUARIUS_CAPRICORN", "AQUARIUS_GEMINI"]
     # sahte rclone: copyto (indir / yukle), lsf --dirs-only | --files-only, cat; RCLONE_BOZ: lsf (dizin listesi), lsfdosya, cat, yukle
-    sahte = ('#!/bin/bash\n'
+    sahte = ('#!/bin/bash\n[ -n "$RCLONE_LOG" ] && echo "$*" >> "$RCLONE_LOG"\n'
              'case "$1" in\n'
              ' copyto) if [ "${2#gdrive:}" != "$2" ]; then s="${2#gdrive:}"; [ -f "$FAKE/$s" ] || exit 3; mkdir -p "$(dirname "$3")"; cp "$FAKE/$s" "$3";\n'
              '   else [ "$RCLONE_BOZ" = yukle ] && exit 5; s="${3#gdrive:}"; mkdir -p "$(dirname "$FAKE/$s")"; cp "$2" "$FAKE/$s"; fi ;;\n'
@@ -314,17 +352,16 @@ def main() -> int:
     z = _uc()
     assert z["rc"] == 0 and len(z["kart"]) == 5 and not z["canli"] and z["tok"] and z["kk"] == "PASS" and z["plan"] and f"PLAN_DAMGA={D}" in z["genv"] \
         and z["isaret"], f"p1g-w05-yukle uctan uca yaz: {z}"
-    for ad, kw in (("kuru", dict(kip="kuru")), ("deneme 2", dict(den="2")), ("eksik kart", dict(eksik=("kart", "AQUARIUS_CANCER"))),
+    for ad, kw in (("eksik kart", dict(eksik=("kart", "AQUARIUS_CANCER"))),
                    ("eksik PLAN", dict(eksik="plan")), ("bozuk RAPOR (HAZIR 4)", dict(rapor=dict(iyi, sayilar={"HAZIR": 4}))),
                    ("tek kullanimlik kilit", dict(kilit="yaz_42999999999")), ("PILOT listesi okunamadi", dict(boz="lsf")),
                    ("kilit: yalniz RAPOR.json ayni damga", dict(kilit="yaz_42999999998", yalniz_rapor=True)),
                    ("kilit: yaz_ klasoru listelenemedi", dict(boz="lsfdosya")), ("kilit: KURU_KAPI.json okunamadi", dict(boz="cat")),
-                   ("kilit isareti yuklenemedi", dict(boz="yukle")), ("ref main degil", dict(ref="refs/heads/baska")),
-                   ("ikinci dispatch (isaret)", dict(ikinci=True))):
+                   ("kilit isareti yuklenemedi", dict(boz="yukle")), ("ikinci dispatch (isaret)", dict(ikinci=True))):
         z = _uc(**kw)
         assert z["rc"] != 0 and not z["tok"], f"p1g-w05-yukle uctan uca bilinen FAIL {ad}: {z['rc']} token {z['tok']} {z['ci'][-300:]}"
-        if ad in ("kuru", "deneme 2", "tek kullanimlik kilit", "PILOT listesi okunamadi", "kilit: yalniz RAPOR.json ayni damga",
-                  "kilit: yaz_ klasoru listelenemedi", "kilit: KURU_KAPI.json okunamadi", "ref main degil", "ikinci dispatch (isaret)"):
+        if ad in ("tek kullanimlik kilit", "PILOT listesi okunamadi", "kilit: yalniz RAPOR.json ayni damga",
+                  "kilit: yaz_ klasoru listelenemedi", "kilit: KURU_KAPI.json okunamadi", "ikinci dispatch (isaret)"):
             assert not z["kart"], f"p1g-w05-yukle {ad}: kapi / kilit kart indirmeden once durmali {z['kart']}"
         if ad == "eksik kart":
             assert "indirilemedi (4570125580 AQUARIUS_CANCER)" in z["ci"] and not any("CAPRICORN" in x or "GEMINI" in x for x in z["kart"]), z["ci"][-300:]
@@ -336,6 +373,73 @@ def main() -> int:
             assert "tek kullanimlik kilit: yaz_43000000001" in z["ci"], z["ci"][-300:]
         if ad == "kilit isareti yuklenemedi":
             assert "kilit isareti Drive'a yazilamadi" in z["ci"] and len(z["kart"]) == 5, z["ci"][-300:]
+    # kuru uctan uca (GRUP 2, gercek adim metni KAPI2 dahil): sahte YEDEK GALERI.json (rank 1..11, W05 bagsiz) + PASS alanli sha256'li
+    # MANIFEST_W05.csv; plan gercek w05_degistir.py plan ile kurulur. KILIT1 kuru'da hic calismaz (sahte rclone'a PILOT listesi istegi gelmez)
+    # ve PILOT/yaz_* altinda "" iceren RAPOR.json olsa da durmaz.
+    import hashlib as _hl
+
+    def _uck(kip="kuru", den="1", ref="refs/heads/main", eksik=None, blok=None):
+        with _tf.TemporaryDirectory() as td:
+            td = Path(td); (td / "bin").mkdir(); (td / "w").mkdir()
+            (td / "bin" / "rclone").write_text(sahte); (td / "bin" / "rclone").chmod(0o755)
+            fk = td / "fake" / "ASTROLOVE" / "TEMP"; p1 = fk / "P1G_W05_20261106_090016"; yd = fk / "POSTER_GALERI_V11_YEDEK" / "20261106_090016"
+            (p1 / "PILOT" / "yaz_42999999991").mkdir(parents=True); (fk / "ETSY_TOKEN.json").write_text("{}")
+            (p1 / "PILOT" / "yaz_42999999991" / "RAPOR.json").write_text('{"mod": "yazim", "plan_damga": "", "a": ""}')   # bos damga tuzagi
+            satir = ["cift,ilan,dosya,sha256,kimlik,canli_ocr,bilinen_pass,durum"]
+            for n, (i, c) in enumerate(zip(g2l, g2c)):
+                kart = p1 / f"{c}_W05_SUREC.jpg"
+                if eksik != ("kart", c):
+                    kart.write_bytes(b"" if eksik == ("bos_kart", c) else f"kart {c}".encode())
+                satir.append(f"{c},{i},{c}_W05_SUREC.jpg,{_hl.sha256(f'kart {c}'.encode()).hexdigest()},PASS,PASS,PASS,PASS")
+                if eksik == ("galeri", c):
+                    continue
+                base = 9000000000 + n * 100
+                gor = [dict(rank=k, listing_image_id=base + k, alt_text="How your order works" if k == 5 else f"alt {c} {k}") for k in range(1, 12)]
+                bag = [dict(property_id=200, value_id=100 + k, image_id=base + k) for k in (7, 8, 9, 10, 11)]
+                if blok == c:
+                    bag.append(dict(property_id=200, value_id=99, image_id=base + 5))
+                (yd / f"{i}_{c}").mkdir(parents=True)
+                (yd / f"{i}_{c}" / "GALERI.json").write_text("" if eksik == ("bos_galeri", c) else _j.dumps(dict(listing_id=i, cift=c, gorseller=gor, baglar=bag)))
+            if eksik != "manifest":
+                (p1 / "MANIFEST_W05.csv").write_text("\n".join(satir) + "\n")
+            for d in ("scripts", "data"):
+                (td / "w" / d).symlink_to(ROOT / d)
+            e = {"PATH": f"{td / 'bin'}:{os.environ.get('PATH', '')}", "FAKE": str(td / "fake"), "P1G": "ASTROLOVE/TEMP/P1G_W05_20261106_090016",
+                 "YEDEK": "ASTROLOVE/TEMP/POSTER_GALERI_V11_YEDEK/20261106_090016", "KIP": kip, "SADECE": G2, "ONAY": Y2, "DAMGA": "",
+                 "GITHUB_RUN_ATTEMPT": den, "GITHUB_REF": ref, "GITHUB_ENV": str(td / "genv"), "GITHUB_RUN_ID": "43000000003",
+                 "RCLONE_LOG": str(td / "rclone.log"), "CIKTI": "ASTROLOVE/TEMP/P1G_W05_20261106_090016/PILOT/kuru_43000000003"}
+            r7 = subprocess.run(["bash", "-e", "-c", adim_tam], capture_output=True, text=True, env=e, cwd=str(td / "w"), stdin=subprocess.DEVNULL)
+            w = td / "w"; lg = (td / "rclone.log").read_text() if (td / "rclone.log").exists() else ""
+            pj = _j.loads((w / "_out" / "PLAN_W05.json").read_text()) if (w / "_out" / "PLAN_W05.json").exists() else {}
+            return dict(rc=r7.returncode, ci=r7.stdout + r7.stderr, kart=sorted(x.name for x in (w / "_kart").iterdir()) if (w / "_kart").exists() else [],
+                        canli=sorted(x.name for x in (w / "_canli").iterdir()) if (w / "_canli").exists() else [],
+                        tok=(w / "_work" / "ETSY_TOKEN.json").exists(), lsf="lsf" in lg, plan=pj,
+                        genv=(td / "genv").read_text() if (td / "genv").exists() else "")
+    z = _uck()
+    assert z["rc"] == 0 and len(z["kart"]) == 20 and len(z["canli"]) == 20 and z["tok"] and not z["lsf"] \
+        and list((z["plan"].get("girdiler") or {})) == g2l and "PLAN_DAMGA=43000000003_" in z["genv"], \
+        f"p1g-w05-yukle kuru uctan uca GRUP 2: rc {z['rc']} kart {len(z['kart'])} canli {len(z['canli'])} token {z['tok']} lsf {z['lsf']} {z['ci'][-400:]}"
+    for ad, kw, ilk in (("kip yaz (KAPI2)", dict(kip="yaz"), True), ("deneme 2 (KAPI2)", dict(den="2"), True),
+                        ("ref main degil (KAPI2)", dict(ref="refs/heads/baska"), True),
+                        ("eksik kart", dict(eksik=("kart", g2c[7])), False), ("eksik GALERI.json", dict(eksik=("galeri", g2c[3])), False),
+                        ("bos kart", dict(eksik=("bos_kart", g2c[19])), False), ("bos GALERI.json", dict(eksik=("bos_galeri", g2c[0])), False),
+                        ("MANIFEST yok", dict(eksik="manifest"), False), ("plan BLOK (W05 renge bagli)", dict(blok=g2c[11]), False)):
+        z = _uck(**kw)
+        assert z["rc"] != 0 and not z["tok"] and not z["lsf"], f"p1g-w05-yukle kuru bilinen FAIL {ad}: rc {z['rc']} token {z['tok']} {z['ci'][-300:]}"
+        if ilk:
+            assert not z["kart"] and "KAPI2" in z["ci"], f"p1g-w05-yukle {ad}: KAPI2 kart indirmeden once durmali {z['kart']} {z['ci'][-200:]}"
+        if ad == "MANIFEST yok":
+            assert "MANIFEST_W05.csv indirilemedi" in z["ci"], z["ci"][-300:]
+        if ad == "plan BLOK (W05 renge bagli)":
+            assert "plan BLOK" in z["ci"], z["ci"][-300:]
+        if ad == "eksik kart":
+            assert f"kart indirilemedi ({g2l[7]} {g2c[7]})" in z["ci"], z["ci"][-300:]
+        if ad == "bos kart":
+            assert f"kart bos ({g2l[19]} {g2c[19]})" in z["ci"], z["ci"][-300:]
+        if ad == "bos GALERI.json":
+            assert f"canli GALERI.json bos ({g2l[0]} {g2c[0]})" in z["ci"], z["ci"][-300:]
+        if ad == "eksik GALERI.json":
+            assert f"canli GALERI.json indirilemedi ({g2l[3]} {g2c[3]})" in z["ci"], z["ci"][-300:]
     print(f"PASS: {len(files)} workflow YAML, {len(PUBLIC_AUDITS)} public denetim sozlesmesi")
     return 0
 
