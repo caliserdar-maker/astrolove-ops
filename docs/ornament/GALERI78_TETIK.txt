@@ -1,2 +1,2 @@
-2026-11-07 05:14 UTC
-4. tetik (7 Kas): yalniz 12 ayni burc cifti (GALERI78.json yalniz_ciftler); ip bolmesi kapakta, ayni burcta sabit "& sonrasi", stillere bolme + punto aynen, bagimsiz bolme kapisi; LEO_LEO_11_IVORY referansi yenilendi (Serdar "A" + "Evet").
+2026-11-07 05:48 UTC
+5. tetik (7 Kas): yalniz TAURUS_TAURUS (42341922601: 11/12 PASS, kontrol 4/4 PASS; TAURUS punto sigmadi). Ayni burcta punto kucultme dongusu (tum kareler, en fazla 12); farkli burcta punto esitligi aranmaz.

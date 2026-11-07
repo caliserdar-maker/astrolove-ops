@@ -43,20 +43,9 @@
   "kaynak": "main scripts/kapak78/simd_sabit.py (Serdar 31 Eki 8a); inceleme 6 Kas: bu ayarla yerelde LEO_LEO 13/13 bayt bayt ayni"
  },
  "yalniz_ciftler": [
-  "AQUARIUS_AQUARIUS",
-  "ARIES_ARIES",
-  "CANCER_CANCER",
-  "CAPRICORN_CAPRICORN",
-  "GEMINI_GEMINI",
-  "LEO_LEO",
-  "LIBRA_LIBRA",
-  "PISCES_PISCES",
-  "SAGITTARIUS_SAGITTARIUS",
-  "SCORPIO_SCORPIO",
-  "TAURUS_TAURUS",
-  "VIRGO_VIRGO"
+  "TAURUS_TAURUS"
  ],
- "yalniz_aciklama": "7 Kas: yalniz bu ciftler uretilir (ayni burc Ivory bolme duzeltmesi). Bos/yoksa 78 cift.",
- "parca_yalniz": 4,
+ "yalniz_aciklama": "7 Kas: yalniz bu ciftler uretilir (ayni burc Ivory bolme duzeltmesi; 42341922601'de 11/12 PASS, TAURUS_TAURUS punto sigmadi -> punto kucultme dongusuyle yeniden). Bos/yoksa 78 cift.",
+ "parca_yalniz": 1,
  "hedef_onek_yalniz": "ORNAMENT_GALERI78_BOLME"
 }

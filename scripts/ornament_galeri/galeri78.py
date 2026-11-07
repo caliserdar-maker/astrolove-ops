@@ -118,7 +118,7 @@ AYNI_BURC_BOL = 1     # 7 Kas: ayni burc ciftlerinde iki bosluk ipe esit uzak (y
 SOL_TOL_PX = 8        # bolme kapisi: ipin solundaki baslik genisligi kapaktan en fazla bu kadar farkli (bolme degisirse ~kelime genisligi kadar fark eder)
 
 
-def bolme_kapisi(kap):
+def bolme_kapisi(kap, punto_esit=True):
     """Bagimsiz olcum: her karede baslik puntosu kapakla ayni ve ipin solundaki baslik genisligi (ip_x - baslik_ust_kutu sol kenari, cizilen
     piksellerden) kapaktan en fazla SOL_TOL_PX farkli. Motorun bol_secilen degeri yalniz bilgi (zorlandigi icin kendi kendini dogrular)."""
     k0 = kap.get("01_KAPAK") or {}
@@ -127,8 +127,9 @@ def bolme_kapisi(kap):
         return None if (not u or x is None) else round(float(x) - float(u[0]), 1)
     s0, b0 = sol(k0), k0.get("baslik_boy")
     sat = {k: dict(boy=v.get("baslik_boy"), sol=sol(v), bol=v.get("bol_secilen")) for k, v in kap.items()}
-    hata = [k for k, v in sat.items() if s0 is None or v["sol"] is None or v["boy"] != b0 or abs(v["sol"] - s0) > SOL_TOL_PX]
-    return dict(ok=not hata and s0 is not None, hata=hata, kareler=sat, tol_px=SOL_TOL_PX)
+    # punto esitligi yalniz ayni burcta (farkli burcta punto zorlanmaz; 7 Kas 3. tur inceleme bulgu 5)
+    hata = [k for k, v in sat.items() if s0 is None or v["sol"] is None or (punto_esit and v["boy"] != b0) or abs(v["sol"] - s0) > SOL_TOL_PX]
+    return dict(ok=not hata and s0 is not None, hata=hata, kareler=sat, tol_px=SOL_TOL_PX, punto_esit=punto_esit)
 
 
 def cift_uret(cift, kaynak, sembol, is_kok, cikti_kok, log):
@@ -145,16 +146,31 @@ def cift_uret(cift, kaynak, sembol, is_kok, cikti_kok, log):
     olc = {"cift": cift, "kapak": {}, "zaman_sn": {}}
     t = time.time()
     a_, b_ = cift.split("_")
-    j = kapak(cift, "RUBY", "PERSONALIZED ORNAMENT", O / f"{cift}_01_KAPAK.jpg", log=log, bol=AYNI_BURC_BOL if a_ == b_ else None)
+    ayni = a_ == b_
     BK = ("baslik_boy", "baslik_kutu", "baslik_ust_kutu", "ip_x_baslik", "uyari", "kapi_a_8bit_max_fark", "baslik_4x5_icinde", "bol_dogal", "bol_secilen")
-    olc["kapak"]["01_KAPAK"] = {k: j.get(k) for k in BK + ("disk",)}
-    bol = j.get("bol_secilen")                     # 7 Kas Serdar "A": ip bolmesi kapakta secilir, stillere ve video karelerine aynen verilir
-    boy = j.get("baslik_boy")                      # punto da aynen (zorlanan bolme sigmazsa motor DUR verir; 7 Kas inceleme: SAG_SAG White 109/111)
-    for stil, ad, alt in STILLER:
-        y = W / f"{cift}_STIL_{stil}.jpg"
-        j = kapak(cift, stil, alt, y, log=log, bol=bol, boy=boy)
-        shutil.copy(y, O / f"{cift}_{ad}.jpg")
-        olc["kapak"][ad] = {k: j.get(k) for k in BK}
+    # 7 Kas Serdar "A": ip bolmesi kapakta secilir, stillere ve video karelerine aynen verilir. Ayni burcta sabit bolme + punto da aynen;
+    # zorlanan bolme bir sahnede sigmazsa (TAURUS_TAURUS 176, kosu 42341922601) punto TUM karelerde 2'ser kuculur (kapak dahil), en fazla 12 deneme.
+    # Farkli burc ciftlerinde punto zorlanmaz (eski yol, 7 Kas 2. tur inceleme bulgu 4).
+    boy_z = None
+    for deneme in range(12):
+        try:
+            j = kapak(cift, "RUBY", "PERSONALIZED ORNAMENT", O / f"{cift}_01_KAPAK.jpg", log=log, bol=AYNI_BURC_BOL if ayni else None, boy=boy_z)
+            olc["kapak"] = {"01_KAPAK": {k: j.get(k) for k in BK + ("disk",)}}
+            bol = j.get("bol_secilen"); boy = j.get("baslik_boy") if ayni else None
+            for stil, ad, alt in STILLER:
+                y = W / f"{cift}_STIL_{stil}.jpg"
+                j = kapak(cift, stil, alt, y, log=log, bol=bol, boy=boy)
+                shutil.copy(y, O / f"{cift}_{ad}.jpg")
+                olc["kapak"][ad] = {k: j.get(k) for k in BK}
+            break
+        except RuntimeError as e:
+            if not (ayni and "sigmiyor" in str(e)):
+                raise
+            boy_z = (boy_z if boy_z is not None and "01_KAPAK" not in olc["kapak"] else int(olc["kapak"]["01_KAPAK"]["baslik_boy"])) - 2
+            olc["kapak"] = {}
+            olc.setdefault("punto_kucultme", []).append(dict(deneme=deneme + 1, yeni_boy=boy_z, neden=str(e)[-160:]))
+    else:
+        raise RuntimeError("DUR: ayni burc bolmesi 12 denemede sigmadi")
     # kapi: baslik bolmesi ve puntosu her karede ayni (ayni burc ciftlerinde Ivory farkli bolunuyordu; 6 Kas gorsel inceleme)
     olc["zaman_sn"]["kapak_stil"] = round(time.time() - t); t = time.time()
     kos(["python3", str(KOK / "kart" / "ornament_kart.py"), cift],
@@ -171,7 +187,7 @@ def cift_uret(cift, kaynak, sembol, is_kok, cikti_kok, log):
     for k in ("semsiz", "bos"):
         jv = kapak(cift, "RUBY", "PERSONALIZED ORNAMENT", V / f"KAPAK_{k}.jpg", baski=V / f"baski_{k}.png", log=log, bol=bol, boy=boy)
         olc["kapak"][f"video_{k}"] = {k2: jv.get(k2) for k2 in BK}
-    olc["bolme"] = bolme_kapisi(olc["kapak"])
+    olc["bolme"] = bolme_kapisi(olc["kapak"], punto_esit=ayni)
     olc["bolme"]["dogal_farkli"] = [k for k, v in olc["kapak"].items() if v.get("bol_dogal") != v.get("bol_secilen")]
     mp4 = O / f"{cift}_VIDEO.mp4"
     r = kos(["python3", str(KOK / "video" / "video_orn.py"), str(V), str(mp4)], env=VIDEO_ENV, log=log)
