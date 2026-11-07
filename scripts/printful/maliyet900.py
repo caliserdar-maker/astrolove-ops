@@ -57,7 +57,7 @@ ADRES = {
     'IL': dict(country_code='IL', city='Jerusalem', zip='9195016', address1='Ruppin Blvd 11'),
 }
 IZIN = (('GET', re.compile(r'^/oauth/scopes$')), ('GET', re.compile(r'^/orders\?limit=5$')), ('POST', re.compile(r'^/orders/estimate-costs$')),
-        ('POST', re.compile(r'^/shipping/rates$')), ('GET', re.compile(r'^/products/variant/23133$')))
+        ('POST', re.compile(r'^/shipping/rates$')), ('GET', re.compile(r'^/products/variant/23133$')), ('GET', re.compile(r'^/countries$')))
 S = requests.Session(); S.headers.update({'User-Agent': UA, 'Accept': 'application/json'})
 
 
@@ -113,9 +113,52 @@ def kdv_sayfasi(R):
     R['kdv_sayfasi'] = 'dogrulanamadi (sayfa acilmadi)'
 
 
+def tum_ulke(O, damga):
+    """VERI=tum_ulke (Serdar 7 Kas "Evet": profil ulke ulke, yalniz Printful'un gonderdigi ulkeler). Salt okuma: GET /countries,
+    her ulke icin POST /shipping/rates (1 adet; ucret varsa 2 adet). Adres yalniz ulke (+ varsa ilk eyalet kodu); sehir / posta kodu yok."""
+    st, d = pf('GET', '/countries')
+    ulkeler = sonuc(d) if isinstance(sonuc(d), list) else []
+    if st != 200 or not ulkeler:
+        print('DUR: /countries', st, str(d)[:300], flush=True); return 3
+    R = dict(gorev='Printful 900 tum ulke kargo (salt okuma)', varyant=VARYANT, damga=damga, ulke_sayisi=len(ulkeler), satir=[])
+    for u in ulkeler:
+        cc = u.get('code'); states = u.get('states') or []
+        alici = {'country_code': cc}
+        if states:
+            alici['state_code'] = states[0].get('code')
+        satir = dict(ulke=cc, ad=u.get('name'), eyalet=alici.get('state_code'))
+        for q in (1, 2):
+            st, d = pf('POST', '/shipping/rates', {'recipient': alici, 'items': [{'variant_id': VARYANT, 'quantity': q}], 'currency': 'USD'})
+            rates = sonuc(d) if isinstance(sonuc(d), list) else []
+            std = next((x for x in rates if x.get('id') == 'STANDARD'), rates[0] if rates else None)
+            satir[f'http_{q}'] = st
+            satir[f'ucret_{q}'] = (std or {}).get('rate')
+            satir[f'gun_{q}'] = [(std or {}).get('minDeliveryDays'), (std or {}).get('maxDeliveryDays')]
+            if st != 200:
+                satir[f'hata_{q}'] = str((d or {}).get('result') if isinstance(d, dict) else d)[:200]
+            time.sleep(0.6)
+            if q == 1 and not satir['ucret_1']:
+                break
+        R['satir'].append(satir)
+        print(cc, satir.get('http_1'), satir.get('ucret_1'), satir.get('ucret_2'), flush=True)
+    gruplar = {}
+    for s in R['satir']:
+        k = f"{s.get('ucret_1')} / {s.get('ucret_2')}" if s.get('ucret_1') else f"YOK (HTTP {s.get('http_1')})"
+        gruplar.setdefault(k, []).append(s['ulke'])
+    R['gruplar'] = gruplar
+    (O / f'kargo_tum_{damga}.json').write_text(json.dumps(R, indent=1, ensure_ascii=False))
+    md = ['# Printful 900 tum ulke kargo (salt okuma)', '', f"ulke sayisi {len(ulkeler)}", '']
+    md += [f"- {k}: {len(v)} ulke: {' '.join(sorted(x or '?' for x in v))}" for k, v in sorted(gruplar.items())]
+    (O / f'kargo_tum_{damga}.md').write_text('\n'.join(md) + '\n')
+    print('OZET tum_ulke', {k: len(v) for k, v in gruplar.items()}, flush=True)
+    return 0
+
+
 def main():
     O = Path(sys.argv[1]); O.mkdir(parents=True, exist_ok=True)
     damga = time.strftime('%Y%m%d_%H%M', time.gmtime())
+    if os.environ.get('VERI', '').strip() == 'tum_ulke':
+        return tum_ulke(O, damga)
     R = dict(gorev='Printful 900 maliyet dogrulama (salt okuma, siparis yok)', varyant=VARYANT, dosya=DOSYA, damga=damga, satir=[])
     dokuman(R)
     st, d = pf('GET', '/oauth/scopes')

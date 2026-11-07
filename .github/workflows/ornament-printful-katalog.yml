@@ -345,6 +345,8 @@ jobs:
           retention-days: 3
       - name: Printful 900 maliyet (maliyet900; salt okuma, siparis yok, Drive yok)
         if: env.MOD == 'maliyet900'
+        env:
+          VERI: ${{ inputs.veri }}   # 'tum_ulke' = tum ulke kargo sorgusu (Serdar 7 Kas)
         run: |
           set -euo pipefail
           U="docs/ornament/ham"; mkdir -p "s/$U"
@@ -353,7 +355,7 @@ jobs:
           set +e
           python3 -I main/scripts/printful/maliyet900.py "s/$U" 2>&1 | sansur | tee /tmp/maliyet900_log.txt; k=${PIPESTATUS[0]}
           set -e
-          L=$(ls -t s/$U/maliyet_tahmin_*.json | head -1); cp /tmp/maliyet900_log.txt "${L%.json}_LOG.txt"
+          L=$( (ls -t s/$U/maliyet_tahmin_*.json s/$U/kargo_tum_*.json 2>/dev/null || true) | head -1); cp /tmp/maliyet900_log.txt "${L%.json}_LOG.txt"
           if grep -rlF "$PRINTFUL_TOKEN" "s/$U" >/dev/null; then echo "::error::ciktida token, yazilmadi"; exit 1; fi
           if grep -rlE "Bearer [A-Za-z0-9]" "s/$U" >/dev/null; then echo "::error::ciktida Bearer, yazilmadi"; exit 1; fi
           echo "::notice::maliyet900 cikis $k | $(tail -1 /tmp/maliyet900_log.txt | cut -c1-200)"
