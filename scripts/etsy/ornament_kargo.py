@@ -47,6 +47,7 @@ KOTA_MIN = 10
 ILAN_ISTEK = 21                          # fiyat: GET listing, GET inv, GET varimg, PUT (5xx ile en fazla 3), GET listing, GET inv, GET varimg, acil PATCH + GET
 RET_IZINLI = {"BV", "HM", "TF", "UM", "CC", "CX", "NF", "SJ", "TK", "XK"}   # Etsy'nin tanimayabilecegi bolgeler (400 ise atlanir)
 ISO_RET = re.compile(r"^Value for destination_country_iso must be a valid ISO Country Code: ([A-Z]{2})\.$")   # 7 Kas kosu 42358294077: CI
+BILINEN_RET = {"CI"}                     # Etsy'nin tanimadigi, gozlenen (7 Kas kosu 42358294077 ve 42359104357)
 METIN_SINIR = 5                          # metinle atlanan ulke sayisi siniri (Merkez onerisi, tahmin; Serdar onayi); fazlasi DUR
 KORUNAN = {"US", "CA", "GB", "AU", "NZ", "IE", "DE", "FR", "IT", "ES", "NL", "BE", "AT", "CH", "SE", "DK", "NO", "FI", "PL",
            "PT", "CZ", "GR", "LU"}       # buyuk pazarlar (Merkez onerisi, tahmin; Serdar onayi): metinle ATLANMAZ (red = sistematik hata, DUR)
@@ -266,18 +267,24 @@ def teshis(api, shop, out):
     return R
 
 
+def _anahtar(lst):
+    return sorted((((d.get("destination_country_iso") or d.get("destination_region") or "?"), OT.para(d.get("primary_cost")),
+                    OT.para(d.get("secondary_cost")), d.get("min_delivery_days"), d.get("max_delivery_days")) for d in lst), key=repr)
+
+
 def hedefler(api, shop, pid):
-    """Profil hedefleri SAYFALI (getShopShippingProfileDestinationsByShippingProfile): profil yanitindaki liste kesik olabilir (inceleme)."""
-    out, off = [], 0
-    while True:
-        r = api.get(f"/shops/{shop}/shipping-profiles/{pid}/destinations", params={"limit": 100, "offset": off}) or {}
-        sayfa = r.get("results") or []
-        out += sayfa
-        if len(sayfa) < 100:                        # count toplam mi sayfa mi belirsiz (inceleme 3. tur): bos olmayan tam sayfa = devam
-            return out
-        off += 100
-        if off >= 1000:
-            raise SystemExit(f"DUR: profil {pid} hedefleri 1000'i asti (okuma sinirinda)")
+    """Profil hedefleri: getShopShippingProfile yaniti + magaza profil listesindeki ayni profil; ikisi BIREBIR ayni olmali.
+    destinations uc noktasi KULLANILMAZ (7 Kas teshis kosu 42359284764: profil ve liste 125/125 tekil; destinations limit=100 ile
+    1, parametresiz 25 donuyor; 42359104357 bu yuzden 28 hedefi yeniden gonderdi, Etsy kopya olusturmadi)."""
+    prof = api.get(f"/shops/{shop}/shipping-profiles/{pid}") or {}
+    a = prof.get("shipping_profile_destinations")
+    sps = (api.get(f"/shops/{shop}/shipping-profiles") or {}).get("results") or []
+    b = [x.get("shipping_profile_destinations") for x in sps if str(x.get("shipping_profile_id")) == str(pid)]
+    if not isinstance(a, list) or len(b) != 1 or not isinstance(b[0], list):
+        raise SystemExit(f"DUR: profil {pid} hedefleri okunamadi (profil yaniti {type(a).__name__}, listede {len(b)} kayit)")
+    if _anahtar(a) != _anahtar(b[0]):
+        raise SystemExit(f"DUR: profil {pid} hedefleri profil yanitinda {len(a)}, magaza listesinde {len(b[0])}: farkli (kesik okuma)")
+    return a
 
 
 def _hedef_haritasi(prof):
@@ -321,7 +328,11 @@ def profil(api, shop, out, kuru=False):
             if s or s2:
                 raise SystemExit(f"DUR: var olan profil onayli yapida degil: {s + s2}")
         eksik = [h for h in hedef if h[0] not in have]
-        butce = len(eksik) + (0 if pid else 1) + 8 + KOTA_MIN + 5     # yazimlar + geri okumalar (sayfali) + taban + pay
+        supheli = sorted({h[0] for h in eksik} - RET_IZINLI - BILINEN_RET)
+        if pid and have and len(have) % 25 == 0 and supheli:
+            raise SystemExit(f"DUR: var olan profilde {len(have)} hedef okundu (25'in kati, kesik okuma olabilir) ve eksik {supheli[:10]} "
+                             f"({len(supheli)}); POST yok. Yapilacak: profil_teshis kosusu ile profil sayisini dogrula; gercek eksikse Merkez karariyla devam")
+        butce = len(eksik) + (0 if pid else 1) + 8 + KOTA_MIN + 5     # yazimlar + geri okumalar (hedefler: 2 GET / cagri) + taban + pay
         R["butce"] = dict(gerekli=butce, kalan=api.remaining, eksik_hedef=len(eksik))
         if not kuru and api.remaining is not None and str(api.remaining).isdigit() and int(api.remaining) < butce:
             raise SystemExit(f"DUR: kota {api.remaining} < profil butcesi {butce} (hic yazilmadi)")
@@ -525,6 +536,7 @@ class KuruAg:
         self.remaining, self.calls, self.istek, self._kapi_bakildi = "5000", 0, [], False
         self.sert_taban = None
         self.db, self.profiller, self.ret, self.ret_metin = {}, {}, {}, {}
+        self.kesik_profil = 0
         for c, lid in lids.items():
             self.db[str(lid)] = dict(state="draft", inv=dict(products=[dict(
                 sku=OT.sku(c, kd), property_values=[dict(property_id=OT.P_STYLE, property_name="Style", value_ids=[1000 + n], values=[ad])],
@@ -543,14 +555,15 @@ class KuruAg:
         if re.match(r"^/shops/\d+/shipping-profiles$", path):
             return {"results": list(self.profiller.values())}
         m = re.match(r"^/shops/\d+/shipping-profiles/(\d+)/destinations$", path)
-        if m:
+        if m:                                       # gercek Etsy davranisi (teshis 42359284764): limit=100 -> 1, parametresiz -> 25
             h = self.profiller[m.group(1)]["shipping_profile_destinations"]
-            off = int((kw.get("params") or {}).get("offset", 0))
-            return {"count": len(h), "results": h[off:off + 100]}
+            n = 1 if (kw.get("params") or {}).get("limit") else 25
+            return {"count": n, "results": h[:n]}
         m = re.match(r"^/shops/\d+/shipping-profiles/(\d+)$", path)
-        if m:                                       # gercek Etsy'de profil yanitindaki liste kesik olabilir: taklit ilk 25
+        if m:
             pr = dict(self.profiller[m.group(1)])
-            pr["shipping_profile_destinations"] = pr["shipping_profile_destinations"][:25]
+            if self.kesik_profil:
+                pr["shipping_profile_destinations"] = pr["shipping_profile_destinations"][:self.kesik_profil]
             return pr
         m = re.match(r"^/shops/\d+/listings/(\d+)/variation-images$", path)
         if m:

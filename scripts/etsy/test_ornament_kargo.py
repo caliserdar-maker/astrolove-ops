@@ -563,9 +563,10 @@ def t_profil_olusturma_500_tek_post():
     assert len([x for x in p.istek if x[0] == "POST"]) == 1
 
 
-def t_profil_sayfali_okuma():
+def t_profil_hedef_okuma_destinations_kullanmaz():
     p, prof = _tam_profil()
     assert len(K.hedefler(p, "1", prof["shipping_profile_id"])) == 127
+    assert not any(pt.endswith("/destinations") for m, pt, _ in p.istek if m == "GET"), "destinations GET yapildi"
 
 
 def t_fiyat_acil_basarisiz_mesaji():
@@ -614,24 +615,113 @@ def t_izin_patch_json_govde_yasak():
     dur_bekle(lambda: api._call("PATCH", f"/shops/1/listings/{a}", data={"state": "inactive"}, json_body={"state": "active"}), "YASAK (fiyat)")
 
 
-def t_profil_sayfa_count_sayfa_boyu():
+def t_profil_kesik_profil_yaniti_dur():
+    p, prof = _tam_profil()
+    p.kesik_profil = 25
+    dur_bekle(lambda: K.hedefler(p, "1", prof["shipping_profile_id"]), "farkli (kesik okuma)")
+
+
+def t_profil_kesik_yanit_yeniden_kosuda_dur_post_yok():
+    p, prof = _tam_profil()
+    p.kesik_profil = 25
+    once = len(p.istek)
+    with tmp() as d:
+        dur_bekle(lambda: K.profil(p, "1", Path(d)), "kesik okuma")
+    assert not [x for x in p.istek[once:] if x[0] == "POST"], "kesik okumada POST gitti"
+
+
+def _kes_liste(p, n):
+    orj = p._ag
+
+    def kes(method, path, **kw):
+        r = orj(method, path, **kw)
+        if method == "GET" and path.endswith("/shipping-profiles"):
+            r = {"results": [dict(x, shipping_profile_destinations=x["shipping_profile_destinations"][:n]) for x in r["results"]]}
+        return r
+    p._ag = kes
+
+
+def t_profil_kesik_liste_yaniti_dur():
+    p, prof = _tam_profil()
+    _kes_liste(p, 100)
+    dur_bekle(lambda: K.hedefler(p, "1", prof["shipping_profile_id"]), "farkli (kesik okuma)")
+
+
+def t_profil_ucret_farki_okumada_dur():
     p, prof = _tam_profil()
     orj = p._ag
 
-    def sayfa(method, path, **kw):
+    def degis(method, path, **kw):
         r = orj(method, path, **kw)
-        if path.endswith("/destinations"):
-            r = dict(r, count=len(r["results"]))      # count = sayfa boyu varyanti
+        if method == "GET" and path.endswith("/shipping-profiles"):
+            r = {"results": [dict(x, shipping_profile_destinations=[dict(d, primary_cost=dict(amount=1490, divisor=100))
+                             if d["destination_country_iso"] == "DE" else d for d in x["shipping_profile_destinations"]])
+                             for x in r["results"]]}
         return r
-    p._ag = sayfa
-    assert len(K.hedefler(p, "1", prof["shipping_profile_id"])) == 127
+    p._ag = degis
+    dur_bekle(lambda: K.hedefler(p, "1", prof["shipping_profile_id"]), "farkli (kesik okuma)")
 
 
-def t_profil_ilk_kosu_kesik_profil_yaniti():
+def t_profil_ikisi_birlikte_kesik_post_yok():
+    p, prof = _tam_profil()
+    p.kesik_profil = 100
+    _kes_liste(p, 100)
+    once = len(p.istek)
+    with tmp() as d:
+        dur_bekle(lambda: K.profil(p, "1", Path(d)), "25'in kati")
+    assert not [x for x in p.istek[once:] if x[0] == "POST"], "kesik okumada POST gitti"
+
+
+def t_profil_125_bilinen_ret_devam():
+    # gercek durum: profilde 125 (25'in kati), eksik yalniz CI + XK -> devam, POST yalniz bu ikisi
+    p = K.KuruProfil()
+    p.ret, p.ret_metin = {"CI": 400, "XK": 400}, {"CI": _iso("CI")}
+    with tmp() as d:
+        K.profil(p, "1", Path(d))
+        once = len(p.istek)
+        R = K.profil(p, "1", Path(d))
+    post = [x[2]["destination_country_iso"] for x in p.istek[once:] if x[0] == "POST"]
+    assert sorted(post) == ["CI", "XK"], post
+    assert R["kontrol"] == {"hedef_beklenen": 127, "profilde": 125, "reddedilen": 2}, R["kontrol"]
+
+
+def t_anahtar_bolge_none_cokmez():
+    K._anahtar([dict(destination_region="eu", primary_cost=None), dict(destination_region="eu", primary_cost=dict(amount=100, divisor=100))])
+
+
+class _KuruSalt(K.KuruAg, K.SaltOkur):
+    def __init__(self):
+        self.kuru_kur({})
+
+
+def t_teshis_salt_okuma():
+    p, prof = _tam_profil()
+    s = _KuruSalt(); s.profiller = p.profiller
+    with tmp() as d:
+        R = K.teshis(s, "1", Path(d))
+    v = R[str(prof["shipping_profile_id"])]
+    assert v["profil_yaniti"]["adet"] == 127 and v["dest_param"]["adet"] == 1 and v["dest_yalin"]["adet"] == 25, v
+    assert all(m == "GET" for m, _, _ in s.istek), s.istek
+    dur_bekle(lambda: s.tek_post("/shops/1/shipping-profiles", {}), "YASAK")
+
+
+def t_profil_listede_yok_dur():
+    p, prof = _tam_profil()
+    orj = p._ag
+
+    def bos(method, path, **kw):
+        if path.endswith("/shipping-profiles") and method == "GET":
+            return {"results": []}
+        return orj(method, path, **kw)
+    p._ag = bos
+    dur_bekle(lambda: K.hedefler(p, "1", prof["shipping_profile_id"]), "okunamadi")
+
+
+def t_profil_ozet_tam():
     p = K.KuruProfil()
     with tmp() as d:
         R = K.profil(p, "1", Path(d))
-    assert R["kontrol"]["profilde"] == 127 and len(R["profil"]["hedefler"]) == 25   # ozet kesik yanittan, kontrol sayfali okumadan
+    assert R["kontrol"]["profilde"] == 127 and len(R["profil"]["hedefler"]) == 127
 
 
 # ---------------- veri ----------------
