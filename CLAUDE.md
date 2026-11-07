@@ -21,12 +21,19 @@ bolumu okunmadan baslanmaz.
      karar degisikliginde DUR + kisa rapor. Kota bitince is bolunur, mevcut kotayla kaldigi yerden devam (ilan yarim birakilmaz).
   4) Her partide tek satir rapor; sonda toplu rapor -> Merkez kontrol.
   Degismeyenler: tek Etsy yazimi + kilit_bekle.py; kota tabani 10 + "tahmini istek + 10"; salt okuma onaysiz.
+- ETSY OKUMA YOLU OLCUMU (Merkez dersi, Serdar 7 Kas onayi): Etsy'ye yazan kodun kullandigi her okuma uc noktasi ve hedef deger
+  listesi (ulke kodu, enum) kod ve sahte Etsy yazilmadan once salt okuma kosusuyla gercek Etsy'de olculur (salt okuma, onaysiz;
+  Etsy bolumu 1. madde); sahte Etsy bu olcumden kurulur. Bilinen (7 Kas, tek olcum): shipping profile destinations ucu kesik
+  doner (limit=100 -> 1, parametresiz 25; teshis 42359284764); profil GET ve magaza profil listesi 125/125 ayni; 25'in kati
+  kesik okuma DUR verir; Etsy ulke listesinde CI ve XK yok.
 - Token sahibi: Drive `ASTROLOVE/TEMP/ETSY_TOKEN.json` tek kaynaktir; yenilenen
   refresh token her kosuda geri yazilir (bkz. docs/SECRETS.md). Ayni anda tek
   Etsy kosusu: `scripts/etsy/kilit_bekle.py` (28 Eyl 2026, Serdar onayi; GitHub
   `concurrency: etsy-token` KULLANILMAZ, bekleyen kosuyu iptal ediyordu). Yeni Etsy
-  workflow'u: `permissions: actions: read` + checkout'tan hemen sonra, token indirmeden
-  ONCE `GH_TOKEN: ${{ github.token }}` ile `python3 scripts/etsy/kilit_bekle.py` adimi.
+  workflow'u: `permissions: actions: read` + token indirmeden ve ilk Etsy isteginden hemen
+  ONCE `GH_TOKEN: ${{ github.token }}` ile `python3 scripts/etsy/kilit_bekle.py` adimi (Serdar 7 Kas: checkout, kurulum ve
+  Etsy disi girdi indirme kilitten once olabilir; token ile Etsy kosularinin yazdigi Drive durumu (DURUM, plan) kilitten SONRA
+  indirilir; sira dogrulugu degismez, kilit_bekle.py kendinden once olusan tum aktif kume kosularini bekler).
   Zamanlanmis router mesgulse turu atlar (`--mod atla`).
   KILIT SURESI (Serdar 23 Eki): Etsy kilidini tutan kosuda uzun Etsy disi is (OCR, goruntu isleme, toplu indirme) yapilmaz;
   Etsy okumasi biter bitmez kosu biter (ham veri Drive'a), isleme kilitsiz ayri is akisinda yapilir (kagit-tara 39947456694
@@ -102,6 +109,13 @@ bolumu okunmadan baslanmaz.
    ajani (asagida "Capraz inceleme"). Ortak kaynak: kilit, kota ve ayni dosyaya iki ajan yazmaz.
 2. Iterasyon YERELDE: kucuk ornek (6 poster / 1 cift) ile 60 sn altinda
    test. Actions yalniz yerelde temiz cikan surum icin, en fazla 1 kez.
+   TEMIZ KOPYA VE KABUK TESTI (Merkez dersi, Serdar 7 Kas onayi; 5-6 Kas): Actions'a gidecek kod yerelde commit'in temiz
+   kopyasindan (git archive ya da yeni klon) test edilir; `git check-ignore` ile commit'e girmeyen dosya taranir (6 Kas galeri78
+   kosu 42282343035: fonts/ .gitignore). Is akisi (yml) kabuk adimlari push oncesi yerelde sahte aracla ve is akisinin kullandigi
+   kabukla kosulur (varsayilan `bash -e`; `shell: bash` adimi `-eo pipefail`); yeniden deneme / cikis kodu toplayan adimda
+   `set +e` ya da `|| RC=1` (5 Kas ornament 78 toplama). Sahte aracin taklit ettigi cikti gercek aracin bilinen davranisiyla
+   (resmi belge ya da onceki salt okuma kosusunun logu) karsilastirilir; liste
+   ciktisini ayristiran kapi beklenmeyen ciktida DUR verir (6 Kas ornament-taslak pilot 42290409207: rclone lsf klasorleri de listeledi).
 3. Her gorev basinda 3 satir yaz: (a) yontem, (b) "bitti" tanimi (olculur
    esik), (c) tahmini sure. Yontem degisecekse DUR, Mo'ya sor.
 4. En fazla 2 iterasyon. Ikincisi de temiz degilse DUR, durumu raporla,
@@ -192,6 +206,9 @@ Hedef: Serdar isim + burc yeri + tagline verir, 15 dk icinde 5 PDF Drive'da (Tes
   4. KAPI GEVŞETME YASAĞI (Serdar 1 Kas "b" + 4 Kas): kapı tanımı gevşetilmez, yalnız sıkılaştırılır. Ölçüm bölgesini daraltan,
      payı büyüten, eşiği gevşeten değişiklik gevşetmedir; Serdar onayı olmadan yapılmaz. Ölçüm ile üretim aynı parametreyle çalışır;
      farklıysa raporda yazılır. (4 Kas: ornament Kova kapısının ölçüm payı 24 -> 66 px büyütüldü, üretim 24 px'te kaldı: kör bant.)
+     Sıkılaştırma da önce tipik ve en kötü veriyle ölçülür; "temkinli" diye ölçülmeden kapı konmaz, onaylı planın tanımını
+     değiştiren sıkılaştırma Serdar'a sorulur (Merkez dersi, Serdar 7 Kas onayı; 6 Kas gece: ornament sipariş hattında
+     tarih_alt_795 ve 32 px eşitliği ölçülmeden konmuştu, siparişlerin çoğunu düşürecekti).
 - Raporlardaki her rakamın kaynağı yazılır (ölçüm / API / dosya / tahmin). Kaynaksız rakam yok.
 - Görev metinlerinde rol verme yok; oturum, işe başlamadan ilgili karar dosyalarını ve önceki sonuçları okur.
 - İş sırasında görevin dışında bir hata, risk ya da fırsat görülürse (ör. sipariş hattında kapı FAIL'i), kanıtıyla rapora eklenir; kendiliğinden düzeltilmez.
