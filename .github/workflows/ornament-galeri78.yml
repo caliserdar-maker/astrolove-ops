@@ -76,13 +76,17 @@ jobs:
           assert len(cift) == c['beklenen_cift'], ('cift sayisi', len(cift))
           assert not eksik, ('eksik stil', eksik)
           L = sorted(cift); P = c['parca']
+          Y = c.get('yalniz_ciftler') or []               # 7 Kas: yalniz bu ciftler (ayni burc Ivory bolme duzeltmesi)
+          if Y:
+              assert set(Y) <= set(L), ('yalniz_ciftler kaynakta yok', sorted(set(Y) - set(L)))
+              L = sorted(Y); P = min(c.get('parca_yalniz') or P, len(L))
           parca = [{'i': i, 'ciftler': ','.join(L[i::P])} for i in range(P)]
           json.dump({'ciftler': L, 'parca': parca}, open('/tmp/r/PLAN.json', 'w'), indent=1)
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
               f.write('matris=' + json.dumps({'include': parca}) + '\n')
           print('cift', len(L), 'parca', P, 'parca basina', [len(p['ciftler'].split(',')) for p in parca])
           PY
-          O=$(python3 -c "import json; print(json.load(open('s/docs/ornament/GALERI78.json'))['hedef_onek'])")
+          O=$(python3 -c "import json; c=json.load(open('s/docs/ornament/GALERI78.json')); print(c['hedef_onek_yalniz'] if c.get('yalniz_ciftler') else c['hedef_onek'])")
           D=${O}_$(date -u +%Y%m%d_%H%M)_${GITHUB_RUN_ID}
           rclone lsjson gdrive:ASTROLOVE/TEMP --dirs-only > /tmp/ozel_temp.json 2>>/tmp/rclone_err.txt
           python3 -c "import json; m=[d for d in json.load(open('/tmp/ozel_temp.json')) if d['Name']=='$D']; assert not m, 'hedef zaten var'"
@@ -246,7 +250,7 @@ jobs:
           az = {c: dos.get(c, 0) for c in plan['ciftler'] if dos.get(c, 0) != 14}
           o = dict(cift=len(plan['ciftler']), sonuc_gelen=len(s), PASS=sum(v['sonuc'] == 'PASS' for v in s.values()), FAIL=fail, sonucu_eksik=eksik,
                    kontrol=kon, kontrol_fail=[k for k, v in kon.items() if v != 'PASS'], kontrol_eksik=len(plan['parca']) - len(kon),
-                   dosya_sayisi_14_degil=az, esik='78 cift PASS, her cift klasorunde 14 dosya (12 + OLCUM.json + SAYFA.jpg)')
+                   dosya_sayisi_14_degil=az, esik=f"{len(plan['ciftler'])} cift PASS, her cift klasorunde 14 dosya (12 + OLCUM.json + SAYFA.jpg)")
           o['DURUM'] = 'PASS' if (o['PASS'] == len(plan['ciftler']) and not eksik and not az and not o['kontrol_fail'] and o['kontrol_eksik'] == 0) else 'FAIL'
           json.dump(o, open('/tmp/rap/OZET.json', 'w'), ensure_ascii=False, indent=1)
           print(json.dumps(o, ensure_ascii=False)[:3000])

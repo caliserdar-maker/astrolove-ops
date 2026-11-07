@@ -1,2 +1,2 @@
-2026-11-06 20:04 UTC
-3. tetik: kart fontlari commit'e eklendi (.gitignore fonts/; 42282343035 iptal). Temiz git archive testi LEO_LEO PASS.
+2026-11-07 05:14 UTC
+4. tetik (7 Kas): yalniz 12 ayni burc cifti (GALERI78.json yalniz_ciftler); ip bolmesi kapakta, ayni burcta sabit "& sonrasi", stillere bolme + punto aynen, bagimsiz bolme kapisi; LEO_LEO_11_IVORY referansi yenilendi (Serdar "A" + "Evet").

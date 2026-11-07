@@ -19,7 +19,7 @@
   "numpy": "2.5.3",
   "opencv-python-headless": "5.0.0.93"
  },
- "referans": "LEO_LEO 12 dosyasinin sha256'si yerel onayli ciktilardan (Serdar 'cok guzel' 6 Kas; galeri78.py ile yerelde bayt bayt ayni uretildi). LEO_LEO'yu ureten parca kendi ciktisini karsilastirir; fark = o cift FAIL = ozet DURUM FAIL (runner ortami yerelden farkli: SIMD, x264, font).",
+ "referans": "LEO_LEO 12 dosyasinin sha256'si yerel onayli ciktilardan (Serdar 'cok guzel' 6 Kas; galeri78.py ile yerelde bayt bayt ayni uretildi). LEO_LEO'yu ureten parca kendi ciktisini karsilastirir; fark = o cift FAIL = ozet DURUM FAIL (runner ortami yerelden farkli: SIMD, x264, font). 7 Kas: LEO_LEO_11_IVORY.jpg referansi yenilendi (Serdar 'A' + 'Evet': ip bolmesi kapakta secilir, stillere aynen; yerel yeni kod ciktisi, diger 11 dosya eski referansla ayni).",
  "referans_sha": {
   "LEO_LEO": {
    "LEO_LEO_01_KAPAK.jpg": "5d760442ed371e3bd7e6c8c8cad78420606d0f1179d68d240f5661fc5cab48d6",
@@ -32,7 +32,7 @@
    "LEO_LEO_08_SAPPHIRE.jpg": "d3f7a536e4d9c9b2c6f52976b756ee26b6b1b6e90467d4ba5053a17df3b5d6e4",
    "LEO_LEO_09_EMERALD.jpg": "cd8be561fda083064d1dd7cc7f5e8ceaea4a6355f8646db3164350371484fa40",
    "LEO_LEO_10_WHITE.jpg": "d9c45d60fcb165dcc367ad82b2bd2b025ee93c11f79dc8c068025243afc8cff9",
-   "LEO_LEO_11_IVORY.jpg": "32c45af277a78a2efea29d5a2e8f1af2ca16c438eb5965bfc8d94cc10af0fa96",
+   "LEO_LEO_11_IVORY.jpg": "2bccf608e7a36b3ee29813746814d7d497798cad8981e246c816b2a3cd99fdf1",
    "LEO_LEO_VIDEO.mp4": "433bf7b04dd42ecf850138b25b31d485023d7a2757ebc217ddfb8fb0ef898ec2"
   }
  },
@@ -41,5 +41,22 @@
   "OPENCV_CPU_DISABLE": "AVX512-SKX",
   "OPENBLAS_CORETYPE": "Haswell",
   "kaynak": "main scripts/kapak78/simd_sabit.py (Serdar 31 Eki 8a); inceleme 6 Kas: bu ayarla yerelde LEO_LEO 13/13 bayt bayt ayni"
- }
+ },
+ "yalniz_ciftler": [
+  "AQUARIUS_AQUARIUS",
+  "ARIES_ARIES",
+  "CANCER_CANCER",
+  "CAPRICORN_CAPRICORN",
+  "GEMINI_GEMINI",
+  "LEO_LEO",
+  "LIBRA_LIBRA",
+  "PISCES_PISCES",
+  "SAGITTARIUS_SAGITTARIUS",
+  "SCORPIO_SCORPIO",
+  "TAURUS_TAURUS",
+  "VIRGO_VIRGO"
+ ],
+ "yalniz_aciklama": "7 Kas: yalniz bu ciftler uretilir (ayni burc Ivory bolme duzeltmesi). Bos/yoksa 78 cift.",
+ "parca_yalniz": 4,
+ "hedef_onek_yalniz": "ORNAMENT_GALERI78_BOLME"
 }

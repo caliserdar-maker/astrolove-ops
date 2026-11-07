@@ -612,6 +612,8 @@ def main():
     if ipx is not None:
         sat = bx[bx.shape[0] // 2]
         ipw = float(max(8, sat.sum()))
+    BOL = {}                                                       # baslik ip bolmesi: bosluk sirasi (0 = ilk bosluk); dogal ve secilen
+    v_bol = os.environ.get("V_BOL", "")                          # 7 Kas Serdar "A": bolme kapakta secilir, stillere V_BOL ile aynen verilir
     def satir_ciz(metin, f_, iz_, y_, anchor_dikey):
         """-> (yerlestirildi_mi, kutu_genisligi). Harfler tek tek, iz_ harf araligi."""
         amp_yol = os.environ.get("V_AMP", "")
@@ -625,6 +627,13 @@ def main():
         if ipx is not None and bos:
             pos_ = [x0_ + sum(gen[:i]) + iz_ * i for i in range(len(metin))]
             i_s = min(bos, key=lambda i: abs(ipx - (pos_[i] + gen[i] / 2)))
+            if metin == a.baslik:
+                i_d = i_s
+                if v_bol != "":
+                    if not (0 <= int(v_bol) < len(bos)):
+                        raise SystemExit(f"DUR: V_BOL {v_bol} gecersiz ({len(bos)} bosluk)")
+                    i_s = bos[int(v_bol)]
+                BOL.update(dogal=bos.index(i_d), secilen=bos.index(i_s))
             sol = sum(gen[:i_s]) + iz_ * i_s                     # bosluga kadar
             sag = top - sol - gen[i_s] - iz_                     # bosluktan sonra
             g_ = max(gen[i_s] + 2 * iz_, ipw + 2 * max(14, 0.12 * f_.size))
@@ -646,6 +655,9 @@ def main():
             x_ += gen[i] + iz_
         return True, top
     boy0 = boy
+    v_boy = os.environ.get("V_BOY", "")                          # 7 Kas: stil karelerinde kapak puntosu aynen (zorlanan bolme sigmazsa DUR)
+    if v_boy:
+        boy = int(v_boy); fb = font(boy, 650)
     while True:
         ok_b, _ = satir_ciz(a.baslik, fb, 0, y1, "s") if boy <= float(os.environ.get("V_MIN_OLCEK", "0.85")) * boy0 else (None, None)
         if ok_b is None:
@@ -655,6 +667,8 @@ def main():
             d = d_bak
             if ok_b:
                 satir_ciz(a.baslik, fb, 0, y1, "s"); break
+            if v_boy:
+                raise SystemExit(f"DUR: zorlanan punto {boy} + bolme {v_bol!r} bu sahnede sigmiyor ({a.baslik!r})")
             boy -= 2; fb = font(boy, 650); continue
         if not ok_b:
             # ip kelime boslugundan gecemiyor: harf kesilir. 6 Kas inceleme KRITIK: sessiz basma yok, DUR
@@ -662,7 +676,9 @@ def main():
             if os.environ.get("V_KESIM_SERBEST", "0") != "1":
                 raise SystemExit(f"DUR: ip baslikta harf kesiyor ({a.baslik!r}, punto {boy}); V_MIN_OLCEK / V_MERKEZ ile cozum secilmeli")
             ipx_y = ipx; ipx = None; satir_ciz(a.baslik, fb, 0, y1, "s"); ipx = ipx_y
+            BOL.clear()                                             # bolmesiz cizildi: kapi sahte PASS vermesin
         break
+    kb_ust = kat.getbbox()                                          # yalniz baslik satiri (alt satirdan once), cizilen piksellerden
     fa0 = fa
     while True:
         kat_t = Image.new("L", im.size, 0); d_bak = d; d = ImageDraw.Draw(kat_t)
@@ -715,7 +731,9 @@ def main():
            "kapi_a_bagimsiz_yol_ort_fark": round(kapi_a_ort, 4), "hale_buyutme_px": buyut, "hale_acili_duzeltilen_px": hale_px, "isik_yonu": [round(lx, 3), round(ly, 3)], "uyari": uyari, "kapi_a_8bit_max_fark": kapi_a_u8, "kapi_a_bagimsiz_yol_max_fark": kapi_a, "seffaf_baski": seffaf, "baslik_boy": boy, "baslik_kutu": kb,
            "baslik_4x5_icinde": bool(kb[0] >= 600 and kb[2] <= 2400), "baslik_2x3_icinde": bool(kb[0] >= 750 and kb[2] <= 2250),
            "disk_2x3_icinde": bool(cx - R >= 750 and cx + R <= 2250), "baslik_renk": a.baslik_renk or a.renk, "hale": a.hale,
-           "zoom": a.zoom, "sahne_penceresi_ham_px": pencere, "sahne_buyutme_kat": buyutme, "gren_std": round(gstd, 2), "siyah_kaldirma": round(kaldir, 1), "kenar_aktarim": kenar_aktarim, "yan_duvar": yan_duvar, "golge": a.golge, "dondur_der": round(dondur_der, 2), "ip_x_baslik": ipx, "dugum_geri_px": dugum_px, "acik_cizgi_px": acik_cizgi_px, "baslik_kaydirma": [round(kb_, 1), round(ka_, 1)]}
+           "zoom": a.zoom, "sahne_penceresi_ham_px": pencere, "sahne_buyutme_kat": buyutme, "gren_std": round(gstd, 2), "siyah_kaldirma": round(kaldir, 1), "kenar_aktarim": kenar_aktarim, "yan_duvar": yan_duvar, "golge": a.golge, "dondur_der": round(dondur_der, 2), "ip_x_baslik": ipx, "dugum_geri_px": dugum_px, "acik_cizgi_px": acik_cizgi_px, "baslik_kaydirma": [round(kb_, 1), round(ka_, 1)],
+           "bol_dogal": BOL.get("dogal"), "bol_secilen": BOL.get("secilen"), "bol_zorla": v_bol,
+           "baslik_ust_kutu": list(kb_ust) if kb_ust else None, "boy_zorla": v_boy}
     json.dump(rap, open(a.cikti + ".json", "w"), ensure_ascii=False, indent=1)
     print(json.dumps(rap, ensure_ascii=False))
 

@@ -29,10 +29,10 @@ def kos(cmd, env=None, log=None):
     return r
 
 
-def kapak(cift, stil, alt, cikti, baski=None, log=None):
+def kapak(cift, stil, alt, cikti, baski=None, log=None, bol=None, boy=None):
     a, b = cift.split("_")
     cmd = ["bash", str(KOK / "kapak" / "uret3.sh"), cift, stil, f"{a} & {b}", alt, str(cikti)] + ([str(baski)] if baski else [])
-    kos(cmd, log=log)
+    kos(cmd, env={"V_BOL": "" if bol is None else str(bol), "V_BOY": "" if boy is None else str(boy)}, log=log)
     j = json.load(open(str(cikti) + ".json"))
     if j.get("uyari"):
         raise RuntimeError(f"kapak uyari {stil}: {j['uyari']}")
@@ -114,6 +114,23 @@ def sayfa(cift, O, dosyalar, mp4):
     sh.save(O / f"{cift}_SAYFA.jpg", quality=86)
 
 
+AYNI_BURC_BOL = 1     # 7 Kas: ayni burc ciftlerinde iki bosluk ipe esit uzak (yazi-tura); sabit kural "& sonrasi" ("LEO & | LEO", Serdar'in onayladigi LEO duzeni)
+SOL_TOL_PX = 8        # bolme kapisi: ipin solundaki baslik genisligi kapaktan en fazla bu kadar farkli (bolme degisirse ~kelime genisligi kadar fark eder)
+
+
+def bolme_kapisi(kap):
+    """Bagimsiz olcum: her karede baslik puntosu kapakla ayni ve ipin solundaki baslik genisligi (ip_x - baslik_ust_kutu sol kenari, cizilen
+    piksellerden) kapaktan en fazla SOL_TOL_PX farkli. Motorun bol_secilen degeri yalniz bilgi (zorlandigi icin kendi kendini dogrular)."""
+    k0 = kap.get("01_KAPAK") or {}
+    def sol(v):
+        u = v.get("baslik_ust_kutu"); x = v.get("ip_x_baslik")
+        return None if (not u or x is None) else round(float(x) - float(u[0]), 1)
+    s0, b0 = sol(k0), k0.get("baslik_boy")
+    sat = {k: dict(boy=v.get("baslik_boy"), sol=sol(v), bol=v.get("bol_secilen")) for k, v in kap.items()}
+    hata = [k for k, v in sat.items() if s0 is None or v["sol"] is None or v["boy"] != b0 or abs(v["sol"] - s0) > SOL_TOL_PX]
+    return dict(ok=not hata and s0 is not None, hata=hata, kareler=sat, tol_px=SOL_TOL_PX)
+
+
 def cift_uret(cift, kaynak, sembol, is_kok, cikti_kok, log):
     W = is_kok / cift; O = cikti_kok / cift
     shutil.rmtree(W, ignore_errors=True); shutil.rmtree(O, ignore_errors=True)
@@ -127,13 +144,18 @@ def cift_uret(cift, kaynak, sembol, is_kok, cikti_kok, log):
             raise RuntimeError(f"sembol yok: {cift}/{f}")
     olc = {"cift": cift, "kapak": {}, "zaman_sn": {}}
     t = time.time()
-    j = kapak(cift, "RUBY", "PERSONALIZED ORNAMENT", O / f"{cift}_01_KAPAK.jpg", log=log)
-    olc["kapak"]["01_KAPAK"] = {k: j.get(k) for k in ("baslik_boy", "baslik_kutu", "ip_x_baslik", "uyari", "disk", "kapi_a_8bit_max_fark", "baslik_4x5_icinde")}
+    a_, b_ = cift.split("_")
+    j = kapak(cift, "RUBY", "PERSONALIZED ORNAMENT", O / f"{cift}_01_KAPAK.jpg", log=log, bol=AYNI_BURC_BOL if a_ == b_ else None)
+    BK = ("baslik_boy", "baslik_kutu", "baslik_ust_kutu", "ip_x_baslik", "uyari", "kapi_a_8bit_max_fark", "baslik_4x5_icinde", "bol_dogal", "bol_secilen")
+    olc["kapak"]["01_KAPAK"] = {k: j.get(k) for k in BK + ("disk",)}
+    bol = j.get("bol_secilen")                     # 7 Kas Serdar "A": ip bolmesi kapakta secilir, stillere ve video karelerine aynen verilir
+    boy = j.get("baslik_boy")                      # punto da aynen (zorlanan bolme sigmazsa motor DUR verir; 7 Kas inceleme: SAG_SAG White 109/111)
     for stil, ad, alt in STILLER:
         y = W / f"{cift}_STIL_{stil}.jpg"
-        j = kapak(cift, stil, alt, y, log=log)
+        j = kapak(cift, stil, alt, y, log=log, bol=bol, boy=boy)
         shutil.copy(y, O / f"{cift}_{ad}.jpg")
-        olc["kapak"][ad] = {k: j.get(k) for k in ("baslik_boy", "baslik_kutu", "ip_x_baslik", "uyari", "kapi_a_8bit_max_fark", "baslik_4x5_icinde")}
+        olc["kapak"][ad] = {k: j.get(k) for k in BK}
+    # kapi: baslik bolmesi ve puntosu her karede ayni (ayni burc ciftlerinde Ivory farkli bolunuyordu; 6 Kas gorsel inceleme)
     olc["zaman_sn"]["kapak_stil"] = round(time.time() - t); t = time.time()
     kos(["python3", str(KOK / "kart" / "ornament_kart.py"), cift],
         env={"ORN_KAPAK_DIR": str(W), "ORN_SEMBOL_DIR": str(sembol), "ORN_OUT": str(W / "kart")}, log=log)
@@ -147,7 +169,10 @@ def cift_uret(cift, kaynak, sembol, is_kok, cikti_kok, log):
     olc["katman"] = katman_kontrol(rb, V / "maske954.npz")
     shutil.copy(O / f"{cift}_01_KAPAK.jpg", V / "KAPAK_tam.jpg"); shutil.copy(str(O / f"{cift}_01_KAPAK.jpg") + ".json", V / "KAPAK_tam.json")
     for k in ("semsiz", "bos"):
-        kapak(cift, "RUBY", "PERSONALIZED ORNAMENT", V / f"KAPAK_{k}.jpg", baski=V / f"baski_{k}.png", log=log)
+        jv = kapak(cift, "RUBY", "PERSONALIZED ORNAMENT", V / f"KAPAK_{k}.jpg", baski=V / f"baski_{k}.png", log=log, bol=bol, boy=boy)
+        olc["kapak"][f"video_{k}"] = {k2: jv.get(k2) for k2 in BK}
+    olc["bolme"] = bolme_kapisi(olc["kapak"])
+    olc["bolme"]["dogal_farkli"] = [k for k, v in olc["kapak"].items() if v.get("bol_dogal") != v.get("bol_secilen")]
     mp4 = O / f"{cift}_VIDEO.mp4"
     r = kos(["python3", str(KOK / "video" / "video_orn.py"), str(V), str(mp4)], env=VIDEO_ENV, log=log)
     try:
@@ -168,7 +193,8 @@ def cift_uret(cift, kaynak, sembol, is_kok, cikti_kok, log):
     for f in O.glob("*.jpg.json"):                                        # olcum OLCUM.json'da; jpg yanindaki ham json Drive'a gitmez
         f.unlink()
     olc["referans"] = referans_kontrol(cift, O, REFERANS)
-    olc["sonuc"] = "PASS" if (olc["katman"]["ok"] and olc["video"]["ok"] and olc["dosya"]["ok"] and olc["referans"]["ok"]) else "FAIL"
+    olc["sonuc"] = "PASS" if (olc["katman"]["ok"] and olc["video"]["ok"] and olc["dosya"]["ok"] and olc["referans"]["ok"]
+                              and olc["bolme"]["ok"]) else "FAIL"
     json.dump(olc, open(O / f"{cift}_OLCUM.json", "w"), ensure_ascii=False, indent=1)
     shutil.rmtree(W, ignore_errors=True)
     return olc["sonuc"], olc
