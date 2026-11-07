@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""ORNAMENT KARGO + FIYAT (Serdar 7 Kas "Evet", KARARLAR_20261107 Karar 3). YAYIN YOK, PATCH YOK, DELETE YOK, Etsy Ads YOK.
+"""ORNAMENT KARGO + FIYAT (Serdar 7 Kas "Evet", KARARLAR_20261107 Karar 3). YAYIN YOK, DELETE YOK, Etsy Ads YOK. PATCH yalniz ACIL
+state=inactive (taslak PUT sonrasi yayina duserse, izinli ilan).
 
 Onayli yapi: urun 19.90 $ (5 stil); kargo ABD 9.90 $ (ek adet 0.90), Printful'un 9.89 $ ile gonderdigi diger ulkeler 13.90 $
 (ek adet 2.90); profil ULKE ULKE (EU bolgesi ve "diger tum ulkeler" YOK). Printful kargo verisi: docs/ornament/kargo/KARGO_TUM_20261107.json
@@ -41,7 +42,7 @@ DIGER = (13.90, 2.90)
 PF_ABD, PF_DIGER = 5.89, 9.89            # Printful 1 adet kargo; farkli ucretli ulke profile GIRMEZ (Serdar'a sorulur)
 CIKIS = ("LV", "LV-1004")
 KOTA_MIN = 10
-ILAN_ISTEK = 11                          # fiyat: GET listing, GET inv, GET varimg, PUT (5xx ile en fazla 3), GET listing, GET inv, GET varimg, acil PATCH + GET
+ILAN_ISTEK = 21                          # fiyat: GET listing, GET inv, GET varimg, PUT (5xx ile en fazla 3), GET listing, GET inv, GET varimg, acil PATCH + GET
 RET_IZINLI = {"BV", "HM", "TF", "UM", "CC", "CX", "NF", "SJ", "TK", "XK"}   # Etsy'nin tanimayabilecegi bolgeler (400 ise atlanir)
 FREE = re.compile(r"free\s+shipping|ships?\s+free|free\s+delivery", re.I)
 
@@ -153,7 +154,8 @@ class FiyatIzin(Ag):
             m = re.match(r"^/listings/(\d+)/inventory$", path)
             a = re.match(r"^/shops/\d+/listings/(\d+)$", path)
             ok = (method == "PUT" and m and m.group(1) in self.izinli) or \
-                 (method == "PATCH" and a and a.group(1) in self.izinli and kw.get("data") == {"state": "inactive"})
+                 (method == "PATCH" and a and a.group(1) in self.izinli and kw.get("data") == {"state": "inactive"}
+                  and kw.get("json_body") is None and kw.get("params") is None)
             if not ok:
                 raise SystemExit(f"YASAK (fiyat): {method} {path}")
         return self._ag(method, path, **kw)
@@ -215,10 +217,13 @@ def hedefler(api, shop, pid):
     out, off = [], 0
     while True:
         r = api.get(f"/shops/{shop}/shipping-profiles/{pid}/destinations", params={"limit": 100, "offset": off}) or {}
-        out += r.get("results") or []
-        off += 100
-        if off >= (r.get("count") or 0) or off > 1000:
+        sayfa = r.get("results") or []
+        out += sayfa
+        if len(sayfa) < 100:                        # count toplam mi sayfa mi belirsiz (inceleme 3. tur): bos olmayan tam sayfa = devam
             return out
+        off += 100
+        if off >= 1000:
+            raise SystemExit(f"DUR: profil {pid} hedefleri 1000'i asti (okuma sinirinda)")
 
 
 def _hedef_haritasi(prof):
@@ -385,12 +390,19 @@ def fiyat_tek(api, shop, pair, lid, out, kuru=False):
     api.put_json(f"/listings/{lid}/inventory", govde)
     L2 = api.get(f"/listings/{lid}") or {}
     if L2.get("state") == "active":                 # taslak yayina dustu: aninda inactive (ornament_taslak acil yolu), sonra DUR
-        st2 = "?"
+        st2, gitti, hata = "?", False, ""
         try:
             api.patch(f"/shops/{shop}/listings/{lid}", {"state": "inactive"})
+            gitti = True
             st2 = (api.get(f"/listings/{lid}") or {}).get("state")
-        finally:
-            raise SystemExit(f"DUR: {pair} {lid} PUT sonrasi active oldu; acil inactive -> {st2} (Serdar'a bildir)")
+        except BaseException as e:                  # noqa: BLE001  hata metni korunur, DUR asagida
+            hata = f"{type(e).__name__}: {str(getattr(e, 'code', e))[:200]}"
+        json.dump(dict(cift=pair, lid=lid, acil=True, patch_gitti=gitti, state_sonra=st2, hata=hata),
+                  open(out / f"ACIL_{pair}.json", "w"), indent=1)
+        if st2 == "inactive":
+            raise SystemExit(f"DUR: {pair} {lid} PUT sonrasi active oldu; ACIL inactive YAPILDI (Serdar'a bildir)")
+        raise SystemExit(f"DUR: {pair} {lid} PUT sonrasi active oldu; ACIL BASARISIZ (patch_gitti={gitti}, state={st2}, {hata}): "
+                         f"panelden elle inactive yapilmali")
     inv2 = api.get(f"/listings/{lid}/inventory") or {}
     sonra = urun_ozet(inv2)
     hatalar = []
@@ -471,8 +483,10 @@ class KuruAg:
             off = int((kw.get("params") or {}).get("offset", 0))
             return {"count": len(h), "results": h[off:off + 100]}
         m = re.match(r"^/shops/\d+/shipping-profiles/(\d+)$", path)
-        if m:
-            return self.profiller[m.group(1)]
+        if m:                                       # gercek Etsy'de profil yanitindaki liste kesik olabilir: taklit ilk 25
+            pr = dict(self.profiller[m.group(1)])
+            pr["shipping_profile_destinations"] = pr["shipping_profile_destinations"][:25]
+            return pr
         m = re.match(r"^/shops/\d+/listings/(\d+)/variation-images$", path)
         if m:
             return {"results": [dict(v) for v in self.db[m.group(1)]["vi"]]}

@@ -97,7 +97,8 @@ def t_fiyat_put_sonrasi_state_dur():
         return r
     api._ag = bozuk
     with tmp() as d:
-        dur_bekle(lambda: K.fiyat(api, "1", Path(d), lids, list(lids)), "acil inactive -> inactive")
+        dur_bekle(lambda: K.fiyat(api, "1", Path(d), lids, list(lids)), "ACIL inactive YAPILDI")
+        assert json.load(open(Path(d) / f"ACIL_{list(lids)[0]}.json"))["patch_gitti"] is True
     assert api.db[lid]["state"] == "inactive"
 
 
@@ -423,6 +424,72 @@ def t_profil_olusturma_500_tek_post():
 def t_profil_sayfali_okuma():
     p, prof = _tam_profil()
     assert len(K.hedefler(p, "1", prof["shipping_profile_id"])) == 127
+
+
+def t_fiyat_acil_basarisiz_mesaji():
+    api, lids = kf(1)
+    lid = next(iter(lids.values())); orj = api._ag
+
+    def bozuk(method, path, **kw):
+        if method == "PATCH":
+            raise SystemExit("HATA: PATCH -> 400")
+        r = orj(method, path, **kw)
+        if method == "PUT":
+            api.db[lid]["state"] = "active"
+        return r
+    api._ag = bozuk
+    with tmp() as d:
+        dur_bekle(lambda: K.fiyat(api, "1", Path(d), lids, list(lids)), "ACIL BASARISIZ")
+        j = json.load(open(Path(d) / f"ACIL_{list(lids)[0]}.json"))
+    assert j["patch_gitti"] is False and "400" in j["hata"], j
+
+
+def t_fiyat_put_sonrasi_sold_out_dur():
+    api, lids = kf(1)
+    lid = next(iter(lids.values())); orj = api._ag
+
+    def bozuk(method, path, **kw):
+        r = orj(method, path, **kw)
+        if method == "PUT":
+            api.db[lid]["state"] = "sold_out"
+        return r
+    api._ag = bozuk
+    with tmp() as d:
+        dur_bekle(lambda: K.fiyat(api, "1", Path(d), lids, list(lids)), "state sold_out")
+
+
+def t_fiyat_value_id_on_kontrol_dur():
+    api, lids = kf(1)
+    api.db[next(iter(lids.values()))]["inv"]["products"][0]["property_values"][0]["value_ids"] = []
+    with tmp() as d:
+        dur_bekle(lambda: K.fiyat(api, "1", Path(d), lids, list(lids)), "value_id eksik")
+    assert "PUT" not in [x[0] for x in api.istek]
+
+
+def t_izin_patch_json_govde_yasak():
+    api, lids = kf(1)
+    a = next(iter(lids.values())); api.izinli = frozenset([a])
+    dur_bekle(lambda: api._call("PATCH", f"/shops/1/listings/{a}", data={"state": "inactive"}, json_body={"state": "active"}), "YASAK (fiyat)")
+
+
+def t_profil_sayfa_count_sayfa_boyu():
+    p, prof = _tam_profil()
+    orj = p._ag
+
+    def sayfa(method, path, **kw):
+        r = orj(method, path, **kw)
+        if path.endswith("/destinations"):
+            r = dict(r, count=len(r["results"]))      # count = sayfa boyu varyanti
+        return r
+    p._ag = sayfa
+    assert len(K.hedefler(p, "1", prof["shipping_profile_id"])) == 127
+
+
+def t_profil_ilk_kosu_kesik_profil_yaniti():
+    p = K.KuruProfil()
+    with tmp() as d:
+        R = K.profil(p, "1", Path(d))
+    assert R["kontrol"]["profilde"] == 127 and len(R["profil"]["hedefler"]) == 25   # ozet kesik yanittan, kontrol sayfali okumadan
 
 
 # ---------------- veri ----------------
