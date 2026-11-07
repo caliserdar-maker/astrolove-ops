@@ -7,7 +7,7 @@ Izinli istekler (assert): GET /oauth/scopes, GET /orders?limit=5, POST /orders/e
 2 yetki: GET /oauth/scopes.
 3a orders/read VARSA: GET /orders?limit=5 (paging.total) ONCE; 14 ulke x 1 ve 2 adet POST /orders/estimate-costs; yanitta siparis id /
    draft varsa DUR (cikis 3); GET /orders?limit=5 SONRA; total farkliysa DUR (cikis 3).
-3b orders/read YOKSA: POST /shipping/rates 14 ulke x 1 ve 2 adet (ek adet = 2 adet - 1 adet), GET /products/variant/23133 (urun fiyati),
+3b orders/read YOKSA: POST /shipping/rates ADRES ulkeleri x 1 ve 2 adet (ek adet = 2 adet - 1 adet), GET /products/variant/23133 (urun fiyati),
    KDV: help.printful.com makale 360014008620 (Zendesk API JSON, olmazsa HTML); acilmazsa 'dogrulanamadi'.
 Adresler: kamu binasi / muze adresleri (gercek musteri degil), ad 'Test'. Dosya: bu deponun herkese acik SADE_1 ornek PNG'si.
 Kullanim: maliyet900.py <cikti_klasoru>  (env PRINTFUL_TOKEN)"""
@@ -39,6 +39,22 @@ ADRES = {
     'CH': dict(country_code='CH', city='Zurich', zip='8001', address1='Museumstrasse 2'),
     'NO': dict(country_code='NO', city='Oslo', zip='0026', address1='Karl Johans gate 22'),
     'TR': dict(country_code='TR', city='Istanbul', zip='34435', address1='Taksim Meydani, Beyoglu'),
+    # Serdar 7 Kas "tum ulkelere kargo": ek ulkeler (kamu binasi / muze adresleri, gercek musteri degil)
+    'SE': dict(country_code='SE', city='Stockholm', zip='100 12', address1='Riksgatan 1'),
+    'PL': dict(country_code='PL', city='Warszawa', zip='00-902', address1='ul. Wiejska 4'),
+    'IE': dict(country_code='IE', city='Dublin', zip='D02 FH48', address1='Kildare Street'),
+    'DK': dict(country_code='DK', city='Kobenhavn', zip='1240', address1='Christiansborg Slotsplads 1'),
+    'AT': dict(country_code='AT', city='Wien', zip='1010', address1='Maria-Theresien-Platz'),
+    'BE': dict(country_code='BE', city='Bruxelles', zip='1000', address1='Rue de la Loi 16'),
+    'PT': dict(country_code='PT', city='Lisboa', zip='1100-148', address1='Praca do Comercio'),
+    'MX': dict(country_code='MX', state_code='CMX', city='Ciudad de Mexico', zip='06000', address1='Plaza de la Constitucion'),
+    'BR': dict(country_code='BR', state_code='SP', city='Sao Paulo', zip='01310-200', address1='Av. Paulista 1578'),
+    'IN': dict(country_code='IN', state_code='DL', city='New Delhi', zip='110001', address1='Rajpath'),
+    'ZA': dict(country_code='ZA', city='Cape Town', zip='8001', address1='25 Queen Victoria Street'),
+    'SG': dict(country_code='SG', city='Singapore', zip='178957', address1='1 St Andrews Road'),
+    'KR': dict(country_code='KR', city='Seoul', zip='03154', address1='209 Sejong-daero'),
+    'AE': dict(country_code='AE', city='Dubai', zip='00000', address1='Sheikh Mohammed bin Rashid Blvd'),
+    'IL': dict(country_code='IL', city='Jerusalem', zip='9195016', address1='Ruppin Blvd 11'),
 }
 IZIN = (('GET', re.compile(r'^/oauth/scopes$')), ('GET', re.compile(r'^/orders\?limit=5$')), ('POST', re.compile(r'^/orders/estimate-costs$')),
         ('POST', re.compile(r'^/shipping/rates$')), ('GET', re.compile(r'^/products/variant/23133$')))
