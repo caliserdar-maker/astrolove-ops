@@ -1,0 +1,3836 @@
+{
+ "gorev": "Printful 900 tum ulke kargo (salt okuma)",
+ "varyant": 23133,
+ "damga": "20261107_0823",
+ "ulke_sayisi": 245,
+ "satir": [
+  {
+   "ulke": "AD",
+   "ad": "Andorra",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "AE",
+   "ad": "United Arab Emirates",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "AF",
+   "ad": "Afghanistan",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "At the moment we can’t ship products to this country due to <a href=\"https://help.printful.com/hc/en/articles/50265153665681-Is-Printful-available-in-all-countries-\" target=\"_blank\">carrier restrictio"
+  },
+  {
+   "ulke": "AG",
+   "ad": "Antigua and Barbuda",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "AI",
+   "ad": "Anguilla",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "AL",
+   "ad": "Albania",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "AM",
+   "ad": "Armenia",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "AN",
+   "ad": "Netherlands Antilles",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "Sorry, shipping to this country has been disabled!"
+  },
+  {
+   "ulke": "AO",
+   "ad": "Angola",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "AQ",
+   "ad": "Antarctica",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "AR",
+   "ad": "Argentina",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "AS",
+   "ad": "American Samoa",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "AT",
+   "ad": "Austria",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "AU",
+   "ad": "Australia",
+   "eyalet": "ACT",
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "AW",
+   "ad": "Aruba",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "AZ",
+   "ad": "Azerbaijan",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "BA",
+   "ad": "Bosnia and Herzegovina",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "BB",
+   "ad": "Barbados",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "BD",
+   "ad": "Bangladesh",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "BE",
+   "ad": "Belgium",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "BF",
+   "ad": "Burkina Faso",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "BG",
+   "ad": "Bulgaria",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "BH",
+   "ad": "Bahrain",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "BI",
+   "ad": "Burundi",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "BJ",
+   "ad": "Benin",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "BM",
+   "ad": "Bermuda",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "BN",
+   "ad": "Brunei Darussalam",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "BO",
+   "ad": "Bolivia",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "BR",
+   "ad": "Brazil",
+   "eyalet": "AC",
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "BS",
+   "ad": "Bahamas",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "BT",
+   "ad": "Bhutan",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "At the moment we can’t ship products to this country due to <a href=\"https://help.printful.com/hc/en/articles/50265153665681-Is-Printful-available-in-all-countries-\" target=\"_blank\">carrier restrictio"
+  },
+  {
+   "ulke": "BV",
+   "ad": "Bouvet Island",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    10,
+    25
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    10,
+    25
+   ]
+  },
+  {
+   "ulke": "BW",
+   "ad": "Botswana",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "BZ",
+   "ad": "Belize",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "CA",
+   "ad": "Canada",
+   "eyalet": "AB",
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "CC",
+   "ad": "Cocos (Keeling) Islands",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    10,
+    25
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    10,
+    25
+   ]
+  },
+  {
+   "ulke": "CD",
+   "ad": "Congo, the Democratic Republic of the",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "CF",
+   "ad": "Central African Republic",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "CG",
+   "ad": "Congo",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "CH",
+   "ad": "Switzerland",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "CI",
+   "ad": "Cote D'Ivoire",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "CK",
+   "ad": "Cook Islands",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "CL",
+   "ad": "Chile",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "CM",
+   "ad": "Cameroon",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "CN",
+   "ad": "China",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "CO",
+   "ad": "Colombia",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "CR",
+   "ad": "Costa Rica",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "CU",
+   "ad": "Cuba, Republic of",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "Sorry, shipping to this country has been disabled!"
+  },
+  {
+   "ulke": "CV",
+   "ad": "Cape Verde",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "CW",
+   "ad": "Curacao",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "CX",
+   "ad": "Christmas Island",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    10,
+    25
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    10,
+    25
+   ]
+  },
+  {
+   "ulke": "CY",
+   "ad": "Cyprus",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "CZ",
+   "ad": "Czech Republic",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "DE",
+   "ad": "Germany",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "DJ",
+   "ad": "Djibouti",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "Sorry, shipping to Djibouti is not possible."
+  },
+  {
+   "ulke": "DK",
+   "ad": "Denmark",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "DM",
+   "ad": "Dominica",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "DO",
+   "ad": "Dominican Republic",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "DZ",
+   "ad": "Algeria",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "Sorry, shipping to Algeria is not possible."
+  },
+  {
+   "ulke": "EC",
+   "ad": "Ecuador",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "Sorry, shipping to this country has been disabled!"
+  },
+  {
+   "ulke": "EE",
+   "ad": "Estonia",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "EG",
+   "ad": "Egypt",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "EH",
+   "ad": "Western Sahara",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "ER",
+   "ad": "Eritrea",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "Sorry, shipping to Eritrea is not possible."
+  },
+  {
+   "ulke": "ES",
+   "ad": "Spain",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "ET",
+   "ad": "Ethiopia",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "FI",
+   "ad": "Finland",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "FJ",
+   "ad": "Fiji",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "FK",
+   "ad": "Falkland Islands (Malvinas)",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "FM",
+   "ad": "Micronesia, Federated States of",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "FO",
+   "ad": "Faroe Islands",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "FR",
+   "ad": "France",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "GA",
+   "ad": "Gabon",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "GB",
+   "ad": "United Kingdom",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    4,
+    12
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    4,
+    12
+   ]
+  },
+  {
+   "ulke": "GD",
+   "ad": "Grenada",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "GE",
+   "ad": "Georgia",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "GF",
+   "ad": "French Guiana",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "GG",
+   "ad": "Guernsey",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "GH",
+   "ad": "Ghana",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "GI",
+   "ad": "Gibraltar",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "GL",
+   "ad": "Greenland",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "GM",
+   "ad": "Gambia",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "GN",
+   "ad": "Guinea",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "GP",
+   "ad": "Guadeloupe",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "GQ",
+   "ad": "Equatorial Guinea",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "GR",
+   "ad": "Greece",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "GS",
+   "ad": "South Georgia and the South Sandwich Islands",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "GT",
+   "ad": "Guatemala",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "GU",
+   "ad": "Guam",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "GW",
+   "ad": "Guinea-Bissau",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "GY",
+   "ad": "Guyana",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "HK",
+   "ad": "Hong Kong",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "HM",
+   "ad": "Heard Island and Mcdonald Islands",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    10,
+    25
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    10,
+    25
+   ]
+  },
+  {
+   "ulke": "HN",
+   "ad": "Honduras",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "HR",
+   "ad": "Croatia",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "HT",
+   "ad": "Haiti",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "HU",
+   "ad": "Hungary",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "ID",
+   "ad": "Indonesia",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "IE",
+   "ad": "Ireland",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "IL",
+   "ad": "Israel",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "IM",
+   "ad": "Isle of Man",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "IN",
+   "ad": "India",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "IO",
+   "ad": "British Indian Ocean Territory",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "IQ",
+   "ad": "Iraq",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "Sorry, shipping to Iraq is not possible."
+  },
+  {
+   "ulke": "IR",
+   "ad": "Iran, Islamic Republic of",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "Sorry, shipping to this country has been disabled!"
+  },
+  {
+   "ulke": "IS",
+   "ad": "Iceland",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "IT",
+   "ad": "Italy",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "JE",
+   "ad": "Jersey",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "JM",
+   "ad": "Jamaica",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "JO",
+   "ad": "Jordan",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "JP",
+   "ad": "Japan",
+   "eyalet": "01",
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "KE",
+   "ad": "Kenya",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "KG",
+   "ad": "Kyrgyzstan",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "KH",
+   "ad": "Cambodia",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "KI",
+   "ad": "Kiribati",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "KM",
+   "ad": "Comoros",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "KN",
+   "ad": "Saint Kitts and Nevis",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "KP",
+   "ad": "Korea, Democratic People's Republic of",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "Sorry, shipping to this country has been disabled!"
+  },
+  {
+   "ulke": "KR",
+   "ad": "Korea, Republic of",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "KW",
+   "ad": "Kuwait",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "KY",
+   "ad": "Cayman Islands",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "KZ",
+   "ad": "Kazakhstan",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "LA",
+   "ad": "Lao People's Democratic Republic",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "At the moment we can’t ship products to this country due to <a href=\"https://help.printful.com/hc/en/articles/50265153665681-Is-Printful-available-in-all-countries-\" target=\"_blank\">carrier restrictio"
+  },
+  {
+   "ulke": "LB",
+   "ad": "Lebanon",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "LC",
+   "ad": "Saint Lucia",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "LI",
+   "ad": "Liechtenstein",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "LK",
+   "ad": "Sri Lanka",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "LR",
+   "ad": "Liberia",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "LS",
+   "ad": "Lesotho",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "LT",
+   "ad": "Lithuania",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "LU",
+   "ad": "Luxembourg",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "LV",
+   "ad": "Latvia",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "LY",
+   "ad": "Libyan Arab Jamahiriya",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "At the moment we can’t ship products to this country due to <a href=\"https://help.printful.com/hc/en/articles/50265153665681-Is-Printful-available-in-all-countries-\" target=\"_blank\">carrier restrictio"
+  },
+  {
+   "ulke": "MA",
+   "ad": "Morocco",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "MC",
+   "ad": "Monaco",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "MD",
+   "ad": "Moldova, Republic of",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "ME",
+   "ad": "Montenegro",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "MF",
+   "ad": "Saint Martin",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "MG",
+   "ad": "Madagascar",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "Sorry, shipping to Madagascar is not possible."
+  },
+  {
+   "ulke": "MH",
+   "ad": "Marshall Islands",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "MK",
+   "ad": "North Macedonia, Republic of",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "ML",
+   "ad": "Mali",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "MM",
+   "ad": "Myanmar",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "MN",
+   "ad": "Mongolia",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "MO",
+   "ad": "Macao",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "MP",
+   "ad": "Northern Mariana Islands",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "MQ",
+   "ad": "Martinique",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "MR",
+   "ad": "Mauritania",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "MS",
+   "ad": "Montserrat",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "MT",
+   "ad": "Malta",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "MU",
+   "ad": "Mauritius",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "MV",
+   "ad": "Maldives",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "MW",
+   "ad": "Malawi",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "MX",
+   "ad": "Mexico",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "MY",
+   "ad": "Malaysia",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "MZ",
+   "ad": "Mozambique",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "NA",
+   "ad": "Namibia",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "NC",
+   "ad": "New Caledonia",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "NE",
+   "ad": "Niger",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "NF",
+   "ad": "Norfolk Island",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    10,
+    25
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    10,
+    25
+   ]
+  },
+  {
+   "ulke": "NG",
+   "ad": "Nigeria",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "NI",
+   "ad": "Nicaragua",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "NL",
+   "ad": "Netherlands",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "NO",
+   "ad": "Norway",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "NP",
+   "ad": "Nepal",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "NR",
+   "ad": "Nauru",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "NU",
+   "ad": "Niue",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "NZ",
+   "ad": "New Zealand",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "OM",
+   "ad": "Oman",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "PA",
+   "ad": "Panama",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "PE",
+   "ad": "Peru",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "PF",
+   "ad": "French Polynesia",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "PG",
+   "ad": "Papua New Guinea",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "PH",
+   "ad": "Philippines",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "PK",
+   "ad": "Pakistan",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "PL",
+   "ad": "Poland",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "PM",
+   "ad": "Saint Pierre and Miquelon",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "PN",
+   "ad": "Pitcairn",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "PR",
+   "ad": "Puerto Rico",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "PS",
+   "ad": "Palestinian Territory, Occupied",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "Sorry, shipping to Palestinian Territory, Occupied is not possible."
+  },
+  {
+   "ulke": "PT",
+   "ad": "Portugal",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "PW",
+   "ad": "Palau",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "PY",
+   "ad": "Paraguay",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "QA",
+   "ad": "Qatar",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "RE",
+   "ad": "Reunion",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "RO",
+   "ad": "Romania",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "RS",
+   "ad": "Serbia",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "RW",
+   "ad": "Rwanda",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "SA",
+   "ad": "Saudi Arabia",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "SB",
+   "ad": "Solomon Islands",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "SC",
+   "ad": "Seychelles",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "SD",
+   "ad": "Sudan",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "Sorry, shipping to Sudan is not possible."
+  },
+  {
+   "ulke": "SE",
+   "ad": "Sweden",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "SG",
+   "ad": "Singapore",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "SH",
+   "ad": "Saint Helena",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    10,
+    25
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    10,
+    25
+   ]
+  },
+  {
+   "ulke": "SI",
+   "ad": "Slovenia",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "SJ",
+   "ad": "Svalbard and Jan Mayen",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "SK",
+   "ad": "Slovakia",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "SL",
+   "ad": "Sierra Leone",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "SM",
+   "ad": "San Marino",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "SN",
+   "ad": "Senegal",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "SO",
+   "ad": "Somalia",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "SR",
+   "ad": "Suriname",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "ST",
+   "ad": "Sao Tome and Principe",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "SV",
+   "ad": "El Salvador",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "SX",
+   "ad": "Sint Maarten",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "SY",
+   "ad": "Syrian Arab Republic",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "Sorry, shipping to this country has been disabled!"
+  },
+  {
+   "ulke": "SZ",
+   "ad": "Eswatini",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "TC",
+   "ad": "Turks and Caicos Islands",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "TD",
+   "ad": "Chad",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "At the moment we can’t ship products to this country due to <a href=\"https://help.printful.com/hc/en/articles/50265153665681-Is-Printful-available-in-all-countries-\" target=\"_blank\">carrier restrictio"
+  },
+  {
+   "ulke": "TF",
+   "ad": "French Southern Territories",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "TG",
+   "ad": "Togo",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "TH",
+   "ad": "Thailand",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "TJ",
+   "ad": "Tajikistan",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "TK",
+   "ad": "Tokelau",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "TL",
+   "ad": "Timor-Leste",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "At the moment we can’t ship products to this country due to <a href=\"https://help.printful.com/hc/en/articles/50265153665681-Is-Printful-available-in-all-countries-\" target=\"_blank\">carrier restrictio"
+  },
+  {
+   "ulke": "TM",
+   "ad": "Turkmenistan",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "At the moment we can’t ship products to this country due to <a href=\"https://help.printful.com/hc/en/articles/50265153665681-Is-Printful-available-in-all-countries-\" target=\"_blank\">carrier restrictio"
+  },
+  {
+   "ulke": "TN",
+   "ad": "Tunisia",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "TO",
+   "ad": "Tonga",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "TR",
+   "ad": "Turkey",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "TT",
+   "ad": "Trinidad and Tobago",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "TV",
+   "ad": "Tuvalu",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "TW",
+   "ad": "Taiwan",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "TZ",
+   "ad": "Tanzania",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "UA",
+   "ad": "Ukraine",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "UG",
+   "ad": "Uganda",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "UM",
+   "ad": "United States Minor Outlying Islands",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "US",
+   "ad": "United States",
+   "eyalet": "AA",
+   "http_1": 200,
+   "ucret_1": "5.89",
+   "gun_1": [
+    4,
+    6
+   ],
+   "http_2": 200,
+   "ucret_2": "6.59",
+   "gun_2": [
+    4,
+    6
+   ]
+  },
+  {
+   "ulke": "UY",
+   "ad": "Uruguay",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "UZ",
+   "ad": "Uzbekistan",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "VA",
+   "ad": "Vatican City",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "VC",
+   "ad": "Saint Vincent and the Grenadines",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "VE",
+   "ad": "Venezuela",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "Sorry, shipping to Venezuela is not possible."
+  },
+  {
+   "ulke": "VG",
+   "ad": "Virgin Islands, British",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "VI",
+   "ad": "Virgin Islands, U.S.",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "VN",
+   "ad": "Vietnam",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "VU",
+   "ad": "Vanuatu",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "WF",
+   "ad": "Wallis and Futuna",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "WS",
+   "ad": "Samoa",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "At the moment we can’t ship products to this country due to <a href=\"https://help.printful.com/hc/en/articles/50265153665681-Is-Printful-available-in-all-countries-\" target=\"_blank\">carrier restrictio"
+  },
+  {
+   "ulke": "XK",
+   "ad": "Kosovo",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    6,
+    15
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    6,
+    15
+   ]
+  },
+  {
+   "ulke": "YE",
+   "ad": "Yemen",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "At the moment we can’t ship products to this country due to <a href=\"https://help.printful.com/hc/en/articles/50265153665681-Is-Printful-available-in-all-countries-\" target=\"_blank\">carrier restrictio"
+  },
+  {
+   "ulke": "YT",
+   "ad": "Mayotte",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    10,
+    25
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    10,
+    25
+   ]
+  },
+  {
+   "ulke": "ZA",
+   "ad": "South Africa",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  },
+  {
+   "ulke": "ZM",
+   "ad": "Zambia",
+   "eyalet": null,
+   "http_1": 200,
+   "ucret_1": "9.89",
+   "gun_1": [
+    12,
+    18
+   ],
+   "http_2": 200,
+   "ucret_2": "11.88",
+   "gun_2": [
+    12,
+    18
+   ]
+  },
+  {
+   "ulke": "ZW",
+   "ad": "Zimbabwe",
+   "eyalet": null,
+   "http_1": 400,
+   "ucret_1": null,
+   "gun_1": [
+    null,
+    null
+   ],
+   "hata_1": "This product \"Ceramic Ornaments, 2-Side Print (1 pc / Circle)\" ships to Estonia, Lithuania, Latvia, Canada, France, Germany, Belgium, Netherlands, Bouvet Island, Cocos (Keeling) Islands, Christmas Isl"
+  }
+ ],
+ "gruplar": {
+  "9.89 / 11.88": [
+   "AD",
+   "AE",
+   "AL",
+   "AM",
+   "AO",
+   "AR",
+   "AT",
+   "AU",
+   "AW",
+   "BB",
+   "BE",
+   "BF",
+   "BG",
+   "BH",
+   "BI",
+   "BJ",
+   "BM",
+   "BO",
+   "BR",
+   "BS",
+   "BV",
+   "BZ",
+   "CA",
+   "CC",
+   "CD",
+   "CF",
+   "CG",
+   "CH",
+   "CI",
+   "CN",
+   "CR",
+   "CV",
+   "CX",
+   "CZ",
+   "DE",
+   "DK",
+   "DO",
+   "EE",
+   "ES",
+   "ET",
+   "FI",
+   "FR",
+   "GA",
+   "GB",
+   "GD",
+   "GE",
+   "GH",
+   "GI",
+   "GL",
+   "GN",
+   "GQ",
+   "GR",
+   "GT",
+   "HK",
+   "HM",
+   "HR",
+   "HU",
+   "ID",
+   "IE",
+   "IL",
+   "IS",
+   "IT",
+   "JO",
+   "JP",
+   "KE",
+   "KI",
+   "KN",
+   "KR",
+   "LC",
+   "LI",
+   "LS",
+   "LT",
+   "LU",
+   "LV",
+   "MC",
+   "MK",
+   "ML",
+   "MO",
+   "MR",
+   "MT",
+   "MW",
+   "MX",
+   "MY",
+   "MZ",
+   "NE",
+   "NF",
+   "NL",
+   "NO",
+   "NR",
+   "NZ",
+   "OM",
+   "PH",
+   "PL",
+   "PT",
+   "PY",
+   "RE",
+   "RO",
+   "RW",
+   "SB",
+   "SC",
+   "SE",
+   "SG",
+   "SH",
+   "SI",
+   "SJ",
+   "SK",
+   "SL",
+   "SM",
+   "SR",
+   "ST",
+   "SV",
+   "TC",
+   "TF",
+   "TG",
+   "TH",
+   "TK",
+   "TR",
+   "TW",
+   "TZ",
+   "UG",
+   "UM",
+   "VA",
+   "VN",
+   "XK",
+   "YT",
+   "ZM"
+  ],
+  "YOK (HTTP 400)": [
+   "AF",
+   "AG",
+   "AI",
+   "AN",
+   "AQ",
+   "AS",
+   "AZ",
+   "BA",
+   "BD",
+   "BN",
+   "BT",
+   "BW",
+   "CK",
+   "CL",
+   "CM",
+   "CO",
+   "CU",
+   "CW",
+   "CY",
+   "DJ",
+   "DM",
+   "DZ",
+   "EC",
+   "EG",
+   "EH",
+   "ER",
+   "FJ",
+   "FK",
+   "FM",
+   "FO",
+   "GF",
+   "GG",
+   "GM",
+   "GP",
+   "GS",
+   "GU",
+   "GW",
+   "GY",
+   "HN",
+   "HT",
+   "IM",
+   "IN",
+   "IO",
+   "IQ",
+   "IR",
+   "JE",
+   "JM",
+   "KG",
+   "KH",
+   "KM",
+   "KP",
+   "KW",
+   "KY",
+   "KZ",
+   "LA",
+   "LB",
+   "LK",
+   "LR",
+   "LY",
+   "MA",
+   "MD",
+   "ME",
+   "MF",
+   "MG",
+   "MH",
+   "MM",
+   "MN",
+   "MP",
+   "MQ",
+   "MS",
+   "MU",
+   "MV",
+   "NA",
+   "NC",
+   "NG",
+   "NI",
+   "NP",
+   "NU",
+   "PA",
+   "PE",
+   "PF",
+   "PG",
+   "PK",
+   "PM",
+   "PN",
+   "PR",
+   "PS",
+   "PW",
+   "QA",
+   "RS",
+   "SA",
+   "SD",
+   "SN",
+   "SO",
+   "SX",
+   "SY",
+   "SZ",
+   "TD",
+   "TJ",
+   "TL",
+   "TM",
+   "TN",
+   "TO",
+   "TT",
+   "TV",
+   "UA",
+   "UY",
+   "UZ",
+   "VC",
+   "VE",
+   "VG",
+   "VI",
+   "VU",
+   "WF",
+   "WS",
+   "YE",
+   "ZA",
+   "ZW"
+  ],
+  "5.89 / 6.59": [
+   "US"
+  ]
+ }
+}
