@@ -137,8 +137,8 @@ def oku(api, shop, out, lids):
     sps = (api.get(f"/shops/{shop}/shipping-profiles") or {}).get("results") or []
     R["profiller"] = [OT.profil_ozet(x) for x in sps]
     for c, lid in sorted(lids.items()):
-        L = api.get(f"/listings/{lid}", params={"includes": "Inventory"}) or {}
-        inv = L.get("inventory") or api.get(f"/listings/{lid}/inventory") or {}
+        L = api.get(f"/listings/{lid}") or {}
+        inv = api.get(f"/listings/{lid}/inventory") or {}     # getListing includes "inventory" kabul etmiyor (kosu 42356001503: 400)
         metin = " ".join([L.get("title") or "", L.get("description") or "", " ".join(L.get("tags") or [])])
         R["ilan"][c] = dict(lid=lid, state=L.get("state"), profil=L.get("shipping_profile_id"), urun=urun_ozet(inv),
                             free_shipping=[m.group(0) for m in FREE.finditer(metin)])
