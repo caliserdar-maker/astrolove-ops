@@ -128,6 +128,7 @@ class Kilitli(Etsy):
     sil_izin = frozenset()
     vid_izin = frozenset()
     yalniz_gorsel = False          # sira modu: video ve variation-images yazimi yasak (inceleme 4)
+    video_yasak = False            # yeniden modu: video yazimi yasak
 
     def _izin(self, method, path):
         L = self.lid
@@ -149,6 +150,8 @@ class Kilitli(Etsy):
             raise SystemExit(f"YASAK yazma: {method} {path}")
         if self.yalniz_gorsel and method == "POST" and (path.endswith("/videos") or path.endswith("/variation-images")):
             raise SystemExit(f"YASAK (sira modu): {method} {path}")
+        if self.video_yasak and "/videos" in path:
+            raise SystemExit(f"YASAK (yeniden modu): {method} {path}")
 
     def _call(self, method, path, **kw):
         if method != "GET":
@@ -314,9 +317,11 @@ def yaz(api, shop, out, pair, Y):
         yeni[n] = int(r["listing_image_id"]); d["yeni"] = {str(k): v for k, v in yeni.items()}; kaydet(); say += 1
     state_oku("2 yeni 14 gorsel")
     rk = {x["listing_image_id"]: x.get("rank") for x in gorseller()}
-    yanlis = {n: rk.get(yeni[n]) for n in range(1, N_YENI + 1) if rk.get(yeni[n]) != n}
-    if yanlis:   # inceleme 1: Etsy ayni rank'ta eskiyi kaydirmaz (6 Kas olcum, ESIT); yalniz yeni gorsellerin kendi rank'i denetlenir
-        kaydet(); raise SystemExit(f"DUR: {pair} yeni gorsel rank'lari beklenen degil {yanlis}")
+    sira_r = [rk.get(yeni[n]) for n in range(1, N_YENI + 1)]
+    if None in sira_r or any(a_ >= b_ for a_, b_ in zip(sira_r, sira_r[1:])):
+        # GEVSETME (Serdar 8 Kas "Evet, sira kapisi"): 8 Kas olcum (42461185221) Etsy silmede kalanlari 1..N yeniden numaralar; yeni
+        # gorseller n'den kayabilir -> tam rank == n yerine var ve kesin artan. Son geri okuma: 14 gorsel, rank kesin artan, id sirasi, alt metin.
+        kaydet(); raise SystemExit(f"DUR: {pair} yeni gorsel rank'lari sirali degil {dict(zip(range(1, N_YENI + 1), sira_r))}")
     # 3) Style -> yeni 10-14
     inv = api.get(f"/listings/{lid}/inventory") or {}
     vid = {v["values"][0]: v["value_ids"][0] for p in inv.get("products") or [] for v in p.get("property_values") or []
@@ -564,6 +569,179 @@ def sira(api, shop, out, pair, Y):
     return R
 
 
+# ------------------------------------------------------------------ yeniden (Serdar 8 Kas "Kodla yeniden yaz")
+def yeniden(api, shop, out, pair, Y):
+    """sira kosusu (42461185221) FAIL: Etsy silinen 2-6'nin yerini kapatti, sira karisik. Galeri, bu ilanda gercek Etsy'de 9/9 gecen yaz()
+    yoluyla yeni sirayla kurulur: stile bagli olmayan 9 gorsel silinir, 14 yeni gorsel 1-14 yuklenir, Style yeni 10-14'e baglanir, eski 5 stil
+    gorseli silinir. Video, baslik, state dokunulmaz. Yalniz CANCER_LIBRA. DURUM9[pair].yeniden ile devam. Her hata DUR."""
+    R = {"cift": pair, "mod": "yeniden", "adimlar": []}
+    durum_f = out / "DURUM9.json"
+    D = json.load(open(durum_f)) if durum_f.exists() else {}
+    rapor_f = out / f"Y9_{pair}.json"
+
+    def kaydet():
+        json.dump(D, open(durum_f, "w"), indent=1)
+        json.dump(R, open(rapor_f, "w"), indent=1, ensure_ascii=False, default=str)
+
+    if pair != "CANCER_LIBRA":
+        raise SystemExit(f"DUR-ON: {pair} yeniden modu yalniz CANCER_LIBRA")
+    d = D.get("ciftler", {}).get(pair) or {}
+    if pair in D.get("sira_v2", []):
+        print(f"::warning::{pair}: ATLANDI, sira zaten yeni (sira_v2)"); R["atlandi"] = "sira_v2"; return R
+    if pair not in D.get("tamam", []) or sorted(int(k) for k in d.get("yeni", {})) != list(range(1, 15)):
+        kaydet(); raise SystemExit(f"DUR-ON: {pair} DURUM9'da eski sirayla tamam degil")
+    alt, baslik, hata = alt_metinler(pair)
+    galeri, _video, mh = medya(pair)
+    if hata or mh:
+        kaydet(); raise SystemExit(f"DUR-ON: {pair} metin {hata} medya {mh}")
+    y = Y.get(pair) or {}
+    if not str(y.get("listing_id", "")).isdigit():
+        kaydet(); raise SystemExit(f"DUR-ON: {pair} yedek yok")
+    lid = int(y["listing_id"])
+    eski = {int(k): v for k, v in d["yeni"].items()}                                  # eski sirali tamam galeri (pilot)
+    s2y = {int(k): v for k, v in (d.get("sira2") or {}).get("yeni", {}).items()}      # sira kosusunun yukledigi 2-6
+    bekl = {eski[n] for n in range(1, 15) if n not in SIRA_DEG} | set(s2y.values())   # su anki galerinin beklenen 14 id'si
+    bagli = {eski[r] for r in STIL_SIRA.values()}
+    serbest = bekl - bagli
+    Ye = d.setdefault("yeniden", {})
+    yeni = {int(k): v for k, v in Ye.get("yeni", {}).items()}
+    api.lid, api.sil_izin, api.vid_izin, api.video_yasak = lid, frozenset(bekl), frozenset(), True
+    api.get(f"/shops/{shop}")
+    R["kota_bas"] = api.remaining
+    api.kota(KOTA_ILAN + 10)
+
+    def durum(adim, acil=True):
+        L = api.get(f"/listings/{lid}") or {}
+        st = L.get("state")
+        R["adimlar"].append((adim, st, api.remaining))
+        print(f"{pair} {adim}: state={st} kota={api.remaining}", flush=True)
+        if st == "active" and acil:
+            st2 = "?"
+            try:
+                api.patch(f"/shops/{shop}/listings/{lid}", {"state": "inactive"})
+                st2 = (api.get(f"/listings/{lid}") or {}).get("state")
+            except BaseException as e:  # noqa: BLE001
+                st2 = f"hata {type(e).__name__}: {str(e)[:200]}"
+            finally:
+                R["adimlar"].append((adim + " ACIL inactive", st2, api.remaining)); kaydet()
+                print(f"::error::ACIL: {pair} {adim} sonrasi active -> inactive (simdi {st2}). DUR.", flush=True)
+                if st2 != "inactive":
+                    print(f"::error::ACIL BASARISIZ: {pair} listing {lid} hala {st2}; Etsy panelinden elle inactive yapilmali.", flush=True)
+                raise SystemExit(2)
+        if st != "draft":
+            kaydet(); raise SystemExit(f"DUR: {pair} state {st} ({adim}); dokunulmadi")
+        return L
+
+    def gorseller():
+        return sorted(((api.get(f"/listings/{lid}/images") or {}).get("results") or []), key=lambda x: (x.get("rank") or 0, x.get("listing_image_id")))
+
+    def baglar():
+        vis = (api.get(f"/shops/{shop}/listings/{lid}/variation-images") or {}).get("results") or []
+        return {v.get("value_id"): v.get("image_id") for v in vis if v.get("property_id") == P_STYLE}
+
+    def videolar():
+        return [v.get("video_id") for v in ((api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or [])]
+
+    L = durum("0 baslangic", acil=False)
+    if html.unescape(L.get("title") or "") != baslik:
+        kaydet(); raise SystemExit(f"DUR: {pair} {lid} baslik METIN ile ayni degil (kimlik)")
+    inv = api.get(f"/listings/{lid}/inventory") or {}
+    vid = {v["values"][0]: v["value_ids"][0] for p in inv.get("products") or [] for v in p.get("property_values") or []
+           if v.get("property_id") == P_STYLE and v.get("value_ids")}
+    if sorted(vid) != sorted(STIL_SIRA) or vid != {s_: y["stil"][s_] for s_ in vid}:
+        kaydet(); raise SystemExit(f"DUR: {pair} Style value_id yedekten farkli {vid}")
+    ims0, bag0, vid0 = gorseller(), baglar(), videolar()
+    R["once"] = dict(gorsel=[(x.get("listing_image_id"), x.get("rank"), x.get("alt_text"), x.get("url_fullxfull")) for x in ims0],
+                     bag=bag0, video=vid0)
+    kaydet()
+    simdi = {x.get("listing_image_id") for x in ims0}
+    bag_eski = {vid[s_]: eski[r] for s_, r in STIL_SIRA.items()}
+    bag_yeni = {vid[s_]: yeni.get(r) for s_, r in STIL_SIRA.items()}
+    if not Ye.get("basladi"):
+        on = {"galeri = beklenen 14 id": simdi == bekl and len(ims0) == 14, "stil baglari eski 10-14": bag0 == bag_eski,
+              "video 1": len(vid0) == 1}
+    else:
+        on = {"yalniz beklenen + bu kosunun yeni id'leri": simdi <= (bekl | set(yeni.values())),
+              "kayitli yeni id'ler galeride, rank kesin artan": all(yeni[n] in simdi for n in yeni) and (lambda r: all(a_ < b_ for a_, b_ in zip(r, r[1:])))(
+                  [next((x.get("rank") for x in ims0 if x.get("listing_image_id") == yeni[n]), None) for n in sorted(yeni)]),
+              "bag yeniye gectiyse kalan eski yalniz stil gorselleri": bag0 != bag_yeni or not (simdi & serbest),
+              "stil baglari eski ya da yeni 10-14": bag0 in (bag_eski, bag_yeni), "video 1": len(vid0) == 1}
+    R["on_kontrol"] = on
+    if not all(on.values()):
+        kaydet(); raise SystemExit(f"DUR: {pair} on kontrol {[k for k, v in on.items() if not v]} (yazim yapilmadi)")
+    if not Ye.get("basladi"):
+        Ye["video"] = vid0; Ye["basladi"] = True; kaydet()
+    # 1) stile bagli olmayan 9 gorsel silinir
+    for i in sorted(serbest):
+        if i in simdi:
+            api.delete(f"/shops/{shop}/listings/{lid}/images/{i}")
+    durum("1 bagsiz 9 silindi")
+    # 2) yeni 14 gorsel 1..14
+    say = len(gorseller())
+    for n in range(1, N_YENI + 1):
+        if n in yeni:
+            continue
+        if say >= 20:
+            kaydet(); raise SystemExit(f"DUR: {pair} galeri {say} gorsel (20 siniri)")
+        with open(galeri[n - 1], "rb") as fh:
+            r = api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (galeri[n - 1].name, fh, "image/jpeg")},
+                              data={"rank": str(n), "alt_text": alt[n - 1]})
+        yeni[n] = int(r["listing_image_id"]); Ye["yeni"] = {str(k): v for k, v in yeni.items()}; kaydet(); say += 1
+    durum("2 yeni 14 gorsel")
+    rk = {x["listing_image_id"]: x.get("rank") for x in gorseller()}
+    sira_r = [rk.get(yeni[n]) for n in range(1, N_YENI + 1)]
+    if None in sira_r or any(a_ >= b_ for a_, b_ in zip(sira_r, sira_r[1:])):    # GEVSETME (Serdar 8 Kas "Evet, sira kapisi"), yaz() ile ayni
+        kaydet(); raise SystemExit(f"DUR: {pair} yeni gorsel rank'lari sirali degil {dict(zip(range(1, N_YENI + 1), sira_r))}")
+    # 3) Style -> yeni 10-14
+    bag_yeni = {vid[s_]: yeni[r] for s_, r in STIL_SIRA.items()}
+    if baglar() != bag_yeni:
+        api.post_json(f"/shops/{shop}/listings/{lid}/variation-images",
+                      {"variation_images": [dict(property_id=P_STYLE, value_id=vid[s_], image_id=yeni[r]) for s_, r in STIL_SIRA.items()]})
+    durum("3 stil baglari")
+    if baglar() != bag_yeni:
+        kaydet(); raise SystemExit(f"DUR: {pair} stil baglari yeniye gecmedi")
+    # 4) eski 5 stil gorseli silinir
+    simdi = {x["listing_image_id"] for x in gorseller()}
+    for i in sorted(bagli):
+        if i in simdi:
+            api.delete(f"/shops/{shop}/listings/{lid}/images/{i}")
+    durum("4 eski stil gorselleri silindi")
+    # 5) geri okuma
+    for _ in range(6):
+        ims = gorseller()
+        if all(x.get("full_width") for x in ims):
+            break
+        time.sleep(10)
+    L = api.get(f"/listings/{lid}") or {}
+    norm = lambda t: " ".join(html.unescape(str(t or "")).split())  # noqa: E731
+    K = {
+        "14 gorsel, rank kesin artan": len(ims) == 14 and all(a_ < b_ for a_, b_ in zip([x.get("rank") for x in ims], [x.get("rank") for x in ims][1:])),
+        "gorseller yeni id sirasi": [x.get("listing_image_id") for x in ims] == [yeni[n] for n in range(1, 15)],
+        "eski gorsel yok": not ({x.get("listing_image_id") for x in ims} & bekl),
+        "3000x2250": all((x.get("full_width"), x.get("full_height")) == (3000, 2250) for x in ims),
+        "alt metinler": [norm(x.get("alt_text")) for x in ims] == [norm(a) for a in alt],
+        "stil 10-14": baglar() == bag_yeni,
+        "video ayni": videolar() == Ye.get("video"),
+        "state draft": L.get("state") == "draft",
+        "baslik ayni": html.unescape(L.get("title") or "") == baslik,
+    }
+    R["kontrol"] = K
+    R["son"] = dict(listing_id=lid, link=f"https://www.etsy.com/your/shops/me/listing-editor/edit/{lid}",
+                    gorsel=[(x.get("rank"), x.get("listing_image_id")) for x in ims])
+    R["kota_son"] = api.remaining
+    kotu = [k for k, v in K.items() if not v]
+    print(f"::warning::{pair} {lid} yeniden | kontrol {len(K) - len(kotu)}/{len(K)} | FAIL {kotu} | kota {R['kota_bas']} -> {R['kota_son']}")
+    if kotu:
+        kaydet(); raise SystemExit(f"FAIL kontrol {pair}: {kotu}")
+    d["yeni"] = {str(n): yeni[n] for n in range(1, 15)}; d["sira"] = "v2"
+    d.pop("sira2", None); d.pop("yeniden", None)
+    D.setdefault("sira_v2", [])
+    if pair not in D["sira_v2"]:
+        D["sira_v2"].append(pair)
+    kaydet()
+    return R
+
+
 # ------------------------------------------------------------------ kuru (ag yok, yedekten taklit)
 class Kuru(Kilitli):
     kuru = True
@@ -573,6 +751,7 @@ class Kuru(Kilitli):
         self.kayit, self.Y = [], Y
         self.n = 0
         self.kaydir = False
+        self.sikistir = False      # silme davranisi: 30 Eyl olcumu kapatmaz, 8 Kas olcumu (42461185221) kapatti; kuru ve testler iki modu da kosar
 
     def ilan(self, y):
         self.L = dict(listing_id=y["listing_id"], state=y["state"], title=y["baslik"])
@@ -587,6 +766,18 @@ class Kuru(Kilitli):
         e = {int(k): v for k, v in d["yeni"].items()}
         a = dict(zip(GALERI, alt_metinler(pair)[0]))
         self.ims = [dict(listing_image_id=e[n], rank=n, alt_text=a[ESKI_GALERI9[n - 1]], full_width=3000, full_height=2250) for n in range(1, 15)]
+        self.vids = [dict(video_id=990001, video_state="active")]
+        self.vis = [dict(property_id=P_STYLE, value_id=y["stil"][s], image_id=e[r]) for s, r in STIL_SIRA.items()]
+
+    def ilan_yeniden(self, y, d, pair):
+        """yeniden kurusu: sira kosusu sonrasi karisik galeri (8 Kas olcumu 42461185221 sirasi; rank'lar esit) + 1 video + eski bag (taklit)"""
+        self.ilan(y)
+        e = {int(k): v for k, v in d["yeni"].items()}
+        s2 = {int(k): v for k, v in (d.get("sira2") or {}).get("yeni", {}).items()}
+        a = dict(zip(GALERI, alt_metinler(pair)[0]))
+        sira = [(1, e[1], "01_KAPAK")] + [(n, s2[n], GALERI[n - 1]) for n in SIRA_DEG] + \
+               [(n - 5, e[n], ESKI_GALERI9[n - 1]) for n in range(7, 15)]                # eski 7-14 -> 2-9 (sikisti)
+        self.ims = [dict(listing_image_id=i, rank=r, alt_text=a[f], full_width=3000, full_height=2250) for r, i, f in sira]
         self.vids = [dict(video_id=990001, video_state="active")]
         self.vis = [dict(property_id=P_STYLE, value_id=y["stil"][s], image_id=e[r]) for s, r in STIL_SIRA.items()]
 
@@ -642,7 +833,11 @@ class Kuru(Kilitli):
             raise SystemExit(f"KURU: taklit edilmeyen GET {path}")
         if method == "DELETE" and "/images/" in path:
             i = int(path.rsplit("/", 1)[1])
+            r0 = next((x["rank"] for x in self.ims if x["listing_image_id"] == i), None)
             self.ims = [x for x in self.ims if x["listing_image_id"] != i]       # olcum (30 Eyl): silme rank sikistirmaz
+            if self.sikistir and r0 is not None:          # olcum (8 Kas, 42461185221): kalanlar sirasi korunarak 1..N yeniden numaralandi
+                for k, x in enumerate(sorted(self.ims, key=lambda x: (x["rank"], x["listing_image_id"])), 1):
+                    x["rank"] = k
             return {}
         if method == "DELETE" and "/videos/" in path:
             i = int(path.rsplit("/", 1)[1]); self.vids = [v for v in self.vids if v["video_id"] != i]; return {}
@@ -654,15 +849,18 @@ class Kuru(Kilitli):
 
 
 def kuru(shop, out, pair, Y):
-    api = Kuru(shop, Y)
-    api.ilan(Y[pair])
+    """8 Kas: Etsy silmede rank'lari bazen kapatir (42461185221), bazen kapatmaz (30 Eyl olcumu): iki davranis da kosulur, ikisi de PASS olmali"""
     o2 = out / "kuru"; o2.mkdir(parents=True, exist_ok=True)
-    (o2 / "DURUM9.json").unlink(missing_ok=True)
-    R = yaz(api, shop, o2, pair, Y)
-    yazma = [k for k in api.kayit if k["yazma"]]
-    ozet = dict(cift=pair, istek=len(api.kayit), yazma=len(yazma), kontrol=R["kontrol"])
-    json.dump(dict(ozet=ozet, istekler=api.kayit), open(o2 / f"KURU_{pair}.json", "w"), indent=1, ensure_ascii=False)
-    print(f"KURU {pair}: {len(api.kayit)} istek ({len(yazma)} yazma) | kontrol {sum(R['kontrol'].values())}/{len(R['kontrol'])}")
+    ozet = {}
+    for sik in (True, False):
+        api = Kuru(shop, Y); api.sikistir = sik
+        api.ilan(Y[pair])
+        (o2 / "DURUM9.json").unlink(missing_ok=True)
+        R = yaz(api, shop, o2, pair, Y)
+        yazma = [k for k in api.kayit if k["yazma"]]
+        ozet[f"sikistir={sik}"] = dict(cift=pair, istek=len(api.kayit), yazma=len(yazma), kontrol=R["kontrol"])
+        json.dump(dict(ozet=ozet[f"sikistir={sik}"], istekler=api.kayit), open(o2 / f"KURU_{pair}_{sik}.json", "w"), indent=1, ensure_ascii=False)
+        print(f"KURU {pair} sikistir={sik}: {len(api.kayit)} istek ({len(yazma)} yazma) | kontrol {sum(R['kontrol'].values())}/{len(R['kontrol'])}")
     (o2 / "DURUM9.json").unlink(missing_ok=True)
     return ozet
 
@@ -685,6 +883,27 @@ def sira_kuru(shop, out, pair, Y):
     else:
         print(f"SIRA KURU {pair}: {len(api.kayit)} istek ({len(yazma)} yazma) | kontrol {sum((R.get('kontrol') or {}).values())}/{len(R.get('kontrol') or {})} "
               f"| ZAYIF TEST: taklit DURUM9'dan kurulur (gercek galeri sira kosusunun on kontrolunde denetlenir)")
+    (o2 / "DURUM9.json").unlink(missing_ok=True)
+
+
+def yeniden_kuru(shop, out, pair, Y):
+    D = json.load(open(out / "DURUM9.json")) if (out / "DURUM9.json").exists() else {}
+    d = D.get("ciftler", {}).get(pair)
+    if pair != "CANCER_LIBRA" or not d or not d.get("tamam") or sorted(int(k) for k in d.get("yeni", {})) != list(range(1, 15)) \
+            or sorted(int(k) for k in (d.get("sira2") or {}).get("yeni", {})) != SIRA_DEG:
+        raise SystemExit(f"DUR-ON: {pair} DURUM9 beklenen degil (yeniden_kuru)")
+    o2 = out / "yeniden_kuru"; o2.mkdir(parents=True, exist_ok=True)
+    sonuc = {}
+    for sik in (True, False):                     # Etsy silmede rank kapatir mi: iki davranis da denenir
+        api = Kuru(shop, Y); api.sikistir = sik
+        api.ilan_yeniden(Y[pair], d, pair)
+        json.dump(D, open(o2 / "DURUM9.json", "w"))
+        R = yeniden(api, shop, o2, pair, Y)
+        yazma = [k for k in api.kayit if k["yazma"]]
+        sonuc[f"sikistir={sik}"] = dict(istek=len(api.kayit), yazma=len(yazma), kontrol=R.get("kontrol"))
+        json.dump(dict(ozet=sonuc, istekler=api.kayit), open(o2 / f"YENIDEN_KURU_{pair}_{sik}.json", "w"), indent=1, ensure_ascii=False)
+        print(f"YENIDEN KURU {pair} sikistir={sik}: {len(api.kayit)} istek ({len(yazma)} yazma) | kontrol "
+              f"{sum((R.get('kontrol') or {}).values())}/{len(R.get('kontrol') or {})} | ZAYIF TEST: taklit DURUM9'dan (gercek on kontrolde)")
     (o2 / "DURUM9.json").unlink(missing_ok=True)
 
 
@@ -752,13 +971,13 @@ def liste_yaz(out, Y):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mod", required=True, choices=["yedek", "kuru", "yaz", "sira_kuru", "sira"])
+    ap.add_argument("--mod", required=True, choices=["yedek", "kuru", "yaz", "sira_kuru", "sira", "yeniden_kuru", "yeniden"])
     ap.add_argument("--ciftler", default="CANCER_LIBRA")
     a = ap.parse_args()
     out = Path(os.environ.get("OUT", "_out")); out.mkdir(parents=True, exist_ok=True)
     ciftler = cift_listesi(a.ciftler)
     shop = os.environ.get("ETSY_SHOP_ID", "39729443")
-    if a.mod in ("kuru", "yaz", "sira_kuru", "sira"):
+    if a.mod in ("kuru", "yaz", "sira_kuru", "sira", "yeniden_kuru", "yeniden"):
         Y = json.load(open(os.environ["YEDEK"]))
     if a.mod == "kuru":
         for c in ciftler:
@@ -768,6 +987,10 @@ def main():
         for c in ciftler:
             sira_kuru(shop, out, c, Y)
         return
+    if a.mod == "yeniden_kuru":
+        for c in ciftler:
+            yeniden_kuru(shop, out, c, Y)
+        return
     k, s = os.environ.get("ETSY_API_KEY", ""), os.environ.get("ETSY_SHARED_SECRET", "")
     mask(k); mask(s)
     store = TokenStore(os.environ["TOKEN_FILE"], k, s)
@@ -776,6 +999,12 @@ def main():
     if a.mod == "yedek":
         harita = json.load(open(os.environ["TASLAK_DURUM"])).get("ciftler", {})
         yedek(SaltOkur(store), shop, out, ciftler, harita); return
+    if a.mod == "yeniden":                           # Serdar 8 Kas "Kodla yeniden yaz": pilot galeri yeni sirayla yeniden
+        api = Kilitli(store)
+        for c in ciftler:
+            api.lid = None
+            yeniden(api, shop, out, c, Y)
+        return
     if a.mod == "sira":                              # Serdar 8 Kas: pilot sira duzeltmesi (yalniz CANCER_LIBRA beklenir)
         api = Kilitli(store)
         for c in ciftler:

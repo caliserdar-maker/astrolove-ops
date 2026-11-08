@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""ornament_galeri9.py sahte Etsy testleri (ag yok). Sahte Etsy olcumle kurulu (6 Kas ESIT: ayni rank'a yukleme kaydirmaz; 30 Eyl: silme
-rank sikistirmaz); kaydirmali mod da denenir. Bilinen PASS: tam akis (iki mod). Bilinen FAIL: yedek disi gorsel / video silme, bilinmeyen
+"""ornament_galeri9.py sahte Etsy testleri (ag yok). Sahte Etsy olcumle kurulu (6 Kas ESIT: ayni rank'a yukleme kaydirmaz; silme: 30 Eyl
+olcumu rank kapatmaz, 8 Kas olcumu 42461185221 kapatti -> iki mod da denenir); kaydirmali mod da denenir. Bilinen PASS: tam akis (iki mod). Bilinen FAIL: yedek disi gorsel / video silme, bilinmeyen
 gorsel, baslik farki, baslangicta active (PATCH yok, DUR), pilot once, video 4xx (isaret geri), yarim kosudan devam, yabanci video.
 8 Kas: yeni sira (2. sembol karti); sira modu: yalniz 2-6, baglar / video ayni, devam, yazimdan ONCE tam on kontrol (yer degisimi, alt metin,
 ters bag, rank cakismasi, bilinmeyen gorsel), yalniz CANCER_LIBRA, acil inactive, video / variation yasak, geri okuma FAIL, eski sirali yarim
@@ -224,11 +224,91 @@ def main():
         ak.post_file = asil_k; next(x for x in ak.ims if x["listing_image_id"] == 60009)["rank"] = 13; n0 = len(ak.kayit)
         bekle_dur(lambda: g.sira(ak, "39729443", o, "CANCER_LIBRA", Y), "on kontrol")
         assert not [k for k in ak.kayit[n0:] if k["yazma"]]
+        # yeniden (8 Kas "Kodla yeniden yaz"): sira FAIL sonrasi karisik galeri -> yaz yolu; Etsy silmede sikistirsa da sikistirmasa da PASS
+        def yeni_durum(o):
+            D = eski_durum(o); D["ciftler"]["CANCER_LIBRA"]["sira2"] = {"basladi": True, "yeni": {str(n): 70000 + n for n in g.SIRA_DEG}}
+            json.dump(D, open(Path(o) / "DURUM9.json", "w")); return D
+        def yeni_api(D, sik):
+            a = g.Kuru("39729443", Y); a.sikistir = sik; a.ilan_yeniden(Y["CANCER_LIBRA"], D["ciftler"]["CANCER_LIBRA"], "CANCER_LIBRA"); return a
+        for sik in (True, False):
+            o = Path(t, f"y{sik}"); o.mkdir(); D = yeni_durum(o); ay = yeni_api(D, sik)
+            R = g.yeniden(ay, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), (sik, R["kontrol"])
+            assert not [k for k in ay.kayit if "/videos" in k["url"] and k["method"] != "GET"]
+            D2 = json.load(open(o / "DURUM9.json")); assert "CANCER_LIBRA" in D2["sira_v2"] and "sira2" not in D2["ciftler"]["CANCER_LIBRA"]
+            assert "atlandi" in g.yeniden(ay, "39729443", o, "CANCER_LIBRA", Y)
+        # yeniden devam: 7. yuklemede kopma, devam PASS (sikistirmali)
+        o = Path(t, "yk"); o.mkdir(); D = yeni_durum(o); ayk = yeni_api(D, True); asil_y = ayk.post_file; say_y = {"n": 0}
+        def kopy(path, files, data=None):
+            say_y["n"] += 1
+            if say_y["n"] == 7:
+                raise SystemExit("HATA: baglanti koptu")
+            return asil_y(path, files, data)
+        ayk.post_file = kopy
+        bekle_dur(lambda: g.yeniden(ayk, "39729443", o, "CANCER_LIBRA", Y), "koptu")
+        ayk.post_file = asil_y
+        R = g.yeniden(ayk, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), R["kontrol"]
+        # yeniden on kontrol: beklenmeyen gorsel / ters bag -> yazmadan DUR; yalniz CANCER_LIBRA; video yazimi yasak
+        for ad, boz in (("yb1", lambda a: a.ims.append(dict(listing_image_id=1, rank=15, alt_text="", full_width=1, full_height=1))),
+                        ("yb2", lambda a: a.vis.__setitem__(0, dict(a.vis[0], image_id=a.vis[1]["image_id"])))):
+            o = Path(t, ad); o.mkdir(); D = yeni_durum(o); ab = yeni_api(D, True); boz(ab)
+            bekle_dur(lambda: g.yeniden(ab, "39729443", o, "CANCER_LIBRA", Y), "on kontrol")
+            assert not [k for k in ab.kayit if k["yazma"]], ad
+        bekle_dur(lambda: g.yeniden(ab, "39729443", Path(t, "yb1"), "LEO_LEO", Y2), "yalniz CANCER_LIBRA")
+        ab.lid = 4611501158; ab.video_yasak = True
+        bekle_dur(lambda: ab._izin("POST", "/shops/39729443/listings/4611501158/videos"), "yeniden modu")
+        # inceleme: eski stil gorsellerinin silinmesinde (bagli 5'ten 2.) kopma -> devam PASS, iki silme davranisinda (yaz ve yeniden)
+        for sik in (True, False):
+            def kop_sil(a):
+                asil = a._call; say = {"n": 0}; bagli = {v["image_id"] for v in a.vis}
+                def kc(method, path, *x, **k):
+                    if method == "DELETE" and "/images/" in path and int(path.rsplit("/", 1)[1]) in bagli:
+                        say["n"] += 1
+                        if say["n"] == 2:
+                            raise SystemExit("HATA: baglanti koptu")
+                    return asil(method, path, *x, **k)
+                a._call = kc; return asil
+            o = Path(t, f"ka{sik}"); o.mkdir(); D = yeni_durum(o); aa = yeni_api(D, sik); asil_a = kop_sil(aa)
+            bekle_dur(lambda: g.yeniden(aa, "39729443", o, "CANCER_LIBRA", Y), "koptu")
+            aa._call = asil_a
+            R = g.yeniden(aa, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), ("yeniden devam", sik, R["kontrol"])
+            o = Path(t, f"kb{sik}"); o.mkdir(); ab2 = g.Kuru("39729443", Y); ab2.ilan(Y["CANCER_LIBRA"]); ab2.sikistir = sik; asil_b = kop_sil(ab2)
+            bekle_dur(lambda: g.yaz(ab2, "39729443", o, "CANCER_LIBRA", Y), "koptu")
+            ab2._call = asil_b
+            R = g.yaz(ab2, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), ("yaz devam", sik, R["kontrol"])
+        # inceleme C: devamda kayitli yeni gorsel galeriden silinmis -> yazmadan DUR
+        o = Path(t, "kc"); o.mkdir(); D = yeni_durum(o); ac = yeni_api(D, True); asil_c2 = ac.post_file; say_c = {"n": 0}
+        def kopc(path, files, data=None):
+            say_c["n"] += 1
+            if say_c["n"] == 5:
+                raise SystemExit("HATA: baglanti koptu")
+            return asil_c2(path, files, data)
+        ac.post_file = kopc
+        bekle_dur(lambda: g.yeniden(ac, "39729443", o, "CANCER_LIBRA", Y), "koptu")
+        ac.post_file = asil_c2
+        y2 = int(json.load(open(o / "DURUM9.json"))["ciftler"]["CANCER_LIBRA"]["yeniden"]["yeni"]["2"])
+        ac.ims = [x for x in ac.ims if x["listing_image_id"] != y2]; n0 = len(ac.kayit)
+        bekle_dur(lambda: g.yeniden(ac, "39729443", o, "CANCER_LIBRA", Y), "on kontrol")
+        assert not [k for k in ac.kayit[n0:] if k["yazma"]]
+        # sira kapisi bilinen FAIL (inceleme): Etsy her yuklemeyi rank 1'e koyarsa (ters sira) yaz ve yeniden "sirali degil" DUR, Style POST yok
+        def ters_yukle(a):
+            asil = a.post_file
+            def p1(path, files, data=None):
+                return asil(path, files, dict(data, rank="1") if path.endswith("/images") else data)
+            a.post_file = p1
+        o = Path(t, "ts1"); o.mkdir(); at = g.Kuru("39729443", Y); at.ilan(Y["CANCER_LIBRA"]); ters_yukle(at)
+        bekle_dur(lambda: g.yaz(at, "39729443", o, "CANCER_LIBRA", Y), "sirali degil")
+        assert not [k for k in at.kayit if k["url"].endswith("variation-images") and k["method"] != "GET"]
+        o = Path(t, "ts2"); o.mkdir(); D = yeni_durum(o); at2 = yeni_api(D, True); ters_yukle(at2)
+        bekle_dur(lambda: g.yeniden(at2, "39729443", o, "CANCER_LIBRA", Y), "sirali degil")
+        assert not [k for k in at2.kayit if k["url"].endswith("variation-images") and k["method"] != "GET"]
+        # 77 ilanin yaz() yolu Etsy silmede sikistirsa da PASS
+        o = Path(t, "ysik"); o.mkdir(); a_s = g.Kuru("39729443", Y); a_s.ilan(Y["CANCER_LIBRA"]); a_s.sikistir = True
+        R = g.yaz(a_s, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), ("yaz sikistir", R["kontrol"])
         # pilot kapisi bilinen PASS: tamam + sira_v2 varken LEO_LEO yazilir
         o = Path(t, "o22"); o.mkdir(); D = eski_durum(o); D["sira_v2"] = ["CANCER_LIBRA"]; json.dump(D, open(o / "DURUM9.json", "w"))
         a22 = g.Kuru("39729443", Y2); a22.ilan(Y2["LEO_LEO"]); a22.kuru = False
         R = g.yaz(a22, "39729443", o, "LEO_LEO", Y2); assert all(R["kontrol"].values()), R["kontrol"]
-    print("test_ornament_galeri9: 30/30 PASS")
+    print("test_ornament_galeri9: 44/44 PASS")
 
 
 if __name__ == "__main__":
