@@ -94,6 +94,7 @@ bolumu okunmadan baslanmaz.
   farkli surum kurar: 11.0.0, 12.3.0, 11.3.0, surumsuz; is akisi surumleri bu kurala dayanilarak DEGISTIRILMEZ). 12.x glif
   yerlesimini degistirir (pilot kart 04 farki 87 > esik 45). Galeri/kart betikleri (kart_nokta_marka / eski78_gorsel_uret /
   kart02_iki_sutun; is akislari 11.0.0) baska surumde DUR verir. Ornek venv: `python3 -m venv v && v/bin/pip install pillow==<surum>`.
+  Onayli bir seti bayt bayt yeniden uretmek icin onayli setin ortami kullanilir; 8 Kas ornament galeri seti iki ortam istedi: sahne Pillow 12.3 / numpy 2.5.3, yazi Pillow 11.0.0 / numpy 2.1.3 (Merkez dersi, oturum kaydi 506114dc T238/T242).
 - Wallpaper hatti dahil tum uretim GitHub Actions'ta kosar; ChatGPT/Colab
   uretim hattinda yoktur (KARAR 3, 1 Eyl 2026).
 - Esik ve yerlesim kurallari tahminle degil, onayli dosyalardan olculerek
@@ -116,6 +117,9 @@ bolumu okunmadan baslanmaz.
    `set +e` ya da `|| RC=1` (5 Kas ornament 78 toplama). Sahte aracin taklit ettigi cikti gercek aracin bilinen davranisiyla
    (resmi belge ya da onceki salt okuma kosusunun logu) karsilastirilir; liste
    ciktisini ayristiran kapi beklenmeyen ciktida DUR verir (6 Kas ornament-taslak pilot 42290409207: rclone lsf klasorleri de listeledi).
+   Gecmis okuyan test (git show, eski commit) temiz kopyada tam gecmisli yeni klonla kosar; git archive ve sig klon bu testte yanlis FAIL verir (Merkez dersi, 7 Kas test_printful_5x7). Gecmis okumayan testte git archive yeter.
+   Kabukta karsilastirma (case, [ ], grep) bos degiskenle yapilmaz: once [ -n "$X" ] kontrolu, bossa DUR (Merkez dersi, 7 Kas: bos DAMGA case deseninde her JSON'a eslesti, olculdu).
+   Alt surec cagrilarinda mutlak yol kullanilir (8 Kas: goreli yol FAIL, Merkez oturum kaydi); yeni kapi her modla (kuru dahil) test edilir.
 3. Her gorev basinda 3 satir yaz: (a) yontem, (b) "bitti" tanimi (olculur
    esik), (c) tahmini sure. Yontem degisecekse DUR, Mo'ya sor.
 4. En fazla 2 iterasyon. Ikincisi de temiz degilse DUR, durumu raporla,
@@ -137,6 +141,7 @@ bolumu okunmadan baslanmaz.
 - Baslatilan her koşu ARALIKSIZ izlenir: GitHub API ile jobs her 30-60 sn okunur (tek komut icinde dongu), bir is biter bitmez sonucu okunur.
 - FAIL olan is icin koşunun tamamini bekleme: ayni dakikada rapor oku, duzelt, yerelde dogrula, o is icin yeni koşu baslat.
 - Kosu bitince ayni dakikada 6 satir rapor. Bekleme gereken tek durum: Serdar'in acik onayi gereken eylem (Etsy yazma, musteriye dokunan eylem).
+- ISTISNA (Serdar 8 Kas "Merkez'e izin ver"): yalniz Genel Merkez sayfasi (Serdar'in "Genel Merkez" diye actigi planlama sayfasi; linki Merkez'in YAPILACAKLAR "Oturumlar" bolumunde) Serdar'in acik istegiyle oturuma donen send_later zinciri kurabilir (orn. saatlik kota kontrolu), yalniz Serdar'in onayladigi is icin. Zincir her turda once "is zaten bitti mi" bakar; is bittiyse ya da gercek hata (beklenen kota DUR'u disinda) varsa kendini yeniden kurmaz ve Serdar'a raporlar. Bu oturum (Denetim) ve diger Code oturumlarinda bu bolumdeki yasak aynen surer.
 
 ## MARKA ADI (1 Eki 2026, Serdar kesin talimati)
 
@@ -209,6 +214,9 @@ Hedef: Serdar isim + burc yeri + tagline verir, 15 dk icinde 5 PDF Drive'da (Tes
      Sıkılaştırma da önce tipik ve en kötü veriyle ölçülür; "temkinli" diye ölçülmeden kapı konmaz, onaylı planın tanımını
      değiştiren sıkılaştırma Serdar'a sorulur (Merkez dersi, Serdar 7 Kas onayı; 6 Kas gece: ornament sipariş hattında
      tarih_alt_795 ve 32 px eşitliği ölçülmeden konmuştu, siparişlerin çoğunu düşürecekti).
+  5. ORTAK ISTEMCI VE GERCEK TEST (Merkez dersi, 7-8 Kas): Etsy'ye yazan yeni kodda yazma cagrisi ortak istemciden (etsy_common) gecer ya da ayni fonksiyonda metin yasak kapisi cagrilir (onayli ornek: ornament_kargo.py:132, Serdar 7 Kas "A"); mevcut tarama testi (test_ai_beyan C) yalniz aciklama govdeli dogrudan requests cagrilarini tarar, genis tarama ayri is. Testler gercek fonksiyonu calistirir (mutasyon denemesi: kod bozuldugunda test FAIL vermeli). Kod push'undan sonra o push'un tetikledigi CI kosulari okunur, yesil olmadan "bitti" denmez (7 Kas: ihlal bad682d ile girdi, sonraki 6 push'un CI'i FAIL verdi).
+  6. INCELEME TUR SINIRI (Serdar 8 Kas, token plani onay 3): bagimsiz inceleme en fazla 2 tur. 2. turdan sonra kalan kucuk duzeltme (kural, kapi ya da yazim yolu degistirmeyen) testle kanitlanir. 2. tur yeni YUKSEK bulgu verirse DUR, Serdar'a tek satir. Etsy'ye yazan yol ve musteriye dokunan islerde KALITE KURALLARI 1 aynen surer (yazim yolu incelemeden sonra degisirse degisen kisim yeniden incelenir; bulgular duzeltilmeden kosu yok). Inceleme odagi degisen kisimdir; inceleyene ilgili karar dosyalari, onceki sonuclar ve degisen kodun cagirdigi moduller de verilir (tam baglam, asagidaki madde).
+  7. KALITE ONCE (Serdar 8 Kas "Katiliyorum"): bir tasarruf (Claude kullanim kotasi, token) kurali bir kalite kuraliyla (bagimsiz inceleme, kapi, test, pilot, yedek, Etsy toplu yazim adimlari, siparis kesintisizligi, musteriye dokunan eylem onayi) catisirsa kalite kazanir; Serdar'a tek satirla yazilir. Claude kullanim kotasi baskisi kalite adimi atlama gerekcesi degildir.
 - Raporlardaki her rakamın kaynağı yazılır (ölçüm / API / dosya / tahmin). Kaynaksız rakam yok.
 - Görev metinlerinde rol verme yok; oturum, işe başlamadan ilgili karar dosyalarını ve önceki sonuçları okur.
 - İş sırasında görevin dışında bir hata, risk ya da fırsat görülürse (ör. sipariş hattında kapı FAIL'i), kanıtıyla rapora eklenir; kendiliğinden düzeltilmez.
