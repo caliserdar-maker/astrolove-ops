@@ -3,9 +3,9 @@
 
 Sahneler (AI, baskisiz disk; fal nano-banana-2/edit, Kling arka plan) SAHNE klasorunden; urun baskisi kodla birebir (ANA_1 2.1).
 Baskilar: BASKI/<CIFT>_<RUBY|SAPPHIRE|EMERALD|SADE_ALTIN|FILDISI>_954.png (Drive TEMP/ORNAMENT_78_TOPLAMA_...).
-Cikti: CIKTI/<CIFT>/<CIFT>_01_KAPAK.jpg ... _14_IVORY.jpg (+ _15_SEMBOL_KARTI.jpg, --maske ile), <CIFT>_VIDEO.mp4, <CIFT>_OLCUM.json (kapi sonucu).
+Cikti: CIKTI/<CIFT>/<CIFT>_01_KAPAK.jpg ... _14_IVORY.jpg (06 = sembol karti, --maske --altin --zemin zorunlu), <CIFT>_VIDEO.mp4, <CIFT>_OLCUM.json (kapi sonucu).
 Sira (Serdar 7 Kas galeri + 8 Kas stil gorselleri): 01 kapak, 02 agac, 03 eller, 04 stiller (K06), 05 K03, 06 K02, 07 K04, 08 K05,
-09 yil boyu, 10-14 stil (Ruby, Sapphire, Emerald, White, Ivory; kapak sahnesi + "<STIL> STYLE").
+09 yil boyu (06 = sembol karti, Serdar 8 Kas), 10-14 stil (Ruby, Sapphire, Emerald, White, Ivory; kapak sahnesi + "<STIL> STYLE").
 kullanim: python uret_cift.py --ciftler CANCER_LIBRA,LEO_LEO --sahne DIR --baski DIR --is DIR --cikti DIR [--ref REF.json]
 """
 import argparse
@@ -24,7 +24,7 @@ PY_YAZI = os.environ.get("PY_YAZI", sys.executable)   # onayli set: yazi adimlar
 STIL = [("RUBY", "RUBY", None), ("SAPPHIRE", "SAPPHIRE", "kapak_SAPPHIRE"), ("EMERALD", "EMERALD", "kapak_EMERALD"),
         ("WHITE", "SADE_ALTIN", "kapak_WHITE"), ("IVORY", "FILDISI", "kapak_IVORY")]
 SAHNE_TEK = [("02_AGAC", "agac3"), ("03_ELLER", "eller3"), ("09_YILBOYU", "yilboyu")]
-KARTLAR = [("05_KISISEL", "kart_kisisel3", "K03", {}), ("06_SEMBOL", "kart_sembol", "K02", {}),
+KARTLAR = [("05_KISISEL", "kart_kisisel3", "K03", {}),        # 06: sembol karti (Serdar 8 Kas "06 yerine"; eski K02 urun fotolu kart cikti)
            ("07_BOYUT", "kart_boyut", "K04", {}), ("08_SUREC", "kart_surec5", "K05", {"NESNE": "renk"})]
 DOSYALAR = ["01_KAPAK", "02_AGAC", "03_ELLER", "04_STILLER", "05_KISISEL", "06_SEMBOL", "07_BOYUT", "08_SUREC", "09_YILBOYU",
             "10_RUBY", "11_SAPPHIRE", "12_EMERALD", "13_WHITE", "14_IVORY"]
@@ -74,10 +74,13 @@ def cift_uret(cift, sahne, baski, isk, cikti, log):
         raise RuntimeError(f"baski eksik {eksik}")
     olcum = dict(cift=cift, A=A, B=B, set={}, yazi={})
     S = lambda n: str(Path(sahne) / f"{n}.png")
-    if KART.get("yalniz"):                       # yalniz sembol karti ornegi (Serdar gorsel onayi icin)
-        t = kos([KOD / "sembol_karti.py", cift, KART["zemin"], KART["maske"], KART["altin"], str(o / f"{cift}_15_SEMBOL_KARTI.jpg")], w,
-                {"KART_DIR": KART["kart_dir"]}, log, PY_YAZI)
-        olcum["yazi"]["15_SEMBOL_KARTI"] = t.strip().splitlines()[-1]
+    if not KART.get("maske"):
+        raise RuntimeError("sembol karti girdileri yok (--maske --altin --zemin)")
+    # 06 sembol karti (Serdar 8 Kas: yayindaki "Two Signs, One Shared Symbol" karti, yeni set zemini, hazir altin dosyalar; 06 yerine)
+    t = kos([KOD / "sembol_karti.py", cift, KART["zemin"], KART["maske"], KART["altin"], str(o / f"{cift}_06_SEMBOL.jpg")], w,
+            {"KART_DIR": KART["kart_dir"]}, log, PY_YAZI)
+    olcum["yazi"]["06_SEMBOL"] = t.strip().splitlines()[-1]
+    if KART.get("yalniz"):
         return olcum
     # 01 kapak + 10 Ruby (ayni SET, farkli alt satir) + video katmani
     j = son_json(kos([KOD / "set_yerlestir.py", "kapak", S("kapak"), OLC / "kapak.olc.json"], w, {"BASKI": bp["RUBY"]}, log))
@@ -125,11 +128,6 @@ def cift_uret(cift, sahne, baski, isk, cikti, log):
             {"V_SET": str(w / "SET_kapak.jpg"), "V_OLC": str(OLC / "kapak.olc.json"), "V_JSON": str(w / "SET_kapak.json"),
              "V_KATMAN": str(w / "katman.npz"), "V_SON": str(w / "K01.jpg")}, log)
     olcum["video"] = t.strip().splitlines()[-1]
-    # 15 sembol karti (Serdar 8 Kas: yayindaki "Two Signs, One Shared Symbol" karti, yeni set zemini, hazir altin dosyalar aynen)
-    if KART.get("maske"):
-        t = kos([KOD / "sembol_karti.py", cift, KART["zemin"], KART["maske"], KART["altin"], str(o / f"{cift}_15_SEMBOL_KARTI.jpg")], w,
-                {"KART_DIR": KART["kart_dir"]}, log, PY_YAZI)
-        olcum["yazi"]["15_SEMBOL_KARTI"] = t.strip().splitlines()[-1]
     return olcum
 
 
@@ -138,7 +136,7 @@ def kapi(cift, olcum, cikti, ref):
     from PIL import Image
     h = []
     o = Path(cikti) / cift
-    for d in ([] if KART.get("yalniz") else DOSYALAR) + (["15_SEMBOL_KARTI"] if KART.get("maske") else []):
+    for d in (["06_SEMBOL"] if KART.get("yalniz") else DOSYALAR):
         p = o / f"{cift}_{d}.jpg"
         if not p.exists():
             h.append(f"yok {d}"); continue

@@ -9,14 +9,9 @@
   "FILDISI"
  ],
  "hedef_onek": "ORNAMENT_GALERI9",
- "ciftler": [
-  "CANCER_LIBRA",
-  "SAGITTARIUS_SAGITTARIUS",
-  "CAPRICORN_SAGITTARIUS",
-  "ARIES_PISCES"
- ],
- "ciftler_aciklama": "Serdar 7 Kas (4): once 3 ornek cift (ayni burc + en uzun ad SAGITTARIUS_SAGITTARIUS, farkli burc en uzun CAPRICORN_SAGITTARIUS, rastgele ARIES_PISCES) + kontrol CANCER_LIBRA; kapi + bagimsiz inceleme temizse TUMU",
- "parca": 4,
+ "ciftler": "TUMU",
+ "ciftler_aciklama": "Serdar 7 Kas (4): ornek 4 cift 42451553017 4/4 PASS (kapi) -> TUMU 78. Serdar 8 Kas: sembol karti 06 yerine.",
+ "parca": 16,
  "max_parallel": 8,
  "sahneler": {
   "kapak.png": {
@@ -96,7 +91,7 @@
  "sembol_karti": {
   "acik": true,
   "sembol_ref": "ac9aa7185f9d7b07903f0cb99e7f366f425a631c",
-  "aciklama": "Serdar 8 Kas: 15. gorsel sembol karti; altin hazir dosyalar aynen (12 burc zodiac_symbols_gold, 78 ANA_SEMBOL78_KATMAN <CIFT>_ana.png), maskeler kupa-printful-sonuc kupa_uretim/sembol (yerlesim kapilari icin)"
+  "aciklama": "Serdar 8 Kas: 06 = sembol karti (eski urun fotolu K02 cikti; 'Two Signs, One Shared Symbol' tekrari olmasin); ortak sembol ANA_SEMBOL78 aynen, burclar zodiac_symbols_gold, ton ana sembole esitlenir (Temmuz parlak sarisi olmayacak)"
  },
- "yalniz_kart": true
+ "yalniz_kart": false
 }

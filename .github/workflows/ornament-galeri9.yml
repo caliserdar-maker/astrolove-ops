@@ -246,7 +246,7 @@ jobs:
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "::add-mask::$GOOGLE_CLIENT_SECRET"
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - name: Ozet (PASS / FAIL, dosya sayimi 17)
+      - name: Ozet (PASS / FAIL, dosya sayimi 16)
         run: |
           set -euo pipefail
           rclone copy "gdrive:ASTROLOVE/TEMP/$D/RAPOR" /tmp/rap -q 2>>/tmp/rclone_err.txt
@@ -260,9 +260,9 @@ jobs:
           dos = collections.Counter(l.split('/')[0] for l in open('/tmp/liste.txt') if '/' in l and not l.startswith('RAPOR/'))
           eksik = [c for c in plan['ciftler'] if c not in s]
           fail = {c: v['neden'] for c, v in s.items() if v['sonuc'] != 'PASS'}
-          az = {c: dos.get(c, 0) for c in plan['ciftler'] if dos.get(c, 0) != 17}
+          az = {c: dos.get(c, 0) for c in plan['ciftler'] if dos.get(c, 0) != 16}
           o = dict(cift=len(plan['ciftler']), PASS=sum(v['sonuc'] == 'PASS' for v in s.values()), FAIL=fail, sonucu_eksik=eksik,
-                   dosya_sayisi_17_degil=az, esik='her cift PASS, klasorde 17 dosya (15 jpg + VIDEO + OLCUM)')
+                   dosya_sayisi_16_degil=az, esik='her cift PASS, klasorde 16 dosya (14 jpg + VIDEO + OLCUM; 06 sembol karti)')
           o['DURUM'] = 'PASS' if (o['PASS'] == len(plan['ciftler']) and not eksik and not az) else 'FAIL'
           json.dump(o, open('/tmp/rap/OZET.json', 'w'), ensure_ascii=False, indent=1)
           print(json.dumps(o, ensure_ascii=False)[:3000])
