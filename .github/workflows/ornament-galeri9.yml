@@ -1,0 +1,249 @@
+name: ornament-galeri9
+# Serdar 7-8 Kas: ornament galeri v9 (14 gorsel + video; "tum gorseller kapaklar ve videolar uretilsin", "Evet, sen yap").
+# Kod scripts/ornament_galeri/v9/ (uret_cift.py). Ayar docs/ornament/GALERI9.json (ciftler: ornek 3 + kontrol ya da TUMU).
+# Sahneler: fal adresleri, sha256 kapisi (AI, baskisiz disk); baskilar Drive TEMP/<kaynak_klasor> (galeri78 ile ayni, adla).
+# Hedef Drive TEMP/ORNAMENT_GALERI9_<damga>_<kosu>/<CIFT>/ + RAPOR/. Etsy / Printful YOK. Depo public: cikti dala girmez, Drive ID loga yazilmaz.
+# Tetik: YALNIZ docs/ornament/GALERI9_TETIK.txt (dal ornament-printful-katalog).
+on:
+  push:
+    branches: [ornament-printful-katalog]
+    paths: [docs/ornament/GALERI9_TETIK.txt]
+permissions: {}
+concurrency:
+  group: ornament-galeri9
+  cancel-in-progress: false
+jobs:
+  hazirla:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      D: ${{ steps.plan.outputs.D }}
+      matris: ${{ steps.plan.outputs.matris }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            scripts/printful/
+            docs/ornament/GALERI9.json
+          path: s
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Siparis kosusu kontrolu (etkin siparis varsa DUR)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/r
+          python3 -I s/scripts/printful/uretim78.py siparis --depo "$GITHUB_REPOSITORY" --cikti /tmp/r/SIPARIS.json --dur
+      - name: rclone kur + yapilandir
+        timeout-minutes: 5
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Sahneler (fal) indir + sha256 + Drive arsiv (SAHNE9, kalici kopya)
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/sahne
+          python3 - <<'PY'
+          import hashlib, json, subprocess
+          S = json.load(open('s/docs/ornament/GALERI9.json'))['sahneler']
+          for ad, v in S.items():
+              subprocess.run(['curl', '-fsSL', '--retry', '3', '-o', f'/tmp/sahne/{ad}', v['url']], check=True)
+              h = hashlib.sha256(open(f'/tmp/sahne/{ad}', 'rb').read()).hexdigest()
+              assert h == v['sha256'], (ad, h)
+          print('sahne', len(S), 'sha256 PASS')
+          PY
+          rclone copy /tmp/sahne "gdrive:ASTROLOVE/TEMP/ORNAMENT_SAHNE9" -q 2>>/tmp/rclone_err.txt
+      - name: Plan (ciftler, parcalar, hedef klasor)
+        id: plan
+        run: |
+          set -euo pipefail
+          K=$(python3 -c "import json; print(json.load(open('s/docs/ornament/GALERI9.json'))['kaynak_klasor'])")
+          rclone lsf "gdrive:ASTROLOVE/TEMP/$K" --files-only --include "*_954.png" > /tmp/r/kaynak_liste.txt 2>>/tmp/rclone_err.txt
+          python3 - <<'PY'
+          import json, os, itertools
+          c = json.load(open('s/docs/ornament/GALERI9.json'))
+          B = ['ARIES','TAURUS','GEMINI','CANCER','LEO','VIRGO','LIBRA','SCORPIO','SAGITTARIUS','CAPRICORN','AQUARIUS','PISCES']
+          T = sorted('_'.join(sorted(p)) for p in itertools.combinations_with_replacement(B, 2))
+          L = T if c['ciftler'] == 'TUMU' else list(c['ciftler'])
+          assert set(L) <= set(T), ('bilinmeyen', sorted(set(L) - set(T)))
+          ad = set(l.strip() for l in open('/tmp/r/kaynak_liste.txt') if l.strip())
+          eksik = [f'{x}_{s}_954.png' for x in L for s in c['stil_dosya'] if f'{x}_{s}_954.png' not in ad]
+          assert not eksik, ('baski eksik', eksik[:10], len(eksik))
+          P = min(c['parca'], len(L))
+          parca = [{'i': i, 'ciftler': ','.join(L[i::P])} for i in range(P)]
+          json.dump({'ciftler': L, 'parca': parca}, open('/tmp/r/PLAN.json', 'w'), indent=1)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write('matris=' + json.dumps({'include': parca}) + '\n')
+          print('cift', len(L), 'parca', P, [len(p['ciftler'].split(',')) for p in parca])
+          PY
+          D=ORNAMENT_GALERI9_$(date -u +%Y%m%d_%H%M)_${GITHUB_RUN_ID}
+          rclone mkdir "gdrive:ASTROLOVE/TEMP/$D/RAPOR" 2>>/tmp/rclone_err.txt
+          rclone copy /tmp/r "gdrive:ASTROLOVE/TEMP/$D/RAPOR" --include "PLAN.json" --include "SIPARIS.json" -q 2>>/tmp/rclone_err.txt
+          echo "D=$D" >> "$GITHUB_OUTPUT"; echo "::notice::Drive TEMP/$D"
+
+  uret:
+    needs: hazirla
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    permissions:
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8   # siparis isleri icin yer (Serdar 1 Eki: en az 8 bos kosucu)
+      matrix: ${{ fromJSON(needs.hazirla.outputs.matris) }}
+    env:
+      D: ${{ needs.hazirla.outputs.D }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            scripts/ornament_galeri/v9/
+            scripts/kapak78/yd_kart/fonts/
+            scripts/printful/
+            docs/ornament/GALERI9.json
+          path: s
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Siparis kosusu kontrolu (etkin siparis varsa bu parca DUR)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/sip
+          python3 -I s/scripts/printful/uretim78.py siparis --depo "$GITHUB_REPOSITORY" --cikti /tmp/sip/SIPARIS.json --dur
+      - name: "Paketler (iki ortam, sahne Pillow 12.3 / numpy 2.5.3; yazi Pillow 11.0.0 / numpy 2.1.3)"
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg libraqm0 libfribidi0 >/dev/null
+          pip install -q pillow==12.3.0 numpy==2.5.3 opencv-python-headless==5.0.0.93
+          python3 -m venv /tmp/vyazi
+          /tmp/vyazi/bin/pip install -q pillow==11.0.0 numpy==2.1.3 opencv-python-headless==5.0.0.93
+          for P in python3 /tmp/vyazi/bin/python; do
+            $P -c "import sys, numpy, PIL, cv2; from PIL import features; r = features.check('raqm'); print(sys.executable, 'numpy', numpy.__version__, 'pillow', PIL.__version__, 'cv2', cv2.__version__, 'raqm', r); sys.exit(0 if r else 1)"
+          done
+          echo "PY_YAZI=/tmp/vyazi/bin/python" >> "$GITHUB_ENV"
+          ffmpeg -version | head -1
+      - name: rclone kur + yapilandir
+        timeout-minutes: 5
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Sahneler (Drive SAHNE9 + sha256) ve baskilar (bu parcanin ciftleri x 5 stil)
+        env:
+          CIFTLER: ${{ matrix.ciftler }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/sahne /tmp/kaynak
+          rclone copy "gdrive:ASTROLOVE/TEMP/ORNAMENT_SAHNE9" /tmp/sahne -q 2>>/tmp/rclone_err.txt
+          python3 - <<'PY'
+          import hashlib, json
+          S = json.load(open('s/docs/ornament/GALERI9.json'))['sahneler']
+          for ad, v in S.items():
+              assert hashlib.sha256(open(f'/tmp/sahne/{ad}', 'rb').read()).hexdigest() == v['sha256'], ad
+          print('sahne sha256 PASS', len(S))
+          PY
+          K=$(python3 -c "import json; print(json.load(open('s/docs/ornament/GALERI9.json'))['kaynak_klasor'])")
+          python3 -c "import json, os; s = json.load(open('s/docs/ornament/GALERI9.json'))['stil_dosya']; print('\n'.join(f'{c}_{t}_954.png' for c in os.environ['CIFTLER'].split(',') for t in s))" > /tmp/liste.txt
+          ok=0; for d in 1 2 3; do rclone copy "gdrive:ASTROLOVE/TEMP/$K" /tmp/kaynak --files-from /tmp/liste.txt --no-traverse -q 2>>/tmp/rclone_err.txt && { ok=1; break; }; sleep $((10*d)); done
+          [ "$ok" = 1 ]
+          n=$(ls /tmp/kaynak | wc -l); b=$(wc -l < /tmp/liste.txt); echo "baski $n / $b"; [ "$n" = "$b" ]
+      - name: Uretim (ETA; cift basina 14 gorsel + video + OLCUM; kapi)
+        id: uretim
+        env:
+          CIFTLER: ${{ matrix.ciftler }}
+          P: ${{ matrix.i }}
+        run: |
+          set +e
+          python3 s/scripts/ornament_galeri/v9/uret_cift.py --ciftler "$CIFTLER" --sahne /tmp/sahne --baski /tmp/kaynak \
+            --is /tmp/is --cikti /tmp/out --etiket "_P$(printf '%02d' $P)"
+          k=$?; echo "k=$k" >> "$GITHUB_OUTPUT"; exit 0
+      - name: Drive'a yukle (ciftler + RAPOR)
+        if: always()
+        run: |
+          set -uo pipefail
+          mkdir -p /tmp/rapor; mv /tmp/out/LOG_P*.txt /tmp/out/SONUC_P*.json /tmp/rapor/ 2>/dev/null || true
+          ok=0; for d in 1 2 3; do
+            rclone copy /tmp/out "gdrive:ASTROLOVE/TEMP/$D" -q 2>>/tmp/rclone_err.txt && rclone copy /tmp/rapor "gdrive:ASTROLOVE/TEMP/$D/RAPOR" -q 2>>/tmp/rclone_err.txt && { ok=1; break; }
+            sleep $((10*d)); done
+          [ "$ok" = 1 ] || { echo "::error::Drive yuklemesi basarisiz"; exit 1; }
+      - name: Sonuc
+        if: always()
+        run: |
+          cat /tmp/rapor/SONUC_P*.json 2>/dev/null | head -60
+          [ "${{ steps.uretim.outputs.k }}" = "0" ]
+
+  ozet:
+    needs: [hazirla, uret]
+    if: always() && needs.hazirla.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      D: ${{ needs.hazirla.outputs.D }}
+    steps:
+      - name: rclone kur + yapilandir
+        timeout-minutes: 5
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Ozet (PASS / FAIL, dosya sayimi 16)
+        run: |
+          set -euo pipefail
+          rclone copy "gdrive:ASTROLOVE/TEMP/$D/RAPOR" /tmp/rap -q 2>>/tmp/rclone_err.txt
+          rclone lsf "gdrive:ASTROLOVE/TEMP/$D" -R --files-only > /tmp/liste.txt 2>>/tmp/rclone_err.txt
+          python3 - <<'PY'
+          import glob, json, collections
+          plan = json.load(open('/tmp/rap/PLAN.json'))
+          s = {}
+          for f in sorted(glob.glob('/tmp/rap/SONUC_P*.json')):
+              s.update(json.load(open(f)))
+          dos = collections.Counter(l.split('/')[0] for l in open('/tmp/liste.txt') if '/' in l and not l.startswith('RAPOR/'))
+          eksik = [c for c in plan['ciftler'] if c not in s]
+          fail = {c: v['neden'] for c, v in s.items() if v['sonuc'] != 'PASS'}
+          az = {c: dos.get(c, 0) for c in plan['ciftler'] if dos.get(c, 0) != 16}
+          o = dict(cift=len(plan['ciftler']), PASS=sum(v['sonuc'] == 'PASS' for v in s.values()), FAIL=fail, sonucu_eksik=eksik,
+                   dosya_sayisi_16_degil=az, esik='her cift PASS, klasorde 16 dosya (14 jpg + VIDEO + OLCUM)')
+          o['DURUM'] = 'PASS' if (o['PASS'] == len(plan['ciftler']) and not eksik and not az) else 'FAIL'
+          json.dump(o, open('/tmp/rap/OZET.json', 'w'), ensure_ascii=False, indent=1)
+          print(json.dumps(o, ensure_ascii=False)[:3000])
+          PY
+          rclone copy /tmp/rap/OZET.json "gdrive:ASTROLOVE/TEMP/$D/RAPOR" -q 2>>/tmp/rclone_err.txt
+          python3 -c "import json, sys; sys.exit(0 if json.load(open('/tmp/rap/OZET.json'))['DURUM'] == 'PASS' else 1)"

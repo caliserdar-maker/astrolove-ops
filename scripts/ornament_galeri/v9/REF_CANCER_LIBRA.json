@@ -1,0 +1,345 @@
+{
+ "aciklama": "CANCER_LIBRA yerel onayli ciktinin sahne olcumleri (8 Kas, uret_cift.py v9, Pillow 12.3 / numpy 2.5.3). Sahneye bagli degerler tum ciftlerde ayni olmali (tolerans 0.6 px); ip_px +-%25, Sm_min -0.08. 8 Kas: st_WHITE / st_IVORY yeni sahnelerle (yansimasiz) guncellendi.",
+ "set": {
+  "kapak": {
+   "ad": "kapak",
+   "R": 739.0,
+   "donme_der": -0.08,
+   "delik_bizim": [
+    1501.9,
+    732.7,
+    55.8
+   ],
+   "delik_ai": [
+    1501.9,
+    703.9,
+    55.8
+   ],
+   "ip_kayma": 28.8,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.975,
+   "Ad_max": 187.4,
+   "ip_px": 9682
+  },
+  "st_SAPPHIRE": {
+   "ad": "st_SAPPHIRE",
+   "R": 738.5,
+   "donme_der": -0.22,
+   "delik_bizim": [
+    1503.4,
+    735.6,
+    54.5
+   ],
+   "delik_ai": [
+    1503.3,
+    705.3,
+    54.5
+   ],
+   "ip_kayma": 30.3,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.897,
+   "Ad_max": 177.0,
+   "ip_px": 9405
+  },
+  "st_EMERALD": {
+   "ad": "st_EMERALD",
+   "R": 739.8,
+   "donme_der": -0.12,
+   "delik_bizim": [
+    1501.6,
+    731.2,
+    55.5
+   ],
+   "delik_ai": [
+    1501.5,
+    704.1,
+    55.5
+   ],
+   "ip_kayma": 27.1,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.906,
+   "Ad_max": 193.9,
+   "ip_px": 9341
+  },
+  "st_WHITE": {
+   "ad": "st_WHITE",
+   "R": 740.3,
+   "donme_der": 0.32,
+   "delik_bizim": [
+    1504.0,
+    732.0,
+    48.1
+   ],
+   "delik_ai": [
+    1504.1,
+    700.0,
+    48.1
+   ],
+   "ip_kayma": 32.0,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.874,
+   "Ad_max": 38.8,
+   "ip_px": 10788
+  },
+  "st_IVORY": {
+   "ad": "st_IVORY",
+   "R": 740.2,
+   "donme_der": 0.42,
+   "delik_bizim": [
+    1503.8,
+    729.8,
+    47.9
+   ],
+   "delik_ai": [
+    1504.0,
+    699.3,
+    47.9
+   ],
+   "ip_kayma": 30.5,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.863,
+   "Ad_max": 42.5,
+   "ip_px": 11535
+  },
+  "agac3": {
+   "ad": "agac3",
+   "R": 557.0,
+   "donme_der": 0.16,
+   "delik_bizim": [
+    1494.8,
+    819.0,
+    41.6
+   ],
+   "delik_ai": [
+    1494.9,
+    795.1,
+    41.6
+   ],
+   "ip_kayma": 24.0,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.953,
+   "Ad_max": 200.0,
+   "ip_px": 6050
+  },
+  "eller3": {
+   "ad": "eller3",
+   "R": 452.7,
+   "donme_der": 1.48,
+   "delik_bizim": [
+    1526.6,
+    1266.7,
+    30.5
+   ],
+   "delik_ai": [
+    1527.2,
+    1242.4,
+    30.5
+   ],
+   "ip_kayma": 24.3,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.889,
+   "Ad_max": 161.5,
+   "ip_px": 4087
+  },
+  "yilboyu": {
+   "ad": "yilboyu",
+   "R": 337.0,
+   "donme_der": 0.16,
+   "delik_bizim": [
+    1498.7,
+    1043.9,
+    24.8
+   ],
+   "delik_ai": [
+    1498.8,
+    1028.7,
+    24.8
+   ],
+   "ip_kayma": 15.2,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.925,
+   "Ad_max": 130.9,
+   "ip_px": 2045
+  },
+  "kart_kisisel3": {
+   "ad": "kart_kisisel3",
+   "R": 387.8,
+   "donme_der": 1.06,
+   "delik_bizim": [
+    651.3,
+    767.9,
+    28.6
+   ],
+   "delik_ai": [
+    651.5,
+    756.7,
+    28.6
+   ],
+   "ip_kayma": 11.2,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.85,
+   "Ad_max": 135.9,
+   "ip_px": 2862
+  },
+  "kart_sembol": {
+   "ad": "kart_sembol",
+   "R": 480.4,
+   "donme_der": -0.4,
+   "delik_bizim": [
+    932.2,
+    860.0,
+    35.1
+   ],
+   "delik_ai": [
+    932.2,
+    835.6,
+    35.1
+   ],
+   "ip_kayma": 24.3,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.85,
+   "Ad_max": 175.6,
+   "ip_px": 4864
+  },
+  "kart_boyut": {
+   "ad": "kart_boyut",
+   "R": 385.4,
+   "donme_der": -0.14,
+   "delik_bizim": [
+    728.6,
+    1057.9,
+    28.2
+   ],
+   "delik_ai": [
+    728.6,
+    1040.7,
+    28.2
+   ],
+   "ip_kayma": 17.3,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.921,
+   "Ad_max": 157.2,
+   "ip_px": 2808
+  },
+  "kart_surec5": {
+   "ad": "kart_surec5",
+   "R": 397.7,
+   "donme_der": 0.46,
+   "delik_bizim": [
+    976.2,
+    879.8,
+    31.3
+   ],
+   "delik_ai": [
+    976.3,
+    865.6,
+    31.3
+   ],
+   "ip_kayma": 14.2,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.85,
+   "Ad_max": 138.0,
+   "ip_px": 3157
+  },
+  "kart_stil_d0": {
+   "ad": "kart_stil_d0",
+   "R": 305.7,
+   "donme_der": -0.58,
+   "delik_bizim": [
+    589.5,
+    693.3,
+    24.5
+   ],
+   "delik_ai": [
+    589.4,
+    678.1,
+    24.7
+   ],
+   "ip_kayma": 15.2,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.85,
+   "Ad_max": 170.1,
+   "ip_px": 1965
+  },
+  "kart_stil_d1": {
+   "ad": "kart_stil_d1",
+   "R": 304.3,
+   "donme_der": -0.82,
+   "delik_bizim": [
+    1497.5,
+    696.9,
+    24.3
+   ],
+   "delik_ai": [
+    1497.3,
+    676.8,
+    24.7
+   ],
+   "ip_kayma": 20.1,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.85,
+   "Ad_max": 165.7,
+   "ip_px": 1970
+  },
+  "kart_stil_d2": {
+   "ad": "kart_stil_d2",
+   "R": 306.4,
+   "donme_der": 0.38,
+   "delik_bizim": [
+    2404.5,
+    700.2,
+    23.6
+   ],
+   "delik_ai": [
+    2404.8,
+    684.5,
+    23.6
+   ],
+   "ip_kayma": 15.7,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.867,
+   "Ad_max": 148.7,
+   "ip_px": 1830
+  },
+  "kart_stil_d3": {
+   "ad": "kart_stil_d3",
+   "R": 309.6,
+   "donme_der": 0.04,
+   "delik_bizim": [
+    1029.1,
+    1502.3,
+    21.1
+   ],
+   "delik_ai": [
+    1029.1,
+    1488.7,
+    21.1
+   ],
+   "ip_kayma": 13.7,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.906,
+   "Ad_max": 18.6,
+   "ip_px": 2187
+  },
+  "kart_stil_d4": {
+   "ad": "kart_stil_d4",
+   "R": 310.9,
+   "donme_der": -1.18,
+   "delik_bizim": [
+    1958.9,
+    1502.3,
+    21.4
+   ],
+   "delik_ai": [
+    1958.8,
+    1490.7,
+    21.4
+   ],
+   "ip_kayma": 11.7,
+   "delik_olcek": 1.0,
+   "Sm_min": 0.913,
+   "Ad_max": 25.9,
+   "ip_px": 2223
+  }
+ }
+}

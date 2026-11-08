@@ -1,0 +1,92 @@
+{
+ "aciklama": "Ornament galeri v9 (Serdar 7-8 Kas): cift basina 14 gorsel + video (scripts/ornament_galeri/v9/uret_cift.py). Sahneler fal (AI, baskisiz disk; sha256 kapisi), baski kodla birebir. Kaynak baskilar Drive TEMP/<kaynak_klasor> (galeri78 ile ayni). Hedef Drive TEMP/<hedef_onek>_<damga>_<kosu>/<CIFT>/. Etsy / Printful YOK.",
+ "kaynak_klasor": "ORNAMENT_78_TOPLAMA_20261105_1901_42089646647",
+ "stil_dosya": [
+  "RUBY",
+  "SAPPHIRE",
+  "EMERALD",
+  "SADE_ALTIN",
+  "FILDISI"
+ ],
+ "hedef_onek": "ORNAMENT_GALERI9",
+ "ciftler": [
+  "CANCER_LIBRA",
+  "SAGITTARIUS_SAGITTARIUS",
+  "CAPRICORN_SAGITTARIUS",
+  "ARIES_PISCES"
+ ],
+ "ciftler_aciklama": "Serdar 7 Kas (4): once 3 ornek cift (ayni burc + en uzun ad SAGITTARIUS_SAGITTARIUS, farkli burc en uzun CAPRICORN_SAGITTARIUS, rastgele ARIES_PISCES) + kontrol CANCER_LIBRA; kapi + bagimsiz inceleme temizse TUMU",
+ "parca": 4,
+ "max_parallel": 8,
+ "sahneler": {
+  "kapak.png": {
+   "url": "https://v3b.fal.media/files/b/0ab18b60/vjDD9pasdChcf3H7WuuF5_ref_kapak2.png",
+   "sha256": "5c289aec8c74de74b1fbef41752ed6cd5066ef9bbbc1bee2ff07dfc8d5284670"
+  },
+  "agac3.png": {
+   "url": "https://v3b.fal.media/files/b/0ab189c5/RlGKEOBViDQmoe15P0yf8_ez2NPnKr.png",
+   "sha256": "3583662131076e339f56851705e35b6c9eeec012634d256efb1ddd4c2d78843d"
+  },
+  "eller3.png": {
+   "url": "https://v3b.fal.media/files/b/0ab189c5/aONND4TWnpc5dZkR1kT49_bHEK6TwB.png",
+   "sha256": "5a9dba64e539df777ea766e1a7127678fed46015965224baf5f5d808f45be308"
+  },
+  "kart_kisisel3.png": {
+   "url": "https://v3b.fal.media/files/b/0ab189c5/-UDamaGzdD8K0o2IqTmAy_50lscvju.png",
+   "sha256": "916c373fae4e7a8ef8e8fce82141b686d2e2610c33cf983dfe9f507677eec6d2"
+  },
+  "kart_boyut.png": {
+   "url": "https://v3b.fal.media/files/b/0ab188ad/o0KBz0VCX2NKjM_EqHJH8_AXrrui2a.png",
+   "sha256": "9f1f3425242ebabf4d37fcc7bfe2c48a72d81b312b51e100efbe3285cd17cc8c"
+  },
+  "kart_sembol.png": {
+   "url": "https://v3b.fal.media/files/b/0ab188ad/saHEpPh8xU5bn9hpSVtFj_C3mdmebz.png",
+   "sha256": "7e3b3bad3ac5b02b6bb577b6a17fe0a6c9a3b6cf97b2792fe81107f545dd7fff"
+  },
+  "kart_surec5.png": {
+   "url": "https://v3b.fal.media/files/b/0ab18d4f/CTPABCrmnueyUqgOpQ9vr_ADsuEKgD.png",
+   "sha256": "469078e8265f27ee501509646ed5e4bde05bb49d80aec83ce5d814552ac6201e"
+  },
+  "yilboyu.png": {
+   "url": "https://v3b.fal.media/files/b/0ab188ad/Qy3mT1G5Ffm5rtMFQYLJa_4lQfrwLA.png",
+   "sha256": "4ee94ba0b7de025f878a5cdde98a488665efd25a69750b806f77c3b5e5eb42b7"
+  },
+  "kart_stil.png": {
+   "url": "https://v3b.fal.media/files/b/0ab188af/QiOFNyy1i49qbKJ-Ux5tC_hNmJLxKd.png",
+   "sha256": "74bcde72ea089c15d1e965dbf83d60723c216082be99fec3382fb4670b761ac0"
+  },
+  "kapak_SAPPHIRE.png": {
+   "url": "https://v3b.fal.media/files/b/0ab199ff/164fw66FuuJw8vshi0Ns__VwMxcoF6.png",
+   "sha256": "1940afbb84d6d1e9f08b309f6687c0bc502b79ee52b259d7c0334aa178c4a74d"
+  },
+  "kapak_EMERALD.png": {
+   "url": "https://v3b.fal.media/files/b/0ab199d9/E1znKXd79ZANF7I6wvBwq_czFFGR4j.png",
+   "sha256": "031e852af31f7c11439f597a7a4d4636b367a04dad429f537a2f6885a0972a21"
+  },
+  "kapak_WHITE.png": {
+   "url": "https://v3b.fal.media/files/b/0ab19a83/WthW_OY4yIxFXZwWgZfSZ_ogH2I4HZ.png",
+   "sha256": "67b9cc40b8487103851c30a9be3cf5d4e90632c9fdcc7ce66d53f8ce2f5d857a"
+  },
+  "kapak_IVORY.png": {
+   "url": "https://v3b.fal.media/files/b/0ab19a83/0TvmtWOldQ5pFGLpiR_CJ_r6mF0GwF.png",
+   "sha256": "ed8e2af40366454204f544e94a18ce707b17abbc9c441bbde9b73363c779380c"
+  },
+  "kling.mp4": {
+   "url": "https://v3b.fal.media/files/b/0ab18b78/HfixiQDiBfI6EhyzFGgNx_output.mp4",
+   "sha256": "3443ec8550a6392ae6ff4d7fdb42f370fb6104bcbf7c3a4f75592fc3c0b63c73"
+  }
+ },
+ "paket": {
+  "ana": {
+   "pillow": "12.3.0",
+   "numpy": "2.5.3",
+   "opencv": "5.0.0.93"
+  },
+  "yazi": {
+   "pillow": "11.0.0",
+   "numpy": "2.1.3",
+   "opencv": "5.0.0.93"
+  }
+ },
+ "paket_aciklama": "Onayli CANCER_LIBRA: sahne yerlestirme (set_yerlestir) Pillow 12.3 / numpy 2.5.3; yazi adimlari (kapak_yazi, kart_yazi, stil_yazi) ve K06 zinciri Pillow 11.0.0 / numpy 2.1.3 (8 Kas yerel olcum: bu ortamlarla onayli dosyalar bayt bayt ayni)"
+}
