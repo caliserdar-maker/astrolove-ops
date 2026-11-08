@@ -36,7 +36,15 @@ yaz0 = list(K.YAZILAR)
 K.YAZILAR.clear(); K.SATIRLAR.clear(); K.KUTULAR.clear()
 
 # 2) altin + keten
-zem = Image.open(ZEMIN).convert("RGB").resize((W, H), Image.LANCZOS)
+zem = Image.open(ZEMIN).convert("RGB")
+if os.environ.get("ZEMIN_REF"):    # Serdar 8 Kas: arka plan setteki diger kartlarla (K05 keteni) ayni renk ve dokuda; isik/vinyet duzlenir
+    _z = np.asarray(zem).astype(np.float32); _r = np.asarray(Image.open(os.environ["ZEMIN_REF"]).convert("RGB")).astype(np.float32)
+    _h, _w = _r.shape[:2]; _ref = _r[int(.15 * _h):int(.85 * _h), int(.62 * _w):int(.95 * _w)]   # K05 sahnesinin temiz keten bolgesi
+    _hp = lambda a: a - cv2.GaussianBlur(a, (0, 0), 6)
+    _tex = _z - cv2.GaussianBlur(_z, (0, 0), 60)
+    _olc = np.array([_hp(_ref[..., c]).std() / max(_hp(_z[..., c]).std(), 1e-3) for c in range(3)])
+    zem = Image.fromarray(np.clip(np.median(_ref.reshape(-1, 3), 0) + _tex * _olc, 0, 255).astype(np.uint8))
+zem = zem.resize((W, H), Image.LANCZOS)
 ALTIN_YOL = {"sol.png": Path(ALTIN) / f"{a_.lower()}_yeni_gold.png", "sag.png": Path(ALTIN) / f"{b_.lower()}_yeni_gold.png",
              "ana.png": Path(ALTIN) / f"{CIFT}_ana.png"}
 _maske = T.maske

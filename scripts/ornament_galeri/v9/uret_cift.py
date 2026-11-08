@@ -78,7 +78,7 @@ def cift_uret(cift, sahne, baski, isk, cikti, log):
         raise RuntimeError("sembol karti girdileri yok (--maske --altin --zemin)")
     # 06 sembol karti (Serdar 8 Kas: yayindaki "Two Signs, One Shared Symbol" karti, yeni set zemini, hazir altin dosyalar; 06 yerine)
     t = kos([KOD / "sembol_karti.py", cift, KART["zemin"], KART["maske"], KART["altin"], str(o / f"{cift}_06_SEMBOL.jpg")], w,
-            {"KART_DIR": KART["kart_dir"]}, log, PY_YAZI)
+            {"KART_DIR": KART["kart_dir"], "ZEMIN_REF": str(Path(sahne) / "kart_surec5.png")}, log, PY_YAZI)
     olcum["yazi"]["06_SEMBOL"] = t.strip().splitlines()[-1]
     if KART.get("yalniz"):
         return olcum
