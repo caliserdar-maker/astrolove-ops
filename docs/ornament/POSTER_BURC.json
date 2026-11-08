@@ -1,1 +1,17 @@
-{"posterler": ["CANCER_LIBRA"]}
+{
+ "posterler": [
+  "ARIES_ARIES",
+  "TAURUS_TAURUS",
+  "GEMINI_GEMINI",
+  "CANCER_CANCER",
+  "LEO_LEO",
+  "VIRGO_VIRGO",
+  "LIBRA_LIBRA",
+  "SCORPIO_SCORPIO",
+  "SAGITTARIUS_SAGITTARIUS",
+  "CAPRICORN_CAPRICORN",
+  "AQUARIUS_AQUARIUS",
+  "PISCES_PISCES"
+ ],
+ "aciklama": "Serdar 8 Kas: kucuk burclar yeni dokuda posterden (ayni burc posteri, sol glif)"
+}
