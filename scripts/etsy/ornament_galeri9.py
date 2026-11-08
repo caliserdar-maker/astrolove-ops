@@ -310,7 +310,37 @@ def yaz(api, shop, out, pair, Y):
     for n in range(1, N_YENI + 1):
         if n in yeni:
             continue
-        _ims = duzgun_bekle(gorseller, None, f"yukleme {n} oncesi", R, yer=1)
+        try:
+            _ims = duzgun_bekle(gorseller, None, f"yukleme {n} oncesi", R, yer=1)
+        except SystemExit:
+            # 8 Kas olcumu (CANCER_SAGITTARIUS 42466686048 / 42467569048): Etsy bosluklari ancak YENI bir silmede kapatir; rank 20'ye
+            # dayaninca, yeni stil gorseli yuklenmis stiller yeniye baglanir ve o stillerin eski gorselleri silinir (kapatmayi tetikler)
+            _ims = gorseller()
+            _r = [x.get("rank") for x in _ims]
+            if not (None not in _r and all(a_ < b_ for a_, b_ in zip(_r, _r[1:])) and max(_r + [0]) + 1 > 20):   # yalniz gercekten yer yoksa
+                raise
+            _ids = {x.get("listing_image_id") for x in _ims}
+            _inv = api.get(f"/listings/{lid}/inventory") or {}
+            _vid = {v["values"][0]: v["value_ids"][0] for p in _inv.get("products") or [] for v in p.get("property_values") or []
+                    if v.get("property_id") == P_STYLE and v.get("value_ids")}
+            if sorted(_vid) != sorted(STIL_SIRA) or _vid != {s_: y["stil"][s_] for s_ in _vid}:
+                kaydet(); raise SystemExit(f"DUR: {pair} Style value_id yedekten farkli {_vid}")
+            _eski_s = {s_: eski[r_ - 1] for s_, r_ in ESKI_STIL_SIRA.items()}
+            _hazir = [s_ for s_, r_ in STIL_SIRA.items() if r_ in yeni and _eski_s[s_] in _ids]
+            if not _hazir:
+                raise
+            _map = {s_: (yeni[r_] if s_ in _hazir or (r_ in yeni and _eski_s[s_] not in _ids) else _eski_s[s_]) for s_, r_ in STIL_SIRA.items()}
+            api.post_json(f"/shops/{shop}/listings/{lid}/variation-images",
+                          {"variation_images": [dict(property_id=P_STYLE, value_id=_vid[s_], image_id=_map[s_]) for s_ in STIL_SIRA]})
+            _vis = (api.get(f"/shops/{shop}/listings/{lid}/variation-images") or {}).get("results") or []
+            if {v.get("value_id"): v.get("image_id") for v in _vis if v.get("property_id") == P_STYLE} != {_vid[s_]: _map[s_] for s_ in STIL_SIRA}:
+                kaydet(); raise SystemExit(f"DUR: {pair} yer acma: stil baglari beklenen degil")
+            state_oku(f"2y yer acma bag {_hazir}")
+            for s_ in _hazir:
+                api.delete(f"/shops/{shop}/listings/{lid}/images/{_eski_s[s_]}")
+            state_oku(f"2y yer acma eski stil silindi {_hazir}")
+            R.setdefault("yer_acma", []).append((n, _hazir))
+            _ims = duzgun_bekle(gorseller, None, f"yukleme {n} oncesi (yer acma sonrasi)", R, yer=1)
         say = len(_ims); r_ust = max([x.get("rank") or 0 for x in _ims] + [0])
         if say >= 20:
             kaydet(); raise SystemExit(f"DUR: {pair} galeri {say} gorsel (20 siniri), yeni {n} yuklenemez")

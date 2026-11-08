@@ -481,6 +481,18 @@ def main():
             af.post_file = ekf
             R = g.yaz(af, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), (gec, R["kontrol"])
             assert min(x["rank"] for x in af.ims) >= 1
+        # yer acma (8 Kas, CANCER_SAGITTARIUS): Etsy kapatmayi kismi yapar (numaralar 5'ten baslar) -> rank 20'ye dayaninca yeni stil
+        # gorseli yuklenmis stiller yeniye baglanir, eskileri silinir; PASS, rank hic 20'yi asmaz, esit rank yok
+        o = Path(t, "yer"); o.mkdir(); ay_ = g.Kuru("39729443", Y); ay_.ilan(Y["CANCER_LIBRA"]); ay_.sikistir = False; ay_.gecikme = 2; ay_.ofset = 4
+        asil_y2 = ay_.post_file
+        def eky(path, files, data=None, _a=asil_y2, _ap=ay_):
+            if path.endswith("/images"):
+                rk_ = [x["rank"] for x in _ap.ims]
+                assert len(set(rk_)) == len(rk_) and int(data["rank"]) == max(rk_) + 1 <= 20, (sorted(rk_), data["rank"])
+            return asil_y2(path, files, data)
+        ay_.post_file = eky
+        R = g.yaz(ay_, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), R["kontrol"]
+        assert R.get("yer_acma"), "yer acma calismali"
         # 77 ilanin yaz() yolu Etsy silmede sikistirsa da PASS
         o = Path(t, "ysik"); o.mkdir(); a_s = g.Kuru("39729443", Y); a_s.ilan(Y["CANCER_LIBRA"]); a_s.sikistir = True
         R = g.yaz(a_s, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), ("yaz sikistir", R["kontrol"])
@@ -488,7 +500,7 @@ def main():
         o = Path(t, "o22"); o.mkdir(); D = eski_durum(o); D["sira_v2"] = ["CANCER_LIBRA"]; json.dump(D, open(o / "DURUM9.json", "w"))
         a22 = g.Kuru("39729443", Y2); a22.ilan(Y2["LEO_LEO"]); a22.kuru = False
         R = g.yaz(a22, "39729443", o, "LEO_LEO", Y2); assert all(R["kontrol"].values()), R["kontrol"]
-    print("test_ornament_galeri9: 65/65 PASS")
+    print("test_ornament_galeri9: 66/66 PASS")
 
 
 if __name__ == "__main__":
