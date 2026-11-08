@@ -325,6 +325,7 @@ def main():
         o = Path(t, "yt2"); o.mkdir(); D = yeni_durum(o)
         D["ciftler"]["CANCER_LIBRA"]["yeniden"] = {"basladi": True, "video": [555], "yeni": {str(n): 80000 + n for n in range(1, 15)}}
         json.dump(D, open(o / "DURUM9.json", "w")); at2 = yeni_api(D, True)
+        at2.vids = [dict(video_id=990001, video_state="active")]          # kayitli taban videosu 555, galeride baska video
         bekle_dur(lambda: g.yeniden(at2, "39729443", o, "CANCER_LIBRA", Y), "video 1")
         assert not [k for k in at2.kayit if k["yazma"]]
         # inceleme T3: (a) sonrasi on kontrol FAIL, sonraki kosuda taban ezilmez (video geri gelince PASS)
