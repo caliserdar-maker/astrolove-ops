@@ -257,7 +257,7 @@ def yaz(api, shop, out, pair, Y, RU, OLCU):
 
 
 def pilot_dogru(api, shop, Y, RU, OLCU):
-    """Salt okuma: CANCER_LIBRA taslak, RU tam ve olcu esit mi."""
+    """Salt okuma: CANCER_LIBRA taslak ya da YAYINDA (Serdar panelden yayinlar, 8 Kas), RU tam ve olcu esit mi."""
     lid = (Y.get(PILOT) or {}).get("listing_id")
     if not str(lid).isdigit():
         return False, "pilot listing id yok"
@@ -265,7 +265,7 @@ def pilot_dogru(api, shop, Y, RU, OLCU):
     ru = ru_esit(api.get(f"/shops/{shop}/listings/{lid}/translations/ru", ok404=True), RU[PILOT])
     pr = (api.get(f"/shops/{shop}/listings/{lid}/properties") or {}).get("results") or []
     ol = olcu_esit(pr, OLCU)
-    return (st == "draft" and ru == "tam" and ol), f"state={st} ru={ru} olcu={ol}"
+    return (st in ("draft", "active") and ru == "tam" and ol), f"state={st} ru={ru} olcu={ol}"
 
 
 def main():

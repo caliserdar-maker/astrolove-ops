@@ -161,7 +161,9 @@ def main():
         assert not g.pilot_dogru(p, S, Y, RU, OLCU)[0]
         g.yaz(p, S, o, "CANCER_LIBRA", Y, RU, OLCU)
         assert g.pilot_dogru(p, S, Y, RU, OLCU)[0]
-        p.L["state"] = "active"; assert not g.pilot_dogru(p, S, Y, RU, OLCU)[0]; n += 1
+        p.L["state"] = "active"; assert g.pilot_dogru(p, S, Y, RU, OLCU)[0]   # Serdar yayinladi: kabul
+        p.L["state"] = "inactive"; assert not g.pilot_dogru(p, S, Y, RU, OLCU)[0]
+        p.L["state"] = "draft"; p.ru = {"title": "x", "description": "y"}; assert not g.pilot_dogru(p, S, Y, RU, OLCU)[0]; n += 1
         # 15 salt okuma yazamaz
         so = SahteOku()
         bekle_dur(lambda: so._call("PUT", f"/shops/1/listings/{LID}/translations/ru", data={}), "salt okuma")
