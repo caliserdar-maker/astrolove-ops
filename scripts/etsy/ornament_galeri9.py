@@ -45,7 +45,7 @@ if os.environ.get("SEMBOL_KARTI") == "1":       # 8 Kas: sembol karti galeride 2
 N_YENI = len(GALERI)
 ESKI_N = 11                     # ornament_taslak.py N_GORSEL
 ESKI_STIL_SIRA = {"Ruby": 7, "Sapphire": 8, "Emerald": 9, "White": 10, "Ivory": 11}
-KOTA_ILAN = 70                  # ilan basina istek: kuru 46, en kotu (geri okuma + video bekleme + tekrarlar) ~70; + 10 kapida: ilan yarim birakilmaz (CLAUDE.md Etsy 3)
+KOTA_ILAN = 100                 # ilan basina istek (8 Kas, duzgun_bekle ile): kuru 61-69, en kotu (bekleme + video + tekrarlar) ~90; + 10 kapida: ilan yarim birakilmaz (CLAUDE.md Etsy 3)
 PARTI_MAX = 20                  # tek kosuda en fazla cift (CLAUDE.md KILIT SURESI)
 SURE_DK = 60                    # kilit anindan sonra yeni cifte baslanmaz
 TIRE = re.compile("[–—]")
@@ -283,8 +283,6 @@ def yaz(api, shop, out, pair, Y):
     L = state_oku("0 baslangic", acil=False)
     if html.unescape(L.get("title") or "") != baslik:
         kaydet(); raise SystemExit(f"DUR: {pair} {lid} baslik METIN ile ayni degil (kimlik)")
-    if not getattr(api, "kuru", False) and os.environ.get("YAZ_ACIK") != "1":   # inceleme (8 Kas): yaz() gecikmeli kapatmayi beklemiyor; duzeltilene kadar kapali
-        raise SystemExit("DUR: yaz() gecikmeli kapatma (42464635440) icin duzeltilmeden kapali")
     if not getattr(api, "kuru", False) and pair != "CANCER_LIBRA" and not ("CANCER_LIBRA" in D.get("tamam", [])
                                                                            and "CANCER_LIBRA" in D.get("sira_v2", [])):
         kaydet(); raise SystemExit("DUR: CANCER_LIBRA pilotu tamam degil (yeni sira dahil); once pilot")   # pilot once (inceleme 9; kuru haric)
@@ -307,12 +305,12 @@ def yaz(api, shop, out, pair, Y):
             api.delete(f"/shops/{shop}/listings/{lid}/images/{i}")
     state_oku("1 eski 01-06 silindi")
     # 2) yeni 14 gorsel, sira 1..14 (eksik olanlar); her yuklemeden sonra id DURUM9'a
-    _g0 = gorseller(); say = len(_g0)
-    # Serdar 8 Kas "Sona ekleme yontemi": yeni gorseller galerinin SONUNA eklenir (esit rank yok; 42462674399'da esit rank'ta 4-5 yer degisti).
-    # rank = gorsel sayisi + 1 (Etsy "ListingImages must be ordered 1 - 20", 42463597152; Serdar "Evet, duzelt ve devam et")
+    # Serdar 8 Kas "Sona ekleme yontemi" + "Evet, bu yontemle": her yuklemeden ONCE rank'lar 1..N olana kadar okunur (Etsy silmede gecikmeli
+    # kapatir, 42464635440), yeni gorsel N+1'e (esit rank yok, 20 siniri asilmaz)
     for n in range(1, N_YENI + 1):
         if n in yeni:
             continue
+        say = len(duzgun_bekle(gorseller, None, f"yukleme {n} oncesi", R))
         if say >= 20:
             kaydet(); raise SystemExit(f"DUR: {pair} galeri {say} gorsel (20 siniri), yeni {n} yuklenemez")
         with open(galeri[n - 1], "rb") as fh:
@@ -345,6 +343,7 @@ def yaz(api, shop, out, pair, Y):
         if i in simdi:
             api.delete(f"/shops/{shop}/listings/{lid}/images/{i}")
     state_oku("4 eski stil gorselleri silindi")
+    duzgun_bekle(gorseller, N_YENI, "eski stil silindi sonrasi", R)
     # 5) video: eski silinir, yeni yuklenir (gonderim isareti yuklemeden ONCE: kopma sonrasi ikinci video yok)
     vids = (api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or []
     yv = [v for v in vids if v.get("video_id") not in eski_v]
@@ -897,10 +896,11 @@ def duzgun_bekle(gorseller, n, adim, R):
     """8 Kas olcumu (42464635440): Etsy silmede rank'lari GECIKMELI kapatir. Yukleme/silme sonrasi rank'lar 1..n olana kadar okunur."""
     for i in range(DUZGUN_DENEME):
         ims = gorseller()
-        if [x.get("rank") for x in ims] == list(range(1, n + 1)):
+        if [x.get("rank") for x in ims] == list(range(1, (len(ims) if n is None else n) + 1)):
             R.setdefault("duzgun", []).append((adim, i)); return ims
         time.sleep(DUZGUN_BEKLE_SN)
-    raise SystemExit(f"DUR: rank'lar {DUZGUN_DENEME} okumada 1..{n} olmadi ({adim}): {[(x.get('rank'), x.get('listing_image_id')) for x in ims]}")
+    raise SystemExit(f"DUR: rank'lar {DUZGUN_DENEME} okumada 1..{len(ims) if n is None else n} olmadi ({adim}): "
+                     f"{[(x.get('rank'), x.get('listing_image_id')) for x in ims]}")
 
 
 def tasi(api, shop, out, pair, Y):
@@ -1219,7 +1219,7 @@ def kuru(shop, out, pair, Y):
     o2 = out / "kuru"; o2.mkdir(parents=True, exist_ok=True)
     ozet = {}
     for sik in (True,):
-        api = Kuru(shop, Y); api.sikistir = sik
+        api = Kuru(shop, Y); api.sikistir = False; api.gecikme = 3        # inceleme: olculen davranis gecikmeli kapatma
         api.ilan(Y[pair])
         (o2 / "DURUM9.json").unlink(missing_ok=True)
         R = yaz(api, shop, o2, pair, Y)

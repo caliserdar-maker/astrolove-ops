@@ -49,10 +49,7 @@ def bekle_dur(fn, metin):
 def main():
     with tempfile.TemporaryDirectory() as t:
         os.environ["IMG_ROOT"] = t + "/img"; os.environ["BOYUT_KAPI"] = "0"; medya_kur(t + "/img")
-        # gecici kapi (8 Kas): gercek yaz() YAZ_ACIK=1 olmadan DUR; asagidaki kuru-disi testler kapiyi acarak mantigi dener
-        a0 = g.Kuru("39729443", Y := yedek()); a0.ilan(Y["CANCER_LIBRA"]); a0.kuru = False; o0 = Path(t, "o0"); o0.mkdir()
-        bekle_dur(lambda: g.yaz(a0, "39729443", o0, "CANCER_LIBRA", Y), "duzeltilmeden kapali")
-        os.environ["YAZ_ACIK"] = "1"
+        g.DUZGUN_BEKLE_SN = 0
         Y = yedek()
         # 1 PASS
         o = Path(t, "o1"); o.mkdir(); api, R = calis(Y, o)
@@ -301,7 +298,7 @@ def main():
                 return asil(path, files, dict(data, rank="1") if path.endswith("/images") else data)
             a.post_file = p1
         o = Path(t, "ts1"); o.mkdir(); at = g.Kuru("39729443", Y); at.ilan(Y["CANCER_LIBRA"]); ters_yukle(at)
-        bekle_dur(lambda: g.yaz(at, "39729443", o, "CANCER_LIBRA", Y), "sirali degil")
+        bekle_dur(lambda: g.yaz(at, "39729443", o, "CANCER_LIBRA", Y), "olmadi")      # esit rank: yukleme oncesi duzgun_bekle DUR
         assert not [k for k in at.kayit if k["url"].endswith("variation-images") and k["method"] != "GET"]
         o = Path(t, "ts2"); o.mkdir(); D = yeni_durum(o); at2 = yeni_api(D, True); ters_yukle(at2)
         bekle_dur(lambda: g.yeniden(at2, "39729443", o, "CANCER_LIBRA", Y), "sirali degil")
@@ -437,10 +434,9 @@ def main():
             x["rank"] += 3
         bekle_dur(lambda: g.tasi(at5, "39729443", o, "CANCER_LIBRA", Y), "1..14 olmadi"); assert not [k for k in at5.kayit if k["yazma"]]
         bekle_dur(lambda: g.tasi(at5, "39729443", o, "LEO_LEO", Y2), "yalniz CANCER_LIBRA")
-        g.DUZGUN_BEKLE_SN = 5
         # bilinen FAIL: Etsy silmede yeniden numaralamazsa son rank'lar 1-14 olmaz -> geri okuma DUR (kapak 1. degil); yeniden de ayni
         o = Path(t, "ynos"); o.mkdir(); a_n = g.Kuru("39729443", Y); a_n.ilan(Y["CANCER_LIBRA"]); a_n.sikistir = False
-        bekle_dur(lambda: g.yaz(a_n, "39729443", o, "CANCER_LIBRA", Y), "rank 1-14")
+        bekle_dur(lambda: g.yaz(a_n, "39729443", o, "CANCER_LIBRA", Y), "olmadi")    # yukleme oncesi duzgun_bekle DUR (yazim oncesi)
         o = Path(t, "ynos2"); o.mkdir(); D = yeni_durum(o); a_n2 = yeni_api(D, False)
         bekle_dur(lambda: g.yeniden(a_n2, "39729443", o, "CANCER_LIBRA", Y), "rank 1-14")
         # sona ekleme: yuklemeler esit rank'a gitmez (her POST rank'i o anki en buyuk rank + 1)
@@ -452,6 +448,29 @@ def main():
             return asil_e(path, files, data)
         a_e.post_file = eks
         R = g.yaz(a_e, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), R["kontrol"]
+        # inceleme (8 Kas): yaz() gecikmeli kapatmada (olculen davranis) PASS; yuklemeler esit rank'a gitmez; silmede kopma devami
+        for gec in (2, 3):
+            o = Path(t, f"ygec{gec}"); o.mkdir(); ag_ = g.Kuru("39729443", Y); ag_.ilan(Y["CANCER_LIBRA"]); ag_.sikistir = False; ag_.gecikme = gec
+            asil_g = ag_.post_file
+            def ekg(path, files, data=None, _a=asil_g, _ap=ag_):
+                if path.endswith("/images"):
+                    rk_ = sorted(x["rank"] for x in _ap.ims)
+                    assert rk_ == list(range(1, len(rk_) + 1)) and int(data["rank"]) == len(rk_) + 1, (rk_, data["rank"])
+                return _a(path, files, data)
+            ag_.post_file = ekg
+            R = g.yaz(ag_, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), (gec, R["kontrol"])
+        o = Path(t, "ygec_kop"); o.mkdir(); ak_ = g.Kuru("39729443", Y); ak_.ilan(Y["CANCER_LIBRA"]); ak_.sikistir = False; ak_.gecikme = 3
+        asil_k2 = ak_._call; sk = {"n": 0}
+        def kc2(method, path, *x, **k):
+            if method == "DELETE" and "/images/" in path:
+                sk["n"] += 1
+                if sk["n"] == 8:
+                    raise SystemExit("HATA: baglanti koptu")
+            return asil_k2(method, path, *x, **k)
+        ak_._call = kc2
+        bekle_dur(lambda: g.yaz(ak_, "39729443", o, "CANCER_LIBRA", Y), "koptu")
+        ak_._call = asil_k2
+        R = g.yaz(ak_, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), ("gecikme devam", R["kontrol"])
         # 77 ilanin yaz() yolu Etsy silmede sikistirsa da PASS
         o = Path(t, "ysik"); o.mkdir(); a_s = g.Kuru("39729443", Y); a_s.ilan(Y["CANCER_LIBRA"]); a_s.sikistir = True
         R = g.yaz(a_s, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), ("yaz sikistir", R["kontrol"])
@@ -459,7 +478,7 @@ def main():
         o = Path(t, "o22"); o.mkdir(); D = eski_durum(o); D["sira_v2"] = ["CANCER_LIBRA"]; json.dump(D, open(o / "DURUM9.json", "w"))
         a22 = g.Kuru("39729443", Y2); a22.ilan(Y2["LEO_LEO"]); a22.kuru = False
         R = g.yaz(a22, "39729443", o, "LEO_LEO", Y2); assert all(R["kontrol"].values()), R["kontrol"]
-    print("test_ornament_galeri9: 60/60 PASS")
+    print("test_ornament_galeri9: 63/63 PASS")
 
 
 if __name__ == "__main__":
