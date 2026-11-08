@@ -119,8 +119,9 @@ yaz = list(K.YAZILAR)
 if yaz != yaz0 or yaz != ["Two Signs, One Shared Symbol", AB, A, B, ALT]:
     raise SystemExit(f"DUR: metin {yaz}")
 # GEVSETME (Serdar 8 Kas, yalniz bu ciftler): ana sembol altin dosyasi ile maske genisligi az farkli. "Gevsetme: %3": SAGITTARIUS_VIRGO
-# (428 / 438); "Evet, iki cifte de %3": GEMINI_PISCES (576 / 563), LIBRA_SAGITTARIUS (476 / 466). AQUARIUS_LEO (%6,1) gevsetilmedi.
-GEO_TOL = {"SAGITTARIUS_VIRGO": 0.03, "GEMINI_PISCES": 0.03, "LIBRA_SAGITTARIUS": 0.03}
+# (428 / 438); "Evet, iki cifte de %3": GEMINI_PISCES (576 / 563), LIBRA_SAGITTARIUS (476 / 466). AQUARIUS_LEO asagida.
+# "Evet, %7": AQUARIUS_LEO (718 / 677); teshis: duzen maskesinde dalga uclari kenarda kesik, altin dosya tam (kart dogru).
+GEO_TOL = {"SAGITTARIUS_VIRGO": 0.03, "GEMINI_PISCES": 0.03, "LIBRA_SAGITTARIUS": 0.03, "AQUARIUS_LEO": 0.07}
 TOL = GEO_TOL.get(CIFT, 0.02)
 if o["baglac"] != o0["baglac"] or any(abs(p - q) > max(4, TOL * q) for p, q in zip(o["sembol"], o0["sembol"])):   # altin ve maske kutusu oranlari az farkli
     # teshis (8 Kas): kart ve ortak sembol kiyasi (sol maske, sag altin alfa) _DUR dosyalarina; cift yine FAIL (Etsy'ye yazilmaz)

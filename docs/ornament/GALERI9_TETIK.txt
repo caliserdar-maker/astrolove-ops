@@ -1,1 +1,1 @@
-8 Kas 7 FAIL cift tekrar (kosu 42455075234): baslik piksel sigdirma + sembol karti %3 (3 cift, Serdar onayli) + AQUARIUS_LEO teshis
+8 Kas AQUARIUS_LEO tekrar (sembol karti esigi %7, Serdar 'Evet, %7')

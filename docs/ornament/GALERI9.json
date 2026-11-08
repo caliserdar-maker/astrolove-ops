@@ -10,16 +10,10 @@
  ],
  "hedef_onek": "ORNAMENT_GALERI9",
  "ciftler": [
-  "SAGITTARIUS_VIRGO",
-  "GEMINI_PISCES",
-  "LIBRA_SAGITTARIUS",
-  "AQUARIUS_LEO",
-  "ARIES_TAURUS",
-  "ARIES_SCORPIO",
-  "ARIES_CANCER"
+  "AQUARIUS_LEO"
  ],
  "ciftler_aciklama": "Serdar 7 Kas (4): ornek 4 cift 42451553017 4/4 PASS (kapi) -> TUMU 78. Serdar 8 Kas: sembol karti 06 yerine.",
- "parca": 4,
+ "parca": 1,
  "max_parallel": 8,
  "sahneler": {
   "kapak.png": {
