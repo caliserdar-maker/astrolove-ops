@@ -1,0 +1,85 @@
+name: ornament-ru-olcu
+# ORNAMENT 78 TASLAK: Rusca baslik/aciklama + olcu niteligi (Serdar 8 Kas "Evet, kodla yazilsin"). Yayin Serdar'da (panel).
+# Kod scripts/etsy/ornament_ru_olcu.py. mod=oku SALT OKUMA (kategori nitelikleri, mevcut RU / nitelik). mod=yaz: translations/ru PUT +
+# properties PUT (OLCU_JSON, docs/ornament/ORN_OLCU.json, Serdar onayi), PATCH yok (acil inactive haric). Once CANCER_LIBRA.
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      mod: { description: "oku | yaz", required: true, default: "oku" }
+      ciftler: { description: "virgul/bosluk ayrimli CIFT", required: true, default: "CANCER_LIBRA" }
+      pilot_onay: { description: "CANCER_LIBRA pilotu Serdar onayli (coklu yazim icin)", type: boolean, default: false }
+env:
+  O: "gdrive:ASTROLOVE/TEMP/ORNAMENT_GALERI9_ETSY"
+jobs:
+  ru:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Girdi kapisi
+        env: { M: "${{ inputs.mod }}", C: "${{ inputs.ciftler }}" }
+        run: |
+          [[ "$M" =~ ^(oku|yaz)$ ]] || { echo "::error::mod"; exit 1; }
+          [[ "$C" =~ ^[A-Z_,\ ]+$ ]] || { echo "::error::ciftler"; exit 1; }
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+          python3 scripts/etsy/test_ornament_ru_olcu.py
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"; echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Etsy kilidi (yaz; token indirmeden ONCE)
+        if: ${{ inputs.mod == 'yaz' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - name: Token + yedek
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "$O/YEDEK9.json" _work/YEDEK9.json || { echo "::error::YEDEK9.json yok"; exit 1; }
+      - name: Kos
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          YEDEK: _work/YEDEK9.json
+          OLCU_JSON: docs/ornament/ORN_OLCU.json
+          PILOT_ONAY: ${{ inputs.pilot_onay && '1' || '0' }}
+          OUT: _out
+          C: ${{ inputs.ciftler }}
+          M: ${{ inputs.mod }}
+        run: python3 scripts/etsy/ornament_ru_olcu.py --mod "$M" --ciftler "$C"
+      - name: Token geri yaz + cikti Drive'a
+        if: ${{ always() }}
+        env: { M: "${{ inputs.mod }}" }
+        run: |
+          set +e
+          TOKEN_RC=0; OUT_RC=0
+          if [ -f _work/ETSY_TOKEN.json ]; then bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1; fi
+          if ls _out/* >/dev/null 2>&1; then
+            SIR_OK=1
+            if [ -f _work/ETSY_TOKEN.json ]; then python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; SIR_OK=0; OUT_RC=1; }; fi
+            if [ "$SIR_OK" = 1 ]; then rclone copy _out "$O/ru_${M}_${DAMGA:?}" -q || OUT_RC=1
+              echo "Cikti: TEMP/ORNAMENT_GALERI9_ETSY/ru_${M}_$DAMGA" | tee -a "$GITHUB_STEP_SUMMARY"; fi
+          fi
+          [ "$TOKEN_RC" = 0 ] && [ "$OUT_RC" = 0 ] || exit 1
+      - if: always()
+        run: rm -rf _work _out ~/.config/rclone
