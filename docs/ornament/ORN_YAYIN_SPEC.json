@@ -1,0 +1,20 @@
+{
+ "urun": "ornament78",
+ "kaynak": "KARARLAR_20261107 (Karar 3 kargo profili 319230731837, S2 Printful Latvia, fiyat 19,90, [ SHIPPING ] cumlesi, S4 RU paketi 39843f4a, S5 olcu W 2.99 / H 2.99 / D 0.1 in, 8 Kas galeri 14 gorsel + video, 02 sembol karti)",
+ "beklenen": {
+  "shipping_profile_id": 319230731837,
+  "uretim_ortagi": "Printful Latvia",
+  "fiyat": 19.90,
+  "gorsel_sayisi": 14,
+  "gorsel2_alt_icerir": "TWO SIGNS, ONE SHARED SYMBOL",
+  "video_sayisi": 1,
+  "aciklama_zorunlu": ["Made and shipped by our production partner. You can see the shipping cost and estimated delivery time for your country on this page and at checkout."],
+  "aciklama_yasak": ["free shipping"],
+  "nitelikler": [
+   {"property_id": 47626759898, "ad": "Width", "values": ["2.99"], "scale_id": 5},
+   {"property_id": 47626759834, "ad": "Height", "values": ["2.99"], "scale_id": 5},
+   {"property_id": 54142602037, "ad": "Depth", "values": ["0.1"], "scale_id": 5}
+  ]
+ },
+ "ru": {"csv": "data/pod/ORN78_RU.csv", "sha256": "39843f4af64573ea7db2da91fd7358b505aa1425156bc59ede09784445b7db34", "anahtar": "kod"}
+}
