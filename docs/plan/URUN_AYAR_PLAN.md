@@ -8,6 +8,16 @@ sayim, KALITE 4/5 adimlari, atiflar, sema); 1'i reddedildi ("premium canli EN'de
 Tur 2 (son tur, CLAUDE.md:218): yeni YUKSEK yok; 4 ORTA + 2 DUSUK islendi (yayin adimi PATCH yolu, free shipping yasaginin urune ozgu
 olmasi, kapi yeri _call / post_file, ornament_kargo iki izin sinifi, Ag._tek kapilari, eksik kapi sayimi).
 Kaynak turleri: [kod] depodaki satir, [olcum] kosu ya da kayit, [gorev] Merkez gorev metni (8 Kas), [hesap] koddan sayim, [tahmin].
+Duzeltme 1: 8 Kas gece, Merkez gorevi; D1-D5 (Serdar 8 Kas gece "Ikisi de evet"). Atiflar yine main b82f2ec (degismedi) ve origin/gorev-g.
+Degisenler: D1 5. bolum 5.1 yeniden (urun sayisi = carpim, secenek tablosu), B7 duzeltildi, B9 / B10 yeni, S1 onerisi; D2 O1 yeniden
+(7. bolum O1 satiri + 7.1, adim 1-2 bagimliligi, S6); D3 B8 / metin.en / 3. bolum (2) / 4. bolum EN satiri / S13 (canli 78/78 PASS,
+eski olan depo dosyasi); D4 S14, 3. bolum (2), adim 7, B6 ve 1.2 sade satiri (ornament yayini panelde Serdar'da; sade kodla --confirm SADE_YAYIN, olgu olarak yazildi); D5 2.2 GPSR ve S3 onerisi.
+Inceleme (Duzeltme 1) tur 1: 13 bulgu (1 YUKSEK, 5 ORTA, 7 DUSUK), 13'u islendi, 0 reddedildi (5.1-1 kod isi + 5.1-1b; kupa liste yolu;
+batch kosularinin ayrimi; olc 42486805159 zaten kostu, adim 2 O1'e bagli degil; 2.1 "olc ile" -> O1(1); sade hukmu kaldirildi; atiflar; B10 tarih;
+tam carpim varsayimi; 2b CSV notu; S13 gerekcesi; bicim).
+Inceleme (Duzeltme 1) tur 2 (son tur, CLAUDE.md:218): yeni YUKSEK yok; 8 bulgu (2 ORTA, 6 DUSUK) islendi, 0 reddedildi (nitelik degeri
+O1(1) disinda; adim 1 kaynak; atiflar :148, :464-465, b5060ee :3-4; 5.1-1b sayimi; 5.1-3 fiyat kisiti; B9 ifadesi; "duzeltme oncesi" etiketi).
+Yeni kaynak etiketleri: [kaynak dosya, canli degil], [dogrulanmadi], [kod yorumu, olculmedi], [gorev] Merkez, Drive kontrol JSON'u; Denetim dogrulamadi.
 
 ---
 
@@ -38,7 +48,7 @@ Kaynak turleri: [kod] depodaki satir, [olcum] kosu ya da kayit, [gorev] Merkez g
 | by78_taslak createDraftListing (KAPALI: by78_taslak.py:111-115 SystemExit, Serdar 3 Kas) | ayni alan seti + is_personalizable | SHIP, RET, TAX, PARTNER sabit; readiness referans ilandan (REF) | scripts/etsy/by78_taslak.py:246-250 (sabitler :33-36, :40) |
 | by78_taslak devami | envanter, gorsel, varimg, kisisel, nitelik | FORMATS, STYLES sabit | by78_taslak.py:280, :299, :312, :317, :326 |
 | pod_listing_create (is akisi KAPALI: workflow-kapat-pod.yml:2) | createDraftListing, gorsel, video, PATCH, nitelik, RU, kisisel, envanter, varimg | kimlikler magazadan ADA gore bulunur (discover :345-371); fiyat pod_prices.csv; MATERIALS, TITLE_RU sabit | scripts/etsy/pod_listing_create.py:553-556, :575, :589, :599, :605, :611, :613-615, :617, :622, :641 (sabitler :118, :125, :133-136) |
-| sade_taslak (yalniz origin/gorev-g dalinda, main'de YOK) | createDraftListing; kimlikler SABLON ilandan kopyalanir; sonunda state active PATCH | SABLON 4607613712 canli ilan | gorev-g:scripts/kupa/sade_taslak.py:38, :61, :425-428, :606 |
+| sade_taslak (yalniz origin/gorev-g dalinda, main'de YOK) | createDraftListing; kimlikler SABLON ilandan kopyalanir; state active PATCH yalniz --confirm SADE_YAYIN ile (:600-608, :743) | SABLON 4607613712 canli ilan | gorev-g:scripts/kupa/sade_taslak.py:38, :61, :425-428, :606; Serdar 1 Kas karariyla --confirm SADE_YAYIN (:743) verildiginde tum kontroller PASS ise state active yapar (:600-608; yayin_izni kapisi :242-247) |
 
 Sabit kodlanmis kimlikler (ayri liste):
 
@@ -88,9 +98,24 @@ Depodaki diger Etsy yazicilari (yalniz dosya adi; yazma cagrisi taramasi, satirs
 - B3 [kod] ORN_ETSY_AYAR.json:8 "Ornament Free Worldwide ... ucretsiz" diyor; ORN_YAYIN_SPEC.json:15 "free shipping" desenini yasakliyor. Ayar dosyasinda acik metin alani kural disina dusmus.
 - B4 [kod] pod_listing_create.py:118 MATERIALS "Hahnemuhle Photo Rag 308 gsm cotton paper" ve :125 TITLE_RU "жикле" iceriyor (CLAUDE.md:69-71 KAGIT kurali ile celisir). createDraftListing (:575) ortak istemciden gecer ama metin kapisi varsayilan "UYARI" modunda (scripts/etsy/etsy_common.py:255, :356): EN materials istegi GONDERILIR. RU yazimi (:613-615) ru_yazim_kapisi'na takilir (RU_YASAK etsy_common.py:182, kapi :227), istek gitmez. Gercek risk: yasak kagit metniyle acilmis yarim taslak. Is akisi kapali (.github/workflows/workflow-kapat-pod.yml:2, Serdar 22 Eki); yeniden acilirsa risk gercek. Bu plan duzeltmez; ayri is (S10).
 - B5 [kod] Iki tasarim zaten "kilitli plan" deseninde: yd_yapi_yaz yalniz onayli KURU plana gore yazar (yd_yapi_yaz.py:1-4, :123-148); ornament_ru_olcu RU ve olcu dosyasini sha ile kilitler (ornament_ru_olcu.py:30-31, :62-63, :94-95). Ayar kilidi bu deseni genellestirir; yeni desen icat edilmez.
-- B6 [kod] sade_taslak (sign mug) main'de yok, yalniz origin/gorev-g dalinda; kimlikleri canli SABLON ilandan kopyalar (gorev-g:scripts/kupa/sade_taslak.py:38, :61) ve sonda state active PATCH yapar (:606). 5.2 icin bu kodun main'e alinip alinmayacagi karar gerektirir (S7).
-- B7 [kod + olcum] Etsy urun siniri: SKU uc menuye bagliyken 400 (scripts/pod/ilan_yapi_v2.py:299-302; olculmus ret "Total products 576 exceeds maximum allowed 400", docs/REFERANS_ILAN_CL.md:49, 27 Eyl), degilse 2500 (ilan_yapi_v2.py:159-160; scripts/etsy/pod_sku.py:49). Poster ilani zaten 3 menu ve 390 urun (REFERANS_ILAN_CL.md:49); YD de 3 menu, 140 urun (yd_yapi_yaz.py:4, :9-10). Menu siniri 3 (max_variations_supported=3, yd_yapi_yaz.py:56).
-- B8 [olcum, yerel] Ornament EN metni (data/pod/ORNAMENT78_METIN.csv, sha256 c8d18aa9a2462c0eeccf6fbcfc171f35a46b19e01831521e459db37e0f0129a5): 78 aciklamanin 78'inde "free shipping" var, SPEC zorunlu kargo cumlesi 0'inda (ORN_YAYIN_SPEC.json:14-15). Metin kapisi bunu durdurmaz: "free shipping" METIN_KESIN listesinde yok (etsy_common.py:256-270). Bugunku metinle tek gecis yayina_hazir'da FAIL veren ilan acar.
+- B6 [kod] sade_taslak (sign mug) main'de yok, yalniz origin/gorev-g dalinda; kimlikleri canli SABLON ilandan kopyalar (gorev-g:scripts/kupa/sade_taslak.py:38, :61). 5.2 icin bu kodun main'e alinip alinmayacagi karar gerektirir (S7). Olgu (Duzeltme 1): sade_taslak.py:600-608, Serdar 1 Kas karariyla, --confirm SADE_YAYIN (:743) verildiginde tum kontroller PASS ise state active yapar (yayin_izni kapisi :242-247).
+- B7 [kod + olcum] (Duzeltme 1) Tam carpim varsayimiyla tek ilandaki urun sayisi menu deger sayilarinin CARPIMIDIR: canli a2 yolu her satir icin her renk urununu
+  uretir (scripts/pod/ilan_yapi_v2.py:144-156 [kod]; tam carpim yapi CSV'sinin 6 x 13 = 78 satir tam olmasindan gelir); "Etsy tam carpim ister" yalniz kod yorumu (ilan_yapi_v2.py:232) [kod yorumu, olculmedi].
+  Sinir: SKU ve fiyat uc menuye bagliyken 400 [olcum] (docs/REFERANS_ILAN_CL.md:49, 27 Eyl ret "Total products 576 exceeds maximum
+  allowed 400"). 2500 [dogrulanmadi]: olcum yok, yalniz kod yorumu (scripts/etsy/pod_sku.py:49). En fazla 3 menu (max_variations_supported=3,
+  yd_yapi_yaz.py:56); 4 menu olculmedi [dogrulanmadi]. 3 menude on_property yalniz 0, 1 ya da 3 id (REFERANS_ILAN_CL.md:49).
+- B8 [olcum, yerel; kaynak dosya, canli degil] data/pod/ORNAMENT78_METIN.csv (sha256 c8d18aa9a2462c0eeccf6fbcfc171f35a46b19e01831521e459db37e0f0129a5):
+  aciklama sutununda 78/78 "free shipping", SPEC zorunlu kargo cumlesi 0/78 (ORN_YAYIN_SPEC.json:14-15); ORN_ETSY_AYAR.json:8 de "Free Worldwide"
+  der (B3). Canli durum farkli (Duzeltme 1, D3): yayina-hazir kontrol kosusu 42487964917 (8 Kas 14:04 UTC) 78/78 ornament ilanda aciklama
+  zorunlu cumlesi + yasak desen + kargo profili PASS (aciklama kontrolu yayina_hazir.py:301-305) [gorev] Merkez, Drive kontrol JSON'u; Denetim dogrulamadi. Eski olan depo dosyalaridir.
+  Not: CSV kaynak dosyadir, canli degil. Metin kapisi bunu durdurmaz ("free shipping" METIN_KESIN'de yok, etsy_common.py:256-270). Tek gecis
+  (yeni ilan) bugunku CSV'den yazilirsa yayina_hazir'da FAIL veren ilan acar.
+- B9 [kod] ilan_yapi_v2.py:159-160'taki 2500 bekcisi canli a2 yolunda, SKU uc menuye bagliyken (:153-156) calisir; olculen 400 ile celisir
+  (401-2500 urunlu plan bekciden gecer, Etsy reddeder). ilan_yapi_v2.py:298-302 "mode 3" blogu hic calismaz (mode "3" :229-230'da doner); "3x" yolu (:231) 400 bekcisine girmez; ikisi de kaynak degil.
+- B10 [kaynak dosya, canli degil] Poster urun sayisi kaynaklarda celisik (tarih sirasiyla): REFERANS_ILAN_CL.md:9 (27 Eyl) 6 format x 5 renk x
+  13 boy = 390; pod_5x7_yaz.py:9 (30 Eki, daha yeni) geri-al yedegi "130 urun" (= 2 x 5 x 13) ve :7 "5x7 x 10" ekler: 130 + 10 = 140 [hesap];
+  yd_yapi_kuru.py:7, :61 (31 Eki) poster Format adlarini "Digital File", "Print" (2 deger) sayar. Iki taban: A = 390, B = 2 x 5 x 14 = 140
+  (B daha yeni kaynak). Canli sayi O1(2)'ye baglidir.
 
 ## 2. Sema onerisi
 
@@ -103,19 +128,19 @@ sha'lari ve onay sozu ayri (2.3). JSON, Python standart kutuphanesiyle okunur (y
 |---|---|---|---|---|
 | urun | Z | str | "ornament78" | ORN_YAYIN_SPEC.json:2 |
 | taxonomy_id | Z | int | 1857 | ornament_ru_olcu.py:33 [kod]; ORN_YAYIN_SPEC'te yok |
-| readiness_state_id | Z | int | olc ile dogrulanacak | ORN_YAYIN_SPEC'te yok, ayar dosyasindaki deger kullanilmaz (gorev) |
+| readiness_state_id | Z | int | O1(1) ile okunacak (depo karsiligi ORN_ETSY_AYAR.json [kaynak dosya, canli degil]) | ORN_YAYIN_SPEC'te yok, ayar dosyasindaki deger kullanilmaz (gorev) |
 | who_made / when_made / is_supply / type | Z | str | i_did / made_to_order / false / physical | ornament_taslak.py:482-483 [kod] |
 | fiyat | Z | number veya {menu_kombinasyonu: number} + price_on_property | 19.90 (ornament tek fiyat); kupada Style x Size (kupa_taslak.py:510 price_on_property [Style, Size]) | ORN_YAYIN_SPEC.json:9 |
 | kargo.shipping_profile_id | Z | int | 319230731837 | ORN_YAYIN_SPEC.json:5 |
 | kargo.ozet | S | str | (yasak desen taramasindan gecer) | B3 |
 | uretim_ortagi.id / .konum | Z | int / str | 5870733 / "Latvia" | ORN_YAYIN_SPEC.json:7-8 (olc 42486805159) |
-| iade.return_policy_id | Z | int | olc ile dogrulanacak | ORN_YAYIN_SPEC'te yok |
-| bolum.shop_section_id | Z | int | olc ile dogrulanacak | ORN_YAYIN_SPEC'te yok |
+| iade.return_policy_id | Z | int | O1(1) ile okunacak (depo karsiligi ORN_ETSY_AYAR.json [kaynak dosya, canli degil]) | ORN_YAYIN_SPEC'te yok |
+| bolum.shop_section_id | Z | int | O1(1) ile okunacak (depo karsiligi ORN_ETSY_AYAR.json [kaynak dosya, canli degil]) | ORN_YAYIN_SPEC'te yok |
 | kisisellestirme | Z | {acik: bool, sorular: [...]} | acik true, 3 soru | ORN_YAYIN_SPEC.json:10; sorular METIN CSV |
 | varyasyon | Z | {property_id, menu: [{ad, sku_kodu, gorsel_sira}]} | Style 513, 5 stil | ornament_taslak.py:38-41 [kod] |
 | envanter | Z | {stok, fiyat_on_property, sku_on_property} | 999, [], [513] | ornament_taslak.py:48, :512-513 [kod] |
-| olcu / nitelikler | Z | [{property_id, value_ids, values, scale_id}] | W/H/D 2.99/2.99/0.1 in + Material/Indoor/Season | ORN_YAYIN_SPEC.json:16-20; ORN_OLCU.json; malzeme nitelikleri olc ile dogrulanacak |
-| metin.en | Z | {csv, sha256, anahtar} | yeni onayli EN metin (bugunku CSV c8d18aa9... B8 nedeniyle kullanilamaz) | ornament_taslak.py:243 [kod]; sha yerel sha256sum [olcum] |
+| olcu / nitelikler | Z | [{property_id, value_ids, values, scale_id}] | W/H/D 2.99/2.99/0.1 in + Material/Indoor/Season | ORN_YAYIN_SPEC.json:16-20; ORN_OLCU.json; malzeme nitelik DEGERLERI olculmedi: O1(1)'e ilan basina properties GET eklenirse +78 istek [hesap] (yayina_hazir olc yalniz alan adi / turu yazar, :477) |
+| metin.en | Z | {csv, sha256, anahtar} | CSV canlidan guncellendikten sonra sha (S13; bugunku CSV c8d18aa9... canliyi gostermez, B8) | ornament_taslak.py:243 [kod]; sha yerel sha256sum [olcum] |
 | metin.ru | Z (RU yaziliyorsa) | {csv, sha256, anahtar} | ORN78_RU.csv, 39843f4a... | ORN_YAYIN_SPEC.json:25 |
 | baslik / etiketler | Z | metin CSV'den; 140 kr, 13 etiket, <=20 kr | | ornament_taslak.py:267-270 [kod] |
 | aciklama_zorunlu / aciklama_yasak | Z | [str] / [regex] | [ SHIPPING ] cumlesi / free shipping | ORN_YAYIN_SPEC.json:14-15; kapi yazimdan ONCE uygular (B8) |
@@ -131,7 +156,8 @@ sha'lari ve onay sozu ayri (2.3). JSON, Python standart kutuphanesiyle okunur (y
 Her biri {ad, durum: "yapildi"/"yapilmadi", dogrulama: salt okuma uc ve beklenen, kanit: kosu no + tarih}. Kapi "yapildi" ve kanitli olmayan her ise DUR verir.
 - uretim ortagi kaydi (panel): GET /shops/{shop}/production-partners, beklenen id + konum (emsal yayina_hazir.py:401)
 - kargo profili: GET /shops/{shop}/shipping-profiles/{id}, ulke ve ucret listesi (emsal ornament_taslak.py:102)
-- GPSR: API'de dogrulama ucu bilinmiyor (bilmiyorum; ORN_YAYIN_SPEC.json:24 da "kontrol edilmeyen" diyor). Oneri: Serdar panel onayi + tarih, kanit turu "Serdar beyani" (S3).
+- GPSR: API'de dogrulama ucu bilinmiyor (bilmiyorum; ORN_YAYIN_SPEC.json:24 da "kontrol edilmeyen" diyor). Oneri: Serdar beyani; beyan
+  urun + uretim ortagi id + tarihe baglanir (S3). Beyan yalniz GPSR icin; diger panel on isleri yukaridaki ve asagidaki GET'lerle dogrulanir.
 - readiness tanimi, bolum, iade politikasi: magaza duzeyi GET'ler (emsal ornament_taslak.py:124-133)
 
 ### 2.3 "kilit" blogu
@@ -174,11 +200,12 @@ Kalite kurallarina uyum (CLAUDE.md):
   verir; 5.1 / 5.2 canli ilanlarina uygulanmadan once salt okuma taramasi gerekir.
 - Kosudan once tek bagimsiz inceleme (CLAUDE.md:204-207, :218); testler gercek fonksiyonu calistirir, mutasyonla kanit (CLAUDE.md:217).
 - updateListing (PATCH) taslagi yayina alir (CLAUDE.md:54): kapi PATCH'ten hemen once state okur. Uc durum:
-  (1) draft + acil {state: inactive}: izinli. (2) draft + metin / kargo profili PATCH: yalniz ONAYLI YAYIN ADIMINDA, ayri Serdar onayiyla ve
-  ayar kilitliyken (ornament_kargo.py:8-9 aciklama ve shipping_profile_id'yi bu adima birakir; 78 ornament taslaginda eski metin ve eski profil
-  var). Bu PATCH ilani yayina alir; yayin adimi tek kosu, once yayina_hazir kontrolu (S14). (3) active: metin PATCH'i izinli (emsal
-  kupa_galeri78.py:843-847, poster_metin_yaz.py:130-141, ilan_yapi_v2.py:479-537); bu uc emsal active olmayan her durumda DUR verir,
-  inactive ilan icin yol tanimli degil (DUR kalir).
+  (1) draft + acil {state: inactive}: izinli. (2) draft + metin / kargo profili PATCH (kod yayin yolu): YALNIZ S14 "hayir" olursa gecerli;
+  o durumda onayli yayin adiminda, ayri Serdar onayiyla, ayar kilitliyken, once yayina_hazir kontrolu. Bugun ornament yayini Serdar'da,
+  panelden (Serdar 8 Kas, Merkez kaydi KARARLAR_ANA_4 10); kodda: ornament_galeri9.py:4, :157-160; ornament_ru_olcu.py:2, :12-13.
+  Ornament: 55 yayinda, 23 taslak; canli metin ve kargo profili 78/78 PASS [gorev] Merkez, Drive kontrol JSON'u; Denetim dogrulamadi.
+  (3) active: metin PATCH'i izinli (emsal kupa_galeri78.py:843-847, poster_metin_yaz.py:130-141, ilan_yapi_v2.py:479-537); bu uc emsal active
+  olmayan her durumda DUR verir, inactive ilan icin yol tanimli degil (DUR kalir).
 
 ## 4. Tek gercek kaynak
 
@@ -191,7 +218,7 @@ Cakisan alanlar (ORN_ETSY_AYAR.json / ORN_YAYIN_SPEC.json / kod):
 | fiyat | yok | 19.90 (:9) | 29.90 ornament_taslak.py:44; 19.90 ornament_kargo.py:40 |
 | kargo metni | "Free Worldwide ... ucretsiz" (:8) | free shipping yasak (:15) | ornament_taslak.py:52 PROFIL_AD |
 | nitelik | Material/Indoor/Season (:15-19) | W/H/D (:16-20) | ornament_ru_olcu OLCU |
-| EN aciklama | yok | zorunlu kargo cumlesi, free shipping yasak (:14-15) | ORNAMENT78_METIN.csv: 78/78 free shipping, 0/78 zorunlu cumle (B8) |
+| EN aciklama | "Free Worldwide" kargo ozeti (:8) | zorunlu kargo cumlesi, free shipping yasak (:14-15) | ORNAMENT78_METIN.csv: 78/78 free shipping, 0/78 zorunlu cumle (B8; kaynak dosya, canli degil). Canli 78/78 PASS [gorev] Merkez, Drive kontrol JSON'u; Denetim dogrulamadi |
 
 Oneri:
 - Tek kaynak URUN_AYAR.json. ORN_YAYIN_SPEC'in "beklenen" blogu bundan TURETILIR (kodla, ayni sha'dan); elle ikinci kopya kalmaz.
@@ -203,19 +230,37 @@ Oneri:
 
 ## 5. Mevcut ilan guncellemesi (5.1 poster + 1st Anniversary, 5.2 couple mugs + sign mugs)
 
-"Birlestirme"nin anlami Serdar karari (S1). Iki secenek:
+"Birlestirme" istegi Serdar'indir; anlami acik (S1), karar yok. Asagida oneri yazilir, karar Serdar'in (Duzeltme 1, D1).
 
-a) Mevcut ilana varyasyon ekleme: envanter PUT ?max_variations_supported=3 (emsal yd_yapi_yaz.py:56, :254; eski78_cerceve.py:211).
-   Kapi: ayar dosyasi hedef envanterin TAMAMINI tutar (urun listesi, fiyat, sku), yazimdan once canli envanter yedeklenir, plan damgasi
-   kilitlenir (yd_yapi_yaz deseni). Sinir (B7): 3 menu; SKU uc menuye bagliyken 400 urun. Poster ilani 3 menu ve 390 urunle dolu,
-   YD de 3 menu (140 urun): 5.1 icin (a) olculen sinira gore uygulanamaz gorunuyor (390 + 140 > 400, 4. menu yok). 5.2 (kupa 16 urun,
-   kupa_galeri78.py:73) icin sinir sorun degil; menu sayisi ve SKU eslemesi belirleyici.
-   Eksi: tek ilanda iki urunun galeri/metin/kisisellestirme alanlari ayni (20 gorsel siniri: kapak_yukle_78.py:58 ETSY_MAX 20).
-b) Yeni tek ilan + eskilerin kapatilmasi: yeni ilan 6. bolumdeki tek gecisle acilir; eskiler ayri onayla inactive.
-   Kapi: yeni ilan tum ayarlar kilitliyken; kapatma ayri adim, salt okuma ile dogrulanir. Eksi: gecmis ve SEO sifirlanir; siparis eslemesi
-   (SKU) yeni ilana gore guncellenir.
+Kurallar (B7, B9, B10): tam carpim varsayimiyla urun sayisi = menu deger sayilarinin carpimi; en fazla 3 menu; SKU + fiyat 3 menuye
+bagliyken sinir 400 [olcum]. Birlestirmede urun tipi mevcut 3 menuden birine DEGER olarak girer ve carpim hesaplanir [hesap]; toplama
+yazilmaz (duzeltme oncesi metindeki (6e020e3) toplama yanlisti).
+SKU baglama kisiti: 3 menude on_property yalniz 0, 1 ya da 3 id (REFERANS_ILAN_CL.md:49); SKU semasi format ve boy icerir (:46); siparis
+yonlendirici SKU'yu ve renk varyasyonunu ayristirir (pod_sku.parse_tx, :47). SKU baglamasini ya da renk menusunun anlamini degistiren
+secenek: "SKU semasi ve siparis yonlendirici degismeden uygulanamaz; kod isi".
+Tabanlar [kaynak dosya, canli degil]: poster A = 6 format x 5 renk x 13 boy = 390 (REFERANS_ILAN_CL.md:9), B = 2 x 5 x 14 = 140
+(pod_5x7_yaz.py:7, :9; yd_yapi_kuru.py:7, :61); YD = Style 5 x Format 2 x Size 14 = 140 (yd_yapi_kuru.py:5-9).
 
-Oneri: 5.1 icin (b); 5.2 icin S1 cevabi ve O1 (mevcut kupa / sade ilanlarinin menu yapisi, salt okuma). Her iki secenekte ayni kapi gecerli.
+| # | Secenek | Menu deger sayilari | Carpim [hesap] | Sinir (kaynak) | Kod isi | Gecmis / yorum / SEO / siparis eslemesi |
+|---|---|---|---|---|---|---|
+| 5.1-1 | YD urun tipi poster Format menusune 1 deger olarak (or. "1st Anniversary Print"); renk ve boy ayni | A 7 x 5 x 13; B 3 x 5 x 14 | A 455; B 210 | 400 [olcum] | SKU semasi ve siparis yonlendirici degismeden uygulanamaz; kod isi (pod_sku.py:50 SKU2_RE yalniz -F.. ekini tanir; parse_tx :94-108 F'siz her SKU'yu poster baskisi sayar ve rengi poster rengi okur: YD baskisi poster SKU'suyla yanlis urune yonlenir, yeni kodla eslesmez ve gonderilmez). YD dijital (yd_yapi_kuru.py:5-7, :11 dijital 3.90) duser; YD'nin 5 stili kalmaz; YD satirlarinda 5 poster renginin anlami yok | poster ilaninin gecmisi kalir; YD ilanlari kapanirsa YD gecmisi / yorum / SEO gider |
+| 5.1-1b | 5.1-1 + YD 2 format degeri (dijital + baski) | A 8 x 5 x 13; B 4 x 5 x 14 | A 520; B 280 | 400 [olcum] | 5.1-1 ile ayni: SKU semasi ve siparis yonlendirici degismeden uygulanamaz; kod isi | 5.1-1 ile ayni |
+| 5.1-2 | Renk menusune YD 5 stili eklenir (renk + stil = 10), Format ayni | A 6 x 10 x 13; B 2 x 10 x 14 | A 780; B 280 | 400 [olcum] | renk menusunun anlami degisir, parse_tx renk okur (REFERANS_ILAN_CL.md:47): SKU semasi ve siparis yonlendirici degismeden uygulanamaz; kod isi | 5.1-1 ile ayni; anlamsiz kombinasyonlar (stil x cerceve) kapali urun olarak sinira sayilir (tam carpim: ilan_yapi_v2.py:232 [kod yorumu, olculmedi]) |
+| 5.1-3 | Format'a YD 2 deger + renk menusune 5 stil | A 8 x 10 x 13; B 4 x 10 x 14 | A 1040; B 560 | 400 asar [olcum]; SKU 0 / 1 menuye baglanirsa 2500 [dogrulanmadi], ama fiyat format ve boya gore degistigi icin (yd_yapi_kuru.py:10-14) fiyat 3 menuye bagli kalir; olculen 400 durumu sku = price = 3 menu (REFERANS_ILAN_CL.md:49) | SKU baglama + sema + yonlendirici: SKU semasi ve siparis yonlendirici degismeden uygulanamaz; kod isi | 5.1-2 ile ayni |
+| 5.1-4 | Ayri ilanlar kalir; yalniz capraz baglanti / bolum | degismez | A 390 ya da B 140; YD 140 | degismez | yok | gecmis korunur; BU ISTEGI YENIDEN ACAR (Serdar'in birlestirme istegi karsilanmaz) |
+
+(a) mevcut ilana ekleme ve (b) yeni tek ilan + eskileri kapatma, ikisi de AYNI menu ve 400 sinirina tabidir; tablo ikisine de uygulanir.
+(a) icin duzeltme oncesi metindeki (6e020e3) "uygulanamaz gorunuyor" sozu Taban A'da gecerlidir (455 / 520 / 780 / 1040 > 400); Taban B'de 5.1-1 (210), 5.1-1b (280) ve 5.1-2 (280)
+sinir icinde [hesap]. (b) yolunda kapanacak ilan [kaynak dosya, canli degil]: poster 78 (REFERANS_ILAN_CL.md:8) + YD 78 (data/pod/yd78_ids.csv,
+78 veri satiri, baslik haric) = 156; cift basina 1 yeni ilan acilirsa 78 yeni. Canli sayilar O1(2)'ye baglidir.
+Kapi (her secenekte): ayar dosyasi hedef envanterin TAMAMINI tutar (urun listesi, fiyat, sku); yazimdan once canli envanter yedeklenir, plan
+damgasi kilitlenir (yd_yapi_yaz.py:1-4, :123-148 deseni); envanter PUT ?max_variations_supported=3 (yd_yapi_yaz.py:56, :254). Galeri: ilan
+basina 20 gorsel (kapak_yukle_78.py:58); iki urunun galerisi tek ilanda paylasilir.
+5.2 (couple mug 78 + sade 12): kupa 8 stil x 2 boy = 16 urun (kupa_galeri78.py:73); sade ilanlarin menu yapisi depoda olculmedi. Sinir sorun
+gorunmuyor; karar menu sayisi ve SKU eslemesine bagli; O1(2) sonrasi ayni tabloyla yazilir.
+Oneri (karar Serdar'in): once O1(2) ile canli poster tabani (A ya da B) olculsun. Taban A'da hicbir birlestirme secenegi 400 icinde degil.
+Taban B'de 5.1-1 (210), 5.1-1b (280) ve 5.1-2 (280) sinir icinde; ucu de SKU / yonlendirici kod isi ister. YD stilleri korunacaksa 5.1-2,
+YD dijital korunacaksa 5.1-1b ya da 5.1-2. 5.1-4 bu istegi yeniden acar.
 
 ## 6. Istek tahmini (yeni ilan, tek gecis)
 
@@ -249,32 +294,68 @@ Ek azaltma secenegi (bu planin disinda, olculmedi): son okumada /listings/batch 
 
 | # | Adim | Etsy | Sure [tahmin] |
 |---|---|---|---|
-| O1 | AYRI ONAYLA salt okuma olcumu: 5.2 kupa ve sade ilanlarinin menu yapisi + urun sayisi; ornament taslaginin alan adlari ve readiness / iade / bolum kimlikleri (yayina_hazir mod=olc, 2-4 istek) | yalniz GET | 30 dk |
-| 1 | urun_ayar.py + sema + ornament78 URUN_AYAR.json (degerler SPEC + olc'den) | yok | 2 sa |
+| O1 | AYRI ONAYLA salt okuma, iki parca (7.1): (1) ornament readiness / iade / bolum DEGERLERI, (2) kupa + sade ve poster + YD menu yapisi ve urun sayisi. Yeni salt okuma betigi gerekirse bu kod asamasidir, ayri onay | yalniz GET | 1 sa, kod dahil [tahmin] |
+| 1 | urun_ayar.py + sema + ornament78 URUN_AYAR.json (degerler SPEC + O1(1); O1 kosmadan SPEC + kaynak dosya, "olculmedi" etiketli) | yok | 2 sa |
 | 2 | Testler: bilinen PASS (tam ayar) + bilinen FAIL (her zorunlu alan bos, kilitli false, sha farkli, panel isi eksik, SPEC ile fark, aciklamada free shipping, sabit kimlik geri gelirse); sahte Etsy O1 olcumundeki alan yapisiyla | yok | 2 sa |
-| 2b | Yeni DUR kapilarinin gercek veriyle kuru olcumu (CLAUDE.md:214-216: sikilastirma tipik ve en kotu veriyle olculur): 78 ornament ayari + mevcut metin, kupa sabitleri; kac ilan DUR verir, neden listesi | yok | 1 sa |
+| 2b | Yeni DUR kapilarinin gercek veriyle kuru olcumu (CLAUDE.md:214-216: sikilastirma tipik ve en kotu veriyle olculur): 78 ornament ayari + S13 sonrasi (canlidan guncellenmis) CSV, kupa sabitleri; bugunku CSV ile 78 yanlis DUR verir (B8); kac ilan DUR verir, neden listesi | yok | 1 sa |
 | 3 | ornament_taslak (ve kupa/by78) govdesini ayardan kurma + kapi cagrisi; mutasyon kaniti | yok | 2 sa |
 | 4 | yayina_hazir beklenenini ayardan turetme; SPEC'in elle kopyasini kaldirma | yok | 1 sa |
 | 5 | Temiz kopya (tam gecmisli) tam test paketi; tek bagimsiz inceleme (en fazla 2 tur); push sonrasi o push'un CI kosulari yesil (CLAUDE.md:217) | yok | 1,5 sa |
 | 6 | Kuru (AG YOK) tek gecis: istek sayisi raporu (6. bolum tahmini ile kiyas) | yok | 30 dk |
-| 7 | Pilot: 1 yeni ilan (urun Serdar secer), ayri onay; sonra yayina_hazir kontrolu | yazar | 1 sa |
+| 7 | Pilot: kod 1 yeni TASLAK acar (urun Serdar secer), ayri onay; yayin S14'e bagli (bugun panelde Serdar); sonra yayina_hazir kontrolu | yazar (taslak) | 1 sa |
 | 8 | 5.1 / 5.2 ayar dosyalari ve secime gore yazim yolu (S1 sonrasi ayri plan) | | ayri |
+
+### 7.1 O1 tasarimi (Duzeltme 1, D2)
+
+Ornament olc zaten kostu: 42486805159 (8 Kas 13:49 UTC, success) [kosu meta]; alan yapisi test_yayina_hazir.py:8-11'de kullaniliyor. Bu
+yuzden adim 2 (sahte Etsy alan yapisi) O1'e bagli degildir; O1(1) yalniz DEGER okumasi icindir. Bugunku yayina_hazir yolu bu deger
+okumasi ve kupa / sade / poster / YD icin yazildigi gibi kosmaz:
+- yayina_hazir tam SPEC ister (yayina_hazir.py:45-48 zorunlu anahtarlar, :94-100 eksikte DUR) ve --ilanlar YEDEK9 biciminde zorunlu (:421);
+  kupa, sade, poster ve YD icin ikisi de yok.
+- mod=olc readiness / iade / bolum DEGERLERINI yazmaz: ornek ilanlar icin yalniz alan adi ve turu (yayina_hazir.py:8-9; alan_turleri :148);
+  yazdigi degerler uretim ortaklari (id, ad, konum :464-465) ve state sayisi.
+- Istek: olc kosusu 5 istek [hesap; nb = 1 (<= 100 ilan) ve hem draft hem active ornek varken] (magaza :442 + batch :451 (100 ilan basina 1, :167-170) + production-partners :465 + properties x2 :477,
+  draft ve active ornek); koddaki tahmin formulu (:446) 1 + nb + 2 = 4 sayar (production-partners eksik). Duzeltme oncesi metindeki (6e020e3) "2-4 istek" yanlisti.
+- Batch istegi bugunku INCLUDES sabitinde envanter icermez (yayina_hazir.py:42); bu Etsy siniri degildir.
+
+Batch envanter ucu: resmi Etsy API referansi bu oturumda okunamadi (www.etsy.com ve developers.etsy.com ag izninde kapali) [dogrulanmadi].
+Depo kaniti: scripts/etsy/magaza_denetim.py:203 /listings/batch includes "Images,Videos,Inventory,Shipping"; magaza-denetim kosusu
+39640900503 (21 Eki, commit 92ed860, :203 orada da ayni) success [kosu meta; cikti okunmadi, envanterin dondugu dogrulanmadi].
+scripts/sosyal/analiz/kupa_pin_metin_v2.py iki surum: 8c9de44 tek ilan getListing ?includes=Inventory (8c9de44:72) ile kostu (39558151134, failure).
+b5060ee batch includes=Inventory (:73) ile yalniz 39558651500'de kostu, failure, neden okunmadi; b5060ee :3-4 "getListing includes Inventory
+kabul etmiyor (21 Eki 1. deneme 400)" der [kod yorumu]. Batch Inventory icin: 1 success (magaza_denetim) + 1 nedeni okunmamis failure. Iki senaryo:
+
+| Parca | Ilan [kaynak] | Senaryo 1: batch Inventory var | Senaryo 2: ilan basi envanter GET |
+|---|---|---|---|
+| (1) ornament degerleri | 78 (liste Drive'da, TEMP/ORNAMENT_TASLAK/DURUM.json yol adi, ornament_galeri9.py:14; Actions okur) | magaza 1 + batch 1 + readiness / iade / bolum tanimlari 3 (emsal ornament_taslak.py:124-133) = 5 | 5 + 78 = 83 |
+| (2) kupa + sade | 78 + 12 (kupa: Drive TEMP/KUPA_ORCHARD_TASLAK_20261019/KUPA_TASLAK_LISTE.csv yol adi (kupa-galeri78-hazir.yml:76; --liste, kupa_galeri78.py:140-147, :1285); sade: 12 = ARIES sablon + 11 (sade_taslak OUT DURUM.json'da yalniz 11 taslak olabilir [dogrulanmadi]; gorev-g:sade_taslak.py:19, :38); kupa listesi Drive'da, Actions okur) | magaza 1 + batch 1 = 2 | 2 + 90 = 92 |
+| (2) poster + YD | 78 + 78 (data/pod/pod78_ids.csv, data/pod/yd78_ids.csv) | magaza 1 + batch 2 = 3 | 3 + 156 = 159 |
+| Toplam | 324 | 10 | 334 |
+
+Uclar: ilan alanlari (return_policy_id, shop_section_id) batch'ten; readiness deger envanter offering'inde (ornament_taslak.py:510); envanter GET
+emsali kupa_galeri78.py:357, yd_yapi_yaz.py:163. Kota: her kosu basinda kalan >= tahmin + KOTA_SINIRI 10 (CLAUDE.md:49). Ilan kimlikleri plana
+yazilmaz. Yeni salt okuma betigi (ya da olc degisikligi) kod asamasidir, ayri onay.
+Bagimlilik: adim 1 (ornament78 URUN_AYAR degerleri) O1(1)'e bagli (depo karsiligi ORN_ETSY_AYAR.json:5, :9, :11 [kaynak dosya, canli degil]);
+adim 2 O1'e bagli degil (alan yapisi olc 42486805159'dan); 5.1 / 5.2 secimi (S1) O1(2)'ye baglidir. O1 kosmadan adim 1 yalniz SPEC ve
+kaynak dosya degerleriyle, "olculmedi" etiketiyle ilerleyebilir.
 
 ## 8. Acik sorular (Serdar)
 
 | # | Soru | Oneri |
 |---|---|---|
-| S1 | 5.1/5.2 "birlestirme": mevcut ilana varyasyon (a) mi, yeni ilan + eskileri kapatma (b) mi? | O1 olcumunden sonra karar; gecmis korunmasi onemliyse (a) |
+| S1 | 5.1/5.2 "birlestirme": mevcut ilana varyasyon (a) mi, yeni ilan + eskileri kapatma (b) mi? | 5. bolum secenek tablosu (5.1-1 .. 5.1-4); once O1(2) ile canli taban, karar Serdar'in; 5.1-4 bu istegi yeniden acar |
 | S2 | Ayar dosyasinin yeri docs/urun/<URUN>/URUN_AYAR.json uygun mu? | evet |
-| S3 | GPSR API'de dogrulanamiyor; panel on isi kaniti "Serdar beyani + tarih" kabul mu? | evet, kaynak turu "beyan" diye yazilsin |
+| S3 | GPSR API'de dogrulanamiyor; panel on isi kaniti "Serdar beyani + tarih" kabul mu? | evet; beyan urun + uretim ortagi id + tarihe baglanir (oneri; ortak degisirse yeniden beyan; ornek: ornament ortagi 5817638 United States'ten 5870733 Latvia'ya degisti). Beyan yalniz GPSR icin; baska on ise uygulanirsa gevsetme olur |
 | S4 | Onay sozu ve tarihi gizli Drive'da, depoda yalniz sha: uygun mu? | evet (oneri 4 ile uyumlu) |
 | S5 | ORN_ETSY_AYAR.json emekliye ayrilsin mi (yerine URUN_AYAR)? | evet, kod gecisi bitince ayri onayla |
-| S6 | Ornament'ta kalan taslaklar icin ayar dosyasi bugunku canli degerlerle mi doldurulsun? | evet; once O1 ile canli okuma, sonra kilit |
+| S6 | Ornament'ta kalan taslaklar icin ayar dosyasi bugunku canli degerlerle mi doldurulsun? | evet; once O1(1) (yeni salt okuma, ayri onay), sonra kilit |
 | S7 | sade_taslak (sign mug, yalniz gorev-g dalinda) 5.2 icin main'e alinsin mi, yoksa ortak yazicidan mi gecsin? | ortak yazici + ayar dosyasi; SABLON kopyalama yerine ayar |
 | S8 | Kimlik ve fiyat sabitleri tum betiklerden ayara tasinsin mi (kupa, by78 dahil), yoksa yalniz yeni urunlerde mi? | yeni urunlerde zorunlu; eskiler dokunulduklari isle birlikte |
 | S9 | Yeni urun yaziminda metin kapisi ENGEL modu zorunlu olsun mu (ayri onay gerekir, etsy_common.py:252-253)? | evet; canli 5.1 / 5.2 ilanlarina uygulanmadan once salt okuma taramasi. "free shipping" yasagi METIN_KESIN'e (tum urunler, alt metin dahil: etsy_common.py:249-251) EKLENMEZ: onayli poster alt metni "made to order and free shipping" (data/pod/galeri_v11_alt.csv:6) ve poster profili "POD Prints - Free Shipping" (docs/POD_LISTING_TEMPLATE.md:224) DUR verirdi. Yasak urune ozgu: URUN_AYAR.aciklama_yasak, SPEC regex'iyle ayni (free shipping, ships free, free delivery; ORN_YAYIN_SPEC.json:15) |
 | S10 | pod_listing_create'teki Hahnemuhle / жикле sabitleri (B4) ayri iste temizlensin mi (is akisi kapali)? | evet, ayri gorev; is akisi acilmadan once |
 | S11 | Sonraki yeni urun (kayitli "pet memorial", dogrulanmadi) bu sistemle mi baslasin? | evet, ilk uygulama ornegi |
 | S12 | 5.1 icin esas kod: main'deki is akislarinin cagirdigi ama main'de olmayan yd2_galeri_yukle (yd-asama2) ve yd_asama1 (yd-asama1) main'e alinsin mi? | evet, ayar kapisiyla birlikte; once dal farki incelemesi |
-| S13 | Ornament kalan taslaklarinda EN metin: "free shipping" iceren 78 aciklama yeni onayli metinle degismeden yazim yok (B8). Metni kim hazirlar? | Merkez taslak, Serdar onayi, sha ayara |
-| S14 | Ornament 78 taslak icin yayin adimi: yeni EN metin + yeni kargo profili tek PATCH ile (taslagi yayina alir) mi yazilsin? | evet, tek yayin kosusu, ayar kilitli + yayina_hazir PASS sonrasi, ayri onayla |
+| S13 | data/pod/ORNAMENT78_METIN.csv aciklama sutunu canlidan salt okumayla guncellensin mi (ornament kalan 23 zinciri bittikten sonra; zincir bu CSV'nin kod / baslik / alt metin sutunlarini okuyor: ornament_galeri9.py:14, :56, ornament_ru_olcu.py:106; aciklama sutununu okuyan ornament_taslak.py:243, :827 (yaz modunda baska CSV yasak))? Yeni EN metin yazilmaz. | evet, zincir bittikten sonra; sha ayara |
+| S14 | Yeni urunlerde de yayin panelde Serdar'da mi, kod yalniz taslak mi acar? | Merkez onerisi: evet (ornament karariyla tutarli); Serdar karari |
+
+Canli durum kaynagi: yayina-hazir kontrol ciktisi; depo CSV/JSON canliyi gostermez.
