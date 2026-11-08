@@ -310,12 +310,13 @@ def yaz(api, shop, out, pair, Y):
     for n in range(1, N_YENI + 1):
         if n in yeni:
             continue
-        say = len(duzgun_bekle(gorseller, None, f"yukleme {n} oncesi", R))
+        _ims = duzgun_bekle(gorseller, None, f"yukleme {n} oncesi", R, yer=1)
+        say = len(_ims); r_ust = max([x.get("rank") or 0 for x in _ims] + [0])
         if say >= 20:
             kaydet(); raise SystemExit(f"DUR: {pair} galeri {say} gorsel (20 siniri), yeni {n} yuklenemez")
         with open(galeri[n - 1], "rb") as fh:
             r = api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (galeri[n - 1].name, fh, "image/jpeg")},
-                              data={"rank": str(say + 1), "alt_text": alt[n - 1]})
+                              data={"rank": str(r_ust + 1), "alt_text": alt[n - 1]})      # en buyuk rank + 1 (gevsetme)
         yeni[n] = int(r["listing_image_id"]); d["yeni"] = {str(k): v for k, v in yeni.items()}; kaydet(); say += 1
     state_oku("2 yeni 14 gorsel")
     rk = {x["listing_image_id"]: x.get("rank") for x in gorseller()}
@@ -382,7 +383,7 @@ def yaz(api, shop, out, pair, Y):
     norm = lambda t: " ".join(html.unescape(str(t or "")).split())  # noqa: E731
     rank_id = {x.get("rank"): x.get("listing_image_id") for x in ims}
     K = {
-        f"{N_YENI} gorsel, rank 1-{N_YENI}": [x.get("rank") for x in ims] == list(range(1, N_YENI + 1)),     # 8 Kas: sona ekleme; kapak 1. olmali
+        f"{N_YENI} gorsel, rank tekrarsiz ve artan": len(ims) == N_YENI and rank_duzgun(ims),   # gevsetme (Serdar 8 Kas); kapak 1. = id sirasi
         "gorseller yeni id sirasi": [x.get("listing_image_id") for x in ims] == [yeni[n] for n in range(1, N_YENI + 1)],
         "eski gorsel yok": not (set(rank_id.values()) & set(eski)),
         "3000x2250": all((x.get("full_width"), x.get("full_height")) == (3000, 2250) for x in ims),
@@ -892,14 +893,22 @@ def olcum(api, shop, out, pair, Y):
 DUZGUN_DENEME, DUZGUN_BEKLE_SN = 8, 5
 
 
-def duzgun_bekle(gorseller, n, adim, R):
-    """8 Kas olcumu (42464635440): Etsy silmede rank'lari GECIKMELI kapatir. Yukleme/silme sonrasi rank'lar 1..n olana kadar okunur."""
+def rank_duzgun(ims, n=None, yer=0):
+    """GEVSETME (Serdar 8 Kas "Evet, gevsetme"): rank'lar tekrarsiz ve kesin artan (1'den baslamasi gerekmez; ARIES_ARIES 42465998439: 2-6),
+    n verilirse gorsel sayisi n; yer > 0 ise en buyuk rank + yer <= 20 (Etsy "ordered 1 - 20", 42463597152)."""
+    r = [x.get("rank") for x in ims]
+    return (None not in r and all(a_ < b_ for a_, b_ in zip(r, r[1:])) and (n is None or len(ims) == n)
+            and (not yer or (max(r) if r else 0) + yer <= 20))
+
+
+def duzgun_bekle(gorseller, n, adim, R, yer=0):
+    """8 Kas olcumu (42464635440): Etsy silmede rank'lari GECIKMELI gunceller. Yukleme/silme sonrasi rank_duzgun olana kadar okunur."""
     for i in range(DUZGUN_DENEME):
         ims = gorseller()
-        if [x.get("rank") for x in ims] == list(range(1, (len(ims) if n is None else n) + 1)):
+        if rank_duzgun(ims, n, yer):
             R.setdefault("duzgun", []).append((adim, i)); return ims
         time.sleep(DUZGUN_BEKLE_SN)
-    raise SystemExit(f"DUR: rank'lar {DUZGUN_DENEME} okumada 1..{len(ims) if n is None else n} olmadi ({adim}): "
+    raise SystemExit(f"DUR: rank'lar {DUZGUN_DENEME} okumada tekrarsiz-artan olmadi ({adim}; n={n}, yer={yer}): "
                      f"{[(x.get('rank'), x.get('listing_image_id')) for x in ims]}")
 
 
@@ -1005,12 +1014,12 @@ def tasi(api, shop, out, pair, Y):
         if n not in yeni_id or yeni_id[n] not in ids:
             if n in yeni_id and yeni_id[n] not in ids and yeni[n] not in ids:
                 kaydet(); raise SystemExit(f"DUR: {pair} hedef {n} galeride yok (elle kontrol)")
-            ims = duzgun_bekle(gorseller, len(ims), f"{n} yukleme oncesi", R)
+            ims = duzgun_bekle(gorseller, len(ims), f"{n} yukleme oncesi", R, yer=1)
             if len(ims) >= 20:
                 kaydet(); raise SystemExit(f"DUR: {pair} galeri {len(ims)} gorsel (20 siniri)")
             with open(galeri[n - 1], "rb") as fh:
                 r = api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (galeri[n - 1].name, fh, "image/jpeg")},
-                                  data={"rank": str(len(ims) + 1), "alt_text": alt[n - 1]})
+                                  data={"rank": str(max(x.get("rank") or 0 for x in ims) + 1), "alt_text": alt[n - 1]})
             yeni_id[n] = int(r["listing_image_id"]); T["yeni_id"] = {str(k): v for k, v in yeni_id.items()}; kaydet()
             durum(f"{n} yuklendi")
         if n in stil_n.keys() and baglar().get(stil_n[n]) != yeni_id[n]:
@@ -1032,7 +1041,7 @@ def tasi(api, shop, out, pair, Y):
         time.sleep(10); ims = gorseller()
     L = api.get(f"/listings/{lid}") or {}
     norm = lambda t: " ".join(html.unescape(str(t or "")).split())  # noqa: E731
-    K = {"14 gorsel, rank 1-14": [x.get("rank") for x in ims] == list(range(1, 15)),
+    K = {"14 gorsel, rank tekrarsiz ve artan": len(ims) == 14 and rank_duzgun(ims),
          "gorseller hedef sirada": [x.get("listing_image_id") for x in ims] == [son(n) for n in range(1, 15)],
          "3000x2250": all((x.get("full_width"), x.get("full_height")) == (3000, 2250) for x in ims),
          "alt metinler": [norm(x.get("alt_text")) for x in ims] == [norm(a) for a in alt],
@@ -1091,6 +1100,7 @@ class Kuru(Kilitli):
         self.kayit, self.Y = [], Y
         self.n = 0
         self.kaydir = False
+        self.ofset = 0             # >0: yeniden numaralama 1 + ofset'ten baslar (8 Kas olcumu, ARIES_ARIES 42465998439: 2-6)
         self.gecikme = 0           # >0: silme sonrasi rank'lar bu kadar goruntu okumasindan sonra 1..N olur (8 Kas olcumu, 42464635440)
         self._bekleyen = 0
         self.sikistir = True       # silme davranisi: 8 Kas iki gercek kosu (42461185221, 42462674399) kalanlari 1..N yeniden numaraladi (30 Eyl
@@ -1185,7 +1195,7 @@ class Kuru(Kilitli):
                 if self._bekleyen:
                     self._bekleyen -= 1
                     if not self._bekleyen:
-                        for k, x in enumerate(sorted(self.ims, key=lambda x: (x["rank"], x["listing_image_id"])), 1):
+                        for k, x in enumerate(sorted(self.ims, key=lambda x: (x["rank"], x["listing_image_id"])), 1 + self.ofset):
                             x["rank"] = k
                 return dict(results=[dict(x) for x in sorted(self.ims, key=lambda x: (x["rank"], x["listing_image_id"]))])
             if path == f"/listings/{lid}/videos":
@@ -1202,7 +1212,7 @@ class Kuru(Kilitli):
             if self.gecikme and r0 is not None:
                 self._bekleyen = self.gecikme
             elif self.sikistir and r0 is not None:        # olcum (8 Kas, 42461185221): kalanlar sirasi korunarak 1..N yeniden numaralandi
-                for k, x in enumerate(sorted(self.ims, key=lambda x: (x["rank"], x["listing_image_id"])), 1):
+                for k, x in enumerate(sorted(self.ims, key=lambda x: (x["rank"], x["listing_image_id"])), 1 + self.ofset):
                     x["rank"] = k
             return {}
         if method == "DELETE" and "/videos/" in path:

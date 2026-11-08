@@ -430,9 +430,8 @@ def main():
         at4.ims.append(dict(listing_image_id=5, rank=15, alt_text="", full_width=1, full_height=1))
         bekle_dur(lambda: g.tasi(at4, "39729443", o, "CANCER_LIBRA", Y), "on kontrol"); assert not [k for k in at4.kayit if k["yazma"]]
         o = Path(t, "ts_bek"); o.mkdir(); D = tasi_durum(o, gercek); at5 = tasi_api(D, True)
-        for x in at5.ims:
-            x["rank"] += 3
-        bekle_dur(lambda: g.tasi(at5, "39729443", o, "CANCER_LIBRA", Y), "1..14 olmadi"); assert not [k for k in at5.kayit if k["yazma"]]
+        at5.ims[1]["rank"] = at5.ims[0]["rank"]                 # esit rank hic duzelmezse yuklemeden DUR
+        bekle_dur(lambda: g.tasi(at5, "39729443", o, "CANCER_LIBRA", Y), "olmadi"); assert not [k for k in at5.kayit if k["yazma"]]
         bekle_dur(lambda: g.tasi(at5, "39729443", o, "LEO_LEO", Y2), "yalniz CANCER_LIBRA")
         # bilinen FAIL: Etsy silmede yeniden numaralamazsa son rank'lar 1-14 olmaz -> geri okuma DUR (kapak 1. degil); yeniden de ayni
         o = Path(t, "ynos"); o.mkdir(); a_n = g.Kuru("39729443", Y); a_n.ilan(Y["CANCER_LIBRA"]); a_n.sikistir = False
@@ -455,7 +454,7 @@ def main():
             def ekg(path, files, data=None, _a=asil_g, _ap=ag_):
                 if path.endswith("/images"):
                     rk_ = sorted(x["rank"] for x in _ap.ims)
-                    assert rk_ == list(range(1, len(rk_) + 1)) and int(data["rank"]) == len(rk_) + 1, (rk_, data["rank"])
+                    assert len(set(rk_)) == len(rk_) and int(data["rank"]) == max(rk_) + 1 <= 20, (rk_, data["rank"])   # gevsetme
                 return _a(path, files, data)
             ag_.post_file = ekg
             R = g.yaz(ag_, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), (gec, R["kontrol"])
@@ -471,6 +470,17 @@ def main():
         bekle_dur(lambda: g.yaz(ak_, "39729443", o, "CANCER_LIBRA", Y), "koptu")
         ak_._call = asil_k2
         R = g.yaz(ak_, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), ("gecikme devam", R["kontrol"])
+        # gevsetme (Serdar 8 Kas): Etsy numaralari 2'den baslatirsa (ARIES_ARIES 42465998439) yaz PASS, yuklemeler en buyuk + 1
+        for gec in (0, 3):
+            o = Path(t, f"yofs{gec}"); o.mkdir(); af = g.Kuru("39729443", Y); af.ilan(Y["CANCER_LIBRA"]); af.ofset = 1
+            af.sikistir = gec == 0; af.gecikme = gec; asil_f = af.post_file
+            def ekf(path, files, data=None, _a=asil_f, _ap=af):
+                if path.endswith("/images"):
+                    assert int(data["rank"]) == max(x["rank"] for x in _ap.ims) + 1 <= 20, (data["rank"],)
+                return _a(path, files, data)
+            af.post_file = ekf
+            R = g.yaz(af, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), (gec, R["kontrol"])
+            assert min(x["rank"] for x in af.ims) >= 1
         # 77 ilanin yaz() yolu Etsy silmede sikistirsa da PASS
         o = Path(t, "ysik"); o.mkdir(); a_s = g.Kuru("39729443", Y); a_s.ilan(Y["CANCER_LIBRA"]); a_s.sikistir = True
         R = g.yaz(a_s, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), ("yaz sikistir", R["kontrol"])
@@ -478,7 +488,7 @@ def main():
         o = Path(t, "o22"); o.mkdir(); D = eski_durum(o); D["sira_v2"] = ["CANCER_LIBRA"]; json.dump(D, open(o / "DURUM9.json", "w"))
         a22 = g.Kuru("39729443", Y2); a22.ilan(Y2["LEO_LEO"]); a22.kuru = False
         R = g.yaz(a22, "39729443", o, "LEO_LEO", Y2); assert all(R["kontrol"].values()), R["kontrol"]
-    print("test_ornament_galeri9: 63/63 PASS")
+    print("test_ornament_galeri9: 65/65 PASS")
 
 
 if __name__ == "__main__":
