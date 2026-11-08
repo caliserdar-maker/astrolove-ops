@@ -2,11 +2,12 @@
 """Ornament "Two Signs, One Shared Symbol" karti, yeni set (Serdar 8 Kas): yayindaki W02 kartinin duzeni (kart_sablon.sembol_kart AYNEN:
 baslik, alt baslik, iki burc + adlari, birlesim cizgisi, ortak sembol, alt not), arka plan yeni setin keteni (AI, bos), uc sembol ve
 birlesim cizgisi ALTIN DOKU ("3 sembol de gold doku olsun", "birlesim cizgisi de altin doku olsun").
-Altin kaynaklar (onceden uretilmis): burclar Drive zodiac_symbols_gold/<burc>_symbol_gold.png, ortak sembol Drive ANA klasoru <CIFT>_ana.png.
+Altin kaynaklar (hazir, yeni doku): burclar POSTER78_CHATGPT_7200x10800 ayni burc posterlerinden kodla kesilmis <burc>_yeni_gold.png
+(poster_burc.py, Drive TEMP/ORNAMENT_POSTER_BURC/20261108_0612_42453767433), ortak sembol Drive ANA_SEMBOL78_KATMAN <CIFT>_ana.png (aynen).
 Duzen kapilari: once orijinal tuval + maskelerle (kupa_uretim/sembol/<CIFT>) kart_sablon kapilari (baglac, yerlesim) kosulur; sonra ayni
 geometriyle altin + keten cizilir.
 kullanim: python sembol_karti.py CIFT zemin.png maske_dizini altin_dizini cikis.jpg
-  altin_dizini: <burc>_symbol_gold.png (kucuk harf) ve <CIFT>_ana.png
+  altin_dizini: <burc>_yeni_gold.png (kucuk harf) ve <CIFT>_ana.png
 """
 import os
 import sys
@@ -36,7 +37,7 @@ K.YAZILAR.clear(); K.SATIRLAR.clear(); K.KUTULAR.clear()
 
 # 2) altin + keten
 zem = Image.open(ZEMIN).convert("RGB").resize((W, H), Image.LANCZOS)
-ALTIN_YOL = {"sol.png": Path(ALTIN) / f"{a_.lower()}_symbol_gold.png", "sag.png": Path(ALTIN) / f"{b_.lower()}_symbol_gold.png",
+ALTIN_YOL = {"sol.png": Path(ALTIN) / f"{a_.lower()}_yeni_gold.png", "sag.png": Path(ALTIN) / f"{b_.lower()}_yeni_gold.png",
              "ana.png": Path(ALTIN) / f"{CIFT}_ana.png"}
 _maske = T.maske
 _baglac = T.baglac
@@ -71,8 +72,7 @@ def altin_maske(yol, h):
     g = Image.open(ALTIN_YOL[ad]).convert("RGBA")
     g = g.crop(g.getchannel("A").point(lambda v: 255 if v > 20 else 0).getbbox())
     g = g.resize((round(g.width * h / g.height), h), Image.LANCZOS)
-    if ad != "ana.png":
-        g = ton_esitle(g)
+    # 8 Kas: burclar posterden yeni dokuda (poster_burc.py), ton islemi YOK (Serdar: Temmuz dokusu olmayacak; ton esitleme de "eski doku")
     _bilgi[ad] = [g.width, g.height]
     return g
 

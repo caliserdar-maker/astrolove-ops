@@ -111,7 +111,6 @@ jobs:
     env:
       D: ${{ needs.hazirla.outputs.D }}
       ANA_KLASOR: 1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD    # ASTROLOVE/ANA_SEMBOL78_KATMAN_20261008 (ornament-78-uretim.yml ile ayni)
-      BURC_KLASOR: 1j9TBPj86_5njsmf_t0v6tczuwcDyLuXu   # zodiac_symbols_gold (ornament-78-uretim.yml ile ayni)
     steps:
       - uses: actions/checkout@v4
         with:
@@ -191,9 +190,10 @@ jobs:
           git fetch -q --depth 1 --filter=blob:none origin "$R" && git checkout -q FETCH_HEAD; cd ..
           mkdir -p /tmp/altin
           python3 -c "import os; c=os.environ['CIFTLER'].split(','); print('\n'.join(sorted({f'{x}_ana.png' for x in c})))" > /tmp/inc_ana.txt
-          python3 -c "import os; c=os.environ['CIFTLER'].split(','); print('\n'.join(sorted({f'{b.lower()}_symbol_gold.png' for x in c for b in x.split('_')})))" > /tmp/inc_burc.txt
+          python3 -c "import os; c=os.environ['CIFTLER'].split(','); print('\n'.join(sorted({f'{b.lower()}_yeni_gold.png' for x in c for b in x.split('_')})))" > /tmp/inc_burc.txt
           rclone copy "gdrive:" /tmp/altin --drive-root-folder-id "$ANA_KLASOR" --files-from /tmp/inc_ana.txt --no-traverse -q 2>>/tmp/rclone_err.txt
-          rclone copy "gdrive:" /tmp/altin --drive-root-folder-id "$BURC_KLASOR" --files-from /tmp/inc_burc.txt --no-traverse -q 2>>/tmp/rclone_err.txt
+          BK=$(python3 -c "import json; print(json.load(open('s/docs/ornament/GALERI9.json'))['sembol_karti']['burc_klasor'])")
+          rclone copy "gdrive:ASTROLOVE/TEMP/$BK" /tmp/altin --files-from /tmp/inc_burc.txt --no-traverse -q 2>>/tmp/rclone_err.txt
           n=$(ls /tmp/altin | wc -l); b=$(cat /tmp/inc_ana.txt /tmp/inc_burc.txt | wc -l); echo "altin $n / $b"; [ "$n" = "$b" ]
           python3 -c "from PIL import Image; import glob; [print(f.split('/')[-1], Image.open(f).size, Image.open(f).mode) for f in sorted(glob.glob('/tmp/altin/*'))]"
       - name: Uretim (ETA; cift basina 14 gorsel + video + OLCUM; kapi)
