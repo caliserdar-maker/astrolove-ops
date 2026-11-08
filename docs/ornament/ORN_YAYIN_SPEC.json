@@ -1,16 +1,17 @@
 {
  "urun": "ornament78",
- "kaynak": "KARARLAR_20261107 (Karar 3 kargo profili 319230731837, S2 Printful Latvia, fiyat 19,90, [ SHIPPING ] cumlesi, S4 RU paketi 39843f4a, S5 olcu W 2.99 / H 2.99 / D 0.1 in), KARARLAR_20261108 (galeri 14 gorsel + video, sira 01 kapak, 02 sembol karti, 10-14 stil; alt metinler ornament_galeri9.alt_metinler)",
+ "kaynak": "KARARLAR_20261107 (Karar 3 kargo profili 319230731837 ve [ SHIPPING ] cumlesi, S2 Printful Latvia, fiyat 19,90, S4 RU paketi 39843f4a, S5 olcu W 2.99 / H 2.99 / D 0.1 in), KARARLAR_20261108 (galeri 14 gorsel + video, sira 01 kapak, 02 sembol karti, 10-14 stil; alt metinler ornament_galeri9.alt_metinler; eski medya YEDEK9), ORNAMENT_KARAR_20261102 (isim kisisellestirmesi), yasak desen ornament_kargo.FREE",
  "beklenen": {
   "shipping_profile_id": 319230731837,
   "uretim_ortagi": "Printful Latvia",
   "uretim_ortagi_id": null,
   "fiyat": 19.90,
+  "kisisellestirme": true,
   "gorsel_sayisi": 14,
   "gorsel2_alt_icerir": "TWO SIGNS, ONE SHARED SYMBOL",
   "video_sayisi": 1,
-  "aciklama_zorunlu": ["Made and shipped by our production partner. You can see the shipping cost and estimated delivery time for your country on this page and at checkout."],
-  "aciklama_yasak": ["free shipping"],
+  "aciklama_zorunlu": ["[ SHIPPING ] Made and shipped by our production partner. You can see the shipping cost and estimated delivery time for your country on this page and at checkout."],
+  "aciklama_yasak": ["free\\s+shipping|ships?\\s+free|free\\s+delivery"],
   "nitelikler": [
    {"property_id": 47626759898, "ad": "Width", "values": ["2.99"], "scale_id": 5},
    {"property_id": 47626759834, "ad": "Height", "values": ["2.99"], "scale_id": 5},
@@ -18,6 +19,7 @@
   ]
  },
  "alt_metin_kaynagi": "ornament_galeri9:alt_metinler",
- "kontrol_edilmeyen": ["stil secimi - gorsel baglari (variation-images)", "kisisellestirme ayari", "5 stil teklif fiyati (envanter)", "GPSR", "gorsel olculeri (3000x2250)", "baslik ve etiketler"],
+ "eski_medya": true,
+ "kontrol_edilmeyen": ["stil secimi - gorsel baglari (variation-images)", "kisisellestirme ayrintilari (zorunlu, karakter siniri, talimat)", "5 stil teklif fiyati ve stok (envanter)", "para birimi", "GPSR", "gorsel olculeri (3000x2250)", "baslik ve etiket icerigi (yalniz yasak desen taranir)", "kargo profilinin ulke ve ucretleri"],
  "ru": {"csv": "data/pod/ORN78_RU.csv", "sha256": "39843f4af64573ea7db2da91fd7358b505aa1425156bc59ede09784445b7db34", "anahtar": "kod"}
 }

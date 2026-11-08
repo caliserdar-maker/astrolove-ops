@@ -1,7 +1,7 @@
 name: yayina-hazir
 # YAYINA HAZIR KONTROLU (SALT OKUMA; Serdar 8 Kas sistem onerisi 2). Kod scripts/etsy/yayina_hazir.py; SPEC (beklenen degerler)
-# ve ilan listesi (Drive) girdi. mod=olc: 2 ilanda batch + properties alan olcumu; mod=kontrol: tum ilanlar -> YAYINA_HAZIR.md.
-# Etsy'ye yazma yok. Istek: kontrol = 1 + ceil(ilan/100) + ilan (nitelik); olc = 4. Kota yetmezse okuma baslamadan DUR.
+# ve ilan listesi (Drive) girdi. mod=olc: tum ilanlar tek batch, 1 draft + 1 active ornek alan olcumu; mod=kontrol: tum ilanlar -> YAYINA_HAZIR.md.
+# Etsy'ye yazma yok. Istek: kontrol = 1 + 1 (uretim ortaklari) + ceil(ilan/100) + ilan (nitelik); olc = 1 + 1 + ceil(ilan/100) + 2. Kota yetmezse okuma baslamadan DUR.
 permissions:
   actions: read
   contents: read
