@@ -249,8 +249,13 @@ class SahteStore:
 def kos(ilanlar_json, ag, *ek, spec=SPEC_YOL):
     d = Path(tempfile.mkdtemp())
     (d / "I.json").write_text(json.dumps(ilanlar_json))
-    eski = (etsy_common.requests.request, y.TokenStore, sys.argv, dict(os.environ))
+    eski = (etsy_common.requests.request, y.TokenStore, sys.argv, dict(os.environ), etsy_common.Etsy.__init__)
     etsy_common.requests.request, y.TokenStore = ag, SahteStore
+    ilk = eski[4]
+
+    def hizli(self, store):                                # yalniz test: tempo beklemesi yok (60 sn kurali; inceleme 6. tur)
+        ilk(self, store); self.pace = 0
+    etsy_common.Etsy.__init__ = hizli
     os.environ.update(TOKEN_FILE="x", ETSY_API_KEY="k", ETSY_SHARED_SECRET="s", ETSY_SHOP_ID="39729443")
     sys.argv = ["yayina_hazir.py", "--spec", str(spec), "--ilanlar", str(d / "I.json"), "--out", str(d / "o"), *ek]
     hata = None
@@ -265,6 +270,7 @@ def kos(ilanlar_json, ag, *ek, spec=SPEC_YOL):
         os.environ.clear(); os.environ.update(eski[3])
         signal.signal(signal.SIGTERM, signal.SIG_DFL)
         y.SINYAL.clear()
+        etsy_common.Etsy.__init__ = eski[4]
     R = json.loads((d / "o/YAYINA_HAZIR.json").read_text()) if (d / "o/YAYINA_HAZIR.json").exists() else None
     return hata, R, d
 

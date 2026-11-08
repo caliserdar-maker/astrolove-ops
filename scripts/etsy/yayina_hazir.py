@@ -261,7 +261,7 @@ def kontrol_et(spec, kod, L, ru_harita, props=None, alt_f=None, eski=None, ortak
         idler = [str(p.get("production_partner_id")) for p in pp]
         ok = (ortak_id is not None and idler == [str(b["uretim_ortagi_id"])] and str(ortak_id) == str(b["uretim_ortagi_id"])
               and [str(p.get("location")) for p in pp] == [b["uretim_ortagi_konum"]])
-        S["uretim ortagi"] = "PASS" if ok else f"FAIL: {[(p.get('production_partner_id'), p.get('partner_name')) for p in pp]}"
+        S["uretim ortagi"] = "PASS" if ok else f"FAIL: {[(p.get('production_partner_id'), p.get('location')) for p in pp]}"
     f = fiyat(L.get("price"))
     S["fiyat"] = "olculemedi: alan yok" if f is None else ("PASS" if abs(f - float(b["fiyat"])) < 0.005 else f"FAIL: {f}")
     if "is_personalizable" not in L:
