@@ -1,1 +1,1 @@
-8 Kas 05:51 UTC yalniz sembol karti ornegi, 2. deneme (mutlak yol)
+8 Kas 05:55 UTC yalniz sembol karti ornegi, 3. deneme (geometri toleransi)

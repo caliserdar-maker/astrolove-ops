@@ -110,7 +110,7 @@ im, o, _, _ = T.sembol_kart(A, B, Path(MASKE) / CIFT, ALT, AB)
 yaz = list(K.YAZILAR)
 if yaz != yaz0 or yaz != ["Two Signs, One Shared Symbol", AB, A, B, ALT]:
     raise SystemExit(f"DUR: metin {yaz}")
-if o["baglac"] != o0["baglac"] or abs(o["sembol"][1] - o0["sembol"][1]) > 2:
+if o["baglac"] != o0["baglac"] or any(abs(p - q) > max(4, 0.02 * q) for p, q in zip(o["sembol"], o0["sembol"])):   # altin ve maske kutusu oranlari az farkli
     raise SystemExit(f"DUR: geometri farkli {o['baglac']} {o0['baglac']} {o['sembol']} {o0['sembol']}")
 im.save(CIKIS, quality=95, subsampling=0)
 print(dict(kart="SEMBOL_ALTIN", cift=CIFT, sembol=o["sembol"], sembol_maske=o0["sembol"], altin=_bilgi,
