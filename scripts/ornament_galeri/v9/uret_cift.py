@@ -194,7 +194,8 @@ def main():
     ap.add_argument("--yalniz-kart", action="store_true")
     a = ap.parse_args()
     if a.maske:
-        KART.update(maske=a.maske, altin=a.altin, zemin=a.zemin, kart_dir=a.kart_dir, yalniz=a.yalniz_kart)
+        R_ = lambda p: str(Path(p).resolve())            # alt surecler cift is klasorunde kosar: yollar mutlak
+        KART.update(maske=R_(a.maske), altin=R_(a.altin), zemin=R_(a.zemin), kart_dir=R_(a.kart_dir), yalniz=a.yalniz_kart)
     ref = json.load(open(a.ref))["set"] if Path(a.ref).exists() else None
     L = [c for c in a.ciftler.split(",") if c]
     Path(a.cikti).mkdir(parents=True, exist_ok=True)
