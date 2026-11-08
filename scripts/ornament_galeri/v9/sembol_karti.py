@@ -118,8 +118,9 @@ im, o, _, _ = T.sembol_kart(A, B, Path(MASKE) / CIFT, ALT, AB)
 yaz = list(K.YAZILAR)
 if yaz != yaz0 or yaz != ["Two Signs, One Shared Symbol", AB, A, B, ALT]:
     raise SystemExit(f"DUR: metin {yaz}")
-# GEVSETME (Serdar 8 Kas "Gevsetme: %3", yalniz bu cift): SAGITTARIUS_VIRGO ana sembol altin dosyasi maskeden 10 px dar (428 / 438)
-GEO_TOL = {"SAGITTARIUS_VIRGO": 0.03}
+# GEVSETME (Serdar 8 Kas, yalniz bu ciftler): ana sembol altin dosyasi ile maske genisligi az farkli. "Gevsetme: %3": SAGITTARIUS_VIRGO
+# (428 / 438); "Evet, iki cifte de %3": GEMINI_PISCES (576 / 563), LIBRA_SAGITTARIUS (476 / 466). AQUARIUS_LEO (%6,1) gevsetilmedi.
+GEO_TOL = {"SAGITTARIUS_VIRGO": 0.03, "GEMINI_PISCES": 0.03, "LIBRA_SAGITTARIUS": 0.03}
 TOL = GEO_TOL.get(CIFT, 0.02)
 if o["baglac"] != o0["baglac"] or any(abs(p - q) > max(4, TOL * q) for p, q in zip(o["sembol"], o0["sembol"])):   # altin ve maske kutusu oranlari az farkli
     # teshis (8 Kas): kart ve ortak sembol kiyasi (sol maske, sag altin alfa) _DUR dosyalarina; cift yine FAIL (Etsy'ye yazilmaz)
