@@ -123,7 +123,8 @@ def main():
             json.dump(D, open(Path(o) / "DURUM9.json", "w"))
             return D
         def sira_api(D):
-            a = g.Kuru("39729443", Y); a.ilan_sira(Y["CANCER_LIBRA"], D["ciftler"]["CANCER_LIBRA"], "CANCER_LIBRA"); return a
+            a = g.Kuru("39729443", Y); a.sikistir = False          # sira modu (8 Kas kapandi) yalniz sikistirmasiz Etsy'de dogruydu; mantik testi
+            a.ilan_sira(Y["CANCER_LIBRA"], D["ciftler"]["CANCER_LIBRA"], "CANCER_LIBRA"); return a
         o = Path(t, "o11"); o.mkdir(); D = eski_durum(o); a11 = sira_api(D)
         R = g.sira(a11, "39729443", o, "CANCER_LIBRA", Y)
         assert all(R["kontrol"].values()), R["kontrol"]
@@ -230,7 +231,7 @@ def main():
             json.dump(D, open(Path(o) / "DURUM9.json", "w")); return D
         def yeni_api(D, sik):
             a = g.Kuru("39729443", Y); a.sikistir = sik; a.ilan_yeniden(Y["CANCER_LIBRA"], D["ciftler"]["CANCER_LIBRA"], "CANCER_LIBRA"); return a
-        for sik in (True, False):
+        for sik in (True,):                       # 8 Kas olcumu (iki gercek kosu): silme kalanlari 1..N yeniden numaralar
             o = Path(t, f"y{sik}"); o.mkdir(); D = yeni_durum(o); ay = yeni_api(D, sik)
             R = g.yeniden(ay, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), (sik, R["kontrol"])
             assert not [k for k in ay.kayit if "/videos" in k["url"] and k["method"] != "GET"]
@@ -257,7 +258,7 @@ def main():
         ab.lid = 4611501158; ab.video_yasak = True
         bekle_dur(lambda: ab._izin("POST", "/shops/39729443/listings/4611501158/videos"), "yeniden modu")
         # inceleme: eski stil gorsellerinin silinmesinde (bagli 5'ten 2.) kopma -> devam PASS, iki silme davranisinda (yaz ve yeniden)
-        for sik in (True, False):
+        for sik in (True,):
             def kop_sil(a):
                 asil = a._call; say = {"n": 0}; bagli = {v["image_id"] for v in a.vis}
                 def kc(method, path, *x, **k):
@@ -301,6 +302,53 @@ def main():
         o = Path(t, "ts2"); o.mkdir(); D = yeni_durum(o); at2 = yeni_api(D, True); ters_yukle(at2)
         bekle_dur(lambda: g.yeniden(at2, "39729443", o, "CANCER_LIBRA", Y), "sirali degil")
         assert not [k for k in at2.kayit if k["url"].endswith("variation-images") and k["method"] != "GET"]
+        # onceki yeniden denemesi bitmis ama 4-5 yer degismis (42462674399) -> yeni deneme taban = onun 14'u, PASS, gecmis kaydi
+        o = Path(t, "yg"); o.mkdir(); D = yeni_durum(o)
+        D["ciftler"]["CANCER_LIBRA"]["yeniden"] = {"basladi": True, "video": [990001], "yeni": {str(n): 80000 + n for n in range(1, 15)}}
+        json.dump(D, open(o / "DURUM9.json", "w")); ag = yeni_api(D, True)
+        assert sorted(x["rank"] for x in ag.ims) == list(range(1, 15)) and ag.ims[3]["rank"] == 5
+        R = g.yeniden(ag, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), R["kontrol"]
+        D2 = json.load(open(o / "DURUM9.json")); assert len(D2["ciftler"]["CANCER_LIBRA"]["yeniden_gecmis"]) == 1 and "CANCER_LIBRA" in D2["sira_v2"]
+        sil = {int(k["url"].rsplit("/", 1)[1]) for k in ag.kayit if k["method"] == "DELETE"}
+        assert sil == {80000 + n for n in range(1, 15)}, sil
+        # inceleme T1: onceki deneme bitmis ve SIRA DOGRU -> yeni deneme yok, yazma yok (devam yolu yalniz geri okur)
+        o = Path(t, "yt1"); o.mkdir(); D = yeni_durum(o)
+        D["ciftler"]["CANCER_LIBRA"]["yeniden"] = {"basladi": True, "video": [990001], "yeni": {str(n): 80000 + n for n in range(1, 15)},
+                                                   "taban": {"ids": sorted([60001] + [60000 + n for n in range(7, 15)] + [70000 + n for n in g.SIRA_DEG]),
+                                                             "bagli": {s_: 60000 + r for s_, r in g.STIL_SIRA.items()}}}
+        json.dump(D, open(o / "DURUM9.json", "w")); at1 = yeni_api(D, True)
+        for x in at1.ims:
+            x["rank"] = x["listing_image_id"] - 80000
+        R = g.yeniden(at1, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), R["kontrol"]
+        assert not [k for k in at1.kayit if k["yazma"]], "sira dogruyken yazim olmamali"
+        # inceleme T2: (a) sonrasi video degismis -> yazmadan DUR
+        o = Path(t, "yt2"); o.mkdir(); D = yeni_durum(o)
+        D["ciftler"]["CANCER_LIBRA"]["yeniden"] = {"basladi": True, "video": [555], "yeni": {str(n): 80000 + n for n in range(1, 15)}}
+        json.dump(D, open(o / "DURUM9.json", "w")); at2 = yeni_api(D, True)
+        bekle_dur(lambda: g.yeniden(at2, "39729443", o, "CANCER_LIBRA", Y), "video 1")
+        assert not [k for k in at2.kayit if k["yazma"]]
+        # inceleme T3: (a) sonrasi on kontrol FAIL, sonraki kosuda taban ezilmez (video geri gelince PASS)
+        at2.vids = [dict(video_id=555, video_state="active")]
+        R = g.yeniden(at2, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), R["kontrol"]
+        # inceleme V1: onceki bitmis denemede video anahtari yok -> taban videosu su anki video, PASS
+        o = Path(t, "yv1"); o.mkdir(); D = yeni_durum(o)
+        D["ciftler"]["CANCER_LIBRA"]["yeniden"] = {"basladi": True, "yeni": {str(n): 80000 + n for n in range(1, 15)}}
+        json.dump(D, open(o / "DURUM9.json", "w")); av1 = yeni_api(D, True)
+        R = g.yeniden(av1, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), R["kontrol"]
+        # bilinen FAIL: Etsy silmede yeniden numaralamazsa son rank'lar 1-14 olmaz -> geri okuma DUR (kapak 1. degil); yeniden de ayni
+        o = Path(t, "ynos"); o.mkdir(); a_n = g.Kuru("39729443", Y); a_n.ilan(Y["CANCER_LIBRA"]); a_n.sikistir = False
+        bekle_dur(lambda: g.yaz(a_n, "39729443", o, "CANCER_LIBRA", Y), "rank 1-14")
+        o = Path(t, "ynos2"); o.mkdir(); D = yeni_durum(o); a_n2 = yeni_api(D, False)
+        bekle_dur(lambda: g.yeniden(a_n2, "39729443", o, "CANCER_LIBRA", Y), "rank 1-14")
+        # sona ekleme: yuklemeler esit rank'a gitmez (her POST rank'i o anki en buyuk rank + 1)
+        o = Path(t, "yeks"); o.mkdir(); a_e = g.Kuru("39729443", Y); a_e.ilan(Y["CANCER_LIBRA"]); onc = {}
+        asil_e = a_e.post_file
+        def eks(path, files, data=None):
+            if path.endswith("/images"):
+                assert int(data["rank"]) == max(x["rank"] for x in a_e.ims) + 1, (data["rank"], max(x["rank"] for x in a_e.ims))
+            return asil_e(path, files, data)
+        a_e.post_file = eks
+        R = g.yaz(a_e, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), R["kontrol"]
         # 77 ilanin yaz() yolu Etsy silmede sikistirsa da PASS
         o = Path(t, "ysik"); o.mkdir(); a_s = g.Kuru("39729443", Y); a_s.ilan(Y["CANCER_LIBRA"]); a_s.sikistir = True
         R = g.yaz(a_s, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), ("yaz sikistir", R["kontrol"])
@@ -308,7 +356,7 @@ def main():
         o = Path(t, "o22"); o.mkdir(); D = eski_durum(o); D["sira_v2"] = ["CANCER_LIBRA"]; json.dump(D, open(o / "DURUM9.json", "w"))
         a22 = g.Kuru("39729443", Y2); a22.ilan(Y2["LEO_LEO"]); a22.kuru = False
         R = g.yaz(a22, "39729443", o, "LEO_LEO", Y2); assert all(R["kontrol"].values()), R["kontrol"]
-    print("test_ornament_galeri9: 44/44 PASS")
+    print("test_ornament_galeri9: 50/50 PASS")
 
 
 if __name__ == "__main__":

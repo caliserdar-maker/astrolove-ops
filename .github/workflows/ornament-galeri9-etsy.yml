@@ -17,7 +17,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: { description: "yedek | kuru | yaz | sira_kuru | sira | yeniden_kuru | yeniden", required: true, default: "yedek" }
+      mod: { description: "yedek | kuru | yaz | yeniden_kuru | yeniden (sira / sira_kuru 8 Kas kapandi)", required: true, default: "yedek" }
       ciftler: { description: "TUMU ya da virgul/bosluk ayrimli CIFT", required: true, default: "CANCER_LIBRA" }
       galeri: { description: "Drive ASTROLOVE/TEMP/<galeri> (ORNAMENT_GALERI9_...)", required: false, default: "" }
       sembol_karti: { description: "KAPALI (8 Kas): sembol karti galeride 2. sirada; true secilirse girdi kapisi DUR", type: boolean, default: false }
@@ -32,7 +32,7 @@ jobs:
       - name: Girdi kapisi
         env: { M: "${{ inputs.mod }}", C: "${{ inputs.ciftler }}", G: "${{ inputs.galeri }}" }
         run: |
-          [[ "$M" =~ ^(yedek|kuru|yaz|sira_kuru|sira|yeniden_kuru|yeniden)$ ]] || { echo "::error::mod"; exit 1; }
+          [[ "$M" =~ ^(yedek|kuru|yaz|yeniden_kuru|yeniden)$ ]] || { echo "::error::mod (sira / sira_kuru 8 Kas kapandi)"; exit 1; }
           [[ "$C" =~ ^[A-Z_,\ ]+$ ]] || { echo "::error::ciftler"; exit 1; }
           [[ -z "$G" || "$G" =~ ^ORNAMENT_GALERI9_[A-Za-z0-9_]+$ ]] || { echo "::error::galeri (ORNAMENT_GALERI9_...)"; exit 1; }
           if [[ "$M" =~ ^(kuru|yaz|sira_kuru|sira|yeniden_kuru|yeniden)$ && -z "$G" ]]; then echo "::error::galeri gerekli"; exit 1; fi
