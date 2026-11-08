@@ -3,9 +3,11 @@ name: ornament-galeri9-etsy
 # Kod scripts/etsy/ornament_galeri9.py (+ test_ornament_galeri9.py). YAYIN YOK; PATCH yalniz acil state=inactive; DELETE yalniz yedekteki eski
 # gorsel / video id'leri.
 # mod=yedek : SALT OKUMA, taslaklarin galeri / video / stil baglari -> Drive TEMP/ORNAMENT_GALERI9_ETSY/YEDEK9.json (+ damgali kopya);
-#             var olan YEDEK9 kaydi ezilmez, yalniz eksik ciftler eklenir. Pilot: CANCER_LIBRA DURUM9 "tamam" olmadan baska cift yazilmaz.
+#             var olan YEDEK9 kaydi ezilmez, yalniz eksik ciftler eklenir. Pilot: CANCER_LIBRA DURUM9 "tamam" ve "sira_v2" olmadan baska cift yazilmaz.
 # mod=kuru  : AG/TOKEN YOK; YEDEK9'dan taklit, gonderilecek istekler KURU_<CIFT>.json
 # mod=yaz   : cift basina eski 11 gorsel + video -> yeni 14 gorsel + video, stil baglari 10-14, tam geri okuma; DURUM9.json kalici
+# Serdar 8 Kas: sembol karti 2. sirada. mod=sira_kuru (ag/token yok, DURUM9'dan taklit) / mod=sira : eski sirayla TAMAM pilotta yalniz
+#             2-6 silinir ve yeni sirayla yuklenir (stil baglari, video, 1 ve 7-14 ayni); DURUM9 sira_v2.
 # Galeri: Drive ASTROLOVE/TEMP/<galeri>/<CIFT>/ (ornament-galeri9 ciktisi, OLCUM PASS zorunlu).
 permissions:
   actions: read
@@ -13,10 +15,10 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: { description: "yedek | kuru | yaz", required: true, default: "yedek" }
+      mod: { description: "yedek | kuru | yaz | sira_kuru | sira", required: true, default: "yedek" }
       ciftler: { description: "TUMU ya da virgul/bosluk ayrimli CIFT", required: true, default: "CANCER_LIBRA" }
       galeri: { description: "Drive ASTROLOVE/TEMP/<galeri> (ORNAMENT_GALERI9_...)", required: false, default: "" }
-      sembol_karti: { description: "15. gorsel sembol karti dahil (Serdar gorsel onayi sonrasi)", type: boolean, default: false }
+      sembol_karti: { description: "KAPALI (8 Kas): sembol karti galeride 2. sirada; true secilirse girdi kapisi DUR", type: boolean, default: false }
 env:
   O: "gdrive:ASTROLOVE/TEMP/ORNAMENT_GALERI9_ETSY"
   SEMBOL_KARTI: ${{ inputs.sembol_karti && '1' || '0' }}
@@ -28,10 +30,12 @@ jobs:
       - name: Girdi kapisi
         env: { M: "${{ inputs.mod }}", C: "${{ inputs.ciftler }}", G: "${{ inputs.galeri }}" }
         run: |
-          [[ "$M" =~ ^(yedek|kuru|yaz)$ ]] || { echo "::error::mod"; exit 1; }
+          [[ "$M" =~ ^(yedek|kuru|yaz|sira_kuru|sira)$ ]] || { echo "::error::mod"; exit 1; }
           [[ "$C" =~ ^[A-Z_,\ ]+$ ]] || { echo "::error::ciftler"; exit 1; }
           [[ -z "$G" || "$G" =~ ^ORNAMENT_GALERI9_[A-Za-z0-9_]+$ ]] || { echo "::error::galeri (ORNAMENT_GALERI9_...)"; exit 1; }
-          if [[ "$M" =~ ^(kuru|yaz)$ && -z "$G" ]]; then echo "::error::galeri gerekli"; exit 1; fi
+          if [[ "$M" =~ ^(kuru|yaz|sira_kuru|sira)$ && -z "$G" ]]; then echo "::error::galeri gerekli"; exit 1; fi
+          if [[ "$M" =~ ^(sira_kuru|sira)$ && "$C" != "CANCER_LIBRA" ]]; then echo "::error::sira modu yalniz CANCER_LIBRA"; exit 1; fi
+          if [ "$SEMBOL_KARTI" = 1 ]; then echo "::error::sembol_karti girdisi kapali (sembol karti 2. sirada)"; exit 1; fi
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
@@ -51,8 +55,8 @@ jobs:
           printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "::add-mask::$GOOGLE_CLIENT_SECRET"; echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - name: Galeri + video (kuru, yaz; kilitsiz)
-        if: ${{ inputs.mod == 'kuru' || inputs.mod == 'yaz' }}
+      - name: Galeri + video (kuru, yaz, sira; kilitsiz)
+        if: ${{ inputs.mod != 'yedek' }}
         env:
           C: ${{ inputs.ciftler }}
           G: ${{ inputs.galeri }}
@@ -63,11 +67,11 @@ jobs:
           for c in $L; do
             rclone copy "gdrive:ASTROLOVE/TEMP/$G/$c" "_img/$c" --include "*_[01][0-9]_*.jpg" --include "*_VIDEO.mp4" --include "*_OLCUM.json" --transfers 8 -q
             n=$((n+1)); g=$(( $(date +%s)-t0 )); echo "indir [$n/$top] $c $(ls _img/$c | wc -l) dosya | gecen $g sn | kalan ~$(( g*(top-n)/n )) sn | %$((100*n/top))"
-            B=$([ "$SEMBOL_KARTI" = 1 ] && echo 17 || echo 16)
+            B=16
             [ "$(ls _img/$c | wc -l)" -ge "$B" ] || echo "::warning::$c medya $(ls _img/$c | wc -l) ($B olmali; ilan DUR-ON ile atlanir)"
           done
       - name: Etsy kilidi (sira bekle, iptal yok; token indirmeden ONCE)
-        if: ${{ inputs.mod != 'kuru' }}
+        if: ${{ inputs.mod != 'kuru' && inputs.mod != 'sira_kuru' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -79,11 +83,11 @@ jobs:
           set -euo pipefail
           umask 077; mkdir -p _work _out
           echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
-          if [ "$M" != "kuru" ]; then rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json; fi
+          if [ "$M" != "kuru" ] && [ "$M" != "sira_kuru" ]; then rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json; fi
           if [ "$M" = "yedek" ]; then rclone copyto "gdrive:ASTROLOVE/TEMP/ORNAMENT_TASLAK/DURUM.json" _work/TASLAK_DURUM.json
             rclone copyto "$O/YEDEK9.json" _work/YEDEK_ONCEKI.json 2>/dev/null && echo "onceki YEDEK9 korunur" || echo "onceki YEDEK9 yok"; fi
           if [ "$M" != "yedek" ]; then rclone copyto "$O/YEDEK9.json" _work/YEDEK9.json || { echo "::error::YEDEK9.json yok (once mod=yedek)"; exit 1; }; fi
-          if [ "$M" = "yaz" ]; then
+          if [ "$M" = "yaz" ] || [ "$M" = "sira" ] || [ "$M" = "sira_kuru" ]; then
             V=$(rclone lsf "$O" --files-only --include DURUM9.json) || { echo "::error::Drive okunamadi"; exit 1; }
             case "$V" in
               "") echo "DURUM9.json yok (ilk yaz kosusu)";;
@@ -115,7 +119,7 @@ jobs:
           if [ "$M" = "yedek" ] && [ -f _out/YEDEK9.json ]; then
             rclone copyto _out/YEDEK9.json "$O/YEDEK9.json" -q && rclone copyto _out/YEDEK9.json "$O/yedek_${DAMGA:?}/YEDEK9.json" -q || D_RC=1
           fi
-          if [ "$M" = "yaz" ] && [ -f _out/DURUM9.json ]; then
+          if { [ "$M" = "yaz" ] || [ "$M" = "sira" ]; } && [ -f _out/DURUM9.json ]; then
             python3 -c 'import json,re,sys; t=open("_out/DURUM9.json").read(); json.loads(t); sys.exit(1 if re.search(r"(token|secret|Bearer)",t,re.I) else 0)' \
               && rclone copyto _out/DURUM9.json "$O/DURUM9.json" -q || D_RC=1
           fi
