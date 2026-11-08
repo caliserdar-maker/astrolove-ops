@@ -1,10 +1,11 @@
 {
  "urun": "ornament78",
- "kaynak": "KARARLAR_20261107 (Karar 3 kargo profili 319230731837 ve [ SHIPPING ] cumlesi, S2 Printful Latvia, fiyat 19,90, S4 RU paketi 39843f4a, S5 olcu W 2.99 / H 2.99 / D 0.1 in), KARARLAR_20261108 (galeri 14 gorsel + video, sira 01 kapak, 02 sembol karti, 10-14 stil; alt metinler ornament_galeri9.alt_metinler; eski medya YEDEK9), ORNAMENT_KARAR_20261102 (isim kisisellestirmesi), yasak desen ornament_kargo.FREE",
+ "kaynak": "KARARLAR_20261107 (Karar 3 kargo profili 319230731837 ve [ SHIPPING ] cumlesi, S2 Printful Latvia, fiyat 19,90, S4 RU paketi 39843f4a, S5 olcu W 2.99 / H 2.99 / D 0.1 in), KARARLAR_20261108 (galeri 14 gorsel + video, sira 01 kapak, 02 sembol karti, 10-14 stil; alt metinler ornament_galeri9.alt_metinler; eski medya YEDEK9), ORNAMENT_KARAR_20261102 (isim kisisellestirmesi), yasak desen ornament_kargo.FREE, uretim ortagi id + konum olc 42486805159 (8 Kas)",
  "beklenen": {
   "shipping_profile_id": 319230731837,
-  "uretim_ortagi": "Printful Latvia",
-  "uretim_ortagi_id": null,
+  "uretim_ortagi": "Printful Latvia (panel ic adi; API acik adi Printing and Fulfillment Partner)",
+  "uretim_ortagi_id": 5870733,
+  "uretim_ortagi_konum": "Latvia",
   "fiyat": 19.90,
   "kisisellestirme": true,
   "gorsel_sayisi": 14,

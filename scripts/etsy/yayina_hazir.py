@@ -42,9 +42,9 @@ SINIF_SIRA = ("YAYINDA (EKSIK VAR)", "HENUZ YAYINLAMAYIN", "YAYINA HAZIR", "YAYI
 INCLUDES = "images,videos,translations,personalization"
 # Zorunlu anahtar SPEC'te BULUNMALI; kontrol istenmiyorsa acikca bos / null yazilir ([] / null / false) ve rapor "YOK" der,
 # sinif "(ZAYIF KONTROL)" olur (inceleme 3. tur: silinen anahtar kontrolu sessizce kaldirmasin).
-B_ZORUNLU = {"shipping_profile_id", "uretim_ortagi", "fiyat", "kisisellestirme", "gorsel_sayisi", "video_sayisi", "aciklama_yasak",
+B_ZORUNLU = {"shipping_profile_id", "uretim_ortagi_id", "uretim_ortagi_konum", "fiyat", "kisisellestirme", "gorsel_sayisi", "video_sayisi", "aciklama_yasak",
              "aciklama_zorunlu", "nitelikler"}
-B_SECMELI = {"uretim_ortagi_id", "gorsel2_alt_icerir"}
+B_SECMELI = {"uretim_ortagi", "gorsel2_alt_icerir"}   # uretim_ortagi: panel ic adi, bilgi (API acik adi dondurur)
 S_ZORUNLU = {"urun", "kaynak", "beklenen", "kontrol_edilmeyen", "eski_medya", "alt_metin_kaynagi", "ru"}
 S_SECMELI = set()
 
@@ -108,7 +108,7 @@ def spec_yukle(yol):
 
 def uygulanan(spec):
     b = spec["beklenen"]
-    u = ["state", "kargo profili", "uretim ortagi (ad + magazadaki tek id" + (", SPEC id" if b.get("uretim_ortagi_id") else "") + ")",
+    u = ["state", "kargo profili", f"uretim ortagi (id {b['uretim_ortagi_id']} + konum {b['uretim_ortagi_konum']}, magazada var)",
          "fiyat (ilan duzeyi)", "kisisellestirme acik" if b["kisisellestirme"] else "kisisellestirme kapali",
          f"{b['gorsel_sayisi']} gorsel, rank tekrarsiz ve artan",
          "tum alt metinler sirasiyla" if spec.get("alt_metin_kaynagi") else
@@ -245,7 +245,9 @@ def video_kontrol(b, vs, eski_v):
 
 def kontrol_et(spec, kod, L, ru_harita, props=None, alt_f=None, eski=None, ortak_id=None):
     """ru_harita: None = RU kontrolu yok; dict = {kod: CSV satiri}. props: None = nitelik okunmadi.
-    eski: (eski gorsel id kumesi, eski video id kumesi) ya da None. ortak_id: magazada SPEC adli tek ortagin id'si.
+    eski: (eski gorsel id kumesi, eski video id kumesi) ya da None. ortak_id: magazada bulunan SPEC ortagi id'si (yoksa None).
+    Olcum (olc 42486805159, 8 Kas): API partner_name panel ic adini degil acik adi ("Printing and Fulfillment Partner") dondurur,
+    iki ortak ayni adli; ayirt eden id ve location (Latvia 5870733, United States 5817638).
     -> sonuclar dict ad -> 'PASS' | 'FAIL: ...' | 'olculemedi: ...'"""
     S = {}
     b = spec["beklenen"]
@@ -257,10 +259,8 @@ def kontrol_et(spec, kod, L, ru_harita, props=None, alt_f=None, eski=None, ortak
     else:
         pp = [p for p in L.get("production_partners") or [] if isinstance(p, dict)]
         idler = [str(p.get("production_partner_id")) for p in pp]
-        ok = sorted(str(p.get("partner_name")) for p in pp) == [b["uretim_ortagi"]]
-        ok = ok and ortak_id is not None and idler == [str(ortak_id)]
-        if ok and b.get("uretim_ortagi_id") is not None:
-            ok = idler == [str(b["uretim_ortagi_id"])]
+        ok = (ortak_id is not None and idler == [str(b["uretim_ortagi_id"])] and str(ortak_id) == str(b["uretim_ortagi_id"])
+              and [str(p.get("location")) for p in pp] == [b["uretim_ortagi_konum"]])
         S["uretim ortagi"] = "PASS" if ok else f"FAIL: {[(p.get('production_partner_id'), p.get('partner_name')) for p in pp]}"
     f = fiyat(L.get("price"))
     S["fiyat"] = "olculemedi: alan yok" if f is None else ("PASS" if abs(f - float(b["fiyat"])) < 0.005 else f"FAIL: {f}")
@@ -396,13 +396,13 @@ def yaz(out, R, spec):
     return m
 
 
-def ortak_bul(api, shop, ad):
-    """Magazadaki uretim ortaklari; SPEC adli TEK kayit -> id. Yoksa ya da birden fazlaysa DUR (ad belirsiz)."""
+def ortak_bul(api, shop, oid, konum):
+    """Magazadaki uretim ortaklari; SPEC id'si TEK kayit ve konumu SPEC ile ayni olmali, yoksa DUR."""
     pp = (api.get(f"/shops/{shop}/production-partners") or {}).get("results") or []
     liste = [(p.get("production_partner_id"), p.get("partner_name"), p.get("location")) for p in pp]
-    es = [x for x in liste if x[1] == ad]
-    if len(es) != 1:
-        raise SystemExit(f"DUR: magazada '{ad}' adli uretim ortagi {len(es)} kayit (tek olmali): {liste}")
+    es = [x for x in liste if str(x[0]) == str(oid)]
+    if len(es) != 1 or str(es[0][2]) != str(konum):
+        raise SystemExit(f"DUR: magazada uretim ortagi id {oid} / konum {konum} bulunamadi ya da farkli: {liste}")
     return es[0][0], liste
 
 
@@ -512,7 +512,7 @@ def main():
     t0 = time.time()
     zayif = zayif_mi(spec)
     try:
-        ortak_id, R["uretim_ortaklari"] = ortak_bul(api, shop, spec["beklenen"]["uretim_ortagi"]); cagri += 1
+        ortak_id, R["uretim_ortaklari"] = ortak_bul(api, shop, spec["beklenen"]["uretim_ortagi_id"], spec["beklenen"]["uretim_ortagi_konum"]); cagri += 1
         B, n = batch(api, [v for _, v in sec]); cagri += n
         for i, (kod, lid) in enumerate(sec, 1):
             L = B.get(lid)

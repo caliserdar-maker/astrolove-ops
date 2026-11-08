@@ -5,7 +5,10 @@ Uctan uca: main() GERCEK Etsy istemcisi (etsy_common.Etsy._call + SaltOkur kota 
 (etsy_common.requests.request) ve token dosyasi sahte. Sahte yanit yapisi: batch translations dict {dil: ceviri}
 (emsal beyan_marka_yaz.ru_ceviri, marka_tara.py), properties results listesi (ornament_ru_olcu olcumu 42468292187),
 production-partners (id, partner_name, location; emsal kupa_taslak.py:204).
-NOT: mod=olc gercek Etsy kosusundan sonra sabit ornek (OLCUM.json) bu teste eklenecek; o zamana kadar yanit yapisi varsayimdir."""
+Yanit yapisi GERCEK olcumden (olc 42486805159, 8 Kas, OLCUM.json): batch translations dict {dil: kayit ya da None} (13 dil),
+production_partners [{production_partner_id, partner_name acik ad, location}], magazada iki ortak ayni adli (Latvia 5870733,
+United States 5817638), properties [{property_id, property_name, scale_id (olcusuzde None), scale_name, value_ids, values}],
+is_personalizable bool, videos[].video_state, images[].listing_image_id / rank / alt_text."""
 import contextlib
 import copy
 import io
@@ -27,23 +30,31 @@ ALT_F = y.alt_kaynak(SPEC)
 B = SPEC["beklenen"]
 KOD = "CANCER_LIBRA"
 ALT = ALT_F(KOD)[0]
-ORTAK = 77
+ORTAK = 5870733
+ACIK_AD = "Printing and Fulfillment Partner"
+DILLER = ["de", "en-GB", "en-IN", "en-US", "es", "fr", "it", "ja", "nl", "pl", "pt", "ru", "sv"]
 ESKI = ({str(101 + i) for i in range(11)}, {"900"})   # eski 11 gorsel id'si, eski video id'si (YEDEK9 yapisi: 11 gorsel, 1 video)
 
 
 def ilan(kod=KOD, lid=4611501158, state="draft"):
     alt = ALT_F(kod)[0]
     return {"listing_id": lid, "state": state, "shipping_profile_id": B["shipping_profile_id"], "is_personalizable": True,
-            "production_partners": [{"production_partner_id": ORTAK, "partner_name": "Printful Latvia", "location": "Latvia"}],
+            "production_partners": [{"production_partner_id": ORTAK, "partner_name": ACIK_AD, "location": "Latvia"}],
             "price": {"amount": 1990, "divisor": 100, "currency_code": "USD"}, "title": "Zodiac Couple Ornament", "tags": ["ornament"],
             "description": "intro\n\n[ SHIPPING ]\nMade and shipped by our production partner. You can see the shipping cost and "
                            "estimated delivery time for your country on this page and at checkout.\n\n[ RETURNS ]\nend",
             "images": [{"listing_image_id": 5000 + i, "rank": i + 1, "alt_text": alt[i]} for i in range(14)],
             "videos": [{"video_id": 7000, "video_state": "active"}],
-            "translations": {"ru": {"language": "ru", "title": RU[kod]["baslik_ru"], "description": RU[kod]["aciklama_ru"]}}}
+            "translations": dict({d: None for d in DILLER},
+                                 **{"en-US": {"listing_id": lid, "language": "en-US", "title": "t", "description": "d", "tags": []},
+                                    "ru": {"listing_id": lid, "language": "ru", "title": RU[kod]["baslik_ru"],
+                                           "description": RU[kod]["aciklama_ru"], "tags": []}})}
 
 
-PROPS = [{"property_id": o["property_id"], "values": o["values"], "scale_id": o["scale_id"]} for o in B["nitelikler"]]
+PROPS = ([{"property_id": 148789511893, "property_name": "Material", "scale_id": None, "scale_name": None, "value_ids": [83],
+            "values": ["Ceramic"]}]
+         + [{"property_id": o["property_id"], "property_name": o["ad"], "scale_id": o["scale_id"], "scale_name": "Inches",
+             "value_ids": [1], "values": o["values"]} for o in B["nitelikler"]])
 
 
 def sinif(L, props=PROPS, spec=SPEC, ru=RU, kod=KOD, eski=ESKI, ortak=ORTAK):
@@ -68,19 +79,24 @@ def birim():
     L = ilan(); L["state"] = "inactive"; assert sinif(L)[0] == "DURUM inactive"; n += 1
     for alan, deger, ad in (("shipping_profile_id", 319194887351, "kargo profili"),
                             ("shipping_profile_id", "abc", "kargo profili"),
-                            ("production_partners", [{"production_partner_id": 5817638, "partner_name": "Prodigi"}], "uretim ortagi"),
+                            ("production_partners", [{"production_partner_id": 5817638, "partner_name": ACIK_AD, "location": "United States"}],
+                             "uretim ortagi"),                                                       # eski ABD ortagi, ayni acik ad
                             ("production_partners", [], "uretim ortagi"),
                             ("price", {"amount": 2990, "divisor": 100}, "fiyat"),
                             ("is_personalizable", False, "kisisellestirme"),
                             ("videos", [], "video")):
         L = ilan(); L[alan] = deger
         s, k = sinif(L); assert s == "HENUZ YAYINLAMAYIN" and ad in k and k[ad].startswith("FAIL"), (alan, s, k); n += 1
-    L = ilan(); L["production_partners"][0]["production_partner_id"] = 99                     # ad dogru, magazadaki id degil
+    L = ilan(); L["production_partners"][0]["location"] = "United States"                     # id dogru, konum farkli
+    assert sinif(L)[1]["uretim ortagi"].startswith("FAIL"); n += 1
+    L = ilan(); L["translations"]["ru"] = None; assert sinif(L)[1].get("RU") == "FAIL: RU yok"; n += 1   # olculen bicim: RU yok = None
+    L = ilan(); L["production_partners"][0]["production_partner_id"] = 99                     # ad ve konum dogru, id degil
     assert sinif(L)[1]["uretim ortagi"].startswith("FAIL"); n += 1
     assert sinif(ilan(), ortak=None)[1]["uretim ortagi"].startswith("FAIL"); n += 1           # magaza id'si yok -> PASS olmaz
     sp = copy.deepcopy(SPEC); sp["beklenen"]["uretim_ortagi_id"] = 99
     assert "uretim ortagi" in sinif(ilan(), spec=sp)[1]; n += 1
     sp["beklenen"]["uretim_ortagi_id"] = ORTAK; assert sinif(ilan(), spec=sp)[0] == "YAYINA HAZIR"; n += 1
+    assert "uretim_ortagi_konum" in spec_dene(lambda s: s["beklenen"].pop("uretim_ortagi_konum")); n += 1
     # metin: yasak desen baslik / aciklama / etiket, zorunlu cumle ve [ SHIPPING ] basligi
     for alan, deger in (("description", "with Free  Shipping "), ("title", "Ornament ships free "), ("tags", ["free delivery"])):
         L = ilan(); L[alan] = (deger + L[alan]) if isinstance(deger, str) else deger
@@ -131,10 +147,10 @@ def birim():
     L = ilan(); L["translations"] = {"de": {"language": "de", "title": "t", "description": "d"}}
     assert sinif(L)[1].get("RU") == "FAIL: RU yok"; n += 1
     # nitelik
-    p = copy.deepcopy(PROPS); p[2]["values"] = ["0.2"]; assert "nitelik Depth" in sinif(ilan(), p)[1]; n += 1
-    p = copy.deepcopy(PROPS); p[0]["values"] = [2.99]; assert sinif(ilan(), p)[0] == "YAYINA HAZIR"; n += 1
-    p = copy.deepcopy(PROPS); p[1]["scale_id"] = 7; assert "nitelik Height" in sinif(ilan(), p)[1]; n += 1
-    assert sinif(ilan(), PROPS[:2])[1].get("nitelik Depth") == "FAIL: yok"; n += 1
+    p = copy.deepcopy(PROPS); p[3]["values"] = ["0.2"]; assert "nitelik Depth" in sinif(ilan(), p)[1]; n += 1
+    p = copy.deepcopy(PROPS); p[1]["values"] = [2.99]; assert sinif(ilan(), p)[0] == "YAYINA HAZIR"; n += 1
+    p = copy.deepcopy(PROPS); p[2]["scale_id"] = 7; assert "nitelik Height" in sinif(ilan(), p)[1]; n += 1
+    assert sinif(ilan(), PROPS[:3])[1].get("nitelik Depth") == "FAIL: yok"; n += 1
     s, k = sinif(ilan(), None); assert s == "HENUZ YAYINLAMAYIN" and k["nitelik"].startswith("olculemedi"), (s, k); n += 1
     # alan yok -> olculemedi
     for alan, ad in (("shipping_profile_id", "kargo profili"), ("production_partners", "uretim ortagi"), ("images", "gorsel"),
@@ -196,8 +212,8 @@ class SahteAg:
     def __init__(self, ilanlar, kalan, adim=1, ortaklar=None):
         self.ilanlar, self.kalan, self.istek, self.adim = ilanlar, kalan, [], adim   # adim 2: paralel baska kosu kota yiyor
         self.ortaklar = ortaklar if ortaklar is not None else [
-            {"production_partner_id": ORTAK, "partner_name": "Printful Latvia", "location": "Latvia"},
-            {"production_partner_id": 5817638, "partner_name": "Printing and Fulfillment Partner", "location": "United States"}]
+            {"production_partner_id": ORTAK, "partner_name": ACIK_AD, "location": "Latvia"},
+            {"production_partner_id": 5817638, "partner_name": ACIK_AD, "location": "United States"}]
 
     def __call__(self, method, url, params=None, **kw):
         assert method == "GET", method
@@ -315,7 +331,10 @@ def uctan_uca():
     assert x["sinif"] == "HENUZ YAYINLAMAYIN" and x["eksik"]["nitelik"].startswith("olculemedi"); n += 1
     # magazada ortak adi tek degil -> DUR, yarim cikti isaretli
     hata, R, _ = kos(I, SahteAg(il, 1000, ortaklar=[]), "--mod", "kontrol")
-    assert hata and "uretim ortagi 0 kayit" in hata and R and R["yarim"].startswith("SystemExit"), hata; n += 1
+    assert hata and "bulunamadi" in hata and R and R["yarim"].startswith("SystemExit"), hata; n += 1
+    hata, R, _ = kos(I, SahteAg(il, 1000, ortaklar=[{"production_partner_id": ORTAK, "partner_name": ACIK_AD, "location": "United States"}]),
+                     "--mod", "kontrol")
+    assert hata and "bulunamadi ya da farkli" in hata, hata; n += 1
     # kota baslangicta yetmiyor -> okuma yok
     ag = SahteAg(il, 90)                                   # 89 < 81 + 10
     hata, R, _ = kos(I, ag, "--mod", "kontrol")
@@ -388,8 +407,8 @@ def uctan_uca():
     hata, _, d = kos(I, ag, "--mod", "olc")
     O = json.loads((d / "o/OLCUM.json").read_text())
     assert hata is None and len(ag.istek) == 5 and O["donen"] == 78 and sorted(O["ornek"]) == ["active", "draft"], (hata, len(ag.istek)); n += 1
-    assert O["ornek"]["draft"]["translations_anahtar"] == ["ru"] and "images[0].listing_image_id" in O["ornek"]["draft"]["batch_alanlar"]; n += 1
-    assert [x[1] for x in O["uretim_ortaklari"]] == ["Printful Latvia", "Printing and Fulfillment Partner"]; n += 1
+    assert O["ornek"]["draft"]["translations_anahtar"] == DILLER and "images[0].listing_image_id" in O["ornek"]["draft"]["batch_alanlar"]; n += 1
+    assert [x[2] for x in O["uretim_ortaklari"]] == ["Latvia", "United States"]; n += 1
     il2 = {k: v for k, v in il.items() if v["state"] == "active"}                               # batch taslaklari dondurmuyor
     hata, _, d = kos(I, SahteAg(il2, 1000), "--mod", "olc")
     O = json.loads((d / "o/OLCUM.json").read_text())
