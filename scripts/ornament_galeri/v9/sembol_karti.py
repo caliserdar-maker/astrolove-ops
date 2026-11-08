@@ -122,6 +122,19 @@ if yaz != yaz0 or yaz != ["Two Signs, One Shared Symbol", AB, A, B, ALT]:
 GEO_TOL = {"SAGITTARIUS_VIRGO": 0.03}
 TOL = GEO_TOL.get(CIFT, 0.02)
 if o["baglac"] != o0["baglac"] or any(abs(p - q) > max(4, TOL * q) for p, q in zip(o["sembol"], o0["sembol"])):   # altin ve maske kutusu oranlari az farkli
+    # teshis (8 Kas): kart ve ortak sembol kiyasi (sol maske, sag altin alfa) _DUR dosyalarina; cift yine FAIL (Etsy'ye yazilmaz)
+    _cik = Path(CIKIS)
+    im.save(_cik.with_name(_cik.stem + "_DUR.jpg"), quality=90)
+    _m = Image.open(Path(MASKE) / CIFT / "ana.png").convert("RGBA").getchannel("A")
+    _g = Image.open(ALTIN_YOL["ana.png"]).convert("RGBA").getchannel("A")
+    _par = []
+    for _x in (_m, _g, _g.point(lambda v: 255 if v > 3 else 0)):
+        _x = _x.crop(_x.point(lambda v: 255 if v > 20 else 0).getbbox() or (0, 0) + _x.size)
+        _par.append(_x.resize((round(_x.width * 600 / _x.height), 600), Image.LANCZOS))
+    _k = Image.new("L", (sum(x.width for x in _par) + 80, 640), 40); _x0 = 20
+    for _x in _par:
+        _k.paste(_x, (_x0, 20)); _x0 += _x.width + 20
+    _k.save(_cik.with_name(_cik.stem + "_DUR_KIYAS.jpg"), quality=90)
     raise SystemExit(f"DUR: geometri farkli {o['baglac']} {o0['baglac']} {o['sembol']} {o0['sembol']}")
 im.save(CIKIS, quality=95, subsampling=0)
 print(dict(kart="SEMBOL_ALTIN", cift=CIFT, geo_tol=TOL, sembol=o["sembol"], sembol_maske=o0["sembol"], altin=_bilgi,

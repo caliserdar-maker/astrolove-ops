@@ -87,11 +87,23 @@ if not BOL:
     bol_ciz = orta_ciz
 # punto: bant icine sigan en buyuk (baslik 240'tan, alt satir 78'den asagi)
 kat = Image.new("L", (W, H), 0); d = ImageDraw.Draw(kat)
+
+
+def sigar(metin, f, iz=0.0):
+    """8 Kas: ilerleme genisligi yetmez (A harfi solda 1 px tasiyordu, ARIES_TAURUS 799); cizilen pikseller de bant icinde olmali"""
+    if not bol_ciz(metin, f, 0, d, iz=iz, ciz=False)[0]:
+        return False
+    t = Image.new("L", (W, 400), 0)
+    bol_ciz(metin, f, 300, ImageDraw.Draw(t), iz=iz)
+    bb = t.getbbox()
+    return bb is not None and bb[0] >= BANT[0] and bb[2] <= BANT[1]
+
+
 b1 = 240
-while not bol_ciz(UST_S, font(F1 + "CormorantGaramond.ttf", b1, 500), 0, d, ciz=False)[0]:
+while not sigar(UST_S, font(F1 + "CormorantGaramond.ttf", b1, 500)):
     b1 -= 2
 b2 = 78
-while not bol_ciz(ALT_OLCU, font(F1 + "Manrope.ttf", b2, 600), 0, d, iz=0.16, ciz=False)[0]:
+while not sigar(ALT_OLCU, font(F1 + "Manrope.ttf", b2, 600), iz=0.16):
     b2 -= 2
 f1, f2 = font(F1 + "CormorantGaramond.ttf", b1, 500), font(F1 + "Manrope.ttf", b2, 600)
 # dikey: baslik ustu 70 px; alt satir baslik alti ile disk ustu arasinda ortali
