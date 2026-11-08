@@ -17,7 +17,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: { description: "yedek | kuru | yaz | yeniden_kuru | yeniden (sira / sira_kuru 8 Kas kapandi)", required: true, default: "yedek" }
+      mod: { description: "yedek | kuru | yaz | yeniden_kuru | yeniden | olcum (sira / sira_kuru 8 Kas kapandi)", required: true, default: "yedek" }
       ciftler: { description: "TUMU ya da virgul/bosluk ayrimli CIFT", required: true, default: "CANCER_LIBRA" }
       galeri: { description: "Drive ASTROLOVE/TEMP/<galeri> (ORNAMENT_GALERI9_...)", required: false, default: "" }
       sembol_karti: { description: "KAPALI (8 Kas): sembol karti galeride 2. sirada; true secilirse girdi kapisi DUR", type: boolean, default: false }
@@ -32,11 +32,11 @@ jobs:
       - name: Girdi kapisi
         env: { M: "${{ inputs.mod }}", C: "${{ inputs.ciftler }}", G: "${{ inputs.galeri }}" }
         run: |
-          [[ "$M" =~ ^(yedek|kuru|yaz|yeniden_kuru|yeniden)$ ]] || { echo "::error::mod (sira / sira_kuru 8 Kas kapandi)"; exit 1; }
+          [[ "$M" =~ ^(yedek|kuru|yaz|yeniden_kuru|yeniden|olcum)$ ]] || { echo "::error::mod (sira / sira_kuru 8 Kas kapandi)"; exit 1; }
           [[ "$C" =~ ^[A-Z_,\ ]+$ ]] || { echo "::error::ciftler"; exit 1; }
           [[ -z "$G" || "$G" =~ ^ORNAMENT_GALERI9_[A-Za-z0-9_]+$ ]] || { echo "::error::galeri (ORNAMENT_GALERI9_...)"; exit 1; }
-          if [[ "$M" =~ ^(kuru|yaz|sira_kuru|sira|yeniden_kuru|yeniden)$ && -z "$G" ]]; then echo "::error::galeri gerekli"; exit 1; fi
-          if [[ "$M" =~ ^(sira_kuru|sira|yeniden_kuru|yeniden)$ && "$C" != "CANCER_LIBRA" ]]; then echo "::error::sira / yeniden modu yalniz CANCER_LIBRA"; exit 1; fi
+          if [[ "$M" =~ ^(kuru|yaz|sira_kuru|sira|yeniden_kuru|yeniden|olcum)$ && -z "$G" ]]; then echo "::error::galeri gerekli"; exit 1; fi
+          if [[ "$M" =~ ^(sira_kuru|sira|yeniden_kuru|yeniden|olcum)$ && "$C" != "CANCER_LIBRA" ]]; then echo "::error::sira / yeniden modu yalniz CANCER_LIBRA"; exit 1; fi
           if [ "$SEMBOL_KARTI" = 1 ]; then echo "::error::sembol_karti girdisi kapali (sembol karti 2. sirada)"; exit 1; fi
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -89,7 +89,7 @@ jobs:
           if [ "$M" = "yedek" ]; then rclone copyto "gdrive:ASTROLOVE/TEMP/ORNAMENT_TASLAK/DURUM.json" _work/TASLAK_DURUM.json
             rclone copyto "$O/YEDEK9.json" _work/YEDEK_ONCEKI.json 2>/dev/null && echo "onceki YEDEK9 korunur" || echo "onceki YEDEK9 yok"; fi
           if [ "$M" != "yedek" ]; then rclone copyto "$O/YEDEK9.json" _work/YEDEK9.json || { echo "::error::YEDEK9.json yok (once mod=yedek)"; exit 1; }; fi
-          if [ "$M" = "yaz" ] || [ "$M" = "sira" ] || [ "$M" = "sira_kuru" ] || [ "$M" = "yeniden" ] || [ "$M" = "yeniden_kuru" ]; then
+          if [ "$M" = "yaz" ] || [ "$M" = "sira" ] || [ "$M" = "sira_kuru" ] || [ "$M" = "yeniden" ] || [ "$M" = "yeniden_kuru" ] || [ "$M" = "olcum" ]; then
             V=$(rclone lsf "$O" --files-only --include DURUM9.json) || { echo "::error::Drive okunamadi"; exit 1; }
             case "$V" in
               "") echo "DURUM9.json yok (ilk yaz kosusu)";;
@@ -121,7 +121,7 @@ jobs:
           if [ "$M" = "yedek" ] && [ -f _out/YEDEK9.json ]; then
             rclone copyto _out/YEDEK9.json "$O/YEDEK9.json" -q && rclone copyto _out/YEDEK9.json "$O/yedek_${DAMGA:?}/YEDEK9.json" -q || D_RC=1
           fi
-          if { [ "$M" = "yaz" ] || [ "$M" = "sira" ] || [ "$M" = "yeniden" ]; } && [ -f _out/DURUM9.json ]; then
+          if { [ "$M" = "yaz" ] || [ "$M" = "sira" ] || [ "$M" = "yeniden" ] || [ "$M" = "olcum" ]; } && [ -f _out/DURUM9.json ]; then
             python3 -c 'import json,re,sys; t=open("_out/DURUM9.json").read(); json.loads(t); sys.exit(1 if re.search(r"(token|secret|Bearer)",t,re.I) else 0)' \
               && rclone copyto _out/DURUM9.json "$O/DURUM9.json" -q || D_RC=1
           fi

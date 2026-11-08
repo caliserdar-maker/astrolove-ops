@@ -345,6 +345,51 @@ def main():
         R = g.yeniden(a13y, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), R["kontrol"]
         yk = [k for k in a13y.kayit if k.get("dosya")]
         assert len(yk) == 1 and int(yk[0]["form"]["rank"]) == 19, yk
+        # olcum: gercek durum (eski 5 bagli rank 1-5, yeni 1-13 rank 8-20, yeni 14 rank 19) -> B, C, D (E yok)
+        o = Path(t, "olc"); o.mkdir(); D = yeni_durum(o)
+        D["ciftler"]["CANCER_LIBRA"]["yeniden"] = {"basladi": True, "video": [990001],
+            "taban": {"ids": [], "bagli": {s_: 90000 + r for s_, r in g.STIL_SIRA.items()}}, "yeni": {str(n): 91000 + n for n in range(1, 15)}}
+        json.dump(D, open(o / "DURUM9.json", "w"))
+        ao = g.Kuru("39729443", Y); ao.ilan(Y["CANCER_LIBRA"]); ao.sikistir = False
+        a_o = dict(zip(g.GALERI, g.alt_metinler("CANCER_LIBRA")[0]))
+        ao.ims = [dict(listing_image_id=90000 + r, rank=k, alt_text="e", full_width=3000, full_height=2250) for k, r in enumerate(g.STIL_SIRA.values(), 1)]
+        ao.ims += [dict(listing_image_id=91000 + n, rank=7 + n if n < 14 else 19, alt_text=a_o[g.GALERI[n - 1]], full_width=3000, full_height=2250) for n in range(1, 15)]
+        ao.vids = [dict(video_id=990001, video_state="active")]
+        ao.vis = [dict(property_id=g.P_STYLE, value_id=Y["CANCER_LIBRA"]["stil"][s_], image_id=90000 + r) for s_, r in g.STIL_SIRA.items()]
+        asil_sim = ao._sim
+        def sim_norm(m, p, js):                    # silme sonrasi Etsy'nin 1..N normallestirdigi varsayimi (olcumun amaci bunu gormek)
+            r = asil_sim(m, p, js)
+            if m == "DELETE" and "/images/" in p:
+                for k, x in enumerate(sorted(ao.ims, key=lambda x: (x["rank"], x["listing_image_id"])), 1):
+                    x["rank"] = k
+            return r
+        ao._sim = sim_norm
+        R = g.olcum(ao, "39729443", o, "CANCER_LIBRA", Y)
+        O = json.load(open(o / "O9_CANCER_LIBRA.json")); assert "A baslangic" in O["okuma"] and "D 15 sn sonra" in O["okuma"]
+        assert not [k for k in ao.kayit if "/videos" in k["url"] and k["method"] != "GET"]
+        yaz_ = [k for k in ao.kayit if k["yazma"]]
+        assert len([k for k in yaz_ if k["method"] == "DELETE"]) == 5 and not [k for k in yaz_ if k.get("dosya")], "yalniz B ve C"
+        assert {int(k["url"].rsplit("/", 1)[1]) for k in yaz_ if k["method"] == "DELETE"} == {90000 + r for r in g.STIL_SIRA.values()}
+        assert {x["image_id"] for x in ao.vis} == {91000 + r for r in g.STIL_SIRA.values()}
+        D3 = json.load(open(o / "DURUM9.json"))["ciftler"]["CANCER_LIBRA"]["yeniden"]
+        assert D3["olcum"]["bc"] and sorted(D3["taban"]["ids"]) == [91000 + n for n in range(1, 15)]
+        n0 = len(ao.kayit); g.olcum(ao, "39729443", o, "CANCER_LIBRA", Y); assert not [k for k in ao.kayit[n0:] if k["yazma"]]   # tekrar: atlar
+        # olcum: B sonrasi active -> acil inactive + DUR
+        o = Path(t, "olc2"); o.mkdir(); json.dump(D, open(o / "DURUM9.json", "w"))
+        ao2 = g.Kuru("39729443", Y); ao2.ilan(Y["CANCER_LIBRA"]); ao2.ims = [dict(x) for x in ao.ims]; ao2.vids = list(ao.vids)
+        ao2.ims = [dict(listing_image_id=90000 + r, rank=k, alt_text="e", full_width=3000, full_height=2250) for k, r in enumerate(g.STIL_SIRA.values(), 1)] + \
+                  [dict(listing_image_id=91000 + n, rank=7 + n, alt_text="x", full_width=3000, full_height=2250) for n in range(1, 15)]
+        ao2.vis = [dict(property_id=g.P_STYLE, value_id=Y["CANCER_LIBRA"]["stil"][s_], image_id=90000 + r) for s_, r in g.STIL_SIRA.items()]
+        asil_pj = ao2.post_json
+        def pj(path, js):
+            r = asil_pj(path, js); ao2.L["state"] = "active"; return r
+        ao2.post_json = pj
+        try:
+            g.olcum(ao2, "39729443", o, "CANCER_LIBRA", Y); raise AssertionError("DUR bekleniyordu")
+        except SystemExit as e:
+            assert e.code == 2, e.code
+        assert ao2.L["state"] == "inactive" and not [k for k in ao2.kayit if k["method"] == "DELETE"]
+        bekle_dur(lambda: g.olcum(ao, "39729443", o, "LEO_LEO", Y2), "yalniz CANCER_LIBRA")
         # bilinen FAIL: Etsy silmede yeniden numaralamazsa son rank'lar 1-14 olmaz -> geri okuma DUR (kapak 1. degil); yeniden de ayni
         o = Path(t, "ynos"); o.mkdir(); a_n = g.Kuru("39729443", Y); a_n.ilan(Y["CANCER_LIBRA"]); a_n.sikistir = False
         bekle_dur(lambda: g.yaz(a_n, "39729443", o, "CANCER_LIBRA", Y), "rank 1-14")
@@ -366,7 +411,7 @@ def main():
         o = Path(t, "o22"); o.mkdir(); D = eski_durum(o); D["sira_v2"] = ["CANCER_LIBRA"]; json.dump(D, open(o / "DURUM9.json", "w"))
         a22 = g.Kuru("39729443", Y2); a22.ilan(Y2["LEO_LEO"]); a22.kuru = False
         R = g.yaz(a22, "39729443", o, "LEO_LEO", Y2); assert all(R["kontrol"].values()), R["kontrol"]
-    print("test_ornament_galeri9: 51/51 PASS")
+    print("test_ornament_galeri9: 53/53 PASS")
 
 
 if __name__ == "__main__":
