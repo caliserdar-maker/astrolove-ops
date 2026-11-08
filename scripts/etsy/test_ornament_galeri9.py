@@ -336,6 +336,15 @@ def main():
         D["ciftler"]["CANCER_LIBRA"]["yeniden"] = {"basladi": True, "yeni": {str(n): 80000 + n for n in range(1, 15)}}
         json.dump(D, open(o / "DURUM9.json", "w")); av1 = yeni_api(D, True)
         R = g.yeniden(av1, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), R["kontrol"]
+        # 42463597152 durumu: yarim deneme (taban + 13 yeni) -> devam 1 yukleme, PASS; rank hep <= 20
+        o = Path(t, "yy13"); o.mkdir(); D = yeni_durum(o)
+        D["ciftler"]["CANCER_LIBRA"]["yeniden"] = {"basladi": True, "video": [990001],
+            "taban": {"ids": sorted([90000 + n for n in range(1, 15)]), "bagli": {s_: 90000 + r for s_, r in g.STIL_SIRA.items()}},
+            "yeni": {str(n): 91000 + n for n in range(1, 14)}}
+        json.dump(D, open(o / "DURUM9.json", "w")); a13y = yeni_api(D, True)
+        R = g.yeniden(a13y, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), R["kontrol"]
+        yk = [k for k in a13y.kayit if k.get("dosya")]
+        assert len(yk) == 1 and int(yk[0]["form"]["rank"]) == 19, yk
         # bilinen FAIL: Etsy silmede yeniden numaralamazsa son rank'lar 1-14 olmaz -> geri okuma DUR (kapak 1. degil); yeniden de ayni
         o = Path(t, "ynos"); o.mkdir(); a_n = g.Kuru("39729443", Y); a_n.ilan(Y["CANCER_LIBRA"]); a_n.sikistir = False
         bekle_dur(lambda: g.yaz(a_n, "39729443", o, "CANCER_LIBRA", Y), "rank 1-14")
@@ -346,7 +355,7 @@ def main():
         asil_e = a_e.post_file
         def eks(path, files, data=None):
             if path.endswith("/images"):
-                assert int(data["rank"]) == max(x["rank"] for x in a_e.ims) + 1, (data["rank"], max(x["rank"] for x in a_e.ims))
+                assert int(data["rank"]) == len(a_e.ims) + 1 <= 20, (data["rank"], len(a_e.ims))
             return asil_e(path, files, data)
         a_e.post_file = eks
         R = g.yaz(a_e, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), R["kontrol"]
@@ -357,7 +366,7 @@ def main():
         o = Path(t, "o22"); o.mkdir(); D = eski_durum(o); D["sira_v2"] = ["CANCER_LIBRA"]; json.dump(D, open(o / "DURUM9.json", "w"))
         a22 = g.Kuru("39729443", Y2); a22.ilan(Y2["LEO_LEO"]); a22.kuru = False
         R = g.yaz(a22, "39729443", o, "LEO_LEO", Y2); assert all(R["kontrol"].values()), R["kontrol"]
-    print("test_ornament_galeri9: 50/50 PASS")
+    print("test_ornament_galeri9: 51/51 PASS")
 
 
 if __name__ == "__main__":

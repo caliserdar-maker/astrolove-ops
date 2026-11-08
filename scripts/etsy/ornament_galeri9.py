@@ -306,8 +306,8 @@ def yaz(api, shop, out, pair, Y):
     state_oku("1 eski 01-06 silindi")
     # 2) yeni 14 gorsel, sira 1..14 (eksik olanlar); her yuklemeden sonra id DURUM9'a
     _g0 = gorseller(); say = len(_g0)
-    # Serdar 8 Kas "Sona ekleme yontemi": yeni gorseller galerinin SONUNA eklenir (esit rank yok; 42462674399'da esit rank'ta 4-5 yer degisti)
-    r_son = max([x.get("rank") or 0 for x in _g0] + [0])
+    # Serdar 8 Kas "Sona ekleme yontemi": yeni gorseller galerinin SONUNA eklenir (esit rank yok; 42462674399'da esit rank'ta 4-5 yer degisti).
+    # rank = gorsel sayisi + 1 (Etsy "ListingImages must be ordered 1 - 20", 42463597152; Serdar "Evet, duzelt ve devam et")
     for n in range(1, N_YENI + 1):
         if n in yeni:
             continue
@@ -315,8 +315,8 @@ def yaz(api, shop, out, pair, Y):
             kaydet(); raise SystemExit(f"DUR: {pair} galeri {say} gorsel (20 siniri), yeni {n} yuklenemez")
         with open(galeri[n - 1], "rb") as fh:
             r = api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (galeri[n - 1].name, fh, "image/jpeg")},
-                              data={"rank": str(r_son + 1), "alt_text": alt[n - 1]})
-        yeni[n] = int(r["listing_image_id"]); d["yeni"] = {str(k): v for k, v in yeni.items()}; kaydet(); say += 1; r_son += 1
+                              data={"rank": str(say + 1), "alt_text": alt[n - 1]})
+        yeni[n] = int(r["listing_image_id"]); d["yeni"] = {str(k): v for k, v in yeni.items()}; kaydet(); say += 1
     state_oku("2 yeni 14 gorsel")
     rk = {x["listing_image_id"]: x.get("rank") for x in gorseller()}
     sira_r = [rk.get(yeni[n]) for n in range(1, N_YENI + 1)]
@@ -701,8 +701,8 @@ def yeniden(api, shop, out, pair, Y):
     durum("1 bagsiz 9 silindi")
     # 2) yeni 14 gorsel 1..14
     _g0 = gorseller(); say = len(_g0)
-    # Serdar 8 Kas "Sona ekleme yontemi": yeni gorseller galerinin SONUNA eklenir (esit rank yok; 42462674399'da esit rank'ta 4-5 yer degisti)
-    r_son = max([x.get("rank") or 0 for x in _g0] + [0])
+    # Serdar 8 Kas "Sona ekleme yontemi": yeni gorseller galerinin SONUNA eklenir (esit rank yok; 42462674399'da esit rank'ta 4-5 yer degisti).
+    # rank = gorsel sayisi + 1 (Etsy "ListingImages must be ordered 1 - 20", 42463597152; Serdar "Evet, duzelt ve devam et")
     for n in range(1, N_YENI + 1):
         if n in yeni:
             continue
@@ -710,8 +710,8 @@ def yeniden(api, shop, out, pair, Y):
             kaydet(); raise SystemExit(f"DUR: {pair} galeri {say} gorsel (20 siniri)")
         with open(galeri[n - 1], "rb") as fh:
             r = api.post_file(f"/shops/{shop}/listings/{lid}/images", files={"image": (galeri[n - 1].name, fh, "image/jpeg")},
-                              data={"rank": str(r_son + 1), "alt_text": alt[n - 1]})
-        yeni[n] = int(r["listing_image_id"]); Ye["yeni"] = {str(k): v for k, v in yeni.items()}; kaydet(); say += 1; r_son += 1
+                              data={"rank": str(say + 1), "alt_text": alt[n - 1]})
+        yeni[n] = int(r["listing_image_id"]); Ye["yeni"] = {str(k): v for k, v in yeni.items()}; kaydet(); say += 1
     durum("2 yeni 14 gorsel")
     rk = {x["listing_image_id"]: x.get("rank") for x in gorseller()}
     sira_r = [rk.get(yeni[n]) for n in range(1, N_YENI + 1)]
@@ -802,6 +802,15 @@ class Kuru(Kilitli):
         s2 = {int(k): v for k, v in (d.get("sira2") or {}).get("yeni", {}).items()}
         a = dict(zip(GALERI, alt_metinler(pair)[0]))
         p = {int(k): v for k, v in (d.get("yeniden") or {}).get("yeni", {}).items()}
+        tb = (d.get("yeniden") or {}).get("taban")
+        if tb and (d.get("yeniden") or {}).get("basladi") and len(p) < 14:   # yarim deneme (42463597152): bagli 5 + kayitli yeniler sonda
+            bag = tb["bagli"]
+            self.ims = [dict(listing_image_id=bag[s_], rank=k, alt_text="eski", full_width=3000, full_height=2250) for k, s_ in enumerate(STIL_SIRA, 1)]
+            self.ims += [dict(listing_image_id=p[n], rank=5 + k, alt_text=a[GALERI[n - 1]], full_width=3000, full_height=2250)
+                         for k, n in enumerate(sorted(p), 1)]
+            self.vids = [dict(video_id=v, video_state="active") for v in (d["yeniden"].get("video") or [990001])]
+            self.vis = [dict(property_id=P_STYLE, value_id=y["stil"][s_], image_id=bag[s_]) for s_ in STIL_SIRA]
+            return
         if len(p) == 14:                          # onceki yeniden denemesi bitmis (42462674399): 14 yeni, 4-5 yer degismis, stil 10-14 yeni
             sira = {n: n for n in range(1, 15)}; sira[4], sira[5] = 5, 4
             self.ims = [dict(listing_image_id=p[n], rank=sira[n], alt_text=a[GALERI[n - 1]], full_width=3000, full_height=2250) for n in range(1, 15)]
