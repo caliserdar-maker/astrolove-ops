@@ -49,6 +49,10 @@ def bekle_dur(fn, metin):
 def main():
     with tempfile.TemporaryDirectory() as t:
         os.environ["IMG_ROOT"] = t + "/img"; os.environ["BOYUT_KAPI"] = "0"; medya_kur(t + "/img")
+        # gecici kapi (8 Kas): gercek yaz() YAZ_ACIK=1 olmadan DUR; asagidaki kuru-disi testler kapiyi acarak mantigi dener
+        a0 = g.Kuru("39729443", Y := yedek()); a0.ilan(Y["CANCER_LIBRA"]); a0.kuru = False; o0 = Path(t, "o0"); o0.mkdir()
+        bekle_dur(lambda: g.yaz(a0, "39729443", o0, "CANCER_LIBRA", Y), "duzeltilmeden kapali")
+        os.environ["YAZ_ACIK"] = "1"
         Y = yedek()
         # 1 PASS
         o = Path(t, "o1"); o.mkdir(); api, R = calis(Y, o)
@@ -390,6 +394,50 @@ def main():
             assert e.code == 2, e.code
         assert ao2.L["state"] == "inactive" and not [k for k in ao2.kayit if k["method"] == "DELETE"]
         bekle_dur(lambda: g.olcum(ao, "39729443", o, "LEO_LEO", Y2), "yalniz CANCER_LIBRA")
+        # tasi (Serdar 8 Kas "Evet, bu yontemle"): olcum sonrasi gercek sira [1..11, 14, 12, 13] -> plan [14]; gecikmeli ve aninda kapatmada PASS
+        g.DUZGUN_BEKLE_SN = 0
+        def tasi_durum(o, sira):
+            D = yeni_durum(o); yz = {str(n): 92000 + n for n in range(1, 15)}
+            D["ciftler"]["CANCER_LIBRA"]["yeniden"] = {"basladi": True, "video": [990001], "yeni": yz,
+                "olcum": {"bc": True, "D": [[k, 92000 + n] for k, n in enumerate(sira, 1)]}}
+            json.dump(D, open(Path(o) / "DURUM9.json", "w")); return D
+        def tasi_api(D, gec):
+            a = g.Kuru("39729443", Y); a.ilan(Y["CANCER_LIBRA"]); a.sikistir = not gec; a.gecikme = 2 if gec else 0
+            al = dict(zip(g.GALERI, g.alt_metinler("CANCER_LIBRA")[0]))
+            a.ims = [dict(listing_image_id=i, rank=r, alt_text=al[g.GALERI[i - 92001]], full_width=3000, full_height=2250)
+                     for r, i in D["ciftler"]["CANCER_LIBRA"]["yeniden"]["olcum"]["D"]]
+            a.vids = [dict(video_id=990001, video_state="active")]
+            a.vis = [dict(property_id=g.P_STYLE, value_id=Y["CANCER_LIBRA"]["stil"][s_], image_id=92000 + r) for s_, r in g.STIL_SIRA.items()]
+            return a
+        gercek = list(range(1, 12)) + [14, 12, 13]
+        for gec in (True, False):
+            o = Path(t, f"ts{gec}"); o.mkdir(); D = tasi_durum(o, gercek); at_ = tasi_api(D, gec)
+            R = g.tasi(at_, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), (gec, R["kontrol"])
+            assert R["plan"] == [14], R["plan"]
+            assert len([k for k in at_.kayit if k.get("dosya")]) == 1 and len([k for k in at_.kayit if k["method"] == "DELETE"]) == 1
+            assert not [k for k in at_.kayit if "/videos" in k["url"] and k["method"] != "GET"]
+            assert "CANCER_LIBRA" in json.load(open(o / "DURUM9.json"))["sira_v2"]
+        # birden cok yanlis: [1..10, 13, 11, 12, 14] -> plan [11, 12, 13, 14] degil en kucuk: [11..14]? (yerinde kalan hedefin basi) PASS
+        o = Path(t, "ts_cok"); o.mkdir(); D = tasi_durum(o, list(range(1, 11)) + [13, 11, 12, 14]); at2_ = tasi_api(D, True)
+        R = g.tasi(at2_, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), R["kontrol"]
+        assert R["plan"] == [13, 14], R["plan"]
+        # devam: yuklemeden sonra kopma (id kayitli) -> devam bag + silme, PASS
+        o = Path(t, "ts_dev"); o.mkdir(); D = tasi_durum(o, gercek); at3 = tasi_api(D, True); asil_t = at3.post_json
+        at3.post_json = lambda path, js: (_ for _ in ()).throw(SystemExit("HATA: baglanti koptu"))
+        bekle_dur(lambda: g.tasi(at3, "39729443", o, "CANCER_LIBRA", Y), "koptu")
+        at3.post_json = asil_t; n0 = len([k for k in at3.kayit if k.get("dosya")])
+        R = g.tasi(at3, "39729443", o, "CANCER_LIBRA", Y); assert all(R["kontrol"].values()), R["kontrol"]
+        assert len([k for k in at3.kayit if k.get("dosya")]) == n0 == 1, "ikinci yukleme olmamali"
+        # on kontrol: bilinmeyen gorsel -> yazmadan DUR; rank'lar hic duzelmezse yuklemeden DUR; yalniz CANCER_LIBRA
+        o = Path(t, "ts_bil"); o.mkdir(); D = tasi_durum(o, gercek); at4 = tasi_api(D, True)
+        at4.ims.append(dict(listing_image_id=5, rank=15, alt_text="", full_width=1, full_height=1))
+        bekle_dur(lambda: g.tasi(at4, "39729443", o, "CANCER_LIBRA", Y), "on kontrol"); assert not [k for k in at4.kayit if k["yazma"]]
+        o = Path(t, "ts_bek"); o.mkdir(); D = tasi_durum(o, gercek); at5 = tasi_api(D, True)
+        for x in at5.ims:
+            x["rank"] += 3
+        bekle_dur(lambda: g.tasi(at5, "39729443", o, "CANCER_LIBRA", Y), "1..14 olmadi"); assert not [k for k in at5.kayit if k["yazma"]]
+        bekle_dur(lambda: g.tasi(at5, "39729443", o, "LEO_LEO", Y2), "yalniz CANCER_LIBRA")
+        g.DUZGUN_BEKLE_SN = 5
         # bilinen FAIL: Etsy silmede yeniden numaralamazsa son rank'lar 1-14 olmaz -> geri okuma DUR (kapak 1. degil); yeniden de ayni
         o = Path(t, "ynos"); o.mkdir(); a_n = g.Kuru("39729443", Y); a_n.ilan(Y["CANCER_LIBRA"]); a_n.sikistir = False
         bekle_dur(lambda: g.yaz(a_n, "39729443", o, "CANCER_LIBRA", Y), "rank 1-14")
@@ -411,7 +459,7 @@ def main():
         o = Path(t, "o22"); o.mkdir(); D = eski_durum(o); D["sira_v2"] = ["CANCER_LIBRA"]; json.dump(D, open(o / "DURUM9.json", "w"))
         a22 = g.Kuru("39729443", Y2); a22.ilan(Y2["LEO_LEO"]); a22.kuru = False
         R = g.yaz(a22, "39729443", o, "LEO_LEO", Y2); assert all(R["kontrol"].values()), R["kontrol"]
-    print("test_ornament_galeri9: 53/53 PASS")
+    print("test_ornament_galeri9: 60/60 PASS")
 
 
 if __name__ == "__main__":
