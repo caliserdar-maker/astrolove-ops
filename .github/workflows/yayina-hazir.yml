@@ -1,6 +1,7 @@
 name: yayina-hazir
 # YAYINA HAZIR KONTROLU (SALT OKUMA; Serdar 8 Kas sistem onerisi 2). Kod scripts/etsy/yayina_hazir.py; SPEC (beklenen degerler)
-# ve ilan listesi (Drive) girdi. mod=olc: 2 ilanda batch alan olcumu; mod=kontrol: tum ilanlar -> YAYINA_HAZIR.md. Etsy'ye yazma yok.
+# ve ilan listesi (Drive) girdi. mod=olc: 2 ilanda batch + properties alan olcumu; mod=kontrol: tum ilanlar -> YAYINA_HAZIR.md.
+# Etsy'ye yazma yok. Istek: kontrol = 1 + ceil(ilan/100) + ilan (nitelik); olc = 4. Kota yetmezse okuma baslamadan DUR.
 permissions:
   actions: read
   contents: read
@@ -10,13 +11,13 @@ on:
       mod: { description: "olc | kontrol", required: true, default: "olc" }
       spec: { description: "depo yolu, ornek docs/ornament/ORN_YAYIN_SPEC.json", required: true, default: "docs/ornament/ORN_YAYIN_SPEC.json" }
       ilanlar: { description: "Drive yolu (gdrive:ASTROLOVE/TEMP/...json)", required: true, default: "gdrive:ASTROLOVE/TEMP/ORNAMENT_GALERI9_ETSY/YEDEK9.json" }
-      nitelik: { description: "nitelikler de okunsun (ilan basina +1 istek)", type: boolean, default: false }
+      nitelik_yok: { description: "nitelikler OKUNMASIN (SPEC'te nitelik varsa sonuc 'olculemedi'; varsayilan okunur, ilan basina +1 istek)", type: boolean, default: false }
 env:
   O: "gdrive:ASTROLOVE/TEMP/YAYINA_HAZIR"
 jobs:
   kontrol:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 150   # kilit_bekle en fazla 120 dk bekleyebilir
     steps:
       - name: Girdi kapisi
         env: { M: "${{ inputs.mod }}", S: "${{ inputs.spec }}", I: "${{ inputs.ilanlar }}" }
@@ -63,10 +64,10 @@ jobs:
           TOKEN_FILE: _work/ETSY_TOKEN.json
           M: ${{ inputs.mod }}
           S: ${{ inputs.spec }}
-          N: ${{ inputs.nitelik && '1' || '0' }}
+          N: ${{ inputs.nitelik_yok && '1' || '0' }}
         run: |
           set -euo pipefail
-          EK=""; [ "$N" = 1 ] && EK="--nitelik"
+          EK=""; if [ "$N" = 1 ]; then EK="--nitelik-yok"; fi
           python3 scripts/etsy/yayina_hazir.py --mod "$M" --spec "$S" --ilanlar _work/ILANLAR.json --out _out $EK
       - name: Token geri yaz + cikti Drive'a
         if: ${{ always() }}
