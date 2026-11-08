@@ -248,6 +248,7 @@ def kos(ilanlar_json, ag, *ek, spec=SPEC_YOL):
         etsy_common.requests.request, y.TokenStore, sys.argv = eski[0], eski[1], eski[2]
         os.environ.clear(); os.environ.update(eski[3])
         signal.signal(signal.SIGTERM, signal.SIG_DFL)
+        y.SINYAL.clear()
     R = json.loads((d / "o/YAYINA_HAZIR.json").read_text()) if (d / "o/YAYINA_HAZIR.json").exists() else None
     return hata, R, d
 
@@ -361,6 +362,21 @@ def uctan_uca():
                 os.kill(os.getpid(), signal.SIGTERM)
             return f(kod)
         return g
+    import ornament_galeri9 as g9
+    eski_kapi = g9.metin_yasak_kapisi
+    say = []
+
+    def kapi_sinyal(*a, **k):                              # sinyal galeri9'un kendi except SystemExit blogunda yutulur (5. tur)
+        say.append(1)
+        if len(say) == 22:
+            os.kill(os.getpid(), signal.SIGTERM)
+        return eski_kapi(*a, **k)
+    g9.metin_yasak_kapisi = kapi_sinyal
+    try:
+        hata, R, _ = kos(I, SahteAg(il, 1000), "--mod", "kontrol")
+    finally:
+        g9.metin_yasak_kapisi = eski_kapi
+    assert hata and "sinyal 15" in hata and R["yarim"].startswith("SystemExit: DUR: sinyal 15") and len(R["ilanlar"]) < 78, (hata, R.get("yarim")); n += 1
     y.alt_kaynak = alt_sinyal
     try:
         hata, R, _ = kos(I, SahteAg(il, 1000), "--mod", "kontrol")
@@ -386,7 +402,7 @@ def uctan_uca():
     assert hata and "uretim ortaklari okunamadi" in hata and O["donen"] == 78 and sorted(O["ornek"]) == ["active", "draft"], hata; n += 1
     hata, _, d = kos(I, SahteAg(il, 24, adim=4), "--mod", "olc")   # baslangic gecer (20 >= 15); ilk properties'te taban: batch dosyada
     O = json.loads((d / "o/OLCUM.json").read_text())
-    assert hata and "kota" in hata and O["donen"] == 78, (hata, O.get("donen")); n += 1
+    assert hata and "kota" in hata and O["donen"] == 78 and "kota" in O.get("hata", ""), (hata, O.get("hata")); n += 1
     return n
 
 

@@ -406,7 +406,11 @@ def ortak_bul(api, shop, ad):
     return es[0][0], liste
 
 
+SINYAL = []   # gelen sinyal; ic except bloklari (ornament_galeri9.alt_metinler) SystemExit'i yutsa da dongu her ilandan sonra bakar
+
+
 def _sinyal(signum, frame):
+    SINYAL.append(signum)
     raise SystemExit(f"DUR: sinyal {signum} (iptal / zaman asimi)")
 
 
@@ -482,6 +486,11 @@ def main():
                                      "is_personalizable": L.get("is_personalizable"),
                                      "is_personalizable_tur": type(L.get("is_personalizable")).__name__,
                                      "nitelik_id": [p.get("property_id") for p in props if isinstance(p, dict)]}
+            if SINYAL:
+                raise SystemExit(f"DUR: sinyal {SINYAL[0]} (iptal / zaman asimi)")
+        except BaseException as e:
+            O["hata"] = f"{type(e).__name__}: {str(getattr(e, 'code', e))[:300]} (olcum yarim)"
+            raise
         finally:
             olc_yaz()
         print(json.dumps(O, ensure_ascii=False)[:8000])
@@ -520,6 +529,8 @@ def main():
             except Exception as e:  # noqa: BLE001 (beklenmeyen veri tek ilanda kalir; kota DUR SystemExit'i yukari gider)
                 R["ilanlar"][kod] = {"listing_id": lid, "state": L.get("state"), "sinif": "DURUM olculemedi",
                                      "eksik": {"hata": f"olculemedi: {type(e).__name__}: {str(e)[:200]}"}}
+            if SINYAL:
+                raise SystemExit(f"DUR: sinyal {SINYAL[0]} (iptal / zaman asimi; ic blokta yakalanmisti)")
             g = time.time() - t0
             print(f"[{i}/{len(sec)}] {kod} {R['ilanlar'][kod]['sinif']} | gecen {g:.0f} sn | kalan ~{g / i * (len(sec) - i):.0f} sn | "
                   f"%{100 * i // len(sec)} | kota {api.remaining}", flush=True)
