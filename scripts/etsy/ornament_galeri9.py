@@ -271,7 +271,7 @@ def yaz(api, shop, out, pair, Y):
     L = state_oku("0 baslangic", acil=False)
     if html.unescape(L.get("title") or "") != baslik:
         kaydet(); raise SystemExit(f"DUR: {pair} {lid} baslik METIN ile ayni degil (kimlik)")
-    if pair != "CANCER_LIBRA" and "CANCER_LIBRA" not in D.get("tamam", []):     # pilot once (inceleme 9)
+    if not getattr(api, "kuru", False) and pair != "CANCER_LIBRA" and "CANCER_LIBRA" not in D.get("tamam", []):   # pilot once (inceleme 9; kuru haric)
         kaydet(); raise SystemExit("DUR: CANCER_LIBRA pilotu tamam degil; once pilot")
     v0 = (api.get(f"/listings/{lid}/videos", ok404=True) or {}).get("results") or []
     yabanci = [v.get("video_id") for v in v0 if v.get("video_id") not in eski_v and not d.get("video_gonderildi")]

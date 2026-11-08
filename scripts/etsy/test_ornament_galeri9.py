@@ -74,7 +74,7 @@ def main():
         assert not [k for k in sak["api"].kayit if k["method"] == "PATCH"]
         # 7 pilot once: CANCER_LIBRA tamam degilken baska cift DUR
         Y2 = yedek("LEO_LEO"); Y2["LEO_LEO"]["listing_id"] = 4611500000
-        o = Path(t, "o7"); o.mkdir(); a7 = g.Kuru("39729443", Y2); a7.ilan(Y2["LEO_LEO"]); medya_kur(t + "/img", "LEO_LEO")
+        o = Path(t, "o7"); o.mkdir(); a7 = g.Kuru("39729443", Y2); a7.ilan(Y2["LEO_LEO"]); a7.kuru = False; medya_kur(t + "/img", "LEO_LEO")
         bekle_dur(lambda: g.yaz(a7, "39729443", o, "LEO_LEO", Y2), "pilotu")
         # 8 video 4xx: isaret geri alinir, yeniden kosuda video yuklenir
         o = Path(t, "o8"); o.mkdir()
