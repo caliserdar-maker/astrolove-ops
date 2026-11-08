@@ -74,6 +74,11 @@ def cift_uret(cift, sahne, baski, isk, cikti, log):
         raise RuntimeError(f"baski eksik {eksik}")
     olcum = dict(cift=cift, A=A, B=B, set={}, yazi={})
     S = lambda n: str(Path(sahne) / f"{n}.png")
+    if KART.get("yalniz"):                       # yalniz sembol karti ornegi (Serdar gorsel onayi icin)
+        t = kos([KOD / "sembol_karti.py", cift, KART["zemin"], KART["maske"], KART["altin"], str(o / f"{cift}_15_SEMBOL_KARTI.jpg")], w,
+                {"KART_DIR": KART["kart_dir"]}, log, PY_YAZI)
+        olcum["yazi"]["15_SEMBOL_KARTI"] = t.strip().splitlines()[-1]
+        return olcum
     # 01 kapak + 10 Ruby (ayni SET, farkli alt satir) + video katmani
     j = son_json(kos([KOD / "set_yerlestir.py", "kapak", S("kapak"), OLC / "kapak.olc.json"], w, {"BASKI": bp["RUBY"]}, log))
     olcum["set"]["kapak"] = set_json(w / "SET_kapak.json")
@@ -133,7 +138,7 @@ def kapi(cift, olcum, cikti, ref):
     from PIL import Image
     h = []
     o = Path(cikti) / cift
-    for d in DOSYALAR + (["15_SEMBOL_KARTI"] if KART.get("maske") else []):
+    for d in ([] if KART.get("yalniz") else DOSYALAR) + (["15_SEMBOL_KARTI"] if KART.get("maske") else []):
         p = o / f"{cift}_{d}.jpg"
         if not p.exists():
             h.append(f"yok {d}"); continue
@@ -141,7 +146,9 @@ def kapi(cift, olcum, cikti, ref):
         if im.size != (3000, 2250) or im.format != "JPEG":
             h.append(f"boyut {d} {im.size}")
     v = o / f"{cift}_VIDEO.mp4"
-    if not v.exists():
+    if KART.get("yalniz"):
+        pass
+    elif not v.exists():
         h.append("video yok")
     else:
         pr = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-count_frames", "-show_entries",
@@ -184,9 +191,10 @@ def main():
     ap.add_argument("--altin", default="", help="sembol karti: <burc>_symbol_gold.png + <CIFT>_ana.png")
     ap.add_argument("--zemin", default="", help="sembol karti zemini (GALERI9.json sahneler sembol_zemin.png)")
     ap.add_argument("--kart-dir", default=str(KOD.parent / "kart"))
+    ap.add_argument("--yalniz-kart", action="store_true")
     a = ap.parse_args()
     if a.maske:
-        KART.update(maske=a.maske, altin=a.altin, zemin=a.zemin, kart_dir=a.kart_dir)
+        KART.update(maske=a.maske, altin=a.altin, zemin=a.zemin, kart_dir=a.kart_dir, yalniz=a.yalniz_kart)
     ref = json.load(open(a.ref))["set"] if Path(a.ref).exists() else None
     L = [c for c in a.ciftler.split(",") if c]
     Path(a.cikti).mkdir(parents=True, exist_ok=True)

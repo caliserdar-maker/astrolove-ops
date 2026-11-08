@@ -43,18 +43,43 @@ _baglac = T.baglac
 _bilgi = {}
 
 
+# Serdar 8 Kas: Temmuz burc dosyalarinin parlak sarisi "olmayacak"; ton ana sembolun (ornament baskisi altini, ANA_SEMBOL78) altinina
+# esitlenir: kanal basina yuzdelik eslemesi (opak pikseller), sekil ve isik deseni ayni kalir; ana sembol AYNEN.
+_ana = np.asarray(Image.open(ALTIN_YOL["ana.png"]).convert("RGBA")).astype(np.float32)
+_am = _ana[..., 3] > 230
+if _am.sum() < 5000:
+    raise SystemExit(f"DUR: ana sembol opak piksel {int(_am.sum())} (RGBA altin bekleniyor)")
+QS_ = np.linspace(0, 100, 101)
+ANA_Q = np.stack([np.percentile(_ana[..., c][_am], QS_) for c in range(3)], 1)          # 101 x 3
+
+
+def ton_esitle(rgba):
+    a = np.asarray(rgba).astype(np.float32)
+    m = a[..., 3] > 230
+    if m.sum() < 500:
+        return rgba
+    for c in range(3):
+        kq = np.percentile(a[..., c][m], QS_)
+        kq = np.maximum.accumulate(kq + np.arange(len(kq)) * 1e-4)
+        a[..., c] = np.interp(a[..., c], kq, ANA_Q[:, c])
+    return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGBA")
+
+
 def altin_maske(yol, h):
-    """maske() ile ayni olcek kurali (alfa kutusu kirpilir, yukseklik h), piksel altin dosyasindan (renk degismez)."""
-    g = Image.open(ALTIN_YOL[Path(yol).name]).convert("RGBA")
+    """maske() ile ayni olcek kurali (alfa kutusu kirpilir, yukseklik h), piksel altin dosyasindan; burclarda ton ana sembole esitlenir."""
+    ad = Path(yol).name
+    g = Image.open(ALTIN_YOL[ad]).convert("RGBA")
     g = g.crop(g.getchannel("A").point(lambda v: 255 if v > 20 else 0).getbbox())
     g = g.resize((round(g.width * h / g.height), h), Image.LANCZOS)
-    _bilgi[Path(yol).name] = [g.width, g.height]
+    if ad != "ana.png":
+        g = ton_esitle(g)
+    _bilgi[ad] = [g.width, g.height]
     return g
 
 
 # birlesim cizgisi altin: kapak yazisi altin paleti (onayli Ruby baskinin altin pikselleri) + kabartma (sol ust isik)
-PAL = np.array([[125, 74, 3], [143, 91, 5], [161, 105, 18], [191, 130, 25], [212, 152, 34], [228, 191, 67], [240, 223, 94]], np.float32)
 PQ = np.array([0.02, 0.10, 0.25, 0.50, 0.75, 0.90, 0.98], np.float32)
+# PAL: birlesim cizgisi paleti altin_boya icinde ana sembol yuzdeliklerinden
 
 
 def altin_boya(k):
@@ -62,6 +87,7 @@ def altin_boya(k):
     gx = cv2.Sobel(h, cv2.CV_32F, 1, 0, ksize=3); gy = cv2.Sobel(h, cv2.CV_32F, 0, 1, ksize=3)
     isik = -(gx * -0.6 + gy * -0.8) * 6.0
     t = np.clip(0.55 + 0.25 * (cv2.GaussianBlur(k, (0, 0), 1.0) - 0.5) + isik, 0.0, 1.0)
+    PAL = np.stack([np.interp(PQ * 100, QS_, ANA_Q[:, c]) for c in range(3)], 1).astype(np.float32)   # birlesim cizgisi: ana sembol altini
     return np.stack([np.interp(t, PQ, PAL[:, c]) for c in range(3)], -1).astype(np.float32)
 
 

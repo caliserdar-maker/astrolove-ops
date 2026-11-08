@@ -203,7 +203,8 @@ jobs:
           P: ${{ matrix.i }}
         run: |
           set +e
-          python3 s/scripts/ornament_galeri/v9/uret_cift.py --ciftler "$CIFTLER" --sahne /tmp/sahne --baski /tmp/kaynak \
+          Y=$(python3 -c "import json; print('--yalniz-kart' if json.load(open('s/docs/ornament/GALERI9.json')).get('yalniz_kart') else '')")
+          python3 s/scripts/ornament_galeri/v9/uret_cift.py --ciftler "$CIFTLER" --sahne /tmp/sahne --baski /tmp/kaynak $Y \
             --is /tmp/is --cikti /tmp/out --etiket "_P$(printf '%02d' $P)" \
             --maske sem/kupa_uretim/sembol --altin /tmp/altin --zemin /tmp/sahne/sembol_zemin.png --kart-dir s/scripts/ornament_galeri/kart
           k=$?; echo "k=$k" >> "$GITHUB_OUTPUT"; exit 0
