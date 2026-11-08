@@ -74,6 +74,9 @@ def ton_esitle(rgba):
     return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGBA")
 
 
+GEN_UST = 1.25
+
+
 def altin_maske(yol, h):
     """maske() ile ayni olcek kurali (alfa kutusu kirpilir, yukseklik h), piksel altin dosyasindan; burclarda ton ana sembole esitlenir."""
     ad = Path(yol).name
@@ -81,6 +84,11 @@ def altin_maske(yol, h):
     g = g.crop(g.getchannel("A").point(lambda v: 255 if v > 20 else 0).getbbox())
     g = g.resize((round(g.width * h / g.height), h), Image.LANCZOS)
     # 8 Kas: burclar posterden yeni dokuda (poster_burc.py), ton islemi YOK (Serdar: Temmuz dokusu olmayacak; ton esitleme de "eski doku")
+    # Serdar 8 Kas "aquarius sembolu leo sembolune gore fazla buyuk" -> burc genisligi en fazla 1,25 x yukseklik (en/boy: Aquarius 2,06,
+    # digerleri 0,78-1,21; yalniz Aquarius etkilenir), kuculen burc yukseklik h icinde dikeyde ortalanir. Ortak sembol (ana) AYNEN.
+    if ad != "ana.png" and g.width > GEN_UST * h:
+        g = g.resize((round(GEN_UST * h), round(g.height * GEN_UST * h / g.width)), Image.LANCZOS)
+        k = Image.new("RGBA", (g.width, h), (0, 0, 0, 0)); k.paste(g, (0, (h - g.height) // 2)); g = k
     _bilgi[ad] = [g.width, g.height]
     return g
 
