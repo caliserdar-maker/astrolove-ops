@@ -98,6 +98,10 @@ def spec_yukle(yol):
     bilinmeyen = sorted((set(s) - S_ZORUNLU - S_SECMELI) | {f"beklenen.{k}" for k in set(s.get("beklenen") or {}) - B_ZORUNLU - B_SECMELI})
     if eksik or bilinmeyen:
         raise SystemExit(f"DUR: SPEC anahtar hatasi: eksik {eksik}, bilinmeyen {bilinmeyen}")
+    em = s["eski_medya"]
+    if em not in (None, False) and not (isinstance(em, dict) and sorted(em) == ["gorsel_sayisi", "video_sayisi"]
+                                         and all(isinstance(em[x], int) and not isinstance(em[x], bool) for x in em)):
+        raise SystemExit(f"DUR: SPEC eski_medya null/false ya da {{gorsel_sayisi: int, video_sayisi: int}} olmali: {em!r}")
     s["_sha"] = hashlib.sha256(b).hexdigest()
     return s
 
@@ -113,7 +117,7 @@ def uygulanan(spec):
          ("eski gorsel / video id yok (yedek yapisi {gorsel_sayisi} gorsel, {video_sayisi} video)".format(**spec["eski_medya"])
           if spec["eski_medya"] else "eski medya kontrolu YOK"),
          "aciklama zorunlu ifade" if b.get("aciklama_zorunlu") else "aciklama zorunlu ifade YOK",
-         "baslik + aciklama + etiket yasak desen", "RU baslik + aciklama" if spec.get("ru") else "RU YOK",
+         "baslik + aciklama + etiket yasak desen" if b["aciklama_yasak"] else "yasak desen YOK", "RU baslik + aciklama" if spec.get("ru") else "RU YOK",
          "nitelikler" if b.get("nitelikler") else "nitelik YOK", "beklenen kod kumesi (RU CSV)" if spec.get("ru") else "kod kumesi YOK"]
     return u
 
@@ -277,8 +281,12 @@ def kontrol_et(spec, kod, L, ru_harita, props=None, alt_f=None, eski=None, ortak
         if alt_f is not None:
             try:
                 alt_bek, _, hata = alt_f(kod)
-            except (Exception, SystemExit) as e:  # noqa: BLE001 (kaynak DUR/hata -> olculemedi, PASS degil; Etsy istegi yok)
+            except Exception as e:  # noqa: BLE001 (kaynak hatasi -> olculemedi, PASS degil; Etsy istegi yok)
                 alt_bek, hata = None, [f"{type(e).__name__}: {e}"]
+            except SystemExit as e:   # yalniz kaynagin kendi DUR'u (DUR-ON); sinyal / kota DUR yukari gider (inceleme 4. tur)
+                if not str(e.code).startswith("DUR-ON"):
+                    raise
+                alt_bek, hata = None, [f"SystemExit: {e.code}"]
             if hata:
                 S["gorsel"] = f"olculemedi: beklenen alt metin uretilemedi {hata}"
         if "gorsel" not in S:
@@ -437,41 +445,49 @@ def main():
     print(f"ilan {len(sec)} | okunamayan {len(okunamayan)} | nitelik {nitelik} | tahmini istek {tahmin} | kota {kota_bas}", flush=True)
     if a.mod == "olc":
         B, n = batch(api, [v for _, v in sec]); cagri += n
-        try:   # batch'ten SONRA; ortak ucu hatasi olcumu durdurmaz (kota DUR yukari gider)
-            ortaklar = [(p.get("production_partner_id"), p.get("partner_name"), p.get("location"))
-                        for p in (api.get(f"/shops/{shop}/production-partners") or {}).get("results") or []]
-        except SystemExit as e:
-            if str(e.code).startswith("DUR: kota"):
-                raise
-            ortaklar = f"okunamadi: {str(e.code)[:200]}"
-        cagri += 1
         st = {}
         for L in B.values():
             st[str(L.get("state"))] = st.get(str(L.get("state")), 0) + 1
         eksik = [kod for kod, v in sec if v not in B]
-        O = {"istenen": len(sec), "donen": len(B), "state": st, "donmeyen": eksik, "uretim_ortaklari": ortaklar, "ornek": {}}
-        for durum in ("draft", "active"):
-            kod_lid = next(((kod, v) for kod, v in sec if v in B and B[v].get("state") == durum), None)
-            if kod_lid is None:
-                continue
-            kod, v = kod_lid
-            L = B[v]
-            props = (api.get(f"/shops/{shop}/listings/{v}/properties") or {}).get("results") or []; cagri += 1
-            O["ornek"][durum] = {"kod": kod, "batch_alanlar": alan_turleri(L), "properties_alanlar": alan_turleri(props),
-                                 "translations_tur": type(L.get("translations")).__name__,
-                                 "translations_anahtar": sorted(L["translations"]) if isinstance(L.get("translations"), dict) else None,
-                                 "ru_var": ru_bul(L) not in (None, {}),
-                                 "production_partners": [(p.get("production_partner_id"), p.get("partner_name"), p.get("location"))
-                                                         for p in L.get("production_partners") or [] if isinstance(p, dict)],
-                                 "gorsel_rank": [x.get("rank") for x in L.get("images") or [] if isinstance(x, dict)],
-                                 "video_state": [x.get("video_state") for x in L.get("videos") or [] if isinstance(x, dict)],
-                                 "is_personalizable": L.get("is_personalizable"),
-                                 "nitelik_id": [p.get("property_id") for p in props if isinstance(p, dict)]}
-        O["_kota"] = [kota_bas, api.remaining]; O["_cagri"] = cagri
-        json.dump(O, open(out / "OLCUM.json", "w"), indent=1, ensure_ascii=False)
+        O = {"istenen": len(sec), "donen": len(B), "state": st, "donmeyen": eksik, "uretim_ortaklari": None, "ornek": {}}
+
+        def olc_yaz():
+            O["_kota"] = [kota_bas, api.remaining]; O["_cagri"] = cagri
+            json.dump(O, open(out / "OLCUM.json", "w"), indent=1, ensure_ascii=False)
+        olc_yaz()                                  # batch olcumu hemen kaydedilir (sonraki hata onu kaybettirmesin)
+        try:
+            try:
+                O["uretim_ortaklari"] = [(p.get("production_partner_id"), p.get("partner_name"), p.get("location"))
+                                         for p in (api.get(f"/shops/{shop}/production-partners") or {}).get("results") or []]
+            except SystemExit as e:                # kota DUR ve sinyal yukari; ucun kendi hatasi kaydedilir, kosu sonda FAIL
+                if str(e.code).startswith(("DUR: kota", "DUR: sinyal")):
+                    raise
+                O["uretim_ortaklari"] = f"okunamadi: {str(e.code)[:200]}"
+            cagri += 1
+            for durum in ("draft", "active"):
+                kod_lid = next(((kod, v) for kod, v in sec if v in B and B[v].get("state") == durum), None)
+                if kod_lid is None:
+                    continue
+                kod, v = kod_lid
+                L = B[v]
+                props = (api.get(f"/shops/{shop}/listings/{v}/properties") or {}).get("results") or []; cagri += 1
+                O["ornek"][durum] = {"kod": kod, "batch_alanlar": alan_turleri(L), "properties_alanlar": alan_turleri(props),
+                                     "translations_tur": type(L.get("translations")).__name__,
+                                     "translations_anahtar": sorted(L["translations"]) if isinstance(L.get("translations"), dict) else None,
+                                     "ru_var": ru_bul(L) not in (None, {}),
+                                     "production_partners": [(p.get("production_partner_id"), p.get("partner_name"), p.get("location"))
+                                                             for p in L.get("production_partners") or [] if isinstance(p, dict)],
+                                     "gorsel_rank": [x.get("rank") for x in L.get("images") or [] if isinstance(x, dict)],
+                                     "video_state": [x.get("video_state") for x in L.get("videos") or [] if isinstance(x, dict)],
+                                     "is_personalizable": L.get("is_personalizable"),
+                                     "is_personalizable_tur": type(L.get("is_personalizable")).__name__,
+                                     "nitelik_id": [p.get("property_id") for p in props if isinstance(p, dict)]}
+        finally:
+            olc_yaz()
         print(json.dumps(O, ensure_ascii=False)[:8000])
-        if eksik or not O["ornek"]:
-            raise SystemExit(f"DUR: olc eksik: donen {len(B)} / {len(sec)}, donmeyen {eksik[:10]}, ornek {sorted(O['ornek'])}")
+        if eksik or not O["ornek"] or not isinstance(O["uretim_ortaklari"], list):
+            raise SystemExit(f"DUR: olc eksik: donen {len(B)} / {len(sec)}, donmeyen {eksik[:10]}, ornek {sorted(O['ornek'])}, "
+                             f"uretim ortaklari {O['uretim_ortaklari'] if not isinstance(O['uretim_ortaklari'], list) else 'tamam'}")
         return
     R = {"ilanlar": {}, "zaman": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()), "kota_bas": kota_bas, "spec_sha": spec["_sha"],
          "yarim": f"devam ediyor 0/{len(sec)}"}

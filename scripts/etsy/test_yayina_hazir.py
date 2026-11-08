@@ -144,6 +144,10 @@ def birim():
     L = ilan(); L["state"] = "active"; L["shipping_profile_id"] = 1; assert sinif(L)[0] == "YAYINDA (EKSIK VAR)"; n += 1
     # SPEC anahtar kapisi (yanlis adli anahtar kontrolu sessizce kaldirmasin)
     assert spec_dene(lambda s: None) is None; n += 1
+    for deger in (True, {"gorsel_sayisi": 11}, {"gorsel_sayisi": "11", "video_sayisi": 1}, 5):
+        assert "eski_medya" in (spec_dene(lambda s, d=deger: s.update(eski_medya=d)) or ""), deger; n += 1
+    assert spec_dene(lambda s: s.update(eski_medya=None)) is None; n += 1
+    sp3 = copy.deepcopy(SPEC); sp3["beklenen"]["aciklama_yasak"] = []; assert y.zayif_mi(sp3); n += 1
     for anahtar in ("ru", "alt_metin_kaynagi"):
         assert "eksik" in spec_dene(lambda s, a=anahtar: s.pop(a)); n += 1
     for anahtar in ("nitelikler", "aciklama_zorunlu"):
@@ -347,6 +351,22 @@ def uctan_uca():
     finally:
         y.kontrol_et = eski_k
     assert hata and "sinyal 15" in hata and R["yarim"].startswith("SystemExit: DUR: sinyal 15"), (hata, R.get("yarim")); n += 1
+    eski_alt = y.alt_kaynak
+
+    def alt_sinyal(spec):                                  # sinyal alt metin kaynaginda gelirse yutulmaz (inceleme 4. tur)
+        f = eski_alt(spec)
+
+        def g(kod):
+            if kod == sorted(RU)[21]:
+                os.kill(os.getpid(), signal.SIGTERM)
+            return f(kod)
+        return g
+    y.alt_kaynak = alt_sinyal
+    try:
+        hata, R, _ = kos(I, SahteAg(il, 1000), "--mod", "kontrol")
+    finally:
+        y.alt_kaynak = eski_alt
+    assert hata and "sinyal 15" in hata and R["yarim"].startswith("SystemExit: DUR: sinyal 15"), (hata, R.get("yarim")); n += 1
     # olc: tum ilanlar tek batch, ornek draft + active, ortaklar
     ag = SahteAg(il, 1000)
     hata, _, d = kos(I, ag, "--mod", "olc")
@@ -360,10 +380,13 @@ def uctan_uca():
     assert hata and "olc eksik" in hata and O["donen"] == 39 and len(O["donmeyen"]) == 39; n += 1
     hata, _, d = kos(I, SahteAg({}, 1000), "--mod", "olc")
     assert hata and "olc eksik" in hata; n += 1
-    ag = SahteAg(il, 1000, ortaklar="403")
+    ag = SahteAg(il, 1000, ortaklar="403")                 # ortak ucu okunamaz: olcum kaydedilir, kosu FAIL biter
     hata, _, d = kos(I, ag, "--mod", "olc")
     O = json.loads((d / "o/OLCUM.json").read_text())
-    assert hata is None and O["donen"] == 78 and str(O["uretim_ortaklari"]).startswith("okunamadi"), (hata, O["uretim_ortaklari"]); n += 1
+    assert hata and "uretim ortaklari okunamadi" in hata and O["donen"] == 78 and sorted(O["ornek"]) == ["active", "draft"], hata; n += 1
+    hata, _, d = kos(I, SahteAg(il, 24, adim=4), "--mod", "olc")   # baslangic gecer (20 >= 15); ilk properties'te taban: batch dosyada
+    O = json.loads((d / "o/OLCUM.json").read_text())
+    assert hata and "kota" in hata and O["donen"] == 78, (hata, O.get("donen")); n += 1
     return n
 
 
