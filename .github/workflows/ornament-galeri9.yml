@@ -110,6 +110,8 @@ jobs:
       matrix: ${{ fromJSON(needs.hazirla.outputs.matris) }}
     env:
       D: ${{ needs.hazirla.outputs.D }}
+      ANA_KLASOR: 1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD    # ASTROLOVE/ANA_SEMBOL78_KATMAN_20261008 (ornament-78-uretim.yml ile ayni)
+      BURC_KLASOR: 1j9TBPj86_5njsmf_t0v6tczuwcDyLuXu   # zodiac_symbols_gold (ornament-78-uretim.yml ile ayni)
     steps:
       - uses: actions/checkout@v4
         with:
@@ -118,6 +120,7 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             scripts/ornament_galeri/v9/
+            scripts/ornament_galeri/kart/
             scripts/kapak78/yd_kart/fonts/
             scripts/printful/
             docs/ornament/GALERI9.json
@@ -176,6 +179,23 @@ jobs:
           ok=0; for d in 1 2 3; do rclone copy "gdrive:ASTROLOVE/TEMP/$K" /tmp/kaynak --files-from /tmp/liste.txt --no-traverse -q 2>>/tmp/rclone_err.txt && { ok=1; break; }; sleep $((10*d)); done
           [ "$ok" = 1 ]
           n=$(ls /tmp/kaynak | wc -l); b=$(wc -l < /tmp/liste.txt); echo "baski $n / $b"; [ "$n" = "$b" ]
+      - name: Sembol karti girdileri (maskeler sabit sha; altin hazir dosyalar Drive, adla)
+        env:
+          CIFTLER: ${{ matrix.ciftler }}
+        run: |
+          set -euo pipefail
+          R=$(python3 -c "import json; print(json.load(open('s/docs/ornament/GALERI9.json'))['sembol_karti']['sembol_ref'])")
+          git init -q sem && cd sem
+          git remote add origin "https://github.com/$GITHUB_REPOSITORY"
+          git config core.sparseCheckout true; echo "kupa_uretim/sembol/" > .git/info/sparse-checkout
+          git fetch -q --depth 1 --filter=blob:none origin "$R" && git checkout -q FETCH_HEAD; cd ..
+          mkdir -p /tmp/altin
+          python3 -c "import os; c=os.environ['CIFTLER'].split(','); print('\n'.join(sorted({f'{x}_ana.png' for x in c})))" > /tmp/inc_ana.txt
+          python3 -c "import os; c=os.environ['CIFTLER'].split(','); print('\n'.join(sorted({f'{b.lower()}_symbol_gold.png' for x in c for b in x.split('_')})))" > /tmp/inc_burc.txt
+          rclone copy "gdrive:" /tmp/altin --drive-root-folder-id "$ANA_KLASOR" --files-from /tmp/inc_ana.txt --no-traverse -q 2>>/tmp/rclone_err.txt
+          rclone copy "gdrive:" /tmp/altin --drive-root-folder-id "$BURC_KLASOR" --files-from /tmp/inc_burc.txt --no-traverse -q 2>>/tmp/rclone_err.txt
+          n=$(ls /tmp/altin | wc -l); b=$(cat /tmp/inc_ana.txt /tmp/inc_burc.txt | wc -l); echo "altin $n / $b"; [ "$n" = "$b" ]
+          python3 -c "from PIL import Image; import glob; [print(f.split('/')[-1], Image.open(f).size, Image.open(f).mode) for f in sorted(glob.glob('/tmp/altin/*'))]"
       - name: Uretim (ETA; cift basina 14 gorsel + video + OLCUM; kapi)
         id: uretim
         env:
@@ -184,7 +204,8 @@ jobs:
         run: |
           set +e
           python3 s/scripts/ornament_galeri/v9/uret_cift.py --ciftler "$CIFTLER" --sahne /tmp/sahne --baski /tmp/kaynak \
-            --is /tmp/is --cikti /tmp/out --etiket "_P$(printf '%02d' $P)"
+            --is /tmp/is --cikti /tmp/out --etiket "_P$(printf '%02d' $P)" \
+            --maske sem/kupa_uretim/sembol --altin /tmp/altin --zemin /tmp/sahne/sembol_zemin.png --kart-dir s/scripts/ornament_galeri/kart
           k=$?; echo "k=$k" >> "$GITHUB_OUTPUT"; exit 0
       - name: Drive'a yukle (ciftler + RAPOR)
         if: always()
@@ -224,7 +245,7 @@ jobs:
           if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
             echo "::add-mask::$GOOGLE_CLIENT_SECRET"
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
-      - name: Ozet (PASS / FAIL, dosya sayimi 16)
+      - name: Ozet (PASS / FAIL, dosya sayimi 17)
         run: |
           set -euo pipefail
           rclone copy "gdrive:ASTROLOVE/TEMP/$D/RAPOR" /tmp/rap -q 2>>/tmp/rclone_err.txt
@@ -238,9 +259,9 @@ jobs:
           dos = collections.Counter(l.split('/')[0] for l in open('/tmp/liste.txt') if '/' in l and not l.startswith('RAPOR/'))
           eksik = [c for c in plan['ciftler'] if c not in s]
           fail = {c: v['neden'] for c, v in s.items() if v['sonuc'] != 'PASS'}
-          az = {c: dos.get(c, 0) for c in plan['ciftler'] if dos.get(c, 0) != 16}
+          az = {c: dos.get(c, 0) for c in plan['ciftler'] if dos.get(c, 0) != 17}
           o = dict(cift=len(plan['ciftler']), PASS=sum(v['sonuc'] == 'PASS' for v in s.values()), FAIL=fail, sonucu_eksik=eksik,
-                   dosya_sayisi_16_degil=az, esik='her cift PASS, klasorde 16 dosya (14 jpg + VIDEO + OLCUM)')
+                   dosya_sayisi_17_degil=az, esik='her cift PASS, klasorde 17 dosya (15 jpg + VIDEO + OLCUM)')
           o['DURUM'] = 'PASS' if (o['PASS'] == len(plan['ciftler']) and not eksik and not az) else 'FAIL'
           json.dump(o, open('/tmp/rap/OZET.json', 'w'), ensure_ascii=False, indent=1)
           print(json.dumps(o, ensure_ascii=False)[:3000])

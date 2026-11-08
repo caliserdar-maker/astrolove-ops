@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+"""Ornament "Two Signs, One Shared Symbol" karti, yeni set (Serdar 8 Kas): yayindaki W02 kartinin duzeni (kart_sablon.sembol_kart AYNEN:
+baslik, alt baslik, iki burc + adlari, birlesim cizgisi, ortak sembol, alt not), arka plan yeni setin keteni (AI, bos), uc sembol ve
+birlesim cizgisi ALTIN DOKU ("3 sembol de gold doku olsun", "birlesim cizgisi de altin doku olsun").
+Altin kaynaklar (onceden uretilmis): burclar Drive zodiac_symbols_gold/<burc>_symbol_gold.png, ortak sembol Drive ANA klasoru <CIFT>_ana.png.
+Duzen kapilari: once orijinal tuval + maskelerle (kupa_uretim/sembol/<CIFT>) kart_sablon kapilari (baglac, yerlesim) kosulur; sonra ayni
+geometriyle altin + keten cizilir.
+kullanim: python sembol_karti.py CIFT zemin.png maske_dizini altin_dizini cikis.jpg
+  altin_dizini: <burc>_symbol_gold.png (kucuk harf) ve <CIFT>_ana.png
+"""
+import os
+import sys
+from pathlib import Path
+
+import cv2
+import numpy as np
+from PIL import Image
+
+KART = Path(os.environ.get("KART_DIR", Path(__file__).resolve().parents[1] / "kart"))
+sys.path.insert(0, str(KART))
+import kart_sablon as T            # noqa: E402
+import yd_kart_ornek as K          # noqa: E402
+
+CIFT, ZEMIN, MASKE, ALTIN, CIKIS = sys.argv[1:6]
+a_, b_ = CIFT.split("_")
+A, B = a_.capitalize(), b_.capitalize()
+AYNI = A == B
+ALT = "Personalized with your two names and your date"
+AB = f"Two {A} signs joined in an original AstroLoveArt design" if AYNI else f"{A} and {B} joined in an original AstroLoveArt design"
+W, H = T.W, T.H
+
+# 1) duzen + kapilar: orijinal tuval ve maskelerle (yayindaki kartla ayni kod yolu)
+im0, o0, _, _ = T.sembol_kart(A, B, Path(MASKE) / CIFT, ALT, AB)
+yaz0 = list(K.YAZILAR)
+K.YAZILAR.clear(); K.SATIRLAR.clear(); K.KUTULAR.clear()
+
+# 2) altin + keten
+zem = Image.open(ZEMIN).convert("RGB").resize((W, H), Image.LANCZOS)
+ALTIN_YOL = {"sol.png": Path(ALTIN) / f"{a_.lower()}_symbol_gold.png", "sag.png": Path(ALTIN) / f"{b_.lower()}_symbol_gold.png",
+             "ana.png": Path(ALTIN) / f"{CIFT}_ana.png"}
+_maske = T.maske
+_baglac = T.baglac
+_bilgi = {}
+
+
+def altin_maske(yol, h):
+    """maske() ile ayni olcek kurali (alfa kutusu kirpilir, yukseklik h), piksel altin dosyasindan (renk degismez)."""
+    g = Image.open(ALTIN_YOL[Path(yol).name]).convert("RGBA")
+    g = g.crop(g.getchannel("A").point(lambda v: 255 if v > 20 else 0).getbbox())
+    g = g.resize((round(g.width * h / g.height), h), Image.LANCZOS)
+    _bilgi[Path(yol).name] = [g.width, g.height]
+    return g
+
+
+# birlesim cizgisi altin: kapak yazisi altin paleti (onayli Ruby baskinin altin pikselleri) + kabartma (sol ust isik)
+PAL = np.array([[125, 74, 3], [143, 91, 5], [161, 105, 18], [191, 130, 25], [212, 152, 34], [228, 191, 67], [240, 223, 94]], np.float32)
+PQ = np.array([0.02, 0.10, 0.25, 0.50, 0.75, 0.90, 0.98], np.float32)
+
+
+def altin_boya(k):
+    h = cv2.GaussianBlur(k, (0, 0), 2.0)
+    gx = cv2.Sobel(h, cv2.CV_32F, 1, 0, ksize=3); gy = cv2.Sobel(h, cv2.CV_32F, 0, 1, ksize=3)
+    isik = -(gx * -0.6 + gy * -0.8) * 6.0
+    t = np.clip(0.55 + 0.25 * (cv2.GaussianBlur(k, (0, 0), 1.0) - 0.5) + isik, 0.0, 1.0)
+    return np.stack([np.interp(t, PQ, PAL[:, c]) for c in range(3)], -1).astype(np.float32)
+
+
+def altin_baglac(im, xs, y0, uy, wmax=9.0, S=4, n=600):
+    gecici = Image.new("RGB", (W, H), K.ZEMIN)
+    alfa, uc = _baglac(gecici, xs, y0, uy, wmax=wmax, S=S, n=n)
+    a = np.asarray(im).astype(np.float32)
+    renk = altin_boya(alfa.astype(np.float32))
+    a = a * (1 - alfa[..., None]) + renk * alfa[..., None]
+    im.paste(Image.fromarray(np.clip(a, 0, 255).astype(np.uint8)))
+    return alfa, uc
+
+
+T.maske = altin_maske
+T.baglac = altin_baglac
+T.baglac_kapisi = lambda im, alfa, uc, **k: dict(not_="1. gecis (orijinal tuval) kapisi gecti")
+T.yerlesim_kapisi = lambda kay, tur: dict(not_="1. gecis kapisi gecti")
+K.tuval = lambda: zem.copy()
+im, o, _, _ = T.sembol_kart(A, B, Path(MASKE) / CIFT, ALT, AB)
+yaz = list(K.YAZILAR)
+if yaz != yaz0 or yaz != ["Two Signs, One Shared Symbol", AB, A, B, ALT]:
+    raise SystemExit(f"DUR: metin {yaz}")
+if o["baglac"] != o0["baglac"] or abs(o["sembol"][1] - o0["sembol"][1]) > 2:
+    raise SystemExit(f"DUR: geometri farkli {o['baglac']} {o0['baglac']} {o['sembol']} {o0['sembol']}")
+im.save(CIKIS, quality=95, subsampling=0)
+print(dict(kart="SEMBOL_ALTIN", cift=CIFT, sembol=o["sembol"], sembol_maske=o0["sembol"], altin=_bilgi,
+           baglac=o0["baglac_kapisi"], yerlesim=o0.get("yerlesim", {}).get("sonuc") if isinstance(o0.get("yerlesim"), dict) else str(o0.get("yerlesim"))[:80]))
