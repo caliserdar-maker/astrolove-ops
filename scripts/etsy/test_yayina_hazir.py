@@ -11,6 +11,7 @@ import copy
 import io
 import json
 import os
+import signal
 import sys
 import tempfile
 from pathlib import Path
@@ -27,7 +28,7 @@ B = SPEC["beklenen"]
 KOD = "CANCER_LIBRA"
 ALT = ALT_F(KOD)[0]
 ORTAK = 77
-ESKI = ({"101", "102"}, {"900"})          # eski gorsel id'leri, eski video id'si (YEDEK9 benzeri)
+ESKI = ({str(101 + i) for i in range(11)}, {"900"})   # eski 11 gorsel id'si, eski video id'si (YEDEK9 yapisi: 11 gorsel, 1 video)
 
 
 def ilan(kod=KOD, lid=4611501158, state="draft"):
@@ -84,6 +85,8 @@ def birim():
     for alan, deger in (("description", "with Free  Shipping "), ("title", "Ornament ships free "), ("tags", ["free delivery"])):
         L = ilan(); L[alan] = (deger + L[alan]) if isinstance(deger, str) else deger
         k = sinif(L)[1]; assert any(x.startswith("yasak") and v.startswith("FAIL") for x, v in k.items()), (alan, k); n += 1
+    L = ilan(); L["tags"] = ["gift ornament free", "shipping ornament"]; assert sinif(L)[0] == "YAYINA HAZIR"; n += 1   # etiket ucu
+    L = ilan(); L["is_personalizable"] = "false"; assert sinif(L)[1]["kisisellestirme"].startswith("olculemedi"); n += 1
     L = ilan(); L["description"] = L["description"].replace("[ SHIPPING ]\n", "")
     assert any(x.startswith("aciklama zorunlu") for x in sinif(L)[1]); n += 1
     L = ilan(); L["description"] = "Made and shipped by our production partner, with free shipping."
@@ -108,6 +111,10 @@ def birim():
     assert "eski gorsel" in sinif(L)[1]["gorsel"]; n += 1
     L = ilan(); del L["images"][0]["listing_image_id"]; assert sinif(L)[1]["gorsel"].startswith("olculemedi"); n += 1
     assert sinif(ilan(), eski=None)[1]["eski medya"].startswith("olculemedi"); n += 1          # SPEC eski_medya, kayit yok
+    Y_ = SPEC["eski_medya"]
+    assert y.eski_idler({"gorsel": [], "video": []}, Y_) is None; n += 1                       # bos liste yanlis PASS vermez
+    assert y.eski_idler({"gorsel": [{"id": i} for i in range(10)], "video": [{"id": 1}]}, Y_) is None; n += 1
+    assert y.eski_idler({"gorsel": [{"id": i} for i in range(11)], "video": [{"id": 1}]}, Y_) is not None; n += 1
     L = ilan(kod="ARIES_ARIES"); assert sinif(L, kod="ARIES_ARIES")[0] == "YAYINA HAZIR"; n += 1
     assert sinif(ilan(), kod="ARIES_ARIES")[1]["gorsel"].startswith("FAIL"); n += 1           # baska ciftin alt metni
     S = y.kontrol_et(SPEC, "YOK_YOK", ilan(), RU, PROPS, ALT_F, ESKI, ORTAK)                     # kaynak yok -> olculemedi
@@ -137,12 +144,19 @@ def birim():
     L = ilan(); L["state"] = "active"; L["shipping_profile_id"] = 1; assert sinif(L)[0] == "YAYINDA (EKSIK VAR)"; n += 1
     # SPEC anahtar kapisi (yanlis adli anahtar kontrolu sessizce kaldirmasin)
     assert spec_dene(lambda s: None) is None; n += 1
+    for anahtar in ("ru", "alt_metin_kaynagi"):
+        assert "eksik" in spec_dene(lambda s, a=anahtar: s.pop(a)); n += 1
+    for anahtar in ("nitelikler", "aciklama_zorunlu"):
+        assert "beklenen." + anahtar in spec_dene(lambda s, a=anahtar: s["beklenen"].pop(a)); n += 1
     assert "eksik" in spec_dene(lambda s: s.pop("eski_medya")); n += 1
     assert "beklenen.kisisellestirme" in spec_dene(lambda s: s["beklenen"].pop("kisisellestirme")); n += 1
     assert "beklenen.nitelik" in spec_dene(lambda s: s["beklenen"].update(nitelik=s["beklenen"].pop("nitelikler"))); n += 1
     assert "bilinmeyen ['rus']" in spec_dene(lambda s: s.update(rus=s.pop("ru"))); n += 1
-    sp = copy.deepcopy(SPEC); del sp["alt_metin_kaynagi"]                                      # zayif yol raporda ZAYIF yazar
-    assert "ZAYIF" in "; ".join(y.uygulanan(sp)) and "ZAYIF" not in "; ".join(y.uygulanan(SPEC)); n += 1
+    sp = copy.deepcopy(SPEC); sp["alt_metin_kaynagi"] = None                                   # acikca kapali: ZAYIF sinif
+    assert y.zayif_mi(sp) and not y.zayif_mi(SPEC); n += 1
+    S = y.kontrol_et(sp, KOD, ilan(), RU, PROPS, None, ESKI, ORTAK)
+    assert y.siniflandir(ilan(), S, y.zayif_mi(sp))[0] == "YAYINA HAZIR (ZAYIF KONTROL)"; n += 1
+    sp2 = copy.deepcopy(SPEC); sp2["beklenen"]["nitelikler"] = []; assert y.zayif_mi(sp2); n += 1
     L = ilan(); L["images"][1]["alt_text"] = "tree"; assert sinif(L, spec=sp)[1]["gorsel"].startswith("FAIL"); n += 1
     # rapor ve liste
     R = {"ilanlar": {KOD: {"listing_id": 1, "sinif": "YAYINA HAZIR", "eksik": {}},
@@ -186,6 +200,8 @@ class SahteAg:
         path = url.split("/v3/application")[-1]
         self.istek.append((path, dict(params or {})))
         self.kalan -= self.adim
+        if path.endswith("/production-partners") and self.ortaklar == "403":
+            return Yanit(403, {"error": "forbidden"}, self.kalan)
         if path.endswith("/production-partners"):
             return Yanit(200, {"count": len(self.ortaklar), "results": copy.deepcopy(self.ortaklar)}, self.kalan)
         if path.startswith("/shops/") and path.endswith("/properties"):
@@ -222,15 +238,18 @@ def kos(ilanlar_json, ag, *ek, spec=SPEC_YOL):
         y.main()
     except SystemExit as e:
         hata = str(e.code)
+    except KeyboardInterrupt:
+        hata = "KeyboardInterrupt"
     finally:
         etsy_common.requests.request, y.TokenStore, sys.argv = eski[0], eski[1], eski[2]
         os.environ.clear(); os.environ.update(eski[3])
+        signal.signal(signal.SIGTERM, signal.SIG_DFL)
     R = json.loads((d / "o/YAYINA_HAZIR.json").read_text()) if (d / "o/YAYINA_HAZIR.json").exists() else None
     return hata, R, d
 
 
 def kayit(lid):
-    return {"listing_id": lid, "gorsel": [{"id": 101}, {"id": 102}], "video": [{"id": 900}]}
+    return {"listing_id": lid, "gorsel": [{"id": 101 + i} for i in range(11)], "video": [{"id": 900}]}
 
 
 def tum78(n_ilan=78, bozuk=None):
@@ -271,14 +290,14 @@ def uctan_uca():
         if kod == "ARIES_ARIES":
             L["videos"][0]["video_id"] = 900
         if kod == "ARIES_CANCER":
-            L["shipping_profile_id"] = {"x": 1}          # beklenmeyen tur: tek ilanda kalir
+            L["images"].append("x")                      # dict olmayan oge: gercek istisna, yalniz bu ilanda kalir
     I, il = tum78(bozuk=boz); eksik = sorted(I)[-1]; del I[eksik]
     I["LEO_LEO"] = {"hata": "listing id yok (None)"}
     hata, R, d = kos(I, SahteAg(il, 1000), "--mod", "kontrol")
     assert hata is None, hata
     assert R["ilanlar"][eksik]["sinif"] == "DURUM ilan dosyasinda yok"; n += 1
     assert R["ilanlar"]["ARIES_ARIES"]["eksik"]["video"] == "FAIL: eski video"; n += 1
-    assert R["ilanlar"]["ARIES_CANCER"]["sinif"] in ("DURUM olculemedi", "HENUZ YAYINLAMAYIN", "YAYINDA (EKSIK VAR)"); n += 1
+    assert R["ilanlar"]["ARIES_CANCER"]["sinif"] == "DURUM olculemedi", R["ilanlar"]["ARIES_CANCER"]; n += 1
     assert R["ilanlar"]["LEO_LEO"]["sinif"] == "DURUM okunamadi" and "Toplam 78 / beklenen 78" in (d / "o/YAYINA_HAZIR.md").read_text(); n += 1
     # batch'te donmeyen ilan
     I, il = tum78(); del il[4611600005]
@@ -310,16 +329,24 @@ def uctan_uca():
     assert hata is None and R["ilanlar"][sorted(RU)[3]]["sinif"] == "DURUM olculemedi" and "yarim" not in R; n += 1
     # iptal (KeyboardInterrupt) ara noktada: yarim cikti isaretli kalir, istisna yutulmaz
     eski_k, f = istisna(sorted(RU)[12], KeyboardInterrupt()); y.kontrol_et = f
-    d = None
     try:
-        try:
-            kos(I, SahteAg(il, 1000), "--mod", "kontrol")
-            raise AssertionError("iptal yutuldu")
-        except KeyboardInterrupt:
-            pass
+        hata, R, d = kos(I, SahteAg(il, 1000), "--mod", "kontrol")
     finally:
         y.kontrol_et = eski_k
-    n += 1
+    assert hata == "KeyboardInterrupt" and R["yarim"].startswith("KeyboardInterrupt") and 10 <= len(R["ilanlar"]) < 78, (hata, R.get("yarim")); n += 1
+    assert (d / "o/YAYINA_HAZIR.md").read_text().splitlines()[2].startswith("YARIM"); n += 1
+    eski_k = y.kontrol_et
+
+    def sinyal(spec, kod, *a, **k):                       # SIGTERM (Actions iptali / zaman asimi) gercek sinyalle
+        if kod == sorted(RU)[20]:
+            os.kill(os.getpid(), signal.SIGTERM)
+        return eski_k(spec, kod, *a, **k)
+    y.kontrol_et = sinyal
+    try:
+        hata, R, _ = kos(I, SahteAg(il, 1000), "--mod", "kontrol")
+    finally:
+        y.kontrol_et = eski_k
+    assert hata and "sinyal 15" in hata and R["yarim"].startswith("SystemExit: DUR: sinyal 15"), (hata, R.get("yarim")); n += 1
     # olc: tum ilanlar tek batch, ornek draft + active, ortaklar
     ag = SahteAg(il, 1000)
     hata, _, d = kos(I, ag, "--mod", "olc")
@@ -333,6 +360,10 @@ def uctan_uca():
     assert hata and "olc eksik" in hata and O["donen"] == 39 and len(O["donmeyen"]) == 39; n += 1
     hata, _, d = kos(I, SahteAg({}, 1000), "--mod", "olc")
     assert hata and "olc eksik" in hata; n += 1
+    ag = SahteAg(il, 1000, ortaklar="403")
+    hata, _, d = kos(I, ag, "--mod", "olc")
+    O = json.loads((d / "o/OLCUM.json").read_text())
+    assert hata is None and O["donen"] == 78 and str(O["uretim_ortaklari"]).startswith("okunamadi"), (hata, O["uretim_ortaklari"]); n += 1
     return n
 
 

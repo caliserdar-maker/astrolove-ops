@@ -37,12 +37,16 @@ from etsy_common import Etsy, TokenStore, mask  # noqa: E402
 KOK = Path(__file__).resolve().parents[2]
 KOTA_MIN = 10
 LINK = "https://www.etsy.com/your/shops/me/listing-editor/edit/{}"
-SINIF_SIRA = ("YAYINDA (EKSIK VAR)", "HENUZ YAYINLAMAYIN", "YAYINA HAZIR", "YAYINDA")
+ZAYIF = " (ZAYIF KONTROL)"
+SINIF_SIRA = ("YAYINDA (EKSIK VAR)", "HENUZ YAYINLAMAYIN", "YAYINA HAZIR", "YAYINA HAZIR" + ZAYIF, "YAYINDA", "YAYINDA" + ZAYIF)
 INCLUDES = "images,videos,translations,personalization"
-B_ZORUNLU = {"shipping_profile_id", "uretim_ortagi", "fiyat", "kisisellestirme", "gorsel_sayisi", "video_sayisi", "aciklama_yasak"}
-B_SECMELI = {"uretim_ortagi_id", "gorsel2_alt_icerir", "aciklama_zorunlu", "nitelikler"}
-S_ZORUNLU = {"urun", "kaynak", "beklenen", "kontrol_edilmeyen", "eski_medya"}
-S_SECMELI = {"alt_metin_kaynagi", "ru"}
+# Zorunlu anahtar SPEC'te BULUNMALI; kontrol istenmiyorsa acikca bos / null yazilir ([] / null / false) ve rapor "YOK" der,
+# sinif "(ZAYIF KONTROL)" olur (inceleme 3. tur: silinen anahtar kontrolu sessizce kaldirmasin).
+B_ZORUNLU = {"shipping_profile_id", "uretim_ortagi", "fiyat", "kisisellestirme", "gorsel_sayisi", "video_sayisi", "aciklama_yasak",
+             "aciklama_zorunlu", "nitelikler"}
+B_SECMELI = {"uretim_ortagi_id", "gorsel2_alt_icerir"}
+S_ZORUNLU = {"urun", "kaynak", "beklenen", "kontrol_edilmeyen", "eski_medya", "alt_metin_kaynagi", "ru"}
+S_SECMELI = set()
 
 
 class SaltOkur(Etsy):
@@ -106,11 +110,16 @@ def uygulanan(spec):
          "tum alt metinler sirasiyla" if spec.get("alt_metin_kaynagi") else
          ("yalniz 2. gorsel alt metni (ZAYIF: sira kontrol edilmez)" if b.get("gorsel2_alt_icerir") else "alt metin YOK (ZAYIF)"),
          f"{b['video_sayisi']} video, video_state active",
-         "eski gorsel / video id yok" if spec["eski_medya"] else "eski medya kontrolu YOK",
+         ("eski gorsel / video id yok (yedek yapisi {gorsel_sayisi} gorsel, {video_sayisi} video)".format(**spec["eski_medya"])
+          if spec["eski_medya"] else "eski medya kontrolu YOK"),
          "aciklama zorunlu ifade" if b.get("aciklama_zorunlu") else "aciklama zorunlu ifade YOK",
          "baslik + aciklama + etiket yasak desen", "RU baslik + aciklama" if spec.get("ru") else "RU YOK",
          "nitelikler" if b.get("nitelikler") else "nitelik YOK", "beklenen kod kumesi (RU CSV)" if spec.get("ru") else "kod kumesi YOK"]
     return u
+
+
+def zayif_mi(spec):
+    return any("YOK" in u or "ZAYIF" in u for u in uygulanan(spec))
 
 
 def ru_csv(spec):
@@ -176,9 +185,13 @@ def ru_bul(L):
     return {}
 
 
-def eski_idler(kayit):
-    """Ilan dosyasi kaydindaki eski medya id'leri (ornament YEDEK9: gorsel[].id, video[].id). None = kayitta liste yok."""
+def eski_idler(kayit, yapi=None):
+    """Ilan dosyasi kaydindaki eski medya id'leri (ornament YEDEK9: gorsel[].id, video[].id). None = kayitta liste yok ya da
+    yedek yapisi (SPEC eski_medya: gorsel_sayisi, video_sayisi) tutmuyor (bos liste yanlis PASS vermesin; inceleme 3. tur)."""
     if not isinstance(kayit, dict) or not isinstance(kayit.get("gorsel"), list) or not isinstance(kayit.get("video"), list):
+        return None
+    if yapi and (len(kayit["gorsel"]) != yapi.get("gorsel_sayisi") or len(kayit["video"]) != yapi.get("video_sayisi")
+                 or any(not isinstance(x, dict) or x.get("id") is None for x in kayit["gorsel"] + kayit["video"])):
         return None
     return ({str(x.get("id")) for x in kayit["gorsel"] if isinstance(x, dict) and x.get("id") is not None},
             {str(x.get("id")) for x in kayit["video"] if isinstance(x, dict) and x.get("id") is not None})
@@ -249,11 +262,13 @@ def kontrol_et(spec, kod, L, ru_harita, props=None, alt_f=None, eski=None, ortak
     S["fiyat"] = "olculemedi: alan yok" if f is None else ("PASS" if abs(f - float(b["fiyat"])) < 0.005 else f"FAIL: {f}")
     if "is_personalizable" not in L:
         S["kisisellestirme"] = "olculemedi: alan yok"
+    elif not isinstance(L.get("is_personalizable"), bool):   # "false" metni yanlis PASS vermesin (inceleme 3. tur)
+        S["kisisellestirme"] = f"olculemedi: beklenmeyen tur {type(L.get('is_personalizable')).__name__}"
     else:
         S["kisisellestirme"] = "PASS" if bool(L.get("is_personalizable")) == bool(b["kisisellestirme"]) else f"FAIL: {L.get('is_personalizable')}"
     eg, ev = eski if eski is not None else (None, None)
     if spec["eski_medya"] and eski is None:
-        S["eski medya"] = "olculemedi: ilan dosyasinda eski id listesi yok"
+        S["eski medya"] = "olculemedi: ilan dosyasinda eski id listesi yok ya da yedek yapisi farkli"
     ims = L.get("images")
     if not isinstance(ims, list):
         S["gorsel"] = "olculemedi: alan yok"
@@ -274,7 +289,7 @@ def kontrol_et(spec, kod, L, ru_harita, props=None, alt_f=None, eski=None, ortak
         S["metin"] = "olculemedi: baslik / aciklama / etiket alani yok"
     else:
         d = norm(L.get("description"))
-        hepsi = " ".join([norm(L.get("title")), d, " ".join(norm(t) for t in L.get("tags") or [])])
+        hepsi = " | ".join([norm(L.get("title")), d] + [norm(t) for t in L.get("tags") or []])   # etiket uclari birlesmesin
         for z in b.get("aciklama_zorunlu", []):
             S[f"aciklama zorunlu: {z[:30]}"] = "PASS" if norm(z) in d else "FAIL: yok"
         for y in b["aciklama_yasak"]:
@@ -307,14 +322,15 @@ def kontrol_et(spec, kod, L, ru_harita, props=None, alt_f=None, eski=None, ortak
     return S
 
 
-def siniflandir(L, S):
+def siniflandir(L, S, zayif=False):
     st = L.get("state")
     kotu = {k: v for k, v in S.items() if v != "PASS"}
+    ek = ZAYIF if zayif else ""
     if st == "active":
-        return ("YAYINDA" if not kotu else "YAYINDA (EKSIK VAR)"), kotu
+        return ("YAYINDA" + ek if not kotu else "YAYINDA (EKSIK VAR)"), kotu
     if st != "draft":
         return f"DURUM {st}", kotu
-    return ("YAYINA HAZIR" if not kotu else "HENUZ YAYINLAMAYIN"), kotu
+    return ("YAYINA HAZIR" + ek if not kotu else "HENUZ YAYINLAMAYIN"), kotu
 
 
 def sayim(R):
@@ -340,7 +356,8 @@ def md(R, spec):
             f"Kontrol EDİLMEYEN: {ke}.", ""]
     for s in SINIF_SIRA:
         if s in g:
-            out.append(f"## {s}: {len(g[s])}" + (f" (kontrol edilmeyen: {ke})" if s in ("YAYINA HAZIR", "YAYINDA") else ""))
+            temiz = s.startswith(("YAYINA HAZIR", "YAYINDA")) and s != "YAYINDA (EKSIK VAR)"
+            out.append(f"## {s}: {len(g[s])}" + (f" (kontrol edilmeyen: {ke})" if temiz else ""))
             for kod, x in g[s]:
                 ek = "" if not x["eksik"] else " | " + "; ".join(f"{k}: {v}" for k, v in x["eksik"].items())
                 out.append(f"- [{kod}]({LINK.format(x['listing_id'])}){ek}")
@@ -364,9 +381,10 @@ def ilan_listesi(Y):
 
 
 def yaz(out, R, spec):
-    json.dump(R, open(out / "YAYINA_HAZIR.json", "w"), indent=1, ensure_ascii=False)
+    """Once md, sonra JSON (inceleme 3. tur: kesintide ikisi celismesin; JSON son yazilir)."""
     m = md(R, spec)
     open(out / "YAYINA_HAZIR.md", "w").write(m)
+    json.dump(R, open(out / "YAYINA_HAZIR.json", "w"), indent=1, ensure_ascii=False)
     return m
 
 
@@ -418,9 +436,15 @@ def main():
         raise SystemExit(f"DUR: kota {kota_bas} < tahmini istek {tahmin} + {KOTA_MIN} (okuma baslamadi)")
     print(f"ilan {len(sec)} | okunamayan {len(okunamayan)} | nitelik {nitelik} | tahmini istek {tahmin} | kota {kota_bas}", flush=True)
     if a.mod == "olc":
-        ortaklar = [(p.get("production_partner_id"), p.get("partner_name"), p.get("location"))
-                    for p in (api.get(f"/shops/{shop}/production-partners") or {}).get("results") or []]; cagri += 1
         B, n = batch(api, [v for _, v in sec]); cagri += n
+        try:   # batch'ten SONRA; ortak ucu hatasi olcumu durdurmaz (kota DUR yukari gider)
+            ortaklar = [(p.get("production_partner_id"), p.get("partner_name"), p.get("location"))
+                        for p in (api.get(f"/shops/{shop}/production-partners") or {}).get("results") or []]
+        except SystemExit as e:
+            if str(e.code).startswith("DUR: kota"):
+                raise
+            ortaklar = f"okunamadi: {str(e.code)[:200]}"
+        cagri += 1
         st = {}
         for L in B.values():
             st[str(L.get("state"))] = st.get(str(L.get("state")), 0) + 1
@@ -461,6 +485,7 @@ def main():
         R["ilanlar"].setdefault(kod, {"listing_id": None, "sinif": "DURUM okunamadi", "eksik": {"okuma": neden}})
     sec = [(kod, v) for kod, v in sec if kod not in R["ilanlar"]]
     t0 = time.time()
+    zayif = zayif_mi(spec)
     try:
         ortak_id, R["uretim_ortaklari"] = ortak_bul(api, shop, spec["beklenen"]["uretim_ortagi"]); cagri += 1
         B, n = batch(api, [v for _, v in sec]); cagri += n
@@ -473,8 +498,8 @@ def main():
                 props = None
                 if nitelik and L.get("state") in ("draft", "active"):
                     props = (api.get(f"/shops/{shop}/listings/{lid}/properties") or {}).get("results") or []; cagri += 1
-                S = kontrol_et(spec, kod, L, RU, props, alt_f, eski_idler(Y.get(kod)), ortak_id)
-                sinif, kotu = siniflandir(L, S)
+                S = kontrol_et(spec, kod, L, RU, props, alt_f, eski_idler(Y.get(kod), spec["eski_medya"] or None), ortak_id)
+                sinif, kotu = siniflandir(L, S, zayif)
                 R["ilanlar"][kod] = {"listing_id": lid, "state": L.get("state"), "sinif": sinif, "eksik": kotu, "sonuc": S}
             except Exception as e:  # noqa: BLE001 (beklenmeyen veri tek ilanda kalir; kota DUR SystemExit'i yukari gider)
                 R["ilanlar"][kod] = {"listing_id": lid, "state": L.get("state"), "sinif": "DURUM olculemedi",
@@ -485,13 +510,13 @@ def main():
             if i % 10 == 0:
                 R.update(kota_son=api.remaining, cagri=cagri, yarim=f"devam ediyor {i}/{len(sec)}")
                 yaz(out, R, spec)
+        R.pop("yarim", None)
+        R.update(kota_son=api.remaining, cagri=cagri)
+        m = yaz(out, R, spec)
     except BaseException as e:
         R.update(kota_son=api.remaining, cagri=cagri, yarim=f"{type(e).__name__}: {str(getattr(e, 'code', e))[:300]}")
         yaz(out, R, spec)
         raise
-    R.pop("yarim", None)
-    R.update(kota_son=api.remaining, cagri=cagri)
-    m = yaz(out, R, spec)
     print(f"::notice::yayina_hazir {spec.get('urun')} | {sayim(R)} | cagri {cagri} | kota {kota_bas} -> {api.remaining}")
     print(m[:6000])
 

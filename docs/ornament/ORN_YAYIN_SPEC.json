@@ -19,7 +19,7 @@
   ]
  },
  "alt_metin_kaynagi": "ornament_galeri9:alt_metinler",
- "eski_medya": true,
+ "eski_medya": {"gorsel_sayisi": 11, "video_sayisi": 1},
  "kontrol_edilmeyen": ["stil secimi - gorsel baglari (variation-images)", "kisisellestirme ayrintilari (zorunlu, karakter siniri, talimat)", "5 stil teklif fiyati ve stok (envanter)", "para birimi", "GPSR", "gorsel olculeri (3000x2250)", "baslik ve etiket icerigi (yalniz yasak desen taranir)", "kargo profilinin ulke ve ucretleri"],
  "ru": {"csv": "data/pod/ORN78_RU.csv", "sha256": "39843f4af64573ea7db2da91fd7358b505aa1425156bc59ede09784445b7db34", "anahtar": "kod"}
 }
