@@ -805,7 +805,7 @@ class Kuru(Kilitli):
         if len(p) == 14:                          # onceki yeniden denemesi bitmis (42462674399): 14 yeni, 4-5 yer degismis, stil 10-14 yeni
             sira = {n: n for n in range(1, 15)}; sira[4], sira[5] = 5, 4
             self.ims = [dict(listing_image_id=p[n], rank=sira[n], alt_text=a[GALERI[n - 1]], full_width=3000, full_height=2250) for n in range(1, 15)]
-            self.vids = [dict(video_id=990001, video_state="active")]
+            self.vids = [dict(video_id=v, video_state="active") for v in ((d.get("yeniden") or {}).get("video") or [990001])]
             self.vis = [dict(property_id=P_STYLE, value_id=y["stil"][s], image_id=p[r]) for s, r in STIL_SIRA.items()]
             return
         sira = [(1, e[1], "01_KAPAK")] + [(n, s2[n], GALERI[n - 1]) for n in SIRA_DEG] + \
