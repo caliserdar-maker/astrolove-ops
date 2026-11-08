@@ -118,8 +118,11 @@ im, o, _, _ = T.sembol_kart(A, B, Path(MASKE) / CIFT, ALT, AB)
 yaz = list(K.YAZILAR)
 if yaz != yaz0 or yaz != ["Two Signs, One Shared Symbol", AB, A, B, ALT]:
     raise SystemExit(f"DUR: metin {yaz}")
-if o["baglac"] != o0["baglac"] or any(abs(p - q) > max(4, 0.02 * q) for p, q in zip(o["sembol"], o0["sembol"])):   # altin ve maske kutusu oranlari az farkli
+# GEVSETME (Serdar 8 Kas "Gevsetme: %3", yalniz bu cift): SAGITTARIUS_VIRGO ana sembol altin dosyasi maskeden 10 px dar (428 / 438)
+GEO_TOL = {"SAGITTARIUS_VIRGO": 0.03}
+TOL = GEO_TOL.get(CIFT, 0.02)
+if o["baglac"] != o0["baglac"] or any(abs(p - q) > max(4, TOL * q) for p, q in zip(o["sembol"], o0["sembol"])):   # altin ve maske kutusu oranlari az farkli
     raise SystemExit(f"DUR: geometri farkli {o['baglac']} {o0['baglac']} {o['sembol']} {o0['sembol']}")
 im.save(CIKIS, quality=95, subsampling=0)
-print(dict(kart="SEMBOL_ALTIN", cift=CIFT, sembol=o["sembol"], sembol_maske=o0["sembol"], altin=_bilgi,
+print(dict(kart="SEMBOL_ALTIN", cift=CIFT, geo_tol=TOL, sembol=o["sembol"], sembol_maske=o0["sembol"], altin=_bilgi,
            baglac=o0["baglac_kapisi"], yerlesim=o0.get("yerlesim", {}).get("sonuc") if isinstance(o0.get("yerlesim"), dict) else str(o0.get("yerlesim"))[:80]))
