@@ -1,0 +1,129 @@
+name: canli-yapi-olc
+# CANLI YAPI OLCUMU (O1; SALT OKUMA, Etsy'ye YAZMAZ). Plan: plan/urun-ayar docs/plan/URUN_AYAR_PLAN.md 7.1. Kod scripts/etsy/canli_yapi_olc.py.
+# Serdar 8 Kas gece "Hepsi oneriyle" (Merkez Onay 3a): kod onayli; KOSU AYRI ONAY, ornament zinciri bittikten sonra; once mod=prob.
+# mod=prob: TAM 3 istek (magaza + batch includes=Inventory her gruptan 1 ilan + poster tek ilan envanteri); senaryo 1 / 2 karari.
+# mod=olc : --senaryo (prob sonucuyla Serdar onayinda secilir) + prob_cikti (prob OLCUM.json) zorunlu. Istek (tek kosu) =
+#           1 + 3 (yalniz ornament grubu) + ceil(ilan / 100) + (senaryo 2: ilan). Kota: okuma baslamadan kalan >= tahmin + 10.
+# Gizlilik: ilan kimligi yalniz Drive OLCUM.json; log / STEP_SUMMARY (SAYIM.txt) / ::error:: satirlarinda yok.
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      mod: { description: "prob | olc", required: true, default: "prob" }
+      senaryo: { description: "olc icin 1 (batch Inventory) | 2 (ilan basi envanter GET); prob'da bos", required: false, default: "" }
+      gruplar: { description: "virgullu: ornament,kupa,sade,poster,yd", required: true, default: "ornament,kupa,sade,poster,yd" }
+      ornament_liste: { description: "Drive yolu (DURUM.json ciftler)", required: false, default: "gdrive:ASTROLOVE/TEMP/ORNAMENT_TASLAK/DURUM.json" }
+      kupa_liste: { description: "Drive yolu (CSV cift, listing_id)", required: false, default: "gdrive:ASTROLOVE/TEMP/KUPA_ORCHARD_TASLAK_20261019/KUPA_TASLAK_LISTE.csv" }
+      sade_liste: { description: "Drive yolu (DURUM.json burc -> listing_id; bicim dogrulanmadi)", required: false, default: "gdrive:ASTROLOVE/TEMP/SADE_TASLAK_G/DURUM.json" }
+      prob_cikti: { description: "olc icin prob kosusunun OLCUM.json Drive yolu", required: false, default: "" }
+env:
+  O: "gdrive:ASTROLOVE/TEMP/CANLI_YAPI_OLC"
+jobs:
+  olc:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150   # kilit_bekle en fazla 120 dk bekleyebilir
+    steps:
+      - name: Girdi kapisi
+        env:
+          M: ${{ inputs.mod }}
+          SN: ${{ inputs.senaryo }}
+          GR: ${{ inputs.gruplar }}
+          LO: ${{ inputs.ornament_liste }}
+          LK: ${{ inputs.kupa_liste }}
+          LS: ${{ inputs.sade_liste }}
+          PC: ${{ inputs.prob_cikti }}
+        run: |
+          [[ "$M" =~ ^(prob|olc)$ ]] || { echo "::error::mod"; exit 1; }
+          [[ "$GR" =~ ^(ornament|kupa|sade|poster|yd)(,(ornament|kupa|sade|poster|yd))*$ ]] || { echo "::error::gruplar"; exit 1; }
+          RX='^gdrive:ASTROLOVE/TEMP/[A-Za-z0-9_/.-]+\.(json|csv)$'
+          for v in "$LO" "$LK" "$LS"; do [ -z "$v" ] || { [[ "$v" =~ $RX ]] && [[ "$v" != *..* ]]; } || { echo "::error::liste yolu"; exit 1; }; done
+          if [ "$M" = olc ]; then
+            [[ "$SN" =~ ^[12]$ ]] || { echo "::error::olc icin senaryo 1 ya da 2"; exit 1; }
+            [[ "$PC" =~ ^gdrive:ASTROLOVE/TEMP/CANLI_YAPI_OLC/prob_[0-9]{8}_[0-9]{6}/OLCUM\.json$ ]] || { echo "::error::prob_cikti"; exit 1; }
+          else
+            [ -z "$SN" ] || { echo "::error::prob'da senaryo bos"; exit 1; }
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+          python3 scripts/etsy/test_canli_yapi_olc.py
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"; echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Etsy kilidi (token indirmeden ONCE; refresh token donebilir)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - name: Token + listeler
+        env:
+          M: ${{ inputs.mod }}
+          GR: ${{ inputs.gruplar }}
+          LO: ${{ inputs.ornament_liste }}
+          LK: ${{ inputs.kupa_liste }}
+          LS: ${{ inputs.sade_liste }}
+          PC: ${{ inputs.prob_cikti }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          EK=""
+          for g in ${GR//,/ }; do
+            case "$g" in
+              ornament) Y="$LO"; D=_work/ornament.json ;;
+              kupa) Y="$LK"; D=_work/kupa.csv ;;
+              sade) Y="$LS"; D=_work/sade.json ;;
+              poster) Y=""; D=data/pod/pod78_ids.csv ;;
+              yd) Y=""; D=data/pod/yd78_ids.csv ;;
+            esac
+            if [ -n "$Y" ]; then rclone copyto "$Y" "$D" < /dev/null || { echo "::error::$g listesi indirilemedi"; exit 1; }; fi
+            [ -s "$D" ] || { echo "::error::$g listesi bos ya da yok"; exit 1; }
+            EK="$EK --$g $D"
+          done
+          echo "LISTELER=$EK" >> "$GITHUB_ENV"
+          if [ "$M" = olc ]; then rclone copyto "$PC" _work/PROB.json < /dev/null || { echo "::error::prob ciktisi indirilemedi"; exit 1; }; fi
+      - name: Kos
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+          M: ${{ inputs.mod }}
+          SN: ${{ inputs.senaryo }}
+          GR: ${{ inputs.gruplar }}
+        run: |
+          set -euo pipefail
+          EK=""; if [ "$M" = olc ]; then EK="--senaryo $SN --prob _work/PROB.json"; fi
+          # shellcheck disable=SC2086
+          python3 scripts/etsy/canli_yapi_olc.py --mod "$M" --gruplar "$GR" $LISTELER $EK --out _out
+      - name: Token geri yaz + cikti Drive'a
+        if: ${{ always() }}
+        env: { M: "${{ inputs.mod }}" }
+        run: |
+          set +e
+          TOKEN_RC=0; OUT_RC=0
+          if [ -f _work/ETSY_TOKEN.json ]; then bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1; fi
+          if ls _out/* >/dev/null 2>&1; then
+            SIR_OK=1
+            if [ -f _work/ETSY_TOKEN.json ]; then python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out || { echo "::error::ciktida sir"; SIR_OK=0; OUT_RC=1; }; fi
+            if [ "$SIR_OK" = 1 ]; then rclone copy _out "$O/${M}_${DAMGA:?}" -q || OUT_RC=1
+              echo "Cikti: TEMP/CANLI_YAPI_OLC/${M}_$DAMGA" | tee -a "$GITHUB_STEP_SUMMARY"
+              if [ -f _out/SAYIM.txt ]; then cat _out/SAYIM.txt >> "$GITHUB_STEP_SUMMARY"; fi; fi
+          fi
+          [ "$TOKEN_RC" = 0 ] && [ "$OUT_RC" = 0 ] || exit 1
+      - if: always()
+        run: rm -rf _work _out ~/.config/rclone
