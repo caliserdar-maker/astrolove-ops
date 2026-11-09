@@ -1,0 +1,224 @@
+{
+ "urun": "ornament78",
+ "surum": 1,
+ "spec": "docs/ornament/ORN_YAYIN_SPEC.json",
+ "kaynak": {
+  "oncelik": "canli veri esas (plan :361); cakisan 3 deger ORN_YAYIN_SPEC.json'dan (kargo, uretim ortagi, fiyat); ORN_ETSY_AYAR.json'daki cakisan degerler ve ornament_taslak.py FIYAT 29.90 kullanilmaz",
+  "ilan.shipping_profile_id": "ORN_YAYIN_SPEC.json:5 (canli kontrol 42487964917 PASS [gorev] Merkez; Denetim dogrulamadi)",
+  "ilan.production_partner_id": "ORN_YAYIN_SPEC.json:7-8 (olc 42486805159)",
+  "uretim_ortagi_konum": "ORN_YAYIN_SPEC.json:8",
+  "ilan.fiyat": "ORN_YAYIN_SPEC.json:9 (KARARLAR_20261107; ornament_kargo.py:40)",
+  "ilan.taxonomy_id": "ORN_ETSY_AYAR.json:3 = ornament_ru_olcu.py:33",
+  "ilan.readiness_state_id / return_policy_id / shop_section_id": "ORN_ETSY_AYAR.json:5, :11, :9 [kaynak dosya, olculmedi; O1(1) ile okunacak]",
+  "ilan.who_made / when_made / is_supply / type / materials / should_auto_renew / quantity": "ornament_taslak.py:482-486, :48-49 (b82f2ec)",
+  "varyasyon / envanter": "ornament_taslak.py:38-41, :509-513 (b82f2ec)",
+  "taslak.galeri": "ornament_taslak.py:42 (taslak asamasi 11 gorsel; son hal 14: beklenen.gorsel_sayisi)",
+  "taslak.nitelikler": "ORN_ETSY_AYAR.json:15-19 [olculmedi] (taslak asamasi; son hal W/H/D: beklenen.nitelikler)",
+  "metin.en": "data/pod/ORNAMENT78_METIN.csv bugunku sha (canlidan eski, plan B8; S13 sonrasi guncellenir)",
+  "metin.ru / aciklama_zorunlu / aciklama_yasak / beklenen": "ORN_YAYIN_SPEC.json:14-15, :25, :4-21",
+  "kilit": "Serdar ayar onayi YOK (kilitli false); onay kaydi Drive ONAY_ornament78.json (S4), depoda yalniz sha"
+ },
+ "olculmedi": [
+  "ilan.readiness_state_id",
+  "ilan.return_policy_id",
+  "ilan.shop_section_id",
+  "taslak.nitelikler"
+ ],
+ "ilan": {
+  "taxonomy_id": 1857,
+  "who_made": "i_did",
+  "when_made": "made_to_order",
+  "is_supply": "false",
+  "type": "physical",
+  "shipping_profile_id": 319230731837,
+  "return_policy_id": 1513990287785,
+  "readiness_state_id": 1530862376601,
+  "shop_section_id": 61319672,
+  "production_partner_id": 5870733,
+  "materials": [
+   "Ceramic"
+  ],
+  "should_auto_renew": "true",
+  "quantity": 999,
+  "fiyat": 19.9
+ },
+ "uretim_ortagi_konum": "Latvia",
+ "varyasyon": {
+  "property_id": 513,
+  "property_name": "Style",
+  "menu": [
+   {
+    "ad": "Ruby",
+    "sku_kodu": "RU",
+    "gorsel_sira": 7
+   },
+   {
+    "ad": "Sapphire",
+    "sku_kodu": "SA",
+    "gorsel_sira": 8
+   },
+   {
+    "ad": "Emerald",
+    "sku_kodu": "EM",
+    "gorsel_sira": 9
+   },
+   {
+    "ad": "White",
+    "sku_kodu": "WH",
+    "gorsel_sira": 10
+   },
+   {
+    "ad": "Ivory",
+    "sku_kodu": "IV",
+    "gorsel_sira": 11
+   }
+  ]
+ },
+ "envanter": {
+  "price_on_property": [],
+  "quantity_on_property": [],
+  "sku_on_property": [
+   513
+  ],
+  "readiness_state_on_property": []
+ },
+ "metin": {
+  "en": {
+   "csv": "data/pod/ORNAMENT78_METIN.csv",
+   "sha256": "c8d18aa9a2462c0eeccf6fbcfc171f35a46b19e01831521e459db37e0f0129a5",
+   "anahtar": "kod"
+  },
+  "ru": {
+   "csv": "data/pod/ORN78_RU.csv",
+   "sha256": "39843f4af64573ea7db2da91fd7358b505aa1425156bc59ede09784445b7db34",
+   "anahtar": "kod"
+  }
+ },
+ "aciklama_zorunlu": [
+  "[ SHIPPING ] Made and shipped by our production partner. You can see the shipping cost and estimated delivery time for your country on this page and at checkout."
+ ],
+ "aciklama_yasak": [
+  "free\\s+shipping|ships?\\s+free|free\\s+delivery"
+ ],
+ "kisisellestirme": {
+  "acik": true
+ },
+ "taslak": {
+  "galeri": [
+   "01_KAPAK",
+   "02_SEMBOL",
+   "03_KISISEL",
+   "04_BOYUT",
+   "05_SUREC",
+   "06_STIL",
+   "07_RUBY",
+   "08_SAPPHIRE",
+   "09_EMERALD",
+   "10_WHITE",
+   "11_IVORY"
+  ],
+  "nitelikler": [
+   {
+    "property_id": 148789511893,
+    "ad": "Material",
+    "value_ids": [
+     83
+    ],
+    "values": [
+     "Ceramic"
+    ],
+    "scale_id": null
+   },
+   {
+    "property_id": 570246213613,
+    "ad": "Indoor/Outdoor",
+    "value_ids": [
+     5129
+    ],
+    "values": [
+     "Indoor"
+    ],
+    "scale_id": null
+   },
+   {
+    "property_id": 406291158417,
+    "ad": "Season",
+    "value_ids": [
+     3454
+    ],
+    "values": [
+     "All seasons"
+    ],
+    "scale_id": null
+   }
+  ]
+ },
+ "beklenen": {
+  "shipping_profile_id": 319230731837,
+  "uretim_ortagi": "Printful Latvia (panel ic adi; API acik adi Printing and Fulfillment Partner)",
+  "uretim_ortagi_id": 5870733,
+  "uretim_ortagi_konum": "Latvia",
+  "fiyat": 19.9,
+  "kisisellestirme": true,
+  "gorsel_sayisi": 14,
+  "gorsel2_alt_icerir": "TWO SIGNS, ONE SHARED SYMBOL",
+  "video_sayisi": 1,
+  "aciklama_zorunlu": [
+   "[ SHIPPING ] Made and shipped by our production partner. You can see the shipping cost and estimated delivery time for your country on this page and at checkout."
+  ],
+  "aciklama_yasak": [
+   "free\\s+shipping|ships?\\s+free|free\\s+delivery"
+  ],
+  "nitelikler": [
+   {
+    "property_id": 47626759898,
+    "ad": "Width",
+    "values": [
+     "2.99"
+    ],
+    "scale_id": 5
+   },
+   {
+    "property_id": 47626759834,
+    "ad": "Height",
+    "values": [
+     "2.99"
+    ],
+    "scale_id": 5
+   },
+   {
+    "property_id": 54142602037,
+    "ad": "Depth",
+    "values": [
+     "0.1"
+    ],
+    "scale_id": 5
+   }
+  ]
+ },
+ "panel_on_isleri": [
+  {
+   "ad": "uretim_ortagi_kaydi",
+   "durum": "yapilmadi",
+   "dogrulama": "GET /shops/{shop}/production-partners: ilan.production_partner_id + uretim_ortagi_konum (emsal yayina_hazir.py:401)",
+   "kanit": null
+  },
+  {
+   "ad": "kargo_profili",
+   "durum": "yapilmadi",
+   "dogrulama": "GET /shops/{shop}/shipping-profiles/{ilan.shipping_profile_id}: ulke ve ucret listesi (emsal ornament_taslak.py:102)",
+   "kanit": null
+  },
+  {
+   "ad": "gpsr",
+   "durum": "yapilmadi",
+   "dogrulama": "API ucu bilinmiyor: Serdar beyani + tarih; urun + uretim ortagi id'sine bagli (S3); ortak degisirse gecersiz",
+   "kanit": null
+  }
+ ],
+ "kilit": {
+  "kilitli": false,
+  "ayar_sha256": null,
+  "onay_sha256": null
+ }
+}
