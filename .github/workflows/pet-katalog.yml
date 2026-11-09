@@ -1,0 +1,88 @@
+name: pet-katalog
+# Serdar 9 Kas 2026 "ok": pet urun adaylari (battaniye, yastik, evcil hayvan bandanasi) Printful (+ anahtar varsa Printify) katalog
+# SALT OKUMA. Printful: GET + kargo ucreti sorgusu (POST yalniz /shipping/rates ve /v2/shipping-rates; izin listesi betikte).
+# Printify: yalniz GET /catalog uclari. Siparis / urun / sablon / mockup / yukleme OLUSTURULMAZ. Etsy'ye dokunmaz. Zamanlama YOK.
+# Token: Drive TEMP/PRINTFUL_TOKEN.json (maskeli). Printify anahtari: Drive TEMP/PRINTIFY_API_KEY.txt (varsa; maskeli; SILINMEZ;
+# yoksa Printify atlanir, kosu FAIL olmaz). Cikti yalniz Drive TEMP/PET_KATALOG_<UTC damga>/ (CSV, MD, ham/); dala commit YOK.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  oku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Damga + betik denetimi
+        run: |
+          set -euo pipefail
+          echo "DAMGA=$(date -u +%Y%m%dT%H%M%SZ)" >> "$GITHUB_ENV"
+          python3 -m py_compile scripts/printful/pet_katalog.py
+          if grep -nE "^[[:space:]]*(import|from)[[:space:]]+requests" scripts/printful/pet_katalog.py; then echo "::error::requests yasak"; exit 1; fi
+          python3 -I scripts/printful/test_pet_katalog.py | tail -3
+      - name: rclone kur
+        timeout-minutes: 5
+        run: curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+      - name: rclone.conf + Printful token + Printify anahtari (maskeli)
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
+          T=$(rclone cat "gdrive:ASTROLOVE/TEMP/PRINTFUL_TOKEN.json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["api_token"].strip())')
+          [ -n "$T" ] || { echo "::error::PRINTFUL_TOKEN.json api_token bos"; exit 1; }
+          echo "::add-mask::$T"
+          echo "PRINTFUL_TOKEN=$T" >> "$GITHUB_ENV"
+          echo "Printful token okundu (maskeli)"
+          K=$( (rclone cat --drive-export-formats txt "gdrive:ASTROLOVE/TEMP/PRINTIFY_API_KEY.txt" 2>/dev/null || true) \
+               | python3 -c "import sys; print(sys.stdin.read().replace('﻿', '').strip())")
+          if [ -n "$K" ]; then
+            echo "::add-mask::$K"
+            echo "PRINTIFY_API_KEY=$K" >> "$GITHUB_ENV"
+            echo "Printify anahtari okundu (maskeli)"
+          else
+            echo "::notice::Printify anahtari yok (71c1afc kaydi, is sonunda silinmis); Printify atlanir"
+          fi
+      - name: Katalog oku (Printful GET + kargo ucreti; Printify GET)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _out
+          M=(-e "s|${PRINTFUL_TOKEN}|***|g")
+          if [ -n "${PRINTIFY_API_KEY:-}" ]; then M+=(-e "s|${PRINTIFY_API_KEY}|***|g"); fi
+          set +e
+          python3 -I scripts/printful/pet_katalog.py oku _out/ham 2>&1 | sed -u "${M[@]}" | tee _out/KOSU_LOG.txt
+          k=${PIPESTATUS[0]}; set -e
+          echo "::notice::oku cikis $k"; exit $k
+      - name: Rapor (ag yok)
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -d _out/ham ] || { echo "::error::ham yok"; exit 1; }
+          M=(-e "s|${PRINTFUL_TOKEN:-YOK_TOKEN}|***|g")
+          if [ -n "${PRINTIFY_API_KEY:-}" ]; then M+=(-e "s|${PRINTIFY_API_KEY}|***|g"); fi
+          set +e
+          python3 -I scripts/printful/pet_katalog.py rapor _out 2>&1 | sed -u "${M[@]}" | tee -a _out/KOSU_LOG.txt
+          r=${PIPESTATUS[0]}; set -e
+          cat _out/PET_KATALOG.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          exit $r
+      - name: Drive (token / anahtar taramasi, --immutable)
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -d _out ] || { echo "::error::yazilacak cikti yok"; exit 1; }
+          if [ -n "${PRINTFUL_TOKEN:-}" ] && grep -rlF -- "$PRINTFUL_TOKEN" _out; then echo "::error::DUR: ciktida Printful token, yazilmadi"; exit 1; fi
+          if [ -n "${PRINTIFY_API_KEY:-}" ] && grep -rlF -- "$PRINTIFY_API_KEY" _out; then echo "::error::DUR: ciktida Printify anahtari, yazilmadi"; exit 1; fi
+          if grep -rlE "Bearer [A-Za-z0-9]" _out; then echo "::error::DUR: ciktida Bearer, yazilmadi"; exit 1; fi
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/PET_KATALOG_${DAMGA}" --immutable -q
+          echo "::notice::Drive: ASTROLOVE/TEMP/PET_KATALOG_${DAMGA} ($(find _out -type f | wc -l) dosya)"
+      - if: always()
+        run: rm -rf ~/.config/rclone _out
