@@ -18,6 +18,7 @@ Aday kurali (yalniz baslik / tur / model / ad alani; aciklama DEGIL): \\bblanket
 Kargo (Printful): her adayin en kucuk ve en buyuk varyanti (v2 boy bilgisi; esitlikte kucuk varyant id) x ULKELER, 1 adet, USD,
   v1 /shipping/rates + v2 /v2/shipping-rates. Printify: v1 + v2 kargo profilleri (GET). API'nin vermedigi alan: "API vermedi"."""
 import csv
+from http.client import HTTPException
 import json
 import os
 import re
@@ -55,6 +56,7 @@ KELIME = re.compile(r"\b(?:blanket|pillow|cushion|bandana)\b", re.I)
 PET = re.compile(r"\b(?:pet|dog)\b", re.I)
 PF_ALAN = {"v1": ("title", "type_name", "model", "type"), "v2": ("name", "type", "model")}
 BOY_SIRA = ["XXS", "XS", "S", "M", "L", "XL", "2XL", "XXL", "3XL", "4XL", "5XL"]
+BICIM = re.compile(r"^\S+$")                    # token / anahtar: bosluk ve satir sonu YOK
 YOK = "API vermedi"
 PRINTIFY_YOK = "Printify anahtari yok (71c1afc kaydi, is sonunda silinmis)"
 ISTEKLER = []
@@ -68,6 +70,34 @@ def maskele(metin):
         if s:
             metin = metin.replace(s, "***")
     return metin
+
+
+def kisa(metin, n):
+    """Once maskele, SONRA kes (kesilen yarim sir maskeden kacmaz)."""
+    return maskele(str(metin))[:n]
+
+
+class YonlendirmeYok(urllib.request.HTTPRedirectHandler):
+    """30x takip EDILMEZ: urllib yonlendirmede Authorization basligini yeni hosta tasir ve hedef yol izin listesinden gecmez.
+    30x HTTPError olarak doner, istek kaydina yazilir."""
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+_ACICI = urllib.request.build_opener(YonlendirmeYok)
+
+
+def ac(req, timeout=60):
+    return _ACICI.open(req, timeout=timeout)
+
+
+def json_coz(b):
+    """Govde -> json; JSON degilse {"ham": maskeli + kisa metin} (200 HTML yaniti kosuyu dusurmez)."""
+    t = b.decode(errors="replace") if isinstance(b, (bytes, bytearray)) else str(b)
+    try:
+        return json.loads(t)
+    except ValueError:
+        return {"ham": kisa(t, 5000)}
 
 
 def log(m):
@@ -100,10 +130,10 @@ def istek(yol, token, veri=None):
                                      headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json",
                                               "User-Agent": UA, "Accept": "application/json"}, method=yontem)
         try:
-            with urllib.request.urlopen(req, timeout=60) as r:
-                kod, j = r.status, json.load(r)
+            with ac(req, timeout=60) as r:
+                kod, j = r.status, json_coz(r.read())
         except urllib.error.HTTPError as e:
-            govde = e.read().decode(errors="replace")[:5000]
+            govde = kisa(e.read().decode(errors="replace"), 5000)
             if e.code in (429, 500, 502, 503, 504) and deneme < 5:
                 try:
                     bekle = int(e.headers.get("Retry-After") or 0)
@@ -114,11 +144,8 @@ def istek(yol, token, veri=None):
                 time.sleep(bekle)
                 continue
             kod = e.code
-            try:
-                j = json.loads(govde)
-            except ValueError:
-                j = {"ham": govde}
-        except (urllib.error.URLError, TimeoutError) as e:
+            j = json_coz(govde)
+        except (urllib.error.URLError, TimeoutError, ConnectionError, HTTPException) as e:
             if deneme < 5:
                 time.sleep(10)
                 continue
@@ -145,15 +172,15 @@ def py_istek(yontem, yol, anahtar, params=None):
         req = urllib.request.Request(PY_API + yol + q, headers={"Authorization": f"Bearer {anahtar}", "User-Agent": UA,
                                                                  "Accept": "application/json"}, method="GET")
         try:
-            with urllib.request.urlopen(req, timeout=60) as r:
-                kod, j = r.status, json.load(r)
+            with ac(req, timeout=60) as r:
+                kod, j = r.status, json_coz(r.read())
         except urllib.error.HTTPError as e:
             kod = e.code
             if e.code == 429 and deneme < 3:
                 time.sleep(5 * (deneme + 1))
                 continue
-            j = {"_hata": e.code, "_metin": e.read().decode(errors="replace")[:300]}
-        except (urllib.error.URLError, TimeoutError) as e:
+            j = {"_hata": e.code, "_metin": kisa(e.read().decode(errors="replace"), 300)}
+        except (urllib.error.URLError, TimeoutError, ConnectionError, HTTPException) as e:
             if deneme < 3:
                 time.sleep(10)
                 continue
@@ -228,12 +255,12 @@ def boy_deger(v, sira):
     n = [float(x) for x in re.findall(r"\d+(?:\.\d+)?", s)]
     if len(n) >= 2:
         return n[0] * n[1]
+    if s.upper() in BOY_SIRA:                     # harf boyu ONCE sabit sira (Printful sizes sirasi L,M,S,XL gelebilir)
+        return float(BOY_SIRA.index(s.upper()))
     if len(n) == 1:
         return n[0]
-    if s in sira:
-        return float(sira.index(s))
-    if s.upper() in BOY_SIRA:
-        return float(BOY_SIRA.index(s.upper()))
+    if s in sira:                                 # BOY_SIRA'da olmayan boy: Printful sizes sirasi
+        return 100.0 + sira.index(s)
     return None
 
 
@@ -261,10 +288,15 @@ PF_DETAY = (("v1", "/products/{pid}"), ("v1_sizes", "/products/{pid}/sizes?unit=
 
 def oku(ham):
     token = os.environ.get("PRINTFUL_TOKEN", "").strip()
+    anahtar = os.environ.get("PRINTIFY_API_KEY", "").replace("\ufeff", "").strip()
+    SIRLAR[:] = [x for x in (token, anahtar) if x] + [y for x in (token, anahtar) for y in x.split() if len(y) >= 8]
     if not token:
         raise SystemExit("DUR: PRINTFUL_TOKEN yok")
-    anahtar = os.environ.get("PRINTIFY_API_KEY", "").replace("﻿", "").strip()
-    SIRLAR[:] = [token] + ([anahtar] if anahtar else [])
+    if not BICIM.match(token):
+        raise SystemExit("DUR: PRINTFUL_TOKEN bicimi gecersiz (bosluk / satir sonu)")
+    if anahtar and not BICIM.match(anahtar):
+        os.environ["PRINTIFY_DURUM"] = "Printify anahtari bicimi gecersiz (bosluk / satir sonu); Printify atlandi"
+        anahtar = ""
     ham.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
     try:
@@ -300,7 +332,7 @@ def _oku(ham, token, anahtar, t0):  # noqa: C901
     yaz(ham / "_adaylar_printful.json", pf)
     log("ADAY printful " + json.dumps({i: f"{v['ad']} [{','.join(v['neden'])}]" for i, v in pf.items()}, ensure_ascii=False))
 
-    py, bps = {}, None
+    py, bps, py_dur = {}, None, None
     if anahtar:
         bps = py_istek("GET", "/v1/catalog/blueprints.json", anahtar)
         yaz(ham / "py_blueprints.json", bps)
@@ -309,12 +341,17 @@ def _oku(ham, token, anahtar, t0):  # noqa: C901
         yaz(ham / "_printify.json", {"durum": "okundu" if isinstance(bps, list) else f"liste okunamadi {sozluk(bps).get('_hata')}"})
         log("ADAY printify " + json.dumps({i: v["ad"] for i, v in py.items()}, ensure_ascii=False))
     else:
-        yaz(ham / "_printify.json", {"durum": "atlandi", "neden": PRINTIFY_YOK})
-        log(f"PRINTIFY atlandi: {PRINTIFY_YOK}")
-    asim = [f"{ad} {len(a)} > {AZAMI_ADAY}" for ad, a in (("printful", pf), ("printify", py)) if len(a) > AZAMI_ADAY]
-    if asim:
-        yaz(ham / "_dur.json", {"neden": f"aday sayisi asildi: {asim}"})
-        raise SystemExit(f"DUR: aday sayisi asildi ({'; '.join(asim)}); ag adimlarina gecilmedi, liste ham/_adaylar_*.json")
+        neden = os.environ.get("PRINTIFY_DURUM") or PRINTIFY_YOK
+        yaz(ham / "_printify.json", {"durum": "atlandi", "neden": neden})
+        log(f"PRINTIFY atlandi: {neden}")
+    if len(pf) > AZAMI_ADAY:
+        yaz(ham / "_dur.json", {"neden": f"Printful aday sayisi {len(pf)} > {AZAMI_ADAY}"})
+        raise SystemExit(f"DUR: Printful aday sayisi {len(pf)} > {AZAMI_ADAY}; ag adimlarina gecilmedi, liste ham/_adaylar_printful.json")
+    if len(py) > AZAMI_ADAY:                      # Printify istege bagli: yalniz Printify durur, Printful surer, kosu sonunda FAIL
+        py_dur = f"DUR: Printify aday sayisi {len(py)} > {AZAMI_ADAY}; Printify detay / kargo istegi yok, liste ham/_adaylar_printify.json"
+        yaz(ham / "_printify.json", {"durum": "DUR", "neden": py_dur})
+        log(py_dur)
+        py = {}
     log(f"TAHMIN (detay oncesi) printful GET ~{len(pf) * len(PF_DETAY) + len(pf)} + kargo POST <= {len(pf) * 2 * len(ULKELER) * 2}"
         + (f" | printify GET ~{len(py) * 2} + saglayici basina ~8" if anahtar else ""))
 
@@ -329,7 +366,7 @@ def _oku(ham, token, anahtar, t0):  # noqa: C901
                 k, j = istek(yol, token)
             yaz(ham / f"urun_{pid}_{ad}.json", sar("GET", yol, None, k, j))
             if k != 200:
-                log(f"  {yol} -> HTTP {k} {json.dumps(j, ensure_ascii=False)[:200]}")
+                log(f"  {yol} -> HTTP {k} {kisa(json.dumps(j, ensure_ascii=False), 200)}")
         vs_say, off = [], 0
         while off < 1000:
             yol = f"/v2/catalog-products/{pid}/catalog-variants?limit=100&offset={off}"
@@ -355,6 +392,27 @@ def _oku(ham, token, anahtar, t0):  # noqa: C901
     log(f"TAHMIN kargo: {len(plan)} varyant x ulke x 2 (v1 + v2) = {len(plan) * 2} POST")
     yaz(ham / "_kargo_plani.json", [{"urun": a, "varyant": b, "etiket": c, "ulke": d} for a, b, c, d in plan])
     k1, k2, t1 = [], [], time.time()
+    try:
+        _kargo(plan, token, k1, k2, t1)
+    finally:                                      # kesintide (istisna, iptal) o ana kadarki kargo yanitlari kaybolmaz
+        yaz(ham / "kargo_v1.json", k1)
+        yaz(ham / "kargo_v2.json", k2)
+    _printify_detay(ham, py, anahtar, t0)
+    kargo_ok = sum(1 for x in k1 + k2 if x.get("http") == 200)
+    hata = []
+    if http(jy(ham, "v1_products.json")) != 200:
+        hata.append("v1 /products okunamadi")
+    if not any(http(s) == 200 for s in (jy(ham, "v2_catalog_products.json") or {}).get("sayfalar") or []):
+        hata.append("v2 katalog listesi okunamadi")
+    if plan and kargo_ok == 0:
+        hata.append(f"kargo: {len(k1) + len(k2)} sorgunun hicbiri 200 donmedi")
+    if py_dur:
+        hata.append(py_dur)
+    log(f"KARGO basarili {kargo_ok}/{len(k1) + len(k2)}" + (f" | FAIL: {'; '.join(hata)}" if hata else ""))
+    return 1 if hata else 0
+
+
+def _kargo(plan, token, k1, k2, t1):
     for n, (pid, vid, etiket, ulke) in enumerate(plan, 1):
         g1 = {"recipient": {"country_code": ulke, **ADRES[ulke]}, "items": [{"variant_id": vid, "quantity": 1}], "currency": "USD"}
         k, j = istek("/shipping/rates", token, g1)
@@ -367,10 +425,9 @@ def _oku(ham, token, anahtar, t0):  # noqa: C901
             g = time.time() - t1
             log(f"[kargo {n}/{len(plan)} %{100 * n // len(plan)}] gecen {int(g)}s kalan ~{int(g * (len(plan) - n) / n)}s "
                 f"| son: {pid}/{vid}/{ulke} v1 {k} v2 {k_}")
-    yaz(ham / "kargo_v1.json", k1)
-    yaz(ham / "kargo_v2.json", k2)
 
-    # 4) Printify detay (anahtar varsa)
+
+def _printify_detay(ham, py, anahtar, t0):
     if anahtar and py:
         pp_bilgi = {}
         for i, bid in enumerate(sorted(py, key=int), 1):
@@ -398,7 +455,6 @@ def _oku(ham, token, anahtar, t0):  # noqa: C901
                         yaz(ham / f"py_bp_{bid}_pp_{pid}_shipping_v2_{yk}.json",
                             py_istek("GET", f"/v2/catalog/blueprints/{bid}/print_providers/{pid}/shipping/{yk}.json", anahtar))
             log(f"[printify blueprint {i}/{len(py)}] {bid} okundu | gecen {int(time.time() - t0)}s")
-    return 0 if http(jy(ham, "v1_products.json")) == 200 else 1
 
 
 def pf_varyantlar(ham, pid):
@@ -427,7 +483,7 @@ def en_ucuz(secenekler):
 def hata_mesaj(w):
     y = yanit(w)
     m = sozluk(y.get("error")).get("message") or (y.get("result") if isinstance(y.get("result"), str) else None)
-    return str(m or y)[:160]
+    return kisa(m or y, 160)
 
 
 def aralik(deg):
@@ -459,8 +515,9 @@ def pf_rapor(ham, satir, kargo, ozet):  # noqa: C901
                 for sr in liste(t.get("selling_regions")):
                     uyg.setdefault(v.get("catalog_variant_id"), []).append(f"{sr.get('name')}:{sr.get('availability')}")
         yer = [f"{p.get('placement')}:{p.get('technique')}" for p in liste(p2.get("placements")) if p.get("placement") != "mockup"]
-        teknik = sorted({str(t.get("display_name") or t.get("key")) for t in liste(p2.get("techniques")) or liste(p1.get("techniques"))}
-                        | {str(p.get("technique")) for p in liste(p2.get("placements")) if p.get("technique")})
+        tek = [str(t.get("display_name") or t.get("key")) for t in liste(p2.get("techniques")) or liste(p1.get("techniques"))] + \
+              [str(p.get("technique")) for p in liste(p2.get("placements")) if p.get("technique")]
+        teknik = sorted({t.lower(): t for t in sorted(tek, key=str.lower, reverse=True)}.values(), key=str.lower)  # buyuk/kucuk tekrar yok
         ad = p1.get("title") or p2.get("name") or aday[pid].get("ad") or YOK
         tur = p1.get("type_name") or p2.get("type") or p1.get("type") or YOK
         cikis_urun = {}
@@ -516,7 +573,7 @@ def pf_rapor(ham, satir, kargo, ozet):  # noqa: C901
                                      + [p.split(":")[-1] for s in satir if s["tedarikci"] == "Printful" and s["urun_id"] == pid
                                         for p in s["fiyat_usd_v2_worldwide"].split("; ")]),
                      "baski": "; ".join(sorted({s["baski_dosyasi_px"] + " @" + s["baski_dosyasi_dpi"] for s in satir
-                                                if s["tedarikci"] == "Printful" and s["urun_id"] == pid}))[:200] or YOK,
+                                                if s["tedarikci"] == "Printful" and s["urun_id"] == pid})) or YOK,
                      "teknik": "; ".join(teknik) or YOK,
                      "uretim": "; ".join(f"{d} (hedef {','.join(sorted(h, key=ULKELER.index))})" for d, h in sorted(cikis_urun.items()))
                      or ("kargo sorgulanmadi" if not ks else YOK),
@@ -577,25 +634,29 @@ def py_rapor(ham, satir, kargo, ozet):
                               "uretim_yeri_v2_cikis": yer, "bolge_durum_v1": YOK, "uygunluk_v2": YOK,
                               "stok_v1": v.get("is_available") if v.get("is_available") is not None else YOK})
             s1 = sozluk(jy(ham, f"py_bp_{bid}_pp_{pid}_shipping_v1.json"))
-            for ulke in ULKELER:
-                pr = [p for p in liste(s1.get("profiles")) if ulke in (p.get("countries") or [])] or \
-                     [p for p in liste(s1.get("profiles")) if "REST_OF_THE_WORLD" in (p.get("countries") or [])]
-                ilk = [sozluk(p.get("first_item")).get("cost") for p in pr]
-                ek = [sozluk(p.get("additional_items")).get("cost") for p in pr]
-                kargo.append({"tedarikci": "Printify", "urun_id": bid, "urun_adi": ad, "saglayici": f"{pid} {pp.get('title')}",
-                              "varyant_id": "tum", "varyant_etiket": "profil", "ulke": ulke, "http_v1": s1.get("_hata", 200),
-                              "ucret_usd": aralik([c / 100 for c in ilk if isinstance(c, int)]), "yontem": "v1 profil",
-                              "min_gun": YOK, "max_gun": YOK, "http_v2": YOK, "ucret_v2": YOK, "cikis_ulkesi_v2": yer,
-                              "ek_urun_usd": aralik([c / 100 for c in ek if isinstance(c, int)]),
-                              "hata": "" if pr else "profilde ulke yok"})
+            prof = liste(s1.get("profiles"))
+            secim = kucuk_buyuk([{"id": v.get("id"), "size": sozluk(v.get("options")).get("size")} for v in liste(var.get("variants"))], [])
+            for v, etiket in secim:                  # Printful ile ayni kural: en kucuk + en buyuk varyant, profil variant_ids uzerinden
+                vp = [p for p in prof if v["id"] in (p.get("variant_ids") or [])] or prof
+                for ulke in ULKELER:
+                    pr = [p for p in vp if ulke in (p.get("countries") or [])] or \
+                         [p for p in vp if "REST_OF_THE_WORLD" in (p.get("countries") or [])]
+                    ilk = sozluk(pr[0].get("first_item")).get("cost") if pr else None
+                    ek = sozluk(pr[0].get("additional_items")).get("cost") if pr else None
+                    kargo.append({"tedarikci": "Printify", "urun_id": bid, "urun_adi": ad, "saglayici": f"{pid} {pp.get('title')}",
+                                  "varyant_id": v["id"], "varyant_etiket": etiket, "ulke": ulke,
+                                  "http_v1": s1.get("_hata", 200 if prof else YOK),
+                                  "ucret_usd": ilk / 100 if isinstance(ilk, int) else YOK, "yontem": "v1 profil",
+                                  "min_gun": YOK, "max_gun": YOK, "http_v2": YOK, "ucret_v2": YOK, "cikis_ulkesi_v2": yer,
+                                  "ek_urun_usd": ek / 100 if isinstance(ek, int) else YOK,
+                                  "hata": "" if pr else "profilde ulke yok"})
         ks = [k for k in kargo if k["tedarikci"] == "Printify" and k["urun_id"] == bid]
         ozet.append({"tedarikci": "Printify", "id": bid, "ad": ad, "tur": bp.get("model") or YOK, "varyant":
                      sum(1 for s in satir if s["tedarikci"] == "Printify" and s["urun_id"] == bid),
                      "boy": aralik_boy([{"size": b} for b in boylar]),
-                     "fiyat": f"{YOK} (Printify katalog API'si maliyet vermez)", "baski": "; ".join(sorted(yerler))[:200] or YOK,
+                     "fiyat": f"{YOK} (Printify katalog API'si maliyet vermez)", "baski": "; ".join(sorted(yerler)) or YOK,
                      "teknik": YOK, "uretim": "; ".join(saglayici) or YOK,
-                     "kargo": kargo_ozet([dict(k, ucret_usd=k["ucret_usd"].split("-")[0] if isinstance(k["ucret_usd"], str) else
-                                               k["ucret_usd"]) for k in ks]), "http": "GET", "eslesme": "title"})
+                     "kargo": kargo_ozet(ks), "http": "GET", "eslesme": "title"})
 
 
 SATIR_ALAN = ["tedarikci", "urun_id", "urun_adi", "tur", "eslesme", "pet_dog", "saglayici", "varyant_id", "varyant_adi", "boy",
