@@ -1,6 +1,6 @@
 name: ornament-taslak
 # ORNAMENT 78 Etsy TASLAK (Serdar 6 Kas gece: taslak olustur, yayin sabah ayri onay; gece onaylari Merkez'de). YAYIN YOK, Etsy Ads YOK.
-# Kod: scripts/etsy/ornament_taslak.py. Metin: data/pod/ORNAMENT78_METIN.csv. Ayar: docs/ornament/ORN_ETSY_AYAR.json.
+# Kod: scripts/etsy/ornament_taslak.py. Metin: data/pod/ORNAMENT78_METIN.csv. Ayar (yaz/kuru): docs/urun/ornament78/URUN_AYAR.json + kapi scripts/etsy/urun_ayar.py (onay kaydi ONAY_YOLU; yoksa yaz DUR). docs/ornament/ORN_ETSY_AYAR.json yaz/kuru tarafindan artik okunmaz.
 # mod=oku : SALT OKUMA (kategori/nitelik, hazirlik, iade, ortak, bolum, kargo, taslaklar).
 # mod=kur : yalniz yoksa: hazirlik 3-5 is gunu, kargo profili "Ornament Free Worldwide" (LV, ucretsiz), bolum "Zodiac Couple Ornaments".
 # mod=kuru: AG/TOKEN YOK; galeri indirilir, gonderilecek istekler KURU_<CIFT>.json.

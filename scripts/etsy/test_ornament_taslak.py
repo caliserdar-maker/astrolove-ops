@@ -3,7 +3,9 @@
 geri okuma farki -> DUR (sonraki cift acilmaz), active -> acil inactive + kod 2, PATCH hatasinda da kod 2, createDraftListing
 belirsiz / 5xx -> DURUM "BELIRSIZ" + DUR, BELIRSIZ yeniden kosu (bulursa devam, bulamazsa DUR), var olan ilan draft degil / baslik
 uyusmuyor -> dokunmadan DUR, ag oncesi DUR-ON -> sonraki cift, parti siniri, ilan basi kota kapisi, onceki videoda ikinci video yok,
-POST listings yalniz taslak_olustur, baglanti hatasi -> BELIRSIZ."""
+POST listings yalniz taslak_olustur, baglanti hatasi -> BELIRSIZ.
+URUN_AYAR (9 Kas): testler test_urun_ayar.sahte_ortam() ile SAHTE kilitli ayar + SAHTE onay + SAHTE metin CSV uzerinde kosar (gercek ayar
+kilitli degil ve gercek metin "free shipping" tasir: ayar kapisi DUR verir; o yol test_urun_ayar'da)."""
 import json
 import os
 import pathlib
@@ -12,6 +14,9 @@ import tempfile
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import ornament_taslak as T  # noqa: E402
+import test_urun_ayar as UT  # noqa: E402
+
+UT.sahte_ortam()
 
 T.time.sleep = lambda s: None
 SHOP = "39729443"
@@ -144,7 +149,7 @@ def testler():
     # 7 BELIRSIZ yeniden kosu: ilan bulunursa ona devam (yeni ilan yok)
     class BelBul(Sahte):
         shop_listeler = [dict(listing_id=9000000001, state="draft", title=baslik("ARIES_ARIES"))]
-        var_olan = dict(listing_id=9000000001, state="draft", title=baslik("ARIES_ARIES"), taxonomy_id=T.ayar()["taxonomy_id"])
+        var_olan = dict(listing_id=9000000001, state="draft", title=baslik("ARIES_ARIES"), taxonomy_id=T.ayar()["ilan"]["taxonomy_id"])
     api, h, D, _ = kos(BelBul, ["ARIES_ARIES"], durum={"ciftler": {"ARIES_ARIES": "BELIRSIZ"}})
     s.append(("BELIRSIZ + bulunan ilan: yeni ilan acilmadi, kimlik DURUM'a", api.olusturma == 0 and D["ciftler"]["ARIES_ARIES"] == 9000000001))
 
@@ -154,14 +159,14 @@ def testler():
 
     # 9 var olan ilan active -> dokunmadan DUR (PATCH yok)
     class VarAct(Sahte):
-        var_olan = dict(listing_id=777, state="active", title=baslik("ARIES_ARIES"), taxonomy_id=T.ayar()["taxonomy_id"])
+        var_olan = dict(listing_id=777, state="active", title=baslik("ARIES_ARIES"), taxonomy_id=T.ayar()["ilan"]["taxonomy_id"])
     api, h, D, _ = kos(VarAct, ["ARIES_ARIES"], durum={"ciftler": {"ARIES_ARIES": 777}})
     s.append(("FAIL: var olan active -> DUR, PATCH yok", h is not None and "draft degil" in str(h.code) and api.patchler == []
               and api.olusturma == 0))
 
     # 10 var olan baslik uyusmuyor -> DUR
     class VarBas(Sahte):
-        var_olan = dict(listing_id=778, state="draft", title="Zodiac Mug", taxonomy_id=T.ayar()["taxonomy_id"])
+        var_olan = dict(listing_id=778, state="draft", title="Zodiac Mug", taxonomy_id=T.ayar()["ilan"]["taxonomy_id"])
     api, h, D, _ = kos(VarBas, ["ARIES_ARIES"], durum={"ciftler": {"ARIES_ARIES": 778}})
     s.append(("FAIL: var olan baslik farkli -> DUR", h is not None and "uyusmuyor" in str(h.code) and len(api.kayit) <= 3))
 
@@ -181,7 +186,7 @@ def testler():
 
     # 14 onceki kosuda video yuklendi, gorunmuyor -> ikinci video yok, DUR
     class VidYok(Sahte):
-        var_olan = dict(listing_id=779, state="draft", title=baslik("ARIES_ARIES"), taxonomy_id=T.ayar()["taxonomy_id"])
+        var_olan = dict(listing_id=779, state="draft", title=baslik("ARIES_ARIES"), taxonomy_id=T.ayar()["ilan"]["taxonomy_id"])
 
         def _sim(self, method, path, params, data, ok404, js):
             if self.L is None and method == "GET" and path == "/listings/779":
@@ -194,6 +199,7 @@ def testler():
     # 15 POST listings genel yoldan yasak; taslak_olustur baglanti hatasinda BELIRSIZ
     k = object.__new__(T.Kilitli)
     k.lid = None
+    k.A = T.ayar(); k.cift = "ARIES_ARIES"
     try:
         k._izin("POST", f"/shops/{SHOP}/listings"); ok = False
     except SystemExit as e:
@@ -209,7 +215,8 @@ def testler():
     T.requests.post = Hata.post
     try:
         row = T.metin_satiri("ARIES_ARIES")
-        kod, js, _ = k.taslak_olustur(SHOP, {"title": row["baslik"], "description": row["aciklama"]})
+        kod, js, _ = k.taslak_olustur(SHOP, T.taslak_govde(k.A, row["baslik"], row["aciklama"],
+                                                           [t.strip() for t in row["etiketler"].split(",")]))
     finally:
         T.requests.post = gercek
     s.append(("Baglanti hatasi -> BELIRSIZ (tek gonderim)", kod == "BELIRSIZ" and js is None))
@@ -231,7 +238,7 @@ def testler():
     # 18 yeni cift icin active ilan bulunur -> dokunmadan DUR
     class ActBul(Sahte):
         shop_listeler = [dict(listing_id=5, state="active", title=baslik("ARIES_ARIES"))]
-        var_olan = dict(listing_id=5, state="active", title=baslik("ARIES_ARIES"), taxonomy_id=T.ayar()["taxonomy_id"])
+        var_olan = dict(listing_id=5, state="active", title=baslik("ARIES_ARIES"), taxonomy_id=T.ayar()["ilan"]["taxonomy_id"])
     api, h, D, _ = kos(ActBul, ["ARIES_ARIES"])
     s.append(("FAIL: yayindaki ayni baslik -> DUR, PATCH yok, ilan acilmadi", h is not None and "draft degil" in str(h.code)
               and api.patchler == [] and api.olusturma == 0))
@@ -258,8 +265,8 @@ def testler():
     gercek_pf = T.Etsy.post_file
     T.Etsy.post_file = lambda self, path, files, data=None, tekrar=3: yakala.setdefault("tekrar", tekrar) and {}
     try:
-        k2 = object.__new__(T.Kilitli); k2.lid = 42; k2.remaining = None
-        k2.post_file(f"/shops/{SHOP}/listings/42/images", files={}, data={})
+        k2 = object.__new__(T.Kilitli); k2.lid = 42; k2.remaining = None; k2.A = T.ayar()
+        k2.post_file(f"/shops/{SHOP}/listings/42/images", files={}, data={"rank": 1})   # rank: ayar kapisi (galeri 1-N)
     finally:
         T.Etsy.post_file = gercek_pf
     s.append(("Kilitli.post_file tekrar=1", yakala.get("tekrar") == 1))
