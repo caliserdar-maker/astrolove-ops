@@ -1,0 +1,166 @@
+name: kolye-arastirma
+# KOLYE ARASTIRMASI (Serdar 9 Kas 2026: "pet simdilik iptal, kolye istiyorum" + "ok"). SALT OKUMA, iki bagimsiz is (needs yok):
+#  pazar   : Etsy rakip orneklemi (scripts/etsy/kolye_pazar.py; ornament_pazar akisi). Yalniz GET, yalniz API anahtari (OAuth token
+#            indirilmez / yenilenmez). Etsy kilidine girer (kilit_bekle, checkout'tan hemen sonra). En fazla 80 istek; kalan - 80 >= 500.
+#            TALEP OLCUMU DEGIL: rakip ilan orneklemi; "en cok satan" iddiasi yok.
+#  printify: Printify kolye katalogu (scripts/printify/kolye_katalog.py). Yalniz GET /catalog; urun / taslak / siparis / yukleme /
+#            mockup YOK. Etsy sirri ve kilit YOK. Anahtar Drive TEMP/PRINTIFY_API_KEY.txt (yoksa ayni adli Google Doc, txt); SILINMEZ;
+#            yok / bos / gecersiz / okunamadi -> is FAIL (atlama yok). Maliyet: API vermedi.
+# Cikti yalniz Drive: TEMP/KOLYE_<run_id>_pazar/ ve TEMP/KOLYE_<run_id>_printify/ (--immutable). Dala commit YOK. Zamanlama YOK.
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  pazar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150     # kilit_bekle en fazla 120 dk bekleyebilir
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pillow==11.0.0
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: Yerel test (sahte yanit, Etsy'ye istek yok)
+        run: |
+          set -euo pipefail
+          python scripts/etsy/test_kolye_pazar.py
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+      - name: Oku (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+        run: |
+          set -uo pipefail
+          set +e                       # GitHub adimi bash -e ile kosar; cikis kodu KOD'a yazilsin diye -e kapatilir
+          kod=0
+          mkdir -p out
+          # Log dosyasi sir_koru tee ile (emsal by78-pin-hazirlik.yml): stdout aynen (runner maskeler), dosyaya '::add-mask::' satiri
+          # girmez, sir degeri iceren satir engellenir ve tee 1 doner (is FAIL). Rakip kimlikleri kolye_pazar icinde '<id>' olur.
+          python scripts/etsy/kolye_pazar.py --out out 2>&1 | python3 scripts/guvenlik/sir_koru.py tee out/KOSU_LOG.txt
+          ps=("${PIPESTATUS[@]}"); kod=${ps[0]}
+          if [ "${ps[1]}" != 0 ]; then echo "::error::sir_koru tee cikis ${ps[1]} (log dosyasinda sir engellendi)"; kod=97; fi
+          echo "KOD=$kod" >> "$GITHUB_ENV"
+          echo "::notice::kolye_pazar cikis $kod (2 = kota kosulu, baslamadi)"
+          exit 0
+      - name: Drive'a yaz
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -d out ] || { echo "cikti yok"; exit 0; }
+          # Tarama yalniz sirrin girebilecegi dosyalarda (Serdar 9 Kas, tur 3 karar A): CSV / MD / JPG Etsy genel ilan alanlarindan
+          # yazilir; log_suz deseni "Ring Bearer Necklace" gibi basliklarda yanlis FAIL veriyordu (olcum).
+          python3 scripts/guvenlik/sir_koru.py tara out/KOSU_LOG.txt out/OZET.json || { echo "::error::DUR: ciktida sir izi, Drive'a yazilmadi"; exit 1; }
+          H="gdrive:ASTROLOVE/TEMP/KOLYE_${{ github.run_id }}_pazar"
+          rclone copy out "$H" --immutable -q
+          echo "::notice::Drive: ASTROLOVE/TEMP/KOLYE_${{ github.run_id }}_pazar/ ($(find out -type f | wc -l) dosya; kod ${KOD:-?})"
+      - if: always()
+        run: rm -rf ~/.config/rclone out
+      - name: Sonuc (kod 0 degilse kirmizi)
+        run: |
+          echo "kolye_pazar cikis kodu: ${KOD:-?}"
+          [ "${KOD:-1}" = "0" ]
+
+  printify:
+    runs-on: ubuntu-latest
+    # KILIT SURESI (CLAUDE.md): kilit_bekle kosu duzeyinde tutar; bu is Etsy disi oldugu halde kosu bitene kadar kilit surer. Gorev
+    # tek dosya + iki is istedi; sure sinirli tutulur: en cok 600 HTTP gonderimi x 0,65 sn ~ 6,5 dk (+ 429 bekleme) -> 15 dk sinir.
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Betik denetimi + yerel test (sahte Printify)
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/printify/kolye_katalog.py
+          if grep -nE "^[[:space:]]*(import|from)[[:space:]]+requests" scripts/printify/kolye_katalog.py; then echo "::error::requests yasak"; exit 1; fi
+          python3 -I scripts/printify/test_kolye_katalog.py
+      - name: rclone kur
+        timeout-minutes: 5
+        run: curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+      - name: rclone.conf + Printify anahtari (maskeli; yoksa FAIL)
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"; fi
+          # Once metin dosyasi PRINTIFY_API_KEY.txt; yoksa ayni adli Google Doc (txt disa aktarim). Dosya SILINMEZ; anahtar yazdirilmaz.
+          KF=$(mktemp); set +e
+          rclone cat "gdrive:ASTROLOVE/TEMP/PRINTIFY_API_KEY.txt" > "$KF" 2>/dev/null; rc=$?
+          if [ "$rc" != 0 ] || [ ! -s "$KF" ]; then
+            rclone cat --drive-export-formats txt "gdrive:ASTROLOVE/TEMP/PRINTIFY_API_KEY.txt" > "$KF" 2>/dev/null; rc=$?
+          fi
+          set -e
+          K=$(python3 -c "import sys; t=open(sys.argv[1], encoding='utf-8', errors='replace').read().replace('﻿', '').strip(); print(t if t and not any(c.isspace() for c in t) else ('BICIMSIZ' if t else 'BOS'))" "$KF")
+          rm -f "$KF"
+          if [ "$rc" = 3 ] || [ "$rc" = 4 ]; then
+            echo "::error::Printify anahtari yok (Drive TEMP/PRINTIFY_API_KEY.txt ya da Google Doc)"; exit 1
+          elif [ "$rc" != 0 ]; then
+            echo "::error::Printify anahtari okunamadi (rclone cikis $rc)"; exit 1
+          elif [ "$K" = BOS ]; then
+            echo "::error::Printify anahtar dosyasi bos"; exit 1
+          elif [ "$K" = BICIMSIZ ]; then
+            echo "::error::Printify anahtari gecersiz (icte bosluk / satir sonu)"; exit 1
+          fi
+          echo "::add-mask::$K"
+          echo "PRINTIFY_API_KEY=$K" >> "$GITHUB_ENV"
+          echo "Printify anahtari okundu (maskeli)"
+      - name: Katalog oku (yalniz GET)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _out
+          set +e
+          python3 -I scripts/printify/kolye_katalog.py oku _out/ham 2>&1 | sed -u -e "s|${PRINTIFY_API_KEY}|***|g" | tee _out/KOSU_LOG.txt
+          k=${PIPESTATUS[0]}; set -e
+          echo "::notice::oku cikis $k"; exit $k
+      - name: Rapor (ag yok)
+        run: |
+          set -euo pipefail
+          set +e
+          python3 -I scripts/printify/kolye_katalog.py rapor _out 2>&1 | sed -u -e "s|${PRINTIFY_API_KEY}|***|g" | tee -a _out/KOSU_LOG.txt
+          r=${PIPESTATUS[0]}; set -e
+          cat _out/KOLYE_KATALOG.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          exit $r
+      - name: Drive (anahtar taramasi, --immutable)
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -d _out ] || { echo "cikti yok"; exit 0; }
+          if [ -n "${PRINTIFY_API_KEY:-}" ] && grep -rlF -- "$PRINTIFY_API_KEY" _out; then echo "::error::DUR: ciktida Printify anahtari, Drive'a yazilmadi"; exit 1; fi
+          if grep -rlE "Bearer [A-Za-z0-9]" _out; then echo "::error::DUR: ciktida Bearer, Drive'a yazilmadi"; exit 1; fi
+          rclone copy _out "gdrive:ASTROLOVE/TEMP/KOLYE_${{ github.run_id }}_printify" --immutable -q
+          echo "::notice::Drive: ASTROLOVE/TEMP/KOLYE_${{ github.run_id }}_printify/ ($(find _out -type f | wc -l) dosya)"
+      - if: always()
+        run: rm -rf ~/.config/rclone _out
