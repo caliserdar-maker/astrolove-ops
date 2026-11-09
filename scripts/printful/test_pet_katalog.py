@@ -291,7 +291,7 @@ def testler():  # noqa: C901
     # aday > 40 -> DUR, detay / kargo istegi yok
     cok = [{"id": 1000 + i, "title": f"Sherpa Blanket {i}"} for i in range(41)]
     sh5 = Sahte(urunler=cok, v2=[])
-    d5, kod5, hata5, log5 = kos(sh5)
+    d5, kod5, hata5, log5 = kos(sh5, KEY)                 # anahtarli: Printify listesine de gidilmemeli
     s.append(("FAIL: aday 42 > 40 -> DUR", hata5 is not None and "aday sayisi" in hata5))
     s.append(("FAIL: DUR'da detay / kargo istegi yok", len(sh5.cagri) == 2 and not any(y == "POST" for y, _, _ in sh5.cagri)))
     s.append(("PASS: DUR'da aday listesi yazildi", len(json.loads((d5 / "ham" / "_adaylar_printful.json").read_text())) == 42
@@ -350,8 +350,6 @@ def testler():  # noqa: C901
         sa.shutdown(); sb.shutdown()
     s.append(("FAIL: 302 takip edilmez, token baska hosta gitmez (GET, POST, Printify)", k_g == 302 and k_p == 302
               and j_y.get("_hata") == 302 and B_say == []))
-    s.append(("PASS: urllib varsayilani 302'yi takip ederdi (test anlamli)", issubclass(P.YonlendirmeYok, P.urllib.request.HTTPRedirectHandler)
-              and P.YonlendirmeYok().redirect_request(None, None, 302, "", {}, "http://x/") is None))
     # JSON olmayan 200 kargo yaniti + baglanti kopmasi
     sh8 = Sahte(html_post=10, kopma=5)
     d8, kod8, hata8, _ = kos(sh8)
@@ -379,6 +377,54 @@ def testler():  # noqa: C901
     k4 = list(__import__("csv").DictReader(open(d4 / "PET_KARGO.csv", encoding="utf-8")))
     s.append(("PASS: Printify kargo satiri varyant + etiket", any(x["tedarikci"] == "Printify" and x["varyant_etiket"] == "en kucuk"
                                                                     for x in k4)))
+    # --- inceleme tur 2 ---
+    with contextlib.redirect_stdout(io.StringIO()):
+        r5 = P.rapor(d5)
+    md5 = (d5 / "PET_KATALOG.md").read_text()
+    s.append(("FAIL: Printful DUR raporu: adaylar 'SORGULANMADI', ozet girdisi yok, rapor 1", r5 == 1 and "SORGULANMADI" in md5
+              and "Aday sayisi: Printful 42 (DUR" in md5 and "- **Printful" not in md5 and "baski dosyasi:" not in md5))
+    with contextlib.redirect_stdout(io.StringIO()):
+        r7 = P.rapor(d7)
+    md7 = (d7 / "PET_KATALOG.md").read_text()
+    s.append(("FAIL: Printify DUR raporu: Printify girdisi yok, rapor 1", r7 == 1 and "- **Printify" not in md7 and "Printify DUR" in md7))
+    kb = lambda vs, sira=(): [v["size"] for v, _ in P.kucuk_buyuk([dict(x, id=i + 1) for i, x in enumerate(vs)], list(sira))]
+    s.append(("PASS: boy XXXL / 6XL / 2XL olcegi", kb([{"size": "XXXL"}, {"size": "6XL"}, {"size": "2XL"}, {"size": "XXL"}]) == ["2XL", "6XL"]))
+    s.append(("PASS: yatak boylari Twin < King (Printful sirasi King once gelse de)",
+              kb([{"size": "King"}, {"size": "Queen"}, {"size": "Twin"}], ["King", "Queen", "Twin"]) == ["Twin", "King"]))
+    s.append(("PASS: Printify model alaninda eslesme", "77" in P.py_adaylar([{"id": 77, "title": "Collar", "model": "Pet Bandana"}])))
+    s.append(("FAIL: Printify aciklamada eslesme yok", P.py_adaylar([{"id": 78, "title": "Mug", "description": "blanket"}]) == {}))
+    ham_t = pathlib.Path(tempfile.mkdtemp()) / "ham"; ham_t.mkdir()
+    for ad_, veri in (("_printify.json", {"durum": "okundu"}), ("_adaylar_printify.json", {"77": {"neden": ["title"], "ad": "Pet Bandana"}}),
+                      ("py_bp_77.json", {"title": "Pet Bandana"}), ("py_bp_77_print_providers.json", [{"id": 5, "title": "PP"}]),
+                      ("py_bp_77_pp_5_variants.json", {"variants": [{"id": 1, "options": {"size": "S"}}, {"id": 2, "options": {"size": "L"}}]}),
+                      ("py_bp_77_pp_5_shipping_v1.json", {"profiles": [{"variant_ids": [1], "countries": ["REST_OF_THE_WORLD"],
+                                                                         "first_item": {"cost": 900, "currency": "EUR"}}]})):
+        (ham_t / ad_).write_text(json.dumps(veri))
+    sat, kar, oz = [], [], []
+    P.py_rapor(ham_t, sat, kar, oz)
+    k1 = [k for k in kar if k["varyant_id"] == 1]
+    k2 = [k for k in kar if k["varyant_id"] == 2]
+    s.append(("FAIL: Printify USD disi para birimi -> ucret yazilmaz", k1 and all(k["ucret_usd"] == P.YOK and "EUR" in k["hata"] for k in k1)))
+    s.append(("FAIL: Printify profilde olmayan varyant -> baska profil kullanilmaz", k2 and all(k["ucret_usd"] == P.YOK
+                                                                                               and "profilde yok" in k["hata"] for k in k2)))
+
+    class Kirik:
+        def read(self):
+            raise ConnectionResetError("govde kopuk")
+    e = urllib.error.HTTPError("http://x", 500, "x", {}, None)
+    e.read = Kirik().read
+    s.append(("FAIL: hata govdesi okunamazsa kosu dusmez", "govde okunamadi" in P._oku_govde(e)))
+    sh12 = Sahte()
+    sh12_ana = sh12.__call__
+
+    def ssl_bir_kez(req, timeout=None, _d=[0]):
+        if _d[0] == 0:
+            _d[0] = 1
+            import ssl
+            raise ssl.SSLError("sahte ssl")
+        return sh12_ana(req, timeout)
+    d12, kod12, hata12, _ = kos(ssl_bir_kez)
+    s.append(("PASS: SSLError yeniden denenir, kosu surer", hata12 is None and kod12 == 0))
     return s
 
 

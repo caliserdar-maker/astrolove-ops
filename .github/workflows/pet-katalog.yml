@@ -23,7 +23,7 @@ jobs:
           echo "DAMGA=$(date -u +%Y%m%dT%H%M%SZ)" >> "$GITHUB_ENV"
           python3 -m py_compile scripts/printful/pet_katalog.py
           if grep -nE "^[[:space:]]*(import|from)[[:space:]]+requests" scripts/printful/pet_katalog.py; then echo "::error::requests yasak"; exit 1; fi
-          python3 -I scripts/printful/test_pet_katalog.py | tail -3
+          python3 -I scripts/printful/test_pet_katalog.py
       - name: rclone kur
         timeout-minutes: 5
         run: curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
