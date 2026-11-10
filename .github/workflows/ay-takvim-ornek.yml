@@ -1,0 +1,205 @@
+name: ay-takvim-ornek
+# AY TAKVIMI ORNEK (Serdar 10 Kas 2026, 2. adim): 2027 cift ay takvimi, CANCER_LIBRA, 4 yerlesim, gercek oranda 4 ornek (18x24 in, 300 dpi).
+# Etsy YOK (yazma / okuma / token yok), Printful YOK, musteri verisi YOK. Cikti YALNIZ Drive TEMP/AY_TAKVIM_ORNEK_<UTC>_<kosu no>/;
+# PNG / JPG / kaynak tasarim dala ve artifact'a GIRMEZ. Zamanlama YOK (yalniz workflow_dispatch, onay = AY-ORNEK-CL, TEK kosu: Re-run yasak).
+# Kod: scripts/ay_takvim/ (main). Motor (siparis-gpt) ve ornament (ornament-printful-katalog) dosyalari DEGISMEZ; sabit sha ile ayri klasore alinir.
+# Sembol: Drive ANA_SEMBOL78_KATMAN (bizim-yilimiz-ornek.yml ile ayni kok), yalniz <CIFT>_ana.png + .json okunur.
+# Sonuc satirlari ::notice:: olarak da basilir (SEMBOL, OZET, KAPI, DRIVE_YOLU, DUR): is logu okunamadiginda annotation'dan gorulur.
+# Kapi FAIL'inde gorseller KAPI_FAIL_ onekiyle yine Drive'a yazilir ve kosu KIRMIZI biter (girdi hatasi haric: gorsel yok).
+# Kapi betigi cokerse KAPI_COKUS_, testler FAIL ise TEST_FAIL_ oneki (dogrulanmamis gorsel temiz adla gitmez).
+on:
+  workflow_dispatch:
+    inputs:
+      onay: { description: "onay dizesi (AY-ORNEK-CL)", required: true, default: "" }
+permissions: {}
+env:
+  MOTOR_SHA: 6da763aa5b9820027420f73264fc69d30e120a33
+  ORNAMENT_SHA: c950151627b4aba29bdea8f75e4c533cea599424
+  CIFT: CANCER_LIBRA
+  A: /tmp/ay
+jobs:
+  ornek:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Kapi (onay, deneme 1, ref main)
+        id: kapi
+        env:
+          ONAY: ${{ github.event.inputs.onay }}
+        run: |
+          set -euo pipefail
+          [ -n "${ONAY:-}" ] || { echo "::error title=DUR::onay bos"; exit 1; }
+          [ "$ONAY" = "AY-ORNEK-CL" ] || { echo "::error title=DUR::onay dizesi yanlis"; exit 1; }
+          [ -n "${GITHUB_RUN_ATTEMPT:-}" ] || { echo "::error title=DUR::deneme no bos"; exit 1; }
+          [ "$GITHUB_RUN_ATTEMPT" = "1" ] || { echo "::error title=DUR::yeniden deneme (Re-run) yasak: deneme $GITHUB_RUN_ATTEMPT"; exit 1; }
+          [ -n "${GITHUB_REF:-}" ] || { echo "::error title=DUR::ref bos"; exit 1; }
+          [ "$GITHUB_REF" = "refs/heads/main" ] || { echo "::error title=DUR::ref main degil: $GITHUB_REF"; exit 1; }
+          echo "kapi tamam: onay, deneme 1, ref main"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/ay_takvim
+            .github/workflows
+      - uses: actions/checkout@v4
+        with: { ref: "${{ env.MOTOR_SHA }}", fetch-depth: 1, sparse-checkout: "motor_gpt", path: _motor, persist-credentials: false }
+      - uses: actions/checkout@v4
+        with: { ref: "${{ env.ORNAMENT_SHA }}", fetch-depth: 1, sparse-checkout: "scripts/printful", path: _orn, persist-credentials: false }
+      - name: Sabit sha dogrulamasi (motor, ornament)
+        run: |
+          set -euo pipefail
+          M=$(git -C _motor rev-parse HEAD); O=$(git -C _orn rev-parse HEAD)
+          [ -n "$M" ] && [ -n "$O" ] || { echo "::error title=DUR::sha okunamadi"; exit 1; }
+          [ "$M" = "$MOTOR_SHA" ] || { echo "::error title=DUR::motor sha farkli: $M"; exit 1; }
+          [ "$O" = "$ORNAMENT_SHA" ] || { echo "::error title=DUR::ornament sha farkli: $O"; exit 1; }
+          [ -s _motor/motor_gpt/golge_motor.py ] && [ -s _orn/scripts/printful/ornament_motor.py ] || { echo "::error title=DUR::motor / ornament dosyasi yok"; exit 1; }
+          echo "motor $M | ornament $O | kod $GITHUB_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Siparis kosusu kontrolu (siparis|order akislari; etkin varsa DUR)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$A"
+          python3 -I _orn/scripts/printful/uretim78.py siparis --depo "$GITHUB_REPOSITORY" --cikti "$A/SIPARIS_KONTROL.json" --dur \
+            || { echo "::error title=DUR::etkin siparis kosusu var ya da kontrol okunamadi"; exit 1; }
+      - name: Paketler (ornament ortami + ephem)
+        run: |
+          set -euo pipefail
+          dpkg -s libfribidi0 >/dev/null 2>&1 || { sudo apt-get update -qq && sudo apt-get install -y -qq libfribidi0; } >/dev/null
+          pip install -q pillow==11.0.0 numpy==2.5.4 opencv-python-headless==5.0.0.93 scipy==1.18.1 scikit-image==0.26.0 potracer==0.0.4 ephem==4.2.1 pyyaml==6.0.2
+          python3 -c "import sys, numpy, cv2, PIL, scipy, skimage, ephem; from PIL import features; r = features.check('raqm'); print('python', sys.version.split()[0], 'numpy', numpy.__version__, 'cv2', cv2.__version__, 'pillow', PIL.__version__, 'scipy', scipy.__version__, 'skimage', skimage.__version__, 'ephem', ephem.__version__, 'raqm', r); sys.exit(0 if (r and PIL.__version__ == '11.0.0') else 1)" \
+            || { echo "::error title=DUR::ortam: pillow 11.0.0 + raqm acik degil"; exit 1; }
+      - name: rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Sembol katmani (Drive'dan yalniz 2 dosya)
+        id: sembol
+        run: |
+          set -euo pipefail
+          [ -n "${CIFT:-}" ] || { echo "::error title=DUR::CIFT bos"; exit 1; }
+          K="gdrive,root_folder_id=1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD:"
+          mkdir -p "$A/k"
+          rclone copy "$K" "$A/k" --include "/${CIFT}_ana.png" --include "/${CIFT}_ana.png.json" --max-depth 1
+          N=$(find "$A/k" -type f | wc -l)
+          [ "$N" = "2" ] || { echo "::error title=DUR::sembol klasorunde $N dosya (beklenen 2)"; exit 1; }
+          [ -s "$A/k/${CIFT}_ana.png" ] || { echo "::error title=DUR::sembol katmani inmedi"; exit 1; }
+          [ -s "$A/k/${CIFT}_ana.png.json" ] || { echo "::error title=DUR::sembol yan json inmedi"; exit 1; }
+          echo "sembol indi: 2 dosya"
+      - name: Sembol olcumu (kapilardan ONCE; DUR'da da Drive'a OLCUM)
+        id: olcum
+        run: |
+          set +e
+          mkdir -p "$A/cikti"
+          python3 scripts/ay_takvim/ay_takvim_ornek.py sembol --katman "$A/k/${CIFT}_ana.png" --cikti "$A/cikti"
+          RC=$?
+          echo "SEMBOL_RC=$RC" >> "$GITHUB_ENV"
+          exit 0
+      - name: Testler (motor + ornament kaynagiyla esdegerlik; atlanan test FAIL)
+        id: test
+        run: |
+          set +e
+          python3 scripts/ay_takvim/test_ay_takvim.py --motor "$PWD/_motor/motor_gpt" --ornament "$PWD/_orn/scripts/printful" --is-akisi "$PWD/.github/workflows/ay-takvim-ornek.yml" --zorunlu > "$A/TEST.log" 2>&1
+          RC=$?
+          tail -n 60 "$A/TEST.log" | sed 's/^::/ ::/'
+          echo "TEST_RC=$RC" >> "$GITHUB_ENV"
+          echo "::notice title=TEST::$(tail -n 1 "$A/TEST.log" | cut -c1-300) (cikis $RC)"
+          exit 0
+      - name: Uretim + kapilar (4 ornek)
+        id: uretim
+        run: |
+          set +e
+          K="$A/k/${CIFT}_ana.png"; M="$PWD/_motor/motor_gpt"; O="$A/cikti"; KOD=scripts/ay_takvim
+          URC=0; KRC=0; GRC=0
+          if [ "${SEMBOL_RC:-9}" != "0" ]; then echo "::error title=DUR::sembol olcumu cikis ${SEMBOL_RC:-?} (3 = sembol bicimi; diger = cokus): uretim yok"; GRC=1; fi
+          uret() {
+            ad="$1"; shift
+            [ "$GRC" = "0" ] || return 0
+            python3 "$KOD/ay_takvim_ornek.py" uret --cift "$CIFT" --katman "$K" --motor "$M" --cikti "$O" --onbellek "$A/onb" --ad "$ad" "$@"
+            r=$?
+            if [ "$r" != "0" ]; then echo "::error title=URETIM $ad::cikis $r"; [ "$r" = "3" ] && GRC=1 || URC=1; return 0; fi
+            python3 "$KOD/ay_takvim_kapi.py" "$O" "$ad" --katman "$K" --onek
+            r=$?
+            [ "$r" = "0" ] || KRC=1
+            if [ "$r" != "0" ] && [ "$r" != "1" ]; then                     # kapi betigi coktu: gorseller dogrulanmadi, onekle isaretle
+              echo "::error title=KAPI $ad::kapi betigi coktu (cikis $r)"
+              for f in "$O/$ad".png "$O/${ad}"_*.png "$O/${ad}"_*.jpg; do [ -f "$f" ] && mv "$f" "$O/KAPI_COKUS_$(basename "$f")"; done
+            fi
+          }
+          uret ORNEK_1_halkalar --isim1 EMILY --isim2 JAMES --yerlesim halkalar --satir "It Began With a Kiss in the Rain"
+          uret ORNEK_2_spiral --isim1 EMILY --isim2 JAMES --yerlesim spiral
+          uret ORNEK_3_girdap --isim1 EMILY --isim2 JAMES --yerlesim girdap --satir "Do you remember our first moonrise?" \
+            --satir "Two hearts, one sky, since 2019." --satir "We'll keep star-gazing, you & me!"
+          uret ORNEK_4_rozet --isim1 ALEXANDRINA --isim2 CHRISTOPHER --yerlesim rozet --satir "Our first year under one roof" --satir "Lisbon, June 14, 2027"
+          { echo "URETIM_RC=$URC"; echo "KAPI_RC=$KRC"; echo "GIRDI_RC=$GRC"; } >> "$GITHUB_ENV"
+          echo "uretim $URC | kapi $KRC | girdi $GRC"
+          exit 0
+      - name: Paket (yuklenecek dosyalar; DUMP ve onbellek haric)
+        id: paket
+        if: ${{ always() && steps.sembol.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          Y="$A/yukle"; mkdir -p "$Y" "$A/cikti"
+          find "$A/cikti" -maxdepth 1 -type f \( -name '*.png' -o -name '*.jpg' -o -name '*_OLCUM.json' -o -name '*_META.json' -o -name '*_DUR.json' -o -name 'SEMBOL_OLCUM.json' \) -exec cp {} "$Y/" \;
+          if [ "${TEST_RC:-9}" != "0" ]; then                                 # test FAIL: gorseller dogrulanmamis kodla uretildi, onekle isaretle
+            for f in "$Y"/*.png "$Y"/*.jpg; do
+              [ -f "$f" ] || continue
+              case "$(basename "$f")" in KAPI_FAIL_*|KAPI_COKUS_*|TEST_FAIL_*) ;; *) mv "$f" "$Y/TEST_FAIL_$(basename "$f")" ;; esac
+            done
+          fi
+          [ -f "$A/TEST.log" ] && cp "$A/TEST.log" "$Y/TEST.log" || true
+          [ -f "$A/SIPARIS_KONTROL.json" ] && cp "$A/SIPARIS_KONTROL.json" "$Y/" || true
+          python3 scripts/ay_takvim/ay_takvim_kapi.py --ozet "$Y" --kosu "${GITHUB_RUN_ID:-0}" --kod "${GITHUB_SHA:-?}" --motor-sha "$MOTOR_SHA" --ornament-sha "$ORNAMENT_SHA" \
+            --rc "sembol=${SEMBOL_RC:-9},test=${TEST_RC:-9},uretim=${URETIM_RC:-9},kapi=${KAPI_RC:-9},girdi=${GIRDI_RC:-9}"
+          ls -la "$Y" | sed 's/^/  /'
+      - name: Drive'a yaz
+        id: drive
+        if: ${{ always() && steps.paket.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          Y="$A/yukle"
+          [ -n "${GITHUB_RUN_ID:-}" ] || { echo "::error title=DUR::kosu no bos"; exit 1; }
+          D="gdrive:ASTROLOVE/TEMP/AY_TAKVIM_ORNEK_$(date -u +%Y%m%d_%H%M)_${GITHUB_RUN_ID}"
+          NB=$(find "$Y" -maxdepth 1 -type f | wc -l)
+          [ "$NB" -ge 1 ] || { echo "::error title=DUR::yuklenecek dosya yok"; exit 1; }
+          RC=1
+          for i in 1 2 3; do
+            if rclone copy "$Y" "$D" --max-depth 1 -q; then RC=0; break; fi
+            echo "::warning::Drive yukleme deneme $i basarisiz"; sleep $((5 * i))
+          done
+          [ "$RC" = "0" ] || { echo "::error title=DUR::Drive yuklemesi basarisiz"; exit 1; }
+          rclone lsf "$D" --files-only --max-depth 1 > "$A/drive_liste.txt"
+          ND=$(grep -c . "$A/drive_liste.txt" || true)
+          [ "$ND" = "$NB" ] || { echo "::error title=DUR::Drive dosya sayisi $ND, beklenen $NB"; exit 1; }
+          echo "::notice title=DRIVE_YOLU::${D#gdrive:} | $ND dosya"
+          sed 's/^/  /' "$A/drive_liste.txt"
+      - name: Sonuc
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          S="sembol=${SEMBOL_RC:-yok} test=${TEST_RC:-yok} uretim=${URETIM_RC:-yok} kapi=${KAPI_RC:-yok} girdi=${GIRDI_RC:-yok} drive=${{ steps.drive.outcome }}"
+          echo "::notice title=SONUC::$S"
+          [ "${SEMBOL_RC:-9}" = "0" ] && [ "${TEST_RC:-9}" = "0" ] && [ "${URETIM_RC:-9}" = "0" ] && [ "${KAPI_RC:-9}" = "0" ] && [ "${GIRDI_RC:-9}" = "0" ] \
+            && [ "${{ steps.drive.outcome }}" = "success" ] || { echo "::error title=DUR::$S"; exit 1; }
+      - name: Temizlik
+        if: ${{ always() }}
+        run: rm -rf ~/.config/rclone /tmp/ay /tmp/rc.zip /tmp/rcb
