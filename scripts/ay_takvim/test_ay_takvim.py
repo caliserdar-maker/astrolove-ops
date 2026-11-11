@@ -132,6 +132,7 @@ def t_ayar():
     v = {y: U.ayar_varsayilan(y) for y in U.AYAR_YERLESIM}
     k('ayar varsayilani = 2. ornek gorevi degerleri (grup ortali, oran 1, alan 205 / 205 / 320, poster yeri, kucuk oran 1, ay adi 53, oto, 150 / 75 / 90, 0,36 / 0,36 / 0,34)',
       all(d['grup_merkez'] == 'grup' and d['grup_oran'] == 1.0 and d['kucuk_u'] == 'poster' and d['kucuk_v'] == 'poster' and d['kucuk_oran'] == 1.0
+          and d['halka_kalinlik'] == 1.0
           and d['ay_adi_cap'] == 53 == U.CAP_AY and d['girdap_ad_uzaklik'] == 'oto' and (d['isim_cap'], d['baslik_cap'], d['metin_cap']) == (150, 75, 90)
           and d['satirlar'] == [] for d in v.values())
       and [v[y]['sembol_alan'] for y in U.AYAR_YERLESIM] == [205, 205, 320] and [v[y]['disk_katsayi'] for y in U.AYAR_YERLESIM] == [0.36, 0.36, 0.34]
@@ -140,7 +141,8 @@ def t_ayar():
       U.ayar_dogrula({}) == v['halkalar'] and U.ayar_dogrula(dict(yerlesim='rozet', kucuk_u=0.6, isim1='anna')) == dict(v['rozet'], kucuk_u=0.6, isim1='ANNA'))
     k('ayar: aralik uclari kabul (grup_oran 0,60 / 1,30; ay_adi_cap 30 / 90; girdap uzaklik 58 / 200 / "oto"; isim_cap 75 / 240)',
       all(U.ayar_dogrula({a_: x_})[a_] == x_ for a_, x_ in (('grup_oran', 0.6), ('grup_oran', 1.3), ('ay_adi_cap', 30), ('ay_adi_cap', 90), ('girdap_ad_uzaklik', 58),
-                                                           ('girdap_ad_uzaklik', 200), ('girdap_ad_uzaklik', 'oto'), ('isim_cap', 75), ('isim_cap', 240), ('kucuk_v', 'poster'))))
+                                                           ('girdap_ad_uzaklik', 200), ('girdap_ad_uzaklik', 'oto'), ('isim_cap', 75), ('isim_cap', 240), ('kucuk_v', 'poster'),
+                                                           ('halka_kalinlik', 1.0), ('halka_kalinlik', 2.5), ('halka_kalinlik', 4), ('halka_kalinlik', 4.0))))
     kotu = [('bilinmeyen anahtar', dict(renk='mavi')), ('aralik disi (grup_oran 1,31)', dict(grup_oran=1.31)), ('aralik disi (ay_adi_cap 29)', dict(ay_adi_cap=29)),
             ('aralik disi (kucuk_u 0,2)', dict(kucuk_u=0.2)), ('aralik disi (sembol_alan 401)', dict(sembol_alan=401)), ('aralik disi (disk_katsayi 0,46)', dict(disk_katsayi=0.46)),
             ('aralik disi (isim_cap 241)', dict(isim_cap=241)), ('yanlis tur (grup_oran metin)', dict(grup_oran='1.0')), ('yanlis tur (bool)', dict(kucuk_oran=True)),
@@ -148,7 +150,10 @@ def t_ayar():
             ('serbest sozcuk yanlis (kucuk_u "orta")', dict(kucuk_u='orta')), ('yerlesim spiral (ayarda yok)', dict(yerlesim='spiral')),
             ('yerlesim taninmiyor', dict(yerlesim='kare')), ('grup_merkez taninmiyor', dict(grup_merkez='sol')), ('sonsuz', dict(grup_oran=float('inf'))),
             ('NaN', dict(kucuk_oran=float('nan'))), ('kabuk karakteri iceren isim', dict(isim1='A; rm -rf /')), ('kabuk karakteri iceren satir', dict(satirlar=['$(id)'])),
-            ('cok buyuk tam sayi (10^400; cokus degil DUR)', dict(grup_oran=10 ** 400)), ('sozluk degil', [1])]
+            ('cok buyuk tam sayi (10^400; cokus degil DUR)', dict(grup_oran=10 ** 400)), ('sozluk degil', [1]),
+            ('aralik disi (halka_kalinlik 0,99: inceltme yok)', dict(halka_kalinlik=0.99)), ('aralik disi (halka_kalinlik 4,01)', dict(halka_kalinlik=4.01)),
+            ('aralik disi (halka_kalinlik 0)', dict(halka_kalinlik=0)), ('yanlis tur (halka_kalinlik metin)', dict(halka_kalinlik='2')),
+            ('yanlis tur (halka_kalinlik bool)', dict(halka_kalinlik=True)), ('serbest sozcuk yok (halka_kalinlik "poster")', dict(halka_kalinlik='poster'))]
     for ack, d in kotu:
         k(f'bilinen FAIL ayar: {ack} -> girdi hatasi', dur_mu(lambda d=d: U.ayar_dogrula(d), None, True))
     k('ayar: spiral yalniz komut satiri yolunda (spiral=True) kabul', U.ayar_dogrula(dict(yerlesim='spiral'), spiral=True)['yerlesim'] == 'spiral')
@@ -1302,6 +1307,87 @@ def t_grup(md, mt, SB, td):
     print(f"BILGI kapi 2 bagimsiz olcum farki (px): hal A {kA['bagimsiz']['fark_en_buyuk']}, hal B {kB['bagimsiz']['fark_en_buyuk']}, ayarli {kK['bagimsiz']['fark_en_buyuk']}", flush=True)
     k('bilinen FAIL kapi 2 grup: ayar META\'da hal B, gorsel hal A -> FAIL', not kapi_grup(GA, dict(grup_merkez='halka'))['PASS'])
 
+    # --- AYAR halka_kalinlik (Serdar 11 Kas "sadece halkayi, orantili olarak kalinlastiralim")
+    h0 = kay[0]
+    ha1, hx1, hy1 = U.halka_kalinlastir(h0['alfa'], h0['px'], h0['py'], C, 1.0)
+    k('halka_kalinlik 1,0: kaynak AYNEN (ayni nesne, ayni yer; islem yok)', ha1 is h0['alfa'] and (hx1, hy1) == (h0['px'], h0['py']))
+    G1 = U.grup_kur(mt, 'CANCER_LIBRA', g, olc['yan_json'], hr_, 'grup', 'poster', 'poster', 1.0, 1.0)
+    k('halka_kalinlik 1,0 acikca verilince grup = ayarsiz grup (olcek, tum maskeler, tum yerler birebir)',
+      G1['olcek'] == GA['olcek'] and np.array_equal(G1['ana']['a'], GA['ana']['a']) and (G1['ana']['x'], G1['ana']['y']) == (GA['ana']['x'], GA['ana']['y'])
+      and all(np.array_equal(a_['A'], b_['A']) and (a_['x'], a_['y'], a_['k']) == (b_['x'], b_['y'], b_['k']) for a_, b_ in zip(G1['ogeler'], GA['ogeler'])))
+
+    def halka_profil(a_, px_, py_):                                           # poster pikselinde aci basina (1 derece) kalinlik ve merkez yaricapi
+        ys, xs = np.nonzero(a_ > 0)
+        w_ = a_[ys, xs] / 255.0
+        dx_, dy_ = xs + 0.5 + px_ - C['cx'], ys + 0.5 + py_ - C['cy']
+        r_ = np.hypot(dx_, dy_)
+        b_ = np.floor(np.degrees(np.arctan2(dy_, dx_)) + 180.0).astype(np.int64) % 360
+        sw, sr = np.bincount(b_, w_, 360), np.bincount(b_, w_ * r_, 360)
+        dolu = sw > 1.0
+        rm = np.where(dolu, sr / np.maximum(sw, 1e-9), 0)
+        return dolu, np.where(dolu, sw / np.maximum(np.radians(1.0) * rm, 1e-9), 0), rm
+    d0, t0, r0 = halka_profil(h0['alfa'], h0['px'], h0['py'])
+    for carp in (1.5, 2.0, 2.5, 3.0, 4.0):
+        ha, hx_, hy_ = U.halka_kalinlastir(h0['alfa'], h0['px'], h0['py'], C, carp)
+        dc, tc, rc_ = halka_profil(ha, hx_, hy_)
+        ort = d0 & dc & (t0 > 3.0)                                             # ince uclar (kalinlik < 3 px) oran olcumune girmez (nicemleme)
+        oran = tc[ort] / t0[ort]
+        k(f'halka_kalinlik {carp:g} (kaynak, poster pikseli): her acida kalinlik x {carp:g} (oran ortanca {np.median(oran):.3f}, en kucuk {oran.min():.3f}, en buyuk {oran.max():.3f}); '
+          f'acisal kapsam ayni ({int(d0.sum())} / {int(dc.sum())} derece); merkez cizgisi yaricapi ayni (en buyuk fark {np.abs(rc_[ort] - r0[ort]).max():.2f} px)',
+          abs(np.median(oran) - carp) <= 0.02 * carp and oran.min() >= 0.95 * carp and oran.max() <= 1.05 * carp and abs(int(d0.sum()) - int(dc.sum())) <= 1
+          and np.abs(rc_[ort] - r0[ort]).max() <= 0.5 and ha.dtype == np.uint8, (np.median(oran), oran.min(), oran.max(), int(d0.sum()), int(dc.sum())))
+        uc0, ucc = t0[d0 & (t0 <= 3.0)], tc[d0 & dc & (t0 <= 3.0)]
+        k(f'halka_kalinlik {carp:g}: uclara dogru incelme korunur (ince uc dilimleri de kalinlasir ama ust kalinligin altinda kalir; uc / ust orani ayni +- 0,05)',
+          len(ucc) >= 2 and abs(ucc.min() / tc.max() - uc0.min() / t0.max()) <= 0.05, (uc0.min() / t0.max(), ucc.min() / tc.max()))
+    G2 = U.grup_kur(mt, 'CANCER_LIBRA', g, olc['yan_json'], hr_, 'grup', 'poster', 'poster', 1.0, 2.0)
+    f1, f2 = KP.cember_uydur(GA['ogeler'][0]['A']), KP.cember_uydur(G2['ogeler'][0]['A'])
+    o1_, o2_ = GA['ogeler'][0], G2['ogeler'][0]
+    q1, q2 = KP.halka_kalinlik_olc(o1_['A'], f1[0], f1[1]), KP.halka_kalinlik_olc(o2_['A'], f2[0], f2[1])
+    print(f"BILGI halka kalinligi (takvim pikseli, hal A): carpan 1 ust {q1['ust_px']} px, carpan 2 ust {q2['ust_px']} px, oran {q2['ust_px'] / q1['ust_px']:.3f}", flush=True)
+    k(f"halka_kalinlik 2 (takvim): YALNIZ halka degisir: grup olcegi, ana sembol ve kucuk sembollerin maske + yerleri birebir ayni; halka merkezi ve yaricapi ayni (+- 0,3 px); "
+      f"olculen kalinlik orani {q2['ust_px'] / q1['ust_px']:.3f}; acisal kapsam ayni",
+      G2['olcek'] == GA['olcek'] and np.array_equal(G2['ana']['a'], GA['ana']['a']) and (G2['ana']['x'], G2['ana']['y']) == (GA['ana']['x'], GA['ana']['y'])
+      and all(np.array_equal(a_['A'], b_['A']) and (a_['x'], a_['y']) == (b_['x'], b_['y']) for a_, b_ in zip(G2['ogeler'][1:], GA['ogeler'][1:]))
+      and abs(o2_['x'] + f2[0] - o1_['x'] - f1[0]) <= 0.3 and abs(o2_['y'] + f2[1] - o1_['y'] - f1[1]) <= 0.3 and abs(f2[2] - f1[2]) <= 0.3
+      and abs(q2['ust_px'] / q1['ust_px'] - 2.0) <= 0.05 and abs(q2['kapsam_derece'] - q1['kapsam_derece']) <= 1
+      and G2['bilgi']['halka_carpan'] == 2.0 and abs(G2['bilgi']['halka_kalinlik_px'] - 2 * GA['bilgi']['halka_kalinlik_px']) < 0.002,
+      (o2_['x'] + f2[0] - o1_['x'] - f1[0], o2_['y'] + f2[1] - o1_['y'] - f1[1], f2[2] - f1[2], q1, q2))
+    k2_ = kapi_grup(G2, dict(halka_kalinlik=2.0))
+    k('kapi 2 grup (bilinen PASS): halka_kalinlik 2 gorseli + META ayar 2 -> PASS; en uzak piksel olcutu TEK NOKTA (|olculerek geri alinmis en uzak - hedef| <= 2; '
+      'carpan 1 ile ayni deger +- 0,5 px), ham en uzak daha buyuk; olculen kalinlik BILGI alaninda',
+      k2_['PASS'] and k2_['bagimsiz']['en_uzak_fark'] <= 2.0 and abs(k2_['bagimsiz']['en_uzak_piksel'] - kA['bagimsiz']['en_uzak_piksel']) <= 0.5
+      and k2_['bagimsiz']['en_uzak_piksel_ham'] > k2_['bagimsiz']['en_uzak_piksel'] + 1.0
+      and abs(k2_['bagimsiz']['halka_kalinlik']['ust_px'] - k2_['bagimsiz']['halka_kalinlik']['hedef_ust_px']) <= 0.3, k2_['bagimsiz'])
+    for al_, hal_, cr_ in ((205, 'grup', 4.0), (320, 'grup', 4.0), (320, 'halka', 3.0), (400 * 1.3, 'grup', 4.0)):
+        Gx = U.grup_kur(mt, 'CANCER_LIBRA', g, olc['yan_json'], al_ * U.S, hal_, 'poster', 'poster', 1.0, cr_)
+        qx_ = kapi_grup(Gx, dict(halka_kalinlik=cr_, grup_merkez=hal_, sembol_alan=205, grup_oran=al_ / 205))
+        k(f'kapi 2 grup (bilinen PASS): halka_kalinlik {cr_:g}, alan {al_:g}, hal {hal_} -> PASS (en uzak fark {qx_["bagimsiz"]["en_uzak_fark"]}, en buyuk fark {qx_["bagimsiz"]["fark_en_buyuk"]} px)',
+          qx_['PASS'] and qx_['bagimsiz']['fark_en_buyuk'] <= 2.0, qx_['bagimsiz'])
+    k('bilinen FAIL kapi 2 grup: gorsel halka_kalinlik 2, META ayar 1 (kalin halka poster halkasi diye gecemez) -> FAIL (maske kaynagin kucultulmusu degil)',
+      (lambda q: not q['PASS'] and q['oge']['halka']['yeniden_kucultme_birebir'] is False)(kapi_grup(G2)))
+    k('bilinen FAIL kapi 2 grup: gorsel poster halkasi, META ayar halka_kalinlik 2 -> FAIL', not kapi_grup(GA, dict(halka_kalinlik=2.0))['PASS'])
+    k('kapi 2: halka_kalinlik 1,0 iken en uzak piksel olcutu onceki tanimla ayni (donusum yok; ham = olculen; fark = |uzak - hedef|)',
+      kA['bagimsiz']['en_uzak_piksel_ham'] == kA['bagimsiz']['en_uzak_piksel'] and abs(kA['bagimsiz']['en_uzak_fark'] - abs(kA['bagimsiz']['en_uzak_piksel'] - hr_)) <= 0.006)
+    es_kur0 = U.grup_kur
+    for ack_, kat_, hal_, cr_ in (('%3 buyuk', 1.03, 'grup', 2.0), ('%0,6 kucuk (3,7 px; kalin halka payiyla gizlenemez)', 0.994, 'grup', 3.0),
+                                  ('%1 kucuk', 0.99, 'grup', 4.0), ('%0,5 buyuk, hal halka (3,1 px)', 1.005, 'halka', 3.0)):
+        U.grup_kur = lambda mt_, c_, g_, j_, h_, *a_, kat_=kat_: es_kur0(mt_, c_, g_, j_, h_ * kat_, *a_)       # uretim bozuk: grup yanlis boyda kurulur
+        try:
+            qb = kapi_grup(U.grup_kur(mt, 'CANCER_LIBRA', g, olc['yan_json'], hr_, hal_, 'poster', 'poster', 1.0, cr_), dict(halka_kalinlik=cr_, grup_merkez=hal_))
+        finally:
+            U.grup_kur = es_kur0
+        k(f'bilinen FAIL kapi 2 grup (uretim mutasyonu, halka_kalinlik {cr_:g}): grup {ack_} kurulmus -> |en uzak - hedef| > 2 px -> FAIL',
+          not qb['PASS'] and qb['bagimsiz']['en_uzak_fark'] > 2.0, qb.get('bagimsiz'))
+    # gren: kalin halka kucuk sembollerin boyanmis pikselini degistirmez (inceleme O1)
+    Lt = np.array([70.0, 12.0, 60.0], np.float32)
+    ht_ = mt.harita_kur('CANCER_LIBRA', str(gk / 'onb'))
+    bA = U.altin_ogeler(mt, [dict(o, x=0, y=0) for o in GA['ogeler']], ht_['har'], ht_['qa_goz'], Lt, 20.0)
+    b2 = U.altin_ogeler(mt, [dict(o, x=0, y=0) for o in G2['ogeler']], ht_['har'], ht_['qa_goz'], Lt, 20.0)
+    k('halka_kalinlik 2: kucuk sembollerin BOYANMIS katmani carpan 1 ile bayt bayt ayni (gren ureteci halka boyundan etkilenmez); halka katmani farkli boyda',
+      np.array_equal(bA[1]['rgb'], b2[1]['rgb']) and np.array_equal(bA[2]['rgb'], b2[2]['rgb']) and bA[0]['rgb'].shape != b2[0]['rgb'].shape and 'rng_boy' in G2['ogeler'][0]
+      and 'rng_boy' not in GA['ogeler'][0])
+    del bA, b2
+
     def uretim_mutasyonu(ack, kur, geri, alan, hal='grup'):
         '''Uretim kodu BOZUK (kapinin cagirdigi U.grup_kur da ayni bozuk kod): yeniden kurulum kaniti tutar, BAGIMSIZ olcum FAIL vermeli.'''
         try:
@@ -1440,7 +1526,8 @@ def t_grup(md, mt, SB, td):
         k('bilinen FAIL kapi 2 (grup): kucuk sembol maskesi kaynagin kucultulmusu degil (bulaniklastirilmis)',
           '2_sembol' in rm['ozet']['fail'] and rm['kapi']['2_sembol']['grup']['oge']['kucuk1']['yeniden_kucultme_birebir'] is False)
     # --- uctan uca: mod deneme, varsayilan disi ayar (kucuk_u, ay_adi_cap, disk_katsayi) -> kapi degerleri META'dan
-    os.environ['AY_TEST_AYAR'] = json.dumps([dict(yerlesim='girdap', kucuk_u=0.6, kucuk_v=1.05, kucuk_oran=1.3, ay_adi_cap=40, disk_katsayi=0.30, satirlar=['Two hearts, one sky']),
+    os.environ['AY_TEST_AYAR'] = json.dumps([dict(yerlesim='girdap', kucuk_u=0.6, kucuk_v=1.05, kucuk_oran=1.3, ay_adi_cap=40, disk_katsayi=0.30, halka_kalinlik=2,
+                                                  satirlar=['Two hearts, one sky']),
                                              dict(yerlesim='halkalar', sembol_alan=400, grup_oran=1.3, grup_merkez='halka')])
     k('deneme ayari dogrulandi (2 deneme)', U.main(['ayar-dogrula', '--env', 'AY_TEST_AYAR', '--cikti', str(gk)]) == 0)
     del os.environ['AY_TEST_AYAR']
@@ -1458,6 +1545,12 @@ def t_grup(md, mt, SB, td):
           rd['kapi']['8_isim']['cap_alt_siniri'] == 40 and [o['cap'] for o in md1['ogeler'] if o['tur'] == 'ay'] == [40.0] * 12 and rd['ozet']['disk_katsayisi'] == 0.30
           and abs(md1['disk']['liste'][0][2] - 0.30 * md1['disk']['bilgi']['aralik'] * U.S) < 0.01 and rd['ozet']['ayar'] == md1['ayar']
           and sorted(rd['ozet']['ayar']) == sorted(U.AYAR_ANAHTAR) and rd['kapi']['1_veri']['PASS'])
+        hb = rd['kapi']['2_sembol']['grup']['bagimsiz']['halka_kalinlik']
+        k(f"deneme 1: halka_kalinlik 2 uctan uca: OLCUM halka kalinligi olculen ust {hb['ust_px']} px = hedef {hb['hedef_ust_px']} px (+- 0,3), META grup kalinligi carpanli; "
+          f"halka tek doku / kontrast kapilarinda (dE00 <= 2, kontrast >= 4,5)",
+          hb['carpan'] == 2 and abs(hb['ust_px'] - hb['hedef_ust_px']) <= 0.3 and md1['grup']['bilgi']['halka_carpan'] == 2.0
+          and rd['kapi']['3_tek_doku']['oge']['halka']['dE00'] <= 2.0 and rd['kapi']['4_kontrast']['oge']['halka']['ortanca_bilgi'] >= 4.5
+          and rd['ozet']['grup']['halka_kalinlik_olculen']['ust_px'] == hb['ust_px'], hb)
         (gk / 'Dm_META.json').write_text(json.dumps(dict(md1, ad='Dm', ayar=dict(md1['ayar'], kucuk_u=0.7))))
         for uz_ in ('.png', '_DUMP.npz'):
             os.link(gk / f'DENEME_1_girdap{uz_}', gk / f'Dm{uz_}')

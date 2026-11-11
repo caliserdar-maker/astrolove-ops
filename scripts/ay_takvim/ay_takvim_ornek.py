@@ -110,9 +110,10 @@ GRUP_ALFA_ESIK = 0.02                                  # grubun siniri: alfa > 0
 # cikti ayni). Araliklar Merkez baslangic degeridir (yalniz yanlis girisi yakalar; tasarim karari degil). AYAR OLAMAZ: sembolun, halkanin ve
 # kucuk sembollerin SEKLI (yalniz es oranli olcek), altin yolu, zemin, fontlar. Cift bu asamada sabit (CANCER_LIBRA).
 AYAR_YERLESIM = ('halkalar', 'girdap', 'rozet')
-AYAR_ANAHTAR = ('yerlesim', 'grup_merkez', 'grup_oran', 'sembol_alan', 'kucuk_u', 'kucuk_v', 'kucuk_oran', 'ay_adi_cap', 'girdap_ad_uzaklik',
+AYAR_ANAHTAR = ('yerlesim', 'grup_merkez', 'grup_oran', 'sembol_alan', 'kucuk_u', 'kucuk_v', 'kucuk_oran', 'halka_kalinlik', 'ay_adi_cap', 'girdap_ad_uzaklik',
                 'isim_cap', 'baslik_cap', 'metin_cap', 'disk_katsayi', 'isim1', 'isim2', 'satirlar')
 AYAR_ARALIK = dict(grup_oran=(0.60, 1.30), sembol_alan=(150, 400), kucuk_u=(0.30, 0.90), kucuk_v=(0.60, 1.30), kucuk_oran=(0.60, 1.80),
+                   halka_kalinlik=(1.00, 4.00),                         # Serdar 11 Kas "sadece halkayi, orantili olarak kalinlastiralim": cizgi kalinligi carpani
                    ay_adi_cap=(30, 90), girdap_ad_uzaklik=(58, 200), disk_katsayi=(0.20, 0.45),
                    isim_cap=(0.5 * 150, 1.6 * 150), baslik_cap=(0.5 * 75, 1.6 * 75), metin_cap=(0.5 * 90, 1.6 * 90))
 AYAR_SERBEST = dict(kucuk_u='poster', kucuk_v='poster', girdap_ad_uzaklik='oto')   # sayi yerine verilebilen tek sozcuk (varsayilan)
@@ -206,6 +207,7 @@ def ayar_varsayilan(yerlesim):
     """Etkin AYAR'in varsayilani (2. ornek gorevinin degerleri). 'poster': kucuk semboller posterdeki yerinde; 'oto': girdap ad uzakligi aramasi."""
     Yv = YERLESIM[yerlesim]
     return dict(yerlesim=yerlesim, grup_merkez='grup', grup_oran=1.0, sembol_alan=Yv['sembol_alan'], kucuk_u='poster', kucuk_v='poster', kucuk_oran=1.0,
+                halka_kalinlik=1.0,
                 ay_adi_cap=CAP_AY, girdap_ad_uzaklik='oto', isim_cap=CAP_ISIM, baslik_cap=CAP_BASLIK, metin_cap=T_METIN, disk_katsayi=Yv['katsayi'],
                 isim1='EMILY', isim2='JAMES', satirlar=[])
 
@@ -850,7 +852,11 @@ def altin_ogeler(mt, ogeler, har, qa_goz, Lana, D_ana):
             a_k, pt = metin_alfa_k(o['metin'], o['font'], o['cap'], o['k'], o['wght'], o['ref'])
         if a_k.shape != (o['A'].shape[0] * o['k'], o['A'].shape[1] * o['k']):
             raise Dur('cerceve', f"{o['ad']}: k kat cerceve 1x cercevenin tam kati degil")       # ornament_motor.py :409-411
-        kat_g, _, atest = mt.oge_katman(a_k, o['k'], rng, har, qa_goz, o.get('motor_ad', 'yazi'))
+        if o.get('rng_boy'):                                                  # kalinlasmis halka (AYAR halka_kalinlik != 1): gren AYRI uretecten; ana uretec OZGUN
+            kat_g, _, atest = mt.oge_katman(a_k, o['k'], np.random.default_rng([11, 1]), har, qa_goz, o.get('motor_ad', 'yazi'))
+            rng.standard_normal(tuple(o['rng_boy']))                          # halka boyu kadar ilerler: sonraki ogelerin (kucuk semboller) greni carpandan etkilenmez
+        else:
+            kat_g, _, atest = mt.oge_katman(a_k, o['k'], rng, har, qa_goz, o.get('motor_ad', 'yazi'))
         if kat_g.shape[:2] != o['A'].shape:
             raise Dur('cerceve', f"{o['ad']}: katman boyu maske ile ayni degil")
         kat_u, uy = renk_uyum(kat_g, o['A'], Lana)
@@ -1045,6 +1051,69 @@ def grup_kaynak(mt, cift, kucuk_u='poster', kucuk_v='poster'):
     return out, C, y_mer
 
 
+def halka_kalinlastir(alfa, px, py, C, carpan, hizala=None):
+    """AYAR halka_kalinlik (Serdar 11 Kas): halkanin CIZGI KALINLIGI her noktada ayni carpanla buyur ("orantili"); yaricap, merkez, aciklik (acisal
+    kapsam) ve uclara dogru incelme bicimi korunur. Yontem: kaynak alfa (poster pikseli), halkanin kendi MERKEZ CIZGISI etrafinda radyal olarak
+    carpan kadar genisletilir: cikti(r, aci) = kaynak(Rc(aci) + (r - Rc(aci)) / carpan, aci). Rc(aci) = o acidaki alfa agirlikli ortalama yaricap
+    (0,5 derecelik kutular, dairesel yumusatma; aciklikta en yakin dolu kutu). Aci degismedigi icin uc noktalar ve aciklik aynen kalir.
+    Ornekleme cift dogrusal (cv2.remap). carpan 1,0: kaynak AYNEN doner (islem yok). Doner (alfa uint8, px, py): tuval radyal buyume kadar genisler.
+    hizala=(ex, ey, olcek): tuval payi, kucultme ve tam sayi yerlesim yuvarlamasi OZGUN halkayla ayni fazda kalacak bicimde secilir (halkanin
+    yeri yuvarlama yuzunden kaymasin; payin 60 px'lik araliginda en kucuk faz farki)."""
+    c = float(carpan)
+    if c == 1.0:
+        return alfa, px, py
+    a = alfa.astype(np.float32) / 255.0
+    h, w = a.shape
+    ys, xs = np.nonzero(alfa > 0)
+    ww = a[ys, xs].astype(np.float64)
+    dx, dy = xs + 0.5 + px - C['cx'], ys + 0.5 + py - C['cy']
+    r, t = np.hypot(dx, dy), np.arctan2(dy, dx)
+    NB = 720
+    b = np.floor((t + np.pi) / (2 * np.pi) * NB).astype(np.int64) % NB
+    sw, sr = np.bincount(b, ww, NB), np.bincount(b, ww * r, NB)
+    dolu = np.nonzero(sw > 1.0)[0]
+    if len(dolu) < NB // 4:
+        raise Dur('halka_kaynak', 'halka kaynaginda merkez cizgisi olculemedi')
+    rc = np.zeros(NB)
+    rc[dolu] = sr[dolu] / sw[dolu]
+    uz = np.abs(np.arange(NB)[:, None] - dolu[None, :]); uz = np.minimum(uz, NB - uz)
+    rc = rc[dolu[np.argmin(uz, 1)]]                                           # bos kutu (aciklik): en yakin dolu kutunun yaricapi
+    g_ = np.exp(-0.5 * (np.arange(-18, 19) / 6.0) ** 2); g_ /= g_.sum()
+    rc = np.convolve(np.r_[rc[-18:], rc, rc[:18]], g_, 'valid')               # dairesel yumusatma (sigma 3 derece)
+    pad = int(math.ceil((c - 1.0) * (r.max() - r.min()) / 2.0)) + 3
+    if hizala is not None:
+        ex_, ey_, ol_ = hizala
+
+        def faz(v):
+            return v - round(v)
+
+        def fark(p_):                                                         # ozgun halkaya gore: sol ust kose yuvarlama fazi (x, y) + boy yuvarlama fazi (w, h)
+            d = [faz((px - p_ - ex_) * ol_) - faz((px - ex_) * ol_), faz((py - p_ - ey_) * ol_) - faz((py - ey_) * ol_),
+                 faz((w + 2 * p_) * ol_) - faz(w * ol_), faz((h + 2 * p_) * ol_) - faz(h * ol_)]
+            return max(abs(v) for v in d)
+        pad = min(range(pad, pad + 61), key=fark)
+    H2, W2 = h + 2 * pad, w + 2 * pad
+    ddx = (np.arange(W2, dtype=np.float32) + 0.5 + px - pad - C['cx'])[None, :]
+    ddy = (np.arange(H2, dtype=np.float32) + 0.5 + py - pad - C['cy'])[:, None]
+    rr = np.sqrt(ddx * ddx + ddy * ddy).astype(np.float32)
+    tt = np.arctan2(np.broadcast_to(ddy, (H2, W2)), np.broadcast_to(ddx, (H2, W2))).astype(np.float32)
+    fi = (tt + np.float32(np.pi)) / np.float32(2 * np.pi) * NB - 0.5           # kutu merkezleri arasi dogrusal (dairesel) aradeger
+    del tt
+    i0 = np.floor(fi).astype(np.int32)
+    f_ = (fi - i0).astype(np.float32)
+    del fi
+    rcf = rc.astype(np.float32)
+    rct = rcf[i0 % NB] * (1 - f_) + rcf[(i0 + 1) % NB] * f_
+    del i0, f_
+    olc_ = (rct + (rr - rct) / np.float32(c)) / np.maximum(rr, 1e-3)           # kaynak yaricapi / cikti yaricapi
+    del rct, rr
+    mx = (np.float32(C['cx']) + ddx * olc_ - np.float32(px) - 0.5).astype(np.float32)
+    my = (np.float32(C['cy']) + ddy * olc_ - np.float32(py) - 0.5).astype(np.float32)
+    del olc_
+    out = cv2.remap(a, mx, my, cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+    return np.clip(np.round(out * 255.0), 0, 255).astype(np.uint8), float(px - pad), float(py - pad)
+
+
 def _dis_noktalar(alfa01, px, py, olcek=1.0):
     """alfa > GRUP_ALFA_ESIK piksellerinin dis bukey kabugu, poster koordinatinda (piksel koseleri dahil)."""
     pts = cv2.findNonZero((alfa01 > GRUP_ALFA_ESIK).astype(np.uint8))
@@ -1053,12 +1122,15 @@ def _dis_noktalar(alfa01, px, py, olcek=1.0):
     return k4 * olcek + [px, py]
 
 
-def grup_kur(mt, cift, g, yan_json, hedef_r, merkez='grup', kucuk_u='poster', kucuk_v='poster', kucuk_oran=1.0):
+def grup_kur(mt, cift, g, yan_json, hedef_r, merkez='grup', kucuk_u='poster', kucuk_v='poster', kucuk_oran=1.0, halka_kalinlik=1.0):
     """Sembol grubu: posterdeki goreli duzen, TEK oran. g: ana katman (RGBA float; RGB 0-255, A 0-1); yan_json: katmanin .json alanlari
     (x, y, w, h [, kaynak_x, kaynak_y, kaynak_w, kaynak_h]: paysiz kutu). Ana sembol posterde: genislik (u1 - u0) R, sol ust (u0, v0)
     (olustur_alfa_sablon.py :52-57; yukseklik katmanin kendi oranindan). Doner dict(olcek, ana=(rgb, a, x, y), ogeler=[...], bilgi);
     x, y takvim merkezine gore tam sayi sol ust kose. hedef_r = grubun cevreleyen dairesinin (hal 'halka': en uzak pikselinin) yaricapi (px).
-    AYAR kucuk_oran: kucuk semboller kendi merkezleri (cx + u R, y) etrafinda es oranli carpilir (1,0 = poster boyu); toplam olcek <= 1."""
+    AYAR kucuk_oran: kucuk semboller kendi merkezleri (cx + u R, y) etrafinda es oranli carpilir (1,0 = poster boyu); toplam olcek <= 1.
+    AYAR halka_kalinlik: yalniz halkanin cizgi kalinligi (halka_kalinlastir). Grubun cevreleyen dairesi, olcegi ve tum yerler OZGUN (carpan 1) halkadan
+    hesaplanir: carpan baska hicbir ogeyi buyutmez / kaydirmaz; kalin halka cevreleyen daireyi yaklasik (carpan - 1) x kalinlik / 2 x olcek kadar asar
+    (yumusak kenar da carpanla genisledigi icin olculen asim biraz fazladir). Gren: kalin halka ayri uretecten, ana uretec ozgun halka boyu kadar ilerler."""
     if merkez not in GRUP_MERKEZ:
         raise Dur('girdi_grup', 'grup merkezi taninmadi', girdi=True)
     if not yan_json or not all(k_ in yan_json for k_ in ('x', 'y', 'w', 'h')):
@@ -1088,6 +1160,17 @@ def grup_kur(mt, cift, g, yan_json, hedef_r, merkez='grup', kucuk_u='poster', ku
     olcek = hedef_r / er
     if olcek > 1.0 or olcek * s_ana > 1.0 or olcek * ko > 1.0:
         raise Dur('grup_olcek', f'grup olcegi {olcek:.4f} (ana {olcek * s_ana:.4f}, kucuk {olcek * ko:.4f}) > 1 (buyutme yok)')
+    hk = float(halka_kalinlik)
+    rng_boy = None
+    if hk != 1.0:                                                             # olcek ve merkez yukarida OZGUN halkayla hesaplandi; simdi yalniz halka kaynagi kalinlasir
+        o0 = kay[0]
+        h0_, w0_ = o0['alfa'].shape                                           # ozgun halkanin k kat cizim boyu (gren ureteci bu kadar ilerler: altin_ogeler)
+        mw0, mh0 = max(1, round(w0_ * olcek)), max(1, round(h0_ * olcek))
+        k0 = max(1, int(math.floor(1.0 / olcek)))
+        while k0 > 1 and (mw0 * k0 > w0_ or mh0 * k0 > h0_):
+            k0 -= 1
+        rng_boy = [mh0 * k0, mw0 * k0]
+        o0['alfa'], o0['px'], o0['py'] = halka_kalinlastir(o0['alfa'], o0['px'], o0['py'], C, hk, (ex, ey, olcek))
     rgb, a = rgba_olcek(g, olcek * s_ana)
     hx, hy = (ana_px - ex) * olcek, (ana_py - ey) * olcek
     ana = dict(rgb=rgb, a=a, x=int(round(hx)), y=int(round(hy)), hedef=[hx, hy], olcek=float(olcek * s_ana))
@@ -1103,9 +1186,11 @@ def grup_kur(mt, cift, g, yan_json, hedef_r, merkez='grup', kucuk_u='poster', ku
         hx, hy = (o['px'] - ex) * olcek, (o['py'] - ey) * olcek
         ogeler.append(dict(ad=o['ad'], tur='grup', motor_ad=o['motor_ad'], kaynak=o['alfa'], A=m, k=k, x=int(round(hx)), y=int(round(hy)),
                            hedef=[hx, hy], poster=[o['px'], o['py']], olcek=float(so), kutu=kutu(m)))
+        if o['ad'] == 'halka' and rng_boy:
+            ogeler[-1]['rng_boy'] = rng_boy
     bilgi = dict(merkez=merkez, olcek=float(olcek), s_ana=float(s_ana), k={o['ad']: o['k'] for o in ogeler}, cevre_merkez_poster=[ex, ey], cevre_yaricap_poster=er, hedef_yaricap=float(hedef_r),
                  halka_merkez_kayma_px=[round((C['cx'] - ex) * olcek, 2), round((C['cy'] - ey) * olcek, 2)],
-                 halka_kalinlik_px=round(C['kalinlik'] * olcek, 3), halka_kalinlik_mm=round(C['kalinlik'] * olcek * 25.4 / DPI, 3),
+                 halka_kalinlik_px=round(C['kalinlik'] * olcek * hk, 3), halka_kalinlik_mm=round(C['kalinlik'] * olcek * hk * 25.4 / DPI, 3), halka_carpan=hk,
                  halka_yaricap_px=round(C['R'] * olcek, 2), cember=C, yerlesim78={k_: Yl[k_] for k_ in ('u0', 'u1', 'v0', 'v1')},
                  kucuk_u=[o['u'] for o in kay if 'u' in o], kucuk_v=round((y_mer - C['cy']) / C['R'], 5), kucuk_oran=ko, pay=[pay_x, pay_y])
     return dict(olcek=float(olcek), ana=ana, ogeler=ogeler, bilgi=bilgi)
@@ -1229,7 +1314,7 @@ def uret(a):
     grup_oge, grup_bilgi = [], None
     if YA['grup']:
         s_r = AY['grup_oran'] * AY['sembol_alan'] * S
-        G = grup_kur(mt, cift, g, s_olc.get('yan_json'), s_r, AY['grup_merkez'], AY['kucuk_u'], AY['kucuk_v'], AY['kucuk_oran'])
+        G = grup_kur(mt, cift, g, s_olc.get('yan_json'), s_r, AY['grup_merkez'], AY['kucuk_u'], AY['kucuk_v'], AY['kucuk_oran'], AY['halka_kalinlik'])
         s_rgb, s_a, s_x, s_y = G['ana']['rgb'], G['ana']['a'], G['ana']['x'], G['ana']['y']
         k05 = kutu(s_a, 0.5)
         eb = (k05[2] - k05[0]) / (k05[3] - k05[1])

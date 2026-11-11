@@ -33,6 +33,10 @@ SEMBOL GRUBU (Serdar 11 Kas; META 'grup' varsa): halka + iki kucuk burc sembolu 
      araliginda 67 noktada en buyuk 1,79 px (ana sembol yeri; sembol_alan 400 x 1,3). GERCEK Drive katmaniyla olculmedi: ilk kosuda OLCUM
      'bagimsiz.fark_en_buyuk' okunur; esik ancak olcumle ve Serdar onayiyla degisir.
      Grup yerlesiminde META 'grup' alani ZORUNLU (yoksa FAIL).
+     AYAR halka_kalinlik (carpan; Serdar 11 Kas): yeniden kurulum ayni carpanla yapilir (maske birebir). Bagimsiz olcumde "en uzak piksel" olcutu
+     AYNI kalir (|en uzak - hedef| <= 2 px, tek nokta): grup olcegi ozgun halkadan kuruldugu icin halka pikselleri once maskeden olculen merkez cizgisi
+     etrafinda 1 / carpan oraninda iceri alinir (olculerek geri alma); ham (kalin) en uzak piksel 'en_uzak_piksel_ham' alaninda BILGI.
+     Halkanin maskeden OLCULEN cizgi kalinligi (ust, en buyuk, ortanca, acisal kapsam) OLCUM 'bagimsiz.halka_kalinlik' alanina BILGI olarak yazilir.
   3  halka ve kucuk semboller de dE00 <= 2,0, >= 200 cekirdek piksel     4  kontrast >= 4,5 onlar icin de
   5  grup ogelerinin alfa farki yalniz BILGI (yazi cizimi degil)
   6  "sembol - disk >= 150 px" GRUBUN gercek alfa siniri (alfa > 0,02) ile en yakin disk; grup - ay adi >= 12 px
@@ -162,6 +166,23 @@ def yatay_yayilim(a):
     return float(np.sqrt((w * (x - mu) ** 2).sum() / w.sum()))
 
 
+def halka_kalinlik_olc(m, cx, cy):
+    """Halka maskesinden cizgi kalinligi (px), aci basina: 1 derecelik dilimde alfa toplami / yay uzunlugu. Doner ust (saat 12 +- 10 derece ortalamasi),
+    en buyuk, ortanca (dolu dilimler) ve dolu dilim sayisi (acisal kapsam, derece). Yalniz olcum (BILGI)."""
+    ys, xs = np.nonzero(m > 0)
+    w = m[ys, xs].astype(np.float64)
+    dx, dy = xs + 0.5 - cx, ys + 0.5 - cy
+    r = np.hypot(dx, dy)
+    b = np.floor(np.degrees(np.arctan2(dy, dx)) + 180.0).astype(np.int64) % 360
+    sw, sr = np.bincount(b, w, 360), np.bincount(b, w * r, 360)
+    dolu = sw > 0.05
+    kal = np.zeros(360)
+    kal[dolu] = sw[dolu] / (np.radians(1.0) * sr[dolu] / sw[dolu])
+    ust = kal[80:101]                                                         # aci -100 .. -80 derece (saat 12)
+    return dict(ust_px=round(float(ust.mean()), 3), ust_mm=round(float(ust.mean()) * 25.4 / U.DPI, 3), en_buyuk_px=round(float(kal.max()), 3),
+                ortanca_px=round(float(np.median(kal[dolu])), 3), kapsam_derece=int(dolu.sum()))
+
+
 def cember_uydur(m):
     """Halka maskesine (alfa agirlikli) en kucuk kareler cemberi (Kasa). Doner (cx, cy, r) maske koordinatinda (piksel merkezi + 0,5)."""
     ys, xs = np.nonzero(m > 0.02)
@@ -190,7 +211,8 @@ def grup_kapisi(meta, D, katman_g, yan_json, motor, sa, sx, sy):
     cift = meta['cift']
     mt = U.Motor(motor)
     hedef_r = AY['grup_oran'] * AY['sembol_alan'] * U.S
-    G = U.grup_kur(mt, cift, katman_g, yan_json, hedef_r, AY['grup_merkez'], AY['kucuk_u'], AY['kucuk_v'], AY['kucuk_oran'])
+    hk = float(AY.get('halka_kalinlik', 1.0))                                 # halka cizgi kalinligi carpani (AYAR; 1,0 = poster)
+    G = U.grup_kur(mt, cift, katman_g, yan_json, hedef_r, AY['grup_merkez'], AY['kucuk_u'], AY['kucuk_v'], AY['kucuk_oran'], hk)
     B = G['bilgi']
     (ex, ey), ol = B['cevre_merkez_poster'], B['olcek']
     mx, my = gb['merkez']
@@ -224,11 +246,35 @@ def grup_kapisi(meta, D, katman_g, yan_json, motor, sa, sx, sy):
     bag.update(halka_merkez=[round(hx, 2), round(hy, 2)], halka_yaricap=round(fr, 2), olculen_olcek=round(s_m, 5))
     if AY['grup_merkez'] == 'halka':
         bag['halka_merkezde_fark'] = round(float(max(abs(hx - mx), abs(hy - my))), 3)
-    uzak = 0.0                                                                # takvim merkezine en uzak grup pikseli (alfa > 0,02; piksel koseleri)
-    for a_, x_, y_ in [(sa, sx, sy)] + [(D[f'gm_{i}'], o['x'], o['y']) for i, o in enumerate(gb['ogeler'])]:
+    # takvim merkezine en uzak grup pikseli (alfa > 0,02; piksel koseleri). halka_kalinlik != 1: grup olcegi OZGUN halkadan kuruldugu icin halka
+    # pikselleri once OLCULEREK ozgun kalinliga geri tasinir: her halka pikseli, maskeden olculen merkez cizgisi Rc(aci) etrafinda 1 / carpan oraninda
+    # radyal olarak iceri alinir (r' = Rc + (r - Rc) / carpan; Rc = 1 derecelik dilimde alfa agirlikli ortalama yaricap, uydurulan halka merkezine gore).
+    # Olcut TEK NOKTA olarak ayni kalir: |en uzak - hedef| <= 2 px (aralik / ek pay yok; inceleme Y2). carpan 1,0'da donusum uygulanmaz.
+    uzak = 0.0
+    for a_, x_, y_ in [(sa, sx, sy)] + [(D[f'gm_{i}'], o['x'], o['y']) for i, o in enumerate(gb['ogeler']) if i > 0 or hk == 1.0]:
         ys, xs = np.nonzero(a_ > U.GRUP_ALFA_ESIK)
         uzak = max(uzak, float(max(np.hypot(xs + x_ + dx - mx, ys + y_ + dy - my).max() for dx in (0, 1) for dy in (0, 1))))
-    bag.update(en_uzak_piksel=round(uzak, 2), en_uzak_fark=round(abs(uzak - hedef_r), 3))
+    uzak_ham = uzak
+    if hk != 1.0:
+        ys, xs = np.nonzero(mh > 0)
+        wq = mh[ys, xs].astype(np.float64)
+        qx, qy = xs + 0.5 - fx, ys + 0.5 - fy
+        qr = np.hypot(qx, qy)
+        qb = np.floor(np.degrees(np.arctan2(qy, qx)) + 180.0).astype(np.int64) % 360
+        sw_, sr_ = np.bincount(qb, wq, 360), np.bincount(qb, wq * qr, 360)
+        rcq = np.where(sw_ > 0, sr_ / np.maximum(sw_, 1e-9), fr)
+        ys, xs = np.nonzero(mh > U.GRUP_ALFA_ESIK)
+        for dx in (0, 1):
+            for dy in (0, 1):
+                ux, uy = xs + dx - fx, ys + dy - fy
+                ur = np.maximum(np.hypot(ux, uy), 1e-6)
+                rc_ = rcq[np.floor(np.degrees(np.arctan2(uy, ux)) + 180.0).astype(np.int64) % 360]
+                kat = (rc_ + (ur - rc_) / hk) / ur
+                uzak_ham = max(uzak_ham, float(np.hypot(oh['x'] + fx + ux - mx, oh['y'] + fy + uy - my).max()))
+                uzak = max(uzak, float(np.hypot(oh['x'] + fx + ux * kat - mx, oh['y'] + fy + uy * kat - my).max()))
+    bag.update(en_uzak_piksel=round(uzak, 2), en_uzak_piksel_ham=round(uzak_ham, 2), en_uzak_fark=round(abs(uzak - hedef_r), 3))
+    hko = halka_kalinlik_olc(mh, fx, fy)                                      # BILGI: maskeden olculen cizgi kalinligi (kapi degil)
+    bag['halka_kalinlik'] = dict(carpan=hk, hedef_ust_px=round(hk * C['kalinlik'] * s_m, 3), **hko)
     if AY['kucuk_u'] == 'poster':
         u_h = POSTER_KUCUK_U.get(cift)
     else:
@@ -291,7 +337,8 @@ def kapi_olc(klasor, ad, katman=None, motor=None, mod='ornek'):
     ayar_fark = []
     if mod == 'ornek':                                                       # mod ornek: ayar = varsayilan (kisi adlari, metin ve hal secimi haric); esik urunden okunmaz
         vars_ = U.ayar_varsayilan(AY['yerlesim']) if AY.get('yerlesim') in U.YERLESIM else {}
-        ayar_fark = sorted(k_ for k_ in U.AYAR_ANAHTAR if k_ not in ('isim1', 'isim2', 'satirlar', 'grup_merkez', 'yerlesim') and AY.get(k_) != vars_.get(k_))
+        ayar_fark = sorted(k_ for k_ in U.AYAR_ANAHTAR if k_ not in ('isim1', 'isim2', 'satirlar', 'grup_merkez', 'yerlesim')
+                           and AY.get(k_, 1.0 if k_ == 'halka_kalinlik' else None) != vars_.get(k_))     # eski META'da halka_kalinlik yok = 1,0
     R['0_uretim'] = dict(kontrol=uk, mod=mod, mod_meta=mod_meta, mod_tutarli=bool(mod == mod_meta), ayar_varsayilan_disi=ayar_fark,
                          PASS=bool(all(v['PASS'] for v in uk.values()) and mod == mod_meta and not ayar_fark))
 
@@ -517,7 +564,7 @@ def kapi_olc(klasor, ad, katman=None, motor=None, mod='ornek'):
         grup_ozet = dict(merkez=gb['merkez'], olcek=round(gb['olcek'], 5), ana_olcek=round(meta['sembol']['yerlesim']['olcek'], 5),
                          ana_olcek_onceki_tur=round(onceki, 5), ana_olcek_orani=round(meta['sembol']['yerlesim']['olcek'] / onceki, 4),
                          halka_merkez_kayma_px=gb['halka_merkez_kayma_px'], halka_kalinlik_px=gb['halka_kalinlik_px'], halka_kalinlik_mm=gb['halka_kalinlik_mm'],
-                         halka_duz_yayilim=halka_duz, konum_fark_en_buyuk=R['2_sembol'].get('grup', {}).get('konum_fark_en_buyuk'),
+                         halka_kalinlik_olculen=R['2_sembol'].get('grup', {}).get('bagimsiz', {}).get('halka_kalinlik'), halka_duz_yayilim=halka_duz, konum_fark_en_buyuk=R['2_sembol'].get('grup', {}).get('konum_fark_en_buyuk'),
                          olculen_fark_en_buyuk=R['2_sembol'].get('grup', {}).get('olculen_fark_en_buyuk'), k=gb['k'])
     ozet = dict(ad=ad, mod=mod, ayar=AY, sert_fail=sert_fail, grup=grup_ozet, girdap_ad=meta['disk'].get('girdap_ad'),
                 uretim_kontrol_fail=sorted(k for k, v in uk.items() if not v['PASS']),
