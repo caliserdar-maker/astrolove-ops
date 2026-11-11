@@ -1,0 +1,13 @@
+{
+ "ad": "DENEME_YUVARLAK_1087",
+ "sekil": "yuvarlak",
+ "baski_px": [1087, 1087],
+ "gercek_mm": [25.4, 25.4],
+ "mm_kaynak": {"tur": "varsayım", "not": "baski alani / gorunen cap orani ve dpi dogrulanmadi (Merkez kaydi 9 Kas)"},
+ "guvenli": {"cx": 543.5, "cy": 543.5, "r": 543.5, "etiket": "varsayım: sablon olcumu yok; guvenli daire = tuvalin ic dairesi"},
+ "guvenli_pay_px": 3,
+ "yasak": [],
+ "alt_sinir": {"yazi_mm": 1.5, "cizgi_mm": 0.2, "kaynak": "Merkez kaydi 9 Kas", "etiket": "varsayım"},
+ "zemin": "motor",
+ "not": "Yalniz sistemi denemek icin; urun karari degildir. guvenli_pay_px 3: ornament degeri (ornament_ornek4.py:45), oranlanmadan."
+}
