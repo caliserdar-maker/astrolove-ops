@@ -1,0 +1,68 @@
+name: metricool-yedek
+# Metricool bekleyen gonderi YEDEGI (Serdar 11 Kas 2026 "Evet"; Starter'a dusmeden once). SALT OKUMA, yalniz GET
+# (scripts/sosyal/metricool_yedek.py; tum aglar, kosu ani -> 2027-03-31). Metricool'a / aglara yazma YOK.
+# Token: secret METRICOOL_USER_TOKEN, kimlik (userId, blogId) Drive TEMP/METRICOOL_TOKEN.json (kalip sosyal-olcum.yml).
+# Betik ciktisi sir_koru tee'den gecer; Drive'dan once sir_koru tara: token / add-mask / anahtar deseni -> DUR; YEDEK.json'da
+# yalniz medya adresi imzasi (presigned-url) varsa yine gizli Drive'a gider, adet ozette. Hedef TEMP/METRICOOL_YEDEK_<UTC>_<kosu>/.
+# Kopyadan sonra rclone size ile iki dosyanin boyutu dogrulanir. Is ozetine yalniz sayilar. Artifact YOK.
+permissions:
+  contents: read
+on:
+  workflow_dispatch: {}
+jobs:
+  yedek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Klasor
+        run: |
+          set -euo pipefail
+          K="METRICOOL_YEDEK_$(date -u +%Y%m%dT%H%M%SZ)_${{ github.run_id }}"
+          echo "O=gdrive:ASTROLOVE/TEMP/$K" >> "$GITHUB_ENV"; echo "hedef TEMP/$K"
+      - name: Yerel test (sahte yanit, ag yok)
+        run: python3 -I scripts/sosyal/test_metricool_yedek.py
+      - name: rclone + conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+          mkdir -p ~/.config/rclone _work _out; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Yedek (yalniz GET) + tarama + Drive + boyut dogrulama
+        env:
+          MC_TOK: ${{ secrets.METRICOOL_USER_TOKEN }}
+        run: |
+          set -uo pipefail
+          set +e                       # adim bash -e ile kosar; cikis kodlari elle denetlenir
+          umask 077
+          [ -n "${MC_TOK:-}" ] || { echo "::error::METRICOOL_USER_TOKEN bos"; exit 1; }
+          echo "::add-mask::$MC_TOK"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/METRICOOL_TOKEN.json" _work/kimlik.json || { echo "::error::kimlik okunamadi"; exit 1; }
+          python3 -c "import json,os;d=json.load(open('_work/kimlik.json'));json.dump({'userToken':os.environ['MC_TOK'],'userId':d['userId'],'blogId':d['blogId']},open('_work/mc.json','w'))" || { echo "::error::kimlik bicimi"; exit 1; }
+          python3 -c "import json;t=json.load(open('_work/kimlik.json')).get('userToken');print('::add-mask::'+t) if t else None"
+          SJ="--sir-json _work/mc.json --sir-json _work/kimlik.json"
+          python3 scripts/sosyal/metricool_yedek.py _work/mc.json _out 2>&1 | python3 scripts/guvenlik/sir_koru.py tee $SJ "$GITHUB_STEP_SUMMARY"
+          ps=("${PIPESTATUS[@]}"); rc=${ps[0]}
+          [ "${ps[1]}" = 0 ] || { echo "::error::sir_koru tee: sir iceren satir engellendi"; rc=97; }
+          [ "$rc" = 0 ] || { echo "::error::DUR: yedek cikis $rc (Drive'a yazilmadi)"; exit 1; }
+          python3 scripts/guvenlik/sir_koru.py tara $SJ _out/OZET.json || { echo "::error::DUR: OZET.json taramasi FAIL"; exit 1; }
+          # YEDEK.json: yalniz medya adresi imzasi (presigned-url) izinli; imzali satirda kalan metin yeniden taranir;
+          # token degeri / add-mask / anahtar deseni -> DUR (Drive'a yazilmaz). Siniflama: metricool_yedek.py --sinif (sir_koru.bulgu).
+          python3 scripts/sosyal/metricool_yedek.py --sinif _out/YEDEK.json _work/mc.json _work/kimlik.json | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "${PIPESTATUS[0]}" = 0 ] || { echo "::error::DUR: YEDEK.json taramasinda token / anahtar izi (Drive'a yazilmadi)"; exit 1; }
+          rclone copy _out "$O" -q || { echo "::error::Drive kopyasi FAIL"; exit 1; }
+          for f in YEDEK.json OZET.json; do
+            y=$(stat -c %s "_out/$f"); u=$(rclone size --json "$O/$f" | python3 -c "import json,sys;print(json.load(sys.stdin).get('bytes'))")
+            echo "DOGRULAMA $f yerel $y uzak $u" | tee -a "$GITHUB_STEP_SUMMARY"
+            [ -n "$u" ] && [ "$y" = "$u" ] || { echo "::error::DUR: $f Drive boyutu dogrulanamadi"; exit 1; }
+          done
+          echo "Drive: ${O#gdrive:} (2 dosya, boyut dogrulandi)" | tee -a "$GITHUB_STEP_SUMMARY"
+      - if: always()
+        run: |
+          rm -rf _work _out ~/.config/rclone
+          if [ -f "$RUNNER_TEMP/SIR_ENGEL" ]; then echo "::error::sir iceren satir engellendi (sir_koru)"; exit 1; fi
