@@ -1,7 +1,15 @@
 name: ay-takvim-ornek
-# AY TAKVIMI ORNEK (Serdar 10 Kas 2026, 2. adim): 2027 cift ay takvimi, CANCER_LIBRA, 4 yerlesim, gercek oranda 4 ornek (18x24 in, 300 dpi).
-# Etsy YOK (yazma / okuma / token yok), Printful YOK, musteri verisi YOK. Cikti YALNIZ Drive TEMP/AY_TAKVIM_ORNEK_<UTC>_<kosu no>/;
-# PNG / JPG / kaynak tasarim dala ve artifact'a GIRMEZ. Zamanlama YOK (yalniz workflow_dispatch, onay = AY-ORNEK-CL, TEK kosu: Re-run yasak).
+# AY TAKVIMI ORNEK (Serdar 10 + 11 Kas 2026, 2. ornek turu): 2027 cift ay takvimi, CANCER_LIBRA, 3 yerlesim, gercek oranda 4 ornek (18x24 in, 300 dpi;
+# halkalar iki halde: grup ortali / halka ortali). Sembol grubu = ana sembol + ince altin halka + iki kucuk burc sembolu (poster duzeni).
+# Etsy YOK (yazma / okuma / token yok), Printful YOK, musteri verisi YOK. Cikti YALNIZ Drive TEMP/AY_TAKVIM_ORNEK2_<UTC>_<kosu no>/;
+# PNG / JPG / kaynak tasarim dala ve artifact'a GIRMEZ. Zamanlama YOK (yalniz workflow_dispatch, onay = AY-ORNEK-CL2, TEK kosu: Re-run yasak).
+# MOD DENEME (Serdar 11 Kas "A"): tasarim denemeleri KOD DEGISMEDEN, yalniz ayarla. onay = AY-DENEME; ayar = JSON metni (1 - 6 denemelik liste,
+# her oge AYAR sozlugu; anahtarlar ve araliklar: scripts/ay_takvim/ay_takvim_ornek.py AYAR_ANAHTAR / AYAR_ARALIK; eksik anahtar = varsayilan).
+# VERI: dispatch girdileri PUBLIC depoda gorunur. Deneme girdisinde YALNIZ ornek isim ve ornek metin kullanilir; MUSTERI VERISI (isim, mesaj,
+# adres) deneme girdisi OLAMAZ. mod / ayar kabuk satirina gomulmez: env uzerinden alinir, yalniz python json ile ayristirilir; dosya adlari
+# koddan uretilir (DENEME_<sira>_<yerlesim>). Deneme ciktisi: deneme basina onizleme JPG + sembol grubu 1:1 kesiti + OLCUM.json; kosu basina
+# OZET.json (her denemenin TAM ayari). Tam boy PNG yuklenmez. Drive TEMP/AY_TAKVIM_DENEME_<UTC>_<kosu no>/. Deneme modunda SERT kapilar:
+# girdi, veri (kapi 1), ortam, motor / sha, sembol bicimi, kapi 2; digerleri olculur ve yazilir, gorseli durdurmaz. Testler deneme modunda kosmaz.
 # Kod: scripts/ay_takvim/ (main). Motor (siparis-gpt) ve ornament (ornament-printful-katalog) dosyalari DEGISMEZ; sabit sha ile ayri klasore alinir.
 # Sembol: Drive ANA_SEMBOL78_KATMAN (bizim-yilimiz-ornek.yml ile ayni kok), yalniz <CIFT>_ana.png + .json okunur.
 # Sonuc satirlari ::notice:: olarak da basilir (SEMBOL, OZET, KAPI, DRIVE_YOLU, DUR): is logu okunamadiginda annotation'dan gorulur.
@@ -10,7 +18,9 @@ name: ay-takvim-ornek
 on:
   workflow_dispatch:
     inputs:
-      onay: { description: "onay dizesi (AY-ORNEK-CL)", required: true, default: "" }
+      onay: { description: "onay dizesi (mod ornek: AY-ORNEK-CL2; mod deneme: AY-DENEME)", required: true, default: "" }
+      mod: { description: "ornek = 4 tam boy ornek; deneme = ayarla 1 - 6 onizleme", type: choice, options: [ornek, deneme], default: ornek }
+      ayar: { description: "mod deneme: JSON liste (1 - 6 ayar sozlugu; en cok 4000 karakter). YALNIZ ornek isim / metin; musteri verisi OLAMAZ", required: false, default: "" }
 permissions: {}
 env:
   MOTOR_SHA: 6da763aa5b9820027420f73264fc69d30e120a33
@@ -29,15 +39,23 @@ jobs:
         id: kapi
         env:
           ONAY: ${{ github.event.inputs.onay }}
+          MOD_GIRDI: ${{ github.event.inputs.mod }}
         run: |
           set -euo pipefail
+          [ -n "${MOD_GIRDI:-}" ] || { echo "::error title=DUR::mod bos"; exit 1; }
+          case "$MOD_GIRDI" in
+            ornek) BEKLENEN="AY-ORNEK-CL2"; MOD=ornek ;;
+            deneme) BEKLENEN="AY-DENEME"; MOD=deneme ;;
+            *) echo "::error title=DUR::mod taninmadi"; exit 1 ;;
+          esac
           [ -n "${ONAY:-}" ] || { echo "::error title=DUR::onay bos"; exit 1; }
-          [ "$ONAY" = "AY-ORNEK-CL" ] || { echo "::error title=DUR::onay dizesi yanlis"; exit 1; }
+          [ "$ONAY" = "$BEKLENEN" ] || { echo "::error title=DUR::onay dizesi yanlis (mod $MOD)"; exit 1; }
           [ -n "${GITHUB_RUN_ATTEMPT:-}" ] || { echo "::error title=DUR::deneme no bos"; exit 1; }
           [ "$GITHUB_RUN_ATTEMPT" = "1" ] || { echo "::error title=DUR::yeniden deneme (Re-run) yasak: deneme $GITHUB_RUN_ATTEMPT"; exit 1; }
           [ -n "${GITHUB_REF:-}" ] || { echo "::error title=DUR::ref bos"; exit 1; }
           [ "$GITHUB_REF" = "refs/heads/main" ] || { echo "::error title=DUR::ref main degil: $GITHUB_REF"; exit 1; }
-          echo "kapi tamam: onay, deneme 1, ref main"
+          echo "MOD=$MOD" >> "$GITHUB_ENV"                                    # dogrulanmis sabit deger (ornek | deneme); sonraki adimlar bunu kullanir
+          echo "kapi tamam: mod $MOD, onay, deneme 1, ref main"
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
@@ -77,6 +95,17 @@ jobs:
           pip install -q pillow==11.0.0 numpy==2.5.4 opencv-python-headless==5.0.0.93 scipy==1.18.1 scikit-image==0.26.0 potracer==0.0.4 ephem==4.2.1 pyyaml==6.0.2
           python3 -c "import sys, numpy, cv2, PIL, scipy, skimage, ephem; from PIL import features; r = features.check('raqm'); print('python', sys.version.split()[0], 'numpy', numpy.__version__, 'cv2', cv2.__version__, 'pillow', PIL.__version__, 'scipy', scipy.__version__, 'skimage', skimage.__version__, 'ephem', ephem.__version__, 'raqm', r); sys.exit(0 if (r and PIL.__version__ == '11.0.0') else 1)" \
             || { echo "::error title=DUR::ortam: pillow 11.0.0 + raqm acik degil"; exit 1; }
+      - name: Ayar dogrulama (mod deneme; gecersiz girdi = DUR, uretim yok)
+        env:
+          AY_TAKVIM_AYAR: ${{ github.event.inputs.ayar }}
+        run: |
+          set -euo pipefail
+          [ -n "${MOD:-}" ] || { echo "::error title=DUR::MOD bos"; exit 1; }
+          if [ "$MOD" != "deneme" ]; then echo "mod $MOD: ayar girdisi kullanilmaz"; exit 0; fi
+          mkdir -p "$A/cikti"
+          python3 scripts/ay_takvim/ay_takvim_ornek.py ayar-dogrula --env AY_TAKVIM_AYAR --cikti "$A/cikti" \
+            || { echo "::error title=DUR::ayar girdisi gecersiz (uretim yok)"; exit 1; }
+          [ -s "$A/cikti/AYAR.json" ] && [ -s "$A/cikti/AYAR_N.txt" ] && [ -s "$A/cikti/AYAR_AD.txt" ] || { echo "::error title=DUR::ayar dosyalari yazilmadi"; exit 1; }
       - name: rclone
         run: |
           set -euo pipefail
@@ -118,6 +147,9 @@ jobs:
         id: test
         run: |
           set +e
+          if [ "${MOD:-}" = "deneme" ]; then                                  # mod deneme: testler push oncesinde ve mod ornek kosusunda kosar
+            echo "TEST_RC=0" >> "$GITHUB_ENV"; echo "::notice title=TEST::mod deneme: testler bu kosuda kosmaz"; exit 0
+          fi
           python3 scripts/ay_takvim/test_ay_takvim.py --motor "$PWD/_motor/motor_gpt" --ornament "$PWD/_orn/scripts/printful" --is-akisi "$PWD/.github/workflows/ay-takvim-ornek.yml" --zorunlu > "$A/TEST.log" 2>&1
           RC=$?
           tail -n 60 "$A/TEST.log" | sed 's/^::/ ::/'
@@ -136,20 +168,48 @@ jobs:
             [ "$GRC" = "0" ] || return 0
             python3 "$KOD/ay_takvim_ornek.py" uret --cift "$CIFT" --katman "$K" --motor "$M" --cikti "$O" --onbellek "$A/onb" --ad "$ad" "$@"
             r=$?
-            if [ "$r" != "0" ]; then echo "::error title=URETIM $ad::cikis $r"; [ "$r" = "3" ] && GRC=1 || URC=1; return 0; fi
-            python3 "$KOD/ay_takvim_kapi.py" "$O" "$ad" --katman "$K" --onek
+            if [ "$r" != "0" ]; then echo "::error title=URETIM $ad::cikis $r"; [ "$r" = "3" ] && GRC=1 || URC=1; sil "$ad"; return 0; fi
+            kapi "$ad" --onek
+          }
+          sil() {                                                           # dogrulanmamis gorsel Drive'a gitmez (uretim yarim kaldi / mod deneme kapi cokusu)
+            for f in "$O/$1".png "$O/${1}"_*.png "$O/${1}"_*.jpg; do [ -f "$f" ] && rm -f "$f"; done
+            return 0
+          }
+          kapi() {
+            ad="$1"; shift
+            python3 "$KOD/ay_takvim_kapi.py" "$O" "$ad" --katman "$K" --motor "$M" --mod "$MOD" "$@"
             r=$?
             [ "$r" = "0" ] || KRC=1
-            if [ "$r" != "0" ] && [ "$r" != "1" ]; then                     # kapi betigi coktu: gorseller dogrulanmadi, onekle isaretle
+            if [ "$r" != "0" ] && [ "$r" != "1" ]; then                     # kapi betigi coktu: gorseller dogrulanmadi
               echo "::error title=KAPI $ad::kapi betigi coktu (cikis $r)"
-              for f in "$O/$ad".png "$O/${ad}"_*.png "$O/${ad}"_*.jpg; do [ -f "$f" ] && mv "$f" "$O/KAPI_COKUS_$(basename "$f")"; done
+              if [ "$MOD" = "deneme" ]; then sil "$ad"                      # mod deneme: sert kapi dogrulanamadi -> gorsel yok
+              else for f in "$O/$ad".png "$O/${ad}"_*.png "$O/${ad}"_*.jpg; do [ -f "$f" ] && mv "$f" "$O/KAPI_COKUS_$(basename "$f")"; done; fi
             fi
           }
-          uret ORNEK_1_halkalar --isim1 EMILY --isim2 JAMES --yerlesim halkalar --satir "It Began With a Kiss in the Rain"
-          uret ORNEK_2_spiral --isim1 EMILY --isim2 JAMES --yerlesim spiral
-          uret ORNEK_3_girdap --isim1 EMILY --isim2 JAMES --yerlesim girdap --satir "Do you remember our first moonrise?" \
-            --satir "Two hearts, one sky, since 2019." --satir "We'll keep star-gazing, you & me!"
-          uret ORNEK_4_rozet --isim1 ALEXANDRINA --isim2 CHRISTOPHER --yerlesim rozet --satir "Our first year under one roof" --satir "Lisbon, June 14, 2027"
+          deneme() {                                                        # $1 = sira (koddan 1..N); ad ayar-dogrula'nin yazdigi listeden
+            i="$1"
+            [ "$GRC" = "0" ] || return 0
+            ad=$(sed -n "${i}p" "$O/AYAR_AD.txt")
+            [ -n "$ad" ] || { echo "::error title=DUR::deneme $i: ad bos"; GRC=1; return 0; }
+            case "$ad" in DENEME_${i}_halkalar|DENEME_${i}_girdap|DENEME_${i}_rozet) ;; *) echo "::error title=DUR::deneme $i: ad beklenmeyen bicimde"; GRC=1; return 0 ;; esac
+            python3 "$KOD/ay_takvim_ornek.py" uret --cift "$CIFT" --katman "$K" --motor "$M" --cikti "$O" --onbellek "$A/onb" --mod deneme --ayar-dosya "$O/AYAR.json" --sira "$i"
+            r=$?
+            if [ "$r" != "0" ]; then echo "::error title=URETIM $ad::cikis $r"; [ "$r" = "3" ] && GRC=1 || URC=1; sil "$ad"; return 0; fi
+            kapi "$ad"
+          }
+          [ -n "${MOD:-}" ] || { echo "::error title=DUR::MOD bos"; GRC=1; }
+          if [ "${MOD:-}" = "ornek" ]; then
+            uret ORNEK_1A_halkalar --isim1 EMILY --isim2 JAMES --yerlesim halkalar --grup-merkez grup
+            uret ORNEK_1B_halkalar --isim1 EMILY --isim2 JAMES --yerlesim halkalar --grup-merkez halka
+            uret ORNEK_3_girdap --isim1 EMILY --isim2 JAMES --yerlesim girdap --grup-merkez grup --satir "Do you remember our first moonrise?" \
+              --satir "Two hearts, one sky, since 2019." --satir "We'll keep star-gazing, you & me!"
+            uret ORNEK_4_rozet --isim1 ALEXANDRINA --isim2 CHRISTOPHER --yerlesim rozet --grup-merkez grup --satir "Our first year under one roof" --satir "Lisbon, June 14, 2027"
+          elif [ "${MOD:-}" = "deneme" ]; then
+            N=$(cat "$O/AYAR_N.txt" 2>/dev/null)
+            case "$N" in 1|2|3|4|5|6) for i in $(seq 1 "$N"); do deneme "$i"; done ;; *) echo "::error title=DUR::deneme sayisi okunamadi"; GRC=1 ;; esac
+          else
+            echo "::error title=DUR::mod taninmadi"; GRC=1
+          fi
           { echo "URETIM_RC=$URC"; echo "KAPI_RC=$KRC"; echo "GIRDI_RC=$GRC"; } >> "$GITHUB_ENV"
           echo "uretim $URC | kapi $KRC | girdi $GRC"
           exit 0
@@ -159,7 +219,13 @@ jobs:
         run: |
           set -euo pipefail
           Y="$A/yukle"; mkdir -p "$Y" "$A/cikti"
-          find "$A/cikti" -maxdepth 1 -type f \( -name '*.png' -o -name '*.jpg' -o -name '*_OLCUM.json' -o -name '*_META.json' -o -name '*_DUR.json' -o -name 'SEMBOL_OLCUM.json' \) -exec cp {} "$Y/" \;
+          [ -n "${MOD:-}" ] || { echo "::error title=DUR::MOD bos"; exit 1; }
+          if [ "$MOD" = "deneme" ]; then                                      # deneme: yalniz onizleme + sembol grubu kesiti + OLCUM / DUR json + AYAR.json (tam boy PNG YOK)
+            find "$A/cikti" -maxdepth 1 -type f \( -name '*_onizleme.jpg' -o -name '*_kesit1_sembol_grubu.png' -o -name 'DENEME_*_OLCUM.json' -o -name '*_DUR.json' \
+              -o -name 'SEMBOL_OLCUM.json' -o -name 'AYAR.json' \) ! -name '*_SEMBOL_OLCUM.json' -exec cp {} "$Y/" \;
+          else
+            find "$A/cikti" -maxdepth 1 -type f \( -name '*.png' -o -name '*.jpg' -o -name '*_OLCUM.json' -o -name '*_META.json' -o -name '*_DUR.json' -o -name 'SEMBOL_OLCUM.json' \) -exec cp {} "$Y/" \;
+          fi
           if [ "${TEST_RC:-9}" != "0" ]; then                                 # test FAIL: gorseller dogrulanmamis kodla uretildi, onekle isaretle
             for f in "$Y"/*.png "$Y"/*.jpg; do
               [ -f "$f" ] || continue
@@ -168,7 +234,7 @@ jobs:
           fi
           [ -f "$A/TEST.log" ] && cp "$A/TEST.log" "$Y/TEST.log" || true
           [ -f "$A/SIPARIS_KONTROL.json" ] && cp "$A/SIPARIS_KONTROL.json" "$Y/" || true
-          python3 scripts/ay_takvim/ay_takvim_kapi.py --ozet "$Y" --kosu "${GITHUB_RUN_ID:-0}" --kod "${GITHUB_SHA:-?}" --motor-sha "$MOTOR_SHA" --ornament-sha "$ORNAMENT_SHA" \
+          python3 scripts/ay_takvim/ay_takvim_kapi.py --ozet "$Y" --mod "$MOD" --kosu "${GITHUB_RUN_ID:-0}" --kod "${GITHUB_SHA:-?}" --motor-sha "$MOTOR_SHA" --ornament-sha "$ORNAMENT_SHA" \
             --rc "sembol=${SEMBOL_RC:-9},test=${TEST_RC:-9},uretim=${URETIM_RC:-9},kapi=${KAPI_RC:-9},girdi=${GIRDI_RC:-9}"
           ls -la "$Y" | sed 's/^/  /'
       - name: Drive'a yaz
@@ -178,7 +244,9 @@ jobs:
           set -euo pipefail
           Y="$A/yukle"
           [ -n "${GITHUB_RUN_ID:-}" ] || { echo "::error title=DUR::kosu no bos"; exit 1; }
-          D="gdrive:ASTROLOVE/TEMP/AY_TAKVIM_ORNEK_$(date -u +%Y%m%d_%H%M)_${GITHUB_RUN_ID}"
+          [ -n "${MOD:-}" ] || { echo "::error title=DUR::MOD bos"; exit 1; }
+          case "$MOD" in ornek) ON=AY_TAKVIM_ORNEK2 ;; deneme) ON=AY_TAKVIM_DENEME ;; *) echo "::error title=DUR::mod taninmadi"; exit 1 ;; esac
+          D="gdrive:ASTROLOVE/TEMP/${ON}_$(date -u +%Y%m%d_%H%M)_${GITHUB_RUN_ID}"
           NB=$(find "$Y" -maxdepth 1 -type f | wc -l)
           [ "$NB" -ge 1 ] || { echo "::error title=DUR::yuklenecek dosya yok"; exit 1; }
           RC=1
@@ -196,7 +264,7 @@ jobs:
         if: ${{ always() }}
         run: |
           set -euo pipefail
-          S="sembol=${SEMBOL_RC:-yok} test=${TEST_RC:-yok} uretim=${URETIM_RC:-yok} kapi=${KAPI_RC:-yok} girdi=${GIRDI_RC:-yok} drive=${{ steps.drive.outcome }}"
+          S="mod=${MOD:-yok} sembol=${SEMBOL_RC:-yok} test=${TEST_RC:-yok} uretim=${URETIM_RC:-yok} kapi=${KAPI_RC:-yok} girdi=${GIRDI_RC:-yok} drive=${{ steps.drive.outcome }}"
           echo "::notice title=SONUC::$S"
           [ "${SEMBOL_RC:-9}" = "0" ] && [ "${TEST_RC:-9}" = "0" ] && [ "${URETIM_RC:-9}" = "0" ] && [ "${KAPI_RC:-9}" = "0" ] && [ "${GIRDI_RC:-9}" = "0" ] \
             && [ "${{ steps.drive.outcome }}" = "success" ] || { echo "::error title=DUR::$S"; exit 1; }
