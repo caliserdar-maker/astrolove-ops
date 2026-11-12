@@ -71,6 +71,42 @@ def set_variable(repo, name, value, token):
         return 201
 
 
+# Etsy shared secret gecisi (Serdar 12 Kas 2026): meta okuma + silme. Silme YALNIZ bu dort gecici adi kabul eder.
+SILINEBILIR = ("ETSY_SHARED_SECRET_YEDEK", "ETSY_SHARED_SECRET_YENI", "ETSY_SECRET_DENEME", "ETSY_SECRET_PROVA")
+
+
+def _ham(method, url, token):
+    """-> (HTTP kodu, json). Hata govdesi okunmaz (deger / ayrinti loga dusmesin)."""
+    req = urllib.request.Request(url, method=method, headers={
+        "Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            raw = r.read()
+            return r.status, (json.loads(raw) if raw else {})
+    except urllib.error.HTTPError as e:
+        return e.code, {}
+
+
+def secret_meta(repo, name, token):
+    """-> {"name", "updated_at"} ya da None (secret yok). GitHub secret DEGERINI hicbir zaman geri vermez."""
+    st, j = _ham("GET", f"{API}/repos/{OWNER}/{repo}/actions/secrets/{name}", token)
+    if st == 404:
+        return None
+    if st != 200:
+        raise RuntimeError(f"secret meta {name} -> {st}")
+    return {"name": j.get("name"), "updated_at": j.get("updated_at")}
+
+
+def delete_secret(repo, name, token):
+    """Yalniz SILINEBILIR listesindeki gecici adlar silinir. -> 204 silindi, 404 zaten yok."""
+    if name not in SILINEBILIR:
+        raise ValueError(f"silme izni yok: {name}")
+    st, _ = _ham("DELETE", f"{API}/repos/{OWNER}/{repo}/actions/secrets/{name}", token)
+    if st not in (204, 404):
+        raise RuntimeError(f"secret silme {name} -> {st}")
+    return st
+
+
 def _token(arg):
     t = arg or os.environ.get("OPS_ADMIN_TOKEN")
     if not t:

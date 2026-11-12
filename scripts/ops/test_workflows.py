@@ -440,6 +440,73 @@ def main() -> int:
             assert f"canli GALERI.json bos ({g2l[0]} {g2c[0]})" in z["ci"], z["ci"][-300:]
         if ad == "eksik GALERI.json":
             assert f"canli GALERI.json indirilemedi ({g2l[3]} {g2c[3]})" in z["ci"], z["ci"][-300:]
+    # etsy-secret-gecis (Serdar 12 Kas 2026): yalniz workflow_dispatch + mod / onay girdisi; cikti kanali yok; her secret yalniz adim
+    # env'inde; kilit token indirmeden / ilk yazimdan once. Metin denetimi: yaml modulu olmadan (yerel Ruby yolu) da calisir.
+    import re as _re
+    sg = (WORKFLOWS / "etsy-secret-gecis.yml").read_text(encoding="utf-8")
+    sg_kod = "\n".join(x for x in sg.splitlines() if not x.lstrip().startswith("#"))
+    for yasak in ("upload-artifact", "download-artifact", "GITHUB_STEP_SUMMARY", "schedule:", "push:", "pull_request", "workflow_call", "workflow_run",
+                  "repository_dispatch", "set -x", "::notice", "::warning", "::error", "| tee", "concurrency:", "GITHUB_OUTPUT", "continue-on-error",
+                  "github.event", "write-all", "id-token"):
+        assert yasak not in sg_kod, f"etsy-secret-gecis: yasak oge: {yasak}"
+    ust = sg_kod.split("jobs:", 1)[0]
+    assert _re.search(r"^on:\n  workflow_dispatch:\n    inputs:\n", ust, _re.M), "etsy-secret-gecis: tetik yalniz workflow_dispatch olmali"
+    assert _re.findall(r"^      (\w+):$", ust, _re.M) == ["mod", "onay"], "etsy-secret-gecis: mod / onay disinda girdi"
+    assert _re.search(r"^permissions:\n  contents: read\n  actions: read\n(?!  )", ust, _re.M), "etsy-secret-gecis: izinler contents: read + actions: read olmali"
+    assert sg_kod.count("permissions:") == 1, "etsy-secret-gecis: is duzeyinde ayri izin blogu"
+    assert "secrets." not in ust and "inputs." in ust and sorted(set(_re.findall(r"inputs\.(\w+)", sg_kod))) == ["mod", "onay"], \
+        "etsy-secret-gecis: is akisi duzeyinde secret ya da mod / onay disinda girdi kullanimi"
+    assert [x.strip() for x in sg_kod.splitlines() if "GITHUB_ENV" in x] == [
+        'echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi'], "etsy-secret-gecis: izinli satir disinda GITHUB_ENV yazimi"
+    adimlar = _re.split(r"\n      - ", sg_kod.split("    steps:\n", 1)[1])
+    assert adimlar[0].strip() == "- uses: actions/checkout@v4" and "secret_gecis.py kapi" in adimlar[1], "etsy-secret-gecis: ilk iki adim checkout + ortak kapi"
+    is_ust = sg_kod.split("jobs:", 1)[1].split("    steps:\n", 1)[0]
+    assert "secrets." not in is_ust and "env:" not in is_ust, "etsy-secret-gecis: is duzeyinde env / secret (her secret yalniz adim env'inde)"
+    # siparis icin BEKLEME YOK (--dk 0): kosu olusturuldugu andan itibaren Etsy kilit sirasindadir ve siparis-kisisel-oku ayni kumededir;
+    # beklemek karsilikli bekleme olurdu. Sira: kontrol 1 -> kilit_bekle -> kontrol 2 -> kurulum -> rclone.
+    _sip = "!contains(fromJSON('[\"kapat\",\"ac\",\"tamam_kapisi\",\"yedek_dogrula\",\"geri_dogrula\"]'), inputs.mod)"
+    for _i in (2, 4):
+        assert "siparis_bekle.py --dk 0" in adimlar[_i] and _sip in adimlar[_i] and "GH_TOKEN: ${{ github.token }}" in adimlar[_i], \
+            f"etsy-secret-gecis: {_i + 1}. adim beklemesiz siparis kontrolu olmali"
+    assert "siparis_bekle.py --dk 60" not in sg_kod and sg_kod.count("siparis_bekle.py") == 2, "etsy-secret-gecis: siparis icin bekleme olmamali"
+    assert adimlar[3].strip().endswith("python3 scripts/etsy/kilit_bekle.py") and "GH_TOKEN: ${{ github.token }}" in adimlar[3], \
+        "etsy-secret-gecis: 4. adim kilit_bekle olmali (token indirmeden ve ilk yazimdan once)"
+    assert "inputs.mod != 'kapat' && inputs.mod != 'ac'" in adimlar[3], "etsy-secret-gecis: kilit yalniz kapat / ac disinda atlanabilir"
+    for _i, ad in enumerate(adimlar[:6]):
+        assert "secrets." not in ad and "rclone" not in ad, f"etsy-secret-gecis: kilit / kurulum adimlarinda sir ya da Drive ({_i})"
+    assert "pip install" in adimlar[5] and "rclone" in adimlar[6] and "RCLONE_CONF_B64" in adimlar[6], "etsy-secret-gecis: rclone kilitten sonra"
+    import importlib.util as _ilu
+    _sp = _ilu.spec_from_file_location("secret_gecis_tw", ROOT / "scripts/etsy/secret_gecis.py")
+    _sg = _ilu.module_from_spec(_sp)
+    _sp.loader.exec_module(_sg)
+    assert _sg.KANIT_UCU is None, "secret_gecis.KANIT_UCU varsayilani AYARSIZ olmali (E6 b); ayar ayri commit + inceleme"
+    assert len(_sg.KAPAT) == 18 and all((WORKFLOWS / f"{a}.yml").exists() for a in _sg.KAPAT), "K3 listesi 18 is akisi, hepsi depoda"
+    # her secret yalniz onu kullanan adimin env'inde: mod -> beklenen secret kumesi (birebir)
+    K, C, YD, YN, O = "ETSY_API_KEY", "ETSY_SHARED_SECRET", "ETSY_SHARED_SECRET_YEDEK", "ETSY_SHARED_SECRET_YENI", "OPS_ADMIN_TOKEN"
+    beklenen = {"olc": {K, C}, "yedek": {C, YN, O}, "yedek_dogrula": {K, C, YD}, "prova": {O}, "prova_son": {O, "ETSY_SECRET_PROVA"}, "kapat": {O}, "ac": {O},
+                "kod_anahtari": {O}, "alan_sil": {K, C}, "alan_geri": {C, YD}, "degistir": {K, C, YD, YN, O}, "dogrula": {K, C, YD, YN},
+                "tamam_kapisi": {C, YN, O}, "tamam_kontrol": {K, C, YD}, "geri_al": {K, C, YD, YN, O}, "geri_dogrula": {K, C, YD, YN},
+                "temizle": {K, C, YD, YN, O}, "temizle_drive": {K, C, O}}
+    assert set(beklenen) - {"prova_son"} == set(_sg.MODLAR), "etsy-secret-gecis: mod listesi betikle ayni olmali"
+    gorulen = {}
+    for ad in adimlar[5:]:
+        m = _re.search(r"python3 scripts/etsy/secret_gecis\.py (\w+)\n", ad + "\n")
+        sirlar = set(_re.findall(r"secrets\.(\w+)", ad))
+        if not m:
+            assert sirlar <= {"RCLONE_CONF_B64", "GOOGLE_CLIENT_SECRET"}, f"etsy-secret-gecis: mod adimi disinda secret: {sorted(sirlar)}"
+            continue
+        mod = m.group(1)
+        assert mod not in gorulen and ad.count("secret_gecis.py") == 1, f"etsy-secret-gecis: {mod} adimi tekrarli"
+        gorulen[mod] = sirlar
+        kosul = "always() && inputs.mod == 'prova'" if mod == "prova_son" else f"if: ${{{{ inputs.mod == '{mod}' }}}}"
+        assert kosul in ad, f"etsy-secret-gecis: {mod} adiminin kosulu"
+        assert "set -euo pipefail" in ad, f"etsy-secret-gecis: {mod} adiminda pipefail yok"
+        assert _re.search(r"secret_gecis\.py \w+\s*$", ad.strip().splitlines()[-1]), f"etsy-secret-gecis: {mod} komutuna arguman / boru eklenmis"
+    assert gorulen == beklenen, f"etsy-secret-gecis: adim secret kumeleri beklenenden farkli: { {k: sorted(v) for k, v in gorulen.items() if v != beklenen.get(k)} }"
+    assert "always()" in adimlar[-1] and "rm -rf ~/.config/rclone" in adimlar[-1], "etsy-secret-gecis: son adim rclone conf temizligi"
+    assert ".github/workflows/etsy-secret-gecis.yml" in kilit_bekle.kilit_kumesi(str(ROOT)), "etsy-secret-gecis Etsy kilit kumesinde degil"
+    abt = (WORKFLOWS / "ai-beyan-test.yml").read_text(encoding="utf-8")
+    assert "scripts/etsy/test_secret_gecis.py" in abt, "test_secret_gecis.py CI test listesinde degil"
     print(f"PASS: {len(files)} workflow YAML, {len(PUBLIC_AUDITS)} public denetim sozlesmesi")
     return 0
 

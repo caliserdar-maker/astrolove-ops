@@ -32,6 +32,7 @@ versiyonlanmayan bir `.env` dosyasinda tutulur.
   kurulamaz. Ayrica Claude Code sandbox proxy'si `api.github.com/.../actions/*`
   yollarini (secrets, variables) engeller; bu yuzden sohbetten API ile secret
   yazilamaz, yalniz Actions icinden yazilir.
+- ISTISNA 2 (KARAR, 12 Kasim 2026): Etsy shared secret yenilemesinde Serdar tarayicidan iki giris yapar: (1) gecisten once, erisimi olcmek icin anlamsiz bir degerle `ETSY_SECRET_DENEME` adina deneme girisi; (2) Etsy panelinden kopyalanan yeni degerin `ETSY_SHARED_SECRET_YENI` adina girisi (kapi FAIL verirse yeniden girilir). Canli `ETSY_SHARED_SECRET`'i yalniz `etsy-secret-gecis` is akisi yazar. Deger sohbete, is akisi girdisine ve Drive'a yazilmaz.
 - Instagram kimligi secret DEGILDIR: Drive `TEMP/ig_token.json`
   ({"token","ig_id","expiry"}). `publish.py` dosyayi rclone ile okur, 60
   gunluk token bitise 10 gunden az kaldiysa `refresh_access_token` ile
@@ -58,15 +59,107 @@ versiyonlanmayan bir `.env` dosyasinda tutulur.
 - `ETSY_REFRESH_TOKEN` GitHub secret'i kullanilmaz; hicbir workflow bu
   secret'i okumaz. Colab veya baska bir ortamdan ayni dosya disinda bir
   token ile Etsy'ye baglanilmaz.
-- `ETSY_API_KEY` (keystring) ve `ETSY_SHARED_SECRET` sabittir ve GitHub
-  Secrets'ta kalir. Etsy v3 `x-api-key` basligi `keystring:shared_secret`
-  bicimindedir.
+- `ETSY_API_KEY` (keystring) kalicidir ve GitHub Secrets'ta kalir.
+  `ETSY_SHARED_SECRET` yenilenebilir; yalniz `etsy-secret-gecis` is akisiyla
+  degistirilir (asagida "Etsy shared secret gecisi"). Etsy v3 `x-api-key`
+  basligi `keystring:shared_secret` bicimindedir.
 - `ETSY_SHOP_ID` sabittir ve GitHub Secrets'ta kalir.
 - Ayni anda yalnizca TEK Etsy kosusu calisir (concurrency grubu); iki kosu
   ayni dosyayi paralel yenilerse biri gecersiz token ile kalir.
 - Not: Drive TEMP'te `etsy_tokens.json` adli ikinci, eski bir dosya daha
   vardir (9 Agu tarihli OAuth kurulumundan). Gecerli dosya `ETSY_TOKEN.json`
   olanidir; eski dosya karistirilmamalidir.
+
+## Etsy shared secret gecisi (KARAR, 12 Kasim 2026)
+
+- Is akisi `.github/workflows/etsy-secret-gecis.yml`, betik
+  `scripts/etsy/secret_gecis.py`, test `scripts/etsy/test_secret_gecis.py`.
+  Girdi yalniz `mod` ve `onay`; sir degeri girdi olmaz. HER KOSU AYRI SERDAR
+  ONAYIDIR. Onay sozcugu moda ozeldir: `SERDAR_SECRET_<MOD buyuk harf>`
+  (ornek: mod `degistir` icin `SERDAR_SECRET_DEGISTIR`). Kosu yalniz `main`
+  dalindan ve ilk denemede (yeniden kosu yok) calisir.
+- Cikti yalniz sabit metin + EVET / HAYIR / DOLU / BOS / VAR / YOK / HTTP
+  kodu. Artifact, is ozeti, Drive raporu yok. Sir degeri, parcasi, uzunlugu,
+  ozeti yazilmaz (tek istisna: `olc` modunda "secret en az 12 karakter").
+- Etsy istekleri: yalniz `GET /openapi-ping`, `GET /users/me` (OAuth'lu salt
+  okuma) ve token yenileme (kilit altinda, standart geri yazim). `x-api-key`
+  basligini betik, sinanan HEDEF secret'la kendisi kurar. 401'de
+  kendiliginden yenileme yok; token dosyasindaki alan canliya esit degilken
+  yenileme denenmez. Her istekten once kota tabani 10.
+- KANIT UCU: hangi istegin secret'i dogruladigi olculmedi. Kod sabiti
+  `secret_gecis.KANIT_UCU` varsayilani AYARSIZ; `olc` kosusundan sonra ayri
+  commit ve incelemeyle `ping` ya da `oauth` yapilir. Ayarsizken
+  `yedek_dogrula`, `degistir`, `dogrula`, `tamam_kontrol`, `geri_al`,
+  `geri_dogrula`, `temizle`, `temizle_drive` DUR verir. Bu modlar once
+  pozitif istegi atar (hedef secret 200 olmali; ilk 200 kotayi bildirir),
+  sonra 5 rastgele secret'la (10, 12, 16, 24, 32 karakter, harf-rakam; gercek
+  degerden turetilmez) negatif kontrol yapar: biri 200 donerse ya da 401 /
+  403 disinda kod donerse DUR. Kanit PASS olmadan ne secret ne dosya
+  yazilir. Ardisik istekler arasi 0,25 sn.
+- Kanit ucu secilirken on sart: `olc` ciktisinda o ucun "yaniti kota basligi
+  tasiyor: EVET" satiri (`yedek_dogrula` bunu yeniden sinar; baslik yoksa
+  gecise baslanmaz). `oauth` secilirse: access token suresi dolmusken kanitli
+  modlar (acil `geri_al` dahil) DUR verir (gecerliligi kanitlanmamis
+  secret'la yenileme yok); once herhangi bir Etsy okuma kosusu token'i
+  tazeler. Kanit ucu karari verilirken bu maliyet hesaba katilir.
+- Kilit ve siparis: `kapat` / `ac` disindaki her modda `kilit_bekle.py`.
+  Siparis icin BEKLENMEZ: yazan modlarda kilitten once ve sonra
+  `siparis_bekle.py --dk 0`; aktif `siparis-*` kosusu varsa kosu hemen DUR
+  verir (yeni kosu ayri onay). Hicbir sey yazmayan `tamam_kapisi`,
+  `yedek_dogrula`, `geri_dogrula` modlarinda ve `kapat` / `ac`'ta siparis
+  kontrolu yoktur. Neden: kosu olusturuldugu andan itibaren Etsy kilit
+  sirasindadir ve `siparis-kisisel-oku` ayni kumededir; beklemek karsilikli
+  bekleme olurdu.
+- Not (ISTISNA 2 ile birlikte okunur): Serdar degeri Drive'a yazmaz. Betik,
+  token dosyasinda `shared_secret` alani DOLU ise `degistir` / `geri_al` /
+  `alan_geri` modlarinda degeri o alana yazar ve her alan yaziminda dosyanin
+  tarihli yedegini `ASTROLOVE/TEMP/SECRET_GECIS_YEDEK` altina koyar (yedek,
+  eski alani ve token'lari tasir; `temizle_drive`'a kadar durur). Alan once
+  `alan_sil` ile kaldirilirsa yeni deger Drive'a hic yazilmaz.
+
+| Mod | Ne yapar | Yazdigi yer | Etsy istegi (en cok) |
+| --- | --- | --- | --- |
+| `olc` | Olcum: token dosyasi alanlari (DOLU / BOS, ortama esit mi), ucuncu dosya, OAuth GET ve ping'in ortam / alan / 5 rastgele secret'la HTTP kodu, yanitin kota basligi tasiyip tasimadigi; SONUC: kanit ucu adayi ya da "KANIT UCU YOK" | yok (suresi dolmus token yenilenirse standart geri yazim) | 15 |
+| `yedek` | canli deger -> `ETSY_SHARED_SECRET_YEDEK`. YEDEK zaten VARSA ya da canli == YENI ise DUR (uzerine yazilmaz) | GitHub secret | 0 |
+| `yedek_dogrula` | AYRI kosu: YEDEK == canli + negatif kontrol + kanit ucu YEDEK ile 200 + yanit kota basligi tasiyor | yok | 6 |
+| `prova` | Serdar'in `ETSY_SECRET_DENEME` girisi VAR mi (okur, siler); `OPS_ADMIN_TOKEN` secret yazma / silme ve is akisi kapatma / acma yetkisi (`ETSY_SECRET_PROVA`, `etsy-quota-probe.yml`; sonunda eski duruma). Canli secret'a dokunmaz | gecici GitHub secret | 0 |
+| `kapat` | Asagidaki 18 is akisindan ETKIN olanlari kapatir; adlari `ETSY_GECIS_KAPATILAN` repo degiskenine EKLER | is akisi durumu, repo degiskeni | 0 |
+| `ac` | Yalniz `ETSY_GECIS_KAPATILAN`'daki is akislarini acar (onceden kapali olan acilmaz) | is akisi durumu, repo degiskeni | 0 |
+| `kod_anahtari` | `SIPARIS_KOD_ANAHTARI` yoksa rastgele (48 bayt) yazar; VARSA dokunmaz | GitHub secret | 0 |
+| `alan_sil` | Token dosyasindan `shared_secret` alanini kaldirir (on kapi: alan == canli; "zaten yok" PASS; tarihli Drive yedegi; geri okuma: yalniz o alan, refresh_token ayni) | Drive token dosyasi + yedek | 1 |
+| `alan_geri` | Alan yoksa canli degerle geri koyar (YEDEK varsa canli == YEDEK sarti; YEDEK yoksa bu sart yok) | Drive token dosyasi + yedek | 0 |
+| `degistir` | Kapilar (YENI dolu ve bosluksuz, YENI != YEDEK, canli YEDEK'e ya da YENI'ye esit, 18 is akisinda aktif kosu yok, ucuncu dosyada eski alan yok, dosya alani BOS / eski / yeni, negatif kontrol, kanit ucu YENI ile 200) PASS ise canli := YENI; dosya alani DOLU ise YENI'ye cekilir, BOS ise dokunulmaz. Kapi FAIL ise hicbir sey yazilmaz. Yeniden kosulabilir (ayri onay): yarim kalan dosya alani kanit PASS olduktan sonra tamamlanir | GitHub secret, (alan DOLU ise) Drive token dosyasi + yedek | 6 |
+| `dogrula` | AYRI kosu: canli == YENI, canli != YEDEK, dosya alanlari beklenen durumda, negatif kontrol, kanit ucu canli ile 200, zincir testi (token yenileme + geri yazim) | Drive token dosyasi (yenilenen token) | 7 |
+| `tamam_kapisi` | "completed"den hemen once: canli == YENI; son yazimdan (secret ya da dosya alani, +5 dk pay) once baslamis aktif Etsy kosusu yok (kilit kumesi + `secrets.ETSY_*` ya da `ETSY_TOKEN.json` iceren her yml); dosya alani beklenen durumda | yok | 0 |
+| `tamam_kontrol` | "completed"den sonra TEK okuma: negatif kontrol, eski (YEDEK) reddediliyor, canli 200, zincir testi, OAuth'lu GET 200 | Drive token dosyasi (yenilenen token) | 9 |
+| `geri_al` | canli := YEDEK (YEDEK != YENI ve kanit ucu YEDEK ile 200 ise); dosya alani DOLU ve YEDEK degilse (YENI ya da taninmayan deger) kanitlanmis YEDEK'e cekilir, onceki hali tarihli yedekte kalir | GitHub secret, (alan guncellendiyse) Drive token dosyasi + yedek | 6 |
+| `geri_dogrula` | AYRI kosu: canli == YEDEK, YEDEK != YENI, dosya alani beklenen durumda, negatif kontrol, kanit ucu YEDEK ile 200 | yok | 6 |
+| `temizle` | Iki dal. Gecis tamam (canli != YEDEK): canli 200, eski reddediliyor, negatif kontrol. Geri donus tamam (canli == YEDEK): canli 200, YENI varsa reddediliyor, negatif kontrol. Sonra `ETSY_SHARED_SECRET_YENI`, `ETSY_SECRET_DENEME`, `ETSY_SECRET_PROVA` ve EN SON `ETSY_SHARED_SECRET_YEDEK` silinir; Drive token yedekleri yalniz LISTELENIR (ad + tarih) | GitHub secret (silme) | 7 |
+| `temizle_drive` | Ayri onayla, YEDEK secret'i silindikten sonra: yalniz bu betigin yedek klasoru (`ASTROLOVE/TEMP/SECRET_GECIS_YEDEK`) kalici silinir; `ETSY_TOKEN_ONCEKI_*` yalniz listelenir | Drive (silme) | 6 |
+
+- Sira ozeti (baglayici ayrinti 12 Kasim plani C4; her adim ayri onay): `olc`
+  -> kanit ucu ayari (commit + inceleme) -> `kod_anahtari` -> `yedek` ->
+  `yedek_dogrula` -> Serdar `ETSY_SECRET_DENEME` girer -> `prova` -> (karara
+  gore) `alan_sil` -> `kapat` -> Serdar Etsy panelinde yeni secret uretir ve
+  `ETSY_SHARED_SECRET_YENI`'ye girer -> `degistir` -> `dogrula` ->
+  `tamam_kapisi` -> Serdar panelde "completed" -> `tamam_kontrol` ->
+  `temizle` -> `ac` -> (ayri onayla) `temizle_drive`. Geri donusten sonra
+  (asagidaki a-c tamamlaninca): `temizle` (geri donus dali) -> `ac` ->
+  (ayri onayla) `temizle_drive`.
+- GERI DONUS SIRASI ("completed"den once): (a) `geri_al` kosusu: YEDEK ->
+  canli (+ dosya alani eski degere, alan guncellendiyse); (b) AYRI kosuda
+  `geri_dogrula`: canli == YEDEK EVET, dosya alani beklenen durumda, kanit
+  ucu YEDEK ile 200; (c) EN SON Serdar panelde "Cancel". "completed"den
+  sonra eski deger Etsy'de silinmistir, geri donus yoktur.
+- Gecisten once kapatilan 18 is akisi (sir sizdirabilen log yollari; liste
+  `secret_gecis.KAPAT`): gorsel-denetim, wp-pdf-probe, wp-saat80-ornek,
+  wp-share-mockups, by-taslak-hazirlik, etsy-ai-scan, etsy-quota-probe,
+  etsy-ru-probe, etsy-state-probe, ig-ilan-dogrula, pw-ru-probe,
+  urun-gorsel-cl, gorsel02, gorsel19, seo51, pin-v6, dijital-donusum-uygula,
+  pod-arac-v4.
+- Gecici secret adlari: `ETSY_SHARED_SECRET_YEDEK`, `ETSY_SHARED_SECRET_YENI`,
+  `ETSY_SECRET_DENEME`, `ETSY_SECRET_PROVA`. `gh_secrets.delete_secret` yalniz
+  bu dort adi siler.
 
 ## rclone OAuth istemcisi (KARAR, 2 Eylul 2026)
 
