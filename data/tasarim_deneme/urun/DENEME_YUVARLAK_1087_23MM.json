@@ -1,0 +1,13 @@
+{
+ "ad": "DENEME_YUVARLAK_1087_23MM",
+ "sekil": "yuvarlak",
+ "baski_px": [1087, 1087],
+ "gercek_mm": [23.0, 23.0],
+ "mm_kaynak": {"tur": "resmi", "not": "baski alani 1087 x 1087 px, 1200 dpi = 23,0 x 23,0 mm (uretici tasarim ekrani ve sablonu; Merkez kaydi 12 Kas 2026)"},
+ "guvenli": {"cx": 543.5, "cy": 543.5, "r": 515.0, "etiket": "sablon olcumu (Merkez kaydi 12 Kas 2026): kesik cizgili dairenin ic kenari; Serdar karari 12 Kas 2026"},
+ "guvenli_pay_px": 3,
+ "yasak": [],
+ "alt_sinir": {"yazi_mm": 1.5, "cizgi_mm": 0.2, "kaynak": "uretici yardim sayfasi (lazer kazima urunleri); Merkez kaydi 12 Kas 2026", "etiket": "resmi, yalniz kazima; renkli baski icin yazili alt sinir bulunamadi"},
+ "zemin": "motor",
+ "not": "Yalniz sistemi denemek icin; urun karari degildir. Ic yasak bolge / delik yok. Cerceve payi bilinmiyor (yazilmadi). guvenli_pay_px 3: ornament degeri (ornament_ornek4.py:45), oranlanmadan."
+}

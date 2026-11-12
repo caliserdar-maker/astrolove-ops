@@ -231,6 +231,49 @@ def t_butce():
         k(f'bilinen FAIL JSON: {ack} -> girdi hatasi', dur_mu(lambda m=m: TD._json_oku(m, 'istek'), 'girdi_json', True))
 
 
+def t_urun_23mm():
+    """D0 (Serdar 12 Kas 2026): yeni urun girdisi DENEME_YUVARLAK_1087_23MM (23,0 mm; guvenli r 515). Arac kodu degismedi; testler
+    yeni DOSYAYI gercek fonksiyonlarla (urun_dogrula, mm_px, birim, kiris, kosu_kimligi, butce_kontrol) sinar. Eski dosya aynen kalir."""
+    YENI = KOK / 'data' / 'tasarim_deneme' / 'urun' / 'DENEME_YUVARLAK_1087_23MM.json'
+    ESKI_SHA = '0d170c64939240ed9129d0d4fbcc670249b5df9d1914b90e42d61bfb052c8d90'
+    U = json.loads(YENI.read_text(encoding='utf-8'))
+    D = TD.urun_dogrula(copy.deepcopy(U))
+
+    def mm_sayi(u):                                                           # (baski alani mm, 1,5 mm px, 0,2 mm px), uc ondalik
+        return (round(TD.mm_px(u) * 1087, 3), round(1.5 / TD.mm_px(u), 3), round(0.2 / TD.mm_px(u), 3))
+
+    def geo_sayi(u):                                                          # (birim, merkez satirinda kiris, guvenli dairenin disindaki satirda kiris)
+        return (TD.birim(u), round(TD.kiris(u, 543.5, 543.5), 6), TD.kiris(u, 1060.0, 1062.0))
+    k('urun girdisi 23MM: dosya urun_dogrula\'dan gecer; alanlar gorev metniyle ayni (ad, mm kaynagi resmi, 23,0 x 23,0 mm, guvenli merkez 543,5 / 543,5 ve r 515, '
+      'pay 3, yasak bos, alt sinir yazi 1,5 / cizgi 0,2 mm, zemin motor)',
+      D['ad'] == 'DENEME_YUVARLAK_1087_23MM' and U['sekil'] == 'yuvarlak' and U['baski_px'] == [1087, 1087] and U['gercek_mm'] == [23.0, 23.0]
+      and U['mm_kaynak']['tur'] == 'resmi' and (U['guvenli']['cx'], U['guvenli']['cy'], U['guvenli']['r']) == (543.5, 543.5, 515.0)
+      and U['guvenli_pay_px'] == 3 and U['yasak'] == [] and U['alt_sinir']['yazi_mm'] == 1.5 and U['alt_sinir']['cizgi_mm'] == 0.2 and U['zemin'] == 'motor'
+      and YENI.name == U['ad'] + '.json', {a_: U.get(a_) for a_ in ('ad', 'gercek_mm', 'guvenli_pay_px')})
+    k('urun girdisi 23MM, mm formulu: 1087 px = 23,0 mm; 1,5 mm = 70,891 px; 0,2 mm = 9,452 px', mm_sayi(U) == (23.0, 70.891, 9.452), mm_sayi(U))
+    k('urun girdisi 23MM, yerlesim birimi (543,5; 543,5; 515); merkez satirinda kiris 2 x (515 - 3) = 1024 px; guvenli dairenin disindaki satirda (y 1060 - 1062) kiris 0',
+      geo_sayi(U) == ((543.5, 543.5, 515.0), 1024.0, 0.0), geo_sayi(U))
+    U_mm = dict(copy.deepcopy(U), gercek_mm=[25.4, 25.4])
+    U_r = copy.deepcopy(U)
+    U_r['guvenli']['r'] = 543.5
+    k('urun girdisi 23MM, bilinen FAIL: kopyada gercek_mm 25,4 yapilinca mm sayilari tutmaz (25,4; 64,193; 8,559); r 543,5 yapilinca birim ve kiris tutmaz '
+      '(543,5; kiris 1081; y 1060 satirinda kiris > 0)', mm_sayi(U_mm) == (25.4, 64.193, 8.559) and mm_sayi(U_mm) != mm_sayi(U) and geo_sayi(U_mm) == geo_sayi(U)
+      and geo_sayi(U_r)[0] == (543.5, 543.5, 543.5) and geo_sayi(U_r)[1] == 1081.0 and geo_sayi(U_r)[2] > 0 and mm_sayi(U_r) == mm_sayi(U),
+      (mm_sayi(U_mm), geo_sayi(U_r)))
+    KE, KY = TD.kosu_kimligi(URUN_DOSYA), TD.kosu_kimligi(YENI)
+    S_eski = sahte_sure([dict(durum='tamam', toplam_sn=25.0)])                # olcum kaydi ESKI girdinin kimligini tasir
+    k('[sahte veri] urun girdisi 23MM, kosu kimligi: yeni dosyanin kimligi eskisinden farkli (yalniz urun_sha256); eski girdinin kimligini tasiyan olcum kaydiyla '
+      'yeni girdide asil kosu baslamaz (girdi hatasi)', KE != KY and KE['urun_sha256'] != KY['urun_sha256'] and {a_: v for a_, v in KE.items() if a_ != 'urun_sha256'}
+      == {a_: v for a_, v in KY.items() if a_ != 'urun_sha256'} and S_eski['kimlik'] == KE and dur_mu(lambda: TD.butce_kontrol(3, S_eski, 900, False, KY), 'girdi_butce', True))
+    k('[sahte veri] urun girdisi 23MM, bilinen FAIL yonu: olcum kaydi YENI girdinin kimligini tasiyinca ayni istekle asil kosu baslar; eski kayit eski girdiyle de baslar',
+      (not dur_mu(lambda: TD.butce_kontrol(3, sahte_sure([dict(durum='tamam', toplam_sn=25.0)], kimlik=KY), 900, False, KY)))
+      and not dur_mu(lambda: TD.butce_kontrol(3, S_eski, 900, False, KE)))
+    eski_bayt = URUN_DOSYA.read_bytes()
+    k('eski urun girdisi DEGISMEDI: DENEME_YUVARLAK_1087.json sha256 = dilim 1 / 1B kosularinin kaydindaki deger; bilinen FAIL yonu: tek bayt eklenmis icerik '
+      'ayni sha256\'yi vermez', hashlib.sha256(eski_bayt).hexdigest() == ESKI_SHA and TD.sha_dosya(URUN_DOSYA) == ESKI_SHA
+      and hashlib.sha256(eski_bayt + b' ').hexdigest() != ESKI_SHA and KE['urun_sha256'] == ESKI_SHA, TD.sha_dosya(URUN_DOSYA))
+
+
 def t_olcer_sahte():
     U = urun_oku()
     W = H = 1087
@@ -1270,6 +1313,7 @@ def main():
         (td / 'ag').mkdir(); t_ag(td / 'ag')
         t_urun()
         t_butce()
+        t_urun_23mm()
         t_olcer_sahte()
         (td / 'c').mkdir(); t_cikti_sahte(td / 'c')
         (td / 'p').mkdir(); t_pafta_sahte(td / 'p')
