@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TASARIM DENEME ARACI kapilari ve olcumleri, dilim 1 (Serdar 11 Kas 2026; plan bolum 5, 6). Tek QC betigi, olculebilir esik, PASS / FAIL.
+"""TASARIM DENEME ARACI kapilari ve olcumleri, dilim 1 + 1b (Serdar 11 ve 12 Kas 2026; plan bolum 5, 6). Tek QC betigi, olculebilir esik, PASS / FAIL.
 Son gorsel KAYDEDILEN dosyadan okunur (ATK:3 ilkesi); maskeler bellekten gelir (ayni surec; plan 7.3 madde 2).
 Ay takvimi kapi kodu (ATK = ay_takvim_kapi.py, a9b1323) ice alinmis TEK modulden kullanilir; esik degerleri ATK.ESIK'ten okunur, bu dosyada
 esik DEGISTIRILMEZ ve yeni esik ONERILMEZ. Yeni olcumler esiksiz yazilir.
@@ -12,16 +12,21 @@ SERT (FAIL = secenegin gorseli silinir; taban: ay takvimi deneme modu, ATK:52; S
             kaynagin TEK adim kucultulmusu, bagimsiz olcum (halka cemberi, kucuk burc yeri / boyu, ana sembol yeri, en uzak piksel, logo yeri /
             boyu; pay 2 px). Takvime bagli iki alt kosulun karsiligi (Serdar soru 6 "n"): "grup merkezi = ayardaki grup_x / grup_y'nin tuval
             noktasi" ve "'halka' merkezde halka merkezi o noktada". Beklenen nokta URETIMDEN BAGIMSIZ hesaplanir (beklenen_merkez).
+            BOY (Serdar 12 Kas K1: SERT KALIR): olculen halka yaricapi = halka_r x guvenli yaricap, 2 px (beklenen_boyut; uretimden bagimsiz).
+            Tuvalden tasan (kirpilan) grup ogesi bu kapiyi dusurur (Serdar 12 Kas K2: DEVAM EDER); kapi sonucu ve kodu degismez, yalniz
+            OLCUM ozetine ve hucre etiketine kok neden yazilir ('kok_neden'; tek tanim olc() icinde).
+  cikti     boyut = urun baski_px, dpi etiketi, RGB, sRGB ICC. SERT (Serdar 12 Kas K4; dilim 1'de olcerdi): FAIL veren secenek DUR verir.
   Diger sert kapilar uretim sirasinda DUR verir (tasarim_deneme.py): girdi, ortam, sabit kaynak sha256, motor / KILIT, sembol bicimi,
   buyutme yok, cerceve, renk uyumu icin >= 200 cekirdek piksel (Serdar soru 6 "m"), sembol tuval disi, isim 8 denemede sigmiyor.
 OLCER (FAIL gorseli durdurmaz; OLCUM'a ve hucre etiketine yazilir):
-  cikti       boyut = urun baski_px, dpi etiketi, RGB, sRGB ICC. Bu dilimde OLCER (Serdar soru 6 "c"; plan 6.1'den farkli).
   tasma       guvenli alan / yasak bolge (Serdar soru 6 "d", "i"): UC olcum ayri yazilir: isik payi 0; isik payi 8 px (ornament degeri O4:56,
               oranlanmadan); goruntu farki (son gorsel - altinsiz zemin > 1; O4:425-437). Deger karara baglanmadi.
   cakisma     IKI tanim ayri alanlarda (Serdar soru 6 "e"): takvim (ATK:504-518: paysiz, alfa > 0,02, piksel sayisi); ornament (O4:255-269:
               halka ve sembol 7 x 7, yazilar 5 x 5 genisletme, alfa > 0,05): cift listesi VE cift basina piksel sayisi.
-  tek doku dE00, kontrast, yazim farki, duz renk, yildiz, oge sayisi, grup - yazi boslugu (12 px aynen), metin tabani, isim satiri, metin
+  tek doku dE00, kontrast, yazim farki, duz renk, yildiz, oge sayisi, grup - yazi boslugu (12 px aynen), metin tabani, isim satiri (Serdar
+  12 Kas K3: buyuk harf bandi guvenli dairenin disindaysa DUR YOK; isim olceri FAIL + tasma olcumu; sinir = tuval genisligi), metin
   genisligi, gercek olcu uyarisi (yazi mm, cizgi mm: en ince / 1. yuzdelik / ortanca AYRI; olcut secilmedi, plan soru 4).
+BILGI (esik yok, kapi degil; Serdar 12 Kas): oge cifti basina cakisma pikseli (alfa > 0,02), kucuk burc - yazi en az uzakligi, yildiz sayisi.
 ARACTA OLMAYANLAR (Serdar soru 6 "l"; plan inceleme bulgusu 2): ornament'in yeni duzen kapilari (yeni_duzen.py:292-321, 351) ve ornament'e ozgu
   IoU / leke / ton / sabit bosluk kapilari yoktur. Ornament'in kucultme sinirinin (ornament_motor.py:802) aractaki karsiligi OLCERDIR: isim
   kuculme orani etikette yazar; kapi eklenmedi."""
@@ -287,8 +292,32 @@ def cakisma_ornament(M):
     return out
 
 
+def cift_px_olc(M):
+    """BILGI (esik yok, kapi degil; Serdar 12 Kas): oge cifti basina cakisma = iki maskenin (alfa > 0,02) kesisim piksel sayisi. Doner {a/b: piksel}
+    (butun ciftler, 0 dahil; ad sirasi M'nin sirasi)."""
+    Bm = {ad: M[ad] > 0.02 for ad in M}
+    adlar = list(Bm)
+    return {f'{a1}/{a2}': int((Bm[a1] & Bm[a2]).sum()) for i_, a1 in enumerate(adlar) for a2 in adlar[i_ + 1:]}
+
+
+def kucuk_yazi_olc(M, yazi_adlari):
+    """BILGI (esik yok, kapi degil; Serdar 12 Kas): kucuk1 / kucuk2 maskelerinin (alfa > 0,02) her yazi ogesinin maskesine en az uzakligi (px;
+    piksel merkezleri arasi: binme varsa 0, bitisik 1). Doner {kucukN/yazi: px}; murekkebi olmayan maske atlanir."""
+    out = {}
+    for ya in yazi_adlari:
+        by = M[ya] > 0.02
+        if not by.any():
+            continue
+        dty = cv2.distanceTransform((~by).astype(np.uint8), cv2.DIST_L2, cv2.DIST_MASK_PRECISE)
+        for kad in ('kucuk1', 'kucuk2'):
+            bk = (M[kad] > 0.02) if kad in M else None
+            if bk is not None and bk.any():
+                out[f'{kad}/{ya}'] = round(float(dty[bk].min()), 2)
+    return out
+
+
 def cikti_olc(png, urun):
-    """Cikti kapisi (ATK:593-601 kalibi; boyut ve dpi urun girdisinden). OLCER (Serdar soru 6 "c")."""
+    """Cikti kapisi (ATK:593-601 kalibi; boyut ve dpi urun girdisinden). SERT (Serdar 12 Kas K4; dilim 1'de olcerdi)."""
     im = Image.open(png)
     W, H = int(urun['baski_px'][0]), int(urun['baski_px'][1])
     dpi_b = 25.4 * W / float(urun['gercek_mm'][0])
@@ -339,8 +368,8 @@ def olc(veri):
     altinsiz, yildiz = veri['altinsiz'], veri['yildiz_maske']
     Hh, Ww = altinsiz.shape[:2]                                               # cizim tuvali (maskelerin koordinati)
     dosya_boyut_farki = bool(img.shape[:2] != (Hh, Ww))
-    if dosya_boyut_farki:                                                     # kaydedilen dosya tuvalle ayni boyda degil: cikti kapisi FAIL verir (olcer,
-        t_ = np.zeros((Hh, Ww, 3), np.uint8)                                  # Serdar soru 6 "c"); olcumler dosyanin sol ust koseden tuvale oturtulmus
+    if dosya_boyut_farki:                                                     # kaydedilen dosya tuvalle ayni boyda degil: cikti kapisi FAIL verir (SERT,
+        t_ = np.zeros((Hh, Ww, 3), np.uint8)                                  # Serdar 12 Kas K4); olcumler dosyanin sol ust koseden tuvale oturtulmus
         h_, w_ = min(Hh, img.shape[0]), min(Ww, img.shape[1])                 # haliyle yapilir (eksik bolge siyah, fazla bolge olcum disi); cokme yok
         t_[:h_, :w_] = img[:h_, :w_]
         img = t_
@@ -437,20 +466,28 @@ def olc(veri):
     # tasma: uc olcum (Serdar soru 6 "d", "i")
     olcer['tasma'] = tasma_olc(urun, M, img, altinsiz, veri['tuval_kesilen'])
     olcer['tuval_tasma'] = veri['kontrol']['tasma']
-    # cikti (OLCER: Serdar soru 6 "c")
-    olcer['cikti'] = cikti_olc(png, urun)
-    olcer['cikti']['tuval_boyut_farki'] = dosya_boyut_farki
+    # cikti (SERT: Serdar 12 Kas K4; FAIL veren secenek DUR verir)
+    sert['cikti'] = cikti_olc(png, urun)
+    sert['cikti']['tuval_boyut_farki'] = dosya_boyut_farki
     if dosya_boyut_farki or [Ww, Hh] != [int(urun['baski_px'][0]), int(urun['baski_px'][1])]:
-        olcer['cikti']['PASS'] = False
+        sert['cikti']['PASS'] = False
+    # BILGI (esik yok, kapi degil; Serdar 12 Kas): oge cifti basina cakisma ve kucuk burc - yazi en az uzakligi
+    cift_px = cift_px_olc(M)
+    ky = kucuk_yazi_olc(M, [o['ad'] for o in og])
+    ky_isim = [v for k_, v in ky.items() if k_.endswith('/isimler')]
+    ky_metin = [v for k_, v in ky.items() if '/metin_' in k_]
+    bilgi = dict(cift_px=cift_px, kucuk_yazi_uzaklik=ky,
+                 not_='cift_px: iki maskenin (alfa > 0,02) kesisim pikseli; kucuk_yazi_uzaklik: piksel merkezleri arasi en az uzaklik (0 = binme)')
     # isim satiri, metin genisligi, metin tabani
     oi = next(o for o in og if o['tur'] == 'isim')
     ki = AT.kutu(oi['A'])
     isim = veri['isim']
     kuculme = round(isim['cap'] / isim['cap_baslangic'], 4)
     alt_px = alt['yazi_mm'] / mmpx if alt else None
+    isim_dis = bool(isim.get('guvenli_disinda'))                              # K3: buyuk harf bandi guvenli dairenin disinda (sinir = tuval genisligi)
     olcer['isim'] = dict(genislik=int(ki[2] - ki[0]), sinir=round(isim['sinir'], 1), cap_px=round(isim['cap'], 2), cap_mm=round(isim['cap'] * mmpx, 3),
-                         kuculme_orani=kuculme, deneme=isim['deneme'], alt_sinir_px=round(alt_px, 2) if alt_px else None,
-                         PASS=bool(ki[2] - ki[0] <= isim['sinir'] and (alt_px is None or isim['cap'] >= alt_px)))
+                         kuculme_orani=kuculme, deneme=isim['deneme'], alt_sinir_px=round(alt_px, 2) if alt_px else None, guvenli_disinda=isim_dis,
+                         PASS=bool(ki[2] - ki[0] <= isim['sinir'] and (alt_px is None or isim['cap'] >= alt_px) and not isim_dis))
     olcer['metin_genis'] = veri['kontrol']['metin_genis']
     om = [o for o in og if o['tur'] == 'metin']
     if om:
@@ -532,18 +569,31 @@ def olc(veri):
     sert_fail = [k_ for k_, v in sert.items() if not v['PASS']]
     olcer_fail = [k_ for k_, v in olcer.items() if not v['PASS']]
     tt = olcer['tasma']['toplam']
+    # K2 etiketi (Serdar 12 Kas; kapi sonucu ve kodu DEGISMEZ, yeni olcum yok): sert FAIL listesi tek basina '2_grup' VE yeniden kurulumda
+    # dusen ogelerin (ATK:240-244 kosullari) HEPSI tuvalde kirpilmis ise kok neden yazilir; aksi halde yazilmaz.
+    kok_neden = None
+    if sert_fail == ['2_grup']:
+        g2 = sert['2_grup']
+        dusen = [ad for ad, v in (g2.get('oge') or {}).items()
+                 if not (v['yeniden_kucultme_birebir'] and v['yer_ayni'] and v['konum_fark'] <= E['grup_konum'] and v['olcek'] <= 1.0)]
+        kirpilan = set(veri.get('tuval_kirpilan') or [])
+        if dusen and all(ad in kirpilan for ad in dusen):
+            kok_neden = f"grup ogesi tuvalden tasiyor: {', '.join(dusen)}; konum farki {g2.get('konum_fark_en_buyuk')} px"
     ozet = dict(ad=png.stem, durum='DUR' if sert_fail else 'tamam', sert_fail=sert_fail, olcer_fail=olcer_fail,
                 yazi_en_kucuk_mm=min(yazi_mm) if yazi_mm else None, isim_kuculme=kuculme,
                 cizgi_mm=dict(en_ince=enk('en_ince'), p1=enk('p1'), ortanca=enk('ortanca')), sinir_alti=sinir_alti,
                 tasma_px=dict(isik_0=tt['isik_0'], isik_8=tt['isik_8'], goruntu_farki=tt['goruntu_farki'], tuval_disi=tt['tuval_disi']),
-                cakisma=dict(takvim_px=ct, ornament_cift=len(co), ornament_px=int(sum(co.values()))),
-                grup_yazi_en_az_px=olcer['grup_yazi']['en_az'], cikti='PASS' if olcer['cikti']['PASS'] else 'FAIL',
+                cakisma=dict(takvim_px=ct, ornament_cift=len(co), ornament_px=int(sum(co.values())), ornament_ciftler=co),
+                cift_px=dict(cift_px),
+                kucuk_yazi_px=dict(isim=min(ky_isim) if ky_isim else None, metin=min(ky_metin) if ky_metin else None),
+                kok_neden=kok_neden, isim_guvenli_disinda=isim_dis, yildiz_sayi=int(veri['yildiz']['sayi']),
+                grup_yazi_en_az_px=olcer['grup_yazi']['en_az'], cikti='PASS' if sert['cikti']['PASS'] else 'FAIL',
                 kapi2_fark_en_buyuk=sert['2_grup'].get('olculen_fark_en_buyuk'), kapi2_konum_fark=sert['2_grup'].get('konum_fark_en_buyuk'),
                 kapi2_boyut_fark=(sert['2_grup'].get('boyut_bagimsiz') or {}).get('fark'),
                 en_az_cekirdek=dict(oge=en_az[0], piksel=en_az[1]['piksel']), yildiz_binme_px=yb,
                 en_kotu_dE00=olcer['tek_doku']['en_kotu_dE00'], en_kotu_kontrast=olcer['kontrast']['en_kotu_ortanca'])
     return dict(ozet=ozet, not_='yerel, deneme sembolü; kapı sonucu gerçek katman için kanıt değildir', mm_kaynak=urun['mm_kaynak'],
-                oge=oge, kapi=dict(sert=sert, olcer=olcer), esik={k_: E[k_] for k_ in ('dE00', 'kontrast', 'alfa_fark', 'cekirdek_piksel', 'en_boy',
+                oge=oge, kapi=dict(sert=sert, olcer=olcer), bilgi=bilgi, esik={k_: E[k_] for k_ in ('dE00', 'kontrast', 'alfa_fark', 'cekirdek_piksel', 'en_boy',
                                                                                      'sembol_renk', 'grup_yazi', 'grup_konum', 'grup_konum_olculen',
                                                                                      'yildiz_pay', 'duz_yayilim')},
                 isik_pay_px=list(ISIK_PAY))

@@ -136,7 +136,9 @@ TABAN = {'B1': dict(grup_merkez='halka', grup_x=0.0, grup_y=0.071, halka_r=0.884
                     logo='yok', logo_yer='isim_arasi', metin_tur='tarih', metin_cap=round(0.0742 * 144 / 169.5, 5), metin_y=0.817,
                     satir_aralik=1.6, isim1='EMILY', isim2='JAMES', satirlar=['JUNE 14, 2025'])}
 IZGARA_AZAMI = 7                                        # izgara ekseni basina en cok 7 deger (baslangic degeri)
-IZGARA_ANAHTAR = ('halka_r_carpan', 'grup_y_fark')      # dilim 1: yalniz grup izgarasi (boyut = halka_r carpani, yer = grup_y farki; plan 4.2)
+IZGARA_ANAHTAR = ('halka_r_carpan', 'grup_y_fark')      # grup izgarasi (boyut = halka_r carpani, yer = grup_y farki; plan 4.2)
+IZGARA_TUR = {'grup': IZGARA_ANAHTAR,                   # bir istekte TEK izgara turu (dilim 1b; Serdar 12 Kas)
+              'kucuk': ('kucuk_oran_carpan', 'kucuk_v_fark')}   # kucuk burc izgarasi (boyut = kucuk_oran carpani, yer = kucuk_v farki; plan 4.2)
 
 AT = ATK = None                                         # baglan() sonrasi: ice alinan ay takvimi modulleri (TEK nesne)
 
@@ -424,7 +426,8 @@ def _json_oku(metin, ne):
 
 
 def istek_kur(ham):
-    """Istek (dogrulanan girdi): {taban, tekil: [ayar farki sozlugu ...], izgara: {halka_r_carpan: [...], grup_y_fark: [...]}}.
+    """Istek (dogrulanan girdi): {taban, tekil: [ayar farki sozlugu ...], izgara: {halka_r_carpan: [...], grup_y_fark: [...]} YA DA
+    {kucuk_oran_carpan: [...], kucuk_v_fark: [...]}} (bir istekte tek izgara turu).
     Doner secenek listesi: dict(no, ad (KODDAN: SEC_<NN>_<tur>), tur, ayar (TAM), geri_donus, degisen (tabana gore), satir, sutun).
     Sira = uretim sirasi: once tekiller, sonra izgara (satir = boyut adimi, sutun = yer adimi). Arac listeyi kirpmaz, siralamaz."""
     if not isinstance(ham, dict) or set(ham) - {'taban', 'tekil', 'izgara'}:
@@ -455,25 +458,34 @@ def istek_kur(ham):
         ekle(t, 'tekil')
     iz = ham.get('izgara')
     if iz is not None:
-        if not isinstance(iz, dict) or set(iz) != set(IZGARA_ANAHTAR):
-            raise Dur('girdi_istek', 'izgara: yalniz halka_r_carpan ve grup_y_fark (dilim 1: grup izgarasi)', girdi=True)
-        for k_ in IZGARA_ANAHTAR:
+        tur_ = next((t_ for t_, an_ in IZGARA_TUR.items() if isinstance(iz, dict) and set(iz) == set(an_)), None)
+        if tur_ is None:
+            raise Dur('girdi_istek', 'izgara: TEK tur olmali: grup (halka_r_carpan + grup_y_fark) ya da kucuk burc (kucuk_oran_carpan + kucuk_v_fark)',
+                      girdi=True)
+        an = IZGARA_TUR[tur_]
+        for k_ in an:
             v = iz[k_]
             if not isinstance(v, list) or not 1 <= len(v) <= IZGARA_AZAMI or not all(_sayi(x) for x in v) or len(set(v)) != len(v):
                 raise Dur('girdi_istek', f'izgara {k_}: 1 - {IZGARA_AZAMI} farkli sayi olmali', girdi=True)
         T = TABAN[taban]
         if T['halka_r'] is None or T['grup_merkez'] != 'halka':               # "tek oge degisir" yalniz halka_r + 'halka' merkezde (plan 4.2)
             raise Dur('girdi_istek', 'izgara tabani halka_r + halka merkez modunda degil', girdi=True)
-        for i, c in enumerate(iz['halka_r_carpan']):
-            for j, f in enumerate(iz['grup_y_fark']):
-                ekle(dict(halka_r=round(T['halka_r'] * c, 6), grup_y=round(T['grup_y'] + f, 6)), 'grup', i, j)
+        if tur_ == 'kucuk' and not (_sayi(T['kucuk_v']) and _sayi(T['kucuk_oran'])):
+            raise Dur('girdi_istek', 'kucuk burc izgarasi: tabanda kucuk_v ve kucuk_oran sayi olmali', girdi=True)
+        for i, c in enumerate(iz[an[0]]):                                     # satir = boyut adimi
+            for j, f in enumerate(iz[an[1]]):                                 # sutun = yer adimi
+                if tur_ == 'grup':
+                    ekle(dict(halka_r=round(T['halka_r'] * c, 6), grup_y=round(T['grup_y'] + f, 6)), 'grup', i, j)
+                else:
+                    ekle(dict(kucuk_oran=round(T['kucuk_oran'] * c, 6), kucuk_v=round(T['kucuk_v'] + f, 6)), 'kucuk', i, j)
     if not sec:
         raise Dur('girdi_istek', 'secenek yok', girdi=True)
     return sec
 
 
 SURE_ALAN = ('mod', 'kimlik', 'kurulum_sn', 'toplam_sn', 'secenek', 'asama')
-SURE_SECENEK_ALAN = ('no', 'ad', 'durum', 'toplam_sn')
+SURE_SECENEK_ALAN = ('no', 'ad', 'durum', 'kod', 'toplam_sn')
+CIZIMI_BITEN_DUR = ('kapi_sert',)                       # cizim ve kayit bittikten SONRA verilen DUR kodlari (butce suresine girer)
 
 
 def sure_dogrula(d):
@@ -507,15 +519,27 @@ def sure_dogrula(d):
     return d
 
 
+def kod_sha():
+    """Arac kod dosyalarinin (tasarim_deneme.py, tasarim_kapi.py) sha256'lari."""
+    return {f.name: sha_dosya(f) for f in sorted(Path(__file__).resolve().parent.glob('tasarim_*.py'))}
+
+
 def kosu_kimligi(urun_yolu):
-    """Bir kosunun sure olcumu baska urun / kaynak icin kullanilamasin diye: urun girdisi sha256 + sabit kaynak sha'lari."""
-    return dict(urun_sha256=sha_dosya(urun_yolu), ay_sha=AY_SHA, motor_sha=MOTOR_SHA)
+    """Bir kosunun sure olcumu baska urun / kaynak / KOD icin kullanilamasin diye: urun girdisi sha256 + sabit kaynak sha'lari + kod sha256
+    (kod degisirse olcum kosusu yeniden yapilir; Serdar 12 Kas)."""
+    return dict(urun_sha256=sha_dosya(urun_yolu), ay_sha=AY_SHA, motor_sha=MOTOR_SHA, kod_sha256=kod_sha())
+
+
+def cizimi_biten(s_):
+    """Butce kurali: cizimi BITEN secenek = durumu 'tamam' olan ya da DUR kodu cizimden sonra verilen (kapi_sert). Cizimden once DUR veren girmez."""
+    return isinstance(s_, dict) and (s_.get('durum') == 'tamam' or (s_.get('durum') == 'DUR' and s_.get('kod') in CIZIMI_BITEN_DUR))
 
 
 def butce_kontrol(n, sure, butce, olcum, kimlik=None):
     """Butce kurali (plan 4.5 b; Serdar soru 14 "A": 900 sn). Butce 900 sn'den BUYUK verilemez (kucuk verilebilir). Olcum kosusu: en cok
     OLCUM_AZAMI secenek. Asil kosu: OLCUM kosusunun SURE'si ZORUNLU (mod 'olcum', ayni urun girdisi ve ayni kaynak); istek suresi =
-    kurulum + n x (tam cizimi biten seceneklerin en buyugu). Asiyorsa URETMEDEN girdi hatasi; mesajda sigan en buyuk sayi. Liste kirpilmaz."""
+    kurulum + n x (cizimi BITEN seceneklerin en buyugu: 'tamam' ya da DUR 'kapi_sert'; cizimden once DUR veren haric). Asiyorsa URETMEDEN girdi
+    hatasi; mesajda sigan en buyuk sayi. Liste kirpilmaz."""
     if not _sayi(butce) or butce <= 0 or butce > BUTCE_SN:
         raise Dur('girdi_butce', f'butce {BUTCE_SN} sn sabitinden buyuk ya da gecersiz (Serdar soru 14)', girdi=True)
     if olcum:
@@ -533,10 +557,10 @@ def butce_kontrol(n, sure, butce, olcum, kimlik=None):
     if sure['mod'] != 'olcum':
         raise Dur('girdi_butce', 'SURE dosyasi olcum kosusundan degil', girdi=True)
     if kimlik is None or sure['kimlik'] != kimlik:
-        raise Dur('girdi_butce', 'SURE dosyasi baska urun girdisi ya da baska kaynak icin olculmus', girdi=True)
-    tam = [s['toplam_sn'] for s in sure['secenek'] if isinstance(s, dict) and s.get('durum') == 'tamam' and _sayi(s.get('toplam_sn'))]
+        raise Dur('girdi_butce', 'SURE dosyasi baska urun girdisi, baska kaynak ya da baska kod icin olculmus (olcum kosusunu yeniden yap)', girdi=True)
+    tam = [s['toplam_sn'] for s in sure['secenek'] if cizimi_biten(s) and _sayi(s.get('toplam_sn'))]
     if not tam or max(tam) <= 0:
-        raise Dur('girdi_butce', 'olcum kosusunda tam cizimi biten secenek yok', girdi=True)
+        raise Dur('girdi_butce', 'olcum kosusunda cizimi biten secenek yok', girdi=True)
     t_kur, t_sec = float(sure['kurulum_sn']), float(max(tam))
     istek = t_kur + n * t_sec
     sigan = max(0, int(math.floor((butce - t_kur) / t_sec)))
@@ -696,9 +720,11 @@ def secenek_uret(ort, sec, cikti):
         cap0 = AY['isim_cap'] * Rg
         isim_taban_y = cy + AY['isim_y'] * Rg
         sinir = kiris(urun, isim_taban_y - cap0, isim_taban_y)
-        if sinir < 1.0:
-            raise AT.Dur('isim_sigmadi', 'isim satiri guvenli alanin disinda (kiris 0)')   # YORUM (gorev metni d / g): guvenli alan TASMASI olcerdir;
-            # burada isim satirinin sigacagi genislik HIC yok (kiris 0), isim_sigdir cagirilamaz: AT'nin 'isim_sigmadi' DUR'u (rapora yazildi)
+        isim_disinda = bool(sinir == 0.0)                                     # buyuk harf bandinin bir kismi guvenli dairenin (pay dusulmus) disinda
+        if isim_disinda:                                                      # K3 (Serdar 12 Kas "evet"; onayli tek gevsetme): DUR YOK; isim de tarih satiri
+            sinir = float(W)                                                  # gibi olcerdir; genislik siniri = tuval genisligi (pay dusulmez)
+        elif sinir < 1.0:                                                     # kiris 0'dan buyukken davranis AYNEN (kiris cok kucukse isim kuculur ya da DUR)
+            raise AT.Dur('isim_sigmadi', 'isim satiri icin guvenli alan kirisi 1 px altinda')
         Ai, ti, cap_isim, kuc = AT.isim_sigdir(isim_metni, FI, sinir=sinir, cap0=cap0, cap_alt=0.0, yumusak=True)
         ogeler.append(dict(ad='isimler', tur='isim', metin=isim_metni, font=FI, wght=500, ref='H', cap=float(cap_isim), A=Ai, taban=ti,
                            taban_hedef=isim_taban_y))
@@ -728,12 +754,14 @@ def secenek_uret(ort, sec, cikti):
         for o in ogeler + grup_oge:
             if _kesisim(o['x'], o['y'], *o['A'].shape, W, H) is None:
                 raise AT.Dur('tasma', f"{o['ad']} tumuyle tuval disinda")
-        kontrol['tasma'] = dict(PASS=not tasan, neden=(', '.join(tasan) + ' tuval disina tasiyor') if tasan else None)
+        kontrol['tasma'] = dict(PASS=not tasan, neden=(', '.join(tasan) + ' tuval disina tasiyor') if tasan else None, oge=list(tasan))
         tuval_kesilen = {}
         for o in ogeler + grup_oge:
             y0, y1, x0, x1, ly, lx = _kesisim(o['x'], o['y'], *o['A'].shape, W, H)
             ic = o['A'][ly:ly + y1 - y0, lx:lx + x1 - x0]
             tuval_kesilen[o['ad']] = int((o['A'] > 0.02).sum() - (ic > 0.02).sum())
+            if o['tur'] == 'isim' and not (ic > 0.02).any():                  # isim maskesi tuvalde BOS kalirsa cokme yok: DUR (cizimden once)
+                raise AT.Dur('isim_sigmadi', 'isim murekkebi tumuyle tuval disinda')
         sure['yazi'] = round(time.time() - t_, 1); t_ = time.time()
         # 4 zemin: motor radyal profili + yildiz yolu, es oranli olcek, merkez = grup merkezi (AT:1510-1531 kalibi; disk / rakam yok)
         Zp = json.loads((ort.md / 'zemin_profil.json').read_text())
@@ -776,7 +804,8 @@ def secenek_uret(ort, sec, cikti):
         veri = dict(urun=urun, ayar=AY, cift=CIFT, png=png, altinsiz=altinsiz, yildiz_maske=y_maske, sembol=dict(rgb=s_rgb, a=s_a, x=sx, y=sy, bilgi=s_bilgi),
                     ogeler=ogeler, grup_oge=grup_oge, grup_bilgi=G['bilgi'], merkez=[mx, my], hedef_r=hedef_r, sembol_alan=sembol_alan,
                     katman=ort.katman, s_olc=ort.s_olc, motor=ort.md, mt=mt, kontrol=kontrol, tuval_kesilen=tuval_kesilen, D_ana=D_ana,
-                    isim=dict(cap_baslangic=cap0, cap=float(cap_isim), deneme=kuc, sinir=sinir), yildiz=dict(sayi=int(n_yildiz), atlanan=ysay,
+                    isim=dict(cap_baslangic=cap0, cap=float(cap_isim), deneme=kuc, sinir=sinir, guvenli_disinda=isim_disinda), tuval_kirpilan=list(tasan),
+                    yildiz=dict(sayi=int(n_yildiz), atlanan=ysay,
                                                                                                     engel_cekirdek_px=ek))
         olcum = KP.olc(veri)
         sure['kapi'] = round(time.time() - t_, 1); t_ = time.time()
@@ -875,6 +904,12 @@ def etiket_satirlari(s, mm_kaynak=None):
     if s['durum'] != 'tamam':
         L.append(f"DUR {dur_kodu(s)}")
         L.append(str(s['neden']))
+        kok = (s.get('olcum_ozet') or {}).get('kok_neden')
+        if kok:                                                               # K2 (Serdar 12 Kas): kapi sonucu ve kodu ayni; hucrede kok neden de yazar
+            L.append(kok)
+        boy = (s.get('olcum_ozet') or {}).get('kapi2_boyut_fark')
+        if boy is not None:                                                   # K1: DUR veren secenekte de olculen boy kosulu farki yazilir
+            L.append(f'kapi 2 boy kosulu farki {boy} px')
         return L
     o = s['olcum_ozet']
     L.append(f"yazi buyuk harf en kucuk {o['yazi_en_kucuk_mm']} mm | isim kuculme {o['isim_kuculme']}")
@@ -885,7 +920,12 @@ def etiket_satirlari(s, mm_kaynak=None):
     L.append(f"tasma px: isik 0: {t['isik_0']} | isik 8: {t['isik_8']} | goruntu farki: {t['goruntu_farki']} | tuval disi: {t['tuval_disi']}")
     c = o['cakisma']
     L.append(f"cakisma: takvim tanimi {c['takvim_px']} px | ornament tanimi {c['ornament_cift']} cift, {c['ornament_px']} px")
+    L.append('cakisan cift px (alfa > 0,02): ' + (', '.join(f'{k_} {v}' for k_, v in o.get('cift_px', {}).items() if v) or 'yok'))
+    ky = o.get('kucuk_yazi_px') or {}
+    L.append(f"kucuk burc - yazi en az uzaklik px: isim {ky.get('isim')} | metin {ky.get('metin')}")
     L.append(f"grup-yazi bosluk en az {o['grup_yazi_en_az_px']} px | cikti kapisi {o['cikti']}")
+    if o.get('isim_guvenli_disinda'):                                         # K3 notu
+        L.append('isim guvenli alan disinda')
     L.append('olcer FAIL: ' + (', '.join(o['olcer_fail']) or 'yok'))
     return L
 
@@ -990,21 +1030,27 @@ def kos(a):
         kalan = gecen / i * (len(sec) - i)
         print(f'ETA {i}/{len(sec)} | gecen {gecen:.0f} sn | kalan {kalan:.0f} sn | %{100.0 * i / len(sec):.0f}', flush=True)
     tum_geri = sorted({g_ for r in sonuc for g_ in r['geri_donus']})
-    kod_sha = {f.name: sha_dosya(f) for f in sorted(Path(__file__).resolve().parent.glob('tasarim_*.py'))}
-    ozet = dict(arac='tasarim_deneme dilim 1', not_=SINIR_NOTU, taban=sec[0]['ayar']['taban'], taban_etiket=B1_ETIKET, geri_donus=tum_geri,
+    ozet = dict(arac='tasarim_deneme dilim 1b', not_=SINIR_NOTU, taban=sec[0]['ayar']['taban'], taban_etiket=B1_ETIKET, geri_donus=tum_geri,
                 urun=urun, urun_sha256=sha_dosya(a.urun), mm_px=mm_px(urun), cift=CIFT,
                 sembol_katmani=dict(sha256=ort.s_olc['sha256'], tur='deneme' if ort.katman.name.startswith('DENEME_') else 'gercek',
                                     olcum={k_: ort.s_olc.get(k_) for k_ in ('boyut', 'kutu_alfa_05', 'kutu_alfa_002', 'merkez_05',
                                                                             'cevre_yaricap_05', 'en_boy_05', 'alfa_05_piksel', 'yan_json')}),
-                ay_sha=AY_SHA, motor_sha=MOTOR_SHA, ornament_sha=ORNAMENT_SHA, kaynak_sha256=ort.kaynak_sha, kod_sha256=kod_sha,
+                ay_sha=AY_SHA, motor_sha=MOTOR_SHA, ornament_sha=ORNAMENT_SHA, kaynak_sha256=ort.kaynak_sha, kod_sha256=kimlik['kod_sha256'],
                 paketler=ort.paketler, butce=butce, secenek=[_ozet_secenek(r) for r in sonuc],
                 musteri_verisi='YOK: girdi yalniz ornek isim ve ornek metin olabilir (W:8-9)')
-    pafta, _ = pafta_yaz(ozet, O, O / f"PAFTA_{urun['ad']}_01.jpg")
+    try:
+        pafta, _ = pafta_yaz(ozet, O, O / f"PAFTA_{urun['ad']}_01.jpg")
+    except Exception as e:                                                    # noqa: BLE001
+        if not _dur_mu(e) or e.kod != 'pafta_boyut':
+            raise
+        pafta = dict(dosya=None, durum='DUR', kod=e.kod, neden=e.neden, bayt=None, hucre=len(sonuc))   # 3 MB asildi: OZET / SURE / OLCUM_TUMU yine yazilir
+        log(f'pafta YAZILMADI: {e.kod}: {e.neden}')
     ozet['pafta'] = pafta
     toplam = round(time.time() - t_kos, 1)
     tam = [r['sure']['toplam_sn'] for r in sonuc if r['durum'] == 'tamam']
     sure = dict(mod='olcum' if a.olcum else 'asil', kimlik=kimlik, kurulum_sn=ort.kurulum_sn, toplam_sn=toplam, butce=butce,
-                secenek=[dict(no=r['no'], ad=r['ad'], durum=r['durum'], tur='tam cizim', **r['sure']) for r in sonuc],
+                secenek=[dict(no=r['no'], ad=r['ad'], durum=r['durum'], kod=r['kod'], tur='tam cizim', **r['sure']) for r in sonuc],
+                cizimi_biten_en_cok_sn=max([r['sure']['toplam_sn'] for r in sonuc if cizimi_biten(r)], default=None),
                 secenek_sn=dict(en_az=min(tam) if tam else None, ortanca=float(np.median(tam)) if tam else None, en_cok=max(tam) if tam else None),
                 asama=dict(asama='yerlesim denemesi', baslangic=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(t_kos)),
                            bitis=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), serdar_bekleme=None, deneme_sayisi=None, inceleme_turu=None,
@@ -1019,7 +1065,7 @@ def kos(a):
     (O / 'OLCUM_TUMU.json').write_text(json.dumps(dict(not_=SINIR_NOTU, urun=urun['ad'], secenek=tumu), indent=1, ensure_ascii=False))
     dur = [r['ad'] for r in sonuc if r['durum'] != 'tamam']
     log(f"kosu bitti: {len(sonuc)} secenek, {len(sonuc) - len(dur)} tamam, {len(dur)} DUR | toplam {toplam} sn | pafta {pafta['bayt']} bayt")
-    return 1 if dur else 0
+    return 1 if dur or pafta['dosya'] is None else 0
 
 
 def uret(a):

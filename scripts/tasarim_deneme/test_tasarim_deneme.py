@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""TASARIM DENEME testleri, dilim 1 (Serdar 11 Kas 2026; plan bolum 8 + gorev metni Dayanak 6). ETSY YOK, ag yok, Drive yok.
+"""TASARIM DENEME testleri, dilim 1 + 1b (Serdar 11 ve 12 Kas 2026; plan bolum 8 + gorev metinleri). ETSY YOK, ag yok, Drive yok.
+TEST AGI (CLAUDE.md, main 5a3d85e): test surecinde ag BASTAN kapatilir (emsal scripts/sosyal/test_metricool_yedek.py:19-25); alt surecte kosan
+Python kodu da ayni on ekle (AG_KAPALI) kosar. Kapatilan aga giden cagri AssertionError verir, test FAIL eder.
 Her kapi bilinen PASS + bilinen FAIL ornegiyle denenir; test GERCEK fonksiyonu calistirir; mutasyon denemesi (kod bozulunca test FAIL).
 
 Kullanim:
@@ -21,15 +23,29 @@ import hashlib
 import importlib.util
 import json
 import shutil
+import socket
+import ssl  # noqa: F401  (ag kapatilmadan ONCE yuklenir: sonra yuklenirse socket sinifini bulamaz)
 import subprocess
 import sys
 import tempfile
 import time
+import urllib.request
 from pathlib import Path
 
 import cv2
 import numpy as np
 from PIL import Image, ImageCms
+
+AG_KAPALI = """import socket, ssl, urllib.request
+def _ag_yok(*a, **k):
+    raise AssertionError('gercek ag acilmaya calisildi')
+socket.socket = _ag_yok
+socket.create_connection = _ag_yok
+socket.getaddrinfo = _ag_yok
+urllib.request.urlopen = _ag_yok
+"""
+exec(AG_KAPALI)                                                              # TEST AGI: bu surecte ag bastan kapali (ice almalardan sonra)
+ALT_SUREC = AG_KAPALI + "import runpy, sys\nsys.argv = sys.argv[1:]\nrunpy.run_path(sys.argv[0], run_name='__main__')\n"   # alt surec: ag kapali + betik
 
 BU = Path(__file__).resolve().parent
 KOK = BU.parents[1]
@@ -89,7 +105,7 @@ def urun_oku():
 def sahte_sure(secenek, kurulum=20.0, mod='olcum', kimlik=None):
     """[sahte veri] olcum kosusu SURE kaydi (alanlar tam); kimlik = gercek urun girdisi + sabit kaynak sha'lari."""
     return dict(mod=mod, kimlik=kimlik or TD.kosu_kimligi(URUN_DOSYA), kurulum_sn=kurulum, toplam_sn=kurulum + sum(q['toplam_sn'] for q in secenek),
-                secenek=[dict(no=i, ad=f'SEC_{i:02d}_tekil', **q) for i, q in enumerate(secenek, 1)],
+                secenek=[dict(dict(no=i, ad=f'SEC_{i:02d}_tekil', kod=None), **q) for i, q in enumerate(secenek, 1)],
                 asama=dict(baslangic='2026-01-01T00:00:00Z', bitis='2026-01-01T00:05:00Z'))
 
 
@@ -104,6 +120,32 @@ def png_yaz(arr, yol, dpi=1087.0, icc=True, mod='RGB'):
 
 
 # ---------------------------------------------------------------- kaynaksiz testler
+def t_ag(td):
+    dener = td / 'ag_dener.py'
+    dener.write_text("import socket\nsocket.create_connection(('192.0.2.1', 9), 1)\n")
+    pr = subprocess.run([sys.executable, '-c', ALT_SUREC, str(dener)], capture_output=True, text=True)
+    k('test agi, ALT_SUREC on eki (bilinen FAIL yonu; inceleme 1b bulgu 2): bu on ekle kosan betik aga cikmaya calisirsa sifir olmayan cikis verir',
+      pr.returncode != 0 and 'gercek ag acilmaya calisildi' in pr.stderr, (pr.returncode, pr.stderr[-200:]))
+    sakin = td / 'ag_sakin.py'
+    sakin.write_text("import sys\nprint('tamam', len(sys.argv))\n")
+    pr = subprocess.run([sys.executable, '-c', ALT_SUREC, str(sakin), 'x'], capture_output=True, text=True)
+    k('test agi, ALT_SUREC on eki (bilinen PASS): aga cikmayan betik cikis 0; betik kendi argumanlarini gorur', pr.returncode == 0 and pr.stdout.strip() == 'tamam 2',
+      (pr.returncode, pr.stdout, pr.stderr[-200:]))
+    for ack, f in (('socket.create_connection', lambda: socket.create_connection(('192.0.2.1', 9), 1)), ('socket.socket', lambda: socket.socket()),
+                   ('socket.getaddrinfo', lambda: socket.getaddrinfo('ornek.invalid', 80)), ('urllib urlopen', lambda: urllib.request.urlopen('http://192.0.2.1/'))):
+        try:
+            f()
+            ok = False
+        except AssertionError as e:
+            ok = 'gercek ag' in str(e)
+        k(f'test agi (bilinen FAIL yonu): kapali aga {ack} cagrisi AssertionError verir (yakalanmazsa test FAIL eder)', ok)
+    pr = subprocess.run([sys.executable, '-c', AG_KAPALI + "socket.create_connection(('192.0.2.1', 9), 1)\n"], capture_output=True, text=True)
+    k('test agi, alt surec (bilinen FAIL yonu): ag kapatma on ekiyle kosan Python alt sureci aga cikmaya calisirsa sifir olmayan cikis verir',
+      pr.returncode != 0 and 'gercek ag acilmaya calisildi' in pr.stderr, (pr.returncode, pr.stderr[-200:]))
+    pr = subprocess.run([sys.executable, '-c', AG_KAPALI + "print('tamam')\n"], capture_output=True, text=True)
+    k('test agi, alt surec (bilinen PASS): aga cikmayan alt surec cikis 0', pr.returncode == 0 and pr.stdout.strip() == 'tamam')
+
+
 def t_urun():
     U = urun_oku()
     k('urun semasi: deneme girdisi dosyasi gecerli (yuvarlak 1087, varsayim etiketli)', TD.urun_dogrula(copy.deepcopy(U))['ad'] == 'DENEME_YUVARLAK_1087'
@@ -143,17 +185,29 @@ def t_urun():
 
 def t_butce():
     KIM = TD.kosu_kimligi(URUN_DOSYA)
-    S = sahte_sure([dict(durum='tamam', toplam_sn=23.0), dict(durum='tamam', toplam_sn=25.0), dict(durum='DUR', toplam_sn=90.0)])
+    S = sahte_sure([dict(durum='tamam', toplam_sn=23.0), dict(durum='tamam', toplam_sn=25.0), dict(durum='DUR', kod='renk_uyum_piksel', toplam_sn=90.0)])
     b = TD.butce_kontrol(11, S, 900, False, KIM)
-    k('[sahte veri] butce (bilinen PASS): 11 secenek, kurulum 20 + 11 x 25 = 295 sn <= 900; secenek suresi = tam cizimi bitenlerin EN BUYUGU (DUR veren haric)',
-      b['istek_sn'] == 295.0 and b['secenek_sn'] == 25.0 and b['sigan_en_buyuk'] == 35, b)
+    k('[sahte veri] butce (bilinen PASS): 11 secenek, kurulum 20 + 11 x 25 = 295 sn <= 900; secenek suresi = cizimi BITENLERIN en buyugu; cizimden ONCE DUR veren '
+      '(renk_uyum_piksel, 90 sn) hesaba GIRMEZ', b['istek_sn'] == 295.0 and b['secenek_sn'] == 25.0 and b['sigan_en_buyuk'] == 35, b)
+    S33 = sahte_sure([dict(durum='tamam', toplam_sn=23.0), dict(durum='DUR', kod='kapi_sert', toplam_sn=33.0), dict(durum='DUR', kod='tasma', toplam_sn=90.0)])
+    b33 = TD.butce_kontrol(11, S33, 900, False, KIM)
+    k('[sahte veri] butce (Serdar 12 Kas girdi kurali a): cizimi biten DUR secenegi (kapi_sert, 33 sn) hesaba GIRER: 20 + 11 x 33 = 383 sn; bilinen FAIL yonu: '
+      'ayni kayitta kod kapi_sert degilken (tasma) sure 23 sn kalir', b33['secenek_sn'] == 33.0 and b33['istek_sn'] == 383.0
+      and TD.butce_kontrol(11, sahte_sure([dict(durum='tamam', toplam_sn=23.0), dict(durum='DUR', kod='tasma', toplam_sn=33.0)]), 900, False, KIM)['secenek_sn'] == 23.0, b33)
+    k('[sahte veri] butce: yalniz cizimi biten DUR (kapi_sert) secenegi olan olcum kaydi kabul; 27 secenek x 33 + 20 = 911 sn > 900 -> girdi hatasi, sigan 26',
+      TD.butce_kontrol(26, sahte_sure([dict(durum='DUR', kod='kapi_sert', toplam_sn=33.0)]), 900, False, KIM)['sigan_en_buyuk'] == 26
+      and dur_mu(lambda: TD.butce_kontrol(27, sahte_sure([dict(durum='DUR', kod='kapi_sert', toplam_sn=33.0)]), 900, False, KIM), 'girdi_butce', True))
+    kim_k = dict(KIM, kod_sha256=dict(KIM['kod_sha256'], **{'tasarim_kapi.py': '0' * 64}))
+    k('[sahte veri] SURE kimligi (Serdar 12 Kas girdi kurali b): kimlikte kod sha256 var (2 kod dosyasi); kod sha256 farkliyken (bilinen FAIL) asil kosu baslamaz',
+      sorted(KIM['kod_sha256']) == ['tasarim_deneme.py', 'tasarim_kapi.py'] and all(len(v) == 64 for v in KIM['kod_sha256'].values())
+      and dur_mu(lambda: TD.butce_kontrol(2, S, 900, False, kim_k), 'girdi_butce', True) and TD.butce_kontrol(2, S, 900, False, KIM)['mod'] == 'asil')
     e = dur(lambda: TD.butce_kontrol(36, S, 900, False, KIM))
     k('[sahte veri] bilinen FAIL butce: 36 secenek (920 sn) > 900 -> uretmeden girdi hatasi; mesajda sigan en buyuk sayi 35', e is not None and e.kod == 'girdi_butce'
       and e.girdi and 'sigan en buyuk secenek sayisi 35' in e.neden and 'kirpilmadi' in e.neden, e)
     k('[sahte veri] butce sinirda: 35 secenek (895 sn) kabul', TD.butce_kontrol(35, S, 900, False, KIM)['istek_sn'] == 895.0)
     k('[sahte veri] bilinen FAIL butce: asil kosuda olcum SURE yok -> girdi hatasi', dur_mu(lambda: TD.butce_kontrol(2, None, 900, False, KIM), 'girdi_butce', True))
     k('[sahte veri] bilinen FAIL butce: olcum kosusunda tam cizimi biten secenek yok -> girdi hatasi',
-      dur_mu(lambda: TD.butce_kontrol(2, sahte_sure([dict(durum='DUR', toplam_sn=5.0)]), 900, False, KIM), 'girdi_butce', True))
+      dur_mu(lambda: TD.butce_kontrol(2, sahte_sure([dict(durum='DUR', kod='tasma', toplam_sn=5.0)]), 900, False, KIM), 'girdi_butce', True))
     k('olcum kosusu: en cok 3 secenek', TD.butce_kontrol(3, None, 900, True)['mod'] == 'olcum' and dur_mu(lambda: TD.butce_kontrol(4, None, 900, True), 'girdi_butce', True))
     k('sabit: yerel butce 900 sn (Serdar 11 Kas soru 14 "A")', TD.BUTCE_SN == 900)
     k('[sahte veri] bilinen FAIL butce ust siniri (inceleme 1. tur bulgu 6): butce 901 sn verilemez (asil ve olcum kosusunda girdi hatasi); 600 sn (kucultme) kabul',
@@ -167,7 +221,7 @@ def t_butce():
       and dur_mu(lambda: TD.butce_kontrol(2, S, 900, False, None), 'girdi_butce', True))
     k('[sahte veri] sure kaydi (bilinen PASS): alanlar tam, bitis >= baslangic', TD.sure_dogrula(copy.deepcopy(S))['mod'] == 'olcum')
     for ack, boz in (('eksik alan kurulum_sn', lambda d: d.pop('kurulum_sn')), ('eksik alan asama', lambda d: d.pop('asama')), ('eksik alan kimlik', lambda d: d.pop('kimlik')),
-                     ('secenek kaydinda toplam_sn yok', lambda d: d['secenek'][0].pop('toplam_sn')), ('bitis baslangictan once', lambda d: d['asama'].update(bitis='2025-12-31T23:59:59Z')),
+                     ('secenek kaydinda toplam_sn yok', lambda d: d['secenek'][0].pop('toplam_sn')), ('secenek kaydinda kod yok', lambda d: d['secenek'][0].pop('kod')), ('bitis baslangictan once', lambda d: d['asama'].update(bitis='2025-12-31T23:59:59Z')),
                      ('negatif sure', lambda d: d.update(toplam_sn=-1.0)), ('bos secenek listesi', lambda d: d.update(secenek=[]))):
         d = copy.deepcopy(S)
         boz(d)
@@ -209,6 +263,17 @@ def t_olcer_sahte():
     yakin = dict(sembol=M_ic['a'], isim=KP.tuvale(ic, 400, 532, W, H))      # 2 px aralik: takvim tanimi 0, ornament (sembol 7 x 7 genisletme) > 0
     k('[sahte veri] iki tanim ayri olcer: 2 px aralikli oge takvim taniminda 0, ornament taniminda (7 x 7) cift verir',
       KP.cakisma_takvim([('isim', yakin['isim']), ('sembol', yakin['sembol'])]) == 0 and list(KP.cakisma_ornament(yakin)) == ['sembol/isim'])
+    cp = KP.cift_px_olc(dict(a=ust['a'], b=ust['b'], c=M_ic['b']))
+    k('[sahte veri] BILGI cift basina cakisma: binen cift = iki maskenin kesisim pikseli (> 0), ayrik ciftler 0; butun ciftler adlariyla',
+      cp == {'a/b': int(((ust['a'] > 0.02) & (ust['b'] > 0.02)).sum()), 'a/c': 0, 'b/c': 0} and cp['a/b'] > 0, cp)
+    kare = np.ones((10, 10), np.float32)
+    My = dict(isimler=M_ic['a'], kucuk1=KP.tuvale(kare, 300, 510, W, H), kucuk2=KP.tuvale(kare, 420, 510, W, H))   # isim murekkebi x 405 - 594, y 505 - 534
+    ky = KP.kucuk_yazi_olc(My, ['isimler'])
+    k('[sahte veri] BILGI kucuk burc - yazi en az uzakligi: 96 px uzaktaki kucuk1 -> 96,0; yaziya binen kucuk2 -> 0 (binme)',
+      ky == {'kucuk1/isimler': 96.0, 'kucuk2/isimler': 0.0}, ky)
+    k('[sahte veri] bilinen FAIL yonu: kucuk1 5 px yaklasinca uzaklik 91,0 olur (olcum yere duyarli); murekkebi olmayan yazi maskesi atlanir',
+      KP.kucuk_yazi_olc(dict(My, kucuk1=KP.tuvale(kare, 305, 510, W, H)), ['isimler'])['kucuk1/isimler'] == 91.0
+      and KP.kucuk_yazi_olc(dict(My, metin_1=np.zeros((H, W), np.float32)), ['isimler', 'metin_1']) == ky)
     cubuk = np.zeros((40, 160), np.uint8); cubuk[12:36, 8:152] = 1
     w = KP.sirt_genislik(cubuk, 4)
     k('[sahte veri] sirt genisligi: 4 kat ornekli 24 px cubuk -> en ince ~ 5,75 px (2 x (12 - 0,5) / 4)', abs(float(w.min()) - 5.75) < 0.01, float(w.min()))
@@ -244,9 +309,10 @@ def sahte_ozet(td, n_tamam=2):
             s['png_sha256'] = TD.sha_dosya(td / f"{s['ad']}.png")
             s['olcum_ozet'] = dict(yazi_en_kucuk_mm=0.8, isim_kuculme=1.0, cizgi_mm=dict(en_ince=0.01, p1=0.02, ortanca=0.06),
                                    sinir_alti=dict(yazi=2, cizgi_en_ince=7, cizgi_p1=7, cizgi_ortanca=6), tasma_px=dict(isik_0=11, isik_8=22, goruntu_farki=33, tuval_disi=0),
-                                   cakisma=dict(takvim_px=692, ornament_cift=2, ornament_px=1067), grup_yazi_en_az_px=44.2, cikti='PASS', olcer_fail=['cakisma'])
+                                   cakisma=dict(takvim_px=692, ornament_cift=2, ornament_px=1067), grup_yazi_en_az_px=44.2, cikti='PASS', olcer_fail=['cakisma'],
+                                   cift_px={'isimler/metin_1': 0, 'kucuk1/sembol': 315, 'kucuk2/sembol': 377}, kucuk_yazi_px=dict(isim=30.5, metin=120.0), isim_guvenli_disinda=False)
         else:
-            s['olcum_ozet'] = dict(sert_fail=['2_grup'])
+            s['olcum_ozet'] = dict(sert_fail=['2_grup'], kok_neden='grup ogesi tuvalden tasiyor: halka; konum farki 10.665 px', kapi2_boyut_fark=0.188)
         sec.append(s)
     return dict(urun=U, taban='B1', taban_etiket=TD.B1_ETIKET, geri_donus=['isim_duzen iki_yan -> tek_satir'], mm_px=TD.mm_px(U), secenek=sec)
 
@@ -264,7 +330,17 @@ def t_pafta_sahte(td):
       any('isik 0: 11' in e and 'isik 8: 22' in e and 'goruntu farki: 33' in e for e in E) and any('takvim tanimi 692 px' in e and '2 cift, 1067 px' in e for e in E)
       and any('cikti kapisi PASS' in e for e in E) and any('logo=1.0' in e for e in E)
       and not any(s_ in ' '.join(E).lower() for s_ in ('onerilen', 'en iyi', 'puan', 'tavsiye')), E)
+    k('[sahte veri] hucre etiketi (dilim 1b): cakisan cift adlari + pikselleri (0 olan cift etikete yazilmaz), kucuk burc - yazi en az uzakligi; K3 notu yalniz isim '
+      'guvenli alanin disindayken', 'cakisan cift px (alfa > 0,02): kucuk1/sembol 315, kucuk2/sembol 377' in E and 'kucuk burc - yazi en az uzaklik px: isim 30.5 | metin 120.0' in E
+      and 'isim guvenli alan disinda' not in E
+      and 'isim guvenli alan disinda' in TD.etiket_satirlari(dict(oz['secenek'][1], olcum_ozet=dict(oz['secenek'][1]['olcum_ozet'], isim_guvenli_disinda=True))), E)
     Ed = TD.etiket_satirlari(oz['secenek'][2], 'varsayım')
+    k('[sahte veri] K2 etiketi hucrede: DUR kaydinda kok neden varsa yazar; yoksa (bilinen FAIL yonu) yazmaz; kapi kodu ayni kalir',
+      'grup ogesi tuvalden tasiyor: halka; konum farki 10.665 px' in Ed and 'DUR kapi_sert: 2_grup' in Ed
+      and not any('tuvalden tasiyor' in e for e in TD.etiket_satirlari(dict(oz['secenek'][2], olcum_ozet=dict(sert_fail=['2_grup'], kok_neden=None)))), Ed)
+    k('[sahte veri] K1: DUR veren secenegin hucresinde olculen boy kosulu farki yazar; olcum yoksa (bilinen FAIL yonu) satir yok',
+      'kapi 2 boy kosulu farki 0.188 px' in Ed
+      and not any('boy kosulu' in e for e in TD.etiket_satirlari(dict(oz['secenek'][2], olcum_ozet=dict(sert_fail=['2_grup'], kok_neden=None, kapi2_boyut_fark=None)))), Ed)
     k('[sahte veri] sert DUR veren secenegin hucre etiketi: "DUR" + kapi kodu + kapi adi (secenek gizlenmez); neden satiri kesilmez',
       'DUR kapi_sert: 2_grup' in Ed and 'sert kapi FAIL: 2_grup' in Ed, Ed)
     k('[sahte veri] mm kaynagi "varsayim" etiketi HUCREDE (plan 5.1); kaynak resmi iken yok (bilinen FAIL yonu)',
@@ -409,7 +485,26 @@ def t_ayar():
       and sec[6]['ayar']['halka_r'] == 0.884 and sec[6]['ayar']['grup_y'] == 0.071 and sec[2]['ayar']['halka_r'] == round(0.884 * 0.85, 6)
       and sec[10]['ayar']['grup_y'] == round(0.071 + 0.05, 6) and sec[6]['degisen'] == dict(halka_r=0.884, grup_y=0.071))
     k('izgaranin taban hucresi (x1,00 / 0) tabanla ayni ayar (yeniden uretilir)', sec[6]['ayar'] == sec[0]['ayar'])
-    ikot = [('taban yok', dict(tekil=[{}])), ('bilinmeyen alan', dict(taban='B1', tekil=[{}], sira=[2, 1])), ('secenek yok', dict(taban='B1')),
+    gk_ = TD.istek_kur(dict(taban='B1', tekil=[{}], izgara=dict(kucuk_oran_carpan=[0.8, 1.0, 1.2], kucuk_v_fark=[-0.08, 0, 0.08, 0.16, 0.24, 0.32])))
+    k('kucuk burc izgarasi (Serdar 12 Kas): 1 tekil + 3 x 6 = 19 secenek; adlar SEC_NN_kucuk; satir = boyut adimi (kucuk_oran carpani), sutun = yer adimi '
+      '(kucuk_v farki); hucre ayari tabandan YALNIZ kucuk_oran / kucuk_v ile ayrilir',
+      len(gk_) == 19 and all(q['tur'] == 'kucuk' and q['ad'] == f"SEC_{q['no']:02d}_kucuk" for q in gk_[1:])
+      and [(q['satir'], q['sutun']) for q in gk_[1:]] == [(i, j) for i in range(3) for j in range(6)]
+      and [q['ayar']['kucuk_v'] for q in gk_[1:7]] == [0.29, 0.37, 0.45, 0.53, 0.61, 0.69] and [gk_[i]['ayar']['kucuk_oran'] for i in (1, 7, 13)] == [0.8, 1.0, 1.2]
+      and all({k_ for k_ in q['ayar'] if q['ayar'][k_] != gk_[0]['ayar'][k_]} <= {'kucuk_oran', 'kucuk_v'} for q in gk_[1:]), [q['ad'] for q in gk_[:3]])
+    k('kucuk burc izgarasinin taban hucresi (carpan 1,0; fark 0) tabanla TAM ayni ayar', gk_[8]['ayar'] == gk_[0]['ayar'] and gk_[8]['satir'] == 1 and gk_[8]['sutun'] == 1)
+    TD.TABAN['T_GRUP'] = dict(TD.TABAN['B1'], grup_merkez='grup')
+    try:
+        k('[sahte veri] bilinen FAIL kucuk burc izgarasi: taban halka merkez modunda degilse girdi hatasi ("tek oge degisir" yalniz halka_r + halka merkezde)',
+          dur_mu(lambda: TD.istek_kur(dict(taban='T_GRUP', izgara=dict(kucuk_oran_carpan=[1.0], kucuk_v_fark=[0]))), 'girdi_istek', True))
+    finally:
+        del TD.TABAN['T_GRUP']
+    ikot = [('taban yok', dict(tekil=[{}])),
+            ('iki izgara turu birlikte', dict(taban='B1', izgara=dict(halka_r_carpan=[1], grup_y_fark=[0], kucuk_oran_carpan=[1], kucuk_v_fark=[0]))),
+            ('izgara turleri karisik (halka_r_carpan + kucuk_v_fark)', dict(taban='B1', izgara=dict(halka_r_carpan=[1], kucuk_v_fark=[0]))),
+            ('kucuk burc izgarasi eksik eksen', dict(taban='B1', izgara=dict(kucuk_oran_carpan=[1]))),
+            ('kucuk burc izgarasi aralik disi (kucuk_v 0,37 - 0,20 = 0,17 < 0,20)', dict(taban='B1', izgara=dict(kucuk_oran_carpan=[1.0], kucuk_v_fark=[-0.20]))),
+            ('kucuk burc izgarasi aralik disi (kucuk_oran x 2 = 2,0 > 1,8)', dict(taban='B1', izgara=dict(kucuk_oran_carpan=[2.0], kucuk_v_fark=[0]))), ('bilinmeyen alan', dict(taban='B1', tekil=[{}], sira=[2, 1])), ('secenek yok', dict(taban='B1')),
             ('tekil icinde taban', dict(taban='B1', tekil=[dict(taban='B1')])), ('izgara bilinmeyen anahtar', dict(taban='B1', izgara=dict(isim_cap_carpan=[1], grup_y_fark=[0]))),
             ('izgara 8 deger', dict(taban='B1', izgara=dict(halka_r_carpan=[1, 2, 3, 4, 5, 6, 7, 8], grup_y_fark=[0]))),
             ('izgara yinelenen deger', dict(taban='B1', izgara=dict(halka_r_carpan=[1, 1], grup_y_fark=[0]))),
@@ -511,10 +606,21 @@ def t_motor(K, katman, td):
       and (cA / 'AYAR.json').is_file() and (cA / oz['pafta']['dosya']).stat().st_size <= TD.PAFTA_AZAMI_BAYT and oz['pafta']['hucre'] == 1)
     sj = json.loads((cA / 'SURE.json').read_text())
     k('GERCEK sure kaydi (bilinen PASS): kosunun yazdigi SURE.json alanlari tam, bitis >= baslangic, mod olcum, kimlik = urun girdisi + kaynak sha',
-      TD.sure_dogrula(copy.deepcopy(sj))['mod'] == 'olcum' and sj['kimlik'] == TD.kosu_kimligi(URUN_DOSYA) and sj['secenek'][0]['durum'] == 'tamam')
+      TD.sure_dogrula(copy.deepcopy(sj))['mod'] == 'olcum' and sj['kimlik'] == TD.kosu_kimligi(URUN_DOSYA) and sj['secenek'][0]['durum'] == 'tamam'
+      and sj['secenek'][0]['kod'] is None and sj['kimlik']['kod_sha256'] == oz['kod_sha256'] and sj['cizimi_biten_en_cok_sn'] == sj['secenek'][0]['toplam_sn'])
     k('GERCEK: olcer kapilar PASS (tek doku dE00 <= 2, kontrast >= 4,5, yazim farki, duz renk, yildiz, oge sayisi, grup - yazi >= 12 px, metin tabani, '
-      'metin genisligi, cikti, tasma)', all(ol[q]['PASS'] for q in ('tek_doku', 'kontrast', 'yazim', 'duz_renk', 'yildiz', 'oge_sayisi', 'grup_yazi',
-                                                                  'metin_taban', 'metin_genis', 'cikti', 'tasma')), {q: ol[q]['PASS'] for q in ol})
+      'metin genisligi, tasma)', all(ol[q]['PASS'] for q in ('tek_doku', 'kontrast', 'yazim', 'duz_renk', 'yildiz', 'oge_sayisi', 'grup_yazi',
+                                                             'metin_taban', 'metin_genis', 'tasma')), {q: ol[q]['PASS'] for q in ol})
+    k('GERCEK K4 (bilinen PASS): cikti kapisi SERT listede ve PASS (1087 x 1087, dpi etiketi, RGB, sRGB); olcer listesinde yok',
+      om['kapi']['sert']['cikti']['PASS'] and 'cikti' not in ol and om['ozet']['cikti'] == 'PASS' and sorted(om['kapi']['sert']) == ['2_grup', '2_sembol', 'cikti'])
+    bl = om['bilgi']
+    k('GERCEK BILGI olcumleri (esik yok): cift basina cakisma: sembol - kucuk burc ciftleri > 0 ve toplami = takvim tanimi (B1 bilinen cakisma); isim - metin 0; '
+      'kucuk burc - yazi en az uzakligi > 0; OZET kaydinda cift adlari, ornament ciftleri ve yerlesen yildiz sayisi',
+      bl['cift_px']['kucuk1/sembol'] > 0 and bl['cift_px']['kucuk2/sembol'] > 0 and bl['cift_px']['isimler/metin_1'] == 0
+      and sum(bl['cift_px'].values()) == ol['cakisma']['takvim_binme_piksel'] and len(bl['cift_px']) == 21
+      and om['ozet']['cift_px'] == bl['cift_px'] and om['ozet']['kucuk_yazi_px']['isim'] == min(bl['kucuk_yazi_uzaklik']['kucuk1/isimler'], bl['kucuk_yazi_uzaklik']['kucuk2/isimler']) > 0
+      and om['ozet']['kucuk_yazi_px']['metin'] > 0 and om['ozet']['cakisma']['ornament_ciftler'] == ol['cakisma']['ornament_cift']
+      and om['ozet']['yildiz_sayi'] == ol['yildiz']['sayi'] > 0 and sA['olcum_ozet']['yildiz_sayi'] == ol['yildiz']['sayi'], (bl['cift_px'], om['ozet']['kucuk_yazi_px']))
     k('GERCEK bilinen FAIL (olcer; gorsel VAR): B1 BILINEN CAKISMA: kucuk burclar ana sembole biner -> takvim tanimi > 0 px, ornament tanimi sembol / kucuk ciftleri',
       (not ol['cakisma']['PASS']) and ol['cakisma']['takvim_binme_piksel'] > 0 and 'sembol/kucuk1' in ol['cakisma']['ornament_cift']
       and 'sembol/kucuk2' in ol['cakisma']['ornament_cift'] and (cA / 'SEC_01_tekil.png').is_file(), ol['cakisma'])
@@ -659,10 +765,10 @@ def t_motor(K, katman, td):
       (not okm) and ayr.get('zemin') == [(1151, 1151)] and ayr.get('boya') == [(1151, 1151, 3)] and tuple(ayr.get('png', ())) == (1151, 1151) and 'fark' not in ayr, ayr)
     # 2. halka AYRI SUREC (plan 5.1; inceleme 1. tur bulgu 8): komut satirindan yeni surecte yeniden uretim
     cB2 = td / 'B2'
-    pr = subprocess.run([sys.executable, str(BU / 'tasarim_deneme.py'), 'uret', '--kaynak', KS, '--ozet', str(cA / 'OZET.json'), '--secenek', '1',
+    pr = subprocess.run([sys.executable, '-c', ALT_SUREC, str(BU / 'tasarim_deneme.py'), 'uret', '--kaynak', KS, '--ozet', str(cA / 'OZET.json'), '--secenek', '1',
                          '--katman', str(katman), '--cikti', str(cB2)], capture_output=True, text=True)
     yj2 = json.loads((cB2 / 'SEC_01_tekil_YENIDEN.json').read_text()) if (cB2 / 'SEC_01_tekil_YENIDEN.json').is_file() else {}
-    k("2. halka AYRI SUREC: `uret` komutu yeni Python surecinde ayni PNG sha256'yi verir (cikis 0)",
+    k("2. halka AYRI SUREC (ag kapali on ekle): `uret` komutu yeni Python surecinde ayni PNG sha256'yi verir (cikis 0)",
       pr.returncode == 0 and yj2.get('ayni') is True and yj2.get('png_sha256') == sA['png_sha256'], (pr.returncode, yj2, pr.stdout[-300:]))
 
     # --- C: degisen ayar -> farkli cikti (B1 logosuz); bilinen cakisma B1 tabaninda da var
@@ -805,21 +911,27 @@ def t_motor(K, katman, td):
         k(f'[bozulmus gercek veri] bilinen FAIL olcer {q}: {ack} -> FAIL (ayni kapi gercek veride PASS' + (')' if q != 'isim' else ' degil: alt sinir; burada genislik kosulu)'),
           not ob[q]['PASS'], {a_: b_ for a_, b_ in ob[q].items() if not isinstance(b_, (dict, list))})
     k('[bozulmus gercek veri] isim genisligi > sinir (genislik kosulu gercekten olculdu)', ob['isim']['genislik'] > ob['isim']['sinir'])
-    # cikti kapisi OLCER (Serdar soru 6 "c"): profilsiz dosyada OLCUM'da FAIL, sert FAIL yok (gorsel kalir)
+    # cikti kapisi SERT (Serdar 12 Kas K4; dilim 1'de olcerdi: bu testler o yuzden degisti). Sert FAIL listesi YALNIZ 'cikti', kapi 2 sembol PASS.
+    def cikti_sert(o_):
+        return bool((not o_['kapi']['sert']['cikti']['PASS']) and o_['ozet']['sert_fail'] == ['cikti'] and o_['ozet']['durum'] == 'DUR'
+                    and o_['ozet']['cikti'] == 'FAIL' and o_['kapi']['sert']['2_sembol']['PASS'] and o_['kapi']['sert']['2_grup']['PASS']
+                    and o_['ozet']['kok_neden'] is None)
     png4 = td / 'profilsiz_gercek.png'
     png_yaz(img, png4, icc=False)
-    o4_ = asil['olc'](dict(veri, png=png4))
-    k('[bozulmus gercek veri] cikti kapisi OLCER (madde c): profilsiz son gorsel -> OLCUM cikti FAIL, sert FAIL listesi bos (gorsel durdurulmaz), etikette "cikti FAIL"',
-      (not o4_['kapi']['olcer']['cikti']['PASS']) and o4_['ozet']['sert_fail'] == [] and o4_['ozet']['durum'] == 'tamam' and o4_['ozet']['cikti'] == 'FAIL'
-      and 'cikti' in o4_['ozet']['olcer_fail'])
+    k('[bozulmus gercek veri] K4 bilinen FAIL: profilsiz son gorsel -> sert FAIL listesi yalniz cikti, durum DUR (kapi 2 PASS)', cikti_sert(asil['olc'](dict(veri, png=png4))))
     png5 = td / 'dpi300_gercek.png'
     png_yaz(img, png5, dpi=300.0)
     o5_ = asil['olc'](dict(veri, png=png5, urun=dict(U, alt_sinir=dict(yazi_mm=0.95, cizgi_mm=0.2))))
-    k('[bozulmus gercek veri] cikti kapisi OLCER: yanlis dpi etiketli dosya -> cikti FAIL, gorsel kalir', (not o5_['kapi']['olcer']['cikti']['PASS']) and o5_['ozet']['durum'] == 'tamam')
+    k('[bozulmus gercek veri] K4 bilinen FAIL: yanlis dpi etiketli dosya -> sert FAIL listesi yalniz cikti, durum DUR', cikti_sert(o5_))
     png6 = td / 'rgba_gercek.png'
     png_yaz(img, png6, mod='RGBA')
-    o8_ = asil['olc'](dict(veri, png=png6))
-    k('[bozulmus gercek veri] cikti kapisi OLCER: RGBA dosya -> cikti FAIL, sert FAIL yok', (not o8_['kapi']['olcer']['cikti']['PASS']) and o8_['ozet']['sert_fail'] == [])
+    k('[bozulmus gercek veri] K4 bilinen FAIL: RGBA dosya -> sert FAIL listesi yalniz cikti, durum DUR', cikti_sert(asil['olc'](dict(veri, png=png6))))
+    png7 = td / 'boyut_gercek.png'
+    png_yaz(img[:, :1000], png7)
+    k('[bozulmus gercek veri] K4 bilinen FAIL: sembolu kesmeyen yanlis boyut (1000 x 1087) -> sert FAIL listesi yalniz cikti, durum DUR', cikti_sert(asil['olc'](dict(veri, png=png7))))
+    o_iyi = asil['olc'](dict(veri, png=cB / 'SEC_01_tekil.png'))
+    k('[gercek veri] K4 bilinen PASS: degismemis son gorsel -> cikti PASS, sert FAIL bos, durum tamam', o_iyi['kapi']['sert']['cikti']['PASS'] and o_iyi['ozet']['sert_fail'] == []
+      and o_iyi['ozet']['durum'] == 'tamam')
 
     def w_olc_boyut(v):                                                       # uretim icinde: KAYDEDILEN dosya 1000 x 1087'ye kirpilir, sonra GERCEK olc
         im_ = Image.open(v['png']); im_.load()
@@ -831,17 +943,24 @@ def t_motor(K, katman, td):
     finally:
         KP.olc = asil['olc']
     ob5 = json.loads((td / 'boyut' / 'SEC_01_tekil_OLCUM.json').read_text(encoding='utf-8'))
-    k('cikti kapisi OLCER, URETIM ICINDE (madde c; inceleme 1. tur bulgu 5): yanlis boyutlu (1000 x 1087) kaydedilmis dosya -> cokme yok, OLCUM cikti FAIL, '
-      'sert FAIL bos, secenek tamam, gorsel VAR',
-      rb5['durum'] == 'tamam' and (td / 'boyut' / 'SEC_01_tekil.png').is_file() and Image.open(td / 'boyut' / 'SEC_01_tekil.png').size == (1000, 1087)
-      and (not ob5['kapi']['olcer']['cikti']['PASS']) and ob5['kapi']['olcer']['cikti']['tuval_boyut_farki'] and ob5['ozet']['cikti'] == 'FAIL'
-      and ob5['ozet']['sert_fail'] == [], (rb5['durum'], rb5['kod'], ob5['ozet'].get('olcer_fail')))
+    k('K4, URETIM ICINDE tam yol: yanlis boyutlu (1000 x 1087) kaydedilmis dosya -> cokme yok, secenek DUR kapi_sert (cikti), son gorsel SILINDI, onizleme yok, '
+      'OLCUM kaydinda sert FAIL yalniz cikti; hucre kodu "kapi_sert: cikti"',
+      rb5['durum'] == 'DUR' and rb5['kod'] == 'kapi_sert' and rb5['png_sha256'] is None and not (td / 'boyut' / 'SEC_01_tekil.png').exists()
+      and not (td / 'boyut' / 'SEC_01_tekil_onizleme.jpg').exists() and ob5['ozet']['sert_fail'] == ['cikti'] and ob5['kapi']['sert']['cikti']['tuval_boyut_farki']
+      and TD.dur_kodu(rb5) == 'kapi_sert: cikti' and 'DUR kapi_sert: cikti' in TD.etiket_satirlari(rb5), (rb5['durum'], rb5['kod'], rb5['neden']))
     o6_ = asil['olc'](dict(veri, urun=dict(U, alt_sinir=dict(yazi_mm=0.93, cizgi_mm=0.2))))
     k('mm uyarisi esigin iki yaninda [varsayim girdisi; yalniz formul]: isim 0,942 mm, sinir 0,95 iken isaretli, 0,93 iken isaretsiz',
       o5_['oge']['isimler']['yazi_sinir_alti'] and not o6_['oge']['isimler']['yazi_sinir_alti'] and o6_['oge']['metin_1']['yazi_sinir_alti'])
     o7_ = asil['olc'](dict(veri, urun={k_: v_ for k_, v_ in U.items() if k_ != 'alt_sinir'}))
     k('alt sinir tanimsiz urun: uyari uretilmez, OLCUM "sinir tanimsiz" yazar, gercek olcu PASS', o7_['kapi']['olcer']['gercek_olcu']['PASS']
       and o7_['kapi']['olcer']['gercek_olcu']['not_'] == 'sinir tanimsiz' and o7_['kapi']['olcer']['isim']['alt_sinir_px'] is None)
+
+    u_as = {k_: v_ for k_, v_ in U.items() if k_ != 'alt_sinir'}
+    o9_ = asil['olc'](dict(veri, urun=u_as, isim=dict(veri['isim'], guvenli_disinda=True)))
+    k('[bozulmus gercek veri] K3 isim olceri: alt sinir tanimsizken isim olceri PASS (bilinen PASS, ustteki olcum); ayni veride "guvenli alanin disinda" isaretliyse FAIL '
+      '(FAIL nedeni alt sinir degil, K3 kosulu) ve OLCUM ozetinde not var; sert FAIL yok',
+      o7_['kapi']['olcer']['isim']['PASS'] and (not o9_['kapi']['olcer']['isim']['PASS']) and o9_['kapi']['olcer']['isim']['guvenli_disinda']
+      and o9_['ozet']['isim_guvenli_disinda'] and 'isim' in o9_['ozet']['olcer_fail'] and o9_['ozet']['sert_fail'] == [])
 
     # --- tek oge degisir: birlestirme ONCESI katmanda (plan 4.2; gorev B4)
     def ayar(**f):
@@ -880,6 +999,113 @@ def t_motor(K, katman, td):
       np.array_equal(b1['m'], b2['m']) and not np.array_equal(b1['rgb'], b2['rgb']))
     k('ayni girdiyle motor katmani bayt bayt ayni (belirlenimcilik)', np.array_equal(b1['rgb'], isim_kucuk(40.3)['rgb']))
 
+    # --- K2 etiketi (Serdar 12 Kas): tuvalden tasan grup ogesi DUR vermeye DEVAM eder; kapi sonucu / kodu ayni; kok neden etikette ve OZET kaydinda
+    kt = {}
+
+    def w_olc_tasan(v):
+        shutil.copyfile(v['png'], td / 'tasan_kopya.png')
+        kt['veri'] = v
+        return asil['olc'](v)
+    sec_t = TD.istek_kur(dict(taban='B1', tekil=[dict(halka_r=1.0166)]))[0]
+    KP.olc = w_olc_tasan
+    try:
+        rt = TD.secenek_uret(ort, sec_t, td / 'tasan')
+    finally:
+        KP.olc = asil['olc']
+    ozt = rt.get('olcum_ozet') or {}
+    kn = ozt.get('kok_neden')
+    k('GERCEK K2: halka tuvalden tasiyor (halka_r 1,0166) -> secenek DUR kapi_sert, sert FAIL yalniz 2_grup (AYNEN), gorsel yok; kok neden OZET kaydinda ve hucre '
+      'etiketinde: "grup ogesi tuvalden tasiyor: halka; konum farki <kapi degeri> px"; boy kosulu farki yine yazili',
+      rt['durum'] == 'DUR' and rt['kod'] == 'kapi_sert' and ozt.get('sert_fail') == ['2_grup'] and not (td / 'tasan' / 'SEC_01_tekil.png').exists()
+      and kn == f"grup ogesi tuvalden tasiyor: halka; konum farki {ozt.get('kapi2_konum_fark')} px" and ozt.get('kapi2_konum_fark') > 1.0
+      and kn in TD.etiket_satirlari(rt) and TD.dur_kodu(rt) == 'kapi_sert: 2_grup' and ozt.get('kapi2_boyut_fark') is not None and ozt['kapi2_boyut_fark'] <= 2.0, (rt['kod'], kn))
+    vt = kt.get('veri')
+    if vt is None:
+        k('K2 kosu verisi alindi', False)
+        return
+    ot1 = asil['olc'](dict(vt, png=td / 'tasan_kopya.png'))
+    k('K2 kontrol: ayni kosu verisiyle olcum yeniden -> ayni kok neden (asagidaki bozulmalarin karsilastirma tabani)', ot1['ozet']['kok_neden'] == kn and ot1['ozet']['sert_fail'] == ['2_grup'])
+    png_t = td / 'tasan_profilsiz.png'
+    png_yaz(np.asarray(Image.open(td / 'tasan_kopya.png').convert('RGB')), png_t, icc=False)
+    ot2 = asil['olc'](dict(vt, png=png_t))
+    k('[bozulmus gercek veri] bilinen FAIL yonu K2 etiketi: baska sert FAIL de varken (2_grup + cikti) kok neden YAZILMAZ',
+      sorted(ot2['ozet']['sert_fail']) == ['2_grup', 'cikti'] and ot2['ozet']['kok_neden'] is None, ot2['ozet']['sert_fail'])
+    vt2 = dict(vt, png=td / 'tasan_kopya.png')
+    vt2['grup_oge'] = [dict(o) for o in vt['grup_oge']]
+    vt2['grup_oge'][1]['x'] += 2                                              # kucuk1: KIRPILMAMIS oge, 2 px kaymis -> yeniden kurulumda o da duser
+    ot3 = asil['olc'](vt2)
+    k('[bozulmus gercek veri] bilinen FAIL yonu K2 etiketi: kirpilmamis bir oge (kucuk1) de dusmusken kok neden YAZILMAZ (sert FAIL yine yalniz 2_grup)',
+      ot3['ozet']['sert_fail'] == ['2_grup'] and ot3['ozet']['kok_neden'] is None and not ot3['kapi']['sert']['2_grup']['oge']['kucuk1']['yer_ayni']
+      and 'kucuk1' not in vt['tuval_kirpilan'] and vt['tuval_kirpilan'] == ['halka'], (ot3['ozet']['sert_fail'], ot3['ozet']['kok_neden']))
+    k('bilinen FAIL yonu K2 etiketi (GERCEK uretim): kirpilma yokken dusen 2_grup (merkezi 3 px kaymis uretim) kok neden YAZMAZ',
+      rk3['olcum_ozet']['sert_fail'] == ['2_grup'] and rk3['olcum_ozet']['kok_neden'] is None and not any('tuvalden tasiyor' in e_ for e_ in TD.etiket_satirlari(rk3)))
+
+    # --- kucuk burc izgarasi: "tek oge degisir" GERCEK uretim verisiyle (kapi olcumunden once kesilir) + taban hucresi = taban
+    gk_ = TD.istek_kur(dict(taban='B1', izgara=dict(kucuk_oran_carpan=[0.8, 1.0, 1.2], kucuk_v_fark=[-0.08, 0, 0.08, 0.16, 0.24, 0.32])))
+
+    def veri_al(sec_, ad_):
+        kv = {}
+
+        def w_(v):
+            kv['veri'] = v
+            kv['sha'] = TD.sha_dosya(v['png'])
+            raise Kes()
+        KP.olc = w_
+        try:
+            try:
+                TD.secenek_uret(ort, sec_, td / ad_)
+            except Kes:
+                pass
+        finally:
+            KP.olc = asil['olc']
+        return kv
+    kb, kh = veri_al(gk_[7], 'kb'), veri_al(gk_[17], 'kh')                   # taban hucresi (x1,0; fark 0) ve kose hucresi (x1,2; +0,32)
+
+    def oge3(v, ad_):
+        o = next(o for o in v['ogeler'] + v['grup_oge'] if o['ad'] == ad_)
+        return o['A'], o['x'], o['y']
+
+    def motor3(v, ad_):                                                       # k kat cizim katsayisi ve motor katmaninin alfasi (inceleme 1b bulgu 3)
+        o = next(o for o in v['ogeler'] + v['grup_oge'] if o['ad'] == ad_)
+        return o['atest'], int(o['k']), 0
+
+    def smb(v):
+        return v['sembol']['a'], v['sembol']['x'], v['sembol']['y']
+
+    def ayni3(p_, q_):
+        return bool(p_[0].shape == q_[0].shape and np.array_equal(p_[0], q_[0]) and p_[1:] == q_[1:])
+    if 'veri' not in kb or 'veri' not in kh:
+        k('kucuk burc izgarasi kosu verisi alindi', False)
+        return
+    vb_, vh_ = kb['veri'], kh['veri']
+    k('tek oge degisir, kucuk burc izgarasi (GERCEK uretim verisi; kucuk_oran x1,2 + kucuk_v 0,69): sembol (maske, renk, yer), halka, isimler ve metin_1 maskeleri, '
+      'yerleri, k katsayilari ve motor katmani alfalari AYNI (halka_r degisen kosuda halkaninki farkli: karsilastirma FAIL verebiliyor); kucuk1 ve kucuk2 maskeleri DEGISIR',
+      gk_[17]['ayar']['kucuk_oran'] == 1.2 and gk_[17]['ayar']['kucuk_v'] == 0.69 and ayni3(smb(vb_), smb(vh_)) and np.array_equal(vb_['sembol']['rgb'], vh_['sembol']['rgb'])
+      and all(ayni3(oge3(vb_, a_), oge3(vh_, a_)) and ayni3(motor3(vb_, a_), motor3(vh_, a_)) for a_ in ('halka', 'isimler', 'metin_1'))
+      and not ayni3(motor3(vb_, 'halka'), motor3(vt, 'halka'))
+      and not ayni3(oge3(vb_, 'kucuk1'), oge3(vh_, 'kucuk1')) and not ayni3(oge3(vb_, 'kucuk2'), oge3(vh_, 'kucuk2')))
+    k('bilinen FAIL yonu tek oge degisir: halka_r degisen secenekte (K2 kosu verisi) halka ve sembol AYNI DEGIL (karsilastirma FAIL verebiliyor)',
+      not ayni3(oge3(vb_, 'halka'), oge3(vt, 'halka')) and not ayni3(smb(vb_), smb(vt)))
+    k('kucuk burc izgarasinin taban hucresi = taban (GERCEK): taban hucresinin PNG sha256 = tekil B1 kosusunun sha256; kose hucresinin sha256 farkli',
+      kb['sha'] == rC['png_sha256'] and kh['sha'] != kb['sha'], (kb.get('sha'), rC['png_sha256']))
+
+    # --- pafta 3 MB sinirini asarsa OZET / SURE / OLCUM_TUMU yine yazilir (Serdar 12 Kas; sinir test icinde 2000 bayta cekilir)
+    istek0 = td / 'istek0.json'
+    istek0.write_text(json.dumps(dict(taban='B1', tekil=[{}])))
+    cP = td / 'P3'
+    eski_p = TD.PAFTA_AZAMI_BAYT
+    TD.PAFTA_AZAMI_BAYT = 2000
+    try:
+        rcP = TD.main(['kos', '--kaynak', KS, '--urun', str(URUN_DOSYA), '--istek', str(istek0), '--katman', str(katman), '--cikti', str(cP), '--olcum'])
+    finally:
+        TD.PAFTA_AZAMI_BAYT = eski_p
+    ozP = json.loads((cP / 'OZET.json').read_text(encoding='utf-8')) if (cP / 'OZET.json').is_file() else {}
+    k('bilinen FAIL pafta boyutu (komut): pafta sinirin ustunde -> pafta dosyasi YOK, OZET / SURE / OLCUM_TUMU YINE yazildi, OZET pafta kaydi DUR pafta_boyut, cikis 1; '
+      'ayni kosu sinir 3 MB iken (kosu A) pafta yazar, cikis 0',
+      rcP == 1 and all((cP / f_).is_file() for f_ in ('OZET.json', 'SURE.json', 'OLCUM_TUMU.json')) and not list(cP.glob('PAFTA_*.jpg'))
+      and ozP.get('pafta', {}).get('dosya') is None and ozP.get('pafta', {}).get('kod') == 'pafta_boyut' and ozP['secenek'][0]['durum'] == 'tamam'
+      and ozP['secenek'][0]['png_sha256'] == rC['png_sha256'] and oz['pafta']['dosya'] is not None, (rcP, ozP.get('pafta')))
+
     # --- 5400 girdisi (test ici sozluk; gorsel uretimi yok): iki gecis ve ust uclar
     ortD = copy.copy(ort)
     ortD.urun = TD.urun_dogrula(copy.deepcopy(DIKEY))
@@ -917,8 +1143,53 @@ def t_motor(K, katman, td):
       r['durum'] == 'DUR' and r['kod'] == 'renk_uyum_piksel' and not var and olcum_var, (r['durum'], r['kod'], r['neden']))
     r, var, _ = sdur(dict(grup_y=0.9), 'dtasma')
     k('bilinen FAIL SERT: ana sembol tuval disina tasiyor -> DUR tasma, gorsel yok', r['kod'] == 'tasma' and not var, (r['kod'], r['neden']))
+    # K3 (Serdar 12 Kas "evet"; onayli tek gevsetme): isim buyuk harf bandi guvenli dairenin disinda (kiris 0) -> DUR YOK (dilim 1'de DUR isim_sigmadi idi)
     r, var, _ = sdur(dict(isim_y=0.995), 'disim')
-    k('bilinen FAIL SERT: isim satiri guvenli alana sigmiyor -> DUR isim_sigmadi, gorsel yok', r['kod'] == 'isim_sigmadi' and not var, (r['kod'], r['neden']))
+    omk = json.loads((td / 'disim' / 'SEC_01_tekil_OLCUM.json').read_text(encoding='utf-8')) if var else {}
+    k('GERCEK K3: isim guvenli dairenin disinda (isim_y 0,995; kiris 0) -> DUR YOK, gorsel VAR; isim kuculmedi (oran 1,0), sinir = tuval genisligi 1087; '
+      'isimler ogesinin tasmasi olculdu (isik payi 0 > 0); isim olceri FAIL; etikette "isim guvenli alan disinda"',
+      r['durum'] == 'tamam' and var and omk['ozet']['isim_guvenli_disinda'] and omk['ozet']['isim_kuculme'] == 1.0 and omk['kapi']['olcer']['isim']['sinir'] == 1087.0
+      and omk['kapi']['olcer']['tasma']['oge']['isimler']['isik_0'] > 0 and (not omk['kapi']['olcer']['isim']['PASS']) and omk['ozet']['sert_fail'] == []
+      and 'isim guvenli alan disinda' in TD.etiket_satirlari(r), (r['durum'], r['kod'], r['neden']))
+    k('K3 bilinen FAIL yonu: isim guvenli alanin icindeyken (kosu A) not yok, isimler tasmasi 0, sinir = kiris (< tuval genisligi)',
+      (not om['ozet']['isim_guvenli_disinda']) and ol['tasma']['oge']['isimler']['isik_0'] == 0 and ol['isim']['sinir'] < 1087.0
+      and 'isim guvenli alan disinda' not in TD.etiket_satirlari(sA))
+    r, var, _ = sdur(dict(isim_y=0.994475), 'd8')
+    k('K3 DEGISMEYEN (GERCEK uretim): kiris 0\'dan buyuk ama cok kucukken (3,5 px) isim 8 denemede sigmaz -> DUR isim_sigmadi, gorsel yok',
+      r['kod'] == 'isim_sigmadi' and '8 denemede' in r['neden'] and not var, (r['kod'], r['neden']))
+    k('K3 DEGISMEYEN (gercek fonksiyon): AT.isim_sigdir sinir 1,5 px ile 8 denemede sigmaz -> DUR isim_sigmadi; genis sinirla (bilinen PASS) doner',
+      dur_mu(lambda: AT.isim_sigdir('EMILY & JAMES', ort.mt.font_isim, sinir=1.5, cap0=40.0, cap_alt=0.0, yumusak=True), 'isim_sigmadi')
+      and AT.isim_sigdir('EMILY & JAMES', ort.mt.font_isim, sinir=1087.0, cap0=40.0, cap_alt=0.0, yumusak=True)[2] == 40.0)
+    asil_kiris = TD.kiris
+    TD.kiris = lambda u_, y0_, y1_: 0.5 if abs(y1_ - (543.5 + 0.65 * 543.5)) < 1e-6 else asil_kiris(u_, y0_, y1_)   # yalniz isim satirinin kirisi 0,5 px
+    try:
+        r, var, _ = sdur({}, 'dkiris')
+    finally:
+        TD.kiris = asil_kiris
+    k('[sahte veri] K3 DEGISMEYEN (inceleme 1b bulgu 1): kiris 0\'dan buyuk ama 1 px altinda (0,5; kiris fonksiyonu test icinde degistirildi) -> DUR isim_sigmadi '
+      'AYNEN (K3 yalniz kiris tam 0 iken gecerli), gorsel yok', r['durum'] == 'DUR' and r['kod'] == 'isim_sigmadi' and '1 px altinda' in r['neden'] and not var,
+      (r['durum'], r['kod'], r['neden']))
+    r, var, _ = sdur(dict(halka_r=1.2, kucuk_v=1.3), 'dkucuk')
+    k('K3 DEGISMEYEN (GERCEK uretim): bir oge (kucuk1) tumuyle tuval disinda -> DUR tasma, gorsel yok', r['kod'] == 'tasma' and 'tumuyle tuval disinda' in r['neden'] and not var,
+      (r['kod'], r['neden']))
+    asil_is = AT.isim_sigdir
+
+    def kayik_isim(*a_, **kw_):                                               # [sahte veri] murekkebi tabanin USTUNDE, altinda 200 bos satir olan isim maskesi
+        A_, t_, c_, d_ = asil_is(*a_, **kw_)
+        A2 = np.zeros((int(np.ceil(t_)) + 200, A_.shape[1]), np.float32)
+        h_ = min(A_.shape[0], int(t_))
+        A2[:h_] = A_[:h_]
+        return A2, t_, c_, d_
+    AT.isim_sigdir = kayik_isim
+    try:
+        r, var, _ = sdur(dict(isim_y=-1.0), 'dbos')
+    finally:
+        AT.isim_sigdir = asil_is
+    k('[sahte veri] K3: isim maskesi tuvalde BOS kalirsa (cerceve tuvalle kesisiyor, murekkep tumuyle disarida) kosu cokmez -> DUR isim_sigmadi, gorsel yok',
+      r['durum'] == 'DUR' and r['kod'] == 'isim_sigmadi' and 'tuval disinda' in r['neden'] and not var, (r['kod'], r['neden']))
+    r, var, _ = sdur(dict(isim_y=-1.0), 'dust')
+    k('K3 (GERCEK; bilinen PASS yonu): ayni yerde (isim_y -1,0) gercek isim maskesinin murekkebi kismen tuvalde -> DUR yok, gorsel VAR', r['durum'] == 'tamam' and var,
+      (r['durum'], r['kod'], r['neden']))
     r, var, _ = sdur(dict(metin_y=1.0), 'mtasma')
     omt = json.loads((td / 'mtasma' / 'SEC_01_tekil_OLCUM.json').read_text(encoding='utf-8'))['kapi']['olcer'] if var else {}
     k('GERCEK bilinen FAIL (olcer; gorsel VAR; inceleme 1. tur bulgu 4): metin satiri tuvalin alt kenarinda (metin_y 1,0) -> uretimin kiris hesabi metin_genis FAIL, '
@@ -996,6 +1267,7 @@ def main():
     t0 = time.time()
     with tempfile.TemporaryDirectory(dir=str(Path(a.kaynak).resolve().parent) if a.kaynak else None) as td_:
         td = Path(td_)
+        (td / 'ag').mkdir(); t_ag(td / 'ag')
         t_urun()
         t_butce()
         t_olcer_sahte()
@@ -1016,7 +1288,7 @@ def main():
                 k('yerel deneme sembolu uretildi (AT deneme komutu aynen; DENEME_ adli)', rc == 0 and katman.is_file())
             (td / 'm').mkdir(); t_motor(Path(a.kaynak).resolve(), katman.resolve(), td / 'm')
         else:
-            atla('kaynak yolu yok (ay takvimi modulu, ayar dogrulama, motorlu testler)', 166)
+            atla('kaynak yolu yok (ay takvimi modulu, ayar dogrulama, motorlu testler)', 183)
     top = SAYAC['pas'] + SAYAC['fail']
     print(f"tasarim_deneme testleri: {SAYAC['pas']}/{top} PASS" + (f", {SAYAC['atla']} test ATLANDI" if SAYAC['atla'] else '') + f" | {time.time() - t0:.0f} sn", flush=True)
     return 1 if SAYAC['fail'] or (a.zorunlu and SAYAC['atla']) else 0
