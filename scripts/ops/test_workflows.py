@@ -507,6 +507,44 @@ def main() -> int:
     assert ".github/workflows/etsy-secret-gecis.yml" in kilit_bekle.kilit_kumesi(str(ROOT)), "etsy-secret-gecis Etsy kilit kumesinde degil"
     abt = (WORKFLOWS / "ai-beyan-test.yml").read_text(encoding="utf-8")
     assert "scripts/etsy/test_secret_gecis.py" in abt, "test_secret_gecis.py CI test listesinde degil"
+    # SIPARIS_KOD_ANAHTARI (Serdar 12 Kas 2026, K2): opak siparis kodu ureten 5 adim env'i ayri anahtari da alir; Etsy shared secret
+    # yenilenince kodlar degismesin. Satir her blokta ETSY_SHARED_SECRET'in hemen altinda, ayni girintide.
+    _kod_satir = "SIPARIS_KOD_ANAHTARI: ${{ secrets.SIPARIS_KOD_ANAHTARI }}"
+    _beklenen_kod = {"pod-order-router.yml": 2, "kupa-siparis.yml": 1, "router-kota-deneme.yml": 1, "pod-arac-v4.yml": 1}
+    _gorulen_kod = {}
+    for path in files:
+        _sat = path.read_text(encoding="utf-8").split("\n")
+        for _i, _x in enumerate(_sat):
+            if _x.strip() == _kod_satir:
+                _gorulen_kod[path.name] = _gorulen_kod.get(path.name, 0) + 1
+                _ust = _sat[_i - 1]
+                assert _ust.strip().startswith("ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}") and \
+                    len(_ust) - len(_ust.lstrip()) == len(_x) - len(_x.lstrip()), f"{path.name}:{_i + 1}: SIPARIS_KOD_ANAHTARI, ETSY_SHARED_SECRET'in hemen altinda degil"
+            else:
+                assert "secrets.SIPARIS_KOD_ANAHTARI" not in _x, f"{path.name}:{_i + 1}: SIPARIS_KOD_ANAHTARI beklenmeyen bicimde"
+    assert _gorulen_kod == _beklenen_kod, f"SIPARIS_KOD_ANAHTARI 5 env blogunda olmali: {_gorulen_kod}"
+    # kullanim denetimi (satirin yeri degil, kodu ureten adim): run'inda order_router.py / kupa_siparis.py / receipt_kod gecen HER adim
+    # anahtari env'inde tasir. Tek muafiyet: pod-order-router'in sahte receipt adimi (env'i yok; Serdar 12 Kas: dokunulmaz).
+    if yaml is not None:
+        _ureten = []
+        for path in files:
+            with path.open(encoding="utf-8") as stream:
+                _d = yaml.safe_load(stream)
+            for _is in (_d.get("jobs") or {}).values():
+                for _adim in (_is.get("steps") or []):
+                    if not _re.search(r"order_router\.py|kupa_siparis\.py|receipt_kod", str(_adim.get("run") or "")):
+                        continue
+                    _env, _adi = _adim.get("env") or {}, str(_adim.get("name") or "")
+                    if path.name == "pod-order-router.yml" and _adi.startswith("Sahte receipt paketi"):
+                        assert not _env, "pod-order-router sahte receipt adimi degismemeli (env'siz)"
+                        continue
+                    assert _env.get("SIPARIS_KOD_ANAHTARI") == "${{ secrets.SIPARIS_KOD_ANAHTARI }}", \
+                        f"{path.name}: siparis kodu ureten adim SIPARIS_KOD_ANAHTARI almiyor: {_adi}"
+                    _ureten.append(path.name)
+        assert sorted(_ureten) == ["kupa-siparis.yml", "pod-arac-v4.yml", "pod-order-router.yml", "pod-order-router.yml", "router-kota-deneme.yml"], \
+            f"siparis kodu ureten adimlar degisti: {_ureten}"
+    for _ad, _n in _beklenen_kod.items():      # bu dort dosyada ETSY_SHARED_SECRET alan her adim anahtari da alir
+        assert (WORKFLOWS / _ad).read_text(encoding="utf-8").count("secrets.ETSY_SHARED_SECRET }}") == _n, f"{_ad}: ETSY_SHARED_SECRET alan adim sayisi degisti"
     print(f"PASS: {len(files)} workflow YAML, {len(PUBLIC_AUDITS)} public denetim sozlesmesi")
     return 0
 

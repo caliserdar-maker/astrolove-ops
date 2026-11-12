@@ -9,6 +9,7 @@ versiyonlanmayan bir `.env` dosyasinda tutulur.
 | --- | --- |
 | `ETSY_API_KEY` | Etsy uygulamasinin genel API anahtari (keystring); API isteklerini uygulamaya baglar. |
 | `ETSY_SHARED_SECRET` | Etsy uygulamasinin gizli anahtari; OAuth token degisimi ve imzalama icin kullanilir. |
+| `SIPARIS_KOD_ANAHTARI` | Loglardaki ve raporlardaki opak kodlarin (`S-...`; router'da receipt, kupa hattinda transaction icin) HMAC anahtari (KARAR, 12 Kasim 2026). HENUZ TANIMLI DEGIL; `etsy-secret-gecis` (mod `kod_anahtari`) rastgele uretir, deger hicbir yerde gorunmez. Tanimli DEGILKEN kod `ETSY_SHARED_SECRET` ile uretilir (onceki davranis). Tanimlandigi anda kodlar bir kez degisir (eski rapor ve loglardaki kodlarla eslesmez); sonra Etsy shared secret'i yenilense de degismez. Okuyan adimlar: `pod-order-router.yml` (2), `kupa-siparis.yml`, `router-kota-deneme.yml`, `pod-arac-v4.yml`. Haric: `pod-order-router.yml` sahte receipt adimi (env'siz; sabit yedek anahtarla kod uretir). |
 | `ETSY_REFRESH_TOKEN` | KULLANILMAZ (1 Eyl 2026 karari). Etsy OAuth token zinciri Drive'daki `ASTROLOVE/TEMP/ETSY_TOKEN.json` dosyasindan yurur; asagidaki "Etsy token sahibi" bolumune bakin. Secret silinene kadar yalnizca tarihsel kayittir. |
 | `ETSY_SHOP_ID` | Islem yapilacak Etsy magazasinin sayisal kimligi. |
 | `RCLONE_CONF_B64` | Base64 ile kodlanmis `rclone.conf` icerigi (remote `gdrive`, kendi OAuth istemcimizle yetkilendirilmis, 2 Eyl 2026). Icindeki `client_secret` satiri bayattir; gecerli secret `GOOGLE_CLIENT_SECRET` ile calisma aninda ezilir. |
@@ -146,6 +147,10 @@ versiyonlanmayan bir `.env` dosyasinda tutulur.
   `temizle` -> `ac` -> (ayri onayla) `temizle_drive`. Geri donusten sonra
   (asagidaki a-c tamamlaninca): `temizle` (geri donus dali) -> `ac` ->
   (ayri onayla) `temizle_drive`.
+- `degistir` on sarti (kodda kapi YOK, sirayla saglanir): `kod_anahtari`
+  kosulmus ve `SIPARIS_KOD_ANAHTARI` env satirlari `main`'de olmali; yoksa
+  opak siparis kodlari Etsy secret'i degisince bir kez, anahtar gelince bir
+  kez daha degisir.
 - GERI DONUS SIRASI ("completed"den once): (a) `geri_al` kosusu: YEDEK ->
   canli (+ dosya alani eski degere, alan guncellendiyse); (b) AYRI kosuda
   `geri_dogrula`: canli == YEDEK EVET, dosya alani beklenen durumda, kanit

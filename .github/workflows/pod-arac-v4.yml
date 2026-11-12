@@ -198,6 +198,7 @@ jobs:
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          SIPARIS_KOD_ANAHTARI: ${{ secrets.SIPARIS_KOD_ANAHTARI }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |

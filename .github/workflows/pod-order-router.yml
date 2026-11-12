@@ -206,6 +206,7 @@ jobs:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_KOTA_ROL: router
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          SIPARIS_KOD_ANAHTARI: ${{ secrets.SIPARIS_KOD_ANAHTARI }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
@@ -251,6 +252,7 @@ jobs:
         if: ${{ always() }}
         env:
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}      # yalniz opak receipt kodu icin
+          SIPARIS_KOD_ANAHTARI: ${{ secrets.SIPARIS_KOD_ANAHTARI }}
         run: |
           set -euo pipefail
           TOKEN_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
