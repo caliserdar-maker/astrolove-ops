@@ -93,12 +93,15 @@ YUZEY = {
     'AT.grup_kur': "(mt, cift, g, yan_json, hedef_r, merkez='grup', kucuk_u='poster', kucuk_v='poster', kucuk_oran=1.0, halka_kalinlik=1.0, "
                    "halka_centik='ozgun', logo='yok')",
     'AT.logo_kaynak': "(mt, C, y_mer)",
+    'AT._dis_noktalar': "(alfa01, px, py, olcek=1.0)",                       # dilim D1: serbest sembollu ilk gecis (AT:1217 ile ayni noktalar)
+    'AT.Motor.__init__': "(self, md)",                                       # dilim D1: serbest grup kapisi kendi Motor'unu kurar (ATK:218 kalibi)
     'AT.main': "(argv=None)",
     'AT.Motor.harita_kur': "(self, cift, onbellek=None)",
     'AT.Motor.oge_katman': "(self, a_k, k, rng, har, qa_goz, ad='yazi')",
     'ATK.grup_kapisi': "(meta, D, katman_g, yan_json, motor, sa, sx, sy)",
     'ATK.kontrast_olc': "(rgb, m, cekirdek=0.9, haric=None)",
     'ATK.cember_uydur': "(m)",
+    'ATK.yatay_yayilim': "(a)",                                              # dilim D1: serbest grup kapisinin boy olcumu (ATK:317, 327, 351)
     'ATK.halka_kalinlik_olc': "(m, cx, cy)",
     'ATK.lum': "(rgb)",
 }
@@ -121,11 +124,16 @@ EKSEN_ORAN = 0.005                                      # iki eksenin px / mm or
 # logo AT biriminde (carpan; 1,0 = posterdeki logo boyu x grup olcegi; AT:116). Araliklar BASLANGIC DEGERIDIR (yalniz yanlis girisi yakalar).
 AYAR_ANAHTAR = ('taban', 'grup_merkez', 'grup_x', 'grup_y', 'halka_r', 'grup_r', 'kucuk_u', 'kucuk_v', 'kucuk_oran', 'halka_kalinlik',
                 'halka_centik', 'isim_duzen', 'isim_cap', 'isim_y', 'logo', 'logo_yer', 'metin_tur', 'metin_cap', 'metin_y', 'satir_aralik',
-                'isim1', 'isim2', 'satirlar')
+                'isim1', 'isim2', 'satirlar', 'sembol_oran', 'sembol_u', 'sembol_v')
 AYAR_ARALIK = dict(grup_x=(-1.0, 1.0), grup_y=(-1.0, 1.0), halka_r=(0.30, 1.20), grup_r=(0.30, 1.20), kucuk_u=(0.30, 0.90),
                    kucuk_v=(0.20, 1.30), kucuk_oran=(0.60, 1.80), halka_kalinlik=(1.0, 1.0), isim_cap=(0.03, 0.30), isim_y=(-1.0, 1.0),
-                   logo=(0.50, 2.00), metin_cap=(0.03, 0.30), metin_y=(-1.0, 1.0), satir_aralik=(1.2, 2.2))
-AYAR_SERBEST = dict(kucuk_u='poster', kucuk_v='poster', logo='yok')
+                   logo=(0.50, 2.00), metin_cap=(0.03, 0.30), metin_y=(-1.0, 1.0), satir_aralik=(1.2, 2.2),
+                   # dilim D1 (Serdar 12 Kas 2026; plan 1.2): ana sembolun halkadan BAGIMSIZ boyu ve yeri. sembol_oran: carpan (1,0 = bugunku boy);
+                   # alt uc 0,30 = halka_r alt ucunun aynisi; GERCEK ust uc "buyutme yok" kuralidir (olcek_kontrol: olcek x s_ana x sembol_oran <= 1),
+                   # buradaki 1000 yalniz sayi tasmasi korumasidir. sembol_u / sembol_v: sembolun KAYNAK kutusunun merkezi, capa (halka) merkezine
+                   # gore, halka yaricapi (R) biriminde; 'poster' = bugunku yer. Araliklar yalniz yanlis girisi yakalar (tasarim karari degil).
+                   sembol_oran=(0.30, 1000.0), sembol_u=(-1.30, 1.30), sembol_v=(-1.30, 1.30))
+AYAR_SERBEST = dict(kucuk_u='poster', kucuk_v='poster', logo='yok', sembol_u='poster', sembol_v='poster')
 AYAR_SECIM = dict(grup_merkez=('grup', 'halka'), halka_centik=('ozgun',), isim_duzen=('tek_satir', 'iki_yan'),
                   logo_yer=('kucuk_arasi', 'isim_arasi'), metin_tur=('yok', 'tarih', 'mesaj'))
 METIN_SATIR_AZAMI = 1                                   # dilim 1: tek satir metin
@@ -134,11 +142,14 @@ METIN_SATIR_AZAMI = 1                                   # dilim 1: tek satir met
 TABAN = {'B1': dict(grup_merkez='halka', grup_x=0.0, grup_y=0.071, halka_r=0.884, grup_r=None, kucuk_u='poster', kucuk_v=0.37,
                     kucuk_oran=1.0, halka_kalinlik=1.0, halka_centik='ozgun', isim_duzen='iki_yan', isim_cap=0.0742, isim_y=0.650,
                     logo='yok', logo_yer='isim_arasi', metin_tur='tarih', metin_cap=round(0.0742 * 144 / 169.5, 5), metin_y=0.817,
-                    satir_aralik=1.6, isim1='EMILY', isim2='JAMES', satirlar=['JUNE 14, 2025'])}
+                    satir_aralik=1.6, isim1='EMILY', isim2='JAMES', satirlar=['JUNE 14, 2025'],
+                    sembol_oran=1.0, sembol_u='poster', sembol_v='poster')}
 IZGARA_AZAMI = 7                                        # izgara ekseni basina en cok 7 deger (baslangic degeri)
 IZGARA_ANAHTAR = ('halka_r_carpan', 'grup_y_fark')      # grup izgarasi (boyut = halka_r carpani, yer = grup_y farki; plan 4.2)
 IZGARA_TUR = {'grup': IZGARA_ANAHTAR,                   # bir istekte TEK izgara turu (dilim 1b; Serdar 12 Kas)
-              'kucuk': ('kucuk_oran_carpan', 'kucuk_v_fark')}   # kucuk burc izgarasi (boyut = kucuk_oran carpani, yer = kucuk_v farki; plan 4.2)
+              'kucuk': ('kucuk_oran_carpan', 'kucuk_v_fark'),   # kucuk burc izgarasi (boyut = kucuk_oran carpani, yer = kucuk_v farki; plan 4.2)
+              'sembol': ('sembol_oran_carpan', 'sembol_v_fark'),   # dilim D1: sembol "kendi yerinde" (boyut = sembol_oran carpani; yer = sembol_v farki)
+              'sembol_merkez': ('sembol_oran_carpan',)}         # dilim D1: sembol "halka merkezine gore" (tek eksen; sembol_u / v = poster degeri x carpan)
 
 AT = ATK = None                                         # baglan() sonrasi: ice alinan ay takvimi modulleri (TEK nesne)
 
@@ -399,6 +410,9 @@ def ayar_dogrula(ham):
         raise Dur('girdi_metin', f"{len(AY['satirlar'])} satir > {METIN_SATIR_AZAMI} (dilim 1)", girdi=True)
     if AY['metin_tur'] != 'yok' and not AY['satirlar']:
         raise Dur('girdi_metin', 'metin_tur var, satir yok', girdi=True)
+    if sembol_serbest_mi(AY) and (AY['halka_r'] is None or AY['grup_merkez'] != 'halka'):   # mod siniri (Serdar 12 Kas, plan K9 i)
+        hata(next((sira[k_] for k_ in ('sembol_oran', 'sembol_u', 'sembol_v', 'grup_merkez', 'grup_r') if k_ in sira), 0),
+             'sembol anahtarlari yalniz halka_r + halka merkez modunda')
     geri = []                                                                 # GERI DONUS (plan 3.3): DUR yok, etiket var
     if AY['isim_duzen'] == 'iki_yan':
         AY['isim_duzen'] = 'tek_satir'
@@ -425,9 +439,12 @@ def _json_oku(metin, ne):
         raise Dur('girdi_json', f'{ne}: bozuk JSON', girdi=True) from None
 
 
-def istek_kur(ham):
+def istek_kur(ham, poster_uv=None):
     """Istek (dogrulanan girdi): {taban, tekil: [ayar farki sozlugu ...], izgara: {halka_r_carpan: [...], grup_y_fark: [...]} YA DA
-    {kucuk_oran_carpan: [...], kucuk_v_fark: [...]}} (bir istekte tek izgara turu).
+    {kucuk_oran_carpan: [...], kucuk_v_fark: [...]} YA DA {sembol_oran_carpan: [...], sembol_v_fark: [...]} YA DA {sembol_oran_carpan: [...]}
+    (bir istekte tek izgara turu). Sembol izgaralari (dilim D1): tabandaki sembol yeri 'poster' iken carpan / fark posterdeki degere uygulanir
+    (poster_uv = sembol_poster_uv(...); gerekmediginde None). Carpan 1 ve fark 0 hucresi VARSAYILAN anahtarlarla yazilir (eski yoldan gecer);
+    fark 0 iken sembol_v sayiya cevrilmez ('poster' kalir).
     Doner secenek listesi: dict(no, ad (KODDAN: SEC_<NN>_<tur>), tur, ayar (TAM), geri_donus, degisen (tabana gore), satir, sutun).
     Sira = uretim sirasi: once tekiller, sonra izgara (satir = boyut adimi, sutun = yer adimi). Arac listeyi kirpmaz, siralamaz."""
     if not isinstance(ham, dict) or set(ham) - {'taban', 'tekil', 'izgara'}:
@@ -460,8 +477,8 @@ def istek_kur(ham):
     if iz is not None:
         tur_ = next((t_ for t_, an_ in IZGARA_TUR.items() if isinstance(iz, dict) and set(iz) == set(an_)), None)
         if tur_ is None:
-            raise Dur('girdi_istek', 'izgara: TEK tur olmali: grup (halka_r_carpan + grup_y_fark) ya da kucuk burc (kucuk_oran_carpan + kucuk_v_fark)',
-                      girdi=True)
+            raise Dur('girdi_istek', 'izgara: TEK tur olmali: grup (halka_r_carpan + grup_y_fark), kucuk burc (kucuk_oran_carpan + kucuk_v_fark), '
+                      'sembol (sembol_oran_carpan + sembol_v_fark) ya da sembol_merkez (sembol_oran_carpan)', girdi=True)
         an = IZGARA_TUR[tur_]
         for k_ in an:
             v = iz[k_]
@@ -472,12 +489,27 @@ def istek_kur(ham):
             raise Dur('girdi_istek', 'izgara tabani halka_r + halka merkez modunda degil', girdi=True)
         if tur_ == 'kucuk' and not (_sayi(T['kucuk_v']) and _sayi(T['kucuk_oran'])):
             raise Dur('girdi_istek', 'kucuk burc izgarasi: tabanda kucuk_v ve kucuk_oran sayi olmali', girdi=True)
+        def taban_uv(k_, i_):                                                 # tabandaki sembol yeri sayi olarak ('poster' ise posterdeki deger)
+            if T[k_] != 'poster':
+                return float(T[k_])
+            if poster_uv is None:
+                raise Dur('girdi_istek', 'sembol izgarasi: posterdeki sembol yeri okunamadi (katmanin yan json dosyasi gerekli)', girdi=True)
+            return float(poster_uv[i_])
         for i, c in enumerate(iz[an[0]]):                                     # satir = boyut adimi
-            for j, f in enumerate(iz[an[1]]):                                 # sutun = yer adimi
+            for j, f in enumerate(iz[an[1]] if len(an) > 1 else [0]):         # sutun = yer adimi (tek eksenli turde sutun 0)
                 if tur_ == 'grup':
                     ekle(dict(halka_r=round(T['halka_r'] * c, 6), grup_y=round(T['grup_y'] + f, 6)), 'grup', i, j)
-                else:
+                elif tur_ == 'kucuk':
                     ekle(dict(kucuk_oran=round(T['kucuk_oran'] * c, 6), kucuk_v=round(T['kucuk_v'] + f, 6)), 'kucuk', i, j)
+                else:
+                    oran = round(T['sembol_oran'] * c, 6)
+                    fark = {} if oran == T['sembol_oran'] else dict(sembol_oran=oran)
+                    if tur_ == 'sembol':
+                        if f != 0:                                            # fark 0 iken yer anahtari DEGISMEZ ('poster' sayiya cevrilmez)
+                            fark['sembol_v'] = round(taban_uv('sembol_v', 1) + f, 6)
+                    elif oran != T['sembol_oran']:                            # sembol_merkez: yer = taban yeri x carpan (carpan 1: taban aynen)
+                        fark.update(sembol_u=round(taban_uv('sembol_u', 0) * c, 6), sembol_v=round(taban_uv('sembol_v', 1) * c, 6))
+                    ekle(fark, tur_, i, j)
     if not sec:
         raise Dur('girdi_istek', 'secenek yok', girdi=True)
     return sec
@@ -593,24 +625,123 @@ class Ortam:
         log('kurulum', self.kurulum_sn, 'sn | sembol', self.s_olc['boyut'], '| motor', len(self.mt.sha), 'dosya')
 
 
+# ---------------------------------------------------------------- serbest sembol (dilim D1; Serdar 12 Kas 2026, kapi paketi 3: G1 + GK1)
+def sembol_serbest_mi(AY):
+    """Sembol anahtarlarindan biri varsayilan DISINDA mi. Varsayilanda eski kurulum yolu ve ATK.grup_kapisi AYNEN calisir (iki yol; plan T5);
+    serbest kurulum ve serbest grup kapisi yalniz bu fonksiyon True donerse calisir."""
+    return not (AY['sembol_oran'] == 1.0 and AY['sembol_u'] == 'poster' and AY['sembol_v'] == 'poster')
+
+
+def sembol_geo(md, yan_json):
+    """Sembolun poster yerlesim sabitleri, AT.grup_kur ile AYNI ifadeler (AT:1203-1216): cember C, yerlesim78 Yl, katmanin paysiz (kaynak) kutusu
+    kw x kh, pay, s_ana (katman pikseli -> poster pikseli) ve posterdeki kaynak kutusu merkezi (u_p, v_p; halka yaricapi biriminde)."""
+    j = yan_json
+    if not j or not all(k_ in j for k_ in ('x', 'y', 'w', 'h')):
+        raise Dur('sembol_json', 'sembol yan json (x, y, w, h) yok: sembol yeri icin paysiz kutu gerekir', girdi=True)
+    C = json.loads((Path(md) / 'cember.json').read_text())['cember']
+    Yl = json.loads((Path(md) / 'yerlesim78.json').read_text())[CIFT]
+    pay_x, pay_y = j.get('kaynak_x', j['x']) - j['x'], j.get('kaynak_y', j['y']) - j['y']
+    kw, kh = j.get('kaynak_w', j['w']), j.get('kaynak_h', j['h'])
+    if not all(_sayi(v_) for v_ in (pay_x, pay_y, kw, kh, j['w'], j['h'])) or pay_x < 0 or pay_y < 0 or kw <= 0 or kh <= 0 or kw + pay_x > j['w'] or kh + pay_y > j['h']:
+        raise Dur('sembol_json', 'sembol yan json tutarsiz (paysiz kutu katmanin icinde ve bos olmayan bir kutu olmali)', girdi=True)   # AT:1206 kosullari + yukseklik
+    s_ana = (Yl['u1'] - Yl['u0']) * C['R'] / kw
+    return dict(C=C, Yl=Yl, kw=kw, kh=kh, pay_x=pay_x, pay_y=pay_y, s_ana=s_ana,
+                u_p=Yl['u0'] + kw * s_ana / (2.0 * C['R']), v_p=Yl['v0'] + kh * s_ana / (2.0 * C['R']))
+
+
+def sembol_poster_uv(kaynak, katman):
+    """Posterdeki sembol yeri (kaynak kutusu merkezi; u, v halka yaricapi biriminde): sembol izgaralarinin tabani. Katmanin yan json dosyasi
+    AT.sembol_yukle'nin okudugu dosyadir (AT:988-992). Yan json yoksa None (izgara gerektirirse girdi hatasi)."""
+    yan = Path(str(katman) + '.json')
+    if not yan.is_file():
+        return None
+    j = _json_oku(yan.read_text(encoding='utf-8'), 'sembol yan json')
+    if not isinstance(j, dict):
+        return None
+    geo = sembol_geo(Path(kaynak) / MOTOR_YOL, {k_: j[k_] for k_ in sorted(j) if isinstance(j[k_], (int, float, bool))})
+    return geo['u_p'], geo['v_p']
+
+
+def sembol_yer(geo, AY):
+    """Serbest sembol: katman dizisinin sol ust kosesi POSTER pikselinde (mutlak) ve boy carpani c. Tanim noktasi kaynak kutusunun merkezidir
+    (plan T3): merkez = cember merkezi + (u, v) x R; 'poster' = bugunku yer. c = 1 ve 'poster' iken AT:1216 ile AYNI kayan sayiyi verir
+    (ifade sirasi bunun icin boyle: (cx + u0 x R) + 0 - pay x s_ana)."""
+    C, Yl, c = geo['C'], geo['Yl'], float(AY['sembol_oran'])
+    if AY['sembol_u'] == 'poster':
+        ax = C['cx'] + Yl['u0'] * C['R'] + geo['kw'] * geo['s_ana'] * (1.0 - c) / 2.0 - geo['pay_x'] * geo['s_ana'] * c
+    else:
+        ax = C['cx'] + float(AY['sembol_u']) * C['R'] - geo['kw'] * geo['s_ana'] * c / 2.0 - geo['pay_x'] * geo['s_ana'] * c
+    if AY['sembol_v'] == 'poster':
+        ay = C['cy'] + Yl['v0'] * C['R'] + geo['kh'] * geo['s_ana'] * (1.0 - c) / 2.0 - geo['pay_y'] * geo['s_ana'] * c
+    else:
+        ay = C['cy'] + float(AY['sembol_v']) * C['R'] - geo['kh'] * geo['s_ana'] * c / 2.0 - geo['pay_y'] * geo['s_ana'] * c
+    return ax, ay, c
+
+
+def ilk_gecis(mt, g, yan_json, AY):
+    """Ilk gecis (halka_r modu). AT.grup_kur KUCUK sabit hedefle (ILK_GECIS_HEDEF), halka_kalinlik 1,0, 'ozgun', logo 'yok': poster duzeninin
+    cevre yaricapi (er_poster), cember R, s_ana. SERBEST sembolde (Serdar 12 Kas, plan K1 b4: "en uzak grup pikseli = hedef" kosulu korunur,
+    hedef serbest ayarli kurulumun cevre yaricapindan gelir) er = grup ogelerinin (logo haric) ve SERBEST boydaki / yerdeki sembolun dis
+    noktalarinin halka merkezine en buyuk uzakligi: AT:1217-1224 ile ayni noktalar ve ayni ifade; yalniz sembolun olcegi s_ana x sembol_oran
+    ve yeri sembol_yer'den. Varsayilanda er = er_poster. Uretim (olcek_kontrol) ve serbest grup kapisi bu fonksiyonu AYRI AYRI cagirir."""
+    B = AT.grup_kur(mt, CIFT, g, yan_json, ILK_GECIS_HEDEF, AY['grup_merkez'], AY['kucuk_u'], AY['kucuk_v'], AY['kucuk_oran'], 1.0, 'ozgun', 'yok')
+    bil = B['bilgi']
+    out = dict(er_poster=bil['cevre_yaricap_poster'], er=bil['cevre_yaricap_poster'], R=bil['cember']['R'], s_ana=bil['s_ana'])
+    if sembol_serbest_mi(AY):
+        geo = sembol_geo(mt.md, yan_json)
+        ax, ay, c = sembol_yer(geo, AY)
+        ex, ey = float(geo['C']['cx']), float(geo['C']['cy'])                 # 'halka' merkez (mod siniri): cevre merkezi = cember merkezi (AT:1223)
+        ko = float(AY['kucuk_oran'])
+        nok = [AT._dis_noktalar(g[..., 3], ax, ay, geo['s_ana'] * c)]
+        nok += [AT._dis_noktalar(o['kaynak'].astype(np.float32) / 255.0, o['poster'][0], o['poster'][1], ko if o['ad'].startswith('kucuk') else 1.0)
+                for o in B['ogeler']]
+        tum = np.concatenate(nok)
+        out['er'] = float(np.hypot(tum[:, 0] - ex, tum[:, 1] - ey).max())
+        out['er_sembol'] = float(np.hypot(nok[0][:, 0] - ex, nok[0][:, 1] - ey).max())
+    return out
+
+
+def grup_kur_serbest(mt, g, yan_json, AY, hedef_kur):
+    """SERBEST KURULUM (dilim D1; yalniz bir sembol anahtari varsayilan disindayken cagrilir). Halka, kucuk burclar ve logo AT.grup_kur ile
+    AYNEN kurulur (hedef_kur = poster duzeninin hedef yaricapi: bu ogelerin olcegi, maskesi ve yeri varsayilan yoldakiyle birebir aynidir);
+    yalniz ANA SEMBOL yeniden kurulur: olcegi olcek x s_ana x sembol_oran (AT:1256 ifadesi x carpan; yalniz es oranli kucultme, AT:20), yeri
+    sembol_yer'den (AT:1257-1258 ifadesi). Doner AT.grup_kur ile ayni yapida sozluk; bilgi['sembol'] eklenir."""
+    G = AT.grup_kur(mt, CIFT, g, yan_json, hedef_kur, AY['grup_merkez'], AY['kucuk_u'], AY['kucuk_v'], AY['kucuk_oran'],
+                    AY['halka_kalinlik'], AY['halka_centik'], AY['logo'])
+    geo = sembol_geo(mt.md, yan_json)
+    ax, ay, c = sembol_yer(geo, AY)
+    olcek = G['olcek']
+    ex, ey = G['bilgi']['cevre_merkez_poster']
+    rgb, a = AT.rgba_olcek(g, olcek * geo['s_ana'] * c)
+    hx, hy = (ax - ex) * olcek, (ay - ey) * olcek
+    ana = dict(rgb=rgb, a=a, x=int(round(hx)), y=int(round(hy)), hedef=[hx, hy], olcek=float(olcek * geo['s_ana'] * c))
+    return dict(G, ana=ana, bilgi=dict(G['bilgi'], sembol=dict(oran=c, u=AY['sembol_u'], v=AY['sembol_v'], poster_uv=[geo['u_p'], geo['v_p']])))
+
+
 def olcek_kontrol(ort, AY):
     """halka_r modu, ilk gecis ve "buyutme yok" ust uclari (plan 3.3). Ilk gecis: AT.grup_kur KUCUK sabit hedefle (ILK_GECIS_HEDEF),
     halka_kalinlik 1,0, halka_centik 'ozgun', logo 'yok' -> grubun cevre yaricapi (olcek ve cevre dairesi ozgun halkadan ve logosuz
     hesaplanir, AT:1193-1198, 1217-1225). olcek = halka_r x Rg / cember R. olcek, ana sembol olcegi, olcek x kucuk_oran ya da logo toplam
-    olcegi 1'i asarsa girdi hatasi (AT:1226-1227, 1249-1250 ile ayni kosullar, uretimden once). grup_r modunda None doner."""
+    olcegi 1'i asarsa girdi hatasi (AT:1226-1227, 1249-1250 ile ayni kosullar, uretimden once). grup_r modunda None doner.
+    Dilim D1: ilk gecis onbelleginin anahtarinda sembol ayarlari da vardir (her sembol ayari kendi ilk gecisini alir); serbest sembolde ilk
+    gecis SERBEST ayarla kurulur (ilk_gecis) ve "buyutme yok" kuralina sembol carpani girer (olcek x s_ana x sembol_oran <= 1)."""
     if AY['halka_r'] is None:
         return None
     cx, cy, Rg = birim(ort.urun)
-    anahtar = (AY['grup_merkez'], AY['kucuk_u'], AY['kucuk_v'], AY['kucuk_oran'])
+    anahtar = (AY['grup_merkez'], AY['kucuk_u'], AY['kucuk_v'], AY['kucuk_oran'], AY['sembol_oran'], AY['sembol_u'], AY['sembol_v'])
     if anahtar not in ort.cevre:
-        B1 = AT.grup_kur(ort.mt, CIFT, ort.g, ort.yan_json, ILK_GECIS_HEDEF, AY['grup_merkez'], AY['kucuk_u'], AY['kucuk_v'], AY['kucuk_oran'],
-                         1.0, 'ozgun', 'yok')['bilgi']
-        ort.cevre[anahtar] = dict(er=B1['cevre_yaricap_poster'], R=B1['cember']['R'], s_ana=B1['s_ana'])
+        if sembol_serbest_mi(AY):
+            ig = ilk_gecis(ort.mt, ort.g, ort.yan_json, AY)
+            ort.cevre[anahtar] = dict(er=ig['er'], R=ig['R'], s_ana=ig['s_ana'], er_poster=ig['er_poster'])
+        else:
+            B1 = AT.grup_kur(ort.mt, CIFT, ort.g, ort.yan_json, ILK_GECIS_HEDEF, AY['grup_merkez'], AY['kucuk_u'], AY['kucuk_v'], AY['kucuk_oran'],
+                             1.0, 'ozgun', 'yok')['bilgi']
+            ort.cevre[anahtar] = dict(er=B1['cevre_yaricap_poster'], R=B1['cember']['R'], s_ana=B1['s_ana'])
     c = ort.cevre[anahtar]
     olcek = AY['halka_r'] * Rg / c['R']
-    ko = float(AY['kucuk_oran'])
-    if olcek > 1.0 or olcek * c['s_ana'] > 1.0 or olcek * ko > 1.0:
-        raise Dur('girdi_olcek', f"olcek {olcek:.4f} (ana {olcek * c['s_ana']:.4f}, kucuk {olcek * ko:.4f}) > 1 (buyutme yok)", girdi=True)
+    ko, so = float(AY['kucuk_oran']), float(AY['sembol_oran'])
+    if olcek > 1.0 or olcek * c['s_ana'] * so > 1.0 or olcek * ko > 1.0:
+        raise Dur('girdi_olcek', f"olcek {olcek:.4f} (ana {olcek * c['s_ana'] * so:.4f}, kucuk {olcek * ko:.4f}) > 1 (buyutme yok)", girdi=True)
     if AY['logo'] != 'yok' and olcek * float(AY['logo']) > 1.0:
         raise Dur('girdi_olcek', f"logo toplam olcegi {olcek * float(AY['logo']):.4f} > 1 (buyutme yok)", girdi=True)
     return olcek * c['er']
@@ -619,13 +750,18 @@ def olcek_kontrol(ort, AY):
 def grup_hesapla(ort, AY):
     """Sembol grubu, AT.grup_kur AYNEN (AT:1186-1286). halka_r modu IKI GECIS (olcek_kontrol); grup_r modu hedef = grup_r x Rg.
     Hedef yaricap kapi 2'nin kurdugu ifadeyle AYNI kayan sayi olsun diye 1,0 x (hedef / S) x S olarak verilir (ATK:219).
-    Doner (G, sembol_alan, hedef_r)."""
+    Doner (G, sembol_alan, hedef_r). Dilim D1, SERBEST sembol: grup ogeleri poster duzeninin hedefiyle (hedef_kur), sembol serbest boy / yerle
+    kurulur (grup_kur_serbest); donen hedef_r SERBEST ayarli ilk gecisin hedefidir ("en uzak grup pikseli = hedef" kosulunun hedefi)."""
     cx, cy, Rg = birim(ort.urun)
     hedef = olcek_kontrol(ort, AY)
     if hedef is None:
         hedef = AY['grup_r'] * Rg
     sembol_alan = hedef / AT.S
     hedef_r = 1.0 * sembol_alan * AT.S
+    if sembol_serbest_mi(AY):
+        c = ort.cevre[(AY['grup_merkez'], AY['kucuk_u'], AY['kucuk_v'], AY['kucuk_oran'], AY['sembol_oran'], AY['sembol_u'], AY['sembol_v'])]
+        hedef_kur = 1.0 * ((AY['halka_r'] * Rg / c['R'] * c['er_poster']) / AT.S) * AT.S
+        return grup_kur_serbest(ort.mt, ort.g, ort.yan_json, AY, hedef_kur), sembol_alan, hedef_r
     G = AT.grup_kur(ort.mt, CIFT, ort.g, ort.yan_json, hedef_r, AY['grup_merkez'], AY['kucuk_u'], AY['kucuk_v'], AY['kucuk_oran'],
                     AY['halka_kalinlik'], AY['halka_centik'], AY['logo'])
     return G, sembol_alan, hedef_r
@@ -891,6 +1027,13 @@ def _kir(metin, font, gen):
     return out
 
 
+def sembol_etiketi(sm):
+    """Hucre etiketinin sembol satiri: BILGI olcumleri (esik yok, kapi degil): boy carpani, kapi 2 sembol bolumunun karsilastirdigi tam alfa
+    pikseli ve orttugu icin haric tutulan piksel, sembolun halka cemberinin disinda kalan pikseli."""
+    return (f"sembol: carpan {sm.get('oran')} | tam alfa {sm.get('tam_alfa_piksel')} px | ortulen haric {sm.get('ortulen_piksel_haric')} px | "
+            f"halka disi {sm.get('halka_disi_px')} px")
+
+
 def etiket_satirlari(s, mm_kaynak=None):
     """Pafta hucre etiketi (plan 5.1): yalniz olcum; duz metin, tek renk, vurgu ve siralama yok. Girdi: OZET'teki secenek kaydi.
     mm_kaynak 'varsayım' ise etikette yazar (plan 5.1)."""
@@ -910,6 +1053,9 @@ def etiket_satirlari(s, mm_kaynak=None):
         boy = (s.get('olcum_ozet') or {}).get('kapi2_boyut_fark')
         if boy is not None:                                                   # K1: DUR veren secenekte de olculen boy kosulu farki yazilir
             L.append(f'kapi 2 boy kosulu farki {boy} px')
+        sm = (s.get('olcum_ozet') or {}).get('sembol')
+        if sm:
+            L.append(sembol_etiketi(sm))
         return L
     o = s['olcum_ozet']
     L.append(f"yazi buyuk harf en kucuk {o['yazi_en_kucuk_mm']} mm | isim kuculme {o['isim_kuculme']}")
@@ -926,6 +1072,8 @@ def etiket_satirlari(s, mm_kaynak=None):
     L.append(f"grup-yazi bosluk en az {o['grup_yazi_en_az_px']} px | cikti kapisi {o['cikti']}")
     if o.get('isim_guvenli_disinda'):                                         # K3 notu
         L.append('isim guvenli alan disinda')
+    if o.get('sembol'):                                                       # dilim D1 bilgi olcumleri (esik yok; Serdar 12 Kas, plan K8 b)
+        L.append(sembol_etiketi(o['sembol']))
     L.append('olcer FAIL: ' + (', '.join(o['olcer_fail']) or 'yok'))
     return L
 
@@ -1012,7 +1160,9 @@ def kos(a):
     if urun['sekil'] != 'yuvarlak':
         raise Dur('girdi_sekil', 'dilim 1: gorsel uretimi yalniz yuvarlak sekil', girdi=True)
     baglan(a.kaynak)                                                          # ayar dogrulamasi AT fonksiyonlarini cagirir
-    sec = istek_kur(_json_oku(Path(a.istek).read_text(encoding='utf-8'), 'istek'))
+    ham = _json_oku(Path(a.istek).read_text(encoding='utf-8'), 'istek')
+    sembol_izgara = isinstance(ham, dict) and isinstance(ham.get('izgara'), dict) and any(str(k_).startswith('sembol_') for k_ in ham['izgara'])
+    sec = istek_kur(ham, sembol_poster_uv(a.kaynak, a.katman) if sembol_izgara else None)
     sure_olcum = None if a.olcum else (_json_oku(Path(a.sure).read_text(encoding='utf-8'), 'sure') if a.sure else None)
     kimlik = kosu_kimligi(a.urun)
     butce = butce_kontrol(len(sec), sure_olcum, a.butce, a.olcum, kimlik)     # URETIMDEN ONCE
@@ -1020,7 +1170,9 @@ def kos(a):
     O.mkdir(parents=True, exist_ok=True)
     t_kos = time.time()
     ort = Ortam(a.kaynak, a.katman, urun)
+    t_on = time.time()
     on_kontrol(ort, sec)
+    on_kontrol_sn = round(time.time() - t_on, 1)                              # BILGI: ilk gecislerin suresi (butce kurali bunu SAYMAZ; plan S12 ertelendi)
     (O / 'AYAR.json').write_text(json.dumps([dict(no=s['no'], ad=s['ad'], ayar=s['ayar']) for s in sec], indent=1, ensure_ascii=False))
     sonuc = []
     for i, s in enumerate(sec, 1):
@@ -1030,7 +1182,7 @@ def kos(a):
         kalan = gecen / i * (len(sec) - i)
         print(f'ETA {i}/{len(sec)} | gecen {gecen:.0f} sn | kalan {kalan:.0f} sn | %{100.0 * i / len(sec):.0f}', flush=True)
     tum_geri = sorted({g_ for r in sonuc for g_ in r['geri_donus']})
-    ozet = dict(arac='tasarim_deneme dilim 1b', not_=SINIR_NOTU, taban=sec[0]['ayar']['taban'], taban_etiket=B1_ETIKET, geri_donus=tum_geri,
+    ozet = dict(arac='tasarim_deneme dilim d1', not_=SINIR_NOTU, taban=sec[0]['ayar']['taban'], taban_etiket=B1_ETIKET, geri_donus=tum_geri,
                 urun=urun, urun_sha256=sha_dosya(a.urun), mm_px=mm_px(urun), cift=CIFT,
                 sembol_katmani=dict(sha256=ort.s_olc['sha256'], tur='deneme' if ort.katman.name.startswith('DENEME_') else 'gercek',
                                     olcum={k_: ort.s_olc.get(k_) for k_ in ('boyut', 'kutu_alfa_05', 'kutu_alfa_002', 'merkez_05',
@@ -1048,7 +1200,7 @@ def kos(a):
     ozet['pafta'] = pafta
     toplam = round(time.time() - t_kos, 1)
     tam = [r['sure']['toplam_sn'] for r in sonuc if r['durum'] == 'tamam']
-    sure = dict(mod='olcum' if a.olcum else 'asil', kimlik=kimlik, kurulum_sn=ort.kurulum_sn, toplam_sn=toplam, butce=butce,
+    sure = dict(mod='olcum' if a.olcum else 'asil', kimlik=kimlik, kurulum_sn=ort.kurulum_sn, on_kontrol_sn=on_kontrol_sn, toplam_sn=toplam, butce=butce,
                 secenek=[dict(no=r['no'], ad=r['ad'], durum=r['durum'], kod=r['kod'], tur='tam cizim', **r['sure']) for r in sonuc],
                 cizimi_biten_en_cok_sn=max([r['sure']['toplam_sn'] for r in sonuc if cizimi_biten(r)], default=None),
                 secenek_sn=dict(en_az=min(tam) if tam else None, ortanca=float(np.median(tam)) if tam else None, en_cok=max(tam) if tam else None),

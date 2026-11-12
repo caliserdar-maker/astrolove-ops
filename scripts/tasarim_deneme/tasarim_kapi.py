@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TASARIM DENEME ARACI kapilari ve olcumleri, dilim 1 + 1b (Serdar 11 ve 12 Kas 2026; plan bolum 5, 6). Tek QC betigi, olculebilir esik, PASS / FAIL.
+"""TASARIM DENEME ARACI kapilari ve olcumleri, dilim 1 + 1b + D1 (Serdar 11 ve 12 Kas 2026; plan bolum 5, 6). Tek QC betigi, olculebilir esik, PASS / FAIL.
 Son gorsel KAYDEDILEN dosyadan okunur (ATK:3 ilkesi); maskeler bellekten gelir (ayni surec; plan 7.3 madde 2).
 Ay takvimi kapi kodu (ATK = ay_takvim_kapi.py, a9b1323) ice alinmis TEK modulden kullanilir; esik degerleri ATK.ESIK'ten okunur, bu dosyada
 esik DEGISTIRILMEZ ve yeni esik ONERILMEZ. Yeni olcumler esiksiz yazilir.
@@ -15,6 +15,10 @@ SERT (FAIL = secenegin gorseli silinir; taban: ay takvimi deneme modu, ATK:52; S
             BOY (Serdar 12 Kas K1: SERT KALIR): olculen halka yaricapi = halka_r x guvenli yaricap, 2 px (beklenen_boyut; uretimden bagimsiz).
             Tuvalden tasan (kirpilan) grup ogesi bu kapiyi dusurur (Serdar 12 Kas K2: DEVAM EDER); kapi sonucu ve kodu degismez, yalniz
             OLCUM ozetine ve hucre etiketine kok neden yazilir ('kok_neden'; tek tanim olc() icinde).
+            SERBEST SEMBOL (dilim D1; Serdar 12 Kas, kapi paketi 3 GK1): bir sembol anahtari (sembol_oran, sembol_u, sembol_v) varsayilan
+            DISINDA iken ATK.grup_kapisi cagrilmaz; serbest_grup_kapisi ayni sert kosullari AYNI paylarla (ATK.ESIK) uygular, hedefler ayardan
+            gelir (sembolun olculen yeri / boyu sembol_oran, sembol_u, sembol_v'den; "en uzak grup pikseli" hedefi serbest ayarli ilk gecisten).
+            Varsayilan ayarda yol ve sonuc degismez. Sonuc kaydinda 'kapi' alani hangi yolun calistigini yazar ('atk' / 'serbest').
   cikti     boyut = urun baski_px, dpi etiketi, RGB, sRGB ICC. SERT (Serdar 12 Kas K4; dilim 1'de olcerdi): FAIL veren secenek DUR verir.
   Diger sert kapilar uretim sirasinda DUR verir (tasarim_deneme.py): girdi, ortam, sabit kaynak sha256, motor / KILIT, sembol bicimi,
   buyutme yok, cerceve, renk uyumu icin >= 200 cekirdek piksel (Serdar soru 6 "m"), sembol tuval disi, isim 8 denemede sigmiyor.
@@ -26,7 +30,9 @@ OLCER (FAIL gorseli durdurmaz; OLCUM'a ve hucre etiketine yazilir):
   tek doku dE00, kontrast, yazim farki, duz renk, yildiz, oge sayisi, grup - yazi boslugu (12 px aynen), metin tabani, isim satiri (Serdar
   12 Kas K3: buyuk harf bandi guvenli dairenin disindaysa DUR YOK; isim olceri FAIL + tasma olcumu; sinir = tuval genisligi), metin
   genisligi, gercek olcu uyarisi (yazi mm, cizgi mm: en ince / 1. yuzdelik / ortanca AYRI; olcut secilmedi, plan soru 4).
-BILGI (esik yok, kapi degil; Serdar 12 Kas): oge cifti basina cakisma pikseli (alfa > 0,02), kucuk burc - yazi en az uzakligi, yildiz sayisi.
+BILGI (esik yok, kapi degil; Serdar 12 Kas): oge cifti basina cakisma pikseli (alfa > 0,02), kucuk burc - yazi en az uzakligi, yildiz sayisi;
+  dilim D1 (plan K8 b): sembolun halka cemberinin disinda kalan pikseli (sembol_halka_disi_olc) ve OLCUM ozetinin 'sembol' kaydi (carpan, olcek,
+  kutu, en-boy farki, olculen yer / boy farki, tam sayi yer farki, kapi 2 sembol bolumunun tam_alfa_piksel ve ortulen_piksel_haric sayilari).
 ARACTA OLMAYANLAR (Serdar soru 6 "l"; plan inceleme bulgusu 2): ornament'in yeni duzen kapilari (yeni_duzen.py:292-321, 351) ve ornament'e ozgu
   IoU / leke / ton / sabit bosluk kapilari yoktur. Ornament'in kucultme sinirinin (ornament_motor.py:802) aractaki karsiligi OLCERDIR: isim
   kuculme orani etikette yazar; kapi eklenmedi."""
@@ -50,6 +56,19 @@ def _at():
     if AT is None or ATK is None or ATK.U is not AT:
         raise RuntimeError('ay takvimi modulleri yuklu degil (tasarim_deneme.baglan once cagrilmali)')
     return AT, ATK
+
+
+def _td():
+    TD = sys.modules.get('tasarim_deneme')
+    if TD is None:
+        raise RuntimeError('tasarim_deneme modulu yuklu degil (serbest grup kapisi serbest kurulum fonksiyonlarini oradan cagirir)')
+    return TD
+
+
+def serbest_mi(ayar):
+    """Hangi grup kapisinin calisacagi KAPIDA, ayardan secilir (uretim modulunden okunmaz; inceleme D1 bulgu 4): bir sembol anahtari varsayilan
+    disindaysa serbest grup kapisi. Uretim ayari yok sayip eski yoldan kurarsa serbest kapi sembolu AYARA gore olcer ve FAIL verir."""
+    return not (ayar['sembol_oran'] == 1.0 and ayar['sembol_u'] == 'poster' and ayar['sembol_v'] == 'poster')
 
 
 def beklenen_merkez(urun, ayar):
@@ -145,6 +164,9 @@ def grup_kapisi(veri, g, yan_json):
     AY, S = veri['ayar'], veri['sembol']
     bm = beklenen_merkez(veri['urun'], AY)
     mod, bpx = beklenen_boyut(veri['urun'], AY)
+    if serbest_mi(AY):                                                        # dilim D1 (Serdar 12 Kas, GK1): serbest ayarda ATK.grup_kapisi CAGRILMAZ
+        out = serbest_grup_kapisi(veri, g, yan_json, bm)
+        return _boyut_kosulu(out, mod, bpx, [int(veri['merkez'][0]), int(veri['merkez'][1])], bm)
     sembol_alan = veri['sembol_alan'] if mod == 'halka_r' else bpx / AT.S
     ogeler = [dict(ad=o['ad'], x=int(o['x']), y=int(o['y']), gen=int(o['A'].shape[1]), yuk=int(o['A'].shape[0])) for o in veri['grup_oge']]
     meta = dict(cift=veri.get('cift', 'CANCER_LIBRA'),
@@ -155,17 +177,177 @@ def grup_kapisi(veri, g, yan_json):
                 disk=dict(merkez=bm))
     D = {f'gm_{i}': o['A'].astype(np.float32) for i, o in enumerate(veri['grup_oge'])}
     out = ATK.grup_kapisi(meta, D, g, yan_json, str(veri['motor']), S['a'].astype(np.float32), S['x'], S['y'])
+    out['kapi'] = 'atk'
+    return _boyut_kosulu(out, mod, bpx, meta['grup']['merkez'], bm)
+
+
+def _boyut_kosulu(out, mod, bpx, uretim_merkez, bm):
+    """Kapi 2 grup bolumunun arac eki (iki yolda da AYNI kod): beklenen / uretim merkezi kaydi ve boy kosulu (Serdar 12 Kas K1: SERT):
+    halka_r modunda olculen halka yaricapi = halka_r x guvenli yaricap; grup_r modunda en uzak piksel = grup_r x guvenli yaricap; pay
+    ESIK grup_konum_olculen (2 px)."""
+    _, ATK = _at()
     out['beklenen_merkez'] = [round(float(v), 3) for v in bm]
-    out['uretim_merkez'] = meta['grup']['merkez']
+    out['uretim_merkez'] = uretim_merkez
     bag = out.get('bagimsiz') or {}
     olculen = bag.get('halka_yaricap') if mod == 'halka_r' else bag.get('en_uzak_piksel')
     fark = abs(float(olculen) - bpx) if olculen is not None else None
     pay = ATK.ESIK['grup_konum_olculen']
     out['boyut_bagimsiz'] = dict(mod=mod, beklenen_px=round(bpx, 3), olculen_px=olculen, fark=round(fark, 3) if fark is not None else None, pay_px=pay,
                                  PASS=bool(fark is not None and fark <= pay))
-    out['atk_PASS'] = bool(out['PASS'])                                       # ATK.grup_kapisi'nin kendi sonucu (ek kosul haric)
+    out['atk_PASS'] = bool(out['PASS'])                                       # grup kapisinin (ATK ya da serbest) kendi sonucu (boy kosulu haric)
     out['PASS'] = bool(out['PASS'] and out['boyut_bagimsiz']['PASS'])
     return out
+
+
+def serbest_grup_kapisi(veri, g, yan_json, bm):
+    """SERBEST GRUP KAPISI (dilim D1; Serdar 12 Kas 2026, kapi paketi 3: GK1 + K1 b4). Yalniz bir sembol anahtari varsayilan DISINDA iken
+    calisir; o zaman ATK.grup_kapisi cagrilmaz. ATK.grup_kapisi'nin (ATK:209-360; halka_kalinlik 1,0 ve 'ozgun' dali) HER sert kosulu burada
+    AYNI payla vardir (ESIK grup_konum 1 px, grup_konum_olculen 2 px: ATK.ESIK'ten okunur, burada deger yazilmaz); hedefler poster goreli
+    degil AYARDAN gelir. Kosullar:
+      (1) yeniden kurulum (TD.grup_kur_serbest, kapinin kendi Motor'u ve kendi ilk gecisiyle): hedef yaricap = kayit (ATK:228); ana sembol
+          olcegi = kayit, ana tam sayi yer esitligi, ana olcek <= 1 (ATK:230-233); oge listesi ve sirasi (ATK:223, 234); her grup ogesi: maske
+          birebir, tam sayi yer esit, yer - hedef farki <= 1 px, olcek <= 1 (ATK:238-244). Ana sembolun tam sayi yer - hedef farki yalniz
+          YAZILIR (ATK:232; sert degil).
+      (2) bagimsiz olcum: grup merkezi = beklenen nokta (ATK:249); halka merkezi o noktada <= 2 px (ATK:255-256); en uzak grup pikseli =
+          hedef <= 2 px (ATK:257-264; hedef SERBEST ayarli ilk gecisten); cift icin poster kucuk burc yeri tanimli (ATK:300-309, 355); kucuk
+          burc yer ve boy <= 2 px, 1 solda 2 sagda (ATK:310-321); logo yer ve boy <= 2 px (ATK:322-343); ana sembolun OLCULEN yeri ve boyu
+          <= 2 px (ATK:345-352 ifadesi; beklenen olcek x sembol_oran, beklenen yer sembol_u / sembol_v'den: AYARA gore denetim budur).
+    Donen sozluk ATK.grup_kapisi ile ayni alan adlarini tasir (oge, ana, bagimsiz, konum_fark_en_buyuk, olculen_fark_en_buyuk, PASS)."""
+    AT, ATK = _at()
+    TD = _td()
+    E = ATK.ESIK
+    AY, S = veri['ayar'], veri['sembol']
+    cift = veri.get('cift', 'CANCER_LIBRA')
+    hk, lg_ = float(AY['halka_kalinlik']), AY['logo']
+    if AY['halka_r'] is None or AY['grup_merkez'] != 'halka' or hk != 1.0 or AY['halka_centik'] != 'ozgun':
+        return dict(kapi='serbest', PASS=False, neden='serbest grup kapisi yalniz halka_r + halka merkez, halka_kalinlik 1,0, ozgun icin tanimli')
+    sa, sx, sy = S['a'].astype(np.float32), S['x'], S['y']
+    gb = [dict(ad=o['ad'], x=int(o['x']), y=int(o['y'])) for o in veri['grup_oge']]
+    D = [o['A'].astype(np.float32) for o in veri['grup_oge']]
+    mx, my = int(veri['merkez'][0]), int(veri['merkez'][1])
+    mt = AT.Motor(veri['motor'])                                              # ATK:218: kapi kendi Motor'unu kurar
+    _, bpx = beklenen_boyut(veri['urun'], AY)                                 # halka_r x guvenli yaricap (uretimden bagimsiz)
+    ig = TD.ilk_gecis(mt, g, yan_json, AY)                                    # kapinin KENDI ilk gecisi, serbest ayarla (K1 b4)
+    hedef_r = 1.0 * ((bpx / ig['R'] * ig['er']) / AT.S) * AT.S                # uretimle ayni ifade (TD.olcek_kontrol, TD.grup_hesapla)
+    hedef_kur = 1.0 * ((bpx / ig['R'] * ig['er_poster']) / AT.S) * AT.S
+    G = TD.grup_kur_serbest(mt, g, yan_json, AY, hedef_kur)
+    adlar = ['halka', 'kucuk1', 'kucuk2'] + (['logo'] if lg_ != 'yok' else [])  # logo ayarda varsa grupta ZORUNLU, yoksa OLAMAZ (ATK:223)
+    B = G['bilgi']
+    (ex, ey), ol = B['cevre_merkez_poster'], B['olcek']
+    pay = E['grup_konum_olculen']
+    out = dict(kapi='serbest', olcek=ol, hedef_yaricap=hedef_r, hedef_yaricap_meta_ayni=bool(abs(hedef_r - veri['hedef_r']) < 1e-6), oge={},
+               ilk_gecis=dict(er=ig['er'], er_poster=ig['er_poster'], er_sembol=ig.get('er_sembol')))
+    # ---- (1) yeniden kurulum
+    out['ana'] = dict(olcek=G['ana']['olcek'], olcek_meta_ayni=bool(abs(G['ana']['olcek'] - S['bilgi']['olcek']) < 1e-9),
+                      x_ayni=bool(mx + G['ana']['x'] == sx and my + G['ana']['y'] == sy),
+                      konum_fark=round(float(max(abs(sx - mx - G['ana']['hedef'][0]), abs(sy - my - G['ana']['hedef'][1]))), 3))
+    ok = out['hedef_yaricap_meta_ayni'] and out['ana']['olcek_meta_ayni'] and out['ana']['x_ayni'] and G['ana']['olcek'] <= 1.0
+    ok = ok and len(gb) == len(G['ogeler']) == len(adlar) and [o['ad'] for o in gb] == adlar
+    if not ok:                                                                # ATK:235-237 ile ayni erken donus; neden yazilir (alanlar sessizce bos kalmaz)
+        out['PASS'] = False
+        out['neden'] = 'yeniden kurulum on kosulu FAIL (hedef yaricap / ana olcek / ana tam sayi yer / oge listesi): oge ve bagimsiz olcum yapilmadi'
+        return out
+    for om, m, og_ in zip(gb, D, G['ogeler']):
+        ayni = bool(om['ad'] == og_['ad'] and m.shape == og_['A'].shape and np.array_equal(m, og_['A'].astype(np.float32)))
+        yer = bool(om['x'] == mx + og_['x'] and om['y'] == my + og_['y'])
+        fark = max(abs(om['x'] - mx - (og_['poster'][0] - ex) * ol), abs(om['y'] - my - (og_['poster'][1] - ey) * ol))
+        out['oge'][om['ad']] = dict(yeniden_kucultme_birebir=ayni, yer_ayni=yer, konum_fark=round(float(fark), 3), olcek=og_['olcek'], k=og_['k'])
+        ok = ok and ayni and yer and fark <= E['grup_konum'] and og_['olcek'] <= 1.0
+    # ---- (2) bagimsiz olcum
+    C = json.loads((Path(veri['motor']) / 'cember.json').read_text())['cember']
+    Yl = json.loads((Path(veri['motor']) / 'yerlesim78.json').read_text())[cift]
+    bag = dict(grup_merkez_disk_merkezi=bool([mx, my] == [int(round(bm[0])), int(round(bm[1]))]))
+    oh, mh = gb[0], D[0]
+    fx, fy, fr = ATK.cember_uydur(mh)
+    hx, hy = oh['x'] + fx, oh['y'] + fy                                       # olculen halka merkezi (tuval) ve yaricapi
+    s_m = fr / C['R']                                                         # olculen grup olcegi
+    bag.update(halka_merkez=[round(hx, 2), round(hy, 2)], halka_yaricap=round(fr, 2), olculen_olcek=round(s_m, 5))
+    bag['halka_merkezde_fark'] = round(float(max(abs(hx - mx), abs(hy - my))), 3)
+    uzak = 0.0                                                                # grup merkezine en uzak grup pikseli (alfa > 0,02; piksel koseleri)
+    for a_, x_, y_ in [(sa, sx, sy)] + [(m, o['x'], o['y']) for m, o in zip(D, gb)]:
+        ys, xs = np.nonzero(a_ > AT.GRUP_ALFA_ESIK)
+        uzak = max(uzak, float(max(np.hypot(xs + x_ + dx - mx, ys + y_ + dy - my).max() for dx in (0, 1) for dy in (0, 1))))
+    bag.update(en_uzak_piksel=round(uzak, 2), en_uzak_piksel_ham=round(uzak, 2), en_uzak_fark=round(abs(uzak - hedef_r), 3))
+    hko = ATK.halka_kalinlik_olc(mh, fx, fy)                                  # BILGI: maskeden olculen cizgi kalinligi (kapi degil)
+    bag['halka_kalinlik'] = dict(carpan=hk, hedef_ust_px=round(hk * C['kalinlik'] * s_m, 3), **hko)
+    if AY['kucuk_u'] == 'poster':
+        u_h = ATK.POSTER_KUCUK_U.get(cift)
+    else:
+        u_h = (-float(AY['kucuk_u']), float(AY['kucuk_u']))
+    v_h = (ATK.POSTER_KUCUK_Y - C['cy']) / C['R'] if AY['kucuk_v'] == 'poster' else float(AY['kucuk_v'])
+    ko = float(AY['kucuk_oran'])
+    olc, mer = [], []
+    if u_h is None:
+        bag['neden'] = 'cift icin poster kucuk sembol yeri tanimli degil'
+    else:
+        for i, u_ in ((1, u_h[0]), (2, u_h[1])):
+            om, m, kay = gb[i], D[i], G['ogeler'][i]['kaynak']
+            kk = AT.kutu(m, 0.02)
+            cxk, cyk = om['x'] + (kk[0] + kk[2]) / 2.0, om['y'] + (kk[1] + kk[3]) / 2.0
+            mer.append(cxk)
+            d_yer = max(abs(cxk - hx - u_ * fr), abs(cyk - hy - v_h * fr))
+            d_boy = abs(ATK.yatay_yayilim(m) / (ATK.yatay_yayilim(kay) * s_m * ko) - 1.0) * (kk[2] - kk[0])
+            bag[om['ad']] = dict(u=round((cxk - hx) / fr, 4), v=round((cyk - hy) / fr, 4), hedef_u=u_, hedef_v=round(v_h, 5),
+                                 yer_fark=round(float(d_yer), 3), genislik=int(kk[2] - kk[0]), boy_fark=round(float(d_boy), 3))
+            olc += [d_yer, d_boy]
+        bag['kucuk1_solda_kucuk2_sagda'] = bool(mer[0] < hx < mer[1])
+    if lg_ != 'yok':                                                          # logo: yer (grup ekseni, kucuk sembol satiri) ve boy; ayni olcum payi
+        om, m, kay = gb[3], D[3], G['ogeler'][3]['kaynak']
+        kk = AT.kutu(m, 0.02)
+        cxl, cyl = om['x'] + (kk[0] + kk[2]) / 2.0, om['y'] + (kk[1] + kk[3]) / 2.0
+        d_yer = max(abs(cxl - hx), abs(cyl - hy - v_h * fr))
+        d_boy = abs(ATK.yatay_yayilim(m) / (ATK.yatay_yayilim(kay) * s_m * float(lg_)) - 1.0) * (kk[2] - kk[0])
+        lb = dict(oran=float(lg_), yer_fark=round(float(d_yer), 3), boy_fark=round(float(d_boy), 3), genislik_px=int(kk[2] - kk[0]), yukseklik_px=int(kk[3] - kk[1]),
+                  genislik_mm=round((kk[2] - kk[0]) * 25.4 / AT.DPI, 2), yukseklik_mm=round((kk[3] - kk[1]) * 25.4 / AT.DPI, 2))
+        # BILGI (esik yok; ATK:329-341 ile ayni alanlar): logo ile her kucuk sembol arasi en yakin piksel uzakligi (alfa > 0,02; kenar boslugu = mesafe - 1)
+        x0_ = min(o['x'] for o in gb[1:]); y0_ = min(o['y'] for o in gb[1:])
+        x1_ = max(o['x'] + q.shape[1] for o, q in zip(gb[1:], D[1:])); y1_ = max(o['y'] + q.shape[0] for o, q in zip(gb[1:], D[1:]))
+        tl = np.zeros((y1_ - y0_, x1_ - x0_), np.uint8)
+        tl[om['y'] - y0_:om['y'] - y0_ + m.shape[0], om['x'] - x0_:om['x'] - x0_ + m.shape[1]][m > 0.02] = 1
+        dtl = cv2.distanceTransform((tl == 0).astype(np.uint8), cv2.DIST_L2, cv2.DIST_MASK_PRECISE)
+        for i in (1, 2):
+            ok_, mk_ = gb[i], D[i]
+            dl = dtl[ok_['y'] - y0_:ok_['y'] - y0_ + mk_.shape[0], ok_['x'] - x0_:ok_['x'] - x0_ + mk_.shape[1]][mk_ > 0.02]
+            bos = float(dl.min()) - 1.0
+            lb[f'{ok_["ad"]}_uzaklik_px'] = round(bos, 2); lb[f'{ok_["ad"]}_uzaklik_mm'] = round(bos * 25.4 / AT.DPI, 2)
+            lb[f'{ok_["ad"]}_durum'] = 'cakisiyor' if bos < 0 else 'ayrik'
+        bag['logo'] = lb
+        olc += [d_yer, d_boy]
+    # ana sembol: OLCULEN yer ve boy, hedef AYARDAN (ATK:345-352 ifadesi; beklenen olcek x sembol_oran; beklenen yer sembol_u / sembol_v).
+    # Beklenen alfa > 0,02 kutusu sol ust kosesi = halka merkezi + [kaynak kutusu sol ustu + (k2 - pay) x s_ana x c] x olculen olcek;
+    # kaynak kutusu sol ustu (cember merkezine gore, poster px): 'poster' = u0 x R + kw x s_ana x (1 - c) / 2; sayi = u x R - kw x s_ana x c / 2.
+    # c = 1 ve 'poster' iken ATK:350-351 ile AYNI sayi. Bu hedef uretim kodundan OKUNMAZ.
+    j = yan_json or {}
+    pay_x, pay_y = j.get('kaynak_x', j.get('x', 0)) - j.get('x', 0), j.get('kaynak_y', j.get('y', 0)) - j.get('y', 0)
+    kw, kh = j.get('kaynak_w', j.get('w', 1)), j.get('kaynak_h', j.get('h', 1))
+    s_ana = (Yl['u1'] - Yl['u0']) * C['R'] / kw
+    c = float(AY['sembol_oran'])
+    bx = Yl['u0'] * C['R'] + kw * s_ana * (1.0 - c) / 2.0 if AY['sembol_u'] == 'poster' else float(AY['sembol_u']) * C['R'] - kw * s_ana * c / 2.0
+    by = Yl['v0'] * C['R'] + kh * s_ana * (1.0 - c) / 2.0 if AY['sembol_v'] == 'poster' else float(AY['sembol_v']) * C['R'] - kh * s_ana * c / 2.0
+    k2 = veri['s_olc']['kutu_alfa_002']
+    ks = AT.kutu(sa, 0.02)
+    d_ana = max(abs(sx + ks[0] - hx - (bx + (k2[0] - pay_x) * s_ana * c) * s_m), abs(sy + ks[1] - hy - (by + (k2[1] - pay_y) * s_ana * c) * s_m))
+    d_ana_boy = abs(ATK.yatay_yayilim(sa) / (ATK.yatay_yayilim(g[..., 3]) * s_ana * s_m * c) - 1.0) * (ks[2] - ks[0])
+    bag['ana'] = dict(yer_fark=round(float(d_ana), 3), boy_fark=round(float(d_ana_boy), 3), beklenen_olcek=round(float(s_ana * s_m * c), 6))
+    olc += [d_ana, d_ana_boy, bag['en_uzak_fark'], bag['halka_merkezde_fark']]
+    bag['fark_en_buyuk'] = round(float(max(olc)), 3)
+    bag['PASS'] = bool(u_h is not None and bag['grup_merkez_disk_merkezi'] and bag.get('kucuk1_solda_kucuk2_sagda') and max(olc) <= pay)
+    out['bagimsiz'] = bag
+    out['konum_fark_en_buyuk'] = max([out['ana']['konum_fark']] + [v['konum_fark'] for v in out['oge'].values()])
+    out['olculen_fark_en_buyuk'] = bag['fark_en_buyuk']
+    out['PASS'] = bool(ok and bag['PASS'])
+    return out
+
+
+def sembol_halka_disi_olc(sa, sx, sy, halka_a, halka_x, halka_y):
+    """BILGI (esik yok, kapi degil; Serdar 12 Kas, plan K8 b): sembol maskesinin (alfa > 0,02) halka cemberinin DISINDA kalan piksel sayisi.
+    Halka cemberi = halka maskesine uydurulan cember (ATK.cember_uydur; merkez ve yaricap); piksel merkezi cember yaricapindan uzaksa
+    disaridadir. Doner dict(piksel, halka_yaricap_px)."""
+    _, ATK = _at()
+    fx, fy, fr = ATK.cember_uydur(halka_a)
+    ys, xs = np.nonzero(sa > 0.02)
+    d = np.hypot(xs + 0.5 + sx - (halka_x + fx), ys + 0.5 + sy - (halka_y + fy))
+    return dict(piksel=int((d > fr).sum()), halka_yaricap_px=round(float(fr), 2))
 
 
 # ---------------------------------------------------------------- OLCER: olcum yardimcilari
@@ -476,7 +658,12 @@ def olc(veri):
     ky = kucuk_yazi_olc(M, [o['ad'] for o in og])
     ky_isim = [v for k_, v in ky.items() if k_.endswith('/isimler')]
     ky_metin = [v for k_, v in ky.items() if '/metin_' in k_]
-    bilgi = dict(cift_px=cift_px, kucuk_yazi_uzaklik=ky,
+    halka_o = next((o for o in gg if o['ad'] == 'halka'), None)
+    try:
+        halka_disi = sembol_halka_disi_olc(sa, sx, sy, halka_o['A'], halka_o['x'], halka_o['y']) if halka_o is not None else None
+    except Exception:                                                        # noqa: BLE001  (halka maskesine cember uydurulamadi: bilgi yazilmaz)
+        halka_disi = None
+    bilgi = dict(cift_px=cift_px, kucuk_yazi_uzaklik=ky, sembol_halka_disi=halka_disi,
                  not_='cift_px: iki maskenin (alfa > 0,02) kesisim pikseli; kucuk_yazi_uzaklik: piksel merkezleri arasi en az uzaklik (0 = binme)')
     # isim satiri, metin genisligi, metin tabani
     oi = next(o for o in og if o['tur'] == 'isim')
@@ -587,6 +774,15 @@ def olc(veri):
                 cift_px=dict(cift_px),
                 kucuk_yazi_px=dict(isim=min(ky_isim) if ky_isim else None, metin=min(ky_metin) if ky_metin else None),
                 kok_neden=kok_neden, isim_guvenli_disinda=isim_dis, yildiz_sayi=int(veri['yildiz']['sayi']),
+                # dilim D1: sembol ozeti (BILGI + kapi 2'nin sembole ait OLCULEN farklari; esik burada yok)
+                sembol=dict(oran=AY['sembol_oran'], u=AY['sembol_u'], v=AY['sembol_v'], olcek=round(float(S['bilgi']['olcek']), 6),
+                            kutu_px=[int(S['bilgi']['kutu_05'][2] - S['bilgi']['kutu_05'][0]), int(S['bilgi']['kutu_05'][3] - S['bilgi']['kutu_05'][1])],
+                            en_boy_fark=sert['2_sembol'].get('en_boy_fark'),
+                            yer_fark=((sert['2_grup'].get('bagimsiz') or {}).get('ana') or {}).get('yer_fark'),
+                            boy_fark=((sert['2_grup'].get('bagimsiz') or {}).get('ana') or {}).get('boy_fark'),
+                            tam_sayi_yer_fark=(sert['2_grup'].get('ana') or {}).get('konum_fark'),
+                            tam_alfa_piksel=sert['2_sembol'].get('tam_alfa_piksel'), ortulen_piksel_haric=sert['2_sembol'].get('ortulen_piksel_haric'),
+                            halka_disi_px=halka_disi['piksel'] if halka_disi else None, grup_kapisi=sert['2_grup'].get('kapi')),
                 grup_yazi_en_az_px=olcer['grup_yazi']['en_az'], cikti='PASS' if sert['cikti']['PASS'] else 'FAIL',
                 kapi2_fark_en_buyuk=sert['2_grup'].get('olculen_fark_en_buyuk'), kapi2_konum_fark=sert['2_grup'].get('konum_fark_en_buyuk'),
                 kapi2_boyut_fark=(sert['2_grup'].get('boyut_bagimsiz') or {}).get('fark'),
