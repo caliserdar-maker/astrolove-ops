@@ -1,0 +1,810 @@
+{
+ "kaynak": "fiyat-zam-1114 kosu 43518175873 (oku, cift), ilan 4598537101 ONCE.json, 13 Kas 2026 22:19 UTC; listing alanlari kirpildi",
+ "listing": {
+  "listing_id": 4598537101,
+  "state": "active",
+  "shop_section_id": 60980873,
+  "is_personalizable": true,
+  "personalization_is_required": null,
+  "personalization_char_count_max": null,
+  "personalization_instructions": null,
+  "description": ""
+ },
+ "inventory": {
+  "products": [
+   {
+    "product_id": 35068783233,
+    "sku": "KUPA-LEO_VIRGO-01-11",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35379643546,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1290,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108872673325
+      ],
+      "values": [
+       "Orange Blossom"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463717
+      ],
+      "values": [
+       "11 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35449554396,
+    "sku": "KUPA-LEO_VIRGO-01-15",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35223072127,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1690,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108872673325
+      ],
+      "values": [
+       "Orange Blossom"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463759
+      ],
+      "values": [
+       "15 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35449554394,
+    "sku": "KUPA-LEO_VIRGO-02-11",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35223072125,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1290,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       241431367381
+      ],
+      "values": [
+       "Purple Fig"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463717
+      ],
+      "values": [
+       "11 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35449554392,
+    "sku": "KUPA-LEO_VIRGO-02-15",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35223072123,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1690,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       241431367381
+      ],
+      "values": [
+       "Purple Fig"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463759
+      ],
+      "values": [
+       "15 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35068783231,
+    "sku": "KUPA-LEO_VIRGO-03-11",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35379643544,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1290,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       1477962372394
+      ],
+      "values": [
+       "Olive Breeze"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463717
+      ],
+      "values": [
+       "11 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35449554390,
+    "sku": "KUPA-LEO_VIRGO-03-15",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35379643542,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1690,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       1477962372394
+      ],
+      "values": [
+       "Olive Breeze"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463759
+      ],
+      "values": [
+       "15 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35449554388,
+    "sku": "KUPA-LEO_VIRGO-04-11",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35223072121,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1290,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       1385737843355
+      ],
+      "values": [
+       "Pomegranate Bloom"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463717
+      ],
+      "values": [
+       "11 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35068783229,
+    "sku": "KUPA-LEO_VIRGO-04-15",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35379643540,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1690,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       1385737843355
+      ],
+      "values": [
+       "Pomegranate Bloom"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463759
+      ],
+      "values": [
+       "15 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35068783227,
+    "sku": "KUPA-LEO_VIRGO-05-11",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35379643538,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1290,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       113121771559
+      ],
+      "values": [
+       "Almond Blossom"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463717
+      ],
+      "values": [
+       "11 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35068783225,
+    "sku": "KUPA-LEO_VIRGO-05-15",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35379643536,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1690,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       113121771559
+      ],
+      "values": [
+       "Almond Blossom"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463759
+      ],
+      "values": [
+       "15 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35449554386,
+    "sku": "KUPA-LEO_VIRGO-06-11",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35223072119,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1290,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       208454593771
+      ],
+      "values": [
+       "Lemon Grove"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463717
+      ],
+      "values": [
+       "11 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35449554384,
+    "sku": "KUPA-LEO_VIRGO-06-15",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35223072117,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1690,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       208454593771
+      ],
+      "values": [
+       "Lemon Grove"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463759
+      ],
+      "values": [
+       "15 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35068783223,
+    "sku": "KUPA-LEO_VIRGO-07-11",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35223072115,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1290,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       849634430200
+      ],
+      "values": [
+       "Blue Grape"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463717
+      ],
+      "values": [
+       "11 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35449554382,
+    "sku": "KUPA-LEO_VIRGO-07-15",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35379643534,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1690,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       849634430200
+      ],
+      "values": [
+       "Blue Grape"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463759
+      ],
+      "values": [
+       "15 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35449554380,
+    "sku": "KUPA-LEO_VIRGO-08-11",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35379643532,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1290,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       1504133525149
+      ],
+      "values": [
+       "Golden Loquat"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463717
+      ],
+      "values": [
+       "11 oz"
+      ]
+     }
+    ]
+   },
+   {
+    "product_id": 35068783221,
+    "sku": "KUPA-LEO_VIRGO-08-15",
+    "is_deleted": false,
+    "offerings": [
+     {
+      "offering_id": 35223072113,
+      "quantity": 999,
+      "is_enabled": true,
+      "is_deleted": false,
+      "price": {
+       "amount": 1690,
+       "divisor": 100,
+       "currency_code": "USD"
+      },
+      "readiness_state_id": 1517641240112
+     }
+    ],
+    "property_values": [
+     {
+      "property_id": 513,
+      "property_name": "Style",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       1504133525149
+      ],
+      "values": [
+       "Golden Loquat"
+      ]
+     },
+     {
+      "property_id": 514,
+      "property_name": "Size",
+      "scale_id": null,
+      "scale_name": null,
+      "value_ids": [
+       108362463759
+      ],
+      "values": [
+       "15 oz"
+      ]
+     }
+    ]
+   }
+  ],
+  "price_on_property": [
+   513,
+   514
+  ],
+  "quantity_on_property": [],
+  "sku_on_property": [
+   513,
+   514
+  ],
+  "readiness_state_on_property": [],
+  "listing": null
+ },
+ "vimg": [
+  {
+   "property_id": 513,
+   "value_id": 1504133525149,
+   "value": "Golden Loquat",
+   "image_id": 8823599971
+  },
+  {
+   "property_id": 513,
+   "value_id": 1385737843355,
+   "value": "Pomegranate Bloom",
+   "image_id": 8823598017
+  },
+  {
+   "property_id": 513,
+   "value_id": 849634430200,
+   "value": "Blue Grape",
+   "image_id": 8823599463
+  },
+  {
+   "property_id": 513,
+   "value_id": 208454593771,
+   "value": "Lemon Grove",
+   "image_id": 8775775580
+  },
+  {
+   "property_id": 513,
+   "value_id": 113121771559,
+   "value": "Almond Blossom",
+   "image_id": 8823598455
+  },
+  {
+   "property_id": 513,
+   "value_id": 1477962372394,
+   "value": "Olive Breeze",
+   "image_id": 8823597609
+  },
+  {
+   "property_id": 513,
+   "value_id": 241431367381,
+   "value": "Purple Fig",
+   "image_id": 8775773902
+  },
+  {
+   "property_id": 513,
+   "value_id": 108872673325,
+   "value": "Orange Blossom",
+   "image_id": 8823596885
+  }
+ ],
+ "per": [
+  {
+   "question_text": "Personalization",
+   "instructions": "1. Name for Leo (max 10 letters)\n2. Name for Virgo (max 10 letters)\n3. Message (max 30 characters or blank)",
+   "question_id": 1463157334475,
+   "question_type": "text_input",
+   "required": true,
+   "max_allowed_characters": 256,
+   "max_allowed_files": null,
+   "add_on_price": null
+  }
+ ]
+}

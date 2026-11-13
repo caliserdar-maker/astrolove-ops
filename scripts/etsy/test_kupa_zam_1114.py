@@ -339,6 +339,33 @@ def test_main():
     ok("geri okuma FAIL ilk ilanda durur")
 
 
+def test_gercek_veri():
+    """Canli olcum: kosu 43518175873 (oku, cift), ilan 4598537101 ONCE.json (testdata_kupa_4598537101.json)."""
+    G = json.loads((KOK / "testdata_kupa_4598537101.json").read_text(encoding="utf-8"))
+    prs, h, z = M.plan(G["inventory"])
+    assert not h and len(prs) == 16 and not z and M.bag_gecerli(G["inventory"], G["vimg"]), h
+    ok("gercek envanter PLAN_OK, stil bagi gecerli")
+    b = M.govde(G["inventory"])
+    assert fiyat_kumesi(b) == [("11 oz", 24.9), ("15 oz", 29.9)]
+    once = {p["sku"]: p for p in G["inventory"]["products"]}
+    for p in b["products"]:
+        o = once[p["sku"]]
+        assert [(pv["property_id"], pv["values"], pv["value_ids"]) for pv in p["property_values"]] == \
+               [(pv["property_id"], pv["values"], pv["value_ids"]) for pv in o["property_values"]]
+        assert (p["offerings"][0]["quantity"], p["offerings"][0]["is_enabled"], p["offerings"][0]["readiness_state_id"]) == \
+               (o["offerings"][0]["quantity"], o["offerings"][0]["is_enabled"], o["offerings"][0]["readiness_state_id"])
+    assert b["price_on_property"] == [513, 514] and b["sku_on_property"] == [513, 514] and "listing" not in b
+    ok("gercek envanter govdesi: fiyat disi birebir")
+    a = SahteApi(copy.deepcopy(G["inventory"]), ilanlar=["4598537101"] + [str(4600000000 + i) for i in range(77)])
+    a.vimg, a.per, a.L = copy.deepcopy(G["vimg"]), copy.deepcopy(G["per"]), copy.deepcopy(G["listing"])
+    rc, oz, _ = kos(a, "yaz", "--aile", "cift", "--ilanlar", "4598537101", "--confirm", "KUPA_ZAM_1114")
+    r = oz["ilanlar"][0]
+    assert rc == 0 and r["durum"] == "PASS" and r["renk_onarim"] == "gerekmedi" and len(a.puts) == 1, r
+    ok("gercek veriyle yaz PASS")
+    assert M.soru_imza(G["per"]) == M.soru_imza(copy.deepcopy(G["per"]))
+    ok("gercek kisisellestirme sorusu imzasi")
+
+
 def test_eski_arac_kapali():
     import kupa_fiyat as K
     for arg in (["yaz", "--ilanlar", "1", "--confirm", "KUPA_FIYAT"], ["oku", "--hepsi"]):
@@ -354,5 +381,6 @@ def test_eski_arac_kapali():
 if __name__ == "__main__":
     test_plan_govde()
     test_main()
+    test_gercek_veri()
     test_eski_arac_kapali()
     print(f"TOPLAM test_kupa_zam_1114: {len(SONUC)}/{len(SONUC)} PASS")
