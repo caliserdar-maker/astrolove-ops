@@ -499,6 +499,9 @@ def argumanlar(argv=None):
 
 def main(argv=None):
     a = argumanlar(argv)
+    if a.mod in ("yaz", "geri-al"):   # Serdar 13-14 Kas: dijital 9.90, baski +5; bu aracin plani eski fiyatlari (3.90, zamsiz) yazar
+        raise SystemExit("DUR: yd_yapi_yaz yaz/geri-al kapali (fiyat zammi 14 Kas 2026: scripts/pod/fiyat_zam_1114.py). "
+                         "Arac yeni fiyat tablosuna baglanmadan ve ayri Serdar onayi olmadan yazmaz.")
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     if a.mod not in ("profil", "profil-geri-al"):
         plan_yukle(a.plan, [x for x in a.sadece.split(",") if x], [x for x in a.haric.split(",") if x])   # Etsy isteginden ONCE
