@@ -1,9 +1,9 @@
 name: fiyat-zam-1114
 
 # Serdar 13-14 Kas 2026 (Genel Merkez): poster ve 1st Anniversary ilanlarinda Digital File 3.90 -> 9.90, Print her boy +5 USD;
-# kupa (cift 78; sade 12 icin Serdar teyidi gerekir) 11 oz 12.90 -> 24.90, 15 oz 16.90 -> 29.90, kargo ayni (scripts/etsy/kupa_zam_1114.py).
-# mod oku = salt okuma (plan + kapilar; ATLA uygulanmaz); mod yaz = onay (poster FIYAT_1114, yd FIYAT_1114_YD, kupa KUPA_ZAM_1114;
-# kupa_sade yazimi kodda kapali). Once 1 ilan, canli kontrol, sonra kalanlar. TAMAM okuma/yazma hatasi ve Drive yukleme hatasi
+# kupa (cift 78, sade 12; sade Serdar 14 Kas teyidi) 11 oz 12.90 -> 24.90, 15 oz 16.90 -> 29.90, kargo ayni (scripts/etsy/kupa_zam_1114.py).
+# mod oku = salt okuma (plan + kapilar; ATLA uygulanmaz); mod yaz = onay (poster FIYAT_1114, yd FIYAT_1114_YD, kupa KUPA_ZAM_1114,
+# kupa_sade KUPA_ZAM_1114_SADE). Once 1 ilan, canli kontrol, sonra kalanlar. TAMAM okuma/yazma hatasi ve Drive yukleme hatasi
 # 14 Kas'tan beri tum ailelerde koşuyu kirmizi bitirir.
 # Cikti: Drive TEMP/POD_ORDERS/FIYAT_1114/<aile>_<kosu>/
 

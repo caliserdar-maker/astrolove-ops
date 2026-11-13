@@ -2,8 +2,8 @@
 """Kupa fiyat zammi (Serdar 13-14 Kas 2026, Genel Merkez): Size fiyatlari 11 oz 12.90 -> 24.90, 15 oz 16.90 -> 29.90.
 Kargo (ulke basina ucretli profil) DEGISMEZ. Iki aile:
   cift = bolum 60980873 "Zodiac Couple Mugs" (78 ilan), sade = bolum "Zodiac Sign Mugs" (12 ilan, tek burc; id bolum adindan okunur).
-  SADE: kapsam Merkez okumasi, Serdar teyit etmedi; yaz KAPALI (SADE_YAZ_ACIK=False). 'oku --aile sade' olcumu ve Serdar teyidinden
-  sonra BEKLENEN, gercek fixture ve bu bayrak ayni commit'te acilir.
+  SADE: Serdar 14 Kas teyidi ("Evet": sade kupalar da 24.90 / 29.90). Olcum kosu 43518188944: bolum 61221710, 12 ilan, 12 PLAN_OK,
+  SKU bos, sku_on_property bos (gercek fixture testdata_kupa_sade_4607613712.json).
 Yapi (ikisinde de, 31 Eki karari): Style 513 (8) x Size 514 (2) = 16 urun. Yontem kupa_fiyat.py'nin aynisi: ilan basina tek
 PUT /listings/{id}/inventory, fiyat disi her alan birebir; stil-gorsel baglari once/sonra ada gore. updateListing YOK.
 kupa_fiyat.py'den farklar: hedef/eski fiyat ters yonde; aile secimi; bolum ilan sayisi kontrolu; ATLA yalniz yaz modunda;
@@ -28,8 +28,8 @@ ONAY = {"cift": "KUPA_ZAM_1114", "sade": "KUPA_ZAM_1114_SADE"}
 ONAY_HEPSI = {k: v + "_HEPSI" for k, v in ONAY.items()}
 BOLUM_ID = {"cift": 60980873}
 BOLUM_AD = {"cift": "Zodiac Couple Mugs", "sade": "Zodiac Sign Mugs"}
-BEKLENEN = {"cift": 78, "sade": 12}   # sade: olculmedi (canli_yapi_olc.py:40 sade 11 diyor; ARIES)
-SADE_YAZ_ACIK = False
+BEKLENEN = {"cift": 78, "sade": 12}   # sade: olculdu 12 (kosu 43518188944; canli_yapi_olc.py:40'taki 11 eski)
+SADE_YAZ_ACIK = True   # Serdar 14 Kas teyidi
 INV_YOL = "/listings/{lid}/inventory"
 DOKUNMA = {"4597843405"}
 P_RENK, P_BOY = 513, 514

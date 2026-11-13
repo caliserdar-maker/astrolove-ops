@@ -209,11 +209,14 @@ def test_main():
     rc, oz, _ = kos(SahteApi(inv(), ilanlar=a.ilanlar), "yaz", "--aile", "cift", "--ilanlar", "4597843405", "--confirm", "KUPA_ZAM_1114")
     assert rc == 1 and "DOKUNMA" in oz["genel_hata"]
     ok("DOKUNMA yazilmaz")
-    # sade yazimi kapali (onay sozcugu dogru olsa da), PUT yok
+    # sade bayragi kapaliysa yazim DUR (bayrak Serdar 14 Kas teyidiyle acik)
+    assert M.SADE_YAZ_ACIK is True
+    M.SADE_YAZ_ACIK = False
     a = SahteApi(inv(), bolum="Zodiac Sign Mugs", bolum_id=61234567, ilanlar=[str(4700000000 + i) for i in range(12)])
     rc, oz, _ = kos(a, "yaz", "--aile", "sade", "--ilanlar", a.ilanlar[0], "--confirm", "KUPA_ZAM_1114_SADE")
+    M.SADE_YAZ_ACIK = True
     assert rc == 1 and "sade yazimi kapali" in oz["genel_hata"] and not a.puts, oz
-    ok("sade yazimi kapali")
+    ok("sade bayragi kapaliyken yazim DUR")
     # sade: bolum adindan bulunur, 12 ilan
     a = SahteApi(inv(), bolum="Zodiac Sign Mugs", bolum_id=61234567, ilanlar=[str(4700000000 + i) for i in range(12)])
     rc, oz, _ = kos(a, "oku", "--aile", "sade", "--hepsi")
@@ -366,6 +369,28 @@ def test_gercek_veri():
     ok("gercek kisisellestirme sorusu imzasi")
 
 
+def test_gercek_sade():
+    """Canli olcum: kosu 43518188944 (oku, sade), ilan 4607613712 ONCE.json (SKU bos, sku_on_property bos)."""
+    G = json.loads((KOK / "testdata_kupa_sade_4607613712.json").read_text(encoding="utf-8"))
+    prs, h, z = M.plan(G["inventory"])
+    assert not h and len(prs) == 16 and not z and M.bag_gecerli(G["inventory"], G["vimg"]), h
+    b = M.govde(G["inventory"])
+    assert fiyat_kumesi(b) == [("11 oz", 24.9), ("15 oz", 29.9)] and "sku_on_property" not in b and b["price_on_property"] == [513, 514]
+    assert all(p["sku"] == "" for p in b["products"])
+    ok("gercek sade envanteri: plan ve govde")
+    a = SahteApi(copy.deepcopy(G["inventory"]), bolum="Zodiac Sign Mugs", bolum_id=61221710,
+                 ilanlar=["4607613712"] + [str(4700000000 + i) for i in range(11)])
+    a.vimg, a.per, a.L = copy.deepcopy(G["vimg"]), copy.deepcopy(G["per"]), copy.deepcopy(G["listing"])
+    rc, oz, _ = kos(a, "yaz", "--aile", "sade", "--ilanlar", "4607613712", "--confirm", "KUPA_ZAM_1114_SADE")
+    r = oz["ilanlar"][0]
+    assert rc == 0 and r["durum"] == "PASS" and r["renk_onarim"] == "gerekmedi" and len(a.puts) == 1, r
+    ok("gercek sade verisiyle yaz PASS")
+    a = SahteApi(inv(), bolum="Zodiac Sign Mugs", bolum_id=61221710, ilanlar=[str(4700000000 + i) for i in range(11)])
+    rc, oz, _ = kos(a, "yaz", "--aile", "sade", "--hepsi", "--confirm", "KUPA_ZAM_1114_SADE_HEPSI")
+    assert rc == 1 and "beklenen 12" in oz["genel_hata"] and not a.puts
+    ok("sade hepsi 11 ilanda DUR")
+
+
 def test_eski_arac_kapali():
     import kupa_fiyat as K
     for arg in (["yaz", "--ilanlar", "1", "--confirm", "KUPA_FIYAT"], ["oku", "--hepsi"]):
@@ -382,5 +407,6 @@ if __name__ == "__main__":
     test_plan_govde()
     test_main()
     test_gercek_veri()
+    test_gercek_sade()
     test_eski_arac_kapali()
     print(f"TOPLAM test_kupa_zam_1114: {len(SONUC)}/{len(SONUC)} PASS")
