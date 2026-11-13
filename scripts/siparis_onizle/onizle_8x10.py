@@ -25,6 +25,8 @@ mesaj_json = sys.argv[6] if len(sys.argv) > 6 else ""
 assert sec in ("", "A", "B", "C") and (sec != "B" or mesaj_json), "secenek"
 ek = f"_Option{sec}" if sec else ""
 STANDART_KOD = "d2b414ee270ec029bd5abcef4a6535414ae7d1e1"
+A_KOD = "5b79ca12717cff8e406005f6ffea3f86047e3eab"                     # gecici/harf-kod: d2b414ee + yalniz mesaj 'c' glifi
+IOU_ESIK = 0.985                                                    # siparis_kapi kapi d esigi (yalniz OKUNUR; kapi sonucu degistirilmez)
 out.mkdir(parents=True, exist_ok=True)
 kalem = json.load(open(kis, encoding="utf-8"))["kalemler"]
 v = {x["ad"]: x["deger"] for x in kalem[0]["varyasyon"]}
@@ -44,7 +46,7 @@ if sec == "B":                                                      # yeni mesaj
 elif sec == "C":                                                    # Etsy mesaji, her kelimenin ilk harfi buyuk; geri kalan harfler ve bosluklar aynen
     m = " ".join(w[:1].upper() + w[1:] for w in m_etsy.split(" "))
     oz["mesaj_kaynagi"] = dict(dosya="ETSY_ILK_HARF_BUYUK", uzunluk_ayni=len(m) == len(m_etsy), harfler_ayni=m.lower() == m_etsy.lower(),
-                               her_kelime_buyuk_baslar=all(w[:1].isupper() for w in m.split(" ") if w), etsy_mesajindan_farkli=m != m_etsy)
+                               her_kelime_buyuk_baslar=all(w[:1].isupper() or not w[:1].isalpha() for w in m.split(" ") if w), etsy_mesajindan_farkli=m != m_etsy)
 else:
     m = m_etsy; oz["mesaj_kaynagi"] = dict(dosya="ETSY")
 renk = "_".join(w.capitalize() for w in v.get("Color", "").split())
@@ -84,10 +86,16 @@ u = dict(dosya_var=bool(kp), ust_pass=kp.get("PASS") is True, renk_pass=kr.get("
          sure_kosu_ayni=bool(kosu) and str(su.get("kosu")) == kosu, kod_ref=su.get("gpt_ref"))
 u["kod_standart"] = su.get("gpt_ref") == STANDART_KOD
 u["PASS"] = all(u[a] for a in ("dosya_var", "ust_pass", "renk_pass", "olcu_pass", "leke_pass", "kesik_pass", "sure_kosu_ayni")) and all(u["alt_kapilar"].values())
-if sec != "A": u["PASS"] = u["PASS"] and u["kod_standart"]         # A gecici kod dalindan gelir; digerleri sabit koddan
+u["kod_beklenen"] = su.get("gpt_ref") == (A_KOD if sec == "A" else STANDART_KOD)   # A gecici kod dalindan gelir; digerleri sabit koddan
+u["PASS"] = u["PASS"] and u["kod_beklenen"]
+dd = ko.get("d") if isinstance(ko.get("d"), dict) else {}
+u["d_iou"] = {a: (dd.get(a) or {}).get("iou") for a in ("isim1", "isim2", "tagline")}
+isim_iou_ok = all(isinstance(u["d_iou"][a], (int, float)) and u["d_iou"][a] >= IOU_ESIK for a in ("isim1", "isim2"))
 # A: uretim kapisi FAIL ise ve TEK neden alt kapi d ise (harf sekli degisti) secenek yine yazilir; kapi gevsetilmez, FAIL olarak kalir
-u["yalniz_d_fail"] = (not u["PASS"]) and all(u[a] for a in ("dosya_var", "leke_pass", "kesik_pass", "sure_kosu_ayni")) and bool(u["alt_kapilar"]) \
-    and u["alt_kapilar"].get("d") is False and all(x for a, x in u["alt_kapilar"].items() if a != "d")
+# (d icinde isimler PASS olmali: FAIL nedeni yalniz mesaj satiri; kod ref'i A kodu olmali)
+u["yalniz_d_fail"] = (not u["PASS"]) and all(u[a] for a in ("dosya_var", "leke_pass", "kesik_pass", "sure_kosu_ayni", "kod_beklenen")) and bool(u["alt_kapilar"]) \
+    and u["alt_kapilar"].get("d") is False and all(x for a, x in u["alt_kapilar"].items() if a != "d") and isim_iou_ok \
+    and isinstance(u["d_iou"]["tagline"], (int, float))
 oz["uretim_kapilari"] = u
 
 ocr = dict(calisti=False)
