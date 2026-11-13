@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Siparis 8x10 baski dosyasi -> cercevesiz onizleme + isim/mesaj bolgesi 1:1 kesit + kapilar (yalniz True / False ve sayi basar).
 Deger (isim / mesaj) loga ve OZET'e YAZILMAZ. Cift, renk ve olcu KISISEL.json alan adlarindan okunur (sabit cift yok).
-Kullanim: onizle_8x10.py URETIM_DIR KISISEL.json CIKTI_DIR [URETIM_KOSU_NO]   -> cikis 0 = PASS, 1 = FAIL
+Kullanim: onizle_8x10.py URETIM_DIR KISISEL.json CIKTI_DIR URETIM_KOSU_NO [SECENEK MESAJ_JSON]   -> cikis 0 = PASS, 1 = FAIL
+SECENEK (degisiklik istegi): A = mesaj Etsy okumasindaki gibi, harf sekli degisik (uretim kapisinda YALNIZ d FAIL ise dosyalar yine yazilir,
+OZET'te isaretlenir; baski karari Serdar'da). B = mesaj MESAJ_JSON "mesaj" alanindan (birebir), kod standart olmali. Cikti adlarina _Option<X> eklenir.
 Kapilar: girdi (siparis.json == KISISEL.json, harf harf), teslim (ad, 2400x3000, 300 dpi, 4:4:4, < 20 MB), uretim (KAPI.json PASS),
 kesit (alt %45, 1:1), OCR (bilgi; karar uretim kapisi d + goz kontrolu)."""
 import difflib
@@ -17,18 +19,29 @@ from PIL import Image, ImageFilter
 
 ur, kis, out = Path(sys.argv[1]), sys.argv[2], Path(sys.argv[3])
 kosu = sys.argv[4] if len(sys.argv) > 4 else ""
+sec = sys.argv[5] if len(sys.argv) > 5 else ""
+mesaj_json = sys.argv[6] if len(sys.argv) > 6 else ""
+assert sec in ("", "A", "B") and (sec != "B" or mesaj_json), "secenek"
+ek = f"_Option{sec}" if sec else ""
+STANDART_KOD = "d2b414ee270ec029bd5abcef4a6535414ae7d1e1"
 out.mkdir(parents=True, exist_ok=True)
 kalem = json.load(open(kis, encoding="utf-8"))["kalemler"]
 v = {x["ad"]: x["deger"] for x in kalem[0]["varyasyon"]}
 ON = "Name under "
 burc = sorted(k[len(ON):] for k in v if k.startswith(ON))
-oz = dict(kalem_sayisi=len(kalem), burc_alani=len(burc))
+oz = dict(secenek=sec or None, kalem_sayisi=len(kalem), burc_alani=len(burc))
 if len(kalem) != 1 or len(burc) != 2:
-    json.dump(dict(oz, PASS=False), open(out / "ONIZLE_OZET.json", "w"), indent=1)
+    json.dump(dict(oz, PASS=False), open(out / f"ONIZLE_OZET{ek}.json", "w"), indent=1)
     print("ONIZLE:", json.dumps(dict(oz, PASS=False)))
     sys.exit(1)
 b1, b2 = burc                                                      # alfabetik: isim1 = ilk burcun altindaki isim (posterde solda)
-i1, i2, m = v[ON + b1].strip(), v[ON + b2].strip(), v["Your message"].strip()
+i1, i2, m_etsy = v[ON + b1].strip(), v[ON + b2].strip(), v["Your message"].strip()
+if sec == "B":                                                      # yeni mesaj gizli dosyadan, birebir
+    mj = json.load(open(mesaj_json, encoding="utf-8")); m = mj["mesaj"]
+    oz["mesaj_kaynagi"] = dict(dosya="DEGISIKLIK", bosluk_kirpma_gerekmedi=m == m.strip(), karakter_alani_tutuyor=mj.get("karakter") in (None, len(m)),
+                               sinir_35=len(m) <= 35, etsy_mesajindan_farkli=m != m_etsy)
+else:
+    m = m_etsy; oz["mesaj_kaynagi"] = dict(dosya="ETSY")
 renk = "_".join(w.capitalize() for w in v.get("Color", "").split())
 olcu = v.get("Size", "").replace("×", "x").replace("″", "").split(" ")[0]
 kok = f"AstroLoveArt_{b1.capitalize()}_{b2.capitalize()}_{renk}_{olcu}"
@@ -39,7 +52,8 @@ baski = ur / f"{kok}.jpg"
 s = json.load(open(ur / "siparis.json", encoding="utf-8")) if (ur / "siparis.json").exists() else {}
 g = dict(siparis_json=bool(s), cift_ayni=s.get("cift") == f"{b1}_{b2}".upper(), isim1_ayni=s.get("isim1") == i1, isim2_ayni=s.get("isim2") == i2,
          mesaj_ayni=s.get("tagline") == m, olcu_ayni=s.get("siparis_olcu") == olcu == "8x10", renk_ayni=v.get("Color", "").upper().replace(" ", "_") in (s.get("renk") or {}),
-         format_baski=v.get("Format") == "Print", mesaj_tek_satir="\n" not in m and "\r" not in m)
+         format_baski=v.get("Format") == "Print", mesaj_tek_satir="\n" not in m and "\r" not in m,
+         mesaj_kaynagi_gecerli=all(x for k_, x in oz["mesaj_kaynagi"].items() if k_ != "dosya"))
 g["PASS"] = all(g.values()); oz["girdi"] = g
 
 # 2) teslim kapisi
@@ -63,7 +77,12 @@ u = dict(dosya_var=bool(kp), ust_pass=kp.get("PASS") is True, renk_pass=kr.get("
          alt_kapilar={a: x.get("PASS") is True for a, x in ko.items() if isinstance(x, dict)},
          leke_pass=(kr.get("L") or {}).get("PASS") is True, kesik_pass=(kr.get("K") or {}).get("PASS") is True,
          sure_kosu_ayni=bool(kosu) and str(su.get("kosu")) == kosu, kod_ref=su.get("gpt_ref"))
+u["kod_standart"] = su.get("gpt_ref") == STANDART_KOD
 u["PASS"] = all(u[a] for a in ("dosya_var", "ust_pass", "renk_pass", "olcu_pass", "leke_pass", "kesik_pass", "sure_kosu_ayni")) and all(u["alt_kapilar"].values())
+if sec != "A": u["PASS"] = u["PASS"] and u["kod_standart"]         # A gecici kod dalindan gelir; digerleri sabit koddan
+# A: uretim kapisi FAIL ise ve TEK neden alt kapi d ise (harf sekli degisti) secenek yine yazilir; kapi gevsetilmez, FAIL olarak kalir
+u["yalniz_d_fail"] = (not u["PASS"]) and all(u[a] for a in ("dosya_var", "leke_pass", "kesik_pass", "sure_kosu_ayni")) and bool(u["alt_kapilar"]) \
+    and u["alt_kapilar"].get("d") is False and all(x for a, x in u["alt_kapilar"].items() if a != "d")
 oz["uretim_kapilari"] = u
 
 ocr = dict(calisti=False)
@@ -71,7 +90,7 @@ if t["PASS"]:
     # 4) 1:1 kesit: alt %45 (isimler, sonsuz, kucuk isaretler, mesaj); piksel olcegi 1:1
     y0 = int(H * 0.55)
     kes = im.crop((0, y0, W, H))
-    kes.save(out / f"{kok}_KESIT_1x1.jpg", quality=95, dpi=(300, 300), subsampling=0)
+    kes.save(out / f"{kok}{ek}_KESIT_1x1.jpg", quality=95, dpi=(300, 300), subsampling=0)
     # altin murekkep satir bantlari (R - B > 60): kesit icindeki bant sayisi ve kesit ust kenarinin bir yazi bandini kesip kesmedigi
     a = np.asarray(im, dtype=np.int16); murekkep = (a[:, :, 0] - a[:, :, 2]) > 60; satir = murekkep.sum(axis=1) >= W // 100
     bant, bas = [], None
@@ -93,8 +112,9 @@ if t["PASS"]:
     gl = Image.new("L", (dw, dh), 0); gl.paste(150, (x + 14, y + 22, x + pw + 14, y + ph + 22)); gl = gl.filter(ImageFilter.GaussianBlur(22))
     zemin = Image.composite(Image.new("RGB", (dw, dh), (150, 146, 140)), zemin, gl)
     zemin.paste(im.resize((pw, ph), Image.LANCZOS), (x, y))
-    zemin.save(out / f"{kok}_Preview.jpg", quality=92, dpi=(300, 300))
-    oz["onizleme"] = dict(dosya=f"{kok}_Preview.jpg", boyut=[dw, dh], PASS=True)
+    zemin.save(out / f"{kok}{ek}_Preview.jpg", quality=92, dpi=(300, 300))
+    (out / f"{kok}{ek}.jpg").write_bytes(ham)                           # baski dosyasi: bayt bayt ayni, yalniz ad
+    oz["onizleme"] = dict(dosya=f"{kok}{ek}_Preview.jpg", boyut=[dw, dh], PASS=True)
     # OCR (tesseract varsa): metin degerleri basilmaz, yalniz sonuc. BILGI: karar degil.
     try:
         g2 = Image.fromarray(np.where(murekkep[y0:], 0, 255).astype(np.uint8))
@@ -115,6 +135,7 @@ else:
 oz["ocr"] = ocr
 oz["icerik_goz_kontrolu_gerekli"] = True                             # PASS = kayit + bicim; gorseldeki yazi 1:1 kesitte gozle dogrulanir
 oz["PASS"] = bool(all(oz[a].get("PASS") for a in ("girdi", "teslim", "uretim_kapilari", "kesit", "onizleme")))
-json.dump(oz, open(out / "ONIZLE_OZET.json", "w"), indent=1)
+oz["A_yalniz_kapi_d_fail"] = bool(sec == "A" and not oz["PASS"] and u["yalniz_d_fail"] and all(oz[a].get("PASS") for a in ("girdi", "teslim", "kesit", "onizleme")))
+json.dump(oz, open(out / f"ONIZLE_OZET{ek}.json", "w"), indent=1)
 print("ONIZLE:", json.dumps(oz))
-sys.exit(0 if oz["PASS"] else 1)
+sys.exit(0 if oz["PASS"] or oz["A_yalniz_kapi_d_fail"] else 1)

@@ -10,6 +10,7 @@ on:
       kis: {description: "KISISEL.json klasoru id", required: true}
       hedef: {description: "gizli siparis klasoru id", required: true}
       kosu: {description: "uretim kosu no (SURE.json ile karsilastirilir)", required: true}
+      secenek: {description: "degisiklik secenegi: A (harf sekli) | B (yeni mesaj, hedef kokundeki DEGISIKLIK_1_MESAJ.json)", required: true}
 jobs:
   tara:
     runs-on: ubuntu-latest
@@ -37,11 +38,13 @@ jobs:
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
             if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi; fi
       - name: Girdi indir + maske
-        env: {G: "${{ inputs.gpt }}", K: "${{ inputs.kis }}"}
+        env: {G: "${{ inputs.gpt }}", K: "${{ inputs.kis }}", T: "${{ inputs.hedef }}", SEC: "${{ inputs.secenek }}"}
         run: |
           set -euo pipefail
+          case "$SEC" in A|B) ;; *) echo "::error::secenek A ya da B olmali"; exit 1;; esac
           umask 077; mkdir -p _w _ur
           rclone copy "gdrive,root_folder_id=$K:" _w --include KISISEL.json -q
+          if [ "$SEC" = "B" ]; then rclone copy "gdrive,root_folder_id=$T:" _w --max-depth 1 --include DEGISIKLIK_1_MESAJ.json -q; [ -s _w/DEGISIKLIK_1_MESAJ.json ]; fi
           rclone copy "gdrive,root_folder_id=$G:" _ur --max-depth 1 --include "siparis.json" -q
           python3 - <<'PY'
           import json, os
@@ -57,6 +60,8 @@ jobs:
           v = {x['ad']: x['deger'] for x in kj['kalemler'][0]['varyasyon']}
           for k, t in v.items():
               if k.startswith('Name under ') or k == 'Your message': ekle(t)
+          if os.path.exists('_w/DEGISIKLIK_1_MESAJ.json'):
+              ekle(json.load(open('_w/DEGISIKLIK_1_MESAJ.json', encoding='utf-8')).get('mesaj', ''))
           if os.path.exists('_ur/siparis.json'):
               j = json.load(open('_ur/siparis.json', encoding='utf-8'))
               for k in ('isim1', 'isim2', 'tagline'):
@@ -67,20 +72,28 @@ jobs:
           rclone copy "gdrive,root_folder_id=$G:" _ur --max-depth 1 --include "AstroLoveArt_*.jpg" --include KAPI.json --include SURE.json -q
           ls _ur | sed 's/^/dosya: /'
       - name: Onizleme + kesit + kapilar
-        env: {KOSU: "${{ inputs.kosu }}"}
+        env: {KOSU: "${{ inputs.kosu }}", SEC: "${{ inputs.secenek }}"}
         run: |
           set -euo pipefail
           [[ "$KOSU" =~ ^[0-9]+$ ]] || { echo "::error::kosu no"; exit 1; }
-          python3 scripts/siparis_onizle/onizle_8x10.py _ur _w/KISISEL.json _out "$KOSU"
+          python3 scripts/siparis_onizle/onizle_8x10.py _ur _w/KISISEL.json _out "$KOSU" "$SEC" _w/DEGISIKLIK_1_MESAJ.json
       - name: Gizli klasore yaz + dogrula
-        env: {T: "${{ inputs.hedef }}"}
+        env: {T: "${{ inputs.hedef }}", SEC: "${{ inputs.secenek }}"}
         run: |
           set -euo pipefail
-          cp _ur/AstroLoveArt_*.jpg _ur/KAPI.json _ur/siparis.json _ur/SURE.json _out/
-          rclone copy _out "gdrive,root_folder_id=$T:" -q
-          rclone check _out "gdrive,root_folder_id=$T:" --one-way -q
-          echo "DOGRULAMA: yerel cikti ile gizli klasor ayni (rclone check, tek yon)"
-          echo "KAPILAR PASS; icerik goz kontrolu bekliyor (1:1 kesit)"
-          rclone lsf "gdrive,root_folder_id=$T:" --max-depth 1 --files-only --include "AstroLoveArt_*" --include "ONIZLE_OZET.json" | sed 's/^/hedef: /'
+          # uc teslim dosyasi DEGISIKLIK_1/ kokune, kayitlar (ozet, kapi, girdi, ana kopya) DEGISIKLIK_1/KAYIT_Option<X>/ altina; hedef kokune YAZILMAZ
+          mkdir -p _kayit
+          mv "_out/ONIZLE_OZET_Option$SEC.json" _kayit/
+          cp _ur/AstroLoveArt_*.jpg _ur/KAPI.json _ur/siparis.json _ur/SURE.json _kayit/
+          [ "$(ls _out | wc -l)" = "3" ]
+          D="gdrive,root_folder_id=$T:DEGISIKLIK_1"
+          rclone copy _out "$D" -q
+          rclone check _out "$D" --one-way -q
+          rclone copy _kayit "$D/KAYIT_Option$SEC" -q
+          rclone check _kayit "$D/KAYIT_Option$SEC" --one-way -q
+          echo "DOGRULAMA: yerel cikti ile gizli klasor ayni (rclone check, tek yon; teslim + kayit)"
+          python3 -c "import json; o = json.load(open('_kayit/ONIZLE_OZET_Option$SEC.json')); print('SONUC secenek $SEC: PASS' if o['PASS'] else 'SONUC secenek $SEC: URETIM KAPISI d FAIL (yalniz d), dosyalar secenek olarak yazildi')"
+          echo "icerik goz kontrolu bekliyor (1:1 kesit)"
+          rclone lsf "$D" --max-depth 1 --files-only --include "AstroLoveArt_*" | sed 's/^/hedef: /'
       - if: always()
-        run: rm -rf _w _ur _out ~/.config/rclone /tmp/ocr_in.png
+        run: rm -rf _w _ur _out _kayit ~/.config/rclone /tmp/ocr_in.png
