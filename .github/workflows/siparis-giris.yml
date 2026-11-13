@@ -46,7 +46,8 @@ on:
 permissions:
   contents: read
 env:
-  GPT_REF: ${{ vars.SIPARIS_GPT_REF || 'd2b414ee270ec029bd5abcef4a6535414ae7d1e1' }}   # 26 Eki B: 243c9a4 + yalniz olcu.py 5x7 (OLCU 1500x2100, AILE A). 6da763aa (dikis kapisi kirpik ortalama) GERI ALINDI: inceleme, satirlarin bir kisminda kalan buyuk dikisi gizledigini olctu (MB 5x7 yildizli zeminde kapi i yanlis FAIL verebilir; guvenli yon).; 22 Eki A3 kiyasi FAIL (39850555034): temiz 66ef5e04'e gecis geri alindi
+  GPT_REF: '5b79ca12717cff8e406005f6ffea3f86047e3eab'   # GECICI DAL (tek siparis, secenek A; main'e ALINMAZ): d2b414ee + yalniz mesaj 'c' glifi (dal gecici/harf-kod). Onceki satir:
+  # GPT_REF: ${{ vars.SIPARIS_GPT_REF || 'd2b414ee270ec029bd5abcef4a6535414ae7d1e1' }}   # 26 Eki B: 243c9a4 + yalniz olcu.py 5x7 (OLCU 1500x2100, AILE A). 6da763aa (dikis kapisi kirpik ortalama) GERI ALINDI: inceleme, satirlarin bir kisminda kalan buyuk dikisi gizledigini olctu (MB 5x7 yildizli zeminde kapi i yanlis FAIL verebilir; guvenli yon).; 22 Eki A3 kiyasi FAIL (39850555034): temiz 66ef5e04'e gecis geri alindi
   ESKI_RENK_REF: ${{ vars.ESKI_RENK_REF || 'b8c8c4b17478fd956167577fa69913d06b9eb955' }}
   WP_REF: ${{ vars.SIPARIS_WP_REF || '360cbef947994c7d4b3c9ae95275f778a18af716' }}
 jobs:
@@ -145,6 +146,7 @@ jobs:
           for k in isim1 isim2; do v=$(jq -r ".$k" /tmp/istek.json); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
           m=$(jq -r '.mesaj_b64' /tmp/istek.json | base64 -d); while IFS= read -r s || [ -n "$s" ]; do s="${s#"${s%%[![:space:]]*}"}"; s="${s%"${s##*[![:space:]]}"}"; if [ "$(printf %s "$s" | wc -c)" -ge 4 ]; then echo "::add-mask::$s"; fi; done <<< "${m//$'\r'/$'\n'}"
           C=$(jq -r '.cift' /tmp/istek.json | tr '_' '\n' | sort | paste -sd_)
+          echo "::add-mask::$(jq -r .receipt /tmp/istek.json)"   # GECICI DAL: RECEIPT sonraki adimlarin env blogunda loga basiliyor
           echo "CIFT=$C" >> "$GITHUB_ENV"; echo "RECEIPT=$(jq -r .receipt /tmp/istek.json)" >> "$GITHUB_ENV"
           echo "RENK=$(jq -r .renk /tmp/istek.json)" >> "$GITHUB_ENV"; echo "OLCU=$(jq -r .olcu /tmp/istek.json)" >> "$GITHUB_ENV"
           echo "T_BAS=$(date -u +%s)" >> "$GITHUB_ENV"
@@ -210,7 +212,7 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          D="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:SIPARIS_ISIM/GPT/AstroLoveArt_${RECEIPT}"
+          D="gdrive,root_folder_id=12N9iS2i4byMbkH5c0Inmni_nIv2zyTzH:SIPARIS_ISIM/GPT/AstroLoveArt_${RECEIPT}_A"   # GECICI DAL: ana hattin klasoruyle cakismasin
           python3 -c "import json,os; json.dump(dict(kosu=os.environ['GITHUB_RUN_ID'], is_basi_utc=int(os.environ['T_BAS']), giris='siparis-giris', gpt_ref=os.environ['GPT_REF']), open('/tmp/is/SURE.json','w'))"
           if [ "$RENK" = "MIDNIGHT_BLUE" ]; then
             # MB adi diger 4 renkle ayni kalip (Merkez 26 Eki B): AstroLoveArt_<B1>_<B2>_Midnight_Blue[_2000|_<Olcu>].jpg; kapilar eski adla kostu
