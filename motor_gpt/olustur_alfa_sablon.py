@@ -103,11 +103,12 @@ for ad, burc, cx_ in (('kucuk1', s1, c1), ('kucuk2', s2, c2)):
     ekle(ad, int(round(cx_ - k.shape[1] / 2)) - q, int(round(KUCUK_Y - k.shape[0] / 2)) - q, k8)
 
 # --- tagline ---
-F = ImageFont.truetype(FONT + 'EBGaramond-Italic.ttf', TAG_PUNTO); F.set_variation_by_axes([400])
+TAG_FONT = 'EBGaramond-Italic-A.ttf'   # GECICI DAL (tek siparis, secenek A): 'c' ust ucu kisaltilmis glif (harf_a_glif.py, k = 0.25); kapi standart yazi tipiyle olcer
+F = ImageFont.truetype(FONT + TAG_FONT, TAG_PUNTO); F.set_variation_by_axes([400])
 tp = TAG_PUNTO
-r = yaz(tag, 'EBGaramond-Italic.ttf', 400, tp)
+r = yaz(tag, TAG_FONT, 400, tp)
 while r[2] - r[1] > W - 2 * KENAR:
-    tp -= 4; r = yaz(tag, 'EBGaramond-Italic.ttf', 400, tp)
+    tp -= 4; r = yaz(tag, TAG_FONT, 400, tp)
 ekle('tagline', int(round(ORTA - (r[2] - r[1]) / 2 - r[1])), int(round(TABAN_TAG - r[3])), r[0])
 log('tagline punto', tp)
 
