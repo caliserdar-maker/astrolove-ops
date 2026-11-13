@@ -1,0 +1,134 @@
+name: ornament-metin-canli
+# S13 (Serdar 8 Kas gece "hepsi oneriyle", 9 Kas "ok", 13 Kas gorev metni): data/pod/ORNAMENT78_METIN.csv aciklama sutunu CANLIDAN
+# (SALT OKUMA; Etsy'ye yazma YOK). Kod scripts/etsy/ornament_metin_canli.py. Istek: 1 (shop, kota) + ceil(ilan/100) batch.
+# oku: kilit -> token + ilan listesi -> betik (log sir_koru tee) -> sir sayimi -> token geri yaz -> sir_koru tara -> Drive
+#      TEMP/ORNAMENT_METIN_CANLI/<damga>/ (--immutable). Betik PASS ve degisen > 0 ise yalniz yeni CSV ikinci ise aktarilir.
+# dal: Etsy sirlari YOK; yalniz data/pod/ORNAMENT78_METIN.csv, yeni dal s13/metin-canli (dal varsa DUR, --force yok). main'e YAZMAZ.
+permissions:
+  actions: read
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      ilanlar: { description: "Drive yolu (gdrive:ASTROLOVE/TEMP/...json)", required: true, default: "gdrive:ASTROLOVE/TEMP/ORNAMENT_GALERI9_ETSY/YEDEK9.json" }
+env:
+  O: "gdrive:ASTROLOVE/TEMP/ORNAMENT_METIN_CANLI"
+jobs:
+  oku:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150   # kilit_bekle en fazla 120 dk bekleyebilir
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      csv_hazir: ${{ steps.son.outputs.csv_hazir }}
+    steps:
+      - name: Girdi kapisi
+        env: { I: "${{ inputs.ilanlar }}" }
+        run: |
+          [[ "$I" =~ ^gdrive:ASTROLOVE/TEMP/[A-Za-z0-9_/.-]+\.json$ ]] || { echo "::error::ilanlar"; exit 1; }
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2 pyyaml
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null || sudo apt-get install -y -qq rclone >/dev/null
+          python3 scripts/etsy/test_ornament_metin_canli.py
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"; echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi
+      - name: Etsy kilidi
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - name: Token + ilan listesi
+        env: { I: "${{ inputs.ilanlar }}" }
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p _work _out
+          echo "DAMGA=$(date -u +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
+          rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
+          rclone copyto "$I" _work/ILANLAR.json || { echo "::error::ilan listesi yok"; exit 1; }
+      - name: Kos
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
+          TOKEN_FILE: _work/ETSY_TOKEN.json
+        run: |
+          set +e -o pipefail
+          python3 scripts/etsy/ornament_metin_canli.py --ilanlar _work/ILANLAR.json --csv data/pod/ORNAMENT78_METIN.csv \
+            --spec docs/ornament/ORN_YAYIN_SPEC.json --out _out 2>&1 \
+            | python3 scripts/guvenlik/sir_koru.py tee --sir-json _work/ETSY_TOKEN.json _out/KOSU_LOG.txt
+          S=("${PIPESTATUS[@]}"); BETIK_RC=${S[0]}; TEE_RC=${S[1]}
+          python3 scripts/etsy/ornament_metin_canli.py sir-say _out; SIR_SAY=$?
+          { echo "BETIK_RC=$BETIK_RC"; echo "TEE_RC=$TEE_RC"; echo "SIR_SAY=$SIR_SAY"; } >> "$GITHUB_ENV"
+          echo "betik $BETIK_RC | tee $TEE_RC | sir sayimi $SIR_SAY"
+          if [ "$SIR_SAY" = 4 ]; then echo "::error::sir sayimi: kontrol yapilamadi (ortam degeri bos)"; exit 4; fi
+          if [ "$SIR_SAY" != 0 ]; then echo "::error::sir sayimi > 0: Drive ve dal yazimi yok"; exit 3; fi
+          [ "$BETIK_RC" = 0 ] && [ "$TEE_RC" = 0 ] || exit 1
+      - name: Token geri yaz + cikti Drive'a
+        id: son
+        if: ${{ always() }}
+        run: |
+          set +e
+          TOKEN_RC=0; OUT_RC=0
+          if [ -f _work/ETSY_TOKEN.json ]; then bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1; fi
+          if [ "${SIR_SAY:-x}" != 0 ]; then echo "::error::sir sayimi yapilmadi ya da > 0 (${SIR_SAY:-yok}): Drive ve dal yazimi yok"; OUT_RC=1
+          elif ls _out/* >/dev/null 2>&1; then
+            if python3 scripts/guvenlik/sir_koru.py tara --sir-json _work/ETSY_TOKEN.json _out; then
+              rclone copy _out "$O/${DAMGA:?}" --immutable -q || OUT_RC=1
+              echo "Cikti: TEMP/ORNAMENT_METIN_CANLI/$DAMGA" | tee -a "$GITHUB_STEP_SUMMARY"
+              rclone lsf "$O/$DAMGA" | sed 's/^/drive: /'
+              DEG=$(python3 -c "import json; print(json.load(open('_out/OZET.json')).get('degisen') or 0)" 2>/dev/null || echo 0)
+              if [ "${BETIK_RC:-1}" = 0 ] && [ "${TEE_RC:-1}" = 0 ] && [ "$OUT_RC" = 0 ] && [ "$DEG" -gt 0 ] && [ -f _out/ORNAMENT78_METIN.csv ]; then
+                mkdir -p _dal; cp _out/ORNAMENT78_METIN.csv _dal/; echo "csv_hazir=1" >> "$GITHUB_OUTPUT"
+              else echo "dal yok (betik ${BETIK_RC:-?}, degisen $DEG)"; fi
+            else echo "::error::ciktida sir"; OUT_RC=1; fi
+          fi
+          [ "$TOKEN_RC" = 0 ] && [ "$OUT_RC" = 0 ] || exit 1
+      - name: Yeni CSV (dal isine)
+        if: ${{ steps.son.outputs.csv_hazir == '1' }}
+        uses: actions/upload-artifact@v4
+        with: { name: s13-csv, path: _dal/ORNAMENT78_METIN.csv, retention-days: 1, if-no-files-found: error }
+      - if: always()
+        run: rm -rf _work _out _dal ~/.config/rclone
+  dal:
+    needs: oku
+    if: ${{ needs.oku.outputs.csv_hazir == '1' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.sha }}" }
+      - uses: actions/download-artifact@v4
+        with: { name: s13-csv, path: _dal }
+      - name: Dal s13/metin-canli (yalniz CSV)
+        run: |
+          set -euo pipefail
+          B=s13/metin-canli
+          R=$(git ls-remote origin "refs/heads/$B")   # ayri atama: ls-remote hatasi set -e ile isi durdurur (bos cikti "dal yok" sayilmaz)
+          if [ -n "$R" ]; then echo "::error::dal $B zaten var (--force yok)"; exit 1; fi
+          [ "$(git rev-parse HEAD)" = "$GITHUB_SHA" ] || { echo "::error::HEAD kosu sha'si degil"; exit 1; }
+          cp _dal/ORNAMENT78_METIN.csv data/pod/ORNAMENT78_METIN.csv
+          git add -- data/pod/ORNAMENT78_METIN.csv
+          [ "$(git diff --cached --name-only)" = "data/pod/ORNAMENT78_METIN.csv" ] || { echo "::error::degisen dosya listesi beklenen degil"; exit 1; }
+          git diff --cached -U0 > _fark.txt   # ayri adim: diff hatasi set -e ile isi durdurur
+          python3 -c "import re,sys; t=''.join(l for l in open('_fark.txt',encoding='utf-8') if l.startswith('+') and not l.startswith('+++')); k=[m for m in re.findall(r'\b\d{10}\b',t) if not re.fullmatch(r'900000000\d',m)]; sys.exit(1 if not t or re.search(r'\b42\d{8}\b',t) or k else 0)" \
+            || { echo "::error::eklenen satir yok ya da siparis / ilan kimligi deseni var"; exit 1; }
+          rm -f _fark.txt
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git commit -q -m "S13: ornament metin csv aciklama canlidan (kosu ${{ github.run_id }})"
+          git push origin HEAD:refs/heads/s13/metin-canli
+          echo "dal $B: $(git rev-parse HEAD)" | tee -a "$GITHUB_STEP_SUMMARY"
