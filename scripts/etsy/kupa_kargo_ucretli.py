@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Kupa kargo profili 318301958420: HICBIR YERE ucretsiz kargo yok (Serdar 25 Eki 2026 aksam, Genel Merkez).
-Fiyat 11 oz 12.90 / 15 oz 16.90 (kupa_fiyat.py); fark kargoya tasindi. Ucret = Printful 15 oz Flat Rate (API, kosu 40221341323)
+Fiyat o gun 11 oz 12.90 / 15 oz 16.90 (kupa_fiyat.py; 14 Kas 2026 zammi: 24.90 / 29.90, kupa_zam_1114.py, kargo ayni); fark kargoya tasindi. Ucret = Printful 15 oz Flat Rate (API, kosu 40221341323)
 bir ust .90 + 4.00. Teslim gunleri DEGISMEZ (mevcut degerler korunur).
 Hedef (ilk kupa / ek kupa, USD):
   US 11.90/4.90  CA 12.90/5.90  GB 10.90/1.90  EU 10.90/2.90  AU 13.90/4.90  JP 10.90/2.90  diger tum ulkeler 17.90/7.90

@@ -11,9 +11,9 @@
              (bolum/kargo profili/iade) OLUSTURULMAZ, sabit kayitlar yalniz okunup dogrulanir.
              b) createDraftListing (tek POST): CSV basligi/aciklamasi/13 etiket birebir, i_did, made_to_order, fiziksel,
                 Ceramic, kategori 1062 Mugs, readiness 1517641240112, bolum 60980873, kargo 318301958420,
-                iade 1513990287785, ortak 5817638, fiyat 24.00, stok 999.
+                iade 1513990287785, ortak 5817638, fiyat 24.90, stok 999.
              c) envanter: Style (513) x Size (514) = 16 urun (8 Orchard stili x 11/15 oz), fiyat yalniz boya gore
-                (11 oz 24.00, 15 oz 29.00), stok 999, price_on_property ve sku_on_property [513, 514],
+                (11 oz 24.90, 15 oz 29.90; Serdar 14 Kas fiyat zammi), stok 999, price_on_property ve sku_on_property [513, 514],
                 SKU KUPA-<CIFT>-<01-08>-<11|15>.  d) 14 gorsel (galeri 01-14 sirasi) + video.
              e) Style -> gorsel (Orange Blossom=01, Purple Fig=08 ... Golden Loquat=14).  f) kisisellestirme: tek kutu,
                 zorunlu, 256 karakter, talimat CSV.  g) nitelikler (kategori 1062).  h) geri okuma kontrolleri.
@@ -257,7 +257,7 @@ P_STYLE, P_SIZE = 513, 514
 STILLER = [("Orange Blossom", "01", 1), ("Purple Fig", "02", 8), ("Olive Breeze", "03", 9), ("Pomegranate Bloom", "04", 10),
            ("Almond Blossom", "05", 11), ("Lemon Grove", "06", 12), ("Blue Grape", "07", 13), ("Golden Loquat", "08", 14)]
 ESKI_STILLER = ["Rose Ribbon", "Botanical", "Gold", "Nazar Bond", "Promise Line", "Aegean Tile", "Mediterranean"]
-BOYLAR = [("11 oz", "11", 24.00), ("15 oz", "15", 29.00)]
+BOYLAR = [("11 oz", "11", 24.90), ("15 oz", "15", 29.90)]   # Serdar 14 Kas 2026 (kupa_zam_1114.py ile ayni)
 N_URUN = len(STILLER) * len(BOYLAR)
 N_GORSEL = 14
 MALZEME = ["Ceramic"]
@@ -506,7 +506,7 @@ def yaz(api, shop, out, pair):
     inv = api.get(f"/listings/{lid}/inventory") or {}
     if len(inv.get("products") or []) != N_URUN:
         # Etsy (18 Eki 400): *_on_property ya bos ya iki ozellik; sku iki ozellikte -> fiyat da [513, 514]
-        # (fiyatlar yine yalniz boya gore: her stilde 11 oz 24.00, 15 oz 29.00)
+        # (fiyatlar yine yalniz boya gore: her stilde 11 oz 24.90, 15 oz 29.90)
         api.put_json(f"/listings/{lid}/inventory", dict(products=urunler(), price_on_property=[P_STYLE, P_SIZE], quantity_on_property=[],
                                                         sku_on_property=[P_STYLE, P_SIZE], readiness_state_on_property=[]))
     state_oku("2 envanter")

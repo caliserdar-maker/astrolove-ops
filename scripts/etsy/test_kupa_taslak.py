@@ -47,7 +47,9 @@ class KuruTest(unittest.TestCase):
         self.assertEqual({p["sku"] for p in inv["products"]},
                          {f"KUPA-CANCER_LIBRA-{i:02d}-{b}" for i in range(1, 9) for b in (11, 15)})
         self.assertEqual({p["property_values"][1]["values"][0]: p["offerings"][0]["price"] for p in inv["products"]},
-                         {"11 oz": 24.0, "15 oz": 29.0})
+                         {"11 oz": 24.9, "15 oz": 29.9})
+        olustur = [x for x in yaz if x["method"] == "POST" and x["url"].rstrip("/").endswith("/listings")]
+        self.assertEqual([float((x.get("form") or x.get("json"))["price"]) for x in olustur], [24.9])   # Serdar 14 Kas: 11 oz 24.90
         vi = next(x["json"] for x in yaz if x["url"].endswith("/variation-images"))["variation_images"]
         self.assertEqual([v["image_id"] - 800000 for v in vi], [1, 8, 9, 10, 11, 12, 13, 14])
         self.assertTrue(all("9000000001" in x["url"] for x in yaz[1:]))
