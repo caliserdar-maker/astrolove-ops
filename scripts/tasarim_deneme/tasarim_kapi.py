@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TASARIM DENEME ARACI kapilari ve olcumleri, dilim 1 + 1b + D1 (Serdar 11 ve 12 Kas 2026; plan bolum 5, 6). Tek QC betigi, olculebilir esik, PASS / FAIL.
+"""TASARIM DENEME ARACI kapilari ve olcumleri, dilim 1 + 1b + D1 + D2 (Serdar 11 - 13 Kas 2026; plan bolum 5, 6). Tek QC betigi, olculebilir esik, PASS / FAIL.
 Son gorsel KAYDEDILEN dosyadan okunur (ATK:3 ilkesi); maskeler bellekten gelir (ayni surec; plan 7.3 madde 2).
 Ay takvimi kapi kodu (ATK = ay_takvim_kapi.py, a9b1323) ice alinmis TEK modulden kullanilir; esik degerleri ATK.ESIK'ten okunur, bu dosyada
 esik DEGISTIRILMEZ ve yeni esik ONERILMEZ. Yeni olcumler esiksiz yazilir.
@@ -33,6 +33,17 @@ OLCER (FAIL gorseli durdurmaz; OLCUM'a ve hucre etiketine yazilir):
 BILGI (esik yok, kapi degil; Serdar 12 Kas): oge cifti basina cakisma pikseli (alfa > 0,02), kucuk burc - yazi en az uzakligi, yildiz sayisi;
   dilim D1 (plan K8 b): sembolun halka cemberinin disinda kalan pikseli (sembol_halka_disi_olc) ve OLCUM ozetinin 'sembol' kaydi (carpan, olcek,
   kutu, en-boy farki, olculen yer / boy farki, tam sayi yer farki, kapi 2 sembol bolumunun tam_alfa_piksel ve ortulen_piksel_haric sayilari).
+KAPATILAN OGELER (dilim D2; Serdar 12 - 13 Kas 2026, kapi paketi 4; AYAR `ogeler` = acik ogeler: halka, kucuk, isimler):
+  - Kapatilan halka / kucuk burc GEOMETRIDE kalir: kapi 2 grup bolumu butun grup ogeleriyle AYNEN calisir (veri['grup_oge'] = geometri listesi).
+  - Onayli gevsetme (O3 madde 133): olcerler ve bilgi olcumleri yalniz BOYANAN ogelerde (tek doku, kontrast, yazim, duz renk, cakisma, yildiz,
+    guvenli alan ve tuval tasmasi, grup - yazi, gercek olcu, oge cifti, kucuk burc - yazi); kapi 2 sembol bolumunun "ortulen piksel" listesine
+    (diger) yalniz boyanan VE ayarda acik ogeler girer (kapatilan ogenin maskesi sembolun karsilastirma bolgesini DARALTMAZ).
+  - Onayli gevsetme (GK madde 147): isimler ayarda kapaliyken isim olceri; isimler kapali ve metin_tur 'yok' iken grup - yazi olceri; ayarda
+    boyanan altin oge hic yokken tek doku ve kontrast olcerleri "uygulanamaz" (PASS / FAIL sayilmaz, olcer_fail'e girmez). Tetik YALNIZ AYARDAN:
+    ayarda acik oge veride yoksa bugunku davranis (FAIL ya da cokme) degismez. Oge sayisi: beklenen = ayarda acik, cizilen = boyanan.
+  - "Kapatilan oge gercekten yok mu" (esik yok, kapi degil): kapali ogenin geometri maskesi (alfa > 0,02) bolgesinde son gorsel - altinsiz zemin
+    farki > 1 olan piksel (goruntu_farki tanimi) ve ayni sayinin boyanan oge / sembol maskeleriyle (alfa > 0,02) ortulmeyen kisimdaki degeri.
+  - Kapatilan ogede 200 cekirdek piksel ve boy esitlikleri uretimde SERT (tasarim_deneme.kapali_oge_kontrol; GK madde 158: gevsetme yok).
 ARACTA OLMAYANLAR (Serdar soru 6 "l"; plan inceleme bulgusu 2): ornament'in yeni duzen kapilari (yeni_duzen.py:292-321, 351) ve ornament'e ozgu
   IoU / leke / ton / sabit bosluk kapilari yoktur. Ornament'in kucultme sinirinin (ornament_motor.py:802) aractaki karsiligi OLCERDIR: isim
   kuculme orani etikette yazar; kapi eklenmedi."""
@@ -69,6 +80,26 @@ def serbest_mi(ayar):
     """Hangi grup kapisinin calisacagi KAPIDA, ayardan secilir (uretim modulunden okunmaz; inceleme D1 bulgu 4): bir sembol anahtari varsayilan
     disindaysa serbest grup kapisi. Uretim ayari yok sayip eski yoldan kurarsa serbest kapi sembolu AYARA gore olcer ve FAIL verir."""
     return not (ayar['sembol_oran'] == 1.0 and ayar['sembol_u'] == 'poster' and ayar['sembol_v'] == 'poster')
+
+
+OGE_AD = ('halka', 'kucuk', 'isimler')                 # ayardan kapatilabilen ogeler (tasarim_deneme.OGE_AD ile ayni; kapi kendi kopyasini okur)
+
+
+def acik_ogeler(ayar):
+    """AYARDA acik ogeler (kume). `ogeler` anahtari olmayan ayar (dilim D2 oncesi kayit) = hepsi acik."""
+    return set(ayar.get('ogeler', OGE_AD))
+
+
+def ayarda_acik(ayar, ad):
+    """Altin oge adi (isimler, metin_N, halka, kucuk1, kucuk2, logo) AYARA gore acik mi. Metin ve logo `ogeler` ile kapanmaz."""
+    a = acik_ogeler(ayar)
+    if ad == 'isimler':
+        return 'isimler' in a
+    if ad == 'halka':
+        return 'halka' in a
+    if ad in ('kucuk1', 'kucuk2'):
+        return 'kucuk' in a
+    return True
 
 
 def beklenen_merkez(urun, ayar):
@@ -555,14 +586,19 @@ def olc(veri):
         h_, w_ = min(Hh, img.shape[0]), min(Ww, img.shape[1])                 # haliyle yapilir (eksik bolge siyah, fazla bolge olcum disi); cokme yok
         t_[:h_, :w_] = img[:h_, :w_]
         img = t_
-    og, gg = veri['ogeler'], veri['grup_oge']
+    # dilim D2: gg_tum = GEOMETRI listesi (kapi 2 grup bolumu; kapatilan halka / kucuk burc icinde); gg = BOYANAN grup ogeleri (uretimin altin
+    # cizimine verdigi liste; `boyanan` isareti olmayan eski veri = hepsi boyanmis). Olcerler ve bilgi olcumleri yalniz boyanan ogelerde.
+    og, gg_tum = veri['ogeler'], veri['grup_oge']
+    gg = [o for o in gg_tum if o.get('boyanan', True)]
+    acik = acik_ogeler(AY)
+    isim_kapali = 'isimler' not in acik                                       # "uygulanamaz" tetigi YALNIZ ayardan
     sa, sx, sy = S['a'], S['x'], S['y']
     mmpx = float(urun['gercek_mm'][0]) / float(urun['baski_px'][0])
     alt = urun.get('alt_sinir')
     sert, olcer = {}, {}
 
     # ---- SERT kapi 2
-    diger = [(o['x'], o['y'], o['A']) for o in og + gg]
+    diger = [(o['x'], o['y'], o['A']) for o in og + gg if ayarda_acik(AY, o['ad'])]   # yalniz boyanan VE ayarda acik (kapali oge bolgeyi daraltmaz)
     s2, g, yan = sembol_kapisi(img, altinsiz, S, diger, veri['katman'], veri['s_olc'])
     sert['2_sembol'] = s2
     if g is not None:
@@ -600,16 +636,22 @@ def olc(veri):
         Lc = ATK.lum(b[ce]) if n >= 5 else np.zeros(1)
         duz[o['ad']] = round(float(np.percentile(Lc, 95) - np.percentile(Lc, 5)), 2)
     de = [v['dE00'] for v in t3.values() if v['dE00'] is not None]
-    en_az = min(t3.items(), key=lambda kv: kv[1]['piksel'])
-    beklenen = ['isimler'] + [f'metin_{i + 1}' for i in range(len(AY['satirlar']))] + ['halka', 'kucuk1', 'kucuk2'] + (['logo'] if AY['logo'] != 'yok' else [])
-    cizilen = [o['ad'] for o in og + gg]
+    beklenen = [ad_ for ad_ in ['isimler'] + [f'metin_{i + 1}' for i in range(len(AY['satirlar']))] + ['halka', 'kucuk1', 'kucuk2']
+                + (['logo'] if AY['logo'] != 'yok' else []) if ayarda_acik(AY, ad_)]   # beklenen = AYARDA acik ogeler
+    cizilen = [o['ad'] for o in og + gg]                                      # cizilen = boyanan ogeler
     olcer['oge_sayisi'] = dict(beklenen=beklenen, cizilen=cizilen, PASS=bool(beklenen == cizilen))
-    olcer['tek_doku'] = dict(oge=t3, en_kotu_dE00=max(de) if de else None, en_az_piksel=en_az[1]['piksel'], en_az_piksel_oge=en_az[0],
-                             sembol_Lab=[round(float(v), 2) for v in Ls],
-                             PASS=bool(de and len(de) == len(t3) and max(de) <= E['dE00'] and en_az[1]['piksel'] >= E['cekirdek_piksel']))
-    ko = [v.get('ortanca_bilgi') for v in k4.values()]
-    olcer['kontrast'] = dict(oge=k4, en_kotu_ortanca=min(ko) if all(v is not None for v in ko) else None,
-                             PASS=bool(all(v is not None for v in ko) and min(ko) >= E['kontrast']))
+    if not beklenen:                                                          # ayarda boyanan altin oge HIC yok (ayardan): olculecek oge yok
+        en_az = None
+        olcer['tek_doku'] = dict(uygulanamaz=True, PASS=None, neden='ayarda boyanan altin oge yok', oge=t3, sembol_Lab=[round(float(v), 2) for v in Ls])
+        olcer['kontrast'] = dict(uygulanamaz=True, PASS=None, neden='ayarda boyanan altin oge yok', oge=k4)
+    else:
+        en_az = min(t3.items(), key=lambda kv: kv[1]['piksel'])
+        olcer['tek_doku'] = dict(oge=t3, en_kotu_dE00=max(de) if de else None, en_az_piksel=en_az[1]['piksel'], en_az_piksel_oge=en_az[0],
+                                 sembol_Lab=[round(float(v), 2) for v in Ls],
+                                 PASS=bool(de and len(de) == len(t3) and max(de) <= E['dE00'] and en_az[1]['piksel'] >= E['cekirdek_piksel']))
+        ko = [v.get('ortanca_bilgi') for v in k4.values()]
+        olcer['kontrast'] = dict(oge=k4, en_kotu_ortanca=min(ko) if all(v is not None for v in ko) else None,
+                                 PASS=bool(all(v is not None for v in ko) and min(ko) >= E['kontrast']))
     y5g = {o['ad']: y5.pop(o['ad']) for o in gg}                               # grup ogeleri yalniz bilgi (ATK:498)
     olcer['yazim'] = dict(oge=y5, grup_bilgi=y5g, en_kotu=max(y5.values()) if y5 else None, PASS=bool(not y5 or max(y5.values()) <= E['alfa_fark']))
     halka_duz = duz.pop('halka', None)                                        # halkanin yayilimi yalniz bilgi (ATK:560)
@@ -636,8 +678,11 @@ def olc(veri):
         ink = M[o['ad']] > 0.5
         gy[o['ad']] = round(float(dtg[ink].min()) - 1.0, 2) if ink.any() else None
     gyv = [v for v in gy.values() if v is not None]
-    olcer['grup_yazi'] = dict(oge=gy, en_az=min(gyv) if gyv else None, esik_px=E['grup_yazi'],
-                              PASS=bool(gyv and len(gyv) == len(gy) and min(gyv) >= E['grup_yazi']))
+    if isim_kapali and AY['metin_tur'] == 'yok':                              # ayarda HIC yazi yok (ayardan): olculecek yazi yok
+        olcer['grup_yazi'] = dict(uygulanamaz=True, PASS=None, neden='ayarda yazi yok (isimler kapali, metin_tur yok)', oge=gy, en_az=None, esik_px=E['grup_yazi'])
+    else:
+        olcer['grup_yazi'] = dict(oge=gy, en_az=min(gyv) if gyv else None, esik_px=E['grup_yazi'],
+                                  PASS=bool(gyv and len(gyv) == len(gy) and min(gyv) >= E['grup_yazi']))
     del dtg, grup
     # cakisma: iki tanim (Serdar soru 6 "e")
     sira = [(o['ad'], M[o['ad']]) for o in og + gg] + [('sembol', M['sembol'])]
@@ -658,23 +703,46 @@ def olc(veri):
     ky = kucuk_yazi_olc(M, [o['ad'] for o in og])
     ky_isim = [v for k_, v in ky.items() if k_.endswith('/isimler')]
     ky_metin = [v for k_, v in ky.items() if '/metin_' in k_]
-    halka_o = next((o for o in gg if o['ad'] == 'halka'), None)
+    halka_o = next((o for o in gg_tum if o['ad'] == 'halka'), None)           # halka kapaliyken de GEOMETRI maskesiyle (bugunku gibi)
     try:
         halka_disi = sembol_halka_disi_olc(sa, sx, sy, halka_o['A'], halka_o['x'], halka_o['y']) if halka_o is not None else None
     except Exception:                                                        # noqa: BLE001  (halka maskesine cember uydurulamadi: bilgi yazilmaz)
         halka_disi = None
-    bilgi = dict(cift_px=cift_px, kucuk_yazi_uzaklik=ky, sembol_halka_disi=halka_disi,
+    # "kapatilan oge gercekten yok mu" (esik yok, kapi degil; Serdar 12 Kas, O3 madde 133): ayarda kapali her grup ogesinin GEOMETRI maskesi
+    # (alfa > 0,02) bolgesinde son gorsel - altinsiz zemin farki > 1 olan piksel (tasma olcumundeki goruntu_farki tanimi); ayrica o bolgenin, o oge
+    # DISINDAKI boyanan ogelerin ve sembolun maskeleriyle (alfa > 0,02) ortulmeyen kisminda ayni sayi.
+    yok_mu = {}
+    kap_g = [o for o in gg_tum if not ayarda_acik(AY, o['ad'])]
+    if kap_g:
+        fark_m = np.abs(img.astype(np.float32) - altinsiz.astype(np.float32)).max(2) > 1.0
+        for o in kap_g:
+            mk = tuvale(o['A'], o['x'], o['y'], Ww, Hh) > 0.02
+            ortu = np.zeros((Hh, Ww), bool)
+            for ad_, m_ in M.items():
+                if ad_ != o['ad']:
+                    ortu |= m_ > 0.02
+            yok_mu[o['ad']] = dict(maske_piksel=int(mk.sum()), goruntu_farki=int((fark_m & mk).sum()), ortulmeyen_piksel=int((mk & ~ortu).sum()),
+                                   ortulmeyen_goruntu_farki=int((fark_m & mk & ~ortu).sum()), boyanmis=bool(o.get('boyanan', True)))
+        del fark_m
+    if isim_kapali:                                                           # isim satiri kurulmaz: geometri maskesi yok; veride isim ogesi varsa yazilir
+        yok_mu['isimler'] = dict(maske_piksel=None, goruntu_farki=None, ortulmeyen_piksel=None, ortulmeyen_goruntu_farki=None,
+                                 boyanmis=bool(any(o['tur'] == 'isim' for o in og)), not_='isim satiri kurulmaz: geometri maskesi yok')
+    bilgi = dict(cift_px=cift_px, kucuk_yazi_uzaklik=ky, sembol_halka_disi=halka_disi, kapali_yok_mu=yok_mu,
                  not_='cift_px: iki maskenin (alfa > 0,02) kesisim pikseli; kucuk_yazi_uzaklik: piksel merkezleri arasi en az uzaklik (0 = binme)')
     # isim satiri, metin genisligi, metin tabani
-    oi = next(o for o in og if o['tur'] == 'isim')
-    ki = AT.kutu(oi['A'])
     isim = veri['isim']
-    kuculme = round(isim['cap'] / isim['cap_baslangic'], 4)
-    alt_px = alt['yazi_mm'] / mmpx if alt else None
-    isim_dis = bool(isim.get('guvenli_disinda'))                              # K3: buyuk harf bandi guvenli dairenin disinda (sinir = tuval genisligi)
-    olcer['isim'] = dict(genislik=int(ki[2] - ki[0]), sinir=round(isim['sinir'], 1), cap_px=round(isim['cap'], 2), cap_mm=round(isim['cap'] * mmpx, 3),
-                         kuculme_orani=kuculme, deneme=isim['deneme'], alt_sinir_px=round(alt_px, 2) if alt_px else None, guvenli_disinda=isim_dis,
-                         PASS=bool(ki[2] - ki[0] <= isim['sinir'] and (alt_px is None or isim['cap'] >= alt_px) and not isim_dis))
+    if isim_kapali:                                                           # Serdar 13 Kas (GK madde 147): isimler AYARDA kapali -> isim olceri uygulanamaz
+        kuculme, isim_dis = None, None
+        olcer['isim'] = dict(uygulanamaz=True, PASS=None, neden='isimler ayarda kapali')
+    else:                                                                     # isim ayarda acik: bugunku kod AYNEN (veride isim yoksa bugunku gibi coker)
+        oi = next(o for o in og if o['tur'] == 'isim')
+        ki = AT.kutu(oi['A'])
+        kuculme = round(isim['cap'] / isim['cap_baslangic'], 4)
+        alt_px = alt['yazi_mm'] / mmpx if alt else None
+        isim_dis = bool(isim.get('guvenli_disinda'))                          # K3: buyuk harf bandi guvenli dairenin disinda (sinir = tuval genisligi)
+        olcer['isim'] = dict(genislik=int(ki[2] - ki[0]), sinir=round(isim['sinir'], 1), cap_px=round(isim['cap'], 2), cap_mm=round(isim['cap'] * mmpx, 3),
+                             kuculme_orani=kuculme, deneme=isim['deneme'], alt_sinir_px=round(alt_px, 2) if alt_px else None, guvenli_disinda=isim_dis,
+                             PASS=bool(ki[2] - ki[0] <= isim['sinir'] and (alt_px is None or isim['cap'] >= alt_px) and not isim_dis))
     olcer['metin_genis'] = veri['kontrol']['metin_genis']
     om = [o for o in og if o['tur'] == 'metin']
     if om:
@@ -735,7 +803,8 @@ def olc(veri):
                                    ust_mm=round(hk['ust_px'] * mmpx, 4), ortanca_mm=round(hk['ortanca_px'] * mmpx, 4)))
         if o['ad'] == 'logo':
             kl = AT.kutu(o['A'], 0.5)
-            ek.update(carpan=AY['logo'], logo_isim_buyuk_harf_orani=round((kl[3] - kl[1]) / isim['cap'], 3), temizlik=logo_temizlik_olc(veri['mt']),
+            ek.update(carpan=AY['logo'], logo_isim_buyuk_harf_orani=round((kl[3] - kl[1]) / isim['cap'], 3) if isim.get('cap') else None,
+                      temizlik=logo_temizlik_olc(veri['mt']),
                       bilgi=gb.get('logo'))
         kayit(o['ad'], o['A'], o['x'], o['y'], 'grup', 2.0 * o['yari_kal'], ek)
     for ad, v in olcer['tasma']['oge'].items():
@@ -754,7 +823,8 @@ def olc(veri):
                                 not_=None if alt else 'sinir tanimsiz', PASS=bool(not alt or not any(sinir_alti.values())))
 
     sert_fail = [k_ for k_, v in sert.items() if not v['PASS']]
-    olcer_fail = [k_ for k_, v in olcer.items() if not v['PASS']]
+    uygulanamaz = [k_ for k_, v in olcer.items() if v.get('uygulanamaz')]     # PASS / FAIL sayilmaz (yalniz ayarda kapali ogeye bagli olcerler)
+    olcer_fail = [k_ for k_, v in olcer.items() if not v.get('uygulanamaz') and not v['PASS']]
     tt = olcer['tasma']['toplam']
     # K2 etiketi (Serdar 12 Kas; kapi sonucu ve kodu DEGISMEZ, yeni olcum yok): sert FAIL listesi tek basina '2_grup' VE yeniden kurulumda
     # dusen ogelerin (ATK:240-244 kosullari) HEPSI tuvalde kirpilmis ise kok neden yazilir; aksi halde yazilmaz.
@@ -786,8 +856,12 @@ def olc(veri):
                 grup_yazi_en_az_px=olcer['grup_yazi']['en_az'], cikti='PASS' if sert['cikti']['PASS'] else 'FAIL',
                 kapi2_fark_en_buyuk=sert['2_grup'].get('olculen_fark_en_buyuk'), kapi2_konum_fark=sert['2_grup'].get('konum_fark_en_buyuk'),
                 kapi2_boyut_fark=(sert['2_grup'].get('boyut_bagimsiz') or {}).get('fark'),
-                en_az_cekirdek=dict(oge=en_az[0], piksel=en_az[1]['piksel']), yildiz_binme_px=yb,
-                en_kotu_dE00=olcer['tek_doku']['en_kotu_dE00'], en_kotu_kontrast=olcer['kontrast']['en_kotu_ortanca'])
+                en_az_cekirdek=dict(oge=en_az[0], piksel=en_az[1]['piksel']) if en_az else None, yildiz_binme_px=yb,
+                en_kotu_dE00=olcer['tek_doku'].get('en_kotu_dE00'), en_kotu_kontrast=olcer['kontrast'].get('en_kotu_ortanca'),
+                # dilim D2: acik / kapali ogeler (ayardan), "uygulanamaz" olcerler, kapali ogede cekirdek piksel sayimi ve boy esitligi (uretim
+                # kaydi), "gercekten yok mu" olcumu
+                ogeler=dict(acik=[q for q in OGE_AD if q in acik], kapali=[q for q in OGE_AD if q not in acik]), uygulanamaz=uygulanamaz,
+                kapali_oge=veri.get('kapali_oge') or {}, kapali_yok_mu=yok_mu)
     return dict(ozet=ozet, not_='yerel, deneme sembolü; kapı sonucu gerçek katman için kanıt değildir', mm_kaynak=urun['mm_kaynak'],
                 oge=oge, kapi=dict(sert=sert, olcer=olcer), bilgi=bilgi, esik={k_: E[k_] for k_ in ('dE00', 'kontrast', 'alfa_fark', 'cekirdek_piksel', 'en_boy',
                                                                                      'sembol_renk', 'grup_yazi', 'grup_konum', 'grup_konum_olculen',
