@@ -278,6 +278,8 @@ def main():
     ap.add_argument("--hepsi", action="store_true")
     ap.add_argument("--confirm", default="")
     a = ap.parse_args()
+    raise SystemExit("DUR: kupa_fiyat kapali (fiyat zammi 14 Kas 2026: 11 oz 24.90, 15 oz 29.90; bu arac 12.90/16.90 yazar ve "
+                     "oku modunda yeni fiyati 'eski' sayar). Yeni arac: scripts/etsy/kupa_zam_1114.py")
     yaz = a.mod == "yaz"
     OUT.mkdir(exist_ok=True)
     sonuc, oz_hata, api, ids, tamam = [], None, None, [], False

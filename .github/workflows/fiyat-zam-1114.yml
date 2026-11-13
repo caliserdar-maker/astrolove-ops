@@ -1,7 +1,10 @@
 name: fiyat-zam-1114
 
-# Serdar 13-14 Kas 2026 (Genel Merkez): poster ve 1st Anniversary ilanlarinda Digital File 3.90 -> 9.90, Print her boy +5 USD.
-# mod oku = salt okuma (plan + kapilar; ATLA uygulanmaz); mod yaz = onay FIYAT_1114. Once 1 ilan, canli kontrol, sonra kalanlar.
+# Serdar 13-14 Kas 2026 (Genel Merkez): poster ve 1st Anniversary ilanlarinda Digital File 3.90 -> 9.90, Print her boy +5 USD;
+# kupa (cift 78; sade 12 icin Serdar teyidi gerekir) 11 oz 12.90 -> 24.90, 15 oz 16.90 -> 29.90, kargo ayni (scripts/etsy/kupa_zam_1114.py).
+# mod oku = salt okuma (plan + kapilar; ATLA uygulanmaz); mod yaz = onay (poster FIYAT_1114, yd FIYAT_1114_YD, kupa KUPA_ZAM_1114;
+# kupa_sade yazimi kodda kapali). Once 1 ilan, canli kontrol, sonra kalanlar. TAMAM okuma/yazma hatasi ve Drive yukleme hatasi
+# 14 Kas'tan beri tum ailelerde koşuyu kirmizi bitirir.
 # Cikti: Drive TEMP/POD_ORDERS/FIYAT_1114/<aile>_<kosu>/
 
 permissions:
@@ -16,17 +19,17 @@ on:
         required: true
         default: "oku"
       ilanlar:
-        description: "virgullu ilan id (bos = 78 ilanin hepsi)"
+        description: "virgullu ilan id (bos = bolumdeki ilanlarin hepsi)"
         default: ""
       aile:
-        description: "poster | yd (yil donumu, bolum 60895624)"
+        description: "poster | yd (yil donumu, bolum 60895624) | kupa (cift, bolum 60980873) | kupa_sade (Zodiac Sign Mugs)"
         required: true
         default: "poster"
       atla:
         description: "hepsi modunda atlanacak (zaten yazilmis) ilanlar, virgullu"
         default: ""
       onay:
-        description: "yaz icin poster FIYAT_1114, yd FIYAT_1114_YD (ilanlar bos = 78 ilan: sonuna _HEPSI)"
+        description: "yaz icin poster FIYAT_1114, yd FIYAT_1114_YD, kupa KUPA_ZAM_1114, kupa_sade KUPA_ZAM_1114_SADE (ilanlar bos = hepsi: sonuna _HEPSI)"
         default: ""
 
 jobs:
@@ -72,20 +75,30 @@ jobs:
         run: |
           set -euo pipefail
           case "$MOD" in oku|yaz) ;; *) echo "HATA: mod $MOD"; exit 1;; esac
-          case "$AILE" in poster|yd) ;; *) echo "HATA: aile $AILE"; exit 1;; esac
+          case "$AILE" in poster|yd|kupa|kupa_sade) ;; *) echo "HATA: aile $AILE"; exit 1;; esac
           umask 077; mkdir -p _work
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
-          T="gdrive:ASTROLOVE/TEMP/POD_ORDERS/FIYAT_1114/${AILE}_TAMAM.txt"
-          rclone copyto "$T" _work/tamam.txt 2>/dev/null || : > _work/tamam.txt
-          export ATLA="$(tr '\n' ',' < _work/tamam.txt),${ATLA}"
+          K="gdrive:ASTROLOVE/TEMP/POD_ORDERS/FIYAT_1114"
+          T="$K/${AILE}_TAMAM.txt"
+          LS=$(rclone lsf "$K" --files-only) || { echo "::error::FIYAT_1114 klasoru okunamadi"; exit 1; }
+          if grep -qxF "${AILE}_TAMAM.txt" <<< "$LS"; then
+            rclone copyto "$T" _work/tamam.txt || { echo "::error::TAMAM okunamadi"; exit 1; }
+          else : > _work/tamam.txt; fi
+          export TAMAM_LISTE="$(tr '\n' ',' < _work/tamam.txt)"
+          export ATLA="${TAMAM_LISTE},${ATLA}"
           if [ -n "$ILANLAR" ]; then SEC=(--ilanlar "$ILANLAR"); else SEC=(--hepsi); fi
-          rc=0; python scripts/pod/fiyat_zam_1114.py "$MOD" "${SEC[@]}" --confirm "$ONAY" --aile "$AILE" || rc=$?
-          if [ "$MOD" = yaz ] && [ -f out/TAMAM_EK.txt ]; then
+          rc=0
+          case "$AILE" in
+            kupa) python scripts/etsy/kupa_zam_1114.py "$MOD" "${SEC[@]}" --confirm "$ONAY" --aile cift || rc=$? ;;
+            kupa_sade) python scripts/etsy/kupa_zam_1114.py "$MOD" "${SEC[@]}" --confirm "$ONAY" --aile sade || rc=$? ;;
+            *) python scripts/pod/fiyat_zam_1114.py "$MOD" "${SEC[@]}" --confirm "$ONAY" --aile "$AILE" || rc=$? ;;
+          esac
+          H="$K/${AILE}_${GITHUB_RUN_ID}"
+          if [ -d out ]; then rclone copy out "$H" -q || { echo "::error::Drive yukleme basarisiz"; exit 1; }; fi
+          if [ "$MOD" = yaz ] && [ -s out/TAMAM_EK.txt ]; then   # kayitlar Drive'a yuklendikten SONRA
             { cat _work/tamam.txt out/TAMAM_EK.txt | grep -E '^[0-9]+$' || true; } | sort -u > _work/tamam_yeni.txt
-            rclone copyto _work/tamam_yeni.txt "$T" -q || echo "::warning::TAMAM listesi yazilamadi"
+            rclone copyto _work/tamam_yeni.txt "$T" -q || { echo "::error::TAMAM listesi yazilamadi"; exit 1; }
           fi
-          H="gdrive:ASTROLOVE/TEMP/POD_ORDERS/FIYAT_1114/${AILE}_${GITHUB_RUN_ID}"
-          [ -d out ] && { rclone copy out "$H" -q || echo "::warning::Drive yukleme basarisiz"; }
           exit $rc
       - name: Token geri yaz
         if: always()
