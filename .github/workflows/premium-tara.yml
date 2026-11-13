@@ -10,7 +10,7 @@ on:
       kis: {description: "KISISEL.json klasoru id", required: true}
       hedef: {description: "gizli siparis klasoru id", required: true}
       kosu: {description: "uretim kosu no (SURE.json ile karsilastirilir)", required: true}
-      secenek: {description: "degisiklik secenegi: A (harf sekli) | B (yeni mesaj, hedef kokundeki DEGISIKLIK_1_MESAJ.json)", required: true}
+      secenek: {description: "degisiklik secenegi: A (harf sekli) | B (yeni mesaj, hedef kokundeki DEGISIKLIK_1_MESAJ.json) | C (her kelimenin ilk harfi buyuk)", required: true}
 jobs:
   tara:
     runs-on: ubuntu-latest
@@ -41,7 +41,7 @@ jobs:
         env: {G: "${{ inputs.gpt }}", K: "${{ inputs.kis }}", T: "${{ inputs.hedef }}", SEC: "${{ inputs.secenek }}"}
         run: |
           set -euo pipefail
-          case "$SEC" in A|B) ;; *) echo "::error::secenek A ya da B olmali"; exit 1;; esac
+          case "$SEC" in A|B|C) ;; *) echo "::error::secenek A, B ya da C olmali"; exit 1;; esac
           umask 077; mkdir -p _w _ur
           rclone copy "gdrive,root_folder_id=$K:" _w --include KISISEL.json -q
           if [ "$SEC" = "B" ]; then rclone copy "gdrive,root_folder_id=$T:" _w --max-depth 1 --include DEGISIKLIK_1_MESAJ.json -q; [ -s _w/DEGISIKLIK_1_MESAJ.json ]; fi
@@ -60,6 +60,7 @@ jobs:
           v = {x['ad']: x['deger'] for x in kj['kalemler'][0]['varyasyon']}
           for k, t in v.items():
               if k.startswith('Name under ') or k == 'Your message': ekle(t)
+              if k == 'Your message': ekle(' '.join(w[:1].upper() + w[1:] for w in str(t).split(' ')))
           if os.path.exists('_w/DEGISIKLIK_1_MESAJ.json'):
               ekle(json.load(open('_w/DEGISIKLIK_1_MESAJ.json', encoding='utf-8')).get('mesaj', ''))
           if os.path.exists('_ur/siparis.json'):

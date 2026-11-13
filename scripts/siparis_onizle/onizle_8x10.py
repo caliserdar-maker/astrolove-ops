@@ -3,7 +3,8 @@
 Deger (isim / mesaj) loga ve OZET'e YAZILMAZ. Cift, renk ve olcu KISISEL.json alan adlarindan okunur (sabit cift yok).
 Kullanim: onizle_8x10.py URETIM_DIR KISISEL.json CIKTI_DIR URETIM_KOSU_NO [SECENEK MESAJ_JSON]   -> cikis 0 = PASS, 1 = FAIL
 SECENEK (degisiklik istegi): A = mesaj Etsy okumasindaki gibi, harf sekli degisik (uretim kapisinda YALNIZ d FAIL ise dosyalar yine yazilir,
-OZET'te isaretlenir; baski karari Serdar'da). B = mesaj MESAJ_JSON "mesaj" alanindan (birebir), kod standart olmali. Cikti adlarina _Option<X> eklenir.
+OZET'te isaretlenir; baski karari Serdar'da). B = mesaj MESAJ_JSON "mesaj" alanindan (birebir), kod standart olmali. C = Etsy mesaji, her kelimenin
+ilk harfi buyuk (kural kodda, elle yazim yok), kod standart olmali. Cikti adlarina _Option<X> eklenir.
 Kapilar: girdi (siparis.json == KISISEL.json, harf harf), teslim (ad, 2400x3000, 300 dpi, 4:4:4, < 20 MB), uretim (KAPI.json PASS),
 kesit (alt %45, 1:1), OCR (bilgi; karar uretim kapisi d + goz kontrolu)."""
 import difflib
@@ -21,7 +22,7 @@ ur, kis, out = Path(sys.argv[1]), sys.argv[2], Path(sys.argv[3])
 kosu = sys.argv[4] if len(sys.argv) > 4 else ""
 sec = sys.argv[5] if len(sys.argv) > 5 else ""
 mesaj_json = sys.argv[6] if len(sys.argv) > 6 else ""
-assert sec in ("", "A", "B") and (sec != "B" or mesaj_json), "secenek"
+assert sec in ("", "A", "B", "C") and (sec != "B" or mesaj_json), "secenek"
 ek = f"_Option{sec}" if sec else ""
 STANDART_KOD = "d2b414ee270ec029bd5abcef4a6535414ae7d1e1"
 out.mkdir(parents=True, exist_ok=True)
@@ -40,6 +41,10 @@ if sec == "B":                                                      # yeni mesaj
     mj = json.load(open(mesaj_json, encoding="utf-8")); m = mj["mesaj"]
     oz["mesaj_kaynagi"] = dict(dosya="DEGISIKLIK", bosluk_kirpma_gerekmedi=m == m.strip(), karakter_alani_tutuyor=mj.get("karakter") in (None, len(m)),
                                sinir_35=len(m) <= 35, etsy_mesajindan_farkli=m != m_etsy)
+elif sec == "C":                                                    # Etsy mesaji, her kelimenin ilk harfi buyuk; geri kalan harfler ve bosluklar aynen
+    m = " ".join(w[:1].upper() + w[1:] for w in m_etsy.split(" "))
+    oz["mesaj_kaynagi"] = dict(dosya="ETSY_ILK_HARF_BUYUK", uzunluk_ayni=len(m) == len(m_etsy), harfler_ayni=m.lower() == m_etsy.lower(),
+                               her_kelime_buyuk_baslar=all(w[:1].isupper() for w in m.split(" ") if w), etsy_mesajindan_farkli=m != m_etsy)
 else:
     m = m_etsy; oz["mesaj_kaynagi"] = dict(dosya="ETSY")
 renk = "_".join(w.capitalize() for w in v.get("Color", "").split())
