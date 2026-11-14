@@ -556,6 +556,11 @@ def main() -> int:
     assert "scripts/etsy/test_secret_gecis.py" in abt, "test_secret_gecis.py CI test listesinde degil"
     for _t in ("test_urun_ayar.py", "test_ornament_taslak.py", "test_canli_yapi_olc.py", "test_ornament_metin_canli.py"):   # Serdar 9 Kas; plan madde 5
         assert f"scripts/etsy/{_t}" in abt, f"{_t} CI test listesinde degil"
+    # ai-beyan-test yol filtresi yok (Serdar 14 Kas 2026): testler data/, docs/, config/ okur; filtre geri gelirse FAIL. Metinle (PyYAML "on" -> True).
+    _on = abt.split("\non:\n", 1)[1].split("\njobs:", 1)[0]
+    assert _re.search(r"^  push:", _on, _re.M), "ai-beyan-test: push tetigi yok"
+    _flt = [x for x in _on.splitlines() if _re.match(r"\s*(paths|paths-ignore|branches|branches-ignore|tags|tags-ignore)\s*:", x)]
+    assert not _flt, f"ai-beyan-test: push filtresi var (her push kosmali): {_flt}"
     # SIPARIS_KOD_ANAHTARI (Serdar 12 Kas 2026, K2): opak siparis kodu ureten 5 adim env'i ayri anahtari da alir; Etsy shared secret
     # yenilenince kodlar degismesin. Satir her blokta ETSY_SHARED_SECRET'in hemen altinda, ayni girintide.
     _kod_satir = "SIPARIS_KOD_ANAHTARI: ${{ secrets.SIPARIS_KOD_ANAHTARI }}"

@@ -4,8 +4,7 @@ name: ai-beyan-test
 permissions:
   contents: read
 on:
-  push:
-    paths: ["scripts/**", ".github/workflows/**"]   # depo taramasi tum scripts/ + .sh + workflow curl satirlari
+  push: {}   # yol filtresi YOK (Serdar 14 Kas 2026): CI testleri data/, docs/, config/ dosyalarini da okur; her push kosar
   workflow_dispatch: {}
 jobs:
   test:
