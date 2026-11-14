@@ -23,13 +23,24 @@ socket.socket.sendto = _ag_yok
 socket.create_connection = _ag_yok
 socket.getaddrinfo = _ag_yok
 urllib.request.urlopen = _ag_yok
+# TEST AGI denetim kancasi: ad yamalari _socket ile ya da yamalanmamis adla (getnameinfo vb.) delinebilir; kanca surec icindeki Python soket yollarini yakalar (alt surec: sitecustomize; -I / Popen / Python disi araclar acik).
+import sys as _ag_sys
+def _ag_kanca(olay, arg):
+    if olay in ("socket.connect", "socket.sendto", "socket.sendmsg"):
+        if getattr(arg[0], "family", None) == getattr(socket, "AF_UNIX", -1):
+            return
+        raise AssertionError("gercek ag acilmaya calisildi: " + olay)
+    if olay in ("socket.getaddrinfo", "socket.gethostbyname", "socket.gethostbyaddr", "socket.getnameinfo"):
+        raise AssertionError("gercek ag acilmaya calisildi: " + olay)
+_ag_sys.addaudithook(_ag_kanca)
 _AG_DIZIN = Path(tempfile.mkdtemp(prefix="tw_ag_"))
 atexit.register(shutil.rmtree, _AG_DIZIN, True)   # gecici dizin koşu sonunda silinir
 (_AG_DIZIN / "sitecustomize.py").write_text(            # alt surec python3: ayni kapatma (PYTHONPATH ile yuklenir)
     "import socket\n"
     "def _ag_yok(*a, **k):\n    raise AssertionError('gercek ag acilmaya calisildi')\n"
     "socket.socket.connect = _ag_yok\nsocket.socket.connect_ex = _ag_yok\nsocket.socket.sendto = _ag_yok\n"
-    "socket.create_connection = _ag_yok\nsocket.getaddrinfo = _ag_yok\n", encoding="utf-8")
+    "socket.create_connection = _ag_yok\nsocket.getaddrinfo = _ag_yok\n"
+    "# TEST AGI denetim kancasi: ad yamalari _socket ile ya da yamalanmamis adla (getnameinfo vb.) delinebilir; kanca surec icindeki Python soket yollarini yakalar (alt surec: sitecustomize; -I / Popen / Python disi araclar acik).\nimport sys as _ag_sys\ndef _ag_kanca(olay, arg):\n    if olay in (\"socket.connect\", \"socket.sendto\", \"socket.sendmsg\"):\n        if getattr(arg[0], \"family\", None) == getattr(socket, \"AF_UNIX\", -1):\n            return\n        raise AssertionError(\"gercek ag acilmaya calisildi: \" + olay)\n    if olay in (\"socket.getaddrinfo\", \"socket.gethostbyname\", \"socket.gethostbyaddr\", \"socket.getnameinfo\"):\n        raise AssertionError(\"gercek ag acilmaya calisildi: \" + olay)\n_ag_sys.addaudithook(_ag_kanca)\n", encoding="utf-8")
 (_AG_DIZIN / "bin").mkdir()
 for _arac in ("gh", "curl", "wget", "rclone"):             # alt surec bash: gercek ag araci yerine sahte (testin kendi sahtesi onde kalir)
     (_AG_DIZIN / "bin" / _arac).write_text("#!/bin/sh\necho \"sahte $0: gercek ag yok (test_workflows)\" >&2\nexit 97\n")
@@ -65,6 +76,20 @@ PUBLIC_AUDITS = ("gorsel-denetim.yml",)
 
 
 def main() -> int:
+    # TEST AGI kanca kontrolu (mutasyon: kanca silinirse FAIL): ana surec ve alt surec python3 -c
+    import _socket as _ham
+    _t = _ham.socket(_ham.AF_INET, _ham.SOCK_STREAM)
+    for _ad, _f in (("connect", lambda: _t.connect(("192.0.2.1", 9))), ("getnameinfo", lambda: _ham.getnameinfo(("192.0.2.1", 9), 0))):
+        try:
+            _f(); raise SystemExit(f"TEST AGI: ana surecte _socket {_ad} acik")
+        except AssertionError as _e:
+            assert "gercek ag" in str(_e), f"TEST AGI: ana surec {_ad} beklenmeyen hata {_e}"
+        except OSError:
+            raise SystemExit(f"TEST AGI: ana surecte _socket {_ad} kancaya takilmadi")
+    _t.close()
+    _alt = _run_agsiz([_ag_sys.executable, "-c", "import _socket\ns=_socket.socket()\ns.connect(('192.0.2.1', 9))"],
+                          capture_output=True, text=True, timeout=30)
+    assert _alt.returncode != 0 and "gercek ag" in _alt.stderr, f"TEST AGI: alt surec python3 -c ag acik (rc={_alt.returncode})"
     files = sorted(WORKFLOWS.glob("*.yml"))
     assert files, "workflow bulunamadi"
     for path in files:

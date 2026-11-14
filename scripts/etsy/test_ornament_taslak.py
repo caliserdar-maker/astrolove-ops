@@ -27,6 +27,7 @@ socket.socket.sendto = _ag_yok
 socket.create_connection = _ag_yok
 socket.getaddrinfo = _ag_yok      # DNS de kapali (inceleme 1. tur)
 urllib.request.urlopen = _ag_yok
+# TEST AGI denetim kancasi: test_urun_ayar ice aktarilinca kurulur (UT, asagida); testler() icinde kontrol edilir.
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import ornament_taslak as T  # noqa: E402
@@ -118,8 +119,24 @@ def baslik(c):
     return T.metin_satiri(c)["baslik"]
 
 
+def UT_ag_dene(f):
+    try:
+        f(); return False
+    except AssertionError as e:
+        return "gercek ag" in str(e)
+    except Exception:
+        return False
+
+
 def testler():
     s = []
+    import _socket as _ham
+    _t = _ham.socket(_ham.AF_INET, _ham.SOCK_STREAM)
+    try:
+        s.append(("TEST AGI (kanca, UT ile kurulu): _socket connect / getnameinfo AssertionError verir",
+                  UT_ag_dene(lambda: _t.connect(("192.0.2.1", 9))) and UT_ag_dene(lambda: _ham.getnameinfo(("192.0.2.1", 9), 0))))
+    finally:
+        _t.close()
     # 1 bilinen PASS: iki cift, 13/13, iki tamam
     api, h, D, _ = kos(Sahte, ["ARIES_ARIES", "CANCER_LIBRA"])
     s.append(("PASS: 2 cift tamam, hata yok", h is None and D.get("tamam") == ["ARIES_ARIES", "CANCER_LIBRA"] and api.olusturma == 2))

@@ -28,6 +28,16 @@ socket.socket.sendto = _ag_yok
 socket.create_connection = _ag_yok
 socket.getaddrinfo = _ag_yok      # DNS de kapali (inceleme 1. tur)
 urllib.request.urlopen = _ag_yok
+# TEST AGI denetim kancasi: ad yamalari _socket ile ya da yamalanmamis adla (getnameinfo vb.) delinebilir; kanca surec icindeki Python soket yollarini yakalar (alt surec: sitecustomize; -I / Popen / Python disi araclar acik).
+import sys as _ag_sys
+def _ag_kanca(olay, arg):
+    if olay in ("socket.connect", "socket.sendto", "socket.sendmsg"):
+        if getattr(arg[0], "family", None) == getattr(socket, "AF_UNIX", -1):
+            return
+        raise AssertionError("gercek ag acilmaya calisildi: " + olay)
+    if olay in ("socket.getaddrinfo", "socket.gethostbyname", "socket.gethostbyaddr", "socket.getnameinfo"):
+        raise AssertionError("gercek ag acilmaya calisildi: " + olay)
+_ag_sys.addaudithook(_ag_kanca)
 import textwrap
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -597,6 +607,18 @@ def testler():  # noqa: C901
         _sk.close()
     s.append(("TEST AGI: requests (IP) gercek socket.connect yolunda AssertionError verir",
               ag_dene(lambda: T_.requests.get("http://192.0.2.1/", timeout=1))))
+    import _socket as _ham
+    _u = _ham.socket(_ham.AF_INET, _ham.SOCK_DGRAM)
+    _t = _ham.socket(_ham.AF_INET, _ham.SOCK_STREAM)
+    try:
+        s.append(("TEST AGI (kanca): _socket connect / UDP sendto / sendmsg AssertionError verir",
+                  ag_dene(lambda: _t.connect(("192.0.2.1", 9))) and ag_dene(lambda: _u.sendto(b"x", ("192.0.2.1", 9)))
+                  and ag_dene(lambda: _u.sendmsg([b"x"], [], 0, ("192.0.2.1", 9)))))
+    finally:
+        _u.close(); _t.close()
+    s.append(("TEST AGI (kanca): getnameinfo / gethostbyname / gethostbyaddr / _socket.getaddrinfo AssertionError verir",
+              ag_dene(lambda: socket.getnameinfo(("192.0.2.1", 9), 0)) and ag_dene(lambda: _ham.gethostbyname("example.invalid"))
+              and ag_dene(lambda: _ham.gethostbyaddr("192.0.2.1")) and ag_dene(lambda: _ham.getaddrinfo("example.invalid", 80))))
     s.append(("Gercek URUN_AYAR'da gercek ilan kimligi yok (10 hane, 900000000N disi)",
               not re.search(r"(?<!\d)(?!9000000)\d{10}(?!\d)", (KOK / "docs/urun/ornament78/URUN_AYAR.json").read_text())))
     return s
