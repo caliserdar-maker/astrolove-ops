@@ -173,6 +173,9 @@ def calis(a):
 
     api = None
     try:
+        if os.environ.get("URUN_AYAR"):            # token / ag oncesi: metin_kontrol(r) A vermez, ayar() URUN_AYAR yolunu okur (ornament_taslak:59-61)
+            raise Dur("DUR: URUN_AYAR ortam degiskeni dolu; bu arac ayari yalniz depodaki docs/urun/ornament78/URUN_AYAR.json'dan okur "
+                      "(emsal ornament_taslak yaz modu); okuma yapilmadi")
         spec = json.load(open(a.spec, encoding="utf-8"))
         ham, rows = csv_oku(a.csv)
         O.update(csv_satir=len(rows), csv_sha256_eski=hashlib.sha256(ham).hexdigest(), csv_blob_eski=blob_sha(ham))

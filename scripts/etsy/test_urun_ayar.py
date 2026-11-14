@@ -605,7 +605,7 @@ def testler():  # noqa: C901
         s.append(("TEST AGI: socket.socket().connect (urllib3 yolu) AssertionError verir", ag_dene(lambda: _sk.connect(("192.0.2.1", 9)))))
     finally:
         _sk.close()
-    s.append(("TEST AGI: requests (IP) gercek socket.connect yolunda AssertionError verir",
+    s.append(("TEST AGI: requests (IP) urllib3 getaddrinfo adiminda (ad yamasi) AssertionError verir",
               ag_dene(lambda: T_.requests.get("http://192.0.2.1/", timeout=1))))
     import _socket as _ham
     _u = _ham.socket(_ham.AF_INET, _ham.SOCK_DGRAM)

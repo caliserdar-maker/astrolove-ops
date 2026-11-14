@@ -28,6 +28,16 @@ def _ag_yok(*a, **k):
 socket.socket = _ag_yok
 socket.create_connection = _ag_yok
 urllib.request.urlopen = _ag_yok
+# TEST AGI denetim kancasi: ad yamalari _socket ile ya da yamalanmamis adla (getnameinfo vb.) delinebilir; kanca surec icindeki Python soket yollarini yakalar (alt surec: sitecustomize; -I / Popen / Python disi araclar acik).
+import sys as _ag_sys
+def _ag_kanca(olay, arg):
+    if olay in ("socket.connect", "socket.sendto", "socket.sendmsg"):
+        if getattr(arg[0], "family", None) == getattr(socket, "AF_UNIX", -1):
+            return
+        raise AssertionError("gercek ag acilmaya calisildi: " + olay)
+    if olay in ("socket.getaddrinfo", "socket.gethostbyname", "socket.gethostbyaddr", "socket.getnameinfo"):
+        raise AssertionError("gercek ag acilmaya calisildi: " + olay)
+_ag_sys.addaudithook(_ag_kanca)
 
 BURA = Path(__file__).resolve().parent
 sys.path.insert(0, str(BURA))
@@ -121,26 +131,36 @@ class SahteStore:
         return False
 
 
+class SayacStore(SahteStore):
+    """Kac kez kuruldugunu sayar (URUN_AYAR korumasi token oncesi mi)."""
+    n = 0
+
+    def __init__(self, *a):
+        SayacStore.n += 1
+
+
 def csv_metni(rows, sutun=None):
     s = io.StringIO(newline="")
     w = csv.DictWriter(s, fieldnames=sutun or M.SUTUN, extrasaction="ignore"); w.writeheader(); w.writerows(rows)
     return s.getvalue().encode("utf-8")
 
 
-def kos(ag=None, ilan_json=None, csv_bayt=None, ilan_ham=None):
+def kos(ag=None, ilan_json=None, csv_bayt=None, ilan_ham=None, ortam=None, store=None):
     d = Path(tempfile.mkdtemp(prefix="s13_test_"))
     (d / "I.json").write_text(ilan_ham if ilan_ham is not None else json.dumps(
         ilan_json if ilan_json is not None else {kod: {"listing_id": lid} for kod, lid in IDS.items()}))
     (d / "M.csv").write_bytes(csv_bayt if csv_bayt is not None else csv_metni(ROWS))
     ag = ag or SahteAg(ilanlar())
     eski = (etsy_common.requests.request, M.TokenStore, dict(os.environ), etsy_common.Etsy.__init__)
-    etsy_common.requests.request, M.TokenStore = ag, SahteStore
+    etsy_common.requests.request, M.TokenStore = ag, (store or SahteStore)
     ilk = eski[3]
 
     def hizli(self, store):
         ilk(self, store); self.pace = 0
     etsy_common.Etsy.__init__ = hizli
     os.environ.update(TOKEN_FILE="x", ETSY_API_KEY="k", ETSY_SHARED_SECRET="s", ETSY_SHOP_ID="39729443")
+    os.environ.pop("URUN_AYAR", None)
+    os.environ.update(ortam or {})                # yalniz bu kosu icin; finally'de onceki ortam geri yuklenir
     try:
         with contextlib.redirect_stdout(io.StringIO()) as o:
             rc = -1
@@ -222,6 +242,16 @@ def main():
     I = ilanlar(); I.pop(IDS[ROWS[7]["kod"]])
     dur("batch yanitinda ilan yok", *kos(SahteAg(I))[:3], "batch yanitinda")
     dur("kota tabani alti (kalan 11 < 2 + 10)", *kos(SahteAg(ilanlar(), kalan=12))[:3], "kota")
+    # URUN_AYAR korumasi (Serdar 14 Kas): ortam degiskeni doluysa token ve agdan ONCE DUR; yoksa normal akis
+    SayacStore.n = 0
+    rc, O, y, ag_u, *_ = kos(SahteAg(ilanlar()), store=SayacStore)
+    k("PASS: URUN_AYAR yok -> calis normal (cikis 0, token 1 kez kuruldu)", rc == 0 and O["durum"] == "PASS" and SayacStore.n == 1 and ag_u.istek)
+    SayacStore.n = 0
+    rc, O, y, ag_u, *_ = kos(SahteAg(ilanlar()), store=SayacStore, ortam={"URUN_AYAR": "/sahte/URUN_AYAR.json"})
+    k("bilinen FAIL: URUN_AYAR dolu -> DUR (OZET durum), CSV yok, Etsy istegi 0, TokenStore kurulmadi",
+      rc == 1 and "URUN_AYAR ortam degiskeni dolu" in O["durum"] and y is None and ag_u.istek == [] and SayacStore.n == 0
+      and O["istek"] == 0)
+    k("PASS: URUN_AYAR test ortamindan sizmadi", "URUN_AYAR" not in os.environ)
     dur("CSV sutun farki", *kos(csv_bayt=csv_metni(ROWS, M.SUTUN[:-1]))[:3], "sutun")
     dur("CSV 77 satir", *kos(csv_bayt=csv_metni(ROWS[:-1]))[:3], "77 satir")
     dur("CSV tekrar eden kod", *kos(csv_bayt=csv_metni(ROWS[:-1] + [ROWS[0]]))[:3], "tekil kod")
@@ -246,6 +276,26 @@ def main():
     finally:
         etsy_common.requests.request = gercek
     k("bilinen FAIL: GET disi istek (PATCH) -> SaltOkur SystemExit, aga istek yok", ok and not ag.istek)
+    # ---- test agi denetim kancasi (CLAUDE.md:124; emsal test_urun_ayar): ad yamalarini atlayan yollar da kapali
+    def ag_dene(f):
+        try:
+            f(); return False
+        except AssertionError as e:
+            return "gercek ag" in str(e)
+        except Exception:
+            return False
+    import _socket as _ham
+    _u = _ham.socket(_ham.AF_INET, _ham.SOCK_DGRAM)
+    _t = _ham.socket(_ham.AF_INET, _ham.SOCK_STREAM)
+    try:
+        k("TEST AGI (kanca): _socket connect / UDP sendto / sendmsg AssertionError verir",
+          ag_dene(lambda: _t.connect(("192.0.2.1", 9))) and ag_dene(lambda: _u.sendto(b"x", ("192.0.2.1", 9)))
+          and ag_dene(lambda: _u.sendmsg([b"x"], [], 0, ("192.0.2.1", 9))))
+    finally:
+        _u.close(); _t.close()
+    k("TEST AGI (kanca): getnameinfo / gethostbyname / gethostbyaddr / _socket.getaddrinfo AssertionError verir",
+      ag_dene(lambda: socket.getnameinfo(("192.0.2.1", 9), 0)) and ag_dene(lambda: _ham.gethostbyname("example.invalid"))
+      and ag_dene(lambda: _ham.gethostbyaddr("192.0.2.1")) and ag_dene(lambda: _ham.getaddrinfo("example.invalid", 80)))
     # ---- tarama: betikte dogrudan HTTP istemcisi yok
     kaynak = YOL.read_text(encoding="utf-8")
     k("tarama: betikte requests / urllib / http.client / curl cagrisi yok",
