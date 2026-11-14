@@ -101,7 +101,8 @@ Drive ID deseni 64 haneli sha'lari da yakaliyor).
   scripts/kapak78/test_galeri_v10.py, scripts/prodigi/test_router_sku_v3.py ("--inv gerekli"). Liste disi FAIL -> DUR.
 - Ozel PASS sartlari: test_ornament_kargo (TOPLAM 74 | PASS 74 | FAIL 0; ornament_kargo degerleri URUN_AYAR'dan okur,
   322e066:ornament_taslak.py:101-108), test_ornament_metin_canli (51/51), test_urun_ayar, test_ornament_taslak, test_workflows.
-  git archive kopyasinda ek olarak yalniz CLAUDE.md:121'deki 3 test dusebilir.
+  git archive kopyasinda ek olarak yalniz CLAUDE.md:121'deki 3 test dusebilir. (14 Kas: bu satir 10) G3(b) ile daraltildi;
+  archive'de CI_KOK / KISISEL_KOK zorunlu verilir, yalniz test_printful_5x7 dusebilir; 10'a bakiniz.)
 - Kuru olcum (ana plan 4857c67:docs/plan/URUN_AYAR_PLAN.md:300, adim 2b; kapsam ana planla ayni): gercek URUN_AYAR (madde 4
   sonrasi) + 102d0c52 CSV, 78 ornament cifti, ornament_taslak `--mod kuru` yolu ile TUM yazim uclari (createDraftListing, envanter,
   nitelik, gorsel alt_text, kisisellestirme, stil_gorsel) yazim_kapisi'ndan gecirilir (sahte Etsy, ag kapali, token yok); ayrica
@@ -117,6 +118,9 @@ Drive ID deseni 64 haneli sha'lari da yakaliyor).
   sha nedeni; (d) olculmedi listesinden taslak.nitelikler de silinir -> "olculmedi alanlar var" beklentisi kirmizi;
   (e) CI listesinden test_urun_ayar silinir -> test_workflows kirmizi.
 
+- 14 Kas eki: kuru olcumun yontemi (kayit + gercek ayarla tekrar oynatma, 1560 kapi cagrisi), test agi kurali ve yapi testi
+  10) bolumundedir (G1, G2, G4); yukaridaki satirlar yerinde kalir, celiskide 10) gecerlidir.
+
 ## 7) Kod asamasinin kapanisi
 
 - Tek bagimsiz inceleme, en cok 2 tur (CLAUDE.md:221); 2. tur yeni YUKSEK verirse DUR, push yok.
@@ -128,6 +132,8 @@ Drive ID deseni 64 haneli sha'lari da yakaliyor).
 - Ayri onayla main: push oncesi ls-remote main beklenen taban sha'si degilse DUR; yalniz fast-forward; push sonrasi main CI
   (push olayi, head_sha yeni uc) success.
 
+- 14 Kas eki: son commit'te yeniden test, temiz kopya / CLAUDE.md:121 uyumu ve CI surumleriyle kosu 10) G3'tedir.
+
 ## 8) Kapanan kapi
 
 Yok. Hicbir kapi kaldirilmaz ya da gevsetilmez: yazim_kapisi (322e066:urun_ayar.py:414-) nedenlerinin hepsi kalir; sha kapisi
@@ -135,6 +141,10 @@ Yok. Hicbir kapi kaldirilmaz ya da gevsetilmez: yazim_kapisi (322e066:urun_ayar.
 S13 kapilari (102d0c52:ornament_metin_canli.py:125-145) degismez. metin_kontrol'un yeni surumu eski kurallarin hepsini icerir
 (322e066:ornament_taslak.py:305-328 ile 102d0c52:...:263-285 ayni kurallar) ve ek olarak galeri sayisi sutun kontrolu getirir
 (:295-297). kilit.kilitli false kalir.
+
+14 Kas eki: createDraftListing metin yasak kapisinin yeri (main'de yazma fonksiyonu icinde, dalda _ayar_kapi'da) 10) G2'dedir;
+varsayilan yol o satiri taslak_olustur'a geri koyar, boylece "kapanan kapi yok" harfiyen saglanir. Kosul: Serdar "zincir yeterli"
+yorumunu secerse yukaridaki "Yok" yerine "main:351'deki ayni-fonksiyon cagrisi kalkti; esdegeri _ayar_kapi :359" yazilir.
 
 ## 9) Olculmeyenler
 
@@ -148,3 +158,109 @@ S13 kapilari (102d0c52:ornament_metin_canli.py:125-145) degismez. metin_kontrol'
 
 Kapsam disi (ayri isler): ana plan adim 4 (yayina_hazir turetme; Serdar 9 Kas "2. A"), ORN_ETSY_AYAR emekliligi (ana plan S5;
 dosya silinmez), ornament_metin.py:96 ureteci ("free shipping" cumlesi; yeniden kosarsa CSV'yi ezer), taslak.nitelikler olcumu.
+
+## 10) Kod asamasi ek kurallari (14 Kas)
+
+Girdi: Genel Merkez'in kod asamasi metni taslagina uc bagimsiz inceleme turunun bulgulari (G1-G4; Genel Merkez kayit
+KARARLAR_20261113_EK_MADDE54 madde 115-117). Asagidaki yontemler Denetim'in kod okumasidir (322e066 / 102d0c52); kod bu asamada
+degismez. Sayilar koddan hesaptir; kosulmadi.
+
+### G1 Kuru olcum "tum uclar": kayit + tekrar oynatma
+
+- Sorun: gercek ayarda (kilitli false) kuru yol ilk yazimda durur: yaz() once metin (322e066:scripts/etsy/ornament_taslak.py:461-464),
+  sonra medya (:465-467; cift basina 11 jpg + 1 mp4, medya() :332-337, IMG_ROOT), sonra taslak_kapi (:553 -> :406-408 ->
+  _tek_kapilar :362-376 -> _ayar_kapi :348-360 -> urun_ayar.yazim_kapisi). Gercek ayarla 1. cagrida DUR verdigi icin envanter, gorsel,
+  video, stil, kisisellestirme ve nitelik uclari hic kapiya gelmez. Kuru kaydi (Kuru._kaydet :703-710) yalniz govdeyi tutar; kapi
+  envanter / createDraftListing icin cift (322e066:scripts/etsy/urun_ayar.py:414-416), stil_gorsel icin stil_baglam (:334-339) ister;
+  video yuklemesi _uc'ta "diger" ucudur (:162-176; Kuru.post_file :725-731).
+- Secilen yontem (iki gecis, ag yok, token yok):
+  1. KAYIT: test_urun_ayar.sahte_ortam() (322e066:scripts/etsy/test_urun_ayar.py:62-69; sahte_ayar :47-59: olculmedi = [], panel
+     kanitli, SAHTE onay, kilitli) ve sahte medya (emsal 322e066:scripts/etsy/test_ornament_taslak.py:26-32 medya_kur, :87-88 IMG_ROOT)
+     ile 78 cift kuru kosulur. Kosu AYNI SURECTE yapilir (CLI alt sureci degil: sarmalayici alt surece gecmez): betik
+     ornament_taslak'i import eder, ornament_taslak.UA.yazim_kapisi'ni sarmalayiciyla degistirir ve kuru yolunu (Kuru sinifi :694-;
+     --mod kuru'nun cagirdigi fonksiyon) dogrudan cagirir. Her cagrinin (method, path, data, json_body, cift, stil_baglam, metin_yolu)
+     kopyasi JSON satiri olarak yazilir; stil_baglam'daki rank_id'nin anahtarlari int'tir (:608, :614) ve JSON'da str'ye donusur, bu
+     yuzden vid ve rank_id [[anahtar, deger], ...] listesi olarak kaydedilir. Sonra gercek fonksiyon cagrilir (SAHTE ayarda DUR 0
+     beklenir; DUR > 0 ise olcum DUR).
+  2. TEKRAR OYNATMA: kayittaki her cagri urun_ayar.yazim_kapisi'na gercek ayarla (UA.yukle("ornament78"), madde 4 sonrasi) aynen
+     verilir; stil_baglam listeden int anahtarli dict'e geri cevrilir (urun_ayar.py:341 rank_id.get(int)); degisen yalniz A, onay_yolu
+     (None; gercek onay kaydi yok) ve metin_yolu (SAHTE yoldan depodaki data/pod/ORNAMENT78_METIN.csv'ye); SAHTE
+     CSV ile bayt bayt ayni olmali (madde 3 fiksturu ESKI tabandan YENI uretir; ayni degilse olcum DUR). Her cagrinin DUR nedenleri
+     ayri ayri toplanir (yazim_kapisi SystemExit metni; neden listesi "; " ile ayrilir).
+- Beklenen kayit sayisi (koddan hesap; NIT 3, galeri 11, menu 5: 322e066 URUN_AYAR.json taslak.nitelikler / taslak.galeri /
+  varyasyon.menu): cift basina 20 = createDraftListing 2 (taslak_kapi :553 ve taslak_olustur :555, ikisi de _tek_kapilar) + envanter 1
+  (:575) + gorsel 11 (:581-586) + diger (video) 1 (:601-603) + stil_gorsel 1 (:615-616) + kisisellestirme 1 (:619) + nitelik 3
+  (:622-626). Toplam 1560: createDraftListing 156, envanter 78, gorsel 858, diger 78, stil_gorsel 78, kisisellestirme 78, nitelik 234.
+  Sayi farkliysa olcum DUR (sarmalayici eksik ya da fazla cagri).
+  On olcum (bagimsiz inceleme, 14 Kas, 322e066 git archive kopyasi, ag kapali, madde 4 ayari bellekte): kayit 1560, dagilim ayni;
+  SAHTE ayarla DUR 0; SAHTE CSV = 102d0c52 CSV bayt bayt; tekrar oynatmada her cagrida beklenen 7 neden (stil_gorsel'deki ek neden
+  JSON anahtar tipinden; yukaridaki [[anahtar, deger]] kaydi bunu giderir). Kod asamasinda yeni klonda yeniden olculur.
+- Beklenen tekrar oynatma sonucu: 1560/1560 cagri DUR; her cagride nedenler yalniz kilitli false, ayar sha256 kilit.ayar_sha256 ile
+  farkli, onay kaydi yok, panel on isi yapilmadi (3 panel isi), olculmedi alanlar var. Sifir listesi (madde 6) korunur:
+  aciklama_yasak, aciklama_zorunlu yok, EN metin sha farki, _spec_fark, _csv_satiri, _taslak_govde, _metin_yasak, _envanter,
+  _stil_gorsel, _gorsel, _nitelik nedenleri 0. Beklenen disi neden -> DUR, rapor (uc ve neden basina sayi).
+  metin_kontrol iki surum karsilastirmasi (madde 6) ve kupa sabitleri satiri (madde 6) aynen.
+- Kanit testi: (a) SAHTE ayarla kayit gecisinde DUR 0 ve 1560 kayit; (a2) kayit JSON'a yazilip geri okunduktan sonra SAHTE ayarla
+  tekrar oynatmada stil_gorsel ek nedeni 0 (anahtar tipi kaniti; bagimsiz inceleme olcumu: str anahtarla 78/78 stil_gorsel cagrisi
+  "menu degeri -> gorsel eslemesi ... farkli" verdi); (b) bir kayitta stil_baglam None yapilinca tekrar oynatmada
+  "eslem baglami ... verilmedi" nedeni cikar (kayit eksikse olcumun yakaladigi kaniti); (c) kayit dosyasinda ilan kimligi yok
+  (Kuru sahte listing_id 9000000000 + n; :742) ve token yok.
+
+### G2 Ortak istemci kurali (CLAUDE.md:220)
+
+- Durum: main'de createDraftListing'in yazma fonksiyonu taslak_olustur icinde, gonderilen govdeyle, istekten once
+  metin_yasak_kapisi(..., mod="ENGEL") var (102d0c52:scripts/etsy/ornament_taslak.py:351, requests.post :354). Dalda taslak_olustur
+  (322e066:scripts/etsy/ornament_taslak.py:412-421) bu satiri tasimaz; kapi ayni b2 ile _tek_kapilar :371 -> _ayar_kapi :359'da,
+  post'tan once calisir (davranis korunur) ama "ayni fonksiyonda" degil. 102d0c52:337 (istek gondermeyen taslak_kapi) icin dalda
+  _tek_kapilar -> _ayar_kapi :359 karsilar; ek satir gerekmez (bilgi).
+- VARSAYILAN YOL (planda kalir, karar gerektirmez): 322e066:ornament_taslak.py taslak_olustur icinde, b2 = self._tek_kapilar(...)
+  (:416) ve ai_beyan_kapisi (:417) satirlarindan sonra, self._istek_oncesi() (:418) ve self._bekle() (:419) satirlarindan ONCE:
+  `metin_yasak_kapisi("POST", f"/shops/{shop}/listings", data=b2, mod="ENGEL")`. Siralama gerekcesi: _bekle sayaci istekten once
+  artirir (102d0c52:scripts/etsy/etsy_common.py:748-756); ENGEL'de sayac ve kota etkilenmez. Govde b2 (gonderilen, html_coz sonrasi).
+- Yapi testi (davranis testi yetmez: kapi _ayar_kapi'da zaten calistigi icin yeni satir yokken de yesil kalir): test_urun_ayar'a iki
+  kontrol. (1) AST: Kilitli.taslak_olustur govdesinde requests.post'tan once metin_yasak_kapisi cagrisi var, data argumani b2
+  (emsal 102d0c52:scripts/etsy/test_ai_beyan.py:169-226 C kontrolu, AST taramasi). (2) Casus: Kilitli nesnesi
+  (emsal 322e066:scripts/etsy/test_urun_ayar.py:357-360 object.__new__ + sahte requests.post; 322e066:scripts/etsy/test_ornament_taslak.py:213-221)
+  uzerinde _ayar_kapi'daki kapi su yolla devre disi birakilir: modul degiskeni T.metin_yasak_kapisi YAMANMAZ (yeni satir da ayni
+  degiskeni cagirir; yamanirsa satir varken de test kirmizi olur). Bunun yerine ornegin k._ayar_kapi'si ezilir: yerine konan
+  sarmalayici yalniz (html_coz(data), html_coz(json_body)) dondurur (gerekirse SAHTE ayarla UA.yazim_kapisi'ni da cagirir, metin
+  yasak kapisini cagirmaz). Ornek alanlari 322e066:test_urun_ayar.py:357-358'deki gibi kurulur (remaining, _kalan_yaz,
+  _istek_oncesi, _bekle, _headers). KESIN yasak bir baslikla taslak_olustur cagrilir: istek gitmemeli (sahte post cagrilmamali) ve
+  SystemExit metninde "metin yasak kapisi" ve "KESIN yasak" gecmeli (102d0c52:scripts/etsy/etsy_common.py:373-374; metinde
+  "ENGEL" kelimesi yok). Kuru.taslak_olustur (:738-748) bu fonksiyonu
+  ezdigi icin kuru olcum bu satirin kaniti sayilmaz. Mutasyon: yeni satir silinince (1) ve (2) kirmizi.
+- Kural yorumu ve Serdar sorusu (oneri; karar Serdar'da, varsayilan yol planda kalir): "Dalin bugunku yapisi kurali ozde karsiliyor:
+  createDraftListing'in tek gonderim yolu taslak_olustur -> _tek_kapilar -> _ayar_kapi :359 zinciridir; metin yasak kapisi ayni b2 ile
+  post'tan once, ayni Kilitli nesnesinde calisir (kanit: 322e066:test_ornament_taslak.py ve test_urun_ayar.py'deki ENGEL testleri;
+  kosulmadi). Fazladan satir ayni govdeye ikinci kez ENGEL uygular (yan etkisi yok). Soru: varsayilan yol (satiri taslak_olustur'a
+  geri koymak) mu, yoksa 'zincir yeterli' yorumu mu?" Denetim'in onerisi: varsayilan yol (kural harfiyen, maliyet 1 satir + yapi testi).
+
+### G3 Kapanis: son commit'te yeniden test ve temiz kopya
+
+- Inceleme duzeltmesinden sonra (her turda), push edilecek SON commit'te yeniden: temiz kopya (git archive) + git check-ignore taramasi,
+  tam paket (madde 6 sayilari), mutasyonlar (madde 6 + G2 + G4), kuru olcum (G1). Onceki commit'teki sonuclar push kaniti sayilmaz.
+- Madde 6'daki (eski :104 satiri, 14 Kas notundan once) "git archive kopyasinda yalniz CLAUDE.md:121'deki 3 test ek dusebilir" ile
+  CLAUDE.md:121 ("uc test de bu kosullar saglanmis ortamda gecmeli") uyumu: iki ortam ayri kanittir. (a) Tam gecmisli yeni klonda
+  (origin'i var) 3 test GECMELI (test_printful_5x7 gecmis okur; test_p1g_kart ve test_tag_kerning origin'den dal ceker). (b) git
+  archive kopyasinda CI_KOK (kapak-ci-ref-20261029 dalindaki ref/kapak_ci) ve KISISEL_KOK (kisisel-v1 dalindan cikarilmis
+  scripts/kisisel + assets koku) ZORUNLU verilir; test_p1g_kart ve test_tag_kerning orada da PASS sarttir (CLAUDE.md:121); yalniz
+  test_printful_5x7 (git gecmisi) archive'de dusebilir. Rapor iki ortami ayri yazar.
+- CI listesi testleri CI surumleriyle: kurulum test surecinin DISINDA, ayri ortamda (yeni venv; pip agi yalniz kurulumda, testte ag
+  kapali). test_ai_beyan 102d0c52:.github/workflows/ai-beyan-test.yml:17 surumuyle (yalniz requests==2.34.2); v2-test listesi
+  (madde 5'in eklediği dort test dahil) :28 surumleriyle (requests 2.34.2, numpy 2.1.3, pillow 11.0.0, pyyaml 6.0.2). Sonuc rapora
+  surum + cikis kodu.
+
+### G4 Test agi (CLAUDE.md:124)
+
+- Kural yeni ve degisen testler icindir: test_urun_ayar, test_ornament_taslak (dalda degisen / yeni) ve kod asamasinda degisecek
+  test_workflows. Uc dosya da gercek agi baştan kapatir (emsal 102d0c52:scripts/sosyal/test_metricool_yedek.py:19-25:
+  socket.socket, socket.create_connection, urllib.request.urlopen -> AssertionError). Bugun 322e066'daki ilk ikisinde socket
+  kapatma yok (grep 0); 102d0c52 test_workflows'ta da yok (grep 0). test_workflows alt surec kosar: bash (102d0c52:scripts/ops/test_workflows.py:30,
+  :138, :205, :207, :247; yml adim parcalari) ve python3 - (:266, :268, :272). Ana surecteki socket yamasi alt surece gecmez
+  (CLAUDE.md:124 alt surecte de agi kapatmayi ister): python3 alt sureclerine agi kapatan on kod verilir (stdin basina ya da
+  sitecustomize ile PYTHONPATH); bash alt sureclerinin PATH'ine sahte gh, curl, rclone konur (emsal 102d0c52:scripts/etsy/test_kolye_pazar.py:73-85).
+- Kanit: her biri icin mutasyon: test icine (ve test_workflows'ta bir python3 alt surecine) ag cagrisi eklenince test FAIL
+  (AssertionError "gercek ag"); adres TEST-NET 192.0.2.1 (gercek alan adi yok; kapatma eksik kalsa da gercek hizmete gidilmez) ve
+  mutasyon ag kapali ortamda (unshare -rn) kosulur; cikti rapora.
+- Tam paketteki eski testlere yeni ag kurali uygulanmaz. test_p1g_kart ve test_tag_kerning'in origin'den git fetch'i CLAUDE.md:121
+  ve :124'teki istisnaya gore kalir.
