@@ -11,6 +11,22 @@ import os
 import pathlib
 import sys
 import tempfile
+import socket
+import ssl  # noqa: F401  (ag kapatmadan once yuklenir: ssl/requests socket sinifini alt sinif yapar)
+import urllib.request
+
+
+def _ag_yok(*a, **k):
+    raise AssertionError("gercek ag acilmaya calisildi")
+
+
+# TEST AGI (CLAUDE.md:124; plan URUN_AYAR_MAIN_PLAN 10-G4): gercek dis ag bastan kapali; emsal scripts/sosyal/test_metricool_yedek.py:19-25
+socket.socket.connect = _ag_yok
+socket.socket.connect_ex = _ag_yok
+socket.socket.sendto = _ag_yok
+socket.create_connection = _ag_yok
+socket.getaddrinfo = _ag_yok      # DNS de kapali (inceleme 1. tur)
+urllib.request.urlopen = _ag_yok
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import ornament_taslak as T  # noqa: E402

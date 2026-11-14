@@ -289,7 +289,8 @@ def metin_satiri(pair):
     return r[0]
 
 
-def metin_kontrol(row, A):
+def metin_kontrol(row, A=None):
+    A = A if A is not None else ayar()   # S13 cagrisi (ornament_metin_canli.py) A vermez; plan URUN_AYAR_MAIN_PLAN madde 2
     title, desc = row["baslik"], row["aciklama"]
     tags = [t.strip() for t in row["etiketler"].split(",")]
     n_g = len(galeri(A))
@@ -415,6 +416,7 @@ class Kilitli(Etsy):
         DURUM'a yazildiktan SONRA (201 sonrasi id kaybolmaz)."""
         b2 = self._tek_kapilar(shop, body)
         ai_beyan_kapisi("POST", f"/shops/{shop}/listings", data=b2)   # gonderilen govdeyle ayni fonksiyonda (test_ai_beyan C, AST kurali)
+        metin_yasak_kapisi("POST", f"/shops/{shop}/listings", data=b2, mod="ENGEL")   # CLAUDE.md:220: yazma cagrisiyla ayni fonksiyonda; sayactan (_bekle) once
         self._istek_oncesi()
         sira = self._bekle()            # tempo + token erken yenileme (10 dk)
         try:

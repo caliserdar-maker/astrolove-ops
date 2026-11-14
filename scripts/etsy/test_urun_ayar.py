@@ -12,6 +12,22 @@ import pathlib
 import sys
 import re
 import tempfile
+import socket
+import ssl  # noqa: F401  (ag kapatmadan once yuklenir: ssl/requests socket sinifini alt sinif yapar)
+import urllib.request
+
+
+def _ag_yok(*a, **k):
+    raise AssertionError("gercek ag acilmaya calisildi")
+
+
+# TEST AGI (CLAUDE.md:124; plan URUN_AYAR_MAIN_PLAN 10-G4): gercek dis ag bastan kapali; emsal scripts/sosyal/test_metricool_yedek.py:19-25
+socket.socket.connect = _ag_yok
+socket.socket.connect_ex = _ag_yok
+socket.socket.sendto = _ag_yok
+socket.create_connection = _ag_yok
+socket.getaddrinfo = _ag_yok      # DNS de kapali (inceleme 1. tur)
+urllib.request.urlopen = _ag_yok
 import textwrap
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -24,10 +40,18 @@ ESKI = b"[ SHIPPING ]\nMade and shipped by our production partner, with free shi
 YENI = b"[ SHIPPING ]\nMade and shipped by our production partner. You can see the shipping cost and estimated delivery time for your country on this page and at checkout."
 
 
-def sahte_csv(hedef):
-    b = GERCEK_CSV.read_bytes()
-    if b.count(ESKI) != 78:
-        raise SystemExit(f"DUR: sahte CSV kurulamadi (kargo blogu {b.count(ESKI)}/78)")
+def eski_taban(b):
+    """Depo CSV baytlarindan ESKI kargo bloklu taban (bayt duzeyinde; tirnak / CRLF degismez). Depo CSV'si eski (S13 oncesi) ya da
+    yeni (S13 sonrasi, 102d0c52) olabilir; fikstur ikisinde de ayni (plan madde 3; emsal test_ornament_metin_canli._eski_hal)."""
+    if b.count(ESKI) == 78 and b.count(YENI) == 0:
+        return b
+    if b.count(YENI) == 78 and b.count(ESKI) == 0:
+        return b.replace(YENI, ESKI)
+    raise SystemExit(f"DUR: sahte CSV kurulamadi (kargo blogu eski {b.count(ESKI)} / yeni {b.count(YENI)}, 78 bekleniyor)")
+
+
+def sahte_csv(hedef, kaynak=None):
+    b = eski_taban(pathlib.Path(kaynak or GERCEK_CSV).read_bytes())
     pathlib.Path(hedef).write_bytes(b.replace(ESKI, YENI))
     return pathlib.Path(hedef)
 
@@ -84,15 +108,39 @@ def testler():  # noqa: C901
     s = []
     gercek = UA.yukle("ornament78")
     s.append(("PASS: gercek ayar sema temiz", isinstance(gercek, dict) and gercek["kilit"]["kilitli"] is False))
-    # gercek ayar + gercek CSV: kilitli false ve aciklama_yasak (free shipping) -> DUR
+    # gercek ayar + gercek CSV (S13 sonrasi): DUR nedenleri yalniz kilit / onay / panel / olculmedi (metin ve sha temiz; plan madde 3)
     import csv as _csv
     row = next(r for r in _csv.DictReader(open(GERCEK_CSV, encoding="utf-8")) if r["kod"] == "CANCER_LIBRA")
     tags = [t.strip() for t in row["etiketler"].split(",")]
     g_body = T.taslak_govde(gercek, row["baslik"], row["aciklama"], tags)
     h = dur(UA.yazim_kapisi, gercek, "POST", f"/shops/{SHOP}/listings", g_body, metin_yolu=GERCEK_CSV, cift="CANCER_LIBRA")
-    s.append(("FAIL: gercek ayar -> kilitli false + onay yok + panel + free shipping", h is not None and "kilitli false" in h
-              and "onay kaydi yok" in h and "panel on isi yapilmadi" in h and "aciklama_yasak eslesmesi" in h
-              and "aciklama_zorunlu yok" in h and "olculmedi alanlar var" in h))
+    s.append(("FAIL: gercek ayar -> kilitli false + ayar sha + onay yok + panel + olculmedi; metin / sha nedeni yok", h is not None
+              and "kilitli false" in h and "ayar sha256 kilit.ayar_sha256 ile farkli" in h and "onay kaydi yok" in h
+              and "panel on isi yapilmadi" in h and "olculmedi alanlar var" in h and "aciklama_yasak eslesmesi" not in h
+              and "aciklama_zorunlu yok" not in h and "EN metin CSV sha256 ayardan farkli" not in h))
+    # bilinen FAIL: gercek ayar + ESKI (free shipping) CSV -> kapi eski metni hala yakalar
+    eski_csv = pathlib.Path(tempfile.mkdtemp(prefix="ua_eski_")) / "ESKI.csv"
+    eski_csv.write_bytes(eski_taban(GERCEK_CSV.read_bytes()))
+    erow = next(r for r in _csv.DictReader(open(eski_csv, encoding="utf-8")) if r["kod"] == "CANCER_LIBRA")
+    e_body = T.taslak_govde(gercek, erow["baslik"], erow["aciklama"], [t.strip() for t in erow["etiketler"].split(",")])
+    h = dur(UA.yazim_kapisi, gercek, "POST", f"/shops/{SHOP}/listings", e_body, metin_yolu=eski_csv, cift="CANCER_LIBRA")
+    s.append(("FAIL: gercek ayar + ESKI CSV -> aciklama_yasak + aciklama_zorunlu yok + sha farki", h is not None
+              and "aciklama_yasak eslesmesi" in h and "aciklama_zorunlu yok" in h and "EN metin CSV sha256 ayardan farkli" in h))
+    # fikstur depo CSV'sinin durumundan bagimsiz: eski ve yeni kaynaktan ayni sahte CSV
+    d_f = pathlib.Path(tempfile.mkdtemp(prefix="ua_fik_"))
+    yeni_k = d_f / "YENI_KAYNAK.csv"; yeni_k.write_bytes(eski_taban(GERCEK_CSV.read_bytes()).replace(ESKI, YENI))
+    s.append(("PASS: sahte CSV eski ve yeni kaynaktan bayt bayt ayni", sahte_csv(d_f / "a.csv", eski_csv).read_bytes()
+              == sahte_csv(d_f / "b.csv", yeni_k).read_bytes()))
+    bozuk_k = d_f / "BOZUK.csv"; bozuk_k.write_bytes(eski_taban(GERCEK_CSV.read_bytes()).replace(ESKI, b"[ SHIPPING ]\nx", 1))
+    h = dur(sahte_csv, d_f / "c.csv", bozuk_k)
+    s.append(("FAIL: kaynakta kargo blogu 78 degil -> sahte CSV DUR", h is not None and "sahte CSV kurulamadi" in h))
+    # metin_kontrol A varsayilani (S13 cagrisi A vermez; plan madde 2): A'siz = gercek ayarla A'li
+    _env = os.environ.pop("URUN_AYAR", None)
+    try:
+        s.append(("PASS: metin_kontrol(row) == metin_kontrol(row, gercek ayar)", T.metin_kontrol(row) == T.metin_kontrol(row, gercek)))
+    finally:
+        if _env is not None:
+            os.environ["URUN_AYAR"] = _env
 
     O = sahte_ortam()
     A, onay, csvy = O["A"], O["onay"], O["csv"]
@@ -508,6 +556,47 @@ def testler():  # noqa: C901
     s.append(("PASS: OT.P_STYLE / STILLER / STOK / GALERI ayardan", T_.P_STYLE == gercek["varyasyon"]["property_id"]
               and [x[0] for x in T_.STILLER] == [m["ad"] for m in gercek["varyasyon"]["menu"]] and T_.STOK == gercek["ilan"]["quantity"]
               and T_.GALERI == gercek["taslak"]["galeri"]))
+    # G2 (CLAUDE.md:220; plan 10-G2): createDraftListing metin yasak kapisi yazma cagrisiyla AYNI fonksiyonda, gonderilen govdeyle
+    agac = ast.parse(textwrap.dedent(inspect.getsource(T_.Kilitli.taslak_olustur)))
+    post_s = [c.lineno for c in ast.walk(agac) if isinstance(c, ast.Call) and getattr(c.func, "attr", "") == "post"
+              and getattr(getattr(c.func, "value", None), "id", "") == "requests"]
+    bekle_s = [c.lineno for c in ast.walk(agac) if isinstance(c, ast.Call) and getattr(c.func, "attr", "") in ("_bekle", "_istek_oncesi")]
+    kapi_s = [c.lineno for c in ast.walk(agac) if isinstance(c, ast.Call) and getattr(c.func, "id", "") == "metin_yasak_kapisi"
+              and any(kw.arg == "data" and getattr(kw.value, "id", "") == "b2" for kw in c.keywords)
+              and any(kw.arg == "mod" and getattr(kw.value, "value", "") == "ENGEL" for kw in c.keywords)]
+    s.append(("YAPI: taslak_olustur'da requests.post ve _istek_oncesi / _bekle'den once metin_yasak_kapisi(data=b2, ENGEL)",
+              len(post_s) == 1 and bool(kapi_s) and max(kapi_s) < min(post_s) and bekle_s and max(kapi_s) < min(bekle_s)))
+    # casus: _ayar_kapi'daki kapi devre disi (ornek metodu ezilir; modul degiskeni yamanmaz) -> KESIN yasak yine istekten once durur
+    cagri = []
+    k3 = object.__new__(T_.Kilitli); k3.lid = None; k3.remaining = None; k3.A = k.A; k3.cift = "CANCER_LIBRA"; k3.stil_baglam = None
+    k3._kalan_yaz, k3._istek_oncesi, k3._bekle, k3._headers = (lambda *a: None), (lambda: cagri.append("istek_oncesi")), \
+        (lambda: cagri.append("bekle") or 1), (lambda: {})
+    k3._ayar_kapi = lambda method, path, data=None, json_body=None: (T_.html_coz(data), T_.html_coz(json_body))
+    gp3 = T_.requests.post
+    T_.requests.post = lambda *a, **kw: cagri.append("post") or Yak()
+    try:
+        h = dur(k3.taslak_olustur, SHOP, dict(body, title=srow["baslik"][:100] + " Photo Rag"))
+    finally:
+        T_.requests.post = gp3
+    s.append(("CASUS: _ayar_kapi kapisi kapaliyken KESIN yasak taslak_olustur'da durur, istek / sayac yok", h is not None
+              and "metin yasak kapisi" in h and "KESIN yasak" in h and cagri == []))
+    # test agi kapali (G4): yamanan fonksiyonlar VE gercek kod yolu (requests -> urllib3 -> getaddrinfo / socket.connect)
+    def ag_dene(f):
+        try:
+            f(); return False
+        except AssertionError as e:
+            return "gercek ag" in str(e)
+        except Exception:
+            return False
+    s.append(("TEST AGI: create_connection / getaddrinfo AssertionError verir", ag_dene(lambda: socket.create_connection(("192.0.2.1", 9), 1))
+              and ag_dene(lambda: socket.getaddrinfo("example.invalid", 80))))
+    _sk = socket.socket()
+    try:
+        s.append(("TEST AGI: socket.socket().connect (urllib3 yolu) AssertionError verir", ag_dene(lambda: _sk.connect(("192.0.2.1", 9)))))
+    finally:
+        _sk.close()
+    s.append(("TEST AGI: requests (IP) gercek socket.connect yolunda AssertionError verir",
+              ag_dene(lambda: T_.requests.get("http://192.0.2.1/", timeout=1))))
     s.append(("Gercek URUN_AYAR'da gercek ilan kimligi yok (10 hane, 900000000N disi)",
               not re.search(r"(?<!\d)(?!9000000)\d{10}(?!\d)", (KOK / "docs/urun/ornament78/URUN_AYAR.json").read_text())))
     return s

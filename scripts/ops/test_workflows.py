@@ -3,7 +3,54 @@
 
 import os
 from pathlib import Path
+import atexit
+import shutil
+import socket
+import ssl  # noqa: F401  (ag kapatmadan once yuklenir)
 import subprocess
+import tempfile
+import urllib.request
+
+
+# TEST AGI (CLAUDE.md:124; plan URUN_AYAR_MAIN_PLAN 10-G4): ana surecte ve alt sureclerde gercek dis ag kapali.
+def _ag_yok(*a, **k):
+    raise AssertionError("gercek ag acilmaya calisildi")
+
+
+socket.socket.connect = _ag_yok
+socket.socket.connect_ex = _ag_yok
+socket.socket.sendto = _ag_yok
+socket.create_connection = _ag_yok
+socket.getaddrinfo = _ag_yok
+urllib.request.urlopen = _ag_yok
+_AG_DIZIN = Path(tempfile.mkdtemp(prefix="tw_ag_"))
+atexit.register(shutil.rmtree, _AG_DIZIN, True)   # gecici dizin koşu sonunda silinir
+(_AG_DIZIN / "sitecustomize.py").write_text(            # alt surec python3: ayni kapatma (PYTHONPATH ile yuklenir)
+    "import socket\n"
+    "def _ag_yok(*a, **k):\n    raise AssertionError('gercek ag acilmaya calisildi')\n"
+    "socket.socket.connect = _ag_yok\nsocket.socket.connect_ex = _ag_yok\nsocket.socket.sendto = _ag_yok\n"
+    "socket.create_connection = _ag_yok\nsocket.getaddrinfo = _ag_yok\n", encoding="utf-8")
+(_AG_DIZIN / "bin").mkdir()
+for _arac in ("gh", "curl", "wget", "rclone"):             # alt surec bash: gercek ag araci yerine sahte (testin kendi sahtesi onde kalir)
+    (_AG_DIZIN / "bin" / _arac).write_text("#!/bin/sh\necho \"sahte $0: gercek ag yok (test_workflows)\" >&2\nexit 97\n")
+    (_AG_DIZIN / "bin" / _arac).chmod(0o755)
+os.environ["PATH"] = f"{_AG_DIZIN / 'bin'}:{os.environ.get('PATH', '')}"
+os.environ["PYTHONPATH"] = f"{_AG_DIZIN}:{os.environ['PYTHONPATH']}" if os.environ.get("PYTHONPATH") else str(_AG_DIZIN)
+_run = subprocess.run
+
+
+def _run_agsiz(*a, **k):
+    """Acik env verilen alt sureclere de PYTHONPATH (ag kapatma) eklenir; PATH bu dosyadaki env'lerde os.environ PATH'inden kurulur
+    (sahte ag araclari zaten onde; testin kendi sahte araclari daha da onde)."""
+    env = k.get("env")
+    if env is not None:
+        env = dict(env)
+        env["PYTHONPATH"] = f"{_AG_DIZIN}:{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(_AG_DIZIN)
+        k["env"] = env
+    return _run(*a, **k)
+
+
+subprocess.run = _run_agsiz
 
 try:
     import yaml
@@ -507,6 +554,8 @@ def main() -> int:
     assert ".github/workflows/etsy-secret-gecis.yml" in kilit_bekle.kilit_kumesi(str(ROOT)), "etsy-secret-gecis Etsy kilit kumesinde degil"
     abt = (WORKFLOWS / "ai-beyan-test.yml").read_text(encoding="utf-8")
     assert "scripts/etsy/test_secret_gecis.py" in abt, "test_secret_gecis.py CI test listesinde degil"
+    for _t in ("test_urun_ayar.py", "test_ornament_taslak.py", "test_canli_yapi_olc.py", "test_ornament_metin_canli.py"):   # Serdar 9 Kas; plan madde 5
+        assert f"scripts/etsy/{_t}" in abt, f"{_t} CI test listesinde degil"
     # SIPARIS_KOD_ANAHTARI (Serdar 12 Kas 2026, K2): opak siparis kodu ureten 5 adim env'i ayri anahtari da alir; Etsy shared secret
     # yenilenince kodlar degismesin. Satir her blokta ETSY_SHARED_SECRET'in hemen altinda, ayni girintide.
     _kod_satir = "SIPARIS_KOD_ANAHTARI: ${{ secrets.SIPARIS_KOD_ANAHTARI }}"
