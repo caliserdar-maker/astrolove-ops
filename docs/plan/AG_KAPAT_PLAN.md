@@ -17,8 +17,11 @@ Istek: Serdar 15 Kas, K4. Uygulama ayri gorev ve ayri onayla.
 | scripts/ops/test_workflows.py:49, :53-64 | PYTHONPATH'e sitecustomize dizini; subprocess.run sarmalanir, acik env verilene de PYTHONPATH eklenir |
 | test/toplu-2 89c59bc3 scripts/etsy/test_ornament_metin.py:22-37 | K1 testi: urun_ayar blogunun birebir kopyasi (dorduncu kopya) |
 | scripts/etsy/test_kupa_zam_1114.py:22-24 | yalniz socket.socket.connect, create_connection, urlopen; kanca yok, getaddrinfo/sendto/connect_ex acik |
+| scripts/etsy/test_ornament_taslak.py:14-29, :30, :34 | urun_ayar ile ayni yama (kopya); kanca kendi kopyasi degil, `import test_urun_ayar as UT` (:34) ile kurulur |
+| scripts/etsy/test_secret_gecis.py:28-33 | socket.socket ve create_connection yerine _ag_yok (ucuncu yama bicimi); kanca yok |
+| scripts/etsy/p1_poster_kuru.py:66-75 | uretim kodunda gecici yama (connect, connect_ex, create_connection, getaddrinfo; geri() ile geri alinir); test degil, modul disinda kalir |
 
-Risk: kancanin 4 kopyasi (3'u b1e21190'da + K1) ayri ayri degisirse sapar; test_workflows.py:43 dizgi kopyasi
+Risk: kanca b1e21190'da 4 yerde (test_urun_ayar.py:40, test_ornament_metin_canli.py:40, test_workflows.py:35 ve :43 dizgisi), K1 ile 5; ayri ayri degisirse sapar; test_workflows.py:43 dizgi kopyasi
 elle esitlenir (ilk satir yorumu bile :26 ile ayni tutulmus). Ornek sapma bugun var: canli testi socket.socket'i
 tamamen degistirir (:28), digerleri yalniz yontemleri.
 
@@ -50,13 +53,13 @@ Risk: ortak modul bozulursa CI listesindeki tum testler birden kirilir (tek hata
 | scripts/etsy/test_kupa_galeri78.py | sahte Etsy/Drive (:2-4), :839 sahte rclone; socket yamasi yok |
 | scripts/etsy/test_secret_gecis.py | :28-33 socket.socket + create_connection; :340-341 kendi sitecustomize'i (test_secret_gecis.alt_surec); :346 bash alt surec; kanca yok |
 | scripts/etsy/test_canli_yapi_olc.py | :132-137 EC.requests.request/post taklidi; socket yamasi yok |
-| scripts/etsy/test_ornament_taslak.py | :14-29 urun_ayar ile ayni yama; kanca yok |
+| scripts/etsy/test_ornament_taslak.py | :14-29 urun_ayar ile ayni yama; kanca :34 test_urun_ayar ice aktarimiyla kurulur ve :136'da denetlenir (tam sayilir; gecisde kopya yama silinir, cift kurulum olmamali) |
 | scripts/etsy/test_etsy_kota_kilit.py | sahte GitHub kosulari (:5-8); socket yamasi yok |
 | scripts/etsy/test_urun_ayar.py, test_ornament_metin_canli.py, scripts/ops/test_workflows.py | tam (yama + kanca), bkz. bolum 1 |
 | scripts/etsy/test_kupa_zam_1114.py, test_ornament_metin.py | K2 ile listeye girer (test/toplu-2); durum bolum 1 |
 
 Oneri sirasi (her biri tek satir `ag_kapat.kapat()` + calistirma): once yama/kanca olmayan 8 test (ai_beyan, ru_kapisi, beyan_marka_yaz,
-pod_5x7_yaz, kota_esik, kupa_galeri78, canli_yapi_olc, etsy_kota_kilit), sonra kismi olanlar (ornament_taslak, kupa_zam_1114, secret_gecis),
+pod_5x7_yaz, kota_esik, kupa_galeri78, canli_yapi_olc, etsy_kota_kilit), sonra kismi olanlar (kupa_zam_1114, secret_gecis), sonra ornament_taslak (UT bagimliligi kalkar),
 en son kopyasi silinecek uc dosya. Her gecis: CI surumleriyle ve `unshare -rn` ile PASS sayisi ayni kalmali.
 Risk: taklit yerine gercek socket'e yaslanan bir test (ornek: yerel sunucu) kapatmayla kirilabilir; bkz. bolum 6. Gecis basina ~5-10 dk (tahmin).
 
@@ -69,16 +72,21 @@ Risk: taklit yerine gercek socket'e yaslanan bir test (ornek: yerel sunucu) kapa
 - sys.executable ile alt surec: test_ai_beyan.py:284, test_ru_kapisi.py:88 hicbir kapatma tasimaz.
 Oneri: ag_kapat `Popen.__init__` duzeyinde sarar (run, check_output, call hepsi Popen'den gecer) ve argv'de python + -I/-E/-S gorurse
 AssertionError verir (acik izin listesi parametresiyle). Kesin kapatma yalniz surec disi: CI'da `unshare -rn` (kullanici ad alani) ya da
-runner ag kurali; bu ayri karar. Tahmini is ~45 dk. Risk: -I mesru kullaniliyor: b1e21190'da `git grep -n -E '"-I"|python3 -I' -- scripts` 10 satir (orn. scripts/kupa_siparis/kupa_siparis.py:219, :254;
-scripts/kapak78/sade_kart.py:48, :56, :64; scripts/kapak78/ci_renk/ci_renk_toplu.py:28; scripts/kapak78/kupa_kart78.py:180). Bunlari test eden bir
-test kapatmayla kirilir; yasak yerine izin listesi + uyari gerekebilir.
+runner ag kurali; bu ayri karar. Tahmini is ~45 dk. Risk: -I mesru kullaniliyor. b1e21190 scripts/ altinda cagri satirlari: cift tirnakli 7 (scripts/kupa_siparis/kupa_siparis.py:219, :254;
+scripts/kapak78/sade_kart.py:48, :56, :64; scripts/kapak78/ci_renk/ci_renk_toplu.py:28; scripts/kapak78/kupa_kart78.py:180), tek tirnakli 4
+(scripts/kapak78/kupa_kapak43.py:40, :42; scripts/kapak78/orchard_gorunum.py:39, :46); ayrica 3 belge satiri (ci_renk_karti.py:9, simd_calistir.py:6, :7).
+.github/workflows altinda `python3 -I` / `python -I` 106 satir (git grep -c); test_workflows bunlari bash adimi olarak kosar (:210, :319, :407),
+Popen argv'si "bash" oldugu icin Popen duzeyi -I denetimi bunlari GORMEZ; bu yol yalniz surec disi kapatmayla (unshare -rn) kapanir.
+Bunlari test eden bir test Popen denetimiyle kirilir; yasak yerine izin listesi + uyari gerekebilir.
 
 ## 5. Sahte araclar
 
 Bugun: gh, curl, wget, rclone (test_workflows.py:45). test_secret_gecis kendi araclar() dizinini kurar (:342, rclone/curl/sudo :2-3).
 Eklenecek aday: git (fetch/push/ls-remote), nc, openssl (s_client), node, gcloud/gsutil/bq (ortamda kurulu ve proxy'ye ayarli;
-CLAUDE.md degil, ortam bilgisi). Kural: testin kendi sahtesi onde kalir (test_workflows.py:45 yorumu). git icin dikkat: yerel git
-islemleri (diff, rev-parse, archive) test icinde kullaniliyor olabilir; sahte git yalniz ag alt komutlarini (fetch, pull, push,
+CLAUDE.md degil, ortam bilgisi). Kural: testin kendi sahtesi onde kalir (test_workflows.py:45 yorumu). git icin dikkat: scripts/kapak78/test_p1g_kart.py:36 ve scripts/siparis_dijital/test_tag_kerning.py:30
+origin'den `git fetch` yapar (CI_KOK / KISISEL_KOK verilmezse; CLAUDE.md:124 istisnasi); fetch'i reddeden sahte git bu ikisini kirar,
+bu yuzden git sahtesi ya bu iki testte devre disi ya da girdi kokleri zorunlu olmali (karar gerekir). Yerel git
+islemleri (diff, rev-parse, archive) de test icinde kullaniliyor olabilir; sahte git yalniz ag alt komutlarini (fetch, pull, push,
 clone, ls-remote, remote update) reddedip digerlerini gercek git'e gecirmeli. Tahmini is ~30 dk. Risk: sahte git yanlis alt komutu
 reddederse yerel git kullanan testler kirilir.
 
@@ -97,4 +105,5 @@ bu yuzden varsayilan loopback=False ve proxy degiskenleri kapat() icinde bosalti
 
 Tahmini is: ~4-5 saat (bolum 2-6 toplami, tahmin). Onerilen sira: 2 (modul + kendi testi) -> 3 (CI testleri) -> 4 -> 5 -> 6.
 Her adim ayri commit, ayri dal; CI listesindeki PASS sayisi her adimda ayni kalir. Acik kararlar: (a) CI'da unshare -rn kullanilsin mi,
-(b) loopback modunda proxy degiskenleri bosaltilsin mi, (c) -I/-E/-S alt surecleri yasak mi izinli mi.
+(b) loopback modunda proxy degiskenleri bosaltilsin mi, (c) -I/-E/-S alt surecleri yasak mi izinli mi,
+(d) git fetch yapan iki testte sahte git nasil ele alinir.
