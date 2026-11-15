@@ -1,7 +1,8 @@
 name: magaza-parca-yaz
 
 # ETSY'YE YAZAR: magaza metin alaninda tek parca degisimi (scripts/etsy/magaza_parca_yaz.py ISLER), tek updateShop + API geri
-# okuma. Her is ayri Serdar onayi ister (onay sozcugu). duyuru_marka: Serdar 22 Eki marka adi karari.
+# okuma. Her is ayri Serdar onayi ister (onay sozcugu). duyuru_marka: Serdar 22 Eki marka adi karari. duyuru_noel (onay DUYURU_NOEL):
+# Serdar 15 Kas duyuru v7, tam degisim, metin docs/magaza/DUYURU_NOEL_20261115.txt (kod ve main'e alma ayri onay).
 # Cikti Drive ASTROLOVE/TEMP/DENETIM_20261021/MAGAZA_PARCA/<is>/.
 
 permissions:

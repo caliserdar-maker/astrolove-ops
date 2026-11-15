@@ -584,7 +584,8 @@ def main() -> int:
     _abt_dongu = set(_m.group(1).replace("\\", " ").split())
     assert "scripts/etsy/test_secret_gecis.py" in abt, "test_secret_gecis.py CI test listesinde degil"
     for _t in ("test_urun_ayar.py", "test_ornament_taslak.py", "test_canli_yapi_olc.py", "test_ornament_metin_canli.py",   # Serdar 9 Kas; plan madde 5
-               "test_kupa_zam_1114.py", "test_ornament_metin.py"):                                                          # Serdar 15 Kas K2
+               "test_kupa_zam_1114.py", "test_ornament_metin.py",                                                           # Serdar 15 Kas K2
+               "test_magaza_parca_yaz.py"):                                                                                 # Serdar 15 Kas duyuru_noel
         assert f"scripts/etsy/{_t}" in _abt_dongu, f"{_t} CI test dongusunde degil (yorum satiri sayilmaz)"
     # ai-beyan-test yol filtresi yok (Serdar 14 Kas 2026): testler data/, docs/, config/ okur; filtre geri gelirse FAIL. Metinle (PyYAML "on" -> True).
     _on = abt.split("\non:\n", 1)[1].split("\njobs:", 1)[0]
