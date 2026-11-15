@@ -13,7 +13,7 @@ On kosul, parca isi (biri tutmazsa yazma yok, DUR): parca canli duyuruda tam 1 k
   riski); yeni metinde uzun/orta tire yok; yeni metin = eski metinden yalniz bu parca farkli (uzunluk farki tutarli).
 On kosul, tam degisim (duyuru_noel; biri tutmazsa yazma yok, DUR): canli metin normallestirilince (html.unescape, \\r\\n -> \\n) yeni
   metne esit -> "zaten yazili"; bosluklar tek bosluga indirilince esit -> "zaten yazili (satir sonu farkli)" (SATIR_SONU sonrasi
-  ikinci yazim yok; geri yazim ayri onay); yeni metnin ilk 60 karakteri (varlik/etiket/kivrik tirnak temizlenmis) canlida ->
+  ikinci yazim yok; geri yazim ayri onay); yeni metnin ilk 60 harf/rakami (varlik tekrarli cozulur, etiket atilir) canlida ->
   "onceki yazim izi" (FAIL sonrasi ikinci yazim yok); varsayilan dosya sha256 onayli degere esit (degilse istek yok); yeni metinde uzun/orta tire, AstroLove(?!Art), HTML varligi yok; ilk GET sonrasi kota
   >= KOTA_SINIRI + 2 (PUT + GET + sert taban); PUT'tan hemen once AYNI fonksiyonda (tam_yaz) metin_yasak_kapisi(mod="ENGEL").
 Yazma: PUT /shops/{id} yalniz o alan. Geri okuma: GET /shops/{id}; diger tum metin alanlari (title, sale_message,
@@ -47,7 +47,7 @@ ISLER = {"duyuru_marka": ("announcement", "Each original AstroLove design", "Eac
 # tam degisim isleri: is -> (alan, varsayilan metin dosyasi, onay sozcugu, varsayilan dosyanin onayli sha256'si)
 TAM_ISLER = {"duyuru_noel": ("announcement", BURA.parents[1] / "docs" / "magaza" / "DUYURU_NOEL_20261115.txt", "DUYURU_NOEL",
                              "99c8738a2e3e5f05cbe2e23d91eaebe24eda1a6255be664e1c9d4c7fc4cc9f7e")}   # Serdar 15 Kas duyuru v7, 1080 bayt
-IZ_UZUNLUK = 60      # yeni metnin ilk 60 karakteri (temizlenmis) canlida varsa onceki yazim izi: ikinci yazim yok
+IZ_UZUNLUK = 60      # yeni metnin ilk 60 harf/rakami (temizlenmis) canlida varsa onceki yazim izi: ikinci yazim yok
 IZINLI_VARLIK = {"&#39;"}
 TIRE = re.compile("[—–]")
 MARKA_EKSIK = re.compile(r"AstroLove(?!Art)")
@@ -68,10 +68,15 @@ def bosluk(t):
 
 
 def temiz(t):
-    """Iz karsilastirmasi: HTML varligi cozulur, etiket bosluga, kivrik tirnak duz, bosluklar teke."""
-    t = html.unescape(t or "")
-    t = re.sub(r"<[^>]*>", " ", t).replace("\u2019", "'").replace("\u2018", "'").replace("\u201c", '"').replace("\u201d", '"')
-    return bosluk(t)
+    """Iz karsilastirmasi: HTML varligi degismeyene kadar cozulur (cift kacis), etiket atilir, yalniz harf ve rakam kalir
+    (tirnak / kesme benzerleri, bosluk ve noktalama farki izi gizlemez)."""
+    t = t or ""
+    for _ in range(5):
+        u = html.unescape(t)
+        if u == t:
+            break
+        t = u
+    return re.sub(r"[^0-9a-z]", "", re.sub(r"<[^>]*>", " ", t).lower())
 
 
 def yaz_rapor(out, rapor, kod):
@@ -139,7 +144,9 @@ def tam_degisim(a, api, shop_id):
     except SystemExit as e:
         if e.code in (0, 3):      # tam_yaz icindeki ENGEL DUR'u (rapor yazildi)
             raise
-        yaz_rapor(out, rapor + [f"SONUC: HATA (PUT ya da geri okuma GET): {e} | PUT gitmis olabilir; ikinci kosu yok, canli once salt okumayla kontrol edilir"], 1)
+        yaz_rapor(out, rapor + [f"SONUC: HATA (PUT oncesi kapi/kota, PUT ya da geri okuma GET): {e} | PUT gitmis olabilir; ikinci kosu yok, canli once salt okumayla kontrol edilir"], 1)
+    except Exception as e:      # requests zaman asimi / baglanti / JSON hatasi (etsy_common SystemExit'e cevirmez)
+        yaz_rapor(out, rapor + [f"SONUC: HATA (PUT ya da geri okuma GET istisnasi {type(e).__name__}): {e} | PUT gitmis olabilir; ikinci kosu yok, canli once salt okumayla kontrol edilir"], 1)
     geri = sonra.get(alan) or ""
     degisen = sorted(k for k in set(once) | set(sonra) if k != alan and once.get(k) != sonra.get(k))
     g = norm(geri)
