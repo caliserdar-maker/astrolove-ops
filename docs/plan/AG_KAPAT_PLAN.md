@@ -19,7 +19,7 @@ Istek: Serdar 15 Kas, K4. Uygulama ayri gorev ve ayri onayla.
 | scripts/etsy/test_kupa_zam_1114.py:22-24 | yalniz socket.socket.connect, create_connection, urlopen; kanca yok, getaddrinfo/sendto/connect_ex acik |
 | scripts/etsy/test_ornament_taslak.py:14-29, :30, :34 | urun_ayar ile ayni yama (kopya); kanca kendi kopyasi degil, `import test_urun_ayar as UT` (:34) ile kurulur |
 | scripts/etsy/test_secret_gecis.py:28-33 | socket.socket ve create_connection yerine _ag_yok (ucuncu yama bicimi); kanca yok |
-| scripts/etsy/p1_poster_kuru.py:66-75 | uretim kodunda gecici yama (connect, connect_ex, create_connection, getaddrinfo; geri() ile geri alinir); test degil, modul disinda kalir |
+| scripts/etsy/p1_poster_kuru.py:66-76 | uretim kodunda gecici yama (connect, connect_ex, create_connection, getaddrinfo; geri() ile geri alinir); test degil, modul disinda kalir |
 
 Risk: kanca b1e21190'da 4 yerde (test_urun_ayar.py:40, test_ornament_metin_canli.py:40, test_workflows.py:35 ve :43 dizgisi), K1 ile 5; ayri ayri degisirse sapar; test_workflows.py:43 dizgi kopyasi
 elle esitlenir (ilk satir yorumu bile :26 ile ayni tutulmus). Ornek sapma bugun var: canli testi socket.socket'i
@@ -75,8 +75,8 @@ AssertionError verir (acik izin listesi parametresiyle). Kesin kapatma yalniz su
 runner ag kurali; bu ayri karar. Tahmini is ~45 dk. Risk: -I mesru kullaniliyor. b1e21190 scripts/ altinda cagri satirlari: cift tirnakli 7 (scripts/kupa_siparis/kupa_siparis.py:219, :254;
 scripts/kapak78/sade_kart.py:48, :56, :64; scripts/kapak78/ci_renk/ci_renk_toplu.py:28; scripts/kapak78/kupa_kart78.py:180), tek tirnakli 4
 (scripts/kapak78/kupa_kapak43.py:40, :42; scripts/kapak78/orchard_gorunum.py:39, :46); ayrica 3 belge satiri (ci_renk_karti.py:9, simd_calistir.py:6, :7).
-.github/workflows altinda `python3 -I` / `python -I` 106 satir (git grep -c); test_workflows bunlari bash adimi olarak kosar (:210, :319, :407),
-Popen argv'si "bash" oldugu icin Popen duzeyi -I denetimi bunlari GORMEZ; bu yol yalniz surec disi kapatmayla (unshare -rn) kapanir.
+.github/workflows altinda `python3 -I` / `python -I` 106 satir (git grep -c); test_workflows bunlarin bir kismini (kostugu adimlar) bash olarak kosar (:210, :319, :407);
+Popen argv'si "bash" oldugu icin Popen duzeyi -I denetimi bunlari GORMEZ ve -I PYTHONPATH'i yok saydigi icin sitecustomize de yuklenmez; bu yol yalniz surec disi kapatmayla (unshare -rn) kapanir.
 Bunlari test eden bir test Popen denetimiyle kirilir; yasak yerine izin listesi + uyari gerekebilir.
 
 ## 5. Sahte araclar
