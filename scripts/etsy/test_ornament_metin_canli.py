@@ -183,7 +183,7 @@ def dur(ad, rc, O, yeni, parca):
 
 
 def main():
-    _ua_once = os.environ.get("URUN_AYAR")       # dis ortamdaki deger (yoksa None), ilk kos() ONCESI; son kontrol buna esit olmali
+    _ua_once = os.environ.get("URUN_AYAR")       # dis ortamdaki deger (yoksa None), ilk kos() ONCESI; URUN_AYAR kontrolu buna esit olmali
     # ---- bilinen PASS: canli HTML varlikli + \r\n (olculmedi; iki bicim de denenir)
     rc, O, yeni, ag, log, d = kos()
     R = satirlar(yeni) if yeni else []

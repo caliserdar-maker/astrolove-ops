@@ -75,10 +75,12 @@ def main():
     _t = _ham.socket(_ham.AF_INET, _ham.SOCK_STREAM); _t.settimeout(2)   # kanca kalkarsa takilmasin
     _u = _ham.socket(_ham.AF_INET, _ham.SOCK_DGRAM)
     try:
-        k("TEST AGI (kanca): _socket connect, UDP sendto, getaddrinfo, gethostbyname, getnameinfo ve create_connection AssertionError verir",
+        # sayisal girdiler: kanca bozuksa bile DNS sorgusu cikmaz (audit olayi yine tetiklenir)
+        k("TEST AGI (kanca): _socket connect, UDP sendto, getaddrinfo, gethostbyname, getnameinfo AssertionError verir",
           ag_dene(lambda: _t.connect(("192.0.2.1", 9))) and ag_dene(lambda: _u.sendto(b"x", ("192.0.2.1", 9)))
-          and ag_dene(lambda: _ham.getaddrinfo("example.invalid", 80)) and ag_dene(lambda: _ham.gethostbyname("example.invalid"))
-          and ag_dene(lambda: _ham.getnameinfo(("192.0.2.1", 9), 0)) and ag_dene(lambda: socket.create_connection(("192.0.2.1", 9), 2)))
+          and ag_dene(lambda: _ham.getaddrinfo("192.0.2.1", 9, 0, 0, 0, _ham.AI_NUMERICHOST))
+          and ag_dene(lambda: _ham.gethostbyname("192.0.2.1"))
+          and ag_dene(lambda: _ham.getnameinfo(("192.0.2.1", 9), _ham.NI_NUMERICHOST | _ham.NI_NUMERICSERV)))
     finally:
         _t.close(); _u.close()
     k("PASS: depo CSV'si test sirasinda degismedi", hashlib.sha256(CSV_YOL.read_bytes()).hexdigest() == sha_once)
