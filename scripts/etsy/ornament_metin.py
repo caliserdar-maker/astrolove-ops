@@ -2,7 +2,7 @@
 """ORNAMENT 78 ilan metinleri (baslik, 13 etiket, aciklama, 11 alt metin, 3 kisisellestirme kutusu) -> data/pod/ORNAMENT78_METIN.csv.
 Kaynak (bagli): claude/AstroLove_ORNAMENT_SEO_KARAR_20261103.md (baslik S1, etiket kalibi, aciklama), KARARLAR_20261106 (D1 onizleme
 adimlari, D2 stil adlari), KARARLAR_20261106_2 (6 Kas gece: 3 ayri zorunlu kutu, christmas ornament etiketi anniversary ornament yerine,
-fiyat: Serdar 29,99 secti; .90 kurali (ANA_1 1.1) ile ornament_taslak FIYAT 29.90, sabah teyit; hazirlik 3-5 gun; kargo cumlesi 14 Kas'tan beri canlidaki metin, S13 ornament_metin_canli.py, ucretsiz kargo ifadesi yok). Kart metinleri (K03 "Letters A to Z only, printed in capitals", K05 onizleme adimlari) Serdar
+fiyat: Serdar 29,99 secti; .90 kurali (ANA_1 1.1) ile ornament_taslak FIYAT 29.90, sabah teyit; hazirlik 3-5 gun; kargo cumlesi 14 Kas S13 kosusunda canlidan okunan metin (ornament_metin_canli.py), ucretsiz kargo ifadesi yok). Kart metinleri (K03 "Letters A to Z only, printed in capitals", K05 onizleme adimlari) Serdar
 "hepsi ok" (6 Kas) ile onayli; aciklama ayni sozleri kullanir. Tarih bicimi sipariş hatti ciktisi "JUNE 14, 2025" (siparis_girdi.py).
 Isim: ilanda harf siniri YOK (Serdar 5 Kas "Sinir yok, sigmazsa sor", ORNAMENT_SEO_DUZELTME_20261104 bolum 3; onayli cumle aynen);
 Etsy kutusu karakter siniri ISIM_MAX (yalniz Etsy alani; sigmayi siparis kapisi olcer, etsy-yayin-hatti 9).

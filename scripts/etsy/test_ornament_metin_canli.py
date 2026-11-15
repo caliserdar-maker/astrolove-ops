@@ -183,6 +183,7 @@ def dur(ad, rc, O, yeni, parca):
 
 
 def main():
+    _ua_once = os.environ.get("URUN_AYAR")       # dis ortamdaki deger (yoksa None), ilk kos() ONCESI; son kontrol buna esit olmali
     # ---- bilinen PASS: canli HTML varlikli + \r\n (olculmedi; iki bicim de denenir)
     rc, O, yeni, ag, log, d = kos()
     R = satirlar(yeni) if yeni else []
@@ -243,7 +244,6 @@ def main():
     dur("batch yanitinda ilan yok", *kos(SahteAg(I))[:3], "batch yanitinda")
     dur("kota tabani alti (kalan 11 < 2 + 10)", *kos(SahteAg(ilanlar(), kalan=12))[:3], "kota")
     # URUN_AYAR korumasi (Serdar 14 Kas): ortam degiskeni doluysa token ve agdan ONCE DUR; yoksa normal akis
-    _ua_once = os.environ.get("URUN_AYAR")       # dis ortamdaki deger (yoksa None); kos sonrasi ayni kalmali
     SayacStore.n = 0
     rc, O, y, ag_u, *_ = kos(SahteAg(ilanlar()), store=SayacStore)
     k("PASS: URUN_AYAR yok -> calis normal (cikis 0, token 1 kez kuruldu)", rc == 0 and O["durum"] == "PASS" and SayacStore.n == 1 and ag_u.istek)

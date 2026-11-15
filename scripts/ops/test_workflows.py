@@ -578,10 +578,14 @@ def main() -> int:
     assert "always()" in adimlar[-1] and "rm -rf ~/.config/rclone" in adimlar[-1], "etsy-secret-gecis: son adim rclone conf temizligi"
     assert ".github/workflows/etsy-secret-gecis.yml" in kilit_bekle.kilit_kumesi(str(ROOT)), "etsy-secret-gecis Etsy kilit kumesinde degil"
     abt = (WORKFLOWS / "ai-beyan-test.yml").read_text(encoding="utf-8")
+    # K2 (Serdar 15 Kas, inceleme): ad yalniz alt dize degil, "for t in ... ; do" dongusunun yorumsuz ogesi olmali
+    _m = _re.search(r"for t in (.*?); do", "\n".join(x.split("#", 1)[0] for x in abt.splitlines()), _re.S)
+    assert _m, "ai-beyan-test: test dongusu (for t in ... ; do) yok"
+    _abt_dongu = set(_m.group(1).replace("\\", " ").split())
     assert "scripts/etsy/test_secret_gecis.py" in abt, "test_secret_gecis.py CI test listesinde degil"
     for _t in ("test_urun_ayar.py", "test_ornament_taslak.py", "test_canli_yapi_olc.py", "test_ornament_metin_canli.py",   # Serdar 9 Kas; plan madde 5
                "test_kupa_zam_1114.py", "test_ornament_metin.py"):                                                          # Serdar 15 Kas K2
-        assert f"scripts/etsy/{_t}" in abt, f"{_t} CI test listesinde degil"
+        assert f"scripts/etsy/{_t}" in _abt_dongu, f"{_t} CI test dongusunde degil (yorum satiri sayilmaz)"
     # ai-beyan-test yol filtresi yok (Serdar 14 Kas 2026): testler data/, docs/, config/ okur; filtre geri gelirse FAIL. Metinle (PyYAML "on" -> True).
     _on = abt.split("\non:\n", 1)[1].split("\njobs:", 1)[0]
     assert _re.search(r"^  push:", _on, _re.M), "ai-beyan-test: push tetigi yok"

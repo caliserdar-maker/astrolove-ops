@@ -2,7 +2,8 @@
 """ornament_metin.py ureteci ile depodaki data/pod/ORNAMENT78_METIN.csv ayni mi (K1, Serdar 15 Kas). Ag yok, yazim yok.
 Yalniz satir() ve kapi() cagrilir; main() ve betik KOSULMAZ (cikti yolu sabit, ornament_metin.py main; depodaki CSV'yi ezer).
 KURAL: S13 araci (ornament_metin_canli.py) CSV'nin aciklama sutununu canlidan degistirirse uretec (ornament_metin.py) AYNI commit'te
-guncellenir; bu test ikisi ayrisirsa FAIL verir.
+guncellenir; bu test ikisi ayrisirsa FAIL verir. NOT: S13 is akisi dal commit'inde yalniz CSV'nin degismesine izin verir
+(.github/workflows/ornament-metin-canli.yml:6, :126); bu yuzden S13 dalinda bu test FAIL verir ve uretec main'e almadan once esitlenir.
 Kullanim: python3 scripts/etsy/test_ornament_metin.py -> 'SONUC n/t PASS' (cikis 1 = FAIL)."""
 import csv
 import hashlib
@@ -71,12 +72,15 @@ def main():
     k("PASS: aciklamalarda 'free shipping' 0", sum("free shipping" in r["aciklama"].lower() for r in rows) == 0)
     k("PASS: kapi FAIL 0", sum(bool(OM.kapi(r)) for r in rows) == 0)
     import _socket as _ham
-    _t = _ham.socket(_ham.AF_INET, _ham.SOCK_STREAM)
+    _t = _ham.socket(_ham.AF_INET, _ham.SOCK_STREAM); _t.settimeout(2)   # kanca kalkarsa takilmasin
+    _u = _ham.socket(_ham.AF_INET, _ham.SOCK_DGRAM)
     try:
-        k("TEST AGI (kanca): _socket connect ve _socket.getaddrinfo AssertionError verir",
-          ag_dene(lambda: _t.connect(("192.0.2.1", 9))) and ag_dene(lambda: _ham.getaddrinfo("example.invalid", 80)))
+        k("TEST AGI (kanca): _socket connect, UDP sendto, getaddrinfo, gethostbyname, getnameinfo ve create_connection AssertionError verir",
+          ag_dene(lambda: _t.connect(("192.0.2.1", 9))) and ag_dene(lambda: _u.sendto(b"x", ("192.0.2.1", 9)))
+          and ag_dene(lambda: _ham.getaddrinfo("example.invalid", 80)) and ag_dene(lambda: _ham.gethostbyname("example.invalid"))
+          and ag_dene(lambda: _ham.getnameinfo(("192.0.2.1", 9), 0)) and ag_dene(lambda: socket.create_connection(("192.0.2.1", 9), 2)))
     finally:
-        _t.close()
+        _t.close(); _u.close()
     k("PASS: depo CSV'si test sirasinda degismedi", hashlib.sha256(CSV_YOL.read_bytes()).hexdigest() == sha_once)
     n, t = sum(SONUC), len(SONUC)
     print(f"SONUC {n}/{t} PASS")
