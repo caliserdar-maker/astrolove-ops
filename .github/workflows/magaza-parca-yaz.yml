@@ -12,7 +12,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      is: {description: "is (orn. duyuru_marka)", required: true}
+      is: {description: "is (duyuru_marka ya da duyuru_noel)", required: true}
       onay: {description: "onay sozcugu (orn. DUYURU_MARKA)", required: true}
 
 env:

@@ -13,7 +13,8 @@ On kosul, parca isi (biri tutmazsa yazma yok, DUR): parca canli duyuruda tam 1 k
   riski); yeni metinde uzun/orta tire yok; yeni metin = eski metinden yalniz bu parca farkli (uzunluk farki tutarli).
 On kosul, tam degisim (duyuru_noel; biri tutmazsa yazma yok, DUR): canli metin normallestirilince (html.unescape, \\r\\n -> \\n) yeni
   metne esit -> "zaten yazili"; bosluklar tek bosluga indirilince esit -> "zaten yazili (satir sonu farkli)" (SATIR_SONU sonrasi
-  ikinci yazim yok; geri yazim ayri onay); yeni metinde uzun/orta tire, AstroLove(?!Art), HTML varligi yok; ilk GET sonrasi kota
+  ikinci yazim yok; geri yazim ayri onay); yeni metnin ilk 60 karakteri (varlik/etiket/kivrik tirnak temizlenmis) canlida ->
+  "onceki yazim izi" (FAIL sonrasi ikinci yazim yok); varsayilan dosya sha256 onayli degere esit (degilse istek yok); yeni metinde uzun/orta tire, AstroLove(?!Art), HTML varligi yok; ilk GET sonrasi kota
   >= KOTA_SINIRI + 2 (PUT + GET + sert taban); PUT'tan hemen once AYNI fonksiyonda (tam_yaz) metin_yasak_kapisi(mod="ENGEL").
 Yazma: PUT /shops/{id} yalniz o alan. Geri okuma: GET /shops/{id}; diger tum metin alanlari (title, sale_message,
   digital_sale_message, policy_*, vb.) yazmadan onceki ile ayni olmali.
@@ -28,6 +29,7 @@ Kullanim: magaza_parca_yaz.py --is duyuru_marka --out OUT --confirm DUYURU_MARKA
 """
 import argparse
 import datetime
+import hashlib
 import html
 import json
 import os
@@ -42,8 +44,10 @@ from etsy_common import KOTA_SINIRI, Etsy, TokenStore, log, mask, metin_yasak_ka
 KOTA_ON_KOSUL = KOTA_SINIRI + 2      # PUT + GET + sert taban (Serdar 15 Kas gorev metni); KOTA_SINIRI degismez
 # is -> (alan, eski parca, yeni parca, onay sozcugu)
 ISLER = {"duyuru_marka": ("announcement", "Each original AstroLove design", "Each original AstroLoveArt design", "DUYURU_MARKA")}
-# tam degisim isleri: is -> (alan, varsayilan metin dosyasi, onay sozcugu)
-TAM_ISLER = {"duyuru_noel": ("announcement", BURA.parents[1] / "docs" / "magaza" / "DUYURU_NOEL_20261115.txt", "DUYURU_NOEL")}
+# tam degisim isleri: is -> (alan, varsayilan metin dosyasi, onay sozcugu, varsayilan dosyanin onayli sha256'si)
+TAM_ISLER = {"duyuru_noel": ("announcement", BURA.parents[1] / "docs" / "magaza" / "DUYURU_NOEL_20261115.txt", "DUYURU_NOEL",
+                             "99c8738a2e3e5f05cbe2e23d91eaebe24eda1a6255be664e1c9d4c7fc4cc9f7e")}   # Serdar 15 Kas duyuru v7, 1080 bayt
+IZ_UZUNLUK = 60      # yeni metnin ilk 60 karakteri (temizlenmis) canlida varsa onceki yazim izi: ikinci yazim yok
 IZINLI_VARLIK = {"&#39;"}
 TIRE = re.compile("[—–]")
 MARKA_EKSIK = re.compile(r"AstroLove(?!Art)")
@@ -63,6 +67,13 @@ def bosluk(t):
     return re.sub(r"\s+", " ", t or "").strip()
 
 
+def temiz(t):
+    """Iz karsilastirmasi: HTML varligi cozulur, etiket bosluga, kivrik tirnak duz, bosluklar teke."""
+    t = html.unescape(t or "")
+    t = re.sub(r"<[^>]*>", " ", t).replace("\u2019", "'").replace("\u2018", "'").replace("\u201c", '"').replace("\u201d", '"')
+    return bosluk(t)
+
+
 def yaz_rapor(out, rapor, kod):
     (out / "DUYURU_GERI_OKUMA.txt").write_text("\n".join(rapor) + "\n", encoding="utf-8")
     for x in rapor:
@@ -77,6 +88,8 @@ def tam_on_kosul(eski, yeni, kalan):
         sorun.append("zaten yazili (canli metin yeni metne esit)")
     elif bosluk(norm(eski)) == bosluk(yeni):
         sorun.append("zaten yazili (satir sonu farkli; SATIR_SONU sonrasi ikinci yazim yok, geri yazim ayri onay)")
+    elif yeni.strip() and temiz(yeni)[:IZ_UZUNLUK] in temiz(eski):
+        sorun.append("canlida onceki yazim izi var (yeni metnin basi canlida; FAIL / SATIR_SONU sonrasi ikinci yazim yok, geri yazim ayri onay)")
     if not yeni.strip():
         sorun.append("yeni metin bos")
     if TIRE.search(yeni):
@@ -102,22 +115,31 @@ def tam_yaz(api, shop_id, alan, gonder, out, rapor):
 
 
 def tam_degisim(a, api, shop_id):
-    alan, varsayilan, _ = TAM_ISLER[a.is_]
+    alan, varsayilan, _, sha_onay = TAM_ISLER[a.is_]
     out = pathlib.Path(a.out)
     yol = pathlib.Path(a.metin) if a.metin else varsayilan
-    yeni = yol.read_text(encoding="utf-8").rstrip("\n")
+    ham = yol.read_bytes()
+    sha = hashlib.sha256(ham).hexdigest()
+    if not a.metin and sha != sha_onay:      # is akisi --metin vermez: yalniz onayli dosya yazilir (istek yok, DUR)
+        raise SystemExit(f"DUR: {yol.name} sha256 {sha} onayli degerden farkli ({sha_onay}); Etsy istegi yok.")
+    yeni = ham.decode("utf-8").rstrip("\n")
     once = metin_alanlari(api.get(f"/shops/{shop_id}"))
     ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     (out / f"DUYURU_YEDEK_{ts}.json").write_text(json.dumps(once, ensure_ascii=False, indent=1), encoding="utf-8")
     kota0 = api.remaining
     eski = once.get(alan) or ""
-    rapor = [f"{alan.upper()} TAM DEGISIM (is {a.is_}) | metin {yol.name} | kota ilk GET sonrasi {kota0}",
+    rapor = [f"{alan.upper()} TAM DEGISIM (is {a.is_}) | metin {yol.name} sha256 {sha} | kota ilk GET sonrasi {kota0}",
              "--- ONCE (API, tam) ---", eski, "--- YENI (dosya) ---", yeni]
     sorun = tam_on_kosul(eski, yeni, kota0)
     if sorun:
         yaz_rapor(out, rapor + ["SONUC: DUR, yazma yapilmadi: " + "; ".join(sorun)], 3)
-    tam_yaz(api, shop_id, alan, yeni, out, rapor)
-    sonra = metin_alanlari(api.get(f"/shops/{shop_id}"))
+    try:
+        tam_yaz(api, shop_id, alan, yeni, out, rapor)
+        sonra = metin_alanlari(api.get(f"/shops/{shop_id}"))
+    except SystemExit as e:
+        if e.code in (0, 3):      # tam_yaz icindeki ENGEL DUR'u (rapor yazildi)
+            raise
+        yaz_rapor(out, rapor + [f"SONUC: HATA (PUT ya da geri okuma GET): {e} | PUT gitmis olabilir; ikinci kosu yok, canli once salt okumayla kontrol edilir"], 1)
     geri = sonra.get(alan) or ""
     degisen = sorted(k for k in set(once) | set(sonra) if k != alan and once.get(k) != sonra.get(k))
     g = norm(geri)
@@ -125,7 +147,7 @@ def tam_degisim(a, api, shop_id):
     br = len(re.findall(r"<br\s*/?>", geri, re.I))
     if g == yeni and not degisen:
         sonuc, kod = "PASS", 0
-    elif br == 0 and bosluk(g) == bosluk(yeni) and not degisen:
+    elif bosluk(g) == bosluk(yeni) and not degisen:      # <br> bosluk farki olarak FAIL'e duser
         sonuc, kod = "SATIR_SONU", 2
     else:
         sonuc, kod = "FAIL", 2

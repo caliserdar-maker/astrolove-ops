@@ -50,6 +50,8 @@ class SahteEtsy:
     def __init__(self, shop, kota=500, bozan=False, donus=None):
         self.shop, self.remaining, self.calls, self.bozan, self.puts = dict(shop), kota, 0, bozan, []
         self.donus = donus or (lambda v: v)
+        if donus == "PUT_HATA":
+            self.donus = "PUT_HATA"
 
     def get(self, path, params=None, ok404=False):
         self.calls += 1
@@ -57,6 +59,8 @@ class SahteEtsy:
 
     def put(self, path, data):
         self.calls += 1
+        if self.donus == "PUT_HATA":
+            raise SystemExit("HATA: PUT /shops/1 -> 500")
         self.puts.append(dict(data))
         self.shop.update({k: self.donus(v) for k, v in data.items()})
         if self.bozan:
@@ -155,8 +159,25 @@ def main():
         kod, api, r, _ = noel(metin=metin_dosya(t))
         sonuc.append((f"noel: {ad} -> DUR, neden raporda ({'ENGEL kapisi' if kapi else 'on kosul'})",
                       kod == 3 and not api.puts and neden in r and "SONUC: DUR" in r and (("metin yasak kapisi" in r) == kapi)))
-    kod, api, r, _ = noel(kota=11)
-    sonuc.append(("noel: kota 11 -> DUR", kod == 3 and not api.puts and "kota 11 < 12" in r))
+    kod, api, r, y = noel(kota=11)
+    sonuc.append(("noel: kota 11 -> DUR, yedek on kosuldan once yazildi", kod == 3 and not api.puts and "kota 11 < 12" in r and len(y) == 1))
+    kod, api, r, _ = noel({"title": "t", "announcement": YENI, "sale_message": "s"})
+    sonuc.append(("noel: zaten yazili (birebir) -> DUR, birebir nedeni", kod == 3 and not api.puts and "canli metin yeni metne esit" in r))
+    for ad, canli in (("kesik", YENI[:-1]), ("<br>", YENI.replace("\n\n", "<br><br>")), ("&rsquo;", YENI.replace("'", "&rsquo;"))):
+        kod, api, r, _ = noel({"title": "t", "announcement": canli, "sale_message": "s"})
+        sonuc.append((f"noel: FAIL sonrasi ikinci kosu ({ad} canli) -> DUR, PUT yok", kod == 3 and not api.puts and "onceki yazim izi" in r))
+    kod, api, r, _ = noel(metin=metin_dosya(""))
+    sonuc.append(("noel: bos metin -> DUR", kod == 3 and not api.puts and "yeni metin bos" in r))
+    kod, api, r, _ = noel(donus="PUT_HATA")
+    sonuc.append(("noel: PUT hatasi -> cikis 1, rapor (eski metin tam) yazildi", kod == 1 and "SONUC: HATA" in r and ESKI_NOEL in r))
+    _sakla = m.TAM_ISLER["duyuru_noel"]
+    m.TAM_ISLER["duyuru_noel"] = _sakla[:3] + ("0" * 64,)
+    try:
+        kod, api, r, _ = noel()
+    finally:
+        m.TAM_ISLER["duyuru_noel"] = _sakla
+    sonuc.append(("noel: varsayilan dosya sha256 onayliyla farkli -> DUR, Etsy istegi yok", kod == "HATA" and api.calls == 0 and not api.puts))
+    sonuc.append(("noel: betikteki onayli sha256 = onayli deger", m.TAM_ISLER["duyuru_noel"][3] == NOEL_SHA))
     kod, api, r, _ = noel(kota=None)
     sonuc.append(("noel: kota okunamadi -> DUR", kod == 3 and not api.puts and "kota okunamadi" in r))
     kod, api, r, _ = noel(kota=12)
