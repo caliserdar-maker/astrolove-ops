@@ -11,7 +11,7 @@ yetki, onaylar sende"). YAYIN YOK, Etsy Ads YOK, DELETE YOK. Kalip: scripts/etsy
 --mod yaz : cift basina 1 YENI taslak: createDraftListing (tek POST) -> envanter (Style x ayar fiyati) -> taslak galerisi (alt metinli) -> video
             -> stil gorselleri (Ruby 7 ... Ivory 11) -> 3 kisisellestirme kutusu -> nitelikler -> tam geri okuma. Her yazmadan sonra state
             okunur; "active" -> aninda inactive + DUR. updateListing (PATCH) YOK (taslagi yayina alir); PATCH yalniz acil state=inactive.
-Metin: data/pod/ORNAMENT78_METIN.csv (scripts/etsy/ornament_metin.py). Medya: IMG_ROOT/<CIFT>/<CIFT>_01_KAPAK.jpg ... _11_IVORY.jpg,
+Metin: data/pod/ORNAMENT78_METIN.csv (baslik / etiket / alt metin / kutular: scripts/etsy/ornament_metin.py; aciklama canlidan: S13 ornament_metin_canli.py). Medya: IMG_ROOT/<CIFT>/<CIFT>_01_KAPAK.jpg ... _11_IVORY.jpg,
 <CIFT>_VIDEO.mp4 (ornament-galeri78 ciktisi). Kota tabani 10 (KOTA_SINIRI).
 Ayarlar (Serdar 8 Kas gece "Hepsi oneriyle", Onay 3b): docs/urun/ornament78/URUN_AYAR.json (scripts/etsy/urun_ayar.py). Ilan alanlari,
 fiyat, varyasyon, envanter, taslak galerisi ve nitelikleri AYARDAN gelir; her yazimdan ONCE (html_coz sonrasi son govde) ayar kapisi

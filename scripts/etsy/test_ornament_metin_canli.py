@@ -243,6 +243,7 @@ def main():
     dur("batch yanitinda ilan yok", *kos(SahteAg(I))[:3], "batch yanitinda")
     dur("kota tabani alti (kalan 11 < 2 + 10)", *kos(SahteAg(ilanlar(), kalan=12))[:3], "kota")
     # URUN_AYAR korumasi (Serdar 14 Kas): ortam degiskeni doluysa token ve agdan ONCE DUR; yoksa normal akis
+    _ua_once = os.environ.get("URUN_AYAR")       # dis ortamdaki deger (yoksa None); kos sonrasi ayni kalmali
     SayacStore.n = 0
     rc, O, y, ag_u, *_ = kos(SahteAg(ilanlar()), store=SayacStore)
     k("PASS: URUN_AYAR yok -> calis normal (cikis 0, token 1 kez kuruldu)", rc == 0 and O["durum"] == "PASS" and SayacStore.n == 1 and ag_u.istek)
@@ -251,7 +252,7 @@ def main():
     k("bilinen FAIL: URUN_AYAR dolu -> DUR (OZET durum), CSV yok, Etsy istegi 0, TokenStore kurulmadi",
       rc == 1 and "URUN_AYAR ortam degiskeni dolu" in O["durum"] and y is None and ag_u.istek == [] and SayacStore.n == 0
       and O["istek"] == 0)
-    k("PASS: URUN_AYAR test ortamindan sizmadi", "URUN_AYAR" not in os.environ)
+    k("PASS: URUN_AYAR kos sonrasi kos oncesiyle ayni (yoksa yok; dis ortam degeri korunur)", os.environ.get("URUN_AYAR") == _ua_once)
     dur("CSV sutun farki", *kos(csv_bayt=csv_metni(ROWS, M.SUTUN[:-1]))[:3], "sutun")
     dur("CSV 77 satir", *kos(csv_bayt=csv_metni(ROWS[:-1]))[:3], "77 satir")
     dur("CSV tekrar eden kod", *kos(csv_bayt=csv_metni(ROWS[:-1] + [ROWS[0]]))[:3], "tekil kod")
