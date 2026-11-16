@@ -1,6 +1,7 @@
 name: kupa-yd-oku
 # SALT OKUMA (Etsy'ye yazma YOK; Serdar 31 Eki karar 3b + 5a). scripts/etsy/kupa_yd_oku.py
 #  kupa: 78 kupa ilaninin canli EN + RU metni (1 batch istegi), kupa RU kurucusu girdisi.
+#  gorsel: 78 kupa ilaninin canli gorsel adresleri (Serdar madde 113; 1 batch istegi, includes=Images) -> KUPA78_IMAGE_URLS_<tarih>.csv.
 #  yd  : 1st Anniversary pilot ilanin canli varyasyonlari + ilan nitelikleri + taksonomi ozellikleri (4 istek), boy (Size) id'si.
 # Kupa ilan listesi Drive TEMP/KUPA_ORCHARD_TASLAK_20261019/KUPA_TASLAK_LISTE.csv. Cikti Drive TEMP/KUPA_YD_OKU/<damga>/ (--immutable).
 permissions:
@@ -9,7 +10,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: {description: "kupa | yd | ikisi | kisisel (ayni burclu 12 kupa sorusu, 13 istek)", required: true, default: "ikisi", type: choice, options: [ikisi, kupa, yd, kisisel]}
+      mod: {description: "kupa | yd | ikisi | kisisel (ayni burclu 12 kupa sorusu, 13 istek) | gorsel (78 kupa gorsel adresi, 1 istek)", required: true, default: "ikisi", type: choice, options: [ikisi, kupa, yd, kisisel, gorsel]}
       pilot: {description: "YD pilot listing_id", required: false, default: "4595350971"}
 jobs:
   oku:

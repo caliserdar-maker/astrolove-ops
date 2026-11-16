@@ -7,10 +7,17 @@
          varyasyon ozellikleri), /shops/{shop}/listings/{id}/properties (ilan nitelikleri), /seller-taxonomy/nodes/{tid}/properties
          (taksonomi ozellikleri) = 4 istek. Cikti YD_BOY.json: canli ozellikler, ilan nitelikleri, taksonomide supports_variations
          ozellikler, ad/gorunen ad 'size' / 'dimension' iceren adaylar (yd_yapi_kuru.boy_ozellik kapisiyla sinanir).
+  gorsel: 78 kupa ilaninin canli gorsel adresleri (Serdar madde 113; GET /listings/batch?includes=Images, 100'luk parca: 1 istek).
+         Kimlik + cift data/pod/kupa78_ids.csv (depo); Drive listesiyle birebir ayni degilse Etsy istegi yok (DUR).
+         Cikti KUPA78_IMAGE_URLS_<YYYYMMDD TR>.csv (listing_id, sku, pair, image_rank, url_fullxfull, url_570xN, alt_text;
+         sku = ayni yanittaki canli varyasyon SKU'lari (';' ile), kupa_taslak.sku onekiyle kontrol) + KUPA78_IMAGE_OZET.json.
+         Cikis 1 yalniz: ilan eksik, 0 gorsel ya da bos URL. Rank boslugu / None ve SKU sorunu OZET'te listelenir (rank_hata,
+         sku_hata), CSV yazilir, cikis 0 (GM 16 Kas 23:13; Sosyal yalniz rank 1 adresini kullanir).
 Yazma yontemleri kapali (yd_envanter_oku.salt_okur). Kota: her istekten once etsy_common sert taban (KOTA_SINIRI 10).
 Istek sayisi ISTEK.json (api.calls; token yenileme dahil degil)."""
 import argparse
 import csv
+import datetime
 import json
 import os
 import pathlib
@@ -22,6 +29,8 @@ import etsy_common as E  # noqa: E402
 from yd_envanter_oku import salt_okur  # noqa: E402
 
 ADAY = ("size", "dimension")
+DEPO_LISTE = KOK.parent.parent / "data" / "pod" / "kupa78_ids.csv"
+GORSEL_SUTUN = ["listing_id", "sku", "pair", "image_rank", "url_fullxfull", "url_570xN", "alt_text"]
 
 
 def kupa(api, liste, out):
@@ -46,6 +55,84 @@ def kupa(api, liste, out):
     eksik = sorted(set(cift) - {x["listing_id"] for x in kayit})
     print(f"kupa: liste {len(cift)} okunan {len(kayit)} eksik {len(eksik)} {eksik[:5]} | istek {api.calls} kota {api.remaining}")
     return 0 if len(kayit) == len(cift) == 78 and not eksik else 1
+
+
+def depo_drive_ayni(depo, drive):
+    """-> {listing_id: pair} (depo). Depo 78 farkli id / cift degilse ya da Drive listesi (listing_id, cift) farkliysa SystemExit."""
+    with open(depo, encoding="utf-8-sig") as f:
+        ds = [(r["listing_id"].strip(), r["pair"].strip()) for r in csv.DictReader(f)]
+    with open(drive, encoding="utf-8-sig") as f:
+        gs = [(r["listing_id"].strip(), r["cift"].strip()) for r in csv.DictReader(f) if (r.get("listing_id") or "").strip()]
+    d, g = dict(ds), dict(gs)
+    if len(ds) != len(d) or len(gs) != len(g):
+        raise SystemExit(f"DUR: tekrarli listing_id (depo {len(ds)} satir / {len(d)} id, Drive {len(gs)} satir / {len(g)} id)")
+    if len(d) != 78 or len(set(d.values())) != 78:
+        raise SystemExit(f"DUR: depo listesi {len(d)} id / {len(set(d.values()))} cift (78 beklenir)")
+    if d != g:
+        fark = sorted(set(d.items()) ^ set(g.items()))[:5]
+        raise SystemExit(f"DUR: depo listesi Drive listesiyle ayni degil (depo {len(d)}, Drive {len(g)}, ornek fark {fark}); Etsy istegi yok")
+    return d
+
+
+def sku_ailesi(pair):
+    """kupa_taslak.sku (KUPA-<cift>-<stil>-<boy>, 32 karakter siniri) ile ayni kural; ilan basina 16 varyasyon SKU'su ortak onek."""
+    s = f"KUPA-{pair}"
+    if len(f"{s}-01-11") > 32:
+        b1, b2 = pair.split("_")
+        s = f"KUPA-{b1[:3]}_{b2[:3]}"
+    return f"{s}-*"
+
+
+def tr_tarih(simdi=None):
+    """Dosya adi tarihi Turkiye saatiyle (UTC+3); Drive klasor damgasi is akisinda UTC (date -u), farkli gun olabilir."""
+    simdi = simdi or datetime.datetime.now(datetime.timezone.utc)
+    return (simdi.astimezone(datetime.timezone.utc) + datetime.timedelta(hours=3)).strftime("%Y%m%d")
+
+
+def gorsel(api, liste, out, depo=DEPO_LISTE, tarih=None):
+    cift = depo_drive_ayni(depo, liste)
+    ids, sonuc = list(cift), {}
+    for k in range(0, len(ids), 100):
+        api.kota_kapisi(f"gorsel batch {k}")
+        r = api.get("/listings/batch", {"listing_ids": ",".join(ids[k:k + 100]), "includes": "Images"}) or {}
+        for L in r.get("results") or []:
+            sonuc[str(L.get("listing_id"))] = L
+    tarih = tarih or tr_tarih()
+    satir, sifir, aktif_degil, rank_hata, sku_hata = [], [], [], [], []
+    for lid in sorted(ids, key=lambda x: cift[x]):
+        L = sonuc.get(lid)
+        if L is None:
+            continue
+        if L.get("state") != "active":
+            aktif_degil.append([lid, L.get("state")])
+        ims = L.get("images") or []
+        ranks = [y.get("rank") for y in ims]
+        if any(not isinstance(r, int) for r in ranks) or sorted(ranks) != list(range(1, len(ranks) + 1)):
+            rank_hata.append([lid, ranks])                      # yalniz OZET'e; CSV yine yazilir (GM 16 Kas 23:13)
+        ims = sorted(ims, key=lambda y: (not isinstance(y.get("rank"), int), y.get("rank") if isinstance(y.get("rank"), int) else 0))
+        if not ims:
+            sifir.append(lid)
+        onek = sku_ailesi(cift[lid])[:-1]
+        skus = sorted({x for x in L.get("skus") or [] if x})
+        if not skus or any(not x.startswith(onek) for x in skus):
+            sku_hata.append([lid, skus[:3]])
+        for y in ims:
+            satir.append(dict(listing_id=lid, sku=";".join(skus), pair=cift[lid], image_rank=y.get("rank"),
+                              url_fullxfull=y.get("url_fullxfull") or "", url_570xN=y.get("url_570xN") or "",
+                              alt_text=y.get("alt_text") or ""))
+    ad = f"KUPA78_IMAGE_URLS_{tarih}.csv"
+    with open(out / ad, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=GORSEL_SUTUN)
+        w.writeheader()
+        w.writerows(satir)
+    eksik = sorted(set(ids) - set(sonuc))
+    bos_url = sum(1 for x in satir if not x["url_fullxfull"] or not x["url_570xN"])
+    ozet = dict(dosya=ad, liste=len(ids), okunan=len(sonuc), farkli_ilan_csv=len({x["listing_id"] for x in satir}),
+                gorsel_toplam=len(satir), sifir_gorsel=sifir, aktif_degil=aktif_degil, yanitta_yok=eksik, bos_url=bos_url,
+                rank_hata=rank_hata, sku_hata=sku_hata, istek=api.calls, kota_son=api.remaining)
+    (out / "KUPA78_IMAGE_OZET.json").write_text(json.dumps(ozet, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"gorsel: {json.dumps(ozet, ensure_ascii=False)}")
+    return 0 if len(sonuc) == len(ids) == 78 and not (sifir or eksik or bos_url) else 1
 
 
 def kisisel(api, liste, out):
@@ -105,7 +192,7 @@ def yd(api, shop, pilot, out):
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mod", choices=["kupa", "yd", "ikisi", "kisisel"], default="ikisi")
+    ap.add_argument("--mod", choices=["kupa", "yd", "ikisi", "kisisel", "gorsel"], default="ikisi")
     ap.add_argument("--kupa-liste", default="")
     ap.add_argument("--pilot", default="4595350971")
     ap.add_argument("--out", required=True)
@@ -121,6 +208,8 @@ def main(argv=None):
     rc, istek = 0, {}
     if a.mod in ("kupa", "ikisi"):
         rc |= kupa(api, a.kupa_liste, out); istek["kupa"] = api.calls
+    if a.mod == "gorsel":
+        rc |= gorsel(api, a.kupa_liste, out); istek["gorsel"] = api.calls
     if a.mod == "kisisel":
         rc |= kisisel(api, a.kupa_liste, out); istek["kisisel"] = api.calls
     if a.mod in ("yd", "ikisi"):
