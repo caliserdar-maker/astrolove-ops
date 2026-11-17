@@ -17,6 +17,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parent)); sys.path.insert(0, str
 import order_router as R  # noqa: E402
 
 
+def siparis_satiri(z):
+    """Log satiri; merchantReference (etsy-<receipt>-<boy>) ve 10-12 haneli her sayi opak kod (R.maskele_metin; IP adim 0 c)."""
+    return R.maskele_metin(
+        f"{z['id']} | {z['created']} | {z['merchantReference']} | eslesme {z['receipt_eslesme']} | {z['stage']} | "
+        f"{json.dumps(z['details'])} | issues {len(z['issues'])} | "
+        + "; ".join(f"{k['sku']}x{k['adet']} {k['durum']} [" + ", ".join(f"{x['kaynak']} {x['durum']}" for x in k['asset']) + "]"
+                    for k in z["kalem"]) + f" | eylemler {json.dumps(z['eylemler'])}")
+
+
 def asset_ozet(url):
     u = urlparse(url or "")
     fid = (parse_qs(u.query).get("id") or [""])[0] or (re.findall(r"/d/([\w-]+)", u.path) or [""])[0]
@@ -68,10 +77,7 @@ def main():
     sonuc.sort(key=lambda z: str(z.get("created") or ""))
     Path(a.out).write_text(json.dumps({"ana": a.oid, "receipt_son4": rid[-4:], "siparisler": sonuc}, indent=1, ensure_ascii=False))
     for z in sonuc:
-        print(f"{z['id']} | {z['created']} | {z['merchantReference']} | eslesme {z['receipt_eslesme']} | {z['stage']} | "
-              f"{json.dumps(z['details'])} | issues {len(z['issues'])} | "
-              + "; ".join(f"{k['sku']}x{k['adet']} {k['durum']} [" + ", ".join(f"{x['kaynak']} {x['durum']}" for x in k['asset']) + "]"
-                          for k in z["kalem"]) + f" | eylemler {json.dumps(z['eylemler'])}", flush=True)
+        print(siparis_satiri(z), flush=True)
     return 0
 
 
