@@ -30,14 +30,15 @@ import sys
 import yaml
 
 TASIYICI = ("receipt", "receipt_id", "siparis_no", "siparis_ref", "fisler")
-LISTE = ("fisler", "siparis_alici", "taban")
+LISTE = ("fisler", "siparis_alici", "taban", "skus")
 EK = {"pod-arac-v4.yml": ("confirm", "siparis_alici"),
       "pod-order-router.yml": ("submit",),
-      "a3-esit-kiyas.yml": ("eski", "yeni", "taban")}
+      "a3-esit-kiyas.yml": ("eski", "yeni", "taban"),
+      "prodigi-quote.yml": ("skus",)}                     # siparis_oku modunda 'order_id,merchantReference'
+
 KAPSAM_DISI = {"test_receipt": "depodaki sahte receipt dosya yolu", "sahte_receipt": "depodaki sahte receipt dosya yolu",
                "receipt_pages": "sayfa sayisi", "since_days": "gun sayisi", "sadece_test": "evet/hayir",
-               "son4": "son 4 hane (tam no degil)", "beklenen": "dosya sayisi", "expect_order": "SET kimligi", "yaz": "evet/hayir",
-               ("prodigi-quote.yml", "mode"): "mod secimi (aciklamada merchantReference kelimesi gecer)"}
+               "son4": "son 4 hane (tam no degil)", "beklenen": "dosya sayisi", "expect_order": "SET kimligi", "yaz": "evet/hayir"}
 SINIF = re.compile(r"receipt|sipari[sş]\s*(no|numara)|\border\s*(id|no|number)|\bfi[sş]\b|merchant.?ref", re.I)
 # by-siparis-ornek "Musteri metnini maskele" adimi (isim/tarih/satir + siparis_no maskesi); metin degisirse yeniden onay
 ONAYLI_PYTHON = {"by-siparis-ornek.yml": "6d17062617c0a9fc97a81f086a5458bb778f573a1edab78e4565c0defd45a9d2"}
@@ -246,6 +247,12 @@ def denetle_veri(d, ad="?"):
     ins = _ins(d)
     for k, v in ins.items():
         aciklama = str((v or {}).get("description", "")) if isinstance(v, dict) else ""
+        secenek = (v or {}).get("options") if isinstance(v, dict) else None
+        if isinstance(secenek, list):
+            # secim (choice) girdisi yalniz listelenen degerleri alir: siparis no tasiyamaz; secenekler sayi icermemeli
+            if any(re.search(r"(?<!\d)\d{10,12}(?!\d)", str(o)) for o in secenek):
+                bulgular.append(f"{ad}: R3 sinif: '{k}' secim girdisinin seceneginde 10-12 haneli sayi var")
+            continue
         if SINIF.search(aciklama) and k not in TASIYICI and k not in EK.get(ad, ()) and k not in KAPSAM_DISI \
                 and (ad, k) not in KAPSAM_DISI:
             bulgular.append(f"{ad}: R3 sinif: '{k}' aciklamasi siparis no anlatiyor, TASIYICI / KAPSAM_DISI degil")

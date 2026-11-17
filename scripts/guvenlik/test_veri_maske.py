@@ -74,5 +74,63 @@ for yol, izinli in (("scripts/etsy/ilan_satis_oku.py", ("print(maskele(", "print
     satirlar = [x.strip() for x in (KOK / yol).read_text().splitlines() if "print(" in x]
     kontrol(f"{yol}: her print maskeli yol ({len(satirlar)} print)", satirlar and all(x.startswith(izinli) for x in satirlar))
 
+# --- C2 (CEO karari 23:50): takip_kuru / siparis_kiyas / prodigi_siparis_oku cikti maskesi, varyasyon degeri, \r, kapali anahtar
+import ast  # noqa: E402
+import subprocess  # noqa: E402
+
+
+def main_ilk_cagri(kaynak):
+    """main() govdesindeki ilk ifadeler arasinda maskeli_cikti_kur() cagrisi var mi (argparse / Api'den once)."""
+    m = next(n for n in ast.parse(kaynak).body if isinstance(n, ast.FunctionDef) and n.name == "main")
+    for n in m.body[:3]:
+        if isinstance(n, ast.Expr) and isinstance(n.value, ast.Call) and getattr(n.value.func, "attr", "") == "maskeli_cikti_kur":
+            return True
+    return False
+
+
+for yol in ("scripts/prodigi/takip_kuru.py", "scripts/prodigi/siparis_kiyas.py", "scripts/prodigi/prodigi_siparis_oku.py"):
+    kaynak = (KOK / yol).read_text()
+    kontrol(f"{yol}: main() basinda stdout/stderr maskesi", main_ilk_cagri(kaynak))
+    kontrol(f"{yol}: bilinen FAIL: maskesiz main denetimden gecmez",
+            not main_ilk_cagri(kaynak.replace("R.maskeli_cikti_kur()", "pass")))
+    ozet = [x.strip() for x in kaynak.splitlines() if "fh.write(" in x]
+    kontrol(f"{yol}: adim ozetine yazan her satir maskeli ({len(ozet)})", all("maskeli_metin_tam(" in x for x in ozet))
+# calisma zamani: _MaskeliCikti ile stdout ve stderr (R.log ve print) maskeli; maskesiz hal bilinen FAIL
+kod = ("import sys; sys.path[:0] = [%r, %r, %r]\nimport order_router as R\n%s"
+       "R.log('| %s | etsy-%s-8x10 | ord_1234567890 |')\nprint('stderr %s', file=sys.stderr)\nsys.stdout.flush(); sys.stderr.flush()\n")
+for kur, ad in (("R.maskeli_cikti_kur()\n", "maskeli"), ("", "maskesiz (bilinen FAIL)")):
+    r = subprocess.run([sys.executable, "-I", "-c", kod % (str(KOK / "scripts/prodigi"), str(KOK / "scripts/etsy"),
+                        str(KOK / "scripts/guvenlik"), kur, SAHTE, SAHTE, SAHTE)], capture_output=True, text=True, timeout=60,
+                       env={"PATH": os.environ.get("PATH", ""), "ETSY_SHARED_SECRET": "k"})
+    cikti = r.stdout + r.stderr
+    if kur:
+        kontrol("_MaskeliCikti: stdout + stderr'de siparis no yok, ord_ son 4", r.returncode == 0 and SAHTE not in cikti
+                and "etsy-S-" in cikti and "ord_1234567890" not in cikti)
+    else:
+        kontrol("bilinen FAIL: maskesiz cikti siparis noyu basar", SAHTE in cikti)
+kontrol("maskeli_metin_tam (adim ozeti): siparis no ve ord_ tam kimlik yok",
+        SAHTE not in R.maskeli_metin_tam(f"receipt {SAHTE} ord_1234567890") and "ord_1234567890" not in R.maskeli_metin_tam("ord_1234567890"))
+# varyasyon: kisisellestirme gizli, urun secenegi kalir; \r / \n alan icinde yeni satir dogurmaz
+t2 = dict(t, variations=[{"property_id": 54, "formatted_name": "Personalization", "formatted_value": "Emily\nJames"},
+                         {"formatted_name": "Names", "formatted_value": "Ada Lovelace"},
+                         {"formatted_name": "Color", "formatted_value": "Champagne Ivory"}],
+          sku="X\r::add-mask::y\n::warning::%s" % SAHTE)
+s3 = I.satis_satiri(t2)
+kontrol("varyasyon: Personalization ve bilinmeyen ozellik gizli, Color kalir", "Personalization=***" in s3 and "Names=***" in s3
+        and "Ada" not in s3 and "Emily" not in s3 and "Color=Champagne Ivory" in s3)
+kontrol("\\r / \\n: alan tek satirda kalir, yeni ::add-mask:: / ::warning:: satiri dogmaz, numara maskeli",
+        "\r" not in s3 and "\n" not in s3 and s3.count("::warning::") == 2 and temiz(s3))
+eski3 = "::warning::SATIS x | Personalization=Emily\nJames"
+kontrol("bilinen FAIL: eski bicimde isim ve satir sonu gecer", "Emily" in eski3 and "\n" in eski3)
+# kapali anahtar
+os.environ.pop("ETSY_SHARED_SECRET", None)
+os.environ.pop("SIPARIS_KOD_ANAHTARI", None)
+kontrol("anahtar yok: receipt_kod 'S-gizli' (order_router ve ilan_satis_oku), sabit anahtar yok",
+        R.receipt_kod(SAHTE) == I.receipt_kod(SAHTE) == "S-gizli")
+os.environ["ETSY_SHARED_SECRET"] = "k"
+kontrol("anahtar var: opak kod S- + 8 hane, iki islev ayni", re.fullmatch(r"S-[0-9a-f]{8}", I.receipt_kod(SAHTE)) is not None
+        and I.receipt_kod(SAHTE) == R.receipt_kod(SAHTE))
+os.environ.pop("ETSY_SHARED_SECRET", None)
+
 print("veri maske testi: %d FAIL" % len(HATA))
 sys.exit(1 if HATA else 0)

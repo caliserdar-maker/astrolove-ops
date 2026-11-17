@@ -71,6 +71,7 @@ def ozet(o):
 
 
 def main():
+    R.maskeli_cikti_kur()          # IP adim 0 c: stdout/stderr'de receipt / merchantReference -> opak kod (CEO karari 1)
     ap = argparse.ArgumentParser()
     ap.add_argument("--env", default="live")
     ap.add_argument("--siparis", required=True)
@@ -143,7 +144,7 @@ def main():
     p = os.environ.get("GITHUB_STEP_SUMMARY")
     if p:
         with open(p, "a", encoding="utf-8") as fh:
-            fh.write("```json\n" + metin + "\n```\n")
+            fh.write("```json\n" + R.maskeli_metin_tam(metin) + "\n```\n")
 
 
 if __name__ == "__main__":

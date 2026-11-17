@@ -703,8 +703,12 @@ def receipt_kod(rid):
     """Loga / Actions ozetine receipt yerine yazilan opak kod (anahtar: ETSY_SHARED_SECRET)."""
     import hashlib
     import hmac
-    anahtar = (os.environ.get("SIPARIS_KOD_ANAHTARI") or os.environ.get("ETSY_SHARED_SECRET") or "astrolove").encode()
-    return "S-" + hmac.new(anahtar, str(rid).encode(), hashlib.sha256).hexdigest()[:8]
+    anahtar = os.environ.get("SIPARIS_KOD_ANAHTARI") or os.environ.get("ETSY_SHARED_SECRET")
+    if not anahtar:
+        # IP adim 0 c (17 Kas, CEO karari 3): bilinen sabit anahtar ("astrolove") ile 32 bitlik kod geri cozulebilir -> anahtarsiz
+        # opak kod YOK; tamamen gizlenir (kapali hata, numara yine loga girmez).
+        return "S-gizli"
+    return "S-" + hmac.new(anahtar.encode(), str(rid).encode(), hashlib.sha256).hexdigest()[:8]
 
 
 def maskele_metin(t):
@@ -741,6 +745,19 @@ class _MaskeliCikti:
 
     def __getattr__(self, ad):
         return getattr(self._a, ad)
+
+
+def maskeli_cikti_kur():
+    """stdout + stderr'i _MaskeliCikti ile sarar (fis deseni + kargo_maske); tekrar cagrilirsa iki kez sarmaz."""
+    if not isinstance(sys.stdout, _MaskeliCikti):
+        sys.stdout = _MaskeliCikti(sys.stdout)
+    if not isinstance(sys.stderr, _MaskeliCikti):
+        sys.stderr = _MaskeliCikti(sys.stderr)
+
+
+def maskeli_metin_tam(t):
+    """Adim ozeti (GITHUB_STEP_SUMMARY) ve benzeri dosyalar icin _MaskeliCikti ile ayni maske (fis deseni + kargo_maske)."""
+    return kargo_maske.maskele(maskele_metin(t))
 
 
 def main():

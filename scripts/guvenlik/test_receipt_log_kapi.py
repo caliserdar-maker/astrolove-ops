@@ -94,11 +94,18 @@ PASS_ORNEK = {
 FAIL_ORNEK.update(INCELEME2)
 FAIL_ORNEK["v3 liste for dongusu (izin listesinde yok)"] = PASS_ORNEK.pop("liste for maske")
 FAIL_ORNEK["v3 Python okuma (sha ile onayli degil)"] = PASS_ORNEK.pop("Python okuma + her tasiyici maskeli")
+FAIL_ORNEK["C2 secim girdisi seceneginde 10 haneli sayi"] = ("on:\n  workflow_dispatch:\n    inputs:\n      mode: {type: choice, options: [a, '9000000123'],"
+                                                         " description: 'receipt secimi'}\njobs:\n  a:\n    steps:\n      - run: echo ok\n")
+PASS_ORNEK["C2 secim girdisi (aciklamada receipt kelimesi) serbest"] = ("on:\n  workflow_dispatch:\n    inputs:\n      mode: {type: choice, options: [a, b],"
+                                                                    " description: 'merchantReference siparis_oku'}\njobs:\n  a:\n    steps:\n      - run: echo ok\n")
 for ad, metin in FAIL_ORNEK.items():
     kontrol("bilinen FAIL: " + ad, len(K.denetle_veri(wf(metin), "t.yml")) > 0)
 for ad, metin in PASS_ORNEK.items():
     b = K.denetle_veri(wf(metin), "t.yml")
     kontrol("bilinen PASS: " + ad + (" " + str(b) if b else ""), not b)
+_d = K.denetle_veri(wf("on:\n  workflow_dispatch:\n    inputs:\n      skus: {default: ''}\njobs:\n  a:\n    env: {S: \"${{ inputs.skus }}\"}\n"
+                       "    steps:\n      - run: echo ok\n"), "prodigi-quote.yml")
+kontrol("EK: prodigi-quote skus tasiyici (env FAIL)", len(_d) > 0)
 kontrol("EK: pod-arac-v4 confirm env FAIL",
         len(K.denetle_veri(wf("on:\n  workflow_dispatch:\n    inputs:\n      confirm: {default: ''}\njobs:\n  a:\n"
                               "    env: {C: \"${{ inputs.confirm }}\"}\n    steps:\n      - run: echo ok\n"), "pod-arac-v4.yml")) > 0)

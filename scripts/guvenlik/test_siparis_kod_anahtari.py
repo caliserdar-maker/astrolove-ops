@@ -66,8 +66,9 @@ def main():
         dolu_yeni = kod(f, ETSY_SHARED_SECRET=YENI, SIPARIS_KOD_ANAHTARI=ANAHTAR)  # Etsy secret'i yenilendi
         bos_yeni = kod(f, ETSY_SHARED_SECRET=YENI, SIPARIS_KOD_ANAHTARI="")
         kodlar[etiket] = (bos, dolu)
-        k(f"{etiket}: ikisi de BOS (sahte receipt adiminin ortami) -> sabit yedek anahtar; onceki davranisla ayni",
-          kod(f) == kod(f, ETSY_SHARED_SECRET="", SIPARIS_KOD_ANAHTARI="") == beklenen("astrolove"))
+        k(f"{etiket}: ikisi de BOS (sahte receipt adiminin ortami) -> KAPALI HATA 'S-gizli' (IP adim 0 c, CEO karari 3; sabit "
+          f"'astrolove' anahtari kaldirildi)", kod(f) == kod(f, ETSY_SHARED_SECRET="", SIPARIS_KOD_ANAHTARI="") == "S-gizli"
+          and kod(f) != beklenen("astrolove"))
         k(f"{etiket}: bilinen PASS: anahtar BOS -> kod onceki ile AYNI", bos == onceki == beklenen(ESKI))
         k(f"{etiket}: bilinen FAIL: anahtar DOLU -> kod FARKLI", dolu != onceki and dolu == beklenen(ANAHTAR))
         k(f"{etiket}: anahtar DOLU iken Etsy secret'i degisse de kod AYNI", dolu_yeni == dolu)

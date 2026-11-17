@@ -83,10 +83,12 @@ jobs:
         env:
           LIMIT: ${{ inputs.limit }}
           DISCOVER: ${{ inputs.discover }}
-          SKUS: ${{ inputs.skus }}
           MODE: ${{ inputs.mode }}
         run: |
           set -euo pipefail
+          SKUS=$(jq -r '.inputs.skus // empty' "$GITHUB_EVENT_PATH")
+          while IFS= read -r o; do [ ${#o} -lt 4 ] || echo "::add-mask::$o"; done < <(tr ',' '\n' <<< "$SKUS")   # IP adim 0 c: siparis_oku'da 'ord_..,etsy-<no>-<boy>'
+          for p in $(grep -oE '[0-9]{10,12}' <<< "$SKUS" || true); do echo "::add-mask::$p"; done
           if [ "$MODE" = "hpr_sizes" ]; then
             python scripts/prodigi/prodigi_hpr_sizes.py --out-dir out
             exit 0

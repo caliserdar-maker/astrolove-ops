@@ -83,8 +83,10 @@ def log(m):
 
 def kod_(x):
     """Public loga receipt/transaction yerine opak kod (order_router.receipt_kod ile ayni anahtar)."""
-    k = (os.environ.get("SIPARIS_KOD_ANAHTARI") or os.environ.get("ETSY_SHARED_SECRET") or "astrolove").encode()
-    return "S-" + hmac.new(k, str(x).encode(), hashlib.sha256).hexdigest()[:8]
+    k = os.environ.get("SIPARIS_KOD_ANAHTARI") or os.environ.get("ETSY_SHARED_SECRET")
+    if not k:
+        return "S-gizli"      # IP adim 0 c (CEO karari 3): anahtarsiz opak kod yok (bilinen sabit anahtar geri cozulebilirdi)
+    return "S-" + hmac.new(k.encode(), str(x).encode(), hashlib.sha256).hexdigest()[:8]
 
 
 def piksel(p):
