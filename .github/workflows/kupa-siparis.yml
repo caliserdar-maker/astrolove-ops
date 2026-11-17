@@ -114,11 +114,11 @@ jobs:
           SIPARIS_KOD_ANAHTARI: ${{ secrets.SIPARIS_KOD_ANAHTARI }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
-          RID: ${{ inputs.receipt_id }}
           GUN: ${{ inputs.since_days || '3' }}
           SAHTE: ${{ inputs.sahte_receipt }}
           HEDEF: ${{ inputs.hedef || 'KUPA_SIPARIS' }}
         run: |
+          RID=$(jq -r '.inputs.receipt_id // empty' "$GITHUB_EVENT_PATH"); [ -z "$RID" ] || echo "::add-mask::$RID"   # IP adim 0 c (17 Kas): siparis no olay dosyasindan okunur, loga *** olur
           set +e -uo pipefail     # FAIL kalem cikis 1 verir; Drive/STATE adimlari yine kosar, koşu sonda kirmizi (Serdar'a bildirim)
           args=(--kod _kod/kupa_orchard --cikti _out --drive "gdrive:ASTROLOVE/$HEDEF")
           if [ -n "${SAHTE:-}" ]; then args+=(--receipt-json "$SAHTE")

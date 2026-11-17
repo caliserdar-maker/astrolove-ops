@@ -121,8 +121,11 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Girdi
-        env: {P: "${{ inputs.pf_damga }}", F: "${{ inputs.fisler }}", N: "${{ inputs.beklenen }}"}
-        run: '[[ "$P" =~ ^[0-9]{8}_[0-9]{6}$ && "$F" =~ ^[0-9]+(,[0-9]+)*$ && "$N" =~ ^[0-9]*$ ]] || { echo "::error::girdi"; exit 1; }'
+        env: {P: "${{ inputs.pf_damga }}", N: "${{ inputs.beklenen }}"}
+        run: |
+          F=$(jq -r '.inputs.fisler // empty' "$GITHUB_EVENT_PATH"); for f in ${F//,/ }; do echo "::add-mask::$f"; done   # IP adim 0 c (17 Kas): siparis no olay dosyasindan okunur, loga *** olur
+          [[ "$P" =~ ^[0-9]{8}_[0-9]{6}$ && "$F" =~ ^[0-9]+(,[0-9]+)*$ && "$N" =~ ^[0-9]*$ ]] || { echo "::error::girdi"; exit 1; }
+          echo "F=$F" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -144,7 +147,7 @@ jobs:
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
             grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
       - name: Girdiler + onizleme
-        env: {P: "${{ inputs.pf_damga }}", F: "${{ inputs.fisler }}", N: "${{ inputs.beklenen }}"}
+        env: {P: "${{ inputs.pf_damga }}", N: "${{ inputs.beklenen }}"}   # F: Girdi adiminda maskeli GITHUB_ENV
         run: |
           set -euo pipefail
           S=gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM; mkdir -p _in _pf

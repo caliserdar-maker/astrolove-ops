@@ -68,6 +68,7 @@ jobs:
         env:
           ACIK: ${{ vars.SIPARIS_GPT_ACIK || '1' }}
         run: |
+          _m=$(jq -r '.inputs.receipt // empty' "$GITHUB_EVENT_PATH"); [ -z "$_m" ] || echo "::add-mask::$_m"   # IP adim 0 c (17 Kas): receipt loga *** olur
           set -euo pipefail
           E="$GITHUB_EVENT_PATH"
           for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$E"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
@@ -110,6 +111,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          _m=$(jq -r '.inputs.receipt // empty' "$GITHUB_EVENT_PATH"); [ -z "$_m" ] || echo "::add-mask::$_m"   # IP adim 0 c (17 Kas): receipt loga *** olur
           set -euo pipefail
           E="$GITHUB_EVENT_PATH"
           for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$E"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
@@ -139,6 +141,7 @@ jobs:
         with: { ref: "${{ env.GPT_REF }}", fetch-depth: 1, sparse-checkout: "motor_gpt" }
       - name: Girdi + maske
         run: |
+          _m=$(jq -r '.inputs.receipt // empty' "$GITHUB_EVENT_PATH"); [ -z "$_m" ] || echo "::add-mask::$_m"   # IP adim 0 c (17 Kas): receipt loga *** olur
           set -euo pipefail
           E="$GITHUB_EVENT_PATH"
           jq '.inputs | {receipt, cift, isim1, isim2, mesaj_b64, renk, olcu}' "$E" > /tmp/istek.json

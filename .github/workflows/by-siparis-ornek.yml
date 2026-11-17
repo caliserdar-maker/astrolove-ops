@@ -73,7 +73,6 @@ jobs:
       - name: Uret + kontrol (PASS/FAIL)
         env:
           TUR: ${{ inputs.tur }}
-          SIPARIS_NO: ${{ inputs.siparis_no }}
           PAIR: ${{ inputs.pair }}
           NAME1: ${{ inputs.name1 }}
           NAME2: ${{ inputs.name2 }}
@@ -85,6 +84,7 @@ jobs:
           BOY: ${{ inputs.boy }}
         run: |
           set -euo pipefail
+          SIPARIS_NO=$(jq -r '.inputs.siparis_no // empty' "$GITHUB_EVENT_PATH"); [ -z "$SIPARIS_NO" ] || echo "::add-mask::$SIPARIS_NO"; export SIPARIS_NO   # IP adim 0 c (17 Kas): siparis no olay dosyasindan okunur, loga *** olur
           KOD=_kod KOD_SHA="$KOD_REF" CIKTI=_out python3 scripts/siparis_by/by_siparis.py
       - name: Drive'a yukle
         run: |

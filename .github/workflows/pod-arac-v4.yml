@@ -82,25 +82,35 @@ jobs:
     env:
       MOD: ${{ inputs.mod || 'kuru' }}
       APPLY: ${{ inputs.apply && 'true' || 'false' }}
-      CONFIRM: ${{ inputs.confirm || '' }}
       LISTING: ${{ inputs.listing || '4570110641' }}
       LIMIT: ${{ inputs.limit || '0' }}
       KOTA_ALT: ${{ inputs.kota_alt || '10' }}
       REDIRECT: ${{ inputs.redirect || 'https://astrolove.art/oauth/callback' }}
       KOD: ${{ inputs.kod || '' }}
       STATE: ${{ inputs.state || '' }}
-      SIPARIS_REF: ${{ inputs.siparis_ref || 'etsy-1000000001-8x10' }}
       SIPARIS_SKU: ${{ inputs.siparis_sku || 'GLOBAL-HPR-8x10' }}
       SIPARIS_ADET: ${{ inputs.siparis_adet || '1' }}
       SIPARIS_DOSYA_ID: ${{ inputs.siparis_dosya_id || '' }}
       SIPARIS_REMOTE: ${{ inputs.siparis_remote || '' }}
-      SIPARIS_ALICI: ${{ inputs.siparis_alici || '' }}
       SIPARIS_MASTER: ${{ inputs.siparis_master }}
       SIPARIS_KONTROL: ${{ inputs.siparis_kontrol }}
       TEST_RECEIPT: ${{ inputs.test_receipt || 'scripts/prodigi/test_receipt_kisisel_taban.json' }}
       ADIM: ${{ inputs.adim || '1,2,3' }}
       ATLA: ${{ inputs.atla }}
     steps:
+      - name: Girdi maskesi (IP adim 0 c, 17 Kas; siparis ref / onay / alici loga *** olur)
+        run: |
+          set -euo pipefail
+          E="$GITHUB_EVENT_PATH"
+          REF=$(jq -r '.inputs.siparis_ref // empty' "$E"); REF="${REF:-etsy-1000000001-8x10}"
+          echo "::add-mask::$REF"; for p in $(grep -oE '[0-9]{10,12}' <<< "$REF" || true); do echo "::add-mask::$p"; done
+          echo "SIPARIS_REF=$REF" >> "$GITHUB_ENV"
+          CONF=$(jq -r '.inputs.confirm // empty' "$E")
+          [ "$MOD" != "siparis_gonder" ] || [ -z "$CONF" ] || echo "::add-mask::$CONF"   # yalniz siparis_gonder'de onay = siparis ref
+          echo "CONFIRM=$CONF" >> "$GITHUB_ENV"
+          AL=$(jq -r '.inputs.siparis_alici // empty' "$E")
+          [ -z "$AL" ] || echo "::add-mask::$AL"; while IFS= read -r p; do [ -z "$p" ] || echo "::add-mask::$p"; done < <(tr '|' '\n' <<< "$AL")
+          echo "SIPARIS_ALICI=$AL" >> "$GITHUB_ENV"
       - name: Onay kapisi
         run: |
           set -euo pipefail

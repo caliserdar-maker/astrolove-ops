@@ -49,21 +49,20 @@ jobs:
           rclone copyto "gdrive:ASTROLOVE/TEMP/ETSY_TOKEN.json" _work/ETSY_TOKEN.json
       - name: Oku (salt okur)
         env:
-          RECEIPT: ${{ inputs.receipt }}
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
         run: |
           set -euo pipefail
+          RECEIPT=$(jq -r '.inputs.receipt // empty' "$GITHUB_EVENT_PATH"); [ -z "$RECEIPT" ] || echo "::add-mask::$RECEIPT"   # IP adim 0 c (17 Kas): siparis no olay dosyasindan okunur, loga *** olur
           [[ "$RECEIPT" =~ ^[0-9]+$ ]] || { echo "::error::receipt"; exit 1; }
           python3 scripts/etsy/siparis_kisisel.py --receipt "$RECEIPT" --out _out
       - name: Token geri yaz + gizli klasore yaz
         if: always()
-        env:
-          RECEIPT: ${{ inputs.receipt }}
         run: |
           set -euo pipefail
+          RECEIPT=$(jq -r '.inputs.receipt // empty' "$GITHUB_EVENT_PATH"); [ -z "$RECEIPT" ] || echo "::add-mask::$RECEIPT"   # IP adim 0 c (17 Kas): siparis no olay dosyasindan okunur, loga *** olur
           TOKEN_RC=0; bash scripts/etsy/token_geri_yaz.sh || TOKEN_RC=1
           [[ "$RECEIPT" =~ ^[0-9]+$ ]] || exit 1
           [ -f _out/KISISEL.json ] && rclone copy _out "gdrive:ASTROLOVE/SIPARIS/$RECEIPT/OKUMA_${GITHUB_RUN_ID}" -q && echo "Cikti: SIPARIS/$RECEIPT/OKUMA_${GITHUB_RUN_ID}/" || { echo "::error::KISISEL yok"; exit 1; }

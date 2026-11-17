@@ -28,6 +28,7 @@ jobs:
     steps:
       - name: Girdi
         run: |
+          _m=$(jq -r '.inputs.receipt // empty' "$GITHUB_EVENT_PATH"); [ -z "$_m" ] || echo "::add-mask::$_m"   # IP adim 0 c (17 Kas): receipt loga *** olur
           jq -re '.inputs.receipt | test("^[0-9]+$")' "$GITHUB_EVENT_PATH" >/dev/null
           jq -re '.inputs.renkler | test("^[A-Z_,]+$")' "$GITHUB_EVENT_PATH" >/dev/null
       - uses: actions/checkout@v4
