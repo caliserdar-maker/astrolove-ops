@@ -123,7 +123,6 @@ jobs:
       - name: Girdiler (cron = live + onayli mod)
         env:
           EV: ${{ github.event_name }}
-          IN_SUBMIT: ${{ inputs.submit }}
           IN_APPROVE: ${{ inputs.approve_mode }}
           IN_ENV: ${{ inputs.env }}
           IN_DAYS: ${{ inputs.since_days }}
@@ -134,6 +133,7 @@ jobs:
           IN_MAX: ${{ inputs.max_orders }}
         run: |
           set -euo pipefail
+          IN_SUBMIT=$(jq -r '.inputs.submit // empty' "$GITHUB_EVENT_PATH"); [ -z "$IN_SUBMIT" ] || echo "::add-mask::$IN_SUBMIT"   # IP adim 0 c (17 Kas): siparis no olay dosyasindan okunur, loga *** olur
           if [ "$EV" = "schedule" ]; then
             # 26 Eyl 2026 (Serdar): HICBIR dosya onun onayi olmadan gonderilmez. Cron yalniz paket hazirlar (onayli mod);
             # Prodigi'ye gonderim yalniz elle --submit <receipt> ile, Serdar onayindan sonra.

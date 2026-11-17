@@ -102,15 +102,16 @@ jobs:
         run: |
           set -euo pipefail
           E="$GITHUB_EVENT_PATH"
-          REF=$(jq -r '.inputs.siparis_ref // empty' "$E"); REF="${REF:-etsy-1000000001-8x10}"
+          REF=$(jq -r '(.inputs.siparis_ref // "") | if . == "" then "etsy-1000000001-8x10" else . end' "$E")   # eski: inputs.siparis_ref || varsayilan
           echo "::add-mask::$REF"; for p in $(grep -oE '[0-9]{10,12}' <<< "$REF" || true); do echo "::add-mask::$p"; done
-          echo "SIPARIS_REF=$REF" >> "$GITHUB_ENV"
           CONF=$(jq -r '.inputs.confirm // empty' "$E")
-          [ "$MOD" != "siparis_gonder" ] || [ -z "$CONF" ] || echo "::add-mask::$CONF"   # yalniz siparis_gonder'de onay = siparis ref
-          echo "CONFIRM=$CONF" >> "$GITHUB_ENV"
+          [ ${#CONF} -lt 4 ] || echo "::add-mask::$CONF"   # siparis_gonder'de onay = siparis ref; diger modlarda sabit kelime (maske zararsiz)
           AL=$(jq -r '.inputs.siparis_alici // empty' "$E")
-          [ -z "$AL" ] || echo "::add-mask::$AL"; while IFS= read -r p; do [ -z "$p" ] || echo "::add-mask::$p"; done < <(tr '|' '\n' <<< "$AL")
-          echo "SIPARIS_ALICI=$AL" >> "$GITHUB_ENV"
+          while IFS= read -r p; do [ ${#p} -lt 4 ] || echo "::add-mask::$p"; done < <(tr '|' '\n' <<< "$AL")   # 4 harften kisa parca (US) maskelenmez
+          [ -z "$AL" ] || echo "::add-mask::$AL"
+          D="K57_$(od -An -N8 -tx1 /dev/urandom | tr -d ' \n')"   # GITHUB_ENV ayraci: girdideki yeni satir ek degisken yazamaz
+          { printf 'SIPARIS_REF<<%s\n%s\n%s\n' "$D" "$REF" "$D"; printf 'CONFIRM<<%s\n%s\n%s\n' "$D" "$CONF" "$D"
+            printf 'SIPARIS_ALICI<<%s\n%s\n%s\n' "$D" "$AL" "$D"; } >> "$GITHUB_ENV"
       - name: Onay kapisi
         run: |
           set -euo pipefail

@@ -123,9 +123,10 @@ jobs:
       - name: Girdi
         env: {P: "${{ inputs.pf_damga }}", N: "${{ inputs.beklenen }}"}
         run: |
-          F=$(jq -r '.inputs.fisler // empty' "$GITHUB_EVENT_PATH"); for f in ${F//,/ }; do echo "::add-mask::$f"; done   # IP adim 0 c (17 Kas): siparis no olay dosyasindan okunur, loga *** olur
+          F=$(jq -r '.inputs.fisler // "9000000531,9000000522,9000000523,9000000524,9000000525"' "$GITHUB_EVENT_PATH")   # yok = girdi varsayilani (inputs.fisler ile ayni)
+          while IFS= read -r f; do [ -z "$f" ] || echo "::add-mask::$f"; done < <(tr ',' '\n' <<< "$F")   # IP adim 0 c (17 Kas): siparis no olay dosyasindan okunur, loga *** olur
           [[ "$P" =~ ^[0-9]{8}_[0-9]{6}$ && "$F" =~ ^[0-9]+(,[0-9]+)*$ && "$N" =~ ^[0-9]*$ ]] || { echo "::error::girdi"; exit 1; }
-          echo "F=$F" >> "$GITHUB_ENV"
+          echo "F=$F" >> "$GITHUB_ENV"   # rakam ve virgul (yukaridaki kapi): yeni satir yok
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:

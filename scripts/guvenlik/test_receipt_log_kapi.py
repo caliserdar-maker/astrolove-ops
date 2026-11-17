@@ -65,6 +65,17 @@ FAIL_ORNEK = {
                                        "      - run: |\n          r=$(jq -r .inputs.receipt \"$GITHUB_EVENT_PATH\"); echo \"::add-mask::$r\"\n",
     "R2 baska degisken maskeli": GIRDI + "  a:\n    steps:\n      - run: |\n          r=$(jq -r .inputs.receipt \"$GITHUB_EVENT_PATH\"); x=1; echo \"::add-mask::$x\"\n",
     "R2 liste tek parca maske": GIRDI + "  a:\n    steps:\n      - run: |\n          F=$(jq -r .inputs.fisler \"$GITHUB_EVENT_PATH\"); echo \"::add-mask::$F\"\n",
+    "R2 maskeden once echo (ayni adim)": GIRDI + "  a:\n    steps:\n      - run: |\n          R=$(jq -r .inputs.receipt \"$GITHUB_EVENT_PATH\")\n          echo \"rec $R\"\n          echo \"::add-mask::$R\"\n",
+    "R2 ayni satirda baska degisken maskeli": GIRDI + "  a:\n    steps:\n      - run: |\n          C=$(jq -r .inputs.cift \"$E\"); R=$(jq -r .inputs.receipt \"$E\")\n          echo \"::add-mask::$C\"\n          echo \"$R\"\n",
+    "R0 olay dosyasi cat": GIRDI + "  a:\n    steps:\n      - run: cat \"$GITHUB_EVENT_PATH\"\n      - run: |\n          R=$(jq -r .inputs.receipt \"$GITHUB_EVENT_PATH\"); echo \"::add-mask::$R\"\n",
+    "R0 toJSON(inputs)": GIRDI + "  a:\n    steps:\n      - env: {A: \"${{ toJSON(inputs) }}\"}\n        run: echo hi\n",
+    "R0 inputs['receipt']": GIRDI + "  a:\n    steps:\n      - env: {A: \"${{ inputs['receipt'] }}\"}\n        run: echo $A\n",
+    "R2 calismayan maske (&&)": GIRDI + "  a:\n    steps:\n      - run: |\n          R=$(jq -r .inputs.receipt \"$E\"); [ -n \"\" ] && echo \"::add-mask::$R\"; echo $R\n",
+    "R0 Python olay okuma maskesiz": GIRDI + "  a:\n    steps:\n      - run: python3 -c \"import json,os;print(json.load(open(os.environ['GITHUB_EVENT_PATH']))['inputs']['receipt'])\"\n",
+    "R0 toJSON(github.event.inputs)": GIRDI + "  a:\n    steps:\n      - env: {A: \"${{ toJSON(github.event.inputs) }}\"}\n        run: echo $A\n",
+    "R0 set -x": GIRDI + "  a:\n    steps:\n      - run: |\n          set -x\n          R=$(jq -r .inputs.receipt \"$E\"); echo \"::add-mask::$R\"\n",
+    "R2 if icinde maske": GIRDI + "  a:\n    steps:\n      - run: |\n          R=$(jq -r .inputs.receipt \"$E\"); if false; then echo \"::add-mask::$R\"; fi\n",
+    "R3 sinifsiz siparis girdisi": "on:\n  workflow_dispatch:\n    inputs:\n      no: {description: \"Etsy receipt id\"}\njobs:\n  a:\n    steps:\n      - run: echo ok\n",
     "R2 ikinci is maskesiz": GIRDI + "  a:\n    steps:\n      - run: |\n          r=$(jq -r .inputs.receipt \"$GITHUB_EVENT_PATH\"); echo \"::add-mask::$r\"\n"
                                      "  b:\n    steps:\n      - run: jq -r .inputs.receipt \"$GITHUB_EVENT_PATH\"\n",
 }
@@ -72,6 +83,10 @@ PASS_ORNEK = {
     "if icinde ifade serbest": GIRDI + "  a:\n    if: ${{ inputs.receipt != '' }}\n    steps:\n      - run: echo ok\n",
     "okuma + maske": GIRDI + "  a:\n    steps:\n      - run: |\n          r=$(jq -r '.inputs.receipt // empty' \"$GITHUB_EVENT_PATH\"); [ -z \"$r\" ] || echo \"::add-mask::$r\"\n",
     "liste for maske": GIRDI + "  a:\n    steps:\n      - run: |\n          F=$(jq -r .inputs.fisler \"$GITHUB_EVENT_PATH\"); for f in ${F//,/ }; do echo \"::add-mask::$f\"; done\n",
+    "kosullu koruma [ -z ] ||": GIRDI + "  a:\n    steps:\n      - run: |\n          R=$(jq -r '.inputs.receipt // empty' \"$E\"); [ -z \"$R\" ] || echo \"::add-mask::$R\"; echo \"$R\"\n",
+    "liste while maske": GIRDI + "  a:\n    steps:\n      - run: |\n          F=$(jq -r .inputs.fisler \"$E\")\n          while IFS= read -r f; do [ -z \"$f\" ] || echo \"::add-mask::$f\"; done < <(tr ',' '\\n' <<< \"$F\")\n",
+    "shell jq .inputs[$k] (ifade degil)": GIRDI + "  a:\n    steps:\n      - run: |\n          for k in a b; do jq -re --arg k \"$k\" '.inputs[$k]' \"$E\"; done\n",
+    "Python okuma + her tasiyici maskeli": GIRDI + "  a:\n    steps:\n      - run: |\n          python3 - <<'X'\n          import json, os\n          i = json.load(open(os.environ['GITHUB_EVENT_PATH']))['inputs']\n          for k in ('receipt', 'fisler'):\n              print('::add-mask::' + str(i.get(k)))\n          X\n",
     "tasiyici girdi yok": "on:\n  workflow_dispatch:\n    inputs:\n      mod: {default: x}\njobs:\n  a:\n    steps:\n      - run: echo \"${{ inputs.mod }}\"\n",
 }
 for ad, metin in FAIL_ORNEK.items():
@@ -149,11 +164,32 @@ kontrol("pod-arac-v4 maske adimi rc 0", rc == 0)
 kontrol("pod-arac-v4: siparis no yalniz maske satirinda", yalniz_maskede(out, SAHTE) and "::add-mask::%s" % SAHTE in out)
 kontrol("pod-arac-v4: ref + alici parcalari maskeli", "::add-mask::etsy-%s-8x10" % SAHTE in out and "::add-mask::Ada Test" in out
         and "::add-mask::1 Ornek Sk" in out)
-kontrol("pod-arac-v4: GITHUB_ENV SIPARIS_REF/CONFIRM/SIPARIS_ALICI", "SIPARIS_REF=etsy-%s-8x10" % SAHTE in genv
-        and "CONFIRM=etsy-%s-8x10" % SAHTE in genv and "SIPARIS_ALICI=Ada Test|" in genv)
+def env_oku(genv):
+    """GITHUB_ENV ayracli bicim (AD<<AYRAC / deger / AYRAC) -> dict."""
+    d, s = {}, genv.split("\n")
+    i = 0
+    while i < len(s):
+        if "<<" in s[i]:
+            ad, ay = s[i].split("<<", 1)
+            j = s.index(ay, i + 1)
+            d[ad] = "\n".join(s[i + 1:j])
+            i = j + 1
+        else:
+            i += 1
+    return d
+
+
+g = env_oku(genv)
+kontrol("pod-arac-v4: GITHUB_ENV SIPARIS_REF/CONFIRM/SIPARIS_ALICI (ayracli)", g.get("SIPARIS_REF") == "etsy-%s-8x10" % SAHTE
+        and g.get("CONFIRM") == "etsy-%s-8x10" % SAHTE and g.get("SIPARIS_ALICI", "").startswith("Ada Test|"))
+kontrol("pod-arac-v4: 4 harften kisa alici parcasi maskelenmez (TR)", "::add-mask::TR\n" not in out + "\n")
 rc, out, genv = kos(s, {"confirm": "PILOT_15"}, {"MOD": "pilot15_yaz"})
-kontrol("pod-arac-v4 bos ref: varsayilan + PILOT_15 maskelenmez", rc == 0 and "SIPARIS_REF=etsy-1000000001-8x10" in genv
-        and "::add-mask::PILOT_15" not in out and "CONFIRM=PILOT_15" in genv)
+g = env_oku(genv)
+kontrol("pod-arac-v4 bos ref: varsayilan; onay kelimesi aynen GITHUB_ENV'de", rc == 0 and g.get("SIPARIS_REF") == "etsy-1000000001-8x10"
+        and g.get("CONFIRM") == "PILOT_15" and g.get("SIPARIS_ALICI") == "")
+rc, out, genv = kos(s, {"siparis_alici": "Ada\nSAHTE=1|x"}, {"MOD": "kuru"})
+g = env_oku(genv)
+kontrol("pod-arac-v4: girdideki yeni satir ek degisken yazamaz", rc == 0 and "SAHTE" not in g and g.get("SIPARIS_ALICI", "").startswith("Ada\nSAHTE=1"))
 
 # kupa-siparis: RID satiri (adimin ilk satiri) tek basina
 s = adim_run("kupa-siparis.yml", "uret", "Uret").split("\n")[0]
@@ -167,8 +203,25 @@ s = adim_run("wa-hazirlik-oku.yml", "onizle", "Girdi")
 rc, out, genv = kos(s, {"fisler": "%s,9000000124" % SAHTE}, {"P": "20261117_120000", "N": ""})
 kontrol("wa-hazirlik-oku Girdi rc 0 + her fis maskeli + F GITHUB_ENV", rc == 0 and "::add-mask::%s" % SAHTE in out
         and "::add-mask::9000000124" in out and "F=%s,9000000124" % SAHTE in genv)
+rc, out, genv = kos(s, {}, {"P": "20261117_120000", "N": ""})
+kontrol("wa-hazirlik-oku Girdi: fisler yoksa girdi varsayilani (inputs.fisler ile ayni)", rc == 0
+        and "F=9000000531,9000000522,9000000523,9000000524,9000000525" in genv)
 rc, out, genv = kos(s, {"fisler": "12a"}, {"P": "20261117_120000", "N": ""})
 kontrol("wa-hazirlik-oku Girdi bozuk fis FAIL", rc != 0)
+
+# pod-order-router Girdiler: submit olay dosyasindan + maske; R_SUBMIT GITHUB_ENV'de
+s = adim_run("pod-order-router.yml", "route", "Girdiler")
+rc, out, genv = kos(s, {"submit": SAHTE}, {"EV": "workflow_dispatch", "IN_APPROVE": "", "IN_ENV": "", "IN_DAYS": "", "IN_TR": "",
+                                           "IN_EW": "", "IN_ONLY": "", "IN_OTO": "", "IN_MAX": ""})
+kontrol("pod-order-router submit maskeli + R_SUBMIT", rc == 0 and out.splitlines()[0] == "::add-mask::%s" % SAHTE
+        and "R_SUBMIT=%s" % SAHTE in genv and "R_APPROVE=off" in genv)
+rc, out, genv = kos(s, {}, {"EV": "schedule"})
+kontrol("pod-order-router cron: submit yok, maske yok", rc == 0 and "::add-mask::" not in out and "R_SUBMIT=\n" in genv)
+# a3-esit-kiyas: ilk 3 satir (maske) bash ile
+s = "\n".join(adim_run("a3-esit-kiyas.yml", "kiyas", "Indir").split("\n")[:3])
+rc, out, _ = kos(s, {"eski": SAHTE, "yeni": "9000000124", "taban": "9000000102,9000000103,9000000104"})
+kontrol("a3-esit-kiyas eski/yeni/taban maskeli", rc == 0 and all("::add-mask::%s" % v in out for v in
+        (SAHTE, "9000000124", "9000000102", "9000000103", "9000000104")) and yalniz_maskede(out, SAHTE))
 
 # siparis-kesit-son Girdi
 s = adim_run("siparis-kesit-son.yml", "kesit", "Girdi")

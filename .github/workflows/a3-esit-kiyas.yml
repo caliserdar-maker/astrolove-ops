@@ -47,13 +47,13 @@ jobs:
       - name: Indir + kiyas
         env:
           TUR: ${{ inputs.tur }}
-          ESKI: ${{ inputs.eski }}
-          YENI: ${{ inputs.yeni }}
-          TABAN: ${{ inputs.taban }}
           REF_ESKI: ${{ inputs.ref_eski }}
           REF_YENI: ${{ inputs.ref_yeni }}
           EN_ERKEN: ${{ inputs.en_erken }}
         run: |
+          ESKI=$(jq -r '.inputs.eski // empty' "$GITHUB_EVENT_PATH"); [ -z "$ESKI" ] || echo "::add-mask::$ESKI"   # IP adim 0 c (17 Kas): siparis no olay dosyasindan okunur, loga *** olur
+          YENI=$(jq -r '.inputs.yeni // empty' "$GITHUB_EVENT_PATH"); [ -z "$YENI" ] || echo "::add-mask::$YENI"
+          TABAN=$(jq -r '.inputs.taban // empty' "$GITHUB_EVENT_PATH"); while IFS= read -r t_; do [ -z "$t_" ] || echo "::add-mask::$t_"; done < <(tr ',' '\n' <<< "$TABAN")
           set +e -uo pipefail
           [[ "$TUR" =~ ^(poster|kupa)$ ]] && [[ "$ESKI" =~ ^[A-Za-z0-9_/]+$ ]] && [[ "$YENI" =~ ^[A-Za-z0-9_/]+$ ]] \
             && [[ "$EN_ERKEN" =~ ^[0-9]{10}$ ]] && [ "$ESKI" != "$YENI" ] || { echo "::error::girdi"; exit 1; }
