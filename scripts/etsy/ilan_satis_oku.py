@@ -2,7 +2,7 @@
 """SALT OKUMA: bir ilanin satis kayitlari (getShopReceiptTransactionsByListing; transactions_r). Etsy'ye yazma yok.
 Yazilan: islem tarihi (UTC), adet, fiyat, secilen varyasyonlar, receipt (OPAK KOD, IP adim 0 c 17 Kas), gonderim durumu.
 Alici adi/adres/e-posta YAZILMAZ. Depo HERKESE ACIK: her satir receipt_desen.ROUTER ile maskelenir (10-12 haneli her sayi -> S-<kod>,
-order_router.receipt_kod ile ayni kod; ilan id de maskelenir: supheli = maskele).
+order_router.receipt_kod ile ayni algoritma; ilan id de maskelenir: supheli = maskele).
 Kullanim: ilan_satis_oku.py --cift CANCER_LEO [--ids data/pod/pod78_ids.csv]"""
 import argparse
 import csv
@@ -18,10 +18,11 @@ import receipt_desen  # noqa: E402
 
 
 def receipt_kod(rid):
-    """order_router.receipt_kod ile ayni opak kod (anahtar SIPARIS_KOD_ANAHTARI / ETSY_SHARED_SECRET)."""
+    """order_router.receipt_kod ile ayni algoritma (HMAC-SHA256, ilk 8 hex); anahtar bu is akisinda ETSY_SHARED_SECRET
+    (siparis kod anahtari yalniz siparis betiklerinde, test_siparis_kod_anahtari)."""
     import hashlib
     import hmac
-    anahtar = (os.environ.get("SIPARIS_KOD_ANAHTARI") or os.environ.get("ETSY_SHARED_SECRET") or "astrolove").encode()
+    anahtar = (os.environ.get("ETSY_SHARED_SECRET") or "astrolove").encode()
     return "S-" + hmac.new(anahtar, str(rid).encode(), hashlib.sha256).hexdigest()[:8]
 
 

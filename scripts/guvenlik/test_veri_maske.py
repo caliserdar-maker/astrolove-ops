@@ -49,7 +49,7 @@ t = {"created_timestamp": 1794900000, "quantity": 1, "price": {"amount": 2900, "
      "shipped_timestamp": None}
 s = I.satis_satiri(t)
 kontrol("ilan_satis_oku: satirda acik siparis no yok", temiz(s) and SAHTE not in s)
-kontrol("ilan_satis_oku: opak kod order_router.receipt_kod ile ayni", "receipt " + R.receipt_kod(SAHTE) in s)
+kontrol("ilan_satis_oku: opak kod order_router.receipt_kod ile ayni (anahtar yokken)", "receipt " + R.receipt_kod(SAHTE) in s)
 kontrol("ilan_satis_oku: diger alanlar kaldi (adet, fiyat, sku, varyasyon)", "adet 1" in s and "29.0 USD" in s
         and "sku POD-CAN_LIB-MB-8x10" in s and "Size=8x10" in s and s.startswith("::warning::SATIS "))
 kontrol("ilan_satis_oku: ilk satir (ilan id) maskeli", temiz(I.maskele(f"::warning::SATIS CANCER_LIBRA 4570110641: toplam 3 islem")))
