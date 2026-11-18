@@ -109,7 +109,7 @@ jobs:
           while IFS= read -r p; do [ ${#p} -lt 4 ] || echo "::add-mask::$p"; done < <(tr '|' '\n' <<< "$AL")   # 4 harften kisa parca (US) maskelenmez
           [ -z "$AL" ] || echo "::add-mask::$AL"
           LST=$(jq -r '.inputs.listing // empty' "$E"); LST="${LST:-4570110641}"   # IP c3: eski job env LISTING (env basligi iptal_dok / siparis_kiyas ord id'sini basiyordu)
-          for o in $(grep -oE 'ord_[0-9A-Za-z]+' <<< "$LST" || true); do echo "::add-mask::$o"; n="${o#ord_}"; [ ${#n} -lt 6 ] || echo "::add-mask::$n"; done   # Prodigi ord id loga girmez
+          for o in $(grep -oiE 'ord_[0-9a-z]+' <<< "$LST" || true); do echo "::add-mask::$o"; n="${o:4}"; [ ${#n} -lt 6 ] || echo "::add-mask::$n"; done   # Prodigi ord id loga girmez
           D="K57_$(od -An -N8 -tx1 /dev/urandom | tr -d ' \n')"   # GITHUB_ENV ayraci: girdideki yeni satir ek degisken yazamaz
           { printf 'SIPARIS_REF<<%s\n%s\n%s\n' "$D" "$REF" "$D"; printf 'CONFIRM<<%s\n%s\n%s\n' "$D" "$CONF" "$D"
             printf 'SIPARIS_ALICI<<%s\n%s\n%s\n' "$D" "$AL" "$D"; printf 'LISTING<<%s\n%s\n%s\n' "$D" "$LST" "$D"; } >> "$GITHUB_ENV"

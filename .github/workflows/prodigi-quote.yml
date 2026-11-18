@@ -127,8 +127,8 @@ jobs:
             # Yalniz GET /orders (+ ECB kuru). Musteri verisi yazilmaz; cikti TEMP/PRODIGI.
             python scripts/prodigi/prodigi_ekstra_tesis.py --self-test
             REF_SIPARIS="${SKUS:-}" python scripts/prodigi/prodigi_ekstra_tesis.py --out-dir out > /dev/null   # skus = referans ord id (depoda tutulmaz)
-            python3 scripts/guvenlik/kargo_maske.py < out/PRODIGI_EKSTRA_TESIS.md >> "$GITHUB_STEP_SUMMARY"   # IP c3: ord id son 4
-            head -40 out/PRODIGI_EKSTRA_TESIS.md | python3 scripts/guvenlik/kargo_maske.py
+            python3 scripts/guvenlik/tam_maske.py < out/PRODIGI_EKSTRA_TESIS.md >> "$GITHUB_STEP_SUMMARY"   # IP c3: ord id son 4, siparis no opak kod
+            head -40 out/PRODIGI_EKSTRA_TESIS.md | python3 scripts/guvenlik/tam_maske.py
             rclone copy out "gdrive:ASTROLOVE/TEMP/PRODIGI" --include "PRODIGI_EKSTRA_TESIS.*" --include "EKSTRA_TESIS.json" -q
             exit 0
           fi
