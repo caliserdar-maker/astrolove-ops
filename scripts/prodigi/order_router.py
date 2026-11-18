@@ -728,7 +728,7 @@ class _MaskeliCikti:
         self._t = ""
 
     def _yaz(self, t):
-        return self._a.write(kargo_maske.maskele(maskele_metin(kargo_maske.maskele_alfa(t))))   # IP c3: harfli takip no once
+        return self._a.write(kargo_maske.maskele(maskele_metin(t)))
 
     def write(self, t):
         self._t += t
@@ -757,7 +757,7 @@ def maskeli_cikti_kur():
 
 def maskeli_metin_tam(t):
     """Adim ozeti (GITHUB_STEP_SUMMARY) ve benzeri dosyalar icin _MaskeliCikti ile ayni maske (fis deseni + kargo_maske)."""
-    return kargo_maske.maskele(maskele_metin(kargo_maske.maskele_alfa(t)))
+    return kargo_maske.maskele(maskele_metin(t))
 
 
 def main():

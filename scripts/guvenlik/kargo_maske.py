@@ -26,19 +26,6 @@ _TAKIP = re.compile(
     """)
 
 
-# IP c3 (18 Kas): yalniz rakam olmayan takip bicimleri (UPS / UPU / karisik). order_router fis deseninden ONCE uygular:
-# yoksa "1Z12345E0291980793" icindeki 10 hane S- koduna doner ve ilk 8 karakter acik kalir (son 4 kurali bozulur).
-_TAKIP_ALFA = re.compile(
-    r"""(?x)
-    (?<![A-Za-z0-9])
-    (   1Z[0-9A-Z]{16}
-      | [A-Z]{2}\d{9}[A-Z]{2}
-      | (?=[A-Z0-9]{12,}(?![A-Za-z0-9]))(?=(?:[A-Z]*\d){8})(?=\d*[A-Z])[A-Z0-9]{12,}
-    )
-    (?![A-Za-z0-9])
-    """)
-
-
 def son4(s):
     return "***" + s[-4:]
 
@@ -48,16 +35,6 @@ def _satir(s):
         return s
     s = _ORD.sub(lambda m: "ord_" + son4(m.group(1)), s)
     return _TAKIP.sub(lambda m: son4(m.group(1)), s)
-
-
-def maskele_alfa(metin):
-    """ord_ kimligi + harf iceren takip bicimleri son 4 hane; yalniz rakam dizilerine dokunmaz (fis deseni sonra calisir)."""
-    def _s(s):
-        if s.lstrip().startswith("::add-mask::"):
-            return s
-        s = _ORD.sub(lambda m: "ord_" + son4(m.group(1)), s)
-        return _TAKIP_ALFA.sub(lambda m: son4(m.group(1)), s)
-    return "".join(_s(s) for s in metin.splitlines(keepends=True))
 
 
 def maskele(metin):
