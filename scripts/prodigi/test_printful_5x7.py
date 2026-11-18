@@ -117,7 +117,8 @@ for b in ("8x10", "A1"):
 R.Prodigi = FP; R.load_prodigi_key = lambda e: "x"; R.TokenStore = FS; R.Etsy = FE
 R.otomasyonlar = lambda *a, **k: None
 R.etsy_receipts = lambda *a, **k: [Y, K, S]
-os.environ.update(TOKEN_FILE="/dev/null", ETSY_SHOP_ID="1")
+os.environ.update(TOKEN_FILE="/dev/null", ETSY_SHOP_ID="1",
+                  ETSY_SHARED_SECRET="test-5x7")   # IP c3: receipt_kod kapali hata (anahtarsiz "S-gizli"); P5 fis basina kod ayrimi icin sahte anahtar
 W = Path(tempfile.mkdtemp(prefix="pf5x7_"))
 
 

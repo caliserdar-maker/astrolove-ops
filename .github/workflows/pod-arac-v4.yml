@@ -82,7 +82,6 @@ jobs:
     env:
       MOD: ${{ inputs.mod || 'kuru' }}
       APPLY: ${{ inputs.apply && 'true' || 'false' }}
-      LISTING: ${{ inputs.listing || '4570110641' }}
       LIMIT: ${{ inputs.limit || '0' }}
       KOTA_ALT: ${{ inputs.kota_alt || '10' }}
       REDIRECT: ${{ inputs.redirect || 'https://astrolove.art/oauth/callback' }}
@@ -109,9 +108,11 @@ jobs:
           AL=$(jq -r '.inputs.siparis_alici // empty' "$E")
           while IFS= read -r p; do [ ${#p} -lt 4 ] || echo "::add-mask::$p"; done < <(tr '|' '\n' <<< "$AL")   # 4 harften kisa parca (US) maskelenmez
           [ -z "$AL" ] || echo "::add-mask::$AL"
+          LST=$(jq -r '.inputs.listing // empty' "$E"); LST="${LST:-4570110641}"   # IP c3: eski job env LISTING (env basligi iptal_dok / siparis_kiyas ord id'sini basiyordu)
+          for o in $(grep -oE 'ord_[0-9A-Za-z]+' <<< "$LST" || true); do echo "::add-mask::$o"; n="${o#ord_}"; [ ${#n} -lt 6 ] || echo "::add-mask::$n"; done   # Prodigi ord id loga girmez
           D="K57_$(od -An -N8 -tx1 /dev/urandom | tr -d ' \n')"   # GITHUB_ENV ayraci: girdideki yeni satir ek degisken yazamaz
           { printf 'SIPARIS_REF<<%s\n%s\n%s\n' "$D" "$REF" "$D"; printf 'CONFIRM<<%s\n%s\n%s\n' "$D" "$CONF" "$D"
-            printf 'SIPARIS_ALICI<<%s\n%s\n%s\n' "$D" "$AL" "$D"; } >> "$GITHUB_ENV"
+            printf 'SIPARIS_ALICI<<%s\n%s\n%s\n' "$D" "$AL" "$D"; printf 'LISTING<<%s\n%s\n%s\n' "$D" "$LST" "$D"; } >> "$GITHUB_ENV"
       - name: Onay kapisi
         run: |
           set -euo pipefail
@@ -278,7 +279,7 @@ jobs:
             rclone copy _out/dok "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM" -q
           elif [ "$MOD" = "kanal_oku" ]; then
             # SALT OKUMA: yalniz Prodigi GET /orders (+ son 15 kanal siparisinin GET /orders/{id}); Etsy cagrisi yok.
-            python scripts/prodigi/kanal_oku.py _out/kanal
+            python scripts/prodigi/kanal_oku.py _out/kanal 2>&1 | python3 scripts/guvenlik/kargo_maske.py   # IP c3: ord id son 4 (betik ici _MaskeliCikti + boru)
             rclone copy _out/kanal "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM" -q
           elif [ "$MOD" = "kota_oku" ]; then
             # SALT OKUMA: tek hafif GET ile kalan Etsy kotasi; olcum Drive KOTA_LOG.csv'ye eklenir.

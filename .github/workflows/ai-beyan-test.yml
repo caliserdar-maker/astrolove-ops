@@ -42,3 +42,4 @@ jobs:
           python3 scripts/ops/test_workflows.py
           python3 scripts/guvenlik/test_receipt_log_kapi.py   # IP adim 0 c (17 Kas): siparis no loga acik yazilmaz
           python3 scripts/guvenlik/test_veri_maske.py   # IP adim 0 c: veriden gelen siparis no (ilan_satis_oku, siparis_oku) opak kod
+          python3 scripts/guvenlik/test_maske_calisma.py   # IP adim 0 c3: 3 siparis aracinin gercek main() kosusu + kanal_oku + LISTING / ekstra_tesis maskesi
