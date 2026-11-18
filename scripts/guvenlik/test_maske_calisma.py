@@ -183,15 +183,32 @@ def adimlar(yol, metin=None):
     return d, [s for j in d["jobs"].values() for s in j.get("steps", [])]
 
 
+def _degerler(x):
+    """Ayristirilmis YAML'daki tum metin degerleri (anahtarlar dahil; YAML kacislari cozulmus)."""
+    if isinstance(x, dict):
+        for k, v in x.items():
+            yield str(k)
+            yield from _degerler(v)
+    elif isinstance(x, list):
+        for v in x:
+            yield from _degerler(v)
+    elif x is not None:
+        yield str(x)
+
+
+LISTING_IFADE = re.compile(r"""(?i)inputs\s*(\.\s*listing\b|\[\s*['"]listing['"])|\[\s*['"]inputs['"]\s*\]|"""
+                           r"""tojson\s*\(\s*(inputs|github(\.event(\.inputs)?)?)\s*\)""")
+
+
 def pod_kontrol(metin):
     d, st = adimlar(".github/workflows/pod-arac-v4.yml", metin)
     env = {k for j in d["jobs"].values() for k in (j.get("env") or {})}
     ilk = st[0].get("run", "")
     kanal = [s["run"] for s in st if "kanal_oku.py" in s.get("run", "")]
     kanal_satir = [x for r in kanal for x in r.splitlines() if "kanal_oku.py" in x]
-    ifade = re.findall(r"\$\{\{(.*?)\}\}", metin, re.S)
-    return (not any(re.search(r"inputs\s*(\.\s*listing|\[\s*['\"]listing)", x) for x in ifade)
-            and not re.search(r"(?i)\binputs\b[^\n]*\blisting\b", " ".join(str(s.get("env", "")) + str(s.get("with", "")) for s in st))
+    # inceleme 2 (ORTA 1): her YAML degerindeki her ${{ }} ifadesi; buyuk/kucuk harf, ['inputs'] erisimi, toJSON(inputs|github)
+    ifade = [x for v in _degerler(d) for x in re.findall(r"\$\{\{(.*?)\}\}", v, re.S)]
+    return (not any(LISTING_IFADE.search(x) for x in ifade)
             and "LISTING" not in env and "inputs.listing" in ilk and "::add-mask::$o" in ilk and "LISTING<<" in ilk
             and kanal_satir and all("| python3 scripts/guvenlik/kargo_maske.py" in x for x in kanal_satir))
 
@@ -206,6 +223,15 @@ eski = pm.replace("      - name: Girdi maskesi (IP adim 0 c, 17 Kas; siparis ref
                   "      - name: Girdi maskesi (IP adim 0 c, 17 Kas; siparis ref / onay / alici loga *** olur)\n"
                   "        env: { L2: \"${{ github.event.inputs.listing }}\" }\n", 1)
 kontrol("bilinen FAIL (inceleme m3): maske adiminda adim env tasiyicisi denetimden gecmez", eski != pm and not pod_kontrol(eski))
+for ad, satir in (("inputs.LISTING", "OID: ${{ inputs.LISTING }}"), ("github.event['inputs']['listing']", "OID: ${{ github.event['inputs']['listing'] }}"),
+                  ("toJSON(inputs)", "EV: ${{ toJSON(inputs) }}"), ("toJSON(github.event)", "EV: ${{ toJSON(github.event) }}"),
+                  ("YAML kacisi", 'OID: "${{ inputs.\\u006cisting }}"')):
+    eski = pm.replace("    env:\n      MOD:", "    env:\n      " + satir + "\n      MOD:", 1)
+    kontrol(f"bilinen FAIL (inceleme 2 ORTA 1): job env {ad} denetimden gecmez", eski != pm and not pod_kontrol(eski))
+eski = pm.replace("\njobs:\n", "\nrun-name: ${{ inputs.Listing }}\njobs:\n", 1)
+kontrol("bilinen FAIL (inceleme 2 ORTA 1): run-name inputs.Listing denetimden gecmez", eski != pm and not pod_kontrol(eski))
+eski = pm.replace("    env:\n      MOD:", "    env:\n      LISTING_ADI: listing\n      MOD:", 1)
+kontrol("bilinen PASS: ifade disinda 'listing' kelimesi (ifade yok) yanlis FAIL vermez", eski != pm and pod_kontrol(eski))
 
 
 def adim_kos(run, olay):
