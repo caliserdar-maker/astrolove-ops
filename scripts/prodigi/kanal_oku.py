@@ -13,6 +13,7 @@ from collections import Counter
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent)); sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "etsy"))
 import order_router as R
+R.maskeli_cikti_kur()   # IP c3: stdout/stderr'de ord id son 4, siparis no / merchantReference opak kod (Drive dosyalari tam kalir)
 
 out = Path(sys.argv[1] if len(sys.argv) > 1 else "_out/kanal"); out.mkdir(parents=True, exist_ok=True)
 p = R.Prodigi(R.load_prodigi_key("live"), "live")

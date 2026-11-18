@@ -64,6 +64,7 @@ def oas_shipment_alanlari(url=OAS_URL):
 
 
 def main():
+    R.maskeli_cikti_kur()          # IP adim 0 c: stdout/stderr'de receipt -> opak kod, takip / ord_ son 4 (CEO karari 1)
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--env", default="live", choices=["live", "sandbox"])
     ap.add_argument("--out", default="_out/takip")
@@ -187,7 +188,7 @@ def main():
     p = os.environ.get("GITHUB_STEP_SUMMARY")
     if p:
         with open(p, "a", encoding="utf-8") as fh:
-            fh.write("\n".join(md[:30]) + "\n")
+            fh.write(R.maskeli_metin_tam("\n".join(md[:30])) + "\n")
 
 
 if __name__ == "__main__":

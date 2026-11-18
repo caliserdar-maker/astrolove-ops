@@ -83,10 +83,12 @@ jobs:
         env:
           LIMIT: ${{ inputs.limit }}
           DISCOVER: ${{ inputs.discover }}
-          SKUS: ${{ inputs.skus }}
           MODE: ${{ inputs.mode }}
         run: |
           set -euo pipefail
+          SKUS=$(jq -r '.inputs.skus // empty' "$GITHUB_EVENT_PATH")
+          while IFS= read -r o; do [ ${#o} -lt 4 ] || echo "::add-mask::$o"; done < <(tr ',' '\n' <<< "$SKUS")   # IP adim 0 c: siparis_oku'da 'ord_..,etsy-<no>-<boy>'
+          for p in $(grep -oE '[0-9]{10,12}' <<< "$SKUS" || true); do echo "::add-mask::$p"; done
           if [ "$MODE" = "hpr_sizes" ]; then
             python scripts/prodigi/prodigi_hpr_sizes.py --out-dir out
             exit 0
@@ -125,8 +127,8 @@ jobs:
             # Yalniz GET /orders (+ ECB kuru). Musteri verisi yazilmaz; cikti TEMP/PRODIGI.
             python scripts/prodigi/prodigi_ekstra_tesis.py --self-test
             REF_SIPARIS="${SKUS:-}" python scripts/prodigi/prodigi_ekstra_tesis.py --out-dir out > /dev/null   # skus = referans ord id (depoda tutulmaz)
-            cat out/PRODIGI_EKSTRA_TESIS.md >> "$GITHUB_STEP_SUMMARY"
-            head -40 out/PRODIGI_EKSTRA_TESIS.md
+            python3 scripts/guvenlik/tam_maske.py < out/PRODIGI_EKSTRA_TESIS.md >> "$GITHUB_STEP_SUMMARY"   # IP c3: ord id son 4, siparis no opak kod
+            head -40 out/PRODIGI_EKSTRA_TESIS.md | python3 scripts/guvenlik/tam_maske.py
             rclone copy out "gdrive:ASTROLOVE/TEMP/PRODIGI" --include "PRODIGI_EKSTRA_TESIS.*" --include "EKSTRA_TESIS.json" -q
             exit 0
           fi
@@ -184,5 +186,8 @@ jobs:
         with:
           retention-days: 1
           name: prodigi-quotes
-          path: out/
+          path: |
+            out/
+            !out/PRODIGI_EKSTRA_TESIS.*
+            !out/EKSTRA_TESIS.json
           if-no-files-found: ignore

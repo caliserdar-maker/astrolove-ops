@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "etsy"))
 
 
 def ozet(o):
@@ -24,6 +25,8 @@ def ozet(o):
 
 
 def main():
+    import order_router as R   # IP adim 0 c: stdout/stderr _MaskeliCikti (merchantReference etsy-<no>-<boy> -> opak kod)
+    R.maskeli_cikti_kur()
     from prodigi_pilot_quote import Api, load_key
     oid, ref = sys.argv[1], sys.argv[2]
     top = int(sys.argv[3]) if len(sys.argv) > 3 else 10

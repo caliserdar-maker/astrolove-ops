@@ -40,7 +40,7 @@ jobs:
               s = s.replace('ı', 'i').replace('İ', 'I')
               s = ''.join(c for c in unicodedata.normalize('NFKD', s) if not unicodedata.combining(c))
               return ''.join(c if c.isalnum() else '_' for c in s).strip('_')
-          for k in ('name1', 'name2', 'date', 'line'):
+          for k in ('name1', 'name2', 'date', 'line', 'siparis_no'):   # siparis_no: IP adim 0 c (17 Kas)
               v = ' '.join(str(i.get(k) or '').split())
               for s in {v, v.upper(), asc(v.upper())} - {''}:
                   print('::add-mask::' + s)
@@ -73,7 +73,6 @@ jobs:
       - name: Uret + kontrol (PASS/FAIL)
         env:
           TUR: ${{ inputs.tur }}
-          SIPARIS_NO: ${{ inputs.siparis_no }}
           PAIR: ${{ inputs.pair }}
           NAME1: ${{ inputs.name1 }}
           NAME2: ${{ inputs.name2 }}
@@ -85,6 +84,7 @@ jobs:
           BOY: ${{ inputs.boy }}
         run: |
           set -euo pipefail
+          SIPARIS_NO=$(jq -r '.inputs.siparis_no // empty' "$GITHUB_EVENT_PATH"); [ -z "$SIPARIS_NO" ] || echo "::add-mask::$SIPARIS_NO"; export SIPARIS_NO   # IP adim 0 c (17 Kas): siparis no olay dosyasindan okunur, loga *** olur
           KOD=_kod KOD_SHA="$KOD_REF" CIKTI=_out python3 scripts/siparis_by/by_siparis.py
       - name: Drive'a yukle
         run: |

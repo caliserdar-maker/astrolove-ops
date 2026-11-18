@@ -82,25 +82,37 @@ jobs:
     env:
       MOD: ${{ inputs.mod || 'kuru' }}
       APPLY: ${{ inputs.apply && 'true' || 'false' }}
-      CONFIRM: ${{ inputs.confirm || '' }}
-      LISTING: ${{ inputs.listing || '4570110641' }}
       LIMIT: ${{ inputs.limit || '0' }}
       KOTA_ALT: ${{ inputs.kota_alt || '10' }}
       REDIRECT: ${{ inputs.redirect || 'https://astrolove.art/oauth/callback' }}
       KOD: ${{ inputs.kod || '' }}
       STATE: ${{ inputs.state || '' }}
-      SIPARIS_REF: ${{ inputs.siparis_ref || 'etsy-1000000001-8x10' }}
       SIPARIS_SKU: ${{ inputs.siparis_sku || 'GLOBAL-HPR-8x10' }}
       SIPARIS_ADET: ${{ inputs.siparis_adet || '1' }}
       SIPARIS_DOSYA_ID: ${{ inputs.siparis_dosya_id || '' }}
       SIPARIS_REMOTE: ${{ inputs.siparis_remote || '' }}
-      SIPARIS_ALICI: ${{ inputs.siparis_alici || '' }}
       SIPARIS_MASTER: ${{ inputs.siparis_master }}
       SIPARIS_KONTROL: ${{ inputs.siparis_kontrol }}
       TEST_RECEIPT: ${{ inputs.test_receipt || 'scripts/prodigi/test_receipt_kisisel_taban.json' }}
       ADIM: ${{ inputs.adim || '1,2,3' }}
       ATLA: ${{ inputs.atla }}
     steps:
+      - name: Girdi maskesi (IP adim 0 c, 17 Kas; siparis ref / onay / alici loga *** olur)
+        run: |
+          set -euo pipefail
+          E="$GITHUB_EVENT_PATH"
+          REF=$(jq -r '(.inputs.siparis_ref // "") | if . == "" then "etsy-1000000001-8x10" else . end' "$E")   # eski: inputs.siparis_ref || varsayilan
+          echo "::add-mask::$REF"; for p in $(grep -oE '[0-9]{10,12}' <<< "$REF" || true); do echo "::add-mask::$p"; done
+          CONF=$(jq -r '.inputs.confirm // empty' "$E")
+          [ ${#CONF} -lt 4 ] || echo "::add-mask::$CONF"   # siparis_gonder'de onay = siparis ref; diger modlarda sabit kelime (maske zararsiz)
+          AL=$(jq -r '.inputs.siparis_alici // empty' "$E")
+          while IFS= read -r p; do [ ${#p} -lt 4 ] || echo "::add-mask::$p"; done < <(tr '|' '\n' <<< "$AL")   # 4 harften kisa parca (US) maskelenmez
+          [ -z "$AL" ] || echo "::add-mask::$AL"
+          LST=$(jq -r '.inputs.listing // empty' "$E"); LST="${LST:-4570110641}"   # IP c3: eski job env LISTING (env basligi iptal_dok / siparis_kiyas ord id'sini basiyordu)
+          for o in $(grep -oiE 'ord_[0-9a-z]+' <<< "$LST" || true); do echo "::add-mask::$o"; n="${o:4}"; [ ${#n} -lt 6 ] || echo "::add-mask::$n"; done   # Prodigi ord id loga girmez
+          D="K57_$(od -An -N8 -tx1 /dev/urandom | tr -d ' \n')"   # GITHUB_ENV ayraci: girdideki yeni satir ek degisken yazamaz
+          { printf 'SIPARIS_REF<<%s\n%s\n%s\n' "$D" "$REF" "$D"; printf 'CONFIRM<<%s\n%s\n%s\n' "$D" "$CONF" "$D"
+            printf 'SIPARIS_ALICI<<%s\n%s\n%s\n' "$D" "$AL" "$D"; printf 'LISTING<<%s\n%s\n%s\n' "$D" "$LST" "$D"; } >> "$GITHUB_ENV"
       - name: Onay kapisi
         run: |
           set -euo pipefail
@@ -267,7 +279,7 @@ jobs:
             rclone copy _out/dok "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM" -q
           elif [ "$MOD" = "kanal_oku" ]; then
             # SALT OKUMA: yalniz Prodigi GET /orders (+ son 15 kanal siparisinin GET /orders/{id}); Etsy cagrisi yok.
-            python scripts/prodigi/kanal_oku.py _out/kanal
+            python scripts/prodigi/kanal_oku.py _out/kanal 2>&1 | python3 scripts/guvenlik/kargo_maske.py   # IP c3: ord id son 4 (betik ici _MaskeliCikti + boru)
             rclone copy _out/kanal "gdrive:ASTROLOVE/TEMP/SIPARIS_ISIM" -q
           elif [ "$MOD" = "kota_oku" ]; then
             # SALT OKUMA: tek hafif GET ile kalan Etsy kotasi; olcum Drive KOTA_LOG.csv'ye eklenir.

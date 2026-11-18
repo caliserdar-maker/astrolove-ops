@@ -28,6 +28,7 @@ jobs:
     steps:
       - id: p
         run: |
+          _m=$(jq -r '.inputs.receipt // empty' "$GITHUB_EVENT_PATH"); [ -z "$_m" ] || echo "::add-mask::$_m"   # IP adim 0 c (17 Kas): receipt loga *** olur
           set -euo pipefail
           for k in isim1 isim2; do v=$(jq -r ".inputs.$k" "$GITHUB_EVENT_PATH"); echo "::add-mask::$v"; echo "::add-mask::${v^^}"; done
           m=$(jq -r '.inputs.mesaj_b64' "$GITHUB_EVENT_PATH" | base64 -d); while IFS= read -r s || [ -n "$s" ]; do s="${s#"${s%%[![:space:]]*}"}"; s="${s%"${s##*[![:space:]]}"}"; if [ "$(printf %s "$s" | wc -c)" -ge 4 ]; then echo "::add-mask::$s"; fi; done <<< "${m//$'\r'/$'\n'}"
