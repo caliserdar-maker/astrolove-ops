@@ -238,7 +238,8 @@ jobs:
             for x in "AstroLoveArt_${B12}_${OLCU}.jpg:baski:${CIFT}_teslim_REF.png" "AstroLoveArt_${B12}_${OLCU}_Preview.jpg:onizleme:${CIFT}_teslim_Preview_REF.png"; do
               y=${x%%:*}; q=${x#*:}; tr=${q%%:*}; kn=${q#*:}
               /home/claude/blender/venv/bin/python ops/scripts/siparis_onizle/halka_kapi.py "/tmp/is/$y" "$OLCU" /tmp/is/halka --tur "$tr" --kaynak "/tmp/is/son/$kn" > /tmp/is/halka/h.log 2>&1 || HRC=1
-              cut -c1-300 /tmp/is/halka/h.log; done                          # cikis kodu boruda YUTULMAZ (pipefail yok: once dosya, sonra yazdir)
+              cut -c1-300 /tmp/is/halka/h.log; grep '^HALKA_KAPI_BELLEK' /tmp/is/halka/h.log || true; done   # cikis kodu boruda YUTULMAZ (once dosya, sonra yazdir)
+            free -m | head -2                                                # runner bellegi (C3 olcumu)
             if [ "$HRC" != "0" ] && [ "${HALKA_KAPI_ATLA:-}" = "1" ]; then echo "::warning::halka kapisi FAIL, Serdar istisnasi (repo degiskeni HALKA_KAPI_ATLA=1)"; HRC=0; fi
             if [ "$HRC" != "0" ]; then                                      # 19 Kas aksam (secenek a): neden is icinde ve ozette yazar
               echo "::error title=HALKA KAPISI FAIL::MB $OLCU ${TESLIM_TUR:-}: mavi halka esik ya da tavan ustu (halka_kapi; ayrinti HALKA/HALKA_KAPI_*.json). Musteri dosyasi YUKLENMEZ; Merkez cifti elle duzeltir."

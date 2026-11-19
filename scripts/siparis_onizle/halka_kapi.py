@@ -138,4 +138,6 @@ if __name__ == "__main__":
     tur = a[a.index("--tur") + 1] if "--tur" in a else ""
     kyn = a[a.index("--kaynak") + 1] if "--kaynak" in a else None
     r = kapi(a[0], a[1], a[2], tur, ref, es, kyn, "--tam-kontrol" in a); print("HALKA_KAPI", json.dumps({k: v for k, v in r.items() if k != "olcu_ayrinti"}))
+    import resource                                                  # 19 Kas aksam (GOREV HALKA_KALICI_3 C3): tepe bellek is logunda
+    print("HALKA_KAPI_BELLEK tepe_rss_mb=%d" % (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss // 1024))
     sys.exit(0 if r["PASS"] else 1)
