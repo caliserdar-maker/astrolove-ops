@@ -43,3 +43,24 @@ jobs:
           python3 scripts/guvenlik/test_receipt_log_kapi.py   # IP adim 0 c (17 Kas): siparis no loga acik yazilmaz
           python3 scripts/guvenlik/test_veri_maske.py   # IP adim 0 c: veriden gelen siparis no (ilan_satis_oku, siparis_oku) opak kod
           python3 scripts/guvenlik/test_maske_calisma.py   # IP adim 0 c3: 3 siparis aracinin gercek main() kosusu + kanal_oku + LISTING / ekstra_tesis maskesi
+  siparis-onizle-test:
+    # 19 Kas (GOREV HALKA_KALICI_2 E, inceleme G ORTA 8): Midnight Blue halka duzeltmesi + halka kapisi + siparis yardimcisi testleri. Motor
+    # surumleri (siparis-giris yeni isi ile ayni). test_halka_yama d2b414ee motor_gpt'yi okur (main gecmisinde yok: SHA ile cekilir). Ag YOK.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: d2b414ee (motor tabani) + kurulum
+        run: |
+          set -euo pipefail
+          git fetch -q --depth=1 origin d2b414ee270ec029bd5abcef4a6535414ae7d1e1
+          python3 -m venv /tmp/v                                         # alt surecler -I ile kosar: kullanici site-packages gorulmez, venv gorulur
+          /tmp/v/bin/pip install -q numpy==2.5.3 opencv-python-headless==5.0.0.93 pillow==12.3.0 scipy==1.18.1 pyyaml==6.0.2
+      - name: siparis_onizle testleri (her biri tek basina, cikis kodu ayri)
+        run: |
+          set -euo pipefail
+          for t in scripts/siparis_onizle/test_halka_yama.py scripts/siparis_onizle/test_halka_kapi.py scripts/siparis_onizle/test_premium_tara_kabuk.py \
+                   scripts/siparis_onizle/test_siparis_v2_girdi.py scripts/siparis_onizle/test_kesit_olcum.py \
+                   scripts/siparis_onizle/test_halka_23_akis.py; do
+            echo "== $t"; /tmp/v/bin/python "$t" > _t.log 2>&1 || { tail -40 _t.log; exit 1; }; tail -1 _t.log
+          done

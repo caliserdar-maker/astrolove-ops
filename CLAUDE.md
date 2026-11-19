@@ -166,6 +166,9 @@ Hedef: Serdar isim + burc yeri + tagline verir, 15 dk icinde 5 PDF Drive'da (Tes
   varsayilani b8c8c4b. siparis-dijital renk_ref varsayilani 8a8b370 ESKI ve girisce kullanilmaz (Serdar 22 Eki A2/A2-not;
   degistirilmedi). Temiz dallara gecis (P0.7) yalniz kupada (0196e37a, A3 kiyasi PASS); poster A3 kiyasi FAIL. wp_pod_kod v1;
   receipt yalniz rakam (test: 900000000N, N >= 1).
+- TESLIM (Serdar 19 Kas, KARARLAR_20261119_25-27): siparis-giris dispatch'inde `teslim` HER ZAMAN verilir (baski | dijital; zorunlu girdi,
+  yoksa `yeni` isi durur). Yalniz halka kalici PR'i (caliserdar-maker/astrolove-ops#64) main'e girdikten sonra gecerli; oncesinde main'deki
+  siparis-giris bu girdiyi tanimaz.
 - Siparis kosusu sirasinda prova / tani / toplu kosu ACILMAZ: runner kuyrugu siparis islerini geciktirir
   (Test 2: CI 2 dk gec basladi).
 - "Dosyalar hazir" = 5 PDF Drive'da (createdTime), job bitisi degil. Teslim oncesi 1:1 / onizleme ile

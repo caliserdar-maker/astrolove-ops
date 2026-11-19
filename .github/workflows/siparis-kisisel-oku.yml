@@ -53,10 +53,12 @@ jobs:
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           ETSY_SHOP_ID: ${{ secrets.ETSY_SHOP_ID }}
           TOKEN_FILE: _work/ETSY_TOKEN.json
+          SIPARIS_IZ_ANAHTARI: ${{ secrets.SIPARIS_IZ_ANAHTARI }}
         run: |
           set -euo pipefail
           RECEIPT=$(jq -r '.inputs.receipt // empty' "$GITHUB_EVENT_PATH"); [ -z "$RECEIPT" ] || echo "::add-mask::$RECEIPT"   # IP adim 0 c (17 Kas): siparis no olay dosyasindan okunur, loga *** olur
           [[ "$RECEIPT" =~ ^[0-9]+$ ]] || { echo "::error::receipt"; exit 1; }
+          echo "::notice title=SIPARIS_IZI::$(R="$RECEIPT" python3 -c 'import hmac,hashlib,os;k=os.environ.get("SIPARIS_IZ_ANAHTARI","");r=os.environ.get("R","");print(hmac.new(k.encode(),r.encode(),hashlib.sha256).hexdigest()[:16] if k and r.isdigit() else "yok")')"   # 19 Kas: kosu_sil siparis kontrolu (opak HMAC; anahtar yoksa "yok")
           python3 scripts/etsy/siparis_kisisel.py --receipt "$RECEIPT" --out _out
       - name: Token geri yaz + gizli klasore yaz
         if: always()

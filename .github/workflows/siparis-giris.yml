@@ -38,6 +38,11 @@ on:
         type: choice
         default: kapali
         options: [kapali, raqm]
+      teslim:
+        description: "19 Kas (Serdar karar 1): baski = Printful dosyasi (sinir 100 MB); dijital = Etsy teslimi (sinir 20 MB). ZORUNLU (varsayilan yok)."
+        required: true
+        type: choice
+        options: [baski, dijital]
       kuru:
         description: "true = yalniz yonlendirme karari, uretim yok"
         required: true
@@ -83,7 +88,8 @@ jobs:
           if [ "$TK" = "raqm" ] && { [ "$YOL" != "eski" ] || { [ "$R" != "CHAMPAGNE_IVORY" ] && [ "$R" != "WARM_PARCHMENT" ]; }; }; then echo "HATA: tagline_kerning=raqm yalniz ESKI YOL CI/WP (renk $R, yol $YOL)" >&2; exit 1; fi
           [ "$KURU" = "true" ] && Z=kuru || Z=uret
           case "$YOL" in yeni) KOD="siparis-gpt $GPT_REF";; eski) if [ "$R" = "WARM_PARCHMENT" ]; then KOD="siparis-dijital wp_ref $WP_REF"; else KOD="siparis-dijital renk_ref $ESKI_RENK_REF"; fi;; *) KOD="yok";; esac
-          echo "::notice title=YONLENDIRME::renk=$R olcu=$O anahtar=$ACIK yeni_yol=$Y tagline_kerning=$TK -> $YOL ($Z) kod=$KOD"
+          TS=$(jq -r '.inputs.teslim // "YOK"' "$E")
+          echo "::notice title=YONLENDIRME::renk=$R olcu=$O teslim=$TS anahtar=$ACIK yeni_yol=$Y tagline_kerning=$TK -> $YOL ($Z) kod=$KOD"
           { echo "### Siparis yonlendirme"; echo "renk $R, olcu $O, anahtar $ACIK, yeni_yol $Y, tagline_kerning $TK -> **$YOL** ($Z)"; } >> "$GITHUB_STEP_SUMMARY"
           [ "$Z" = "kuru" ] && echo "yol=kuru-$YOL" >> "$GITHUB_OUTPUT" || echo "yol=$YOL" >> "$GITHUB_OUTPUT"
 
@@ -139,7 +145,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { ref: "${{ env.GPT_REF }}", fetch-depth: 1, sparse-checkout: "motor_gpt" }
+      - uses: actions/checkout@v4                                     # 19 Kas (halka kalici): halka_yama + halka_kapi bu is akisinin kendi commit'inden
+        with: { path: ops, fetch-depth: 1, sparse-checkout: "scripts/siparis_onizle" }
       - name: Girdi + maske
+        env: {SIPARIS_IZ_ANAHTARI: "${{ secrets.SIPARIS_IZ_ANAHTARI }}"}
         run: |
           _m=$(jq -r '.inputs.receipt // empty' "$GITHUB_EVENT_PATH"); [ -z "$_m" ] || echo "::add-mask::$_m"   # IP adim 0 c (17 Kas): receipt loga *** olur
           set -euo pipefail
@@ -152,6 +161,7 @@ jobs:
           echo "RENK=$(jq -r .renk /tmp/istek.json)" >> "$GITHUB_ENV"; echo "OLCU=$(jq -r .olcu /tmp/istek.json)" >> "$GITHUB_ENV"
           echo "T_BAS=$(date -u +%s)" >> "$GITHUB_ENV"
           echo "::notice title=YENI YOL::siparis-gpt kodu $GPT_REF"
+          echo "::notice title=SIPARIS_IZI::$(R="$(jq -r .receipt /tmp/istek.json)" python3 -c 'import hmac,hashlib,os;k=os.environ.get("SIPARIS_IZ_ANAHTARI","");r=os.environ.get("R","");print(hmac.new(k.encode(),r.encode(),hashlib.sha256).hexdigest()[:16] if k and r.isdigit() else "yok")')"   # 19 Kas: kosu_sil siparis kontrolu (opak HMAC)
       - name: rclone
         run: |
           set -euo pipefail
@@ -189,6 +199,18 @@ jobs:
           wait
           ls -la /tmp/k /tmp/k/ek /tmp/ref
           ln -s /tmp/k/ek/SCORPIO_VIRGO_T5_FAIL_tam.png /home/claude/ao/KANIT/SCORPIO_VIRGO_T5_FAIL_tam.png
+          # 19 Kas (Serdar ~02:38 + karar 1, 10:14-10:31): MB halka duzeltmesi KALICI (taban d2b414ee degilse DUR). BASKI: tum MB olculeri
+          # (q100 dosya en buyuk 24x36 90 MB < Printful 100 MB; gate g baskida 100 MB). DIJITAL (Etsy 20 MB): yalniz 20 MB'a sigan olculer
+          # (olcum q100: 5x7 4.2, 8x10 9.3, A4 11.2, 11x14 17.8 MB); digerleri bugunku yolda (q97, halka riski raporda).
+          # 19 Kas aksam (Serdar KARARLAR_20261119_25, secenek a): 2:3 ailesi (12x18 16x24 20x30 24x36) baskida da ACIK, tavan 0.10 aynen;
+          # kaynak halkasi tavani asan siparis halka kapisinda durur (musteri dosyasi yuklenmez), Merkez o cifti elle duzeltir.
+          TT=$(jq -r '.inputs.teslim // empty' "$GITHUB_EVENT_PATH")
+          case "$TT" in baski|dijital) ;; *) echo "::error::teslim girdisi zorunlu (baski | dijital)"; exit 1;; esac
+          echo "TESLIM_TUR=$TT" >> "$GITHUB_ENV"
+          if [ "$RENK" = "MIDNIGHT_BLUE" ] && [ -n "${OLCU:-}" ] && { [ "$TT" = baski ] || [[ " 5x7 8x10 11x14 A4 " == *" $OLCU "* ]]; }; then
+            bash ops/scripts/siparis_onizle/halka_yama/bindir.sh "$GITHUB_WORKSPACE/motor_gpt"; echo "HALKA_DUZELT=1" >> "$GITHUB_ENV"
+            echo "::notice title=HALKA::MB $OLCU $TT: halka duzeltmesi ACIK, halka kapisi kosacak"
+          elif [ "$RENK" = "MIDNIGHT_BLUE" ]; then echo "::warning title=HALKA::MB $OLCU $TT: halka duzeltmesi KAPALI (dijitalde q100 > 20 MB); bugunku yol, halka riski"; fi
       - name: Uret
         run: |
           set -euo pipefail
@@ -201,6 +223,7 @@ jobs:
             RENKLER="$RENK" SIPARIS_OLCU="$OLCU" /home/claude/blender/venv/bin/python /home/claude/blender/db_pw_uret.py "$(jq -r .cift $I)" "$(jq -r .isim1 $I)" "$(jq -r .isim2 $I)" "$(jq -r .mesaj_b64 $I)" "/tmp/k/${CIFT}_ana.png" /tmp/pl /tmp/is
           fi
       - name: Kapilar
+        env: {HALKA_KAPI_ATLA: "${{ vars.HALKA_KAPI_ATLA }}"}
         run: |
           set +e
           if [ "$RENK" = "MIDNIGHT_BLUE" ]; then
@@ -209,6 +232,23 @@ jobs:
             KAPI_OLCULER="$OLCU" /home/claude/blender/venv/bin/python /home/claude/blender/kapi_db_pw.py /tmp/is --json /tmp/is/KAPI.json
           fi
           echo "KAPI_RC=$?" >> "$GITHUB_ENV"
+          HRC=0                                                              # 19 Kas: MB mavi halka kapisi (baski + onizleme), esikler halka_kapi.py
+          if [ "${HALKA_DUZELT:-}" = "1" ]; then
+            B12=$(echo "$CIFT" | tr '_' '\n' | sed 's/.*/\L&/;s/^./\u&/' | paste -sd_); mkdir -p /tmp/is/halka
+            for x in "AstroLoveArt_${B12}_${OLCU}.jpg:baski:${CIFT}_teslim_REF.png" "AstroLoveArt_${B12}_${OLCU}_Preview.jpg:onizleme:${CIFT}_teslim_Preview_REF.png"; do
+              y=${x%%:*}; q=${x#*:}; tr=${q%%:*}; kn=${q#*:}
+              /home/claude/blender/venv/bin/python ops/scripts/siparis_onizle/halka_kapi.py "/tmp/is/$y" "$OLCU" /tmp/is/halka --tur "$tr" --kaynak "/tmp/is/son/$kn" > "/tmp/is/halka/h_$tr.log" 2>&1 || HRC=1
+              grep -E '^HALKA_KAPI' "/tmp/is/halka/h_$tr.log" | cut -c1-300 || true; done   # cikis kodu boruda YUTULMAZ (once dosya, sonra yazdir); tur basina log (neden)
+            free -m | head -2                                                # runner bellegi (C3 olcumu)
+            if [ "$HRC" != "0" ] && [ "${HALKA_KAPI_ATLA:-}" = "1" ]; then echo "::warning::halka kapisi FAIL, Serdar istisnasi (repo degiskeni HALKA_KAPI_ATLA=1)"; HRC=0; fi
+            if [ "$HRC" != "0" ]; then                                      # 19 Kas aksam (secenek a; inceleme D ORTA 1): neden turle, is icinde ve ozette
+              NEDEN=$(python3 ops/scripts/siparis_onizle/halka_neden.py /tmp/is/halka/h_baski.log /tmp/is/halka/h_onizleme.log 2>/dev/null) || NEDEN=""
+              [ -n "$NEDEN" ] || NEDEN="neden okunamadi (halka_neden)"
+              echo "::error title=HALKA KAPISI FAIL::MB $OLCU ${TESLIM_TUR:-}: musteri dosyasi YUKLENMEZ. Neden: $NEDEN"
+              { echo "### Halka kapisi FAIL"; echo "MB $OLCU ${TESLIM_TUR:-}: AstroLoveArt dosyalari Drive'a yuklenmedi (yalniz KAPI / SURE / siparis.json + HALKA kontrolleri)."; echo "Neden: $NEDEN"; } >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+          echo "HALKA_RC=$HRC" >> "$GITHUB_ENV"
       - name: Drive'a yaz
         if: always()
         run: |
@@ -221,13 +261,20 @@ jobs:
               B12=$(echo "$CIFT" | tr '_' '\n' | sed 's/.*/\L&/;s/^./\u&/' | paste -sd_); r=${b#AstroLoveArt_${B12}}
               mv "$f" "/tmp/is/AstroLoveArt_${B12}_Midnight_Blue${r}.jpg"; done
             ls /tmp/is/AstroLoveArt_*.jpg || echo "::warning::teslim JPG yok (uretim dustu); KAPI/siparis.json yine yuklenir"
-            rclone copy /tmp/is "$D" --include "AstroLoveArt_*.jpg" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --exclude "*"
+            [ -d /tmp/is/halka ] && rclone copy /tmp/is/halka "$D/HALKA" --include "HALKA_KAPI_*.json" -q
+            HV=0; [ "${HALKA_DUZELT:-}" = "1" ] && HV=1                       # inceleme G ORTA 5: bayrak aciksa kapi kosmadiysa (HALKA_RC yok) yukleme YOK
+            if [ "${HALKA_RC:-$HV}" != "0" ]; then                           # 19 Kas: halka FAIL -> musteri dosyasi YOK; sayi + kontrol goruntusu (Merkez)
+              echo "::error::halka kapisi FAIL: AstroLoveArt dosyalari yuklenmedi"; rclone copy /tmp/is/halka "$D/HALKA" --include "KONTROL_*.jpg" -q
+              rclone copy /tmp/is "$D" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --exclude "*"
+            else
+              rclone copy /tmp/is "$D" --include "AstroLoveArt_*.jpg" --include "KAPI.json" --include "SURE.json" --include "siparis.json" --exclude "*"
+            fi
           else                                                               # yalniz secilen renk: ana kopya, teslim, onizleme
             rclone copy /tmp/is/$RENK "$D" --include "AstroLoveArt_*.jpg" --exclude "*"
             rclone copy /tmp/is "$D" --max-depth 1 --include "KAPI.json" --include "SURE.json" --include "siparis.json" --exclude "*"
           fi
           rclone lsl "$D"
       - name: Sonuc
-        run: '[ "${KAPI_RC:-1}" = "0" ]'
+        run: '[ "${KAPI_RC:-1}" = "0" ] && [ "${HALKA_RC:-1}" = "0" ]'
       - if: ${{ always() }}
         run: rm -rf ~/.config/rclone
