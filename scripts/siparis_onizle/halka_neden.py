@@ -7,6 +7,7 @@ ciktisini ayri log'a yazar (h_baski.log, h_onizleme.log); bu betik o log'lardaki
   COKTU      HALKA_KAPI satiri yok (istisna, bellek, eksik _REF dosyasi): kapi sonuc vermedi.
 Yalniz sayi ve sabit metin basar (dosya / cift / isim basmaz). Her zaman cikis 0 (neden yazimi isi durdurmaz; karar HALKA_RC'de)."""
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -14,11 +15,13 @@ from pathlib import Path
 def neden(yol):
     tur = Path(yol).stem.replace("h_", "", 1)
     try:
-        satir = [s for s in Path(yol).read_text(errors="replace").splitlines() if s.startswith("HALKA_KAPI {")]
+        tum = Path(yol).read_text(errors="replace").splitlines()
     except OSError:
-        satir = []
-    if not satir:
-        return f"{tur}: COKTU (kapi sonuc vermedi; istisna / bellek / eksik kaynak)"
+        tum = []
+    satir = [s for s in tum if s.startswith("HALKA_KAPI {")]
+    if not satir:                                                    # inceleme D 2. tur DUSUK 2: yalniz istisna SINIF adi (mesaj / yol basilmaz)
+        ist = [m.group(1) for s in tum for m in [re.match(r"^([A-Za-z_][A-Za-z0-9_.]*(?:Error|Exception|Interrupt|Exit))\b", s)] if m]
+        return f"{tur}: COKTU (kapi sonuc vermedi; " + (f"istisna {ist[-1]})" if ist else "log yok ya da surec olduruldu: bellek / sure)")
     try:
         r = json.loads(satir[-1][len("HALKA_KAPI "):])
     except ValueError:

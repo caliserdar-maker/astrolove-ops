@@ -77,6 +77,19 @@ with tempfile.TemporaryDirectory() as t:
 kontrol("esikler degismedi: baski 0.020 (5 MP alti 0.030), onizleme 0.040, tavan 0.10 her tur",
         HK.KODLAMA_ESIK == {"baski": 0.020, "onizleme": 0.040} and HK.KODLAMA_ESIK_KUCUK_BASKI == 0.030 and HK.TAVAN == {"baski": 0.10, "onizleme": 0.10})
 
+# 1b) sozlesme (inceleme D 2. tur DUSUK 1): halka_kapi.py CLI (gercek __main__, alt surec, ag kapali) ciktisi -> halka_neden.neden
+import halka_neden as HN  # noqa: E402
+with tempfile.TemporaryDirectory() as t:
+    td = Path(t)
+    for ad, h, bek in (("temiz", 0.0, "onizleme: PASS"), ("tavan ustu", 0.35, "onizleme: TAVAN (mutlak halka 0.")):
+        src = kaynak("24x36", 1333, 2000, h); y = td / f"cli_{h}.jpg"; KD.kaynak_yaz(src, y); KD.ycc_kaydet(src, y, np.random.default_rng(8))
+        kod = AGSIZ + "import runpy, sys\nsys.argv = %r\nsys.path.insert(0, %r)\nrunpy.run_path(%r, run_name='__main__')\n" % (
+            [str(B / "halka_kapi.py"), str(y), "24x36", str(td / "o"), "--tur", "onizleme", "--kaynak", str(KD.kaynak_yolu(y))], str(B), str(B / "halka_kapi.py"))
+        r = subprocess.run([sys.executable, "-I", "-c", kod], capture_output=True, text=True, timeout=300)
+        (td / "h_onizleme.log").write_text(r.stdout + r.stderr)
+        n = HN.neden(td / "h_onizleme.log")
+        kontrol(f"sozlesme halka_kapi CLI -> halka_neden: {ad} -> '{bek}...' (cikis {'0' if h == 0 else '1'})", n.startswith(bek) and r.returncode == (0 if h == 0 else 1), f"rc {r.returncode} {n} {r.stderr[-200:]}")
+
 # ---------- 2) siparis-giris `yeni` isi adimlari ----------
 GIRIS = yaml.safe_load((KOK / ".github/workflows/siparis-giris.yml").read_text())["jobs"]["yeni"]["steps"]
 
@@ -251,7 +264,6 @@ for ad, env, bek in (("HALKA_RC=1", {"KAPI_RC": "0", "HALKA_RC": "1"}, 1), ("KAP
     kontrol(f"Sonuc adimi: {ad} -> is {'KIRMIZI' if bek else 'YESIL'}", (rc != 0) == bool(bek), f"rc {rc}")
 
 # 2d) halka_neden.py (gercek betik, dogrudan): her siniflama + bilinen PASS
-import halka_neden as HN  # noqa: E402
 with tempfile.TemporaryDirectory() as t:
     td = Path(t)
     for ad, ic, bek in (("tavan", 'HALKA_KAPI {"PASS": false, "halka_bant": 0.1316, "tavan": 0.1, "kodlama_bant": 0.0144, "kodlama_esik": 0.02}', "baski: TAVAN (mutlak halka 0.1316 > 0.1;"),
@@ -259,12 +271,14 @@ with tempfile.TemporaryDirectory() as t:
                         ("ikisi", 'HALKA_KAPI {"PASS": false, "halka_bant": 0.2, "tavan": 0.1, "kodlama_bant": 0.05, "kodlama_esik": 0.02}', "baski: TAVAN (mutlak halka 0.2 > 0.1; kaynak halkasi, Merkez cifti elle duzeltir) + KODLAMA"),
                         ("kaynak yok", 'HALKA_KAPI {"PASS": false, "halka_bant": 0.05, "tavan": 0.1, "kodlama_bant": null, "kodlama_esik": 0.02}', "baski: KODLAMA olculemedi"),
                         ("hata", 'HALKA_KAPI {"PASS": false, "hata": "boyut 10x10 tur baski ile tutmuyor"}', "baski: HATA (kapi: boyut 10x10"),
-                        ("coktu", "Traceback (most recent call last):\nMemoryError", "baski: COKTU"),
+                        ("coktu MemoryError", "Traceback (most recent call last):\n  File \"/tmp/is/x.py\", line 1\nMemoryError", "baski: COKTU (kapi sonuc vermedi; istisna MemoryError)"),
+                        ("coktu FileNotFoundError (yol basilmaz)", "Traceback (most recent call last):\nFileNotFoundError: [Errno 2] No such file: '/tmp/is/son/X_REF.png'", "baski: COKTU (kapi sonuc vermedi; istisna FileNotFoundError)"),
+                        ("olduruldu (bos log)", "", "baski: COKTU (kapi sonuc vermedi; log yok ya da surec olduruldu"),
                         ("bozuk json", "HALKA_KAPI {bozuk", "baski: COKTU (kapi ciktisi okunamadi)"),
                         ("PASS", 'HALKA_KAPI {"PASS": true, "halka_bant": 0.05}', "baski: PASS")):
         (td / "h_baski.log").write_text("HALKA_KAPI_BELLEK tepe_rss_mb=1\n" + ic + "\n")
         n = HN.neden(td / "h_baski.log")
-        kontrol(f"halka_neden: {ad}", n.startswith(bek), n)
+        kontrol(f"halka_neden: {ad}", n.startswith(bek) and "/tmp/" not in n, n)
     kontrol("halka_neden: log yok -> COKTU", HN.neden(td / "h_onizleme.log").startswith("onizleme: COKTU"))
 
 # ---------- 3) siparis_v2 Girdi adimi: 2:3 artik reddedilmez ----------
