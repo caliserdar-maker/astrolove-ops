@@ -363,7 +363,9 @@ def main():
                              ("alt cizgi bitisik 43 onekli 10 hane (x_43..._y; sabit onek yok)", [f"x_{on('43')}_y"], 1),
                              ("bosluklu 10 hane (40 onek)", [f"kimlik {on('40')} metin"], 1),
                              ("sizintisiz fark", ["slug,Merry Christmas ornament gift"], 0),
-                             ("izinli test no 900000001", ["test 900000001 satir"], 0),
+                             ("9 haneli test no 900000001 (desene girmez)", ["test 900000001 satir"], 0),
+                             ("10 haneli izinli test no 900000000N (9000000001; izin dali)", ["test " + "900000000" + "1 satir"], 0),
+                             ("10 haneli izinsiz 9000000011 (izin yalniz 900000000N)", ["test " + "900000001" + "1 satir"], 1),
                              ("11 hane (kosu id gibi) 10 hane sayilmaz", ["kosu 44545840206"], 0),
                              ("eklenen satir yok", [], 1)):
         rc_k = kapi_dene(eklenen)
