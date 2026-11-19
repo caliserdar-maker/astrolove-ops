@@ -202,16 +202,15 @@ jobs:
           # 19 Kas (Serdar ~02:38 + karar 1, 10:14-10:31): MB halka duzeltmesi KALICI (taban d2b414ee degilse DUR). BASKI: tum MB olculeri
           # (q100 dosya en buyuk 24x36 90 MB < Printful 100 MB; gate g baskida 100 MB). DIJITAL (Etsy 20 MB): yalniz 20 MB'a sigan olculer
           # (olcum q100: 5x7 4.2, 8x10 9.3, A4 11.2, 11x14 17.8 MB); digerleri bugunku yolda (q97, halka riski raporda).
+          # 19 Kas aksam (Serdar KARARLAR_20261119_25, secenek a): 2:3 ailesi (12x18 16x24 20x30 24x36) baskida da ACIK, tavan 0.10 aynen;
+          # kaynak halkasi tavani asan siparis halka kapisinda durur (musteri dosyasi yuklenmez), Merkez o cifti elle duzeltir.
           TT=$(jq -r '.inputs.teslim // empty' "$GITHUB_EVENT_PATH")
           case "$TT" in baski|dijital) ;; *) echo "::error::teslim girdisi zorunlu (baski | dijital)"; exit 1;; esac
           echo "TESLIM_TUR=$TT" >> "$GITHUB_ENV"
-          # inceleme F YUKSEK 1: 2:3 ailesi (12x18 16x24 20x30 24x36) olculen tavanla gecemiyor (TAURUS_VIRGO 24x36 yeni yol mutlak 0.1316 > 0.10);
-          # tavan GEVSETILMEZ (Serdar onayi yok) -> bu aile KAPALI, bugunku yol (Serdar karari bekler). Sessiz degil: notice + warning.
-          ALTI23=" 12x18 16x24 20x30 24x36 "
-          if [ "$RENK" = "MIDNIGHT_BLUE" ] && [ -n "${OLCU:-}" ] && [[ "$ALTI23" != *" $OLCU "* ]] && { [ "$TT" = baski ] || [[ " 5x7 8x10 11x14 A4 " == *" $OLCU "* ]]; }; then
+          if [ "$RENK" = "MIDNIGHT_BLUE" ] && [ -n "${OLCU:-}" ] && { [ "$TT" = baski ] || [[ " 5x7 8x10 11x14 A4 " == *" $OLCU "* ]]; }; then
             bash ops/scripts/siparis_onizle/halka_yama/bindir.sh "$GITHUB_WORKSPACE/motor_gpt"; echo "HALKA_DUZELT=1" >> "$GITHUB_ENV"
             echo "::notice title=HALKA::MB $OLCU $TT: halka duzeltmesi ACIK, halka kapisi kosacak"
-          elif [ "$RENK" = "MIDNIGHT_BLUE" ]; then echo "::warning title=HALKA::MB $OLCU $TT: halka duzeltmesi KAPALI (2:3 ailesi tavan karari ya da dijitalde q100 > 20 MB); bugunku yol, halka riski"; fi
+          elif [ "$RENK" = "MIDNIGHT_BLUE" ]; then echo "::warning title=HALKA::MB $OLCU $TT: halka duzeltmesi KAPALI (dijitalde q100 > 20 MB); bugunku yol, halka riski"; fi
       - name: Uret
         run: |
           set -euo pipefail
@@ -241,6 +240,10 @@ jobs:
               /home/claude/blender/venv/bin/python ops/scripts/siparis_onizle/halka_kapi.py "/tmp/is/$y" "$OLCU" /tmp/is/halka --tur "$tr" --kaynak "/tmp/is/son/$kn" > /tmp/is/halka/h.log 2>&1 || HRC=1
               cut -c1-300 /tmp/is/halka/h.log; done                          # cikis kodu boruda YUTULMAZ (pipefail yok: once dosya, sonra yazdir)
             if [ "$HRC" != "0" ] && [ "${HALKA_KAPI_ATLA:-}" = "1" ]; then echo "::warning::halka kapisi FAIL, Serdar istisnasi (repo degiskeni HALKA_KAPI_ATLA=1)"; HRC=0; fi
+            if [ "$HRC" != "0" ]; then                                      # 19 Kas aksam (secenek a): neden is icinde ve ozette yazar
+              echo "::error title=HALKA KAPISI FAIL::MB $OLCU ${TESLIM_TUR:-}: mavi halka esik ya da tavan ustu (halka_kapi; ayrinti HALKA/HALKA_KAPI_*.json). Musteri dosyasi YUKLENMEZ; Merkez cifti elle duzeltir."
+              { echo "### Halka kapisi FAIL"; echo "MB $OLCU ${TESLIM_TUR:-}: AstroLoveArt dosyalari Drive'a yuklenmedi (yalniz KAPI / SURE / siparis.json + HALKA kontrolleri). Merkez cifti elle duzeltir."; } >> "$GITHUB_STEP_SUMMARY"
+            fi
           fi
           echo "HALKA_RC=$HRC" >> "$GITHUB_ENV"
       - name: Drive'a yaz

@@ -60,6 +60,7 @@ jobs:
         run: |
           set -euo pipefail
           for t in scripts/siparis_onizle/test_halka_yama.py scripts/siparis_onizle/test_halka_kapi.py scripts/siparis_onizle/test_premium_tara_kabuk.py \
-                   scripts/siparis_onizle/test_siparis_v2_girdi.py scripts/siparis_onizle/test_kesit_olcum.py; do
+                   scripts/siparis_onizle/test_siparis_v2_girdi.py scripts/siparis_onizle/test_kesit_olcum.py \
+                   scripts/siparis_onizle/test_halka_23_akis.py; do
             echo "== $t"; /tmp/v/bin/python "$t" > _t.log 2>&1 || { tail -40 _t.log; exit 1; }; tail -1 _t.log
           done

@@ -228,7 +228,6 @@ jobs:
           OK_=$(rclone lsf "$O" --dirs-only 2>/dev/null | grep -E '^OKUMA_[0-9]+/$' | sort -V | tail -1 || true)
           [ -n "$OK_" ] || { echo "::error::siparisin OKUMA klasoru yok"; exit 1; }
           [[ "$CO" =~ ^[A-Z]+_[A-Z]+:[0-9A]+x?[0-9]*$ ]] || { echo "::error::tani = CIFT:OLCU"; exit 1; }
-          case " 12x18 16x24 20x30 24x36 " in *" ${CO#*:} "*) echo "::error::2:3 ailesi halka duzeltmesi KAPALI (tavan karari Serdar'da); siparis_v2 kosmaz"; exit 1;; esac
           [ "$FMT" = "Print" ] || { echo "::error::yalniz baski (Print)"; exit 1; }
           umask 077; mkdir -p /tmp/g
           rclone copy "$O/$OK_" /tmp/g --include KISISEL.json -q

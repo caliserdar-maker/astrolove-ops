@@ -38,8 +38,8 @@ KUCUK_PIKSEL, KODLAMA_ESIK_KUCUK_BASKI = 5_000_000, 0.030
 def kodlama_esigi(tur, w, h):
     return KODLAMA_ESIK_KUCUK_BASKI if (tur == "baski" and w * h < KUCUK_PIKSEL) else KODLAMA_ESIK[tur]
 TAVAN = {"baski": 0.10, "onizleme": 0.10}
-# 19 Kas (inceleme F YUKSEK 1): 2:3 ailesi (12x18, 16x24, 20x30, 24x36) bu tavanla gecemiyor (TAURUS_VIRGO 24x36 yeni yol mutlak 0.1316,
-# onizleme 0.1324; CANCER_LEO 0.065, SCORPIO_VIRGO 0.0645). Tavan GEVSETILMEDI (Serdar onayi yok): bu aile siparis-giris'te KAPALI.
+# 19 Kas: 2:3 ailesi (12x18, 16x24, 20x30, 24x36) olcumu: TAURUS_VIRGO 24x36 yeni yol mutlak 0.1316 (onizleme 0.1324) FAIL; CANCER_LEO 0.065,
+# SCORPIO_VIRGO 0.0645 PASS. Serdar KARARLAR_20261119_25 (secenek a): 2:3 baskida ACIK, tavan 0.10 aynen; tavani asan siparis durur (yukleme yok).
 ESIKLER = TAVAN
 R_ARALIK = (200, 1400)
 
