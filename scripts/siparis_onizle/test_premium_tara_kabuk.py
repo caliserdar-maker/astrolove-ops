@@ -60,7 +60,7 @@ u="${@: -1}"; id="${u##*/}"; [ -f "$SAHTE_KOK/silindi_$id" ] && printf 404 || pr
 '''
 
 
-IZ = {"11": "0123456789abcdef", "12": "0123456789abcdef", "13": "0123456789abcdef", "21": "0123456789abcdef", "22": "0123456789abcdef",
+IZ = {"51": "0123456789abcdef", "52": "0123456789abcdef", "53": "0123456789abcdef", "11": "0123456789abcdef", "12": "0123456789abcdef", "13": "0123456789abcdef", "21": "0123456789abcdef", "22": "0123456789abcdef",
       "23": "0123456789abcdef", "24": "0123456789abcdef", "31": "fedcba9876543210"}
 
 
@@ -118,6 +118,15 @@ kontrol("kosu_sil bilinen FAIL: capada iki farkli iz -> hicbir sey silinmez", rc
 K["41"] = f"completed .github/workflows/ai-beyan-test.yml {_y} claude/upbeat-hopper-fjsaii push serdar"
 rc, so, sil = sil_dene("41:ci", _s, K)
 kontrol("kosu_sil: ci kosusu (siparis verisi yok) izsiz silinir", rc == 0 and sil == ["41"], f"rc={rc} {sil} {so}")
+K["51"] = f"completed .github/workflows/siparis-giris.yml {_y} claude/mb-halka-kalici workflow_dispatch serdar"
+K["52"] = f"completed .github/workflows/siparis-kisisel-oku.yml {_y} claude/mb-halka-kalici workflow_dispatch serdar"
+K["53"] = f"completed .github/workflows/siparis-giris.yml {_y} baska-dal workflow_dispatch serdar"
+rc, so, sil = sil_dene("51:giris_pr", _s, K)
+kontrol("kosu_sil giris_pr (C3): PR dalindan siparis-giris kosusu silinir, 404", rc == 0 and sil == ["51"], f"rc={rc} {sil} {so}")
+for ad, ks in (("giris turu PR dalini kabul etmez", "51:giris"), ("giris_pr main kosusunu kabul etmez", "12:giris_pr"),
+               ("giris_pr baska is akisini kabul etmez", "52:giris_pr"), ("giris_pr baska dali kabul etmez", "53:giris_pr")):
+    rc, so, sil = sil_dene(ks, _s, K)
+    kontrol(f"kosu_sil bilinen FAIL: {ad} -> silinmez, cikis 1", rc == 1 and sil == [], f"rc={rc} {sil} {so}")
 
 print("premium-tara kabuk testi: %d FAIL" % len(HATA))
 sys.exit(1 if HATA else 0)
