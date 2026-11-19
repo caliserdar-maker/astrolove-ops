@@ -101,9 +101,20 @@ esac
 '''
 
 
+AGSIZ_PY3 = AGSIZ + r'''import runpy, sys
+a = sys.argv[1:]
+if a[:1] == ["-c"]:
+    sys.argv = ["-c"] + a[2:]; exec(compile(a[1], "<-c>", "exec"), {"__name__": "__main__"})
+else:
+    sys.argv = a; runpy.run_path(a[0], run_name="__main__")
+'''
+
+
 def calis(metin, env_ek, d, bash_e=True):
     (d / "bin").mkdir(exist_ok=True)
     (d / "bin" / "rclone").write_text(SAHTE_RCLONE); (d / "bin" / "rclone").chmod(0o755)
+    (d / "agsiz_py3.py").write_text(AGSIZ_PY3)                 # alt surec python3 da ag kapali (TEST AGI)
+    (d / "bin" / "python3").write_text(f'#!/bin/bash\nexec {sys.executable} -I {d / "agsiz_py3.py"} "$@"\n'); (d / "bin" / "python3").chmod(0o755)
     (d / "adim.sh").write_text(metin)
     for f in ("env", "ozet", "rclone.log"):
         (d / f).touch()
@@ -151,19 +162,27 @@ for ad, tes in (("teslim yok", None), ("teslim gecersiz", "posta")):
 SAHTE_PY = r'''#!/bin/bash
 case "$*" in
   *siparis_kapi.py*) echo '{}' > "$IS/KAPI.json"; exit "${KAPI_SAHTE_RC:-0}" ;;
-  *halka_kapi.py*) echo "$*" >> "$IS/halka_cagri.log"; echo "HALKA_KAPI sahte"; exit "${HALKA_SAHTE_RC:-0}" ;;
+  *halka_kapi.py*) echo "$*" >> "$IS/halka_cagri.log"
+    case "${HALKA_SAHTE_MOD:-tavan}" in
+      cok) echo "Traceback: sahte cokme" ;;
+      kodlama) echo 'HALKA_KAPI {"PASS": false, "halka_bant": 0.05, "tavan": 0.1, "kodlama_bant": 0.031, "kodlama_esik": 0.02}' ;;
+      *) [ "${HALKA_SAHTE_RC:-0}" = "0" ] && echo 'HALKA_KAPI {"PASS": true, "halka_bant": 0.05, "tavan": 0.1, "kodlama_bant": 0.01, "kodlama_esik": 0.02}' \
+           || echo 'HALKA_KAPI {"PASS": false, "halka_bant": 0.1316, "tavan": 0.1, "kodlama_bant": 0.0144, "kodlama_esik": 0.02}' ;;
+    esac
+    exit "${HALKA_SAHTE_RC:-0}" ;;
   *) echo "sahte python: beklenmeyen $*" >&2; exit 3 ;;
 esac
 '''
 
 
-def kapilar(halka_rc, duzelt, atla=""):
+def kapilar(halka_rc, duzelt, atla="", mod="tavan"):
     with tempfile.TemporaryDirectory() as t:
         d = Path(t); IS = d / "is"; (IS / "son").mkdir(parents=True); py = d / "py"; py.write_text(SAHTE_PY); py.chmod(0o755)
+        (d / "ops").symlink_to(KOK)                                  # adim ops/scripts/siparis_onizle/halka_neden.py cagirir (gercek betik)
         metin = adim("Kapilar").replace("/home/claude/blender/venv/bin/python", str(py)).replace("/tmp/is", str(IS))
         assert "/tmp/is" not in metin and "/home/claude/blender/venv/bin/python" not in metin
         env = {"IS": str(IS), "RENK": "MIDNIGHT_BLUE", "CIFT": "CANCER_LEO", "OLCU": "24x36", "TESLIM_TUR": "baski", "HALKA_SAHTE_RC": str(halka_rc),
-               "HALKA_KAPI_ATLA": atla}
+               "HALKA_KAPI_ATLA": atla, "HALKA_SAHTE_MOD": mod}
         if duzelt:
             env["HALKA_DUZELT"] = "1"
         rc, out, genv, ozet, _ = calis(metin, env, d)
@@ -172,9 +191,18 @@ def kapilar(halka_rc, duzelt, atla=""):
 
 
 rc, out, genv, ozet, cagri = kapilar(1, True)
-kontrol("Kapilar: halka FAIL -> HALKA_RC=1, ::error (neden), adim ozetinde 'Halka kapisi FAIL', baski + onizleme kapisi cagrildi",
-        rc == 0 and genv.get("HALKA_RC") == "1" and "::error title=HALKA KAPISI FAIL::" in out and "Halka kapisi FAIL" in ozet
-        and "--tur baski" in cagri and "--tur onizleme" in cagri and "_24x36.jpg" in cagri, f"rc {rc} env {genv} {out[-300:]}")
+satir = {("baski" if "--tur baski" in s else "onizleme"): s for s in cagri.splitlines()}
+kontrol("Kapilar: halka FAIL (tavan) -> HALKA_RC=1, ::error + ozet nedeni TAVAN, baski + onizleme kapisi cagrildi",
+        rc == 0 and genv.get("HALKA_RC") == "1" and "::error title=HALKA KAPISI FAIL::" in out and "Neden: baski: TAVAN (mutlak halka 0.1316 > 0.1" in out
+        and "Halka kapisi FAIL" in ozet and "Neden: baski: TAVAN" in ozet and len(satir) == 2, f"rc {rc} env {genv} {out[-400:]}")
+kontrol("Kapilar: kaynak (_REF) dosya adi sozlesmesi: baski -> son/<CIFT>_teslim_REF.png, onizleme -> son/<CIFT>_teslim_Preview_REF.png (inceleme D DUSUK 2)",
+        satir.get("baski", "").rstrip().endswith("/son/CANCER_LEO_teslim_REF.png") and satir.get("onizleme", "").rstrip().endswith("/son/CANCER_LEO_teslim_Preview_REF.png")
+        and "/AstroLoveArt_Cancer_Leo_24x36.jpg " in satir.get("baski", "") and "/AstroLoveArt_Cancer_Leo_24x36_Preview.jpg " in satir.get("onizleme", ""), str(satir))
+rc, out, genv, ozet, cagri = kapilar(1, True, mod="kodlama")
+kontrol("Kapilar: kodlama bandi FAIL -> neden KODLAMA (cift duzeltme degil)", genv.get("HALKA_RC") == "1" and "Neden: baski: KODLAMA (kodlama bandi 0.031 > 0.02" in out
+        and "TAVAN" not in out.split("Neden:")[-1], out[-300:])
+rc, out, genv, ozet, cagri = kapilar(1, True, mod="cok")
+kontrol("Kapilar: kapi coktu (HALKA_KAPI satiri yok) -> neden COKTU", genv.get("HALKA_RC") == "1" and "Neden: baski: COKTU" in out and "onizleme: COKTU" in out, out[-300:])
 rc, out, genv, ozet, cagri = kapilar(0, True)
 kontrol("Kapilar: halka PASS -> HALKA_RC=0, ::error yok, ozette FAIL yok", rc == 0 and genv.get("HALKA_RC") == "0" and "::error" not in out
         and "Halka kapisi FAIL" not in ozet and cagri.count("halka_kapi.py") == 2, f"rc {rc} env {genv}")
@@ -221,6 +249,23 @@ for ad, env, bek in (("HALKA_RC=1", {"KAPI_RC": "0", "HALKA_RC": "1"}, 1), ("KAP
     with tempfile.TemporaryDirectory() as t:
         rc, out, _, _, _ = calis(SONUC, env, Path(t))
     kontrol(f"Sonuc adimi: {ad} -> is {'KIRMIZI' if bek else 'YESIL'}", (rc != 0) == bool(bek), f"rc {rc}")
+
+# 2d) halka_neden.py (gercek betik, dogrudan): her siniflama + bilinen PASS
+import halka_neden as HN  # noqa: E402
+with tempfile.TemporaryDirectory() as t:
+    td = Path(t)
+    for ad, ic, bek in (("tavan", 'HALKA_KAPI {"PASS": false, "halka_bant": 0.1316, "tavan": 0.1, "kodlama_bant": 0.0144, "kodlama_esik": 0.02}', "baski: TAVAN (mutlak halka 0.1316 > 0.1;"),
+                        ("kodlama", 'HALKA_KAPI {"PASS": false, "halka_bant": 0.05, "tavan": 0.1, "kodlama_bant": 0.025, "kodlama_esik": 0.02}', "baski: KODLAMA (kodlama bandi 0.025 > 0.02;"),
+                        ("ikisi", 'HALKA_KAPI {"PASS": false, "halka_bant": 0.2, "tavan": 0.1, "kodlama_bant": 0.05, "kodlama_esik": 0.02}', "baski: TAVAN (mutlak halka 0.2 > 0.1; kaynak halkasi, Merkez cifti elle duzeltir) + KODLAMA"),
+                        ("kaynak yok", 'HALKA_KAPI {"PASS": false, "halka_bant": 0.05, "tavan": 0.1, "kodlama_bant": null, "kodlama_esik": 0.02}', "baski: KODLAMA olculemedi"),
+                        ("hata", 'HALKA_KAPI {"PASS": false, "hata": "boyut 10x10 tur baski ile tutmuyor"}', "baski: HATA (kapi: boyut 10x10"),
+                        ("coktu", "Traceback (most recent call last):\nMemoryError", "baski: COKTU"),
+                        ("bozuk json", "HALKA_KAPI {bozuk", "baski: COKTU (kapi ciktisi okunamadi)"),
+                        ("PASS", 'HALKA_KAPI {"PASS": true, "halka_bant": 0.05}', "baski: PASS")):
+        (td / "h_baski.log").write_text("HALKA_KAPI_BELLEK tepe_rss_mb=1\n" + ic + "\n")
+        n = HN.neden(td / "h_baski.log")
+        kontrol(f"halka_neden: {ad}", n.startswith(bek), n)
+    kontrol("halka_neden: log yok -> COKTU", HN.neden(td / "h_onizleme.log").startswith("onizleme: COKTU"))
 
 # ---------- 3) siparis_v2 Girdi adimi: 2:3 artik reddedilmez ----------
 YARD = yaml.safe_load((KOK / ".github/workflows/siparis-yardimci.yml").read_text())["jobs"]["siparis_v2"]["steps"]
