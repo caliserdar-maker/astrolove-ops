@@ -337,6 +337,37 @@ def main():
       and "git diff --cached -U0 > _fark.txt" in wf and "|| true" not in json.dumps(dal))
     k("is akisi: push yalniz s13/metin-canli dalina, yalniz dal isinde",
       "git push origin HEAD:refs/heads/s13/metin-canli" in json.dumps(dal) and "git push" not in json.dumps(oku))
+    # ---- dal isi sizinti kapisi (Serdar 19 Kas, Merkez DERSLER_20261119; CLAUDE.md KALITE 9): satir yml'den okunur, gercek kod kosar
+    # (alt surec yok: exec, ag kapali surecte). Rakam siniri (?<!\d)...(?!\d): alt cizgi bitisik sizinti yakalanir; 900000000N izni aynen.
+    dal_run = next(s["run"] for s in dal["steps"] if s.get("name") == "Dal s13/metin-canli (yalniz CSV)")
+    kapi_m = re.search(r'python3 -c "(.*?)" \\\n', dal_run, re.S)
+    k("is akisi: dal sizinti kapisi satiri bulundu (python3 -c)", kapi_m is not None)
+    kapi_kod = kapi_m.group(1) if kapi_m else "import sys; sys.exit(0)"
+    k("is akisi: sizinti deseni rakam sinirli, \\b yok", r"(?<!\d)\d{10}(?!\d)" in kapi_kod and r"(?<!\d)42\d{8}(?!\d)" in kapi_kod
+      and r"\b" not in kapi_kod)
+
+    def kapi_dene(eklenen):
+        with tempfile.TemporaryDirectory() as td:
+            eski_cwd = os.getcwd(); os.chdir(td)
+            try:
+                Path("_fark.txt").write_text("+++ b/data/pod/ORNAMENT78_METIN.csv\n" + "".join(f"+{s}\n" for s in eklenen), encoding="utf-8")
+                try:
+                    exec(compile(kapi_kod, "<dal-kapi>", "exec"), {"__name__": "__main__"})
+                    return 0
+                except SystemExit as e:
+                    return int(e.code or 0)
+            finally:
+                os.chdir(eski_cwd)
+    on = lambda b: b + "12345678"                                  # ornek no kaynakta duz yazilmaz (depo sizinti taramasi)
+    for ad, eklenen, bek in (("alt cizgi bitisik 42 onekli siparis no (x_42..._y)", [f"listing,x_{on('42')}_y,metin"], 1),
+                             ("alt cizgi bitisik 43 onekli 10 hane (x_43..._y; sabit onek yok)", [f"x_{on('43')}_y"], 1),
+                             ("bosluklu 10 hane (40 onek)", [f"kimlik {on('40')} metin"], 1),
+                             ("sizintisiz fark", ["slug,Merry Christmas ornament gift"], 0),
+                             ("izinli test no 900000001", ["test 900000001 satir"], 0),
+                             ("11 hane (kosu id gibi) 10 hane sayilmaz", ["kosu 44545840206"], 0),
+                             ("eklenen satir yok", [], 1)):
+        rc_k = kapi_dene(eklenen)
+        k(f"dal sizinti kapisi: {ad} -> cikis {bek}", rc_k == bek)
     n, t = sum(SONUC), len(SONUC)
     print(f"SONUC {n}/{t} PASS")
     return 0 if n == t else 1

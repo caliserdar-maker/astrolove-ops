@@ -125,7 +125,7 @@ jobs:
           git add -- data/pod/ORNAMENT78_METIN.csv
           [ "$(git diff --cached --name-only)" = "data/pod/ORNAMENT78_METIN.csv" ] || { echo "::error::degisen dosya listesi beklenen degil"; exit 1; }
           git diff --cached -U0 > _fark.txt   # ayri adim: diff hatasi set -e ile isi durdurur
-          python3 -c "import re,sys; t=''.join(l for l in open('_fark.txt',encoding='utf-8') if l.startswith('+') and not l.startswith('+++')); k=[m for m in re.findall(r'\b\d{10}\b',t) if not re.fullmatch(r'900000000\d',m)]; sys.exit(1 if not t or re.search(r'\b42\d{8}\b',t) or k else 0)" \
+          python3 -c "import re,sys; t=''.join(l for l in open('_fark.txt',encoding='utf-8') if l.startswith('+') and not l.startswith('+++')); k=[m for m in re.findall(r'(?<!\d)\d{10}(?!\d)',t) if not re.fullmatch(r'900000000\d',m)]; sys.exit(1 if not t or re.search(r'(?<!\d)42\d{8}(?!\d)',t) or k else 0)" \
             || { echo "::error::eklenen satir yok ya da siparis / ilan kimligi deseni var"; exit 1; }
           rm -f _fark.txt
           git config user.name "github-actions"; git config user.email "actions@github.com"
