@@ -101,9 +101,25 @@ def kirmizi_maske(a, ton=None):
     return m
 
 
-def kirmizi_tara(im):
+ESIK_SACAK_PX = 5        # 21 Kas Serdar karari (KARARLAR_20261121_119, secenek a): DIJITAL dosyada yildiz / altin oge kenarina bitisik (<= SACAK_MESAFE
+SACAK_MESAFE = 2         # px), <= 5 px koyu kirmizi kume (kroma adimi 3-4 kodlama sacagi) KUSUR SAYILMAZ (bilgi). Oge kenarina degmeyen ya da > 5 px kume
+                         # FAIL kalir. BASKI yolunda bu istisna YOK.
+
+
+def oge_maskesi(a):
+    """Parlak oge (kirmizi DEGIL): altin (R > 120, R - B > 40, ton >= 20 derece) ya da beyaz / acik yildiz (uc kanal > 120). Kirmizi nokta
+    (ton < 8) ve onun JPEG halesi (ton < 20) oge sayilmaz; tek basina duran kirmizi nokta 'kenarda' sayilamaz."""
+    R, G, B = (a[..., i].astype(np.float32) for i in range(3))
+    ton = 60.0 * (G - B) / np.maximum(R - B, 1)
+    altin = (R > 120) & ((R - B) > 40) & (ton >= 20)
+    beyaz = (R > 120) & (G > 120) & (B > 120)
+    return altin | beyaz
+
+
+def kirmizi_tara(im, dijital=False):
     """Kirmizi nokta: 4 kenar seridinde (KENAR_PX) eski olcut (13 Kas dersi) + 21 Kas: TUM GORUNTUDE ton < ESIK_TON pikselleri, karar >= ESIK_TON_KUME px
-    bitisik kume. PASS = kenar 0 ve buyuk kume 0."""
+    bitisik kume. dijital=True: parlak oge kenarina (SACAK_MESAFE px) bitisik ve <= ESIK_SACAK_PX kume sacak sayilir (bilgi, karar vermez).
+    PASS = kenar 0 ve sayilan buyuk kume 0."""
     a = np.asarray(im.convert("RGB")).astype(np.int16)
     H, W = a.shape[:2]
     m = kirmizi_maske(a)
@@ -129,10 +145,27 @@ def kirmizi_tara(im):
         o["tum_goruntu_ton_kutu"] = [int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1]
         o["ton_ornek"] = [[int(x), int(y), *[int(c) for c in a[y, x]]] for y, x in list(zip(ys, xs))[:20]]   # tani: x, y, R, G, B (sahte/gizli klasor)
         import cv2
-        n, _, st, _ = cv2.connectedComponentsWithStats(mt.astype(np.uint8), connectivity=8)
+        n, lab, st, _ = cv2.connectedComponentsWithStats(mt.astype(np.uint8), connectivity=8)
         alan = sorted((int(v) for v in st[1:, 4]), reverse=True)
         o["ton_kume_alanlari"] = alan[:15]
-        o["ton_kume_buyuk"] = sum(1 for v in alan if v >= ESIK_TON_KUME)
+        o["dijital_sacak_istisnasi"] = bool(dijital)
+        if dijital:
+            yakin = cv2.dilate(oge_maskesi(a).astype(np.uint8), np.ones((2 * SACAK_MESAFE + 1, 2 * SACAK_MESAFE + 1), np.uint8)) > 0
+            sacak = buyuk = 0
+            for i in range(1, n):
+                ar = int(st[i, 4])
+                if ar < ESIK_TON_KUME:
+                    continue
+                x, y, w, h = (int(v) for v in st[i, :4])
+                kenarda = bool((yakin[y:y + h, x:x + w] & (lab[y:y + h, x:x + w] == i)).any())
+                if kenarda and ar <= ESIK_SACAK_PX:
+                    sacak += 1
+                else:
+                    buyuk += 1
+            o["ton_sacak_bilgi"] = sacak                 # Serdar 21 Kas (a): kusur sayilmaz, sayi raporlanir
+            o["ton_kume_buyuk"] = buyuk
+        else:
+            o["ton_kume_buyuk"] = sum(1 for v in alan if v >= ESIK_TON_KUME)
     o["PASS"] = toplam == 0 and o["ton_kume_buyuk"] == 0
     return o
 
@@ -241,7 +274,7 @@ def main():
                  ornekleme_444=JpegImagePlugin.get_sampling(im) == 0, bayt=teslim.stat().st_size, bicim=im.format)
         d["sinir_bayt"] = boyut_siniri(BEKLENEN_FORMAT)
         d["PASS"] = bool(d["boyut"] == d["hedef"] and d["dpi"] == [300, 300] and d["ornekleme_444"] and d["bayt"] < d["sinir_bayt"] and d["bicim"] == "JPEG")
-        oz["kirmizi_nokta"] = kirmizi_tara(im)
+        oz["kirmizi_nokta"] = kirmizi_tara(im, dijital=BEKLENEN_FORMAT == "Digital File")
         kutu, oz["kesit"] = olc(im)
         if kutu:
             kes = im.convert("RGB").crop(kutu)

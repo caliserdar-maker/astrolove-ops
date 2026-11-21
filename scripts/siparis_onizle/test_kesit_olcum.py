@@ -162,6 +162,38 @@ for ad, (x, y), (w, h), renk in (("2x2 ic", (400, 300), (2, 2), (220, 40, 40)), 
     bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
     kn = K.kirmizi_tara(Image.open(bb))
     kontrol(f"bilinen FAIL: gercek MB altini + kirmizi nokta ({ad})", kn["PASS"] is False and kn["ton_kume_buyuk"] > 0, str(kn.get("ton_kume_alanlari")))
+# 21 Kas Serdar karari (KARARLAR_20261121_119, a): DIJITAL dosyada oge kenarina bitisik <= 5 px koyu kirmizi sacak bilgi; ic nokta ve > 5 px FAIL;
+# BASKI degismez. Dosyalar uretimdeki dijital tablolarla (halka_kodla.tablolar, C3 / C4) kodlanir.
+sys.path.insert(0, str(Path(__file__).resolve().parent / "halka_yama"))
+import halka_kodla as KD  # noqa: E402
+A0 = np.asarray(im0).copy()
+og = K.oge_maskesi(A0.astype(np.int16))
+ys_, xs_ = np.nonzero(og[600:760, 0:820]); ys_ = ys_ + 600                 # isim satiri: altin harf kenari (sag komsu koyu)
+kenar = next((int(x), int(y)) for y, x in zip(ys_, xs_) if x + 4 < 820 and not og[y, x + 1:x + 4].any() and A0[y, x + 2:x + 4].max() < 60)
+
+
+def kodla_tara(a, lq, cq, dijital):
+    bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", qtables=KD.tablolar(lq, cq), subsampling=0); return K.kirmizi_tara(Image.open(bb), dijital=dijital)
+
+
+for lq, cq in ((85, 3), (80, 4)):
+    temiz = kodla_tara(A0.copy(), lq, cq, True)
+    kontrol(f"bilinen PASS: L{lq}_C{cq} temiz gercek MB altini (dijital)", temiz["PASS"] is True, str(temiz.get("ton_kume_alanlari")))
+    x0, y0 = kenar
+    a = A0.copy(); a[y0:y0 + 2, x0 + 1:x0 + 3] = (95, 15, 15)                 # 2x2 = 4 px koyu kirmizi, altin kenarina bitisik
+    kn = kodla_tara(a, lq, cq, True)
+    kontrol(f"bilinen PASS (Serdar 21 Kas a): L{lq}_C{cq} altin kenarinda 4 px koyu kirmizi sacak, dijital -> bilgi", kn["PASS"] is True
+            and kn.get("ton_sacak_bilgi", 0) >= 1, str({k: kn.get(k) for k in ("ton_kume_alanlari", "ton_sacak_bilgi", "ton_kume_buyuk")}))
+    kb = kodla_tara(a, lq, cq, False)
+    kontrol(f"bilinen FAIL: ayni sacak BASKI yolunda (istisna yok) -> FAIL", kb["PASS"] is False, str(kb.get("ton_kume_alanlari")))
+    a = A0.copy(); a[1020:1022, 650:653] = (85, 15, 15)                        # ic bolge, oge yok: 3x2 koyu kirmizi
+    ki = kodla_tara(a, lq, cq, True)
+    kontrol(f"bilinen FAIL: L{lq}_C{cq} ic bolgede 3x2 koyu kirmizi nokta, dijital", ki["PASS"] is False and ki.get("ton_kume_buyuk", 0) >= 1,
+            str({k: ki.get(k) for k in ("ton_kume_alanlari", "ton_sacak_bilgi", "ton_kume_buyuk")}))
+    a = A0.copy(); a[y0 - 1:y0 + 3, x0 + 1:x0 + 5] = (95, 15, 15)             # 4x4 = 16 px, kenarda ama > 5 px
+    kg = kodla_tara(a, lq, cq, True)
+    kontrol(f"bilinen FAIL: L{lq}_C{cq} altin kenarinda > 5 px kume, dijital", kg["PASS"] is False and kg.get("ton_kume_buyuk", 0) >= 1,
+            str({k: kg.get(k) for k in ("ton_kume_alanlari", "ton_sacak_bilgi", "ton_kume_buyuk")}))
 a = np.asarray(im0).copy(); a[300:303, 600:603] = (230, 90, 40)
 bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
 kontrol("bilinen KOR ALAN (belgelenir): turuncu-kirmizi (ton ~16) ic noktayi ton olcutu yakalamaz", K.kirmizi_tara(Image.open(bb))["PASS"] is True)
