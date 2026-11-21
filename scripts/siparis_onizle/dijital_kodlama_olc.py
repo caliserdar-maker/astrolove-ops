@@ -22,7 +22,8 @@ Image.MAX_IMAGE_PIXELS = None
 SINIR = 20_000_000
 PAY = 19_500_000          # 0.5 MB pay: dpi yazimi / tohum farki (olculur; uretim kapisi yine 20 MB)
 # aday adi: L<luma kalitesi>_C<kroma duz adimi>; L100 = tablolar tum 1 (bugunku baski yolu)
-ADAYLAR = ["L100_C1", "L98_C1", "L95_C1", "L92_C1", "L95_C2", "L90_C2", "L90_C3", "L85_C3", "L80_C4", "L75_C5"]
+ADAYLAR = ["L100_C1", "L98_C1", "L95_C1", "L92_C1", "L95_C2", "L90_C2", "L90_C3", "L85_C3", "L80_C4", "L78_C4", "L75_C4", "L70_C4", "L75_C5"]
+# 21 Kas olcum 1 (kosu 44927861906): 24x30 / 24x36 yalniz L75_C5 ile sigdi ve kodlama bandi FAIL (0.045-0.051); C4 + dusuk luma adaylari eklendi.
 
 
 def log(*a):

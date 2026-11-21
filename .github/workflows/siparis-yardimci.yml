@@ -1,7 +1,8 @@
 name: siparis-yardimci
 # SIPARIS YARDIMCISI (Midnight Blue halka duzeltmesi, 19 Kas 2026; GOREV_CEO_DENETIM_HALKA_KALICI / _2). Etsy istegi YOK.
-#   mod=siparis_v2: GERCEK siparis, yalniz MB baski; d2b414ee + halka_yama (HALKA_DUZELT=1), uretim + kesit + halka kapilari; siparisin gizli
-#     alt klasorune (V2_<kosu>) yalniz hepsi PASS ise. Girdi: receipt (maskeli; siparis-giris gecis kurali), tani=CIFT:OLCU, format=Print.
+#   mod=siparis_v2: GERCEK siparis, MB baski VE dijital (21 Kas); d2b414ee + halka_yama (HALKA_DUZELT=1), uretim + kesit + halka kapilari;
+#     siparisin gizli alt klasorune (V2_<kosu>) yalniz hepsi PASS ise. Girdi: receipt (maskeli; siparis-giris gecis kurali), tani=CIFT:OLCU,
+#     format=Print | Digital File (Etsy okumasiyla ayni olmali; dijitalde TESLIM_TUR=dijital: 20 MB siniri + olcu basina kodlama, halka_kodla).
 #   mod=kosu_sil: verilen TAMAMLANMIS kosu kayitlarini siler (DELETE actions/runs), 404 dogrular; tur / dal / baslatan / sinir / SIPARIS_IZI.
 #   mod=halka_ornek, halka_olcum: SAHTE isimli ornek / esik olcumu (OFIS DENEME). mod=gizli_kontrol: sir varligi (deger basilmaz).
 permissions:
@@ -189,7 +190,7 @@ jobs:
     if: ${{ inputs.mod == 'siparis_v2' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    env: {TESLIM_TUR: "baski"}                                          # yalniz baski (Format Print); gate g 100 MB
+    env: {HALKA_DUZELT: "1"}                                            # 21 Kas: is duzeyinde (Uret + Kapilar ayni; Kapilar g siniri TESLIM_TUR ile)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
@@ -228,7 +229,8 @@ jobs:
           OK_=$(rclone lsf "$O" --dirs-only 2>/dev/null | grep -E '^OKUMA_[0-9]+/$' | sort -V | tail -1 || true)
           [ -n "$OK_" ] || { echo "::error::siparisin OKUMA klasoru yok"; exit 1; }
           [[ "$CO" =~ ^[A-Z]+_[A-Z]+:[0-9A]+x?[0-9]*$ ]] || { echo "::error::tani = CIFT:OLCU"; exit 1; }
-          [ "$FMT" = "Print" ] || { echo "::error::yalniz baski (Print)"; exit 1; }
+          case "$FMT" in Print) TT=baski;; "Digital File") TT=dijital;; *) echo "::error::format Print | Digital File"; exit 1;; esac   # 21 Kas: dijital
+          echo "TESLIM_TUR=$TT" >> "$GITHUB_ENV"; echo "FMT=$FMT" >> "$GITHUB_ENV"
           umask 077; mkdir -p /tmp/g
           rclone copy "$O/$OK_" /tmp/g --include KISISEL.json -q
           [ -s /tmp/g/KISISEL.json ] || { echo "::error::KISISEL.json yok"; exit 1; }
@@ -254,8 +256,7 @@ jobs:
           ln -s /tmp/k/ek/SCORPIO_VIRGO_T5_FAIL_tam.png /home/claude/ao/KANIT/SCORPIO_VIRGO_T5_FAIL_tam.png
           [ -s "/tmp/k/${CIFT}_ana.png" ] && [ -s "/tmp/ref/${CIFT}_7200x10800.jpg" ] || { echo "::error::kaynak eksik"; exit 1; }
           bash scripts/siparis_onizle/halka_yama/bindir.sh mg/motor_gpt
-      - name: Uret (HALKA_DUZELT=1)
-        env: {HALKA_DUZELT: "1"}
+      - name: Uret (HALKA_DUZELT=1, TESLIM_TUR girdiden)
         run: |
           set -euo pipefail
           I=/tmp/g/istek.json
@@ -271,7 +272,7 @@ jobs:
           for f in /tmp/is/AstroLoveArt_*.jpg; do [ -e "$f" ] || continue; b=$(basename "$f" .jpg); r=${b#AstroLoveArt_${B12}}; mv "$f" "/tmp/is/AstroLoveArt_${B12}_Midnight_Blue${r}.jpg"; done
           python3 -c "import json,os; json.dump(dict(kosu=os.environ['GITHUB_RUN_ID'], halka_duzelt=1, gpt_ref='d2b414ee', yama_kaynak=os.environ['GITHUB_SHA']), open('/tmp/is/SURE.json','w'))"
           mkdir -p /tmp/out
-          ERC=0; BEKLENEN_FORMAT=Print URETIM_KOSU="$GITHUB_RUN_ID" /tmp/vo/bin/python scripts/siparis_onizle/kesit_olcum.py /tmp/is /tmp/g/KISISEL.json /tmp/out > /tmp/g/kesit.log 2>&1 || ERC=$?
+          ERC=0; BEKLENEN_FORMAT="$FMT" URETIM_KOSU="$GITHUB_RUN_ID" /tmp/vo/bin/python scripts/siparis_onizle/kesit_olcum.py /tmp/is /tmp/g/KISISEL.json /tmp/out > /tmp/g/kesit.log 2>&1 || ERC=$?
           echo "kesit/girdi/onizleme cikis $ERC"
           T11=/tmp/is/AstroLoveArt_${B12}_Midnight_Blue_${OLCU}.jpg; PV=/tmp/is/AstroLoveArt_${B12}_Midnight_Blue_${OLCU}_Preview.jpg
           HRC=0; /home/claude/blender/venv/bin/python scripts/siparis_onizle/halka_kapi.py "$T11" "$OLCU" /tmp/out --tur baski --kaynak "/tmp/is/son/${CIFT}_teslim_REF.png" > /tmp/g/h1.log 2>&1 || HRC=$?
@@ -354,10 +355,11 @@ jobs:
           ln -s /tmp/k/ek/SCORPIO_VIRGO_T5_FAIL_tam.png /home/claude/ao/KANIT/SCORPIO_VIRGO_T5_FAIL_tam.png
           bash scripts/siparis_onizle/halka_yama/bindir.sh mg/motor_gpt
       - name: Uret (SAHTE isimler) + kodlama olcumu
-        env: {T: "${{ inputs.hedef }}"}
+        env: {T: "${{ inputs.hedef }}", SECIM: "${{ inputs.tani }}"}
         run: |
           set -uo pipefail
           [[ "$T" =~ ^[A-Za-z0-9_-]{20,}$ ]] || { echo "::error::hedef id"; exit 1; }
+          if [ -n "$SECIM" ] && [ "$SECIM" != "$GRUP" ]; then echo "grup secimi ($SECIM): bu grup atlandi"; exit 0; fi   # tani = tek grup (yeniden olcum)
           M=$(printf %s 'Always-and-Forever Yours' | base64)
           RC=0
           OLCU_HEPSI=/tmp/hepsi OLCU_HEPSI_LISTE="$GRUP" /home/claude/blender/venv/bin/python /home/claude/blender/siparis_uret.py "$CIFT" Milo Harper "$M" "/tmp/k/${CIFT}_ana.png" /tmp/is > /tmp/uret.log 2>&1 || { tail -30 /tmp/uret.log; exit 1; }

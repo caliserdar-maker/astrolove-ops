@@ -6,7 +6,8 @@ ustunden mesaj altina, pay ile, tam genislik, olcekleme yok.
 Ek kapilar (deger YAZILMAZ, yalniz True / False ve sayi): uretim girdisi (siparis.json) Etsy okumasiyla (KISISEL.json) harf harf ayni;
 dosya adi, piksel, dpi, 4:4:4, < 20 MB; uretim kapilari (KAPI.json).
 18 Kas (Merkez STEP 2, siparis baski): Format "Print" kabul (Digital File da); kirmizi nokta taramasi: teslim dosyasinin 4 kenarinda 10 px serit,
-R - G > 60 ve R - B > 60 olan piksel varsa FAIL (13 Kas Deep Black sag kenar 3x2 px nokta dersi; altin murekkep R - G < 60 oldugu icin sayilmaz).
+R - G > 60 ve R - B > 60 olan piksel varsa FAIL (13 Kas Deep Black sag kenar 3x2 px nokta dersi). 21 Kas: tum goruntude ayrica ton < ESIK_TON
+olcutu karar verir (MB altini R - G > 60 olabildigi icin eski olcut ic bolgede kordu).
 Kullanim: kesit_olcum.py URETIM_DIR KISISEL.json CIKTI_DIR   -> cikis 0 = hepsi PASS, 1 = FAIL (kesit yine yazilir, OZET'te neden)"""
 import hashlib
 import json
@@ -23,6 +24,10 @@ ESIK_RB = 60            # altin: R - B > 60 (zemin mavi: R < B; beyaz yildiz: R 
 ESIK_MUREKKEP = 3e-4    # bant murekkebi / W^2
 KENAR_PX = 10           # kirmizi nokta taramasi: kenar seridi genisligi (px)
 ESIK_KIRMIZI = 60       # kirmizi: R - G > 60 ve R - B > 60
+ESIK_TON = 8.0          # 21 Kas (GOREV SIPARIS_HATTI_DIJITAL 2): tum goruntu karari icin ek ton siniri (derece, 60*(G-B)/(R-B)). Midnight Blue
+                        # altininda R - G > 60 olan piksel cok (siparis 42******25: altinin %48.66'si); olcum (sahte MB 11x14 onizleme): altin
+                        # tonu p0.01 13.98, R - G > 60 olan altinda en dusuk 10.5; ton < 8 temiz goruntude 0 piksel, gomulu kirmizi noktalarin hepsi
+                        # (1x1 dahil, altina degen dahil) yakalanir. Turuncu-kirmizi (ton >= 8) altindan ayrilamaz: kor alan (raporda).
 FORMATLAR = ("Digital File", "Print")
 BEKLENEN_FORMAT = os.environ.get("BEKLENEN_FORMAT", "Print")   # siparis turu: baski siparisinde yalniz "Print" gecer (inceleme LOW 6)
 URETIM_KOSU = os.environ.get("URETIM_KOSU", "")                # verilirse SURE.json kosu no ayni olmali (eski klasor dosyasi karismasin)
@@ -80,14 +85,23 @@ def bantlar(m):
     return out
 
 
+def kirmizi_maske(a, ton=None):
+    """a: HxWx3 int16. Eski kenar olcutu (R - G > 60 ve R - B > 60); ton verilirse ayrica ton < ton derece (altin disi)."""
+    m = ((a[..., 0] - a[..., 1]) > ESIK_KIRMIZI) & ((a[..., 0] - a[..., 2]) > ESIK_KIRMIZI)
+    if ton is not None:
+        r_b = np.maximum(a[..., 0] - a[..., 2], 1).astype(np.float32)
+        m &= (60.0 * (a[..., 1] - a[..., 2]) / r_b) < ton
+    return m
+
+
 def kirmizi_tara(im):
-    """Teslim dosyasinin 4 kenar seridinde (KENAR_PX) kirmizi piksel: sayi + kutular (x0, y0, x1, y1). PASS = hic yok."""
+    """Kirmizi nokta: 4 kenar seridinde (KENAR_PX) eski olcut (13 Kas dersi) + 21 Kas: TUM GORUNTUDE ton < ESIK_TON olcutu. PASS = ikisi de 0."""
     a = np.asarray(im.convert("RGB")).astype(np.int16)
     H, W = a.shape[:2]
-    m = ((a[..., 0] - a[..., 1]) > ESIK_KIRMIZI) & ((a[..., 0] - a[..., 2]) > ESIK_KIRMIZI)
+    m = kirmizi_maske(a)
     k = KENAR_PX
     seritler = {"sol": (0, 0, k, H), "sag": (W - k, 0, W, H), "ust": (0, 0, W, k), "alt": (0, H - k, W, H)}
-    o = {"serit_px": k, "esik": ESIK_KIRMIZI}
+    o = {"serit_px": k, "esik": ESIK_KIRMIZI, "ton_esik": ESIK_TON}
     toplam = 0
     for ad, (x0, y0, x1, y1) in seritler.items():
         s = m[y0:y1, x0:x1]
@@ -97,8 +111,13 @@ def kirmizi_tara(im):
             ys, xs = np.nonzero(s)
             kutu = [int(xs.min()) + x0, int(ys.min()) + y0, int(xs.max()) + x0 + 1, int(ys.max()) + y0 + 1]
         o[ad] = dict(piksel=n, kutu=kutu)
-    o["tum_goruntu_piksel"] = int(m.sum())          # bilgi: kenar disi kirmizi (karar yalniz kenar seritlerinden)
-    o["PASS"] = toplam == 0
+    o["tum_goruntu_piksel"] = int(m.sum())          # bilgi: eski olcut tum goruntu (MB altininda yuksek; karar vermez)
+    mt = kirmizi_maske(a, ESIK_TON)
+    o["tum_goruntu_ton_piksel"] = int(mt.sum())
+    if mt.any():
+        ys, xs = np.nonzero(mt)
+        o["tum_goruntu_ton_kutu"] = [int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1]
+    o["PASS"] = toplam == 0 and o["tum_goruntu_ton_piksel"] == 0
     return o
 
 

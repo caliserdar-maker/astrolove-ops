@@ -25,6 +25,27 @@ def tablolar(luma_q=100, kroma_adim=1):
     return [luma, [int(kroma_adim)] * 64, [int(kroma_adim)] * 64]
 
 
+# 21 Kas (GOREV SIPARIS_HATTI_DIJITAL 1): DIJITAL teslimde (TESLIM_TUR=dijital) olcu basina kodlama. Deger = dijital_olcum kosusunda
+# (sahte isim, 2 cift) 20 MB altina giren ve halka kapisini (kodlama bandi + 0.10 tavan) gecen EN YUKSEK kaliteli aday. Tabloda olmayan olcu
+# q100 ile kodlanir; 20 MB'i asarsa uretim kapisi g FAIL verir ve musteri dosyasi yuklenmez (sessiz dusurme yok).
+DIJITAL_KODLAMA = {}
+
+
+def teslim_tablolari(olcu):
+    """Teslim dosyasinin nicemleme tablolari: baski ya da tabloda olmayan olcu -> None (q100, bugunku yol); dijital -> tablolar(aday)."""
+    import os
+    if os.environ.get("TESLIM_TUR") != "dijital" or olcu not in DIJITAL_KODLAMA:
+        return None
+    L, C = DIJITAL_KODLAMA[olcu].split("_")
+    return tablolar(int(L[1:]), int(C[1:]))
+
+
+def kodlama_adi(olcu):
+    """Rapor: kullanilan kodlamanin adi (L100_C1 = q100)."""
+    import os
+    return DIJITAL_KODLAMA.get(olcu, "L100_C1") if os.environ.get("TESLIM_TUR") == "dijital" else "L100_C1"
+
+
 def ycc_kaydet(rgb, yol, rng, agirlik=None, kroma_sigma=KROMA_SIGMA, icc=None, qtables=None):
     """rgb: HxWx3 kayan nokta sRGB 0-255; agirlik: HxW (1 = zemin, kroma gurultusu tam; 0 = oge) ya da None (her yer zemin).
     qtables: None = q100 (tum 1, bugunku yol, bayt bayt ayni); verilirse tablolar(...) ciktisi (dijital 20 MB kodlamasi)."""

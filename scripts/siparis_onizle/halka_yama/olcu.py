@@ -181,12 +181,12 @@ def _yaz_halka(P2, bg, bilgi, yol, g0, hedef, sn, seed):
     g1 = gren_olc(F, bg, bilgi['_kutu'])
     halka_kodla.kaynak_yaz(F, yol)                                     # halka kapisi kaynagi (kodlama oncesi, _REF.png; teslim edilmez)
     rk = np.random.default_rng([seed, 1119])
-    halka_kodla.ycc_kaydet(F, yol, rk, agirlik=bg); teslim_jpg.dpi_yaz(yol)
+    halka_kodla.ycc_kaydet(F, yol, rk, agirlik=bg, qtables=halka_kodla.teslim_tablolari(bilgi['olcu'])); teslim_jpg.dpi_yaz(yol)   # 21 Kas: dijital olcu tablosu
     oni = yol[:-4] + '_Preview.jpg'; ob = halka_kodla.onizleme(F, oni, rk, agirlik=bg, kaynak=True); teslim_jpg.dpi_yaz(oni); del F
     g = kapi_g(yol, P2, bg, bilgi)
     g['gren'] = dict(kaynak=round(g0, 3) if g0 is not None else None, sigma=round(sn, 3), kodlama_oncesi=round(g1, 3) if g1 is not None else None,
                      hedef=round(hedef, 3))
-    g['kodlama'] = dict(halka_kodla.ycc_tablolari(yol), yontem='YCbCr TPDF + kroma sigma %.1f, q100 4:4:4' % halka_kodla.KROMA_SIGMA,
+    g['kodlama'] = dict(halka_kodla.ycc_tablolari(yol), yontem='YCbCr TPDF + kroma sigma %.1f, %s 4:4:4' % (halka_kodla.KROMA_SIGMA, halka_kodla.kodlama_adi(bilgi['olcu'])),
                         onizleme=os.path.basename(oni), onizleme_boyut=ob)
     return g
 

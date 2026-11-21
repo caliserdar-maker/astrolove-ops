@@ -33,7 +33,7 @@ def yaz(P, z, yol, cjpeg, q=97, ekler=(), seed=11):
             r = np.random.default_rng([seed, y0]); s = P[y0:y0 + 1200]
             F[y0:y0 + 1200] = np.clip(s + (r.random(s.shape, dtype=np.float32) - r.random(s.shape, dtype=np.float32)) * 0.5 * bg[y0:y0 + 1200, :, None], 0, 255)
         rk = np.random.default_rng([seed, 1119])
-        halka_kodla.kaynak_yaz(F, yol); halka_kodla.ycc_kaydet(F, yol, rk, agirlik=bg); dpi_yaz(yol)
+        halka_kodla.kaynak_yaz(F, yol); halka_kodla.ycc_kaydet(F, yol, rk, agirlik=bg, qtables=halka_kodla.teslim_tablolari('24x36')); dpi_yaz(yol)
         oni = yol[:-4] + '_Preview.jpg'; halka_kodla.onizleme(F, oni, rk, agirlik=bg, kaynak=True); dpi_yaz(oni); del F
         hk, kutular = halka(np.asarray(Image.open(yol).convert('RGB')), P, bg)
         return dict(dosya=os.path.basename(yol), bayt=os.path.getsize(yol), mb=round(os.path.getsize(yol) / 1e6, 2), q=100, halka=hk, halka_kutular=kutular,

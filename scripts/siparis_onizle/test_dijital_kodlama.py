@@ -109,6 +109,25 @@ def main():
                     and not any(v.get("halka") for v in r["adaylar"].values()))
         finally:
             DK.HK.kapi, DK.PAY = eski_kapi, eski_pay
+    # 5) teslim_tablolari: yalniz TESLIM_TUR=dijital ve tablodaki olcu tablo alir; baski ve tabloda olmayan olcu q100 (None)
+    eski_tt, eski_tab = os.environ.get("TESLIM_TUR"), dict(KD.DIJITAL_KODLAMA)
+    try:
+        KD.DIJITAL_KODLAMA.clear(); KD.DIJITAL_KODLAMA["16x20"] = "L95_C2"
+        os.environ["TESLIM_TUR"] = "dijital"
+        kontrol("5 dijital + tablodaki olcu -> L95_C2 tablolari", KD.teslim_tablolari("16x20") == KD.tablolar(95, 2)
+                and KD.kodlama_adi("16x20") == "L95_C2")
+        kontrol("5b dijital + tabloda olmayan olcu -> None (q100; 20 MB kapisi karar verir)", KD.teslim_tablolari("A2") is None
+                and KD.kodlama_adi("A2") == "L100_C1")
+        os.environ["TESLIM_TUR"] = "baski"
+        kontrol("5c bilinen FAIL yolu: baski -> her olcude None (q100, baski degismez)", KD.teslim_tablolari("16x20") is None)
+        os.environ.pop("TESLIM_TUR")
+        kontrol("5d TESLIM_TUR yok -> None", KD.teslim_tablolari("16x20") is None)
+    finally:
+        KD.DIJITAL_KODLAMA.clear(); KD.DIJITAL_KODLAMA.update(eski_tab)
+        if eski_tt is None:
+            os.environ.pop("TESLIM_TUR", None)
+        else:
+            os.environ["TESLIM_TUR"] = eski_tt
     print(f"SONUC: {sum(SONUC)}/{len(SONUC)} PASS")
     return 0 if all(SONUC) else 1
 

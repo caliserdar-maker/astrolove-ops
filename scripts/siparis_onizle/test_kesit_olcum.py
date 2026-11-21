@@ -2,7 +2,7 @@
 """kesit_olcum.py testi (18 Kas, siparis baski yardimcisi). Ag kapali (CLAUDE.md TEST AGI); musteri verisi yok, sahte isimler.
 Sentetik MB 11x14 teslim dosyasi (3300x4200, 300 dpi, 4:4:4): lacivert zemin + 4 altin bant (ana, kucuk semboller, isim satiri, mesaj).
 Bilinen PASS: Format Print ve Digital File. Bilinen FAIL: bilinmeyen Format, sag kenarda kirmizi 3x2 nokta, yanlis olcu, isim farki,
-uretim kapisi FAIL. Bilgi: kenar disi kirmizi nokta karar vermez."""
+uretim kapisi FAIL. 21 Kas: tum goruntu ton karari (ic kirmizi nokta FAIL), gercek MB altini PASS."""
 import json
 import os
 import socket
@@ -16,6 +16,7 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from kesit_olcum import boyut_siniri as KO_SINIR  # noqa: E402
+import kesit_olcum as K  # noqa: E402
 
 
 def _ag_yok(*a, **k):
@@ -130,11 +131,30 @@ kontrol("bilinen FAIL: sag kenarda sentetik kirmizi 3x2 nokta", rc == 1 and kn.g
 rc, oz, kes, err = kos(nokta=(5, 1000))
 kontrol("bilinen FAIL: sol kenarda kirmizi nokta", rc == 1 and oz.get("kirmizi_nokta", {}).get("sol", {}).get("piksel", 0) > 0)
 rc, oz, kes, err = kos(nokta=(3300 - 13, 2000))
-kontrol("sinir (Merkez tanimi 10 px): kenardan 10 px iceride nokta kenar seridinde sayilmaz, bilgi sayacinda gorunur",
-        rc == 0 and oz.get("kirmizi_nokta", {}).get("tum_goruntu_piksel", 0) > 0)
+kn = oz.get("kirmizi_nokta", {})
+kontrol("21 Kas: kenardan 13 px iceride nokta kenar seridinde sayilmaz ama tum goruntu ton karari FAIL verir",
+        rc == 1 and kn.get("sag", {}).get("piksel", 1) == 0 and kn.get("tum_goruntu_ton_piksel", 0) > 0 and kn.get("PASS") is False, str(kn))
 rc, oz, kes, err = kos(nokta=(1600, 2300))
-kontrol("bilgi: kenar disi kirmizi nokta karar vermez (PASS), sayilir", rc == 0 and oz.get("kirmizi_nokta", {}).get("PASS") is True
-        and oz["kirmizi_nokta"].get("tum_goruntu_piksel", 0) > 0, str(oz.get("kirmizi_nokta")))
+kn = oz.get("kirmizi_nokta", {})
+kontrol("21 Kas bilinen FAIL: kenar disi (ic) kirmizi nokta artik FAIL", rc == 1 and kn.get("PASS") is False
+        and kn.get("tum_goruntu_ton_piksel", 0) > 0 and kn.get("tum_goruntu_ton_kutu", [0])[0] >= 1590, str(kn))
+# 21 Kas (GOREV SIPARIS_HATTI_DIJITAL 2): GERCEK Midnight Blue altini (sahte isimli 20 Kas deneme onizlemesinden kesit, test_veri):
+# eski olcut altinda yuzlerce piksel sayar (kor), ton olcutu 0 -> PASS; ayni goruntuye gomulu kirmizi noktalar FAIL.
+import io  # noqa: E402
+ALTIN = Path(__file__).resolve().parent / "test_veri" / "mb_altin_sahte_isim.jpg"
+im0 = Image.open(ALTIN).convert("RGB")
+kn = K.kirmizi_tara(im0)
+kontrol("bilinen PASS: gercek MB altini (eski olcut ic sayaci > 0, ton olcutu 0)", kn["PASS"] is True and kn["tum_goruntu_piksel"] > 100
+        and kn["tum_goruntu_ton_piksel"] == 0, str({k: kn[k] for k in ("tum_goruntu_piksel", "tum_goruntu_ton_piksel", "PASS")}))
+for ad, (x, y), (w, h), renk in (("1x1 ic", (400, 300), (1, 1), (220, 40, 40)), ("3x3 altina degen", (14, 690), (3, 3), (210, 35, 35)),
+                                 ("koyu kirmizi 2x2", (700, 900), (2, 2), (140, 20, 25)), ("sag kenar 3x2", (817, 500), (3, 2), (200, 30, 30))):
+    a = np.asarray(im0).copy(); a[y:y + h, x:x + w] = renk
+    bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
+    kn = K.kirmizi_tara(Image.open(bb))
+    kontrol(f"bilinen FAIL: gercek MB altini + kirmizi nokta ({ad})", kn["PASS"] is False and kn["tum_goruntu_ton_piksel"] > 0, str(kn.get("tum_goruntu_ton_piksel")))
+a = np.asarray(im0).copy(); a[300:303, 600:603] = (230, 90, 40)
+bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
+kontrol("bilinen KOR ALAN (belgelenir): turuncu-kirmizi (ton ~16) ic noktayi ton olcutu yakalamaz", K.kirmizi_tara(Image.open(bb))["PASS"] is True)
 rc, oz, kes, err = kos(W=2400, H=3000)
 kontrol("bilinen FAIL: yanlis olcu (2400x3000)", rc == 1 and oz.get("teslim", {}).get("PASS") is False)
 rc, oz, kes, err = kos(isim1_etsy="Mila")
