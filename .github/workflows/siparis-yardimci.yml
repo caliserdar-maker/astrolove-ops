@@ -10,7 +10,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: {description: "siparis_v2 | kosu_sil | halka_ornek | halka_olcum | dijital_olcum | gizli_kontrol", required: true}
+      mod: {description: "siparis_v2 | kosu_sil | halka_ornek | halka_olcum | dijital_olcum | kirmizi_teshis | gizli_kontrol", required: true}
       hedef: {description: "halka_ornek / halka_olcum: OFIS DENEME klasor id (sahte veri). siparis_v2'de VERILMEZ", required: false, default: ""}
       kosular: {description: "kosu_sil: id:tur virgullu (tur: oku | giris | giris_pr | tara | ci)", required: false, default: ""}
       sinir_utc: {description: "kosu_sil: bu siparis isinin baslangici (UTC, 2026-11-18T19:00:00Z); daha eski kosu silinmez", required: false, default: ""}
@@ -371,6 +371,50 @@ jobs:
           exit $RC
       - if: always()
         run: rm -rf /tmp/is /tmp/k /tmp/ref /tmp/o /tmp/hepsi ~/.config/rclone
+
+  kirmizi_teshis:
+    # SALT OKUMA teshis (21 Kas, Merkez 23:1x TR; kapi DEGISMEZ): YALNIZ SAHTE siparis (receipt 900000000N) V2_<uretim_kosu> klasorundeki teslim
+    # dosyasinda kirmizi_teshis.py (kume basina alan, tum piksellerde en parlak R, ogeye uzaklik, maske, yakin altin benzeri ton araligi, surum A/B
+    # karari). Cikti KIRMIZI_TESHIS.json ayni sahte klasore. Etsy / musteri verisi YOK.
+    if: ${{ inputs.mod == 'kirmizi_teshis' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: olcum ortami (siparis_v2 kesit ortami ile ayni)
+        run: python3 -m venv /tmp/vo && /tmp/vo/bin/pip install -q pillow==11.0.0 numpy==2.1.3 opencv-python-headless==4.10.0.84
+      - name: rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Teshis (yalniz sahte siparis)
+        env: {R: "${{ inputs.receipt }}", U: "${{ inputs.uretim_kosu }}", CO: "${{ inputs.tani }}"}
+        run: |
+          set -euo pipefail
+          [ -n "$R" ] && [ -n "$U" ] && [ -n "$CO" ] || { echo "::error::receipt, uretim_kosu, tani gerekli"; exit 1; }
+          [[ "$R" =~ ^900000000[1-9]$ ]] || { echo "::error::yalniz SAHTE receipt (900000000N)"; exit 1; }
+          [[ "$U" =~ ^[0-9]+$ ]] && [[ "$CO" =~ ^[A-Z]+_[A-Z]+:[0-9A]+x?[0-9]*$ ]] || { echo "::error::girdi bicimi"; exit 1; }
+          B12=$(echo "${CO%%:*}" | tr '_' '\n' | sed 's/.*/\L&/;s/^./\u&/' | paste -sd_); F="AstroLoveArt_${B12}_Midnight_Blue_${CO#*:}.jpg"
+          D="gdrive:ASTROLOVE/SIPARIS/$R/V2_$U"; mkdir -p /tmp/t
+          rclone copy "$D" /tmp/t --include "$F" -q
+          [ -s "/tmp/t/$F" ] || { echo "::error::teslim dosyasi yok"; exit 1; }
+          /tmp/vo/bin/python scripts/siparis_onizle/kirmizi_teshis.py "/tmp/t/$F" /tmp/t/KIRMIZI_TESHIS.json
+          rclone copy /tmp/t "$D" --include KIRMIZI_TESHIS.json -q
+      - if: always()
+        run: rm -rf /tmp/t ~/.config/rclone
 
   gizli_kontrol:
     # 19 Kas (GOREV HALKA_KALICI_2 B): ozel kosudan ONCE sir varlik kontrolu. YALNIZ var / yok basilir, deger ASLA. Drive / Etsy / siparis YOK.
