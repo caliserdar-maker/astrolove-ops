@@ -24,6 +24,8 @@ ESIK_RB = 60            # altin: R - B > 60 (zemin mavi: R < B; beyaz yildiz: R 
 ESIK_MUREKKEP = 3e-4    # bant murekkebi / W^2
 KENAR_PX = 10           # kirmizi nokta taramasi: kenar seridi genisligi (px)
 ESIK_KIRMIZI = 60       # kirmizi: R - G > 60 ve R - B > 60
+ESIK_TON_KUME = 3       # 21 Kas uctan uca (4 sahte dijital kosu): tam cozunurlukte 5-26 DAGINIK ton pikseli (kutu tum goruntu) yanlis FAIL verdi;
+                        # karar = en az 3 px bitisik (8 komsu) kume. 13 Kas noktasi 3x2 = 6 px. 1-2 px tek nokta kor alan (raporda).
 ESIK_TON = 8.0          # 21 Kas (GOREV SIPARIS_HATTI_DIJITAL 2): tum goruntu karari icin ek ton siniri (derece, 60*(G-B)/(R-B)). Midnight Blue
                         # altininda R - G > 60 olan piksel cok (21 Kas gercek bir 16x20 siparisinde altinin %48.66'si); olcum (sahte MB 11x14 onizleme): altin
                         # tonu p0.01 13.98, R - G > 60 olan altinda en dusuk 10.5; ton < 8 temiz goruntude 0 piksel, gomulu kirmizi noktalarin hepsi
@@ -99,7 +101,8 @@ def kirmizi_maske(a, ton=None):
 
 
 def kirmizi_tara(im):
-    """Kirmizi nokta: 4 kenar seridinde (KENAR_PX) eski olcut (13 Kas dersi) + 21 Kas: TUM GORUNTUDE ton < ESIK_TON olcutu. PASS = ikisi de 0."""
+    """Kirmizi nokta: 4 kenar seridinde (KENAR_PX) eski olcut (13 Kas dersi) + 21 Kas: TUM GORUNTUDE ton < ESIK_TON pikselleri, karar >= ESIK_TON_KUME px
+    bitisik kume. PASS = kenar 0 ve buyuk kume 0."""
     a = np.asarray(im.convert("RGB")).astype(np.int16)
     H, W = a.shape[:2]
     m = kirmizi_maske(a)
@@ -118,10 +121,18 @@ def kirmizi_tara(im):
     o["tum_goruntu_piksel"] = int(m.sum())          # bilgi: eski olcut tum goruntu (MB altininda yuksek; karar vermez)
     mt = kirmizi_maske(a, ESIK_TON)
     o["tum_goruntu_ton_piksel"] = int(mt.sum())
+    o["ton_kume_esik_px"] = ESIK_TON_KUME
+    o["ton_kume_buyuk"] = 0
     if mt.any():
         ys, xs = np.nonzero(mt)
         o["tum_goruntu_ton_kutu"] = [int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1]
-    o["PASS"] = toplam == 0 and o["tum_goruntu_ton_piksel"] == 0
+        o["ton_ornek"] = [[int(x), int(y), *[int(c) for c in a[y, x]]] for y, x in list(zip(ys, xs))[:20]]   # tani: x, y, R, G, B (sahte/gizli klasor)
+        import cv2
+        n, _, st, _ = cv2.connectedComponentsWithStats(mt.astype(np.uint8), connectivity=8)
+        alan = sorted((int(v) for v in st[1:, 4]), reverse=True)
+        o["ton_kume_alanlari"] = alan[:15]
+        o["ton_kume_buyuk"] = sum(1 for v in alan if v >= ESIK_TON_KUME)
+    o["PASS"] = toplam == 0 and o["ton_kume_buyuk"] == 0
     return o
 
 

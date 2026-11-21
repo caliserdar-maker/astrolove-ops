@@ -146,12 +146,22 @@ im0 = Image.open(ALTIN).convert("RGB")
 kn = K.kirmizi_tara(im0)
 kontrol("bilinen PASS: gercek MB altini (eski olcut ic sayaci > 0, ton olcutu 0)", kn["PASS"] is True and kn["tum_goruntu_piksel"] > 100
         and kn["tum_goruntu_ton_piksel"] == 0, str({k: kn[k] for k in ("tum_goruntu_piksel", "tum_goruntu_ton_piksel", "PASS")}))
-for ad, (x, y), (w, h), renk in (("1x1 ic", (400, 300), (1, 1), (220, 40, 40)), ("3x3 altina degen", (14, 690), (3, 3), (210, 35, 35)),
+a = np.asarray(im0).copy(); a[300, 400] = (220, 40, 40)
+bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
+kn = K.kirmizi_tara(Image.open(bb))
+kontrol("bilinen KOR ALAN (belgelenir): 1x1 tek kirmizi piksel (< 3 px kume) karar vermez, sayilir", kn["PASS"] is True and kn["tum_goruntu_ton_piksel"] > 0, str(kn.get("ton_kume_alanlari")))
+a = np.asarray(im0).copy()
+for i, (x, y) in enumerate(((50, 50), (700, 60), (60, 1000), (780, 1040), (420, 820))):
+    a[y, x] = (220, 40, 40)                                           # tam cozunurlukte gorulen DAGINIK tek pikseller (21 Kas uctan uca)
+bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
+kn = K.kirmizi_tara(Image.open(bb))
+kontrol("bilinen PASS: 5 daginik tek piksel (yanlis FAIL veren durum) -> PASS", kn["PASS"] is True and kn["ton_kume_buyuk"] == 0, str(kn.get("ton_kume_alanlari")))
+for ad, (x, y), (w, h), renk in (("2x2 ic", (400, 300), (2, 2), (220, 40, 40)), ("3x3 altina degen", (14, 690), (3, 3), (210, 35, 35)),
                                  ("koyu kirmizi 2x2", (700, 900), (2, 2), (140, 20, 25)), ("sag kenar 3x2", (817, 500), (3, 2), (200, 30, 30))):
     a = np.asarray(im0).copy(); a[y:y + h, x:x + w] = renk
     bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
     kn = K.kirmizi_tara(Image.open(bb))
-    kontrol(f"bilinen FAIL: gercek MB altini + kirmizi nokta ({ad})", kn["PASS"] is False and kn["tum_goruntu_ton_piksel"] > 0, str(kn.get("tum_goruntu_ton_piksel")))
+    kontrol(f"bilinen FAIL: gercek MB altini + kirmizi nokta ({ad})", kn["PASS"] is False and kn["ton_kume_buyuk"] > 0, str(kn.get("ton_kume_alanlari")))
 a = np.asarray(im0).copy(); a[300:303, 600:603] = (230, 90, 40)
 bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
 kontrol("bilinen KOR ALAN (belgelenir): turuncu-kirmizi (ton ~16) ic noktayi ton olcutu yakalamaz", K.kirmizi_tara(Image.open(bb))["PASS"] is True)
