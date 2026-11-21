@@ -45,8 +45,8 @@ def olcu_oku(deger):
         return m.group(1)
     m = re.search(r"(?<![\d.])(\d+)\s*[″\"]?\s*[x×X]\s*(\d+)(?![\d.])", deger or "")
     return f"{m.group(1)}x{m.group(2)}" if m else ""
-INC = {"5x7": (5, 7), "8x10": (8, 10), "11x14": (11, 14), "12x16": (12, 16), "12x18": (12, 18), "16x20": (16, 20), "16x24": (16, 24),
-       "18x24": (18, 24), "20x30": (20, 30), "24x30": (24, 30), "24x36": (24, 36)}
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from olcu_tablo import PX  # noqa: E402  21 Kas: piksel tablosu tek kaynaktan (halka_yama/olcu.py); eski INC sozlugunde A4/A3/A2 YOKTU (KeyError)
 
 
 def sha(p):
@@ -220,8 +220,8 @@ def main():
     if teslim.exists():
         h0 = sha(teslim)
         im = Image.open(teslim)
-        w, h = INC[s["olcu"]]
-        d.update(boyut=list(im.size), hedef=[w * 300, h * 300], dpi=[round(float(x)) for x in im.info.get("dpi", (0, 0))],
+        w, h = PX[s["olcu"]]
+        d.update(boyut=list(im.size), hedef=[w, h], dpi=[round(float(x)) for x in im.info.get("dpi", (0, 0))],
                  ornekleme_444=JpegImagePlugin.get_sampling(im) == 0, bayt=teslim.stat().st_size, bicim=im.format)
         d["sinir_bayt"] = boyut_siniri(BEKLENEN_FORMAT)
         d["PASS"] = bool(d["boyut"] == d["hedef"] and d["dpi"] == [300, 300] and d["ornekleme_444"] and d["bayt"] < d["sinir_bayt"] and d["bicim"] == "JPEG")
