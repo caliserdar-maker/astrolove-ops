@@ -102,16 +102,17 @@ def kirmizi_maske(a, ton=None):
 
 
 ESIK_SACAK_PX = 5        # 21 Kas Serdar karari (KARARLAR_20261121_119, secenek a): DIJITAL dosyada yildiz / altin oge kenarina bitisik (<= SACAK_MESAFE
-SACAK_MESAFE = 2         # px), <= 5 px koyu kirmizi kume (kroma adimi 3-4 kodlama sacagi) KUSUR SAYILMAZ (bilgi). Oge kenarina degmeyen ya da > 5 px kume
-                         # FAIL kalir. BASKI yolunda bu istisna YOK.
+SACAK_MESAFE = 2         # px), <= 5 px KOYU kirmizi kume (kroma adimi 3-4 kodlama sacagi) KUSUR SAYILMAZ (bilgi). Oge kenarina degmeyen, > 5 px ya da
+                         # parlak (R > SACAK_MAX_R) kume FAIL kalir. BASKI yolunda bu istisna YOK.
+SACAK_MAX_R = 130        # koyu: kumenin en parlak R'si; uctan uca sacak ornekleri R 75-108 (3 kosu, KESIT_OZET ton_ornek); parlak kirmizi (220,40,40) FAIL
 
 
 def oge_maskesi(a):
-    """Parlak oge (kirmizi DEGIL): altin (R > 120, R - B > 40, ton >= 20 derece) ya da beyaz / acik yildiz (uc kanal > 120). Kirmizi nokta
-    (ton < 8) ve onun JPEG halesi (ton < 20) oge sayilmaz; tek basina duran kirmizi nokta 'kenarda' sayilamaz."""
+    """Parlak oge (kirmizi DEGIL): altin (R > 120, R - B > 40, ton >= 28 derece) ya da beyaz / acik yildiz (uc kanal > 120). Kirmizi nokta
+    (ton < 8) ve onun turuncu JPEG halesi (ton < 28) oge sayilmaz."""
     R, G, B = (a[..., i].astype(np.float32) for i in range(3))
     ton = 60.0 * (G - B) / np.maximum(R - B, 1)
-    altin = (R > 120) & ((R - B) > 40) & (ton >= 20)
+    altin = (R > 120) & ((R - B) > 40) & (ton >= 28)                    # altin tonu p1 31.5 (olcum); turuncu hale (~21) oge SAYILMAZ
     beyaz = (R > 120) & (G > 120) & (B > 120)
     return altin | beyaz
 
@@ -157,8 +158,10 @@ def kirmizi_tara(im, dijital=False):
                 if ar < ESIK_TON_KUME:
                     continue
                 x, y, w, h = (int(v) for v in st[i, :4])
-                kenarda = bool((yakin[y:y + h, x:x + w] & (lab[y:y + h, x:x + w] == i)).any())
-                if kenarda and ar <= ESIK_SACAK_PX:
+                kume = lab[y:y + h, x:x + w] == i
+                kenarda = bool((yakin[y:y + h, x:x + w] & kume).any())
+                koyu = int(a[y:y + h, x:x + w, 0][kume].max()) <= SACAK_MAX_R
+                if kenarda and koyu and ar <= ESIK_SACAK_PX:
                     sacak += 1
                 else:
                     buyuk += 1

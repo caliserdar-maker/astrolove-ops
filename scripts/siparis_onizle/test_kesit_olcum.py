@@ -194,6 +194,20 @@ for lq, cq in ((85, 3), (80, 4)):
     kg = kodla_tara(a, lq, cq, True)
     kontrol(f"bilinen FAIL: L{lq}_C{cq} altin kenarinda > 5 px kume, dijital", kg["PASS"] is False and kg.get("ton_kume_buyuk", 0) >= 1,
             str({k: kg.get(k) for k in ("ton_kume_alanlari", "ton_sacak_bilgi", "ton_kume_buyuk")}))
+# beyaz yildiz kenari (uctan uca sacaklarin yeri) + parlak kirmizi + turuncu hale (inceleme 21 Kas)
+for lq, cq in ((85, 3), (80, 4)):
+    a = A0.copy(); a[1000:1002, 400:403] = (235, 235, 230); a[1002:1004, 401:403] = (95, 15, 15)        # 3x2 beyaz yildiz + alti 2x2 koyu kirmizi
+    kn = kodla_tara(a, lq, cq, True)
+    kontrol(f"bilinen PASS: L{lq}_C{cq} BEYAZ YILDIZ kenarinda 4 px koyu kirmizi sacak, dijital", kn["PASS"] is True and kn.get("ton_sacak_bilgi", 0) >= 1,
+            str({k: kn.get(k) for k in ("ton_kume_alanlari", "ton_sacak_bilgi", "ton_kume_buyuk")}))
+    a = A0.copy(); a[1000:1002, 400:403] = (235, 235, 230); a[1003:1005, 401:403] = (220, 40, 40)      # parlak kirmizi, yildizdan 1 px
+    kn = kodla_tara(a, lq, cq, True)
+    kontrol(f"bilinen FAIL: L{lq}_C{cq} yildiz yaninda PARLAK kirmizi 2x2, dijital", kn["PASS"] is False and kn.get("ton_kume_buyuk", 0) >= 1,
+            str({k: kn.get(k) for k in ("ton_kume_alanlari", "ton_sacak_bilgi", "ton_kume_buyuk")}))
+    a = A0.copy(); a[1018:1024, 648:654] = (235, 110, 40); a[1020:1022, 650:652] = (210, 30, 30)       # ic: turuncu halkali kirmizi 2x2, oge yok
+    kn = kodla_tara(a, lq, cq, True)
+    kontrol(f"bilinen FAIL: L{lq}_C{cq} turuncu haleli ic kirmizi nokta (hale oge sayilmaz), dijital", kn["PASS"] is False,
+            str({k: kn.get(k) for k in ("ton_kume_alanlari", "ton_sacak_bilgi", "ton_kume_buyuk")}))
 a = np.asarray(im0).copy(); a[300:303, 600:603] = (230, 90, 40)
 bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
 kontrol("bilinen KOR ALAN (belgelenir): turuncu-kirmizi (ton ~16) ic noktayi ton olcutu yakalamaz", K.kirmizi_tara(Image.open(bb))["PASS"] is True)
