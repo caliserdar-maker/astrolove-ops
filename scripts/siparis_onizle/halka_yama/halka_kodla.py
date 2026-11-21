@@ -13,8 +13,21 @@ YCC = np.array([[0.299, 0.587, 0.114], [-0.168736, -0.331264, 0.5], [0.5, -0.418
 KROMA_SIGMA = 1.0
 
 
-def ycc_kaydet(rgb, yol, rng, agirlik=None, kroma_sigma=KROMA_SIGMA, icc=None):
-    """rgb: HxWx3 kayan nokta sRGB 0-255; agirlik: HxW (1 = zemin, kroma gurultusu tam; 0 = oge) ya da None (her yer zemin)."""
+def tablolar(luma_q=100, kroma_adim=1):
+    """Nicemleme tablolari (21 Kas, dijital 20 MB): luma = libjpeg standart tablosu `luma_q` kalitesinde (100 = tum 1), kroma = duz
+    `kroma_adim` (halka kroma nicemlemesinden geliyordu: standart kroma tablosu YOK). Pillow'un kendi urettigi tablo geri okunur
+    (sira donusumu Pillow'da; kesit_olcum.onizleme_yap ile ayni yontem)."""
+    import io
+    if luma_q >= 100:
+        luma = [1] * 64
+    else:
+        b = io.BytesIO(); Image.new("RGB", (8, 8)).save(b, "JPEG", quality=int(luma_q)); luma = list(Image.open(b).quantization[0])
+    return [luma, [int(kroma_adim)] * 64, [int(kroma_adim)] * 64]
+
+
+def ycc_kaydet(rgb, yol, rng, agirlik=None, kroma_sigma=KROMA_SIGMA, icc=None, qtables=None):
+    """rgb: HxWx3 kayan nokta sRGB 0-255; agirlik: HxW (1 = zemin, kroma gurultusu tam; 0 = oge) ya da None (her yer zemin).
+    qtables: None = q100 (tum 1, bugunku yol, bayt bayt ayni); verilirse tablolar(...) ciktisi (dijital 20 MB kodlamasi)."""
     H = rgb.shape[0]; ycc8 = np.empty(rgb.shape, np.uint8)
     for y0 in range(0, H, 1200):
         s = rgb[y0:y0 + 1200].astype(np.float32) @ YCC.T; s[..., 1:] += 128
@@ -25,7 +38,7 @@ def ycc_kaydet(rgb, yol, rng, agirlik=None, kroma_sigma=KROMA_SIGMA, icc=None):
             g = rng.standard_normal(s[..., 1:].shape, dtype=np.float32) * kroma_sigma
             s[..., 1:] += g if ag is None else g * ag
         ycc8[y0:y0 + 1200] = np.clip(np.rint(s), 0, 255).astype(np.uint8)
-    k = dict(quality=100, subsampling=0, dpi=(300, 300))
+    k = dict(quality=100, subsampling=0, dpi=(300, 300)) if qtables is None else dict(qtables=qtables, subsampling=0, dpi=(300, 300))
     if icc:
         k['icc_profile'] = icc
     Image.fromarray(ycc8, 'YCbCr').save(yol, 'JPEG', **k)
