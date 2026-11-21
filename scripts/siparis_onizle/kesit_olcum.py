@@ -24,10 +24,11 @@ ESIK_RB = 60            # altin: R - B > 60 (zemin mavi: R < B; beyaz yildiz: R 
 ESIK_MUREKKEP = 3e-4    # bant murekkebi / W^2
 KENAR_PX = 10           # kirmizi nokta taramasi: kenar seridi genisligi (px)
 ESIK_KIRMIZI = 60       # kirmizi: R - G > 60 ve R - B > 60
-ESIK_TON_KUME = 3       # 21 Kas uctan uca (4 sahte dijital kosu): tam cozunurlukte 5-26 DAGINIK ton pikseli (kutu tum goruntu) yanlis FAIL verdi;
-                        # karar = en az 3 px bitisik (8 komsu) kume. 13 Kas noktasi 3x2 = 6 px. 1-2 px tek nokta kor alan (raporda).
+ESIK_TON_KUME = 3       # 21 Kas: karar = en az 3 px bitisik (8 komsu) ton kumesi. ONAY BEKLER (Serdar): ayni gun konan "tek piksel" kuralina gore
+                        # gevsetmedir; 4 sahte dijital uctan uca kosuda A3 yalniz tekil piksel (5), 16x20 / 18x24 / 20x30 ise kroma adimi 3-4
+                        # kodlamasinda yildiz kenarinda 3-5 px koyu kirmizi kume verdi (FAIL). 1-2 px ic nokta kor alan (raporda).
 ESIK_TON = 8.0          # 21 Kas (GOREV SIPARIS_HATTI_DIJITAL 2): tum goruntu karari icin ek ton siniri (derece, 60*(G-B)/(R-B)). Midnight Blue
-                        # altininda R - G > 60 olan piksel cok (21 Kas gercek bir 16x20 siparisinde altinin %48.66'si); olcum (sahte MB 11x14 onizleme): altin
+                        # altininda R - G > 60 olan piksel cok (olculdu: altinin yaklasik yarisi); olcum (sahte MB 11x14 onizleme): altin
                         # tonu p0.01 13.98, R - G > 60 olan altinda en dusuk 10.5; ton < 8 temiz goruntude 0 piksel, gomulu kirmizi noktalarin hepsi
                         # (1x1 dahil, altina degen dahil) yakalanir. Turuncu-kirmizi (ton >= 8) altindan ayrilamaz: kor alan (raporda).
 FORMATLAR = ("Digital File", "Print")
