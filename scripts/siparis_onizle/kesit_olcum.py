@@ -25,7 +25,7 @@ ESIK_MUREKKEP = 3e-4    # bant murekkebi / W^2
 KENAR_PX = 10           # kirmizi nokta taramasi: kenar seridi genisligi (px)
 ESIK_KIRMIZI = 60       # kirmizi: R - G > 60 ve R - B > 60
 ESIK_TON = 8.0          # 21 Kas (GOREV SIPARIS_HATTI_DIJITAL 2): tum goruntu karari icin ek ton siniri (derece, 60*(G-B)/(R-B)). Midnight Blue
-                        # altininda R - G > 60 olan piksel cok (siparis 42******25: altinin %48.66'si); olcum (sahte MB 11x14 onizleme): altin
+                        # altininda R - G > 60 olan piksel cok (21 Kas gercek bir 16x20 siparisinde altinin %48.66'si); olcum (sahte MB 11x14 onizleme): altin
                         # tonu p0.01 13.98, R - G > 60 olan altinda en dusuk 10.5; ton < 8 temiz goruntude 0 piksel, gomulu kirmizi noktalarin hepsi
                         # (1x1 dahil, altina degen dahil) yakalanir. Turuncu-kirmizi (ton >= 8) altindan ayrilamaz: kor alan (raporda).
 FORMATLAR = ("Digital File", "Print")
@@ -45,8 +45,12 @@ def olcu_oku(deger):
         return m.group(1)
     m = re.search(r"(?<![\d.])(\d+)\s*[″\"]?\s*[x×X]\s*(\d+)(?![\d.])", deger or "")
     return f"{m.group(1)}x{m.group(2)}" if m else ""
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from olcu_tablo import PX  # noqa: E402  21 Kas: piksel tablosu tek kaynaktan (halka_yama/olcu.py); eski INC sozlugunde A4/A3/A2 YOKTU (KeyError)
+# 21 Kas: BAGIMSIZ piksel hedefi (uretimin tablosundan DEGIL; inceleme ORTA: kapi kendi kaynagini dogrulamasin). Inc x 300 ve ISO A mm / 25.4
+# x 300 (yuvarlama). Eski INC sozlugunde A4/A3/A2 YOKTU (KeyError). test_olcu_tablo: bu tablo == halka_yama/olcu.py OLCU.
+INC = {"5x7": (5, 7), "8x10": (8, 10), "11x14": (11, 14), "12x16": (12, 16), "12x18": (12, 18), "16x20": (16, 20), "16x24": (16, 24),
+       "18x24": (18, 24), "20x30": (20, 30), "24x30": (24, 30), "24x36": (24, 36)}
+ISO_MM = {"A4": (210, 297), "A3": (297, 420), "A2": (420, 594)}
+PX = {**{o: (w * 300, h * 300) for o, (w, h) in INC.items()}, **{o: (round(w / 25.4 * 300), round(h / 25.4 * 300)) for o, (w, h) in ISO_MM.items()}}
 
 
 def sha(p):

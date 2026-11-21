@@ -118,6 +118,8 @@ def main():
                 and KD.kodlama_adi("16x20") == "L95_C2")
         kontrol("5b dijital + tabloda olmayan olcu -> None (q100; 20 MB kapisi karar verir)", KD.teslim_tablolari("A2") is None
                 and KD.kodlama_adi("A2") == "L100_C1")
+        KD.DIJITAL_KODLAMA["11x14"] = "L100_C1"
+        kontrol("5e dijital + L100_C1 -> None (bugunku q100 yolu bayt bayt; qtables 3 DQT yazardi)", KD.teslim_tablolari("11x14") is None)
         os.environ["TESLIM_TUR"] = "baski"
         kontrol("5c bilinen FAIL yolu: baski -> her olcude None (q100, baski degismez)", KD.teslim_tablolari("16x20") is None)
         os.environ.pop("TESLIM_TUR")

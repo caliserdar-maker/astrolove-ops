@@ -43,6 +43,7 @@ gir = yaml.safe_load((KOK / ".github/workflows/siparis-giris.yml").read_text())
 secenek = gir[True]["workflow_dispatch"]["inputs"]["olcu"]["options"] if True in gir else gir["on"]["workflow_dispatch"]["inputs"]["olcu"]["options"]
 kontrol("3 siparis-giris olcu secenekleri == olcu.py OLCU anahtarlari", set(secenek) == set(OT.PX), str(set(secenek) ^ set(OT.PX)))
 kontrol("3b her satilan olcu kesit_olcum.PX'te", all(o in K.PX for o in secenek), str([o for o in secenek if o not in K.PX]))
+kontrol("3b2 kesit_olcum BAGIMSIZ hedefi (inc x 300, mm / 25.4 x 300) == olcu.py OLCU", K.PX == OT.PX, str({o: (K.PX.get(o), OT.PX.get(o)) for o in set(K.PX) | set(OT.PX) if K.PX.get(o) != OT.PX.get(o)}))
 etiket = {o: (f"{o} in" if o[0].isdigit() else o) for o in secenek}
 kontrol("3c olcu_oku her olcuyu okur", all(K.olcu_oku(e) == o for o, e in etiket.items()), str({o: K.olcu_oku(e) for o, e in etiket.items()}))
 ESKI_INC = {"5x7": (5, 7), "8x10": (8, 10), "11x14": (11, 14), "12x16": (12, 16), "12x18": (12, 18), "16x20": (16, 20), "16x24": (16, 24),

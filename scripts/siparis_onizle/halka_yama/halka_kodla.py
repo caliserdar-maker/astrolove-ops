@@ -28,9 +28,9 @@ def tablolar(luma_q=100, kroma_adim=1):
 # 21 Kas (GOREV SIPARIS_HATTI_DIJITAL 1): DIJITAL teslimde (TESLIM_TUR=dijital) olcu basina kodlama. Deger = dijital_olcum kosusunda
 # (sahte isim, 2 cift) 20 MB altina giren ve halka kapisini (kodlama bandi + 0.10 tavan) gecen EN YUKSEK kaliteli aday. Tabloda olmayan olcu
 # q100 ile kodlanir; 20 MB'i asarsa uretim kapisi g FAIL verir ve musteri dosyasi yuklenmez (sessiz dusurme yok).
-# Olcum: siparis-yardimci dijital_olcum kosusu 44927861906 (21 Kas, CANCER_LEO + SCORPIO_VIRGO); secim kurali: iki ciftte de halka kapisi
+# Olcum: siparis-yardimci dijital_olcum kosulari 44927861906 + 44930704703 (21 Kas, CANCER_LEO + SCORPIO_VIRGO); secim kurali: iki ciftte de halka kapisi
 # PASS ve <= 19.0 MB (20 MB'a >= 1 MB pay), aday sirasinda ilk (en yuksek kalite). 24x30 / 24x36: o kosuda sigan tek aday (L75_C5) kodlama
-# bandi FAIL; ince adaylar ayri kosuda olculuyor (tabloda yoksa q100 -> 20 MB kapisi FAIL -> dosya yuklenmez).
+# bandi FAIL; 44930704703 C4 adaylari 19.6-22.3 MB (kroma gurultusu baskin): tabloda YOK -> q100 -> 20 MB kapisi FAIL -> dosya yuklenmez.
 DIJITAL_KODLAMA = {"5x7": "L100_C1", "8x10": "L100_C1", "11x14": "L100_C1", "A4": "L100_C1", "12x16": "L95_C1", "16x20": "L90_C3",
                    "A3": "L95_C1", "12x18": "L92_C1", "18x24": "L85_C3", "16x24": "L90_C3", "A2": "L90_C3", "20x30": "L80_C4"}
 
@@ -38,8 +38,8 @@ DIJITAL_KODLAMA = {"5x7": "L100_C1", "8x10": "L100_C1", "11x14": "L100_C1", "A4"
 def teslim_tablolari(olcu):
     """Teslim dosyasinin nicemleme tablolari: baski ya da tabloda olmayan olcu -> None (q100, bugunku yol); dijital -> tablolar(aday)."""
     import os
-    if os.environ.get("TESLIM_TUR") != "dijital" or olcu not in DIJITAL_KODLAMA:
-        return None
+    if os.environ.get("TESLIM_TUR") != "dijital" or DIJITAL_KODLAMA.get(olcu, "L100_C1") == "L100_C1":
+        return None                                                    # L100_C1 = bugunku q100 yolu bayt bayt (qtables 3 DQT yazar, +69 bayt)
     L, C = DIJITAL_KODLAMA[olcu].split("_")
     return tablolar(int(L[1:]), int(C[1:]))
 
