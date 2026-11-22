@@ -444,11 +444,14 @@ def senaryo_yml():
     import yaml
     w = KOK.parents[2] / ".github/workflows"
     d = yaml.safe_load((w / "sosyal-yayin.yml").read_text())
-    j = d["jobs"]["yayin"]
+    j, o = d["jobs"]["yayin"], d["jobs"]["onayla"]
     kontrol("yml: zamanli kosu anahtara bagli", "vars.SOSYAL_YAYIN_ACIK == 'true'" in j["if"] and "schedule" in j["if"])
-    kontrol("yml: is duzeyi kilit, onayla ayri grup", "onayla" in j["concurrency"]["group"] and "concurrency" not in d)
+    kontrol("yml: yayin isi onayla calistirmaz", "inputs.mod != 'onayla'" in j["if"] and "onayla" not in j["steps"][-1]["run"])
+    kontrol("yml: onayla isi environment kapili, zamanli kosuda yok", o.get("environment") == "sosyal-onay"
+            and "schedule" not in o["if"] and o["steps"][0]["name"] == "Onay kapisi var mi" and "SOSYAL_ONAY_KAPISI" in str(o["steps"][0]))
+    kontrol("yml: ayri kilit gruplari", j["concurrency"]["group"] != o["concurrency"]["group"] and "concurrency" not in d)
     kontrol("yml: elle kuru varsayilan acik", d[True]["workflow_dispatch"]["inputs"]["kuru"]["default"] is True)
-    adim = [x.get("name") for x in j["steps"]]
+    adim = [x.get("name") for x in o["steps"]]
     kontrol("yml: ONAY yazimi medya push'undan sonra", adim.index("ONAY yaz (yalniz onayla, medya push'undan sonra)") > adim.index("Medya push (yalniz onayla)"))
     for f in ("sosyal-izin.yml", "sosyal-token-yenile.yml", "sosyal-olcum-kendi.yml", "sosyal-yayin.yml"):
         y = yaml.safe_load((w / f).read_text())

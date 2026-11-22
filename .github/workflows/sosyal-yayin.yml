@@ -3,7 +3,7 @@ name: sosyal-yayin
 # Kendi paylasim sistemi (PLAN_KENDI_PAYLASIM_SISTEMI_20261122 bolum 4; scripts/sosyal/yayin/).
 # Zamanli kosu (her 30 dk, :07 ve :37) YALNIZ repo degiskeni SOSYAL_YAYIN_ACIK=true ise calisir; platform basina
 # YAYIN_IG / YAYIN_FB / YAYIN_THREADS / YAYIN_YT = true olmayan platform yayinlanmaz. ONAY'siz satir asla paylasilmaz.
-# Elle tetikleme: kuru varsayilan ACIK. mod=onayla: Serdar onayindan sonra Merkez kosar (satirlar + onay); iki asama:
+# Elle tetikleme: kuru varsayilan ACIK. mod=onayla ayri is (environment sosyal-onay, onaylayici Serdar); iki asama:
 # hazirla (medya + plan) -> medya push -> ONAY yaz (ONAY, medya yayina girmeden yazilmaz).
 # Sir ya da izin kodu girdi olarak verilmez. Etsy yok. Otomatik yeniden deneme yok (cift paylasim riski).
 
@@ -37,11 +37,10 @@ jobs:
   yayin:
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    if: ${{ github.event_name != 'schedule' || vars.SOSYAL_YAYIN_ACIK == 'true' }}
-    # Is duzeyinde kilit; onayla ayri grupta (bekleyen onayla, sonraki zamanli kosu tarafindan iptal edilmesin).
-    # Bekleyen bir zamanli kosunun yerini yenisi alabilir: ayni isi yapar, satir kaybi olmaz (DURUM korumasi).
+    if: ${{ (github.event_name == 'schedule' && vars.SOSYAL_YAYIN_ACIK == 'true') || (github.event_name == 'workflow_dispatch' && inputs.mod != 'onayla') }}
+    # Is duzeyinde kilit. Bekleyen bir zamanli kosunun yerini yenisi alabilir: ayni isi yapar, satir kaybi olmaz (DURUM korumasi).
     concurrency:
-      group: sosyal-yayin-${{ inputs.mod == 'onayla' && 'onayla' || 'yayin' }}
+      group: sosyal-yayin-yayin
       cancel-in-progress: false
     env:
       SOSYAL_TAKVIM_ID: ${{ vars.SOSYAL_TAKVIM_ID }}
@@ -80,8 +79,68 @@ jobs:
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
           fi
 
+      - name: Calistir
+        env:
+          MOD: ${{ github.event_name == 'schedule' && 'yayin' || inputs.mod }}
+          KURU: ${{ github.event_name == 'schedule' && 'false' || inputs.kuru }}
+        run: |
+          set -euo pipefail
+          [ -n "$MOD" ] || { echo "::error::MOD bos"; exit 1; }
+          [ -n "$KURU" ] || { echo "::error::KURU bos"; exit 1; }
+          case "$MOD" in yayin|kontrol) ;; *) echo "::error::bu iste mod: $MOD"; exit 1;; esac
+          args=("$MOD")
+          [ "$KURU" = "true" ] && args+=(--kuru)
+          python3 scripts/sosyal/yayin/calis.py "${args[@]}" 2>&1 | python3 scripts/guvenlik/sir_koru.py tee "$GITHUB_STEP_SUMMARY"
+
+  onayla:
+    # Serdar onay kapisi (Merkez 22 Kas: EVET): GitHub environment "sosyal-onay", Required reviewer yalniz caliserdar-maker.
+    # Environment yoksa GitHub onu korumasiz olusturur; bu yuzden ilk adim environment degiskeni SOSYAL_ONAY_KAPISI=serdar
+    # (yalniz environment'ta tanimli) yoksa DUR verir.
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.mod == 'onayla' }}
+    environment: sosyal-onay
+    concurrency:
+      group: sosyal-yayin-onayla
+      cancel-in-progress: false
+    env:
+      SOSYAL_TAKVIM_ID: ${{ vars.SOSYAL_TAKVIM_ID }}
+    steps:
+      - name: Onay kapisi var mi
+        env:
+          KAPI: ${{ vars.SOSYAL_ONAY_KAPISI }}
+        run: |
+          set -euo pipefail
+          [ -n "${KAPI:-}" ] && [ "$KAPI" = "serdar" ] || { echo "::error::sosyal-onay environment'i kurulu degil (SOSYAL_ONAY_KAPISI yok); onay yazilmaz"; exit 1; }
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Bagimliliklar
+        run: pip install -q requests==2.34.2
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          [ -n "${RCLONE_CONF_B64:-}" ] || { echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; }
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf "%s" "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE "^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S" ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
       - name: astrolove-media checkout (yalniz onayla)
-        if: ${{ inputs.mod == 'onayla' && !inputs.kuru }}
+        if: ${{ !inputs.kuru }}
         uses: actions/checkout@v4
         with:
           repository: caliserdar-maker/astrolove-media
@@ -90,32 +149,27 @@ jobs:
           sparse-checkout: yayin
           sparse-checkout-cone-mode: true
 
-      - name: Calistir
+      - name: Hazirla (medya + plan; takvime yazim yok)
         id: calis
         env:
-          MOD: ${{ github.event_name == 'schedule' && 'yayin' || inputs.mod }}
-          KURU: ${{ github.event_name == 'schedule' && 'false' || inputs.kuru }}
+          KURU: ${{ inputs.kuru }}
           SATIRLAR: ${{ inputs.satirlar }}
           ONAY: ${{ inputs.onay }}
         run: |
           set -euo pipefail
-          [ -n "$MOD" ] || { echo "::error::MOD bos"; exit 1; }
           [ -n "$KURU" ] || { echo "::error::KURU bos"; exit 1; }
-          args=("$MOD")
+          [[ "$SATIRLAR" =~ ^[0-9]+(,[0-9]+)*$ ]] || { echo "::error::satirlar bicimi"; exit 1; }
+          [[ "$ONAY" =~ ^SERDAR_20[0-9]{6}$ ]] || { echo "::error::onay bicimi"; exit 1; }
+          args=(onayla --satirlar "$SATIRLAR" --onay "$ONAY" --medya-kok "$GITHUB_WORKSPACE/media" --asama hazirla --plan "$RUNNER_TEMP/onay_plan.json")
           [ "$KURU" = "true" ] && args+=(--kuru)
-          if [ "$MOD" = "onayla" ]; then
-            [[ "$SATIRLAR" =~ ^[0-9]+(,[0-9]+)*$ ]] || { echo "::error::satirlar bicimi"; exit 1; }
-            [[ "$ONAY" =~ ^SERDAR_20[0-9]{6}$ ]] || { echo "::error::onay bicimi"; exit 1; }
-            args+=(--satirlar "$SATIRLAR" --onay "$ONAY" --medya-kok "$GITHUB_WORKSPACE/media" --asama hazirla --plan "$RUNNER_TEMP/onay_plan.json")
-          fi
           RC=0
           python3 scripts/sosyal/yayin/calis.py "${args[@]}" 2>&1 | python3 scripts/guvenlik/sir_koru.py tee "$GITHUB_STEP_SUMMARY" || RC=$?
           echo "rc=$RC" >> "$GITHUB_OUTPUT"
-          # onayla: hazirlikta gecmeyen satir olsa da gecenlerin medyasi push edilir, ONAY yazilir; sonuc son adimda
-          if [ "$MOD" != "onayla" ] || [ "$KURU" = "true" ]; then exit "$RC"; fi
+          # hazirlikta gecmeyen satir olsa da gecenlerin medyasi push edilir, ONAY yazilir; sonuc son adimda
+          if [ "$KURU" = "true" ]; then exit "$RC"; fi
 
       - name: Medya push (yalniz onayla)
-        if: ${{ inputs.mod == 'onayla' && !inputs.kuru }}
+        if: ${{ !inputs.kuru }}
         working-directory: media
         run: |
           set -euo pipefail
@@ -131,7 +185,7 @@ jobs:
           git push
 
       - name: ONAY yaz (yalniz onayla, medya push'undan sonra)
-        if: ${{ inputs.mod == 'onayla' && !inputs.kuru }}
+        if: ${{ !inputs.kuru }}
         env:
           SATIRLAR: ${{ inputs.satirlar }}
           ONAY: ${{ inputs.onay }}
