@@ -440,6 +440,10 @@ jobs:
           echo "SYS_PY=$(command -v python3)" >> "$GITHUB_ENV"
           curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
           unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - uses: actions/setup-python@v5                                   # siparis_v2 ile ayni sira: motor venv SYS_PY (sistem), olcum venv 3.12
+        with: { python-version: "3.12" }
+      - name: olcum ortami (siparis_v2 kesit ortami ile ayni)
+        run: python3 -m venv /tmp/vo && /tmp/vo/bin/pip install -q pillow==11.0.0 numpy==2.1.3 opencv-python-headless==4.10.0.84
       - name: rclone.conf
         env:
           RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
@@ -465,7 +469,6 @@ jobs:
           /home/claude/blender/venv/bin/pip install -q numpy==2.5.3 opencv-python-headless==5.0.0.93 pillow==12.3.0 scipy==1.18.1 scikit-image==0.26.0 potracer==0.0.4
           ln -s /tmp/k/ek/SCORPIO_VIRGO_T5_FAIL_tam.png /home/claude/ao/KANIT/SCORPIO_VIRGO_T5_FAIL_tam.png
           bash scripts/siparis_onizle/halka_yama/bindir.sh mg/motor_gpt
-          python3 -m venv /tmp/vo && /tmp/vo/bin/pip install -q pillow==11.0.0 numpy==2.1.3 opencv-python-headless==4.10.0.84
       - name: Uret (SAHTE isimler) + kaynak / teslim teshisi
         env: {T: "${{ inputs.hedef }}"}
         run: |
