@@ -1,0 +1,58 @@
+name: sosyal-olcum-kendi
+
+# Gunluk istatistik geri okuma (plan 4.8): TAMAM satirlarinin sayilari platform API'lerinden, Drive CSV. Salt okuma.
+# Zamanli kosu yalniz SOSYAL_YAYIN_ACIK=true ise.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "41 2 * * *"
+
+concurrency:
+  group: sosyal-olcum-kendi
+  cancel-in-progress: false
+
+jobs:
+  olcum:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: ${{ github.event_name != 'schedule' || vars.SOSYAL_YAYIN_ACIK == 'true' }}
+    env:
+      SOSYAL_TAKVIM_ID: ${{ vars.SOSYAL_TAKVIM_ID }}
+      YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+      YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Bagimliliklar
+        run: pip install -q requests==2.34.2
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          [ -n "${RCLONE_CONF_B64:-}" ] || { echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; }
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf "%s" "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE "^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S" ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Calistir
+        run: |
+          set -euo pipefail
+          python3 scripts/sosyal/yayin/istatistik.py 2>&1 | python3 scripts/guvenlik/sir_koru.py tee "$GITHUB_STEP_SUMMARY"

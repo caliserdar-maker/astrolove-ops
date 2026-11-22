@@ -205,6 +205,20 @@ versiyonlanmayan bir `.env` dosyasinda tutulur.
   `astrolove-media/carousel_v2/D<NN>/slide_1..5.jpg` yolundan turetilir;
   `ig-media-sync` bu dosyalari Drive'dan Pages reposuna tasir.
 
+## Kendi paylasim sistemi (22 Kas 2026; PLAN_KENDI_PAYLASIM_SISTEMI_20261122, ISTISNA 3 KARARLAR_20261122_69)
+
+- Kod: `scripts/sosyal/yayin/`; is akislari `sosyal-yayin`, `sosyal-izin`, `sosyal-token-yenile`, `sosyal-olcum-kendi`.
+- GitHub Secrets (Serdar elle, kurulum listesi S6): `IG_APP_ID`, `IG_APP_SECRET`, `META_APP_ID`, `META_APP_SECRET`,
+  `THREADS_APP_ID`, `THREADS_APP_SECRET`, `YT_CLIENT_ID`, `YT_CLIENT_SECRET` (YouTube icin AYRI Google projesi
+  astroloveart-yayin; rclone projesine dokunulmaz). Izin kodu gecici: `OAUTH_KOD_IG` / `_FB` / `_THREADS` / `_YT`
+  (sosyal-izin cevir token'a cevirir ve sirri siler).
+- Kullanici token'lari: Drive `ASTROLOVE/TEMP/SOSYAL_<PLATFORM>_TOKEN.json` (tek kaynak; yenilenince geri yazilir).
+- Repo degiskenleri: `SOSYAL_YAYIN_ACIK` (ana anahtar; `true` olmadikca zamanli kosular atlanir), `YAYIN_IG`, `YAYIN_FB`,
+  `YAYIN_THREADS`, `YAYIN_YT` (platform anahtari), `SOSYAL_TAKVIM_ID` (Drive SOSYAL_TAKVIM sheet), istege bagli `FB_PAGE_ID`,
+  `YT_KANAL_ID` (birden cok sayfa/kanal varsa secim).
+- Token URL'de gitmez (Authorization basligi); zorunlu sorgu uclarinda (token degisim/yenileme) hata metninden adres ve sir
+  silinir (`ortak.temizle`). Cikti `sir_koru.py tee` ile suzulur. Yazan istek otomatik yeniden denenmez.
+
 ## Prodigi anahtari (6 Eylul 2026)
 
 Prodigi Print API anahtari GitHub secret'i DEGILDIR; Etsy token modeliyle Drive'da

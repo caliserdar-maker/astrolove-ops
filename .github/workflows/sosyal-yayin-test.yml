@@ -1,0 +1,31 @@
+name: sosyal-yayin-test
+
+# scripts/sosyal/yayin sahte testi (ag kapali, sahte HTTP + sahte rclone). Gercek platforma ya da Drive'a cikmaz.
+
+permissions:
+  contents: read
+
+on:
+  push:
+    paths:
+      - "scripts/sosyal/yayin/**"
+      - ".github/workflows/sosyal-yayin*.yml"
+      - ".github/workflows/sosyal-izin.yml"
+      - ".github/workflows/sosyal-token-yenile.yml"
+      - ".github/workflows/sosyal-olcum-kendi.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q requests==2.34.2 pyyaml
+      - name: Test
+        run: |
+          set -euo pipefail
+          python3 -I scripts/sosyal/yayin/test_yayin.py

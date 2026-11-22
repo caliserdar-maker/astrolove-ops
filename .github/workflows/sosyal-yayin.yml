@@ -1,0 +1,124 @@
+name: sosyal-yayin
+
+# Kendi paylasim sistemi (PLAN_KENDI_PAYLASIM_SISTEMI_20261122 bolum 4; scripts/sosyal/yayin/).
+# Zamanli kosu (her 30 dk, :07 ve :37) YALNIZ repo degiskeni SOSYAL_YAYIN_ACIK=true ise calisir; platform basina
+# YAYIN_IG / YAYIN_FB / YAYIN_THREADS / YAYIN_YT = true olmayan platform yayinlanmaz. ONAY'siz satir asla paylasilmaz.
+# Elle tetikleme: kuru varsayilan ACIK. mod=onayla: Serdar onayindan sonra Merkez kosar (satirlar + onay).
+# Sir ya da izin kodu girdi olarak verilmez. Etsy yok. Otomatik yeniden deneme yok (cift paylasim riski).
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod:
+        description: "yayin | onayla | kontrol"
+        type: choice
+        options: [yayin, onayla, kontrol]
+        default: yayin
+      kuru:
+        description: "Kuru kosu (hicbir sey yazmaz)"
+        type: boolean
+        default: true
+      satirlar:
+        description: "onayla icin satir_no listesi, or. 3,4,5"
+        required: false
+        default: ""
+      onay:
+        description: "onayla icin SERDAR_YYYYMMDD"
+        required: false
+        default: ""
+  schedule:
+    - cron: "7,37 * * * *"
+
+concurrency:
+  group: sosyal-yayin
+  cancel-in-progress: false
+
+jobs:
+  yayin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    if: ${{ github.event_name != 'schedule' || vars.SOSYAL_YAYIN_ACIK == 'true' }}
+    env:
+      SOSYAL_TAKVIM_ID: ${{ vars.SOSYAL_TAKVIM_ID }}
+      SOSYAL_YAYIN_ACIK: ${{ vars.SOSYAL_YAYIN_ACIK }}
+      YAYIN_IG: ${{ vars.YAYIN_IG }}
+      YAYIN_FB: ${{ vars.YAYIN_FB }}
+      YAYIN_THREADS: ${{ vars.YAYIN_THREADS }}
+      YAYIN_YT: ${{ vars.YAYIN_YT }}
+      YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+      YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Bagimliliklar
+        run: pip install -q requests==2.34.2
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          [ -n "${RCLONE_CONF_B64:-}" ] || { echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; }
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf "%s" "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE "^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S" ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: astrolove-media checkout (yalniz onayla)
+        if: ${{ inputs.mod == 'onayla' && !inputs.kuru }}
+        uses: actions/checkout@v4
+        with:
+          repository: caliserdar-maker/astrolove-media
+          token: ${{ secrets.OPS_ADMIN_TOKEN }}
+          path: media
+          sparse-checkout: yayin
+          sparse-checkout-cone-mode: true
+
+      - name: Calistir
+        env:
+          MOD: ${{ github.event_name == 'schedule' && 'yayin' || inputs.mod }}
+          KURU: ${{ github.event_name == 'schedule' && 'false' || inputs.kuru }}
+          SATIRLAR: ${{ inputs.satirlar }}
+          ONAY: ${{ inputs.onay }}
+        run: |
+          set -euo pipefail
+          [ -n "$MOD" ] || { echo "::error::MOD bos"; exit 1; }
+          [ -n "$KURU" ] || { echo "::error::KURU bos"; exit 1; }
+          args=("$MOD")
+          [ "$KURU" = "true" ] && args+=(--kuru)
+          if [ "$MOD" = "onayla" ]; then
+            [[ "$SATIRLAR" =~ ^[0-9]+(,[0-9]+)*$ ]] || { echo "::error::satirlar bicimi"; exit 1; }
+            [[ "$ONAY" =~ ^SERDAR_20[0-9]{6}$ ]] || { echo "::error::onay bicimi"; exit 1; }
+            args+=(--satirlar "$SATIRLAR" --onay "$ONAY" --medya-kok "$GITHUB_WORKSPACE/media")
+          fi
+          python3 scripts/sosyal/yayin/calis.py "${args[@]}" 2>&1 | python3 scripts/guvenlik/sir_koru.py tee "$GITHUB_STEP_SUMMARY"
+
+      - name: Medya push (yalniz onayla)
+        if: ${{ inputs.mod == 'onayla' && !inputs.kuru }}
+        working-directory: media
+        run: |
+          set -euo pipefail
+          [ -d yayin ] || { echo "genel medya yok (FB/YT satirlari)"; exit 0; }
+          git add -A yayin
+          git diff --cached --name-only > ../_d.txt
+          bad=$(grep -vE '^yayin/20[0-9]{4}/[0-9]+_[0-9]+\.(jpg|jpeg|mp4)$' ../_d.txt || true)
+          [ -z "$bad" ] || { echo "::error::yayin/ disinda ya da bicim disi dosya"; exit 1; }
+          if git diff --cached --quiet; then echo "yeni medya yok"; exit 0; fi
+          git config user.name "astrolove-ops"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -qm "yayin: onayli medya ($(wc -l < ../_d.txt) dosya)"
+          git push

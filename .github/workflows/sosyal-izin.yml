@@ -1,0 +1,76 @@
+name: sosyal-izin
+
+# Ilk baglanti (kurulum S7): islem=link izin ekrani linkini adim ozetine yazar (client_id ve state sir degil);
+# islem=cevir OAUTH_KOD_<IG|FB|THREADS|YT> sirrini token'a cevirir, Drive TEMP'e yazar ve kod sirrini siler.
+# Kod ya da sir is akisi girdisi OLMAZ (docs/SECRETS.md DERS). Hicbir platforma gonderi yapmaz.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      islem:
+        type: choice
+        options: [link, cevir]
+        default: link
+      platform:
+        type: choice
+        options: [instagram, facebook, threads, youtube]
+
+jobs:
+  izin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      IG_APP_ID: ${{ secrets.IG_APP_ID }}
+      IG_APP_SECRET: ${{ secrets.IG_APP_SECRET }}
+      META_APP_ID: ${{ secrets.META_APP_ID }}
+      META_APP_SECRET: ${{ secrets.META_APP_SECRET }}
+      THREADS_APP_ID: ${{ secrets.THREADS_APP_ID }}
+      THREADS_APP_SECRET: ${{ secrets.THREADS_APP_SECRET }}
+      YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+      YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+      FB_PAGE_ID: ${{ vars.FB_PAGE_ID }}
+      YT_KANAL_ID: ${{ vars.YT_KANAL_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Bagimliliklar
+        run: pip install -q requests==2.34.2
+      - name: rclone kur
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: rclone.conf olustur
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          [ -n "${RCLONE_CONF_B64:-}" ] || { echo "HATA: RCLONE_CONF_B64 yok" >&2; exit 1; }
+          mkdir -p ~/.config/rclone
+          umask 077
+          printf "%s" "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if grep -qE "^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S" ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+
+      - name: Calistir
+        env:
+          ISLEM: ${{ inputs.islem }}
+          PLATFORM: ${{ inputs.platform }}
+          OAUTH_KOD_IG: ${{ inputs.islem == 'cevir' && inputs.platform == 'instagram' && secrets.OAUTH_KOD_IG || '' }}
+          OAUTH_KOD_FB: ${{ inputs.islem == 'cevir' && inputs.platform == 'facebook' && secrets.OAUTH_KOD_FB || '' }}
+          OAUTH_KOD_THREADS: ${{ inputs.islem == 'cevir' && inputs.platform == 'threads' && secrets.OAUTH_KOD_THREADS || '' }}
+          OAUTH_KOD_YT: ${{ inputs.islem == 'cevir' && inputs.platform == 'youtube' && secrets.OAUTH_KOD_YT || '' }}
+          OPS_ADMIN_TOKEN: ${{ inputs.islem == 'cevir' && secrets.OPS_ADMIN_TOKEN || '' }}
+        run: |
+          set -euo pipefail
+          [ -n "$ISLEM" ] && [ -n "$PLATFORM" ] || { echo "::error::girdi bos"; exit 1; }
+          python3 scripts/sosyal/yayin/izin.py "$ISLEM" "$PLATFORM" 2>&1 | python3 scripts/guvenlik/sir_koru.py tee "$GITHUB_STEP_SUMMARY"

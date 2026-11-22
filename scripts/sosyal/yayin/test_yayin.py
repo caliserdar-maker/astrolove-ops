@@ -1,0 +1,465 @@
+#!/usr/bin/env python3
+"""Kendi paylasim sistemi sahte testi. AG KAPALI: socket bastan engellenir; HTTP sahte oturum, rclone PATH'te sahte arac
+(Drive = gecici klasor). Bilinen PASS: IG reel / karusel, Threads metin, FB reel + gorsel, YT short, kuru kosu (yazim 0),
+onayla (ONAY + ozet + genel medya), izin cevir (token Drive'a, kod sirri silinir), token yenileme.
+Bilinen FAIL: onaysiz, ozet farkli, medya farkli, media_publish 500 (tek deneme, BELIRSIZ), BEKLIYOR, 6 saat gec (KACTI),
+anahtar kapali, son an DURUM dolu, sir sorguda, hata metninde token, yenileme hatasi uyari. Mutasyon: onay kapisi bozulunca test FAIL."""
+import hashlib
+import io
+import json
+import os
+import shutil
+import socket
+import stat
+import sys
+import tempfile
+import contextlib
+from datetime import datetime, timedelta
+from pathlib import Path
+
+
+def _ag_yok(*a, **k):
+    raise AssertionError("gercek ag acilmaya calisildi")
+
+
+socket.socket = _ag_yok
+socket.create_connection = _ag_yok
+
+KOK = Path(__file__).resolve().parent
+sys.path.insert(0, str(KOK))
+TMP = Path(tempfile.mkdtemp(prefix="yayin_test_"))
+DRIVE = TMP / "drive"
+BIN = TMP / "bin"
+DRIVE.mkdir()
+BIN.mkdir()
+(BIN / "rclone").write_text(f"""#!{sys.executable}
+import sys, shutil, os
+D = {str(DRIVE)!r}
+k, a = sys.argv[1], sys.argv[2:]
+yol = lambda r: os.path.join(D, r.split(':', 1)[1])
+if k == 'cat':
+    p = yol(a[0])
+    if not os.path.exists(p): sys.stderr.write('not found'); sys.exit(3)
+    sys.stdout.write(open(p).read())
+elif k == 'rcat':
+    p = yol(a[0]); os.makedirs(os.path.dirname(p), exist_ok=True); open(p, 'w').write(sys.stdin.read())
+elif k == 'copyto':
+    p = yol(a[0])
+    if not os.path.exists(p): sys.stderr.write('not found'); sys.exit(3)
+    shutil.copyfile(p, a[1])
+else:
+    sys.exit(9)
+""")
+(BIN / "rclone").chmod(0o755)
+os.environ["PATH"] = f"{BIN}:{os.environ['PATH']}"
+CONF = TMP / "rclone.conf"
+CONF.write_text('[gdrive]\ntype = drive\nclient_id = cid\nclient_secret = GSECRET0123456789\ntoken = {"refresh_token": "GREFRESH0123456789"}\n')
+os.environ.update(RCLONE_CONFIG=str(CONF), SOSYAL_TAKVIM_ID="SHEET1", GITHUB_ACTIONS="", OPS_ADMIN_TOKEN="ghADMIN0123456789",
+                  YT_CLIENT_ID="ytcid", YT_CLIENT_SECRET="YTSECRET0123456789", IG_APP_ID="igapp", IG_APP_SECRET="IGSECRET0123456789")
+for k in ("RCLONE_CONFIG_GDRIVE_CLIENT_ID", "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET"):
+    os.environ.pop(k, None)
+
+import ortak  # noqa: E402
+import calis  # noqa: E402
+import izin  # noqa: E402
+import secim  # noqa: E402
+import token_yenile  # noqa: E402
+
+TOK = {"instagram": "IGTOKEN_SAHTE_0123456789", "threads": "THTOKEN_SAHTE_0123456789",
+       "facebook": "FBPAGETOKEN_SAHTE_0123456789", "youtube": "YTREFRESH_SAHTE_0123456789"}
+SIRLAR = list(TOK.values()) + ["GSECRET0123456789", "GREFRESH0123456789", "ghADMIN0123456789", "YTSECRET0123456789",
+                               "IGSECRET0123456789", "GACCESS_SAHTE_99", "YTACCESS_SAHTE_99", "KODSAHTE123456", "IGYENI_SAHTE_0123456789"]
+MEDIA = {}  # genel url -> bayt
+SIMDI = datetime(2026, 12, 8, 10, 0, tzinfo=secim.TZ)
+KANAL = {"instagram": ("ig_id", "1784"), "threads": ("th_id", "2555"), "facebook": ("page_id", "9001"),
+         "youtube": ("kanal_id", "UCabc")}
+
+
+class Y:
+    def __init__(self, kod=200, j=None, basliklar=None, icerik=b""):
+        self.status_code, self._j, self.headers, self.content = kod, j, basliklar or {}, icerik
+        self.text = json.dumps(j) if j is not None else ""
+
+    def json(self):
+        if self._j is None:
+            raise ValueError("bos")
+        return self._j
+
+
+class Oturum:
+    def __init__(self, satirlar):
+        self.baslik = secim.SUTUNLAR
+        self.satirlar = [[r.get(c, "") for c in self.baslik] for r in satirlar]
+        self.cagri = []
+        self.publish_500 = False
+        self.son_an_durum = False
+        self.hata_tokenli = False
+        self.yenile_hata = False
+
+    def _hucre(self, rng):
+        a1 = rng.split("!")[1]
+        col = "".join(ch for ch in a1 if ch.isalpha())
+        row = int("".join(ch for ch in a1 if ch.isdigit()))
+        ci = 0
+        for ch in col:
+            ci = ci * 26 + ord(ch) - 64
+        return row - 2, ci - 1
+
+    def request(self, m, url, params=None, data=None, json=None, files=None, headers=None, timeout=None):
+        self.cagri.append((m, url, dict(params or {}), data if isinstance(data, dict) else None, dict(headers or {}), json))
+        auth = (headers or {}).get("Authorization", "")
+        if url.startswith("https://oauth2.googleapis.com/token"):
+            if data.get("refresh_token") == "GREFRESH0123456789":
+                return Y(j={"access_token": "GACCESS_SAHTE_99"})
+            if data.get("grant_type") == "authorization_code":
+                return Y(j={"refresh_token": TOK["youtube"], "access_token": "YTACCESS_SAHTE_99"})
+            return Y(j={"access_token": "YTACCESS_SAHTE_99"})
+        if url.startswith("https://sheets.googleapis.com"):
+            assert auth == "Bearer GACCESS_SAHTE_99"
+            if m == "GET" and "!" not in url:
+                return Y(j={"values": [self.baslik] + self.satirlar})
+            if m == "GET":
+                r, c = self._hucre(url.rsplit("/", 1)[1])
+                v = self.satirlar[r][c] if c < len(self.satirlar[r]) else ""
+                if self.son_an_durum:
+                    v = "BEKLIYOR baska"
+                return Y(j={"values": [[v]]} if v else {})
+            for d in json["data"]:
+                r, c = self._hucre(d["range"])
+                self.satirlar[r][c] = d["values"][0][0]
+            return Y(j={"totalUpdatedCells": len(json["data"])})
+        if url in MEDIA:
+            return Y(icerik=MEDIA[url])
+        if "graph.instagram.com" in url:
+            if url.endswith("/refresh_access_token"):
+                if self.yenile_hata:
+                    return Y(400, {"error": {"message": f"bad token {params['access_token']} at {url}?access_token={params['access_token']}"}})
+                return Y(j={"access_token": "IGYENI_SAHTE_0123456789", "expires_in": 5184000})
+            if url.endswith("/access_token"):
+                return Y(j={"access_token": TOK["instagram"], "expires_in": 5184000})
+            assert auth.startswith("Bearer "), url
+            if url.endswith("/me"):
+                return Y(j={"user_id": "1784", "username": "astroloveart"})
+            if url.endswith("/insights"):
+                return Y(j={"data": [{"name": "views", "values": [{"value": 321}]}, {"name": "likes", "total_value": {"value": 7}}]})
+            if url.endswith("/media_publish"):
+                if self.publish_500:
+                    return Y(500, {"error": {"message": f"oops {auth} {url}?access_token={TOK['instagram']}"}})
+                return Y(j={"id": "IGMEDIA77"})
+            if url.endswith("/media"):
+                n = sum(1 for c in self.cagri if c[1].endswith("/media"))
+                return Y(j={"id": f"C{n}"})
+            return Y(j={"status_code": "FINISHED"})
+        if url.startswith("https://api.instagram.com/oauth/access_token"):
+            assert data["code"] == "KODSAHTE123456", data["code"]
+            return Y(j={"access_token": "IGKISA_SAHTE_000111", "user_id": 5})
+        if "graph.threads.net" in url:
+            if url.endswith("/threads_publish"):
+                return Y(j={"id": "THPOST1"})
+            if url.endswith("/threads"):
+                return Y(j={"id": "THC1"})
+            return Y(j={"status": "FINISHED"})
+        if "rupload.facebook.com" in url:
+            assert auth.startswith("OAuth ")
+            return Y(j={"success": True})
+        if "graph.facebook.com" in url:
+            if url.endswith("/video_reels"):
+                return Y(j={"video_id": "FBV1"} if data["upload_phase"] == "start" else {"success": True})
+            if url.endswith("/photos"):
+                assert files and "source" in files
+                return Y(j={"id": "PH1", "post_id": "9001_55"})
+        if "googleapis.com/upload/youtube" in url and m == "POST":
+            assert params["uploadType"] == "resumable"
+            return Y(j={}, basliklar={"Location": "https://www.googleapis.com/upload/youtube/v3/videos?upload_id=SAHTEUP"})
+        if url.startswith("https://www.googleapis.com/upload/youtube/v3/videos?upload_id="):
+            return Y(j={"id": "YTVID1"})
+        if url.startswith("https://api.github.com/repos/") and m == "DELETE":
+            assert auth == "Bearer ghADMIN0123456789"
+            return Y(204)
+        raise AssertionError(f"beklenmeyen istek {m} {url}")
+
+
+def drive_koy(yol, bayt):
+    p = DRIVE / yol
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_bytes(bayt)
+
+
+def kimlikleri_koy():
+    for p, t in TOK.items():
+        alan, deger = KANAL[p]
+        sir = "refresh_token" if p == "youtube" else "token"
+        drive_koy(f"ASTROLOVE/TEMP/SOSYAL_{p.upper()}_TOKEN.json", json.dumps({sir: t, alan: deger}).encode())
+
+
+def satir(no, platform, tur, medya="", metin="Hello stars", saat=-1, onay=True, durum="", gorunurluk="", md5ler=None):
+    s = {"satir_no": str(no), "tarih_saat_TR": (SIMDI + timedelta(hours=saat)).strftime("%Y-%m-%d %H:%M"),
+         "platform": platform, "tur": tur, "medya": medya, "metin": metin, "link": "", "pano": "", "yz_beyani": "hayir",
+         "gorunurluk": gorunurluk, "DURUM": durum, "sonuc_no": "", "not": ""}
+    if onay:
+        s["ONAY"] = "SERDAR_20261207"
+        s["ONAY_OZET"] = secim.ozet(s, md5ler if md5ler is not None else
+                                    [hashlib.md5((DRIVE / m).read_bytes()).hexdigest() for m in medya.split(";") if m])
+    return s
+
+
+def genel(no, i, ext, bayt, ay="202612"):
+    MEDIA[f"https://caliserdar-maker.github.io/astrolove-media/yayin/{ay}/{no}_{i}{ext}"] = bayt
+
+
+def kos(otr, *arg):
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        rc = calis.main(list(arg), http=ortak.Http(otr, uyku=lambda *_: None), simdi=SIMDI, uyku=lambda *_: None)
+    return rc, out.getvalue()
+
+
+def satir_al(otr, no):
+    for r in otr.satirlar:
+        if r[0] == str(no):
+            return dict(zip(otr.baslik, r))
+
+
+SONUC = []
+
+
+def kontrol(ad, kosul):
+    SONUC.append((ad, bool(kosul)))
+    print(("PASS " if kosul else "FAIL ") + ad)
+
+
+def sizinti_yok(*metinler):
+    hepsi = "\n".join(metinler) + "".join(p.read_text(errors="ignore") for p in DRIVE.rglob("SOSYAL_HATA_*"))
+    return not any(s in hepsi for s in SIRLAR)
+
+
+def acik(**k):
+    os.environ["SOSYAL_YAYIN_ACIK"] = "true"
+    for a in calis.ANAHTAR.values():
+        os.environ[a] = "true" if a in k.get("hepsi", calis.ANAHTAR.values()) else ""
+
+
+def sifirla():
+    shutil.rmtree(DRIVE)
+    DRIVE.mkdir()
+    MEDIA.clear()
+    kimlikleri_koy()
+    drive_koy("SOSYAL/r.mp4", b"REEL")
+    drive_koy("SOSYAL/a.jpg", b"JPG-A")
+    drive_koy("SOSYAL/b.jpg", b"JPG-B")
+    drive_koy("SOSYAL/s.mp4", b"SHORT")
+    genel(1, 1, ".mp4", b"REEL")
+    genel(2, 1, ".jpg", b"JPG-A")
+    genel(2, 2, ".jpg", b"JPG-B")
+
+
+def senaryo_ana():
+    sifirla()
+    acik()
+    rows = [satir(1, "instagram", "reel", "SOSYAL/r.mp4"), satir(2, "instagram", "karusel", "SOSYAL/a.jpg;SOSYAL/b.jpg"),
+            satir(3, "threads", "metin"), satir(4, "facebook", "reel", "SOSYAL/r.mp4"),
+            satir(5, "facebook", "gorsel", "SOSYAL/a.jpg"), satir(6, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="private"),
+            satir(7, "instagram", "reel", "SOSYAL/r.mp4", onay=False),
+            satir(8, "threads", "metin", durum="BEKLIYOR 2026-12-08T09:00"),
+            satir(9, "threads", "metin", saat=-7), satir(10, "threads", "metin", saat=+2)]
+    r11 = satir(11, "threads", "metin")
+    r11["metin"] = "degisti"
+    rows.append(r11)
+    otr = Oturum(rows)
+    rc, out = kos(otr, "yayin")
+    d = {n: satir_al(otr, n) for n in range(1, 12)}
+    kontrol("IG reel TAMAM", d[1]["DURUM"].startswith("TAMAM") and d[1]["sonuc_no"] == "IGMEDIA77")
+    kontrol("IG karusel TAMAM", d[2]["DURUM"].startswith("TAMAM"))
+    kontrol("Threads metin TAMAM", d[3]["DURUM"].startswith("TAMAM") and d[3]["sonuc_no"] == "THPOST1")
+    kontrol("FB reel TAMAM", d[4]["DURUM"].startswith("TAMAM") and d[4]["sonuc_no"] == "FBV1")
+    kontrol("FB gorsel TAMAM", d[5]["DURUM"].startswith("TAMAM") and d[5]["sonuc_no"] == "9001_55")
+    kontrol("YT short TAMAM", d[6]["DURUM"].startswith("TAMAM") and d[6]["sonuc_no"] == "YTVID1")
+    yt = [c for c in otr.cagri if "upload/youtube" in c[1] and c[0] == "POST"]
+    kontrol("YT gorunurluk private gitti", len(yt) == 1 and yt[0][5]["status"]["privacyStatus"] == "private")
+    kontrol("FAIL onaysiz yayinlanmadi", d[7]["DURUM"] == "")
+    kontrol("FAIL BEKLIYOR atlandi", d[8]["DURUM"].startswith("BEKLIYOR 2026-12-08T09:00"))
+    kontrol("FAIL 7 saat gec KACTI", d[9]["DURUM"].startswith("KACTI"))
+    kontrol("zamani gelmeyen bekler", d[10]["DURUM"] == "")
+    kontrol("FAIL onaydan sonra degisen satir yayinlanmadi", d[11]["DURUM"] == "")
+    pub = [c for c in otr.cagri if c[1].endswith("/media_publish")]
+    kontrol("media_publish tam 2 kez (2 IG satiri)", len(pub) == 2)
+    kontrol("sorguda token yok (yayin)", all(not any(s in json.dumps(c[2]) + c[1] for s in SIRLAR) for c in otr.cagri))
+    kontrol("cikis 1 (KACTI + OZET_FARKLI uyarisi)", rc == 1)
+    uy = list(DRIVE.rglob("SOSYAL_HATA_*"))
+    kontrol("uyari dosyasi yazildi", uy and "KACTI" in uy[0].read_text() and "OZET_FARKLI" in uy[0].read_text())
+    kontrol("sizinti yok (ana)", sizinti_yok(out, json.dumps(otr.satirlar)))
+    return otr
+
+
+def senaryo_kuru():
+    sifirla()
+    acik(hepsi=[])
+    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/r.mp4"), satir(9, "threads", "metin", saat=-7)])
+    rc, out = kos(otr, "yayin", "--kuru")
+    yazim = [c for c in otr.cagri if c[0] != "GET" and "oauth2" not in c[1]]
+    kontrol("kuru: yazim 0", not yazim and not list(DRIVE.rglob("SOSYAL_HATA_*")))
+    kontrol("kuru: 'yayinlanirdi' yazdi", "KURU yayinlanirdi" in out)
+
+
+def senaryo_kapali():
+    sifirla()
+    acik(hepsi=["YAYIN_FB"])
+    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/r.mp4")])
+    kos(otr, "yayin")
+    kontrol("FAIL anahtar kapali: yayin yok", satir_al(otr, 1)["DURUM"] == "" and not any("/media" in c[1] for c in otr.cagri))
+    os.environ["SOSYAL_YAYIN_ACIK"] = ""
+    acik_bos = calis.acik_platformlar()
+    kontrol("ana anahtar kapali: platform 0", acik_bos == set())
+
+
+def senaryo_medya_farkli():
+    sifirla()
+    acik()
+    genel(1, 1, ".mp4", b"BASKA")
+    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/r.mp4")])
+    rc, out = kos(otr, "yayin")
+    kontrol("FAIL genel medya farkli: yayin yok", satir_al(otr, 1)["DURUM"] == "" and rc == 1 and "MEDYA" in out)
+
+
+def senaryo_publish_500():
+    sifirla()
+    acik()
+    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/r.mp4")])
+    otr.publish_500 = True
+    rc, out = kos(otr, "yayin")
+    d = satir_al(otr, 1)
+    pub = [c for c in otr.cagri if c[1].endswith("/media_publish")]
+    kontrol("FAIL publish 500: tek deneme", len(pub) == 1)
+    kontrol("FAIL publish 500: HATA + BELIRSIZ", d["DURUM"].startswith("HATA") and d["not"].startswith("BELIRSIZ") and rc == 1)
+    kontrol("FAIL publish 500: hata metninde token yok", sizinti_yok(out, json.dumps(otr.satirlar)))
+
+
+def senaryo_son_an():
+    sifirla()
+    acik()
+    otr = Oturum([satir(3, "threads", "metin")])
+    otr.son_an_durum = True
+    kos(otr, "yayin")
+    kontrol("FAIL son an DURUM dolu: yayin yok", not any(c[1].endswith("/threads") for c in otr.cagri))
+
+
+def senaryo_onayla():
+    sifirla()
+    s = satir(2, "instagram", "karusel", "SOSYAL/a.jpg;SOSYAL/b.jpg", onay=False)
+    bozuk = satir(5, "instagram", "reel", "SOSYAL/yok.mp4", onay=False)
+    otr = Oturum([s, bozuk])
+    mk = TMP / "media"
+    rc, out = kos(otr, "onayla", "--satirlar", "2,5", "--onay", "SERDAR_20261207", "--medya-kok", str(mk))
+    d = satir_al(otr, 2)
+    md5 = [hashlib.md5(b"JPG-A").hexdigest(), hashlib.md5(b"JPG-B").hexdigest()]
+    kontrol("onayla: ONAY + ozet", d["ONAY"] == "SERDAR_20261207" and d["ONAY_OZET"] == secim.ozet(d, md5))
+    kontrol("onayla: genel medya konuldu", (mk / "yayin/202612/2_2.jpg").read_bytes() == b"JPG-B")
+    kontrol("FAIL onayla: medyasi olmayan satir onaylanmadi", satir_al(otr, 5)["ONAY"] == "" and rc == 1)
+    rc2, _ = kos(otr, "onayla", "--satirlar", "2", "--onay", "serdar")
+    kontrol("FAIL onayla: onay bicimi", rc2 == 2)
+
+
+def senaryo_http_kurali():
+    h = ortak.Http(Oturum([]))
+    try:
+        h.iste("GET", "https://graph.instagram.com/v21.0/me", params={"access_token": "x" * 10})
+        kontrol("FAIL sir sorguda reddedilir", False)
+    except ortak.Hata:
+        kontrol("FAIL sir sorguda reddedilir", True)
+    ortak.gizle("SIRSIR123456")
+    t = ortak.temizle("x https://a.b/c?access_token=SIRSIR123456&y=1 Bearer abcdefghijkl SIRSIR123456 code=ZZZ")
+    kontrol("temizle: adres sorgusu, Bearer, sir, code", "SIRSIR123456" not in t and "abcdefghijkl" not in t and "ZZZ" not in t)
+
+
+def senaryo_izin():
+    sifirla()
+    os.environ["OAUTH_KOD_IG"] = "KODSAHTE123456#_"
+    otr = Oturum([])
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        rc = izin.main(["cevir", "instagram"], http=ortak.Http(otr))
+    k = json.loads((DRIVE / "ASTROLOVE/TEMP/SOSYAL_INSTAGRAM_TOKEN.json").read_text())
+    kontrol("izin cevir IG: token + hesap Drive'da", rc == 0 and k["token"] == TOK["instagram"] and k["ig_id"] == "1784")
+    kontrol("izin cevir IG: kod sirri silindi", any(c[0] == "DELETE" and c[1].endswith("/OAUTH_KOD_IG") for c in otr.cagri))
+    kontrol("izin cevir IG: logda kod/token yok", sizinti_yok(out.getvalue()))
+    os.environ.pop("OAUTH_KOD_IG")
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        rc = izin.main(["link", "youtube"])
+    kontrol("izin link YT: state Drive'da, link basildi", rc == 0 and "IZIN_LINKI=https://accounts.google.com" in out.getvalue()
+            and (DRIVE / "ASTROLOVE/TEMP/SOSYAL_IZIN_STATE_YOUTUBE.json").exists() and "YTSECRET" not in out.getvalue())
+    with contextlib.redirect_stdout(io.StringIO()):
+        rc = izin.main(["cevir", "instagram"], http=ortak.Http(Oturum([])))
+    kontrol("FAIL izin cevir: kod sirri yok", rc == 1)
+
+
+def senaryo_yenile():
+    sifirla()
+    otr = Oturum([])
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        rc = token_yenile.main(["instagram"], http=ortak.Http(otr))
+    k = json.loads((DRIVE / "ASTROLOVE/TEMP/SOSYAL_INSTAGRAM_TOKEN.json").read_text())
+    kontrol("yenile IG: yeni token Drive'a geri yazildi", rc == 0 and k["token"] == "IGYENI_SAHTE_0123456789" and k.get("bitis"))
+    sifirla()
+    otr = Oturum([])
+    otr.yenile_hata = True
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        rc = token_yenile.main(["instagram"], http=ortak.Http(otr))
+    uy = list(DRIVE.rglob("SOSYAL_HATA_*"))
+    kontrol("FAIL yenile hata: uyari + cikis 1", rc == 1 and uy)
+    kontrol("FAIL yenile hata: token sizmadi", sizinti_yok(out.getvalue()))
+
+
+def senaryo_istatistik_kontrol():
+    import istatistik
+    sifirla()
+    r = satir(1, "instagram", "reel", "SOSYAL/r.mp4", durum="TAMAM 2026-12-08T09:00")
+    r["sonuc_no"] = "IGMEDIA77"
+    otr = Oturum([r, satir(2, "threads", "metin")])
+    with contextlib.redirect_stdout(io.StringIO()):
+        rc = istatistik.main(http=ortak.Http(otr), simdi=SIMDI)
+    csvs = list(DRIVE.rglob("SOSYAL_OLCUM_*.csv"))
+    metin = csvs[0].read_text() if csvs else ""
+    kontrol("istatistik: TAMAM satiri CSV'de (views 321, likes 7)", rc == 0 and "IGMEDIA77,views,321" in metin and ",likes,7" in metin)
+    kontrol("istatistik: yazim yok (yalniz GET)", all(c[0] == "GET" or "oauth2" in c[1] for c in otr.cagri))
+    acik(hepsi=["YAYIN_IG"])
+    with contextlib.redirect_stdout(io.StringIO()):
+        rc = calis.main(["kontrol"], http=ortak.Http(Oturum([])))
+    kontrol("kontrol IG: kimlik PASS", rc == 0)
+    drive_koy("ASTROLOVE/TEMP/SOSYAL_INSTAGRAM_TOKEN.json", json.dumps({"token": TOK["instagram"], "ig_id": "999"}).encode())
+    with contextlib.redirect_stdout(io.StringIO()):
+        rc = calis.main(["kontrol"], http=ortak.Http(Oturum([])))
+    kontrol("FAIL kontrol: token baska hesaba ait", rc == 1)
+
+
+def mutasyon():
+    """Onay kapisi bozulunca (ONAY_RX her seyi kabul) 'onaysiz yayinlanmadi' kontrolu FAIL vermeli."""
+    import re
+    eski = secim.ONAY_RX
+    secim.ONAY_RX = re.compile(r".*")
+    sifirla()
+    acik()
+    otr = Oturum([satir(7, "instagram", "reel", "SOSYAL/r.mp4", onay=False)])
+    genel(7, 1, ".mp4", b"REEL")
+    otr.satirlar[0][otr.baslik.index("ONAY_OZET")] = secim.ozet(satir_al(otr, 7), [hashlib.md5(b"REEL").hexdigest()])
+    kos(otr, "yayin")
+    secim.ONAY_RX = eski
+    yakalandi = satir_al(otr, 7)["DURUM"] != ""
+    kontrol("mutasyon: bozuk onay kapisi test tarafindan yakalanir", yakalandi)
+
+
+if __name__ == "__main__":
+    try:
+        for f in (senaryo_ana, senaryo_kuru, senaryo_kapali, senaryo_medya_farkli, senaryo_publish_500, senaryo_son_an,
+                  senaryo_onayla, senaryo_http_kurali, senaryo_izin, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
+            try:
+                f()
+            except Exception as e:
+                kontrol(f"{f.__name__} istisna {type(e).__name__}: {e}", False)
+    finally:
+        shutil.rmtree(TMP, ignore_errors=True)
+    bad = [a for a, ok in SONUC if not ok]
+    print(f"\n{len(SONUC) - len(bad)}/{len(SONUC)} PASS")
+    sys.exit(1 if bad else 0)
