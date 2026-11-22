@@ -130,13 +130,24 @@ kontrol("bilinen FAIL: sag kenarda sentetik kirmizi 3x2 nokta", rc == 1 and kn.g
         and kn["sag"]["kutu"][0] >= 3300 - 10, str(kn))
 rc, oz, kes, err = kos(nokta=(5, 1000))
 kontrol("bilinen FAIL: sol kenarda kirmizi nokta", rc == 1 and oz.get("kirmizi_nokta", {}).get("sol", {}).get("piksel", 0) > 0)
+# 22 Kas Serdar karari (KARARLAR_20261122_36, P1): BASKI karari main gibi yalniz kenar seridi; tum goruntu ton sayimi baskida BILGI. DIJITAL karar verir.
 rc, oz, kes, err = kos(nokta=(3300 - 13, 2000))
 kn = oz.get("kirmizi_nokta", {})
-kontrol("21 Kas: kenardan 13 px iceride nokta kenar seridinde sayilmaz ama tum goruntu ton karari FAIL verir",
-        rc == 1 and kn.get("sag", {}).get("piksel", 1) == 0 and kn.get("tum_goruntu_ton_piksel", 0) > 0 and kn.get("PASS") is False, str(kn))
+kontrol("22 Kas P1 bilinen PASS: BASKI, kenardan 13 px iceride nokta -> kenar 0, tum goruntu yalniz bilgi (ton_kume_bilgi >= 1), PASS",
+        rc == 0 and kn.get("sag", {}).get("piksel", 1) == 0 and kn.get("tum_goruntu_ton_piksel", 0) > 0 and kn.get("ton_kume_bilgi", 0) >= 1
+        and kn.get("tum_goruntu_karar") is False and kn.get("PASS") is True, str(kn))
 rc, oz, kes, err = kos(nokta=(1600, 2300))
 kn = oz.get("kirmizi_nokta", {})
-kontrol("21 Kas bilinen FAIL: kenar disi (ic) kirmizi nokta artik FAIL", rc == 1 and kn.get("PASS") is False
+kontrol("22 Kas P1 bilinen PASS: BASKI, ic kirmizi nokta -> yalniz bilgi, PASS (main davranisi)", rc == 0 and kn.get("PASS") is True
+        and kn.get("ton_kume_bilgi", 0) >= 1 and kn.get("tum_goruntu_ton_kutu", [0])[0] >= 1590, str(kn))
+rc, oz, kes, err = kos(nokta=(3300 - 13, 2000), fmt="Digital File", bek="Digital File")
+kn = oz.get("kirmizi_nokta", {})
+kontrol("bilinen FAIL: DIJITAL, kenardan 13 px iceride nokta -> tum goruntu ton karari FAIL",
+        rc == 1 and kn.get("sag", {}).get("piksel", 1) == 0 and kn.get("tum_goruntu_karar") is True and kn.get("ton_kume_buyuk", 0) >= 1
+        and kn.get("PASS") is False, str(kn))
+rc, oz, kes, err = kos(nokta=(1600, 2300), fmt="Digital File", bek="Digital File")
+kn = oz.get("kirmizi_nokta", {})
+kontrol("bilinen FAIL: DIJITAL, kenar disi (ic) kirmizi nokta FAIL", rc == 1 and kn.get("PASS") is False
         and kn.get("tum_goruntu_ton_piksel", 0) > 0 and kn.get("tum_goruntu_ton_kutu", [0])[0] >= 1590, str(kn))
 # 21 Kas (GOREV SIPARIS_HATTI_DIJITAL 2): GERCEK Midnight Blue altini (sahte isimli 20 Kas deneme onizlemesinden kesit, test_veri):
 # eski olcut altinda yuzlerce piksel sayar (kor), ton olcutu 0 -> PASS; ayni goruntuye gomulu kirmizi noktalar FAIL.
@@ -148,20 +159,39 @@ kontrol("bilinen PASS: gercek MB altini (eski olcut ic sayaci > 0, ton olcutu 0)
         and kn["tum_goruntu_ton_piksel"] == 0, str({k: kn[k] for k in ("tum_goruntu_piksel", "tum_goruntu_ton_piksel", "PASS")}))
 a = np.asarray(im0).copy(); a[300, 400] = (220, 40, 40)
 bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
-kn = K.kirmizi_tara(Image.open(bb))
+kn = K.kirmizi_tara(Image.open(bb), dijital=True)
 kontrol("bilinen KOR ALAN (belgelenir): 1x1 tek kirmizi piksel (< 3 px kume) karar vermez, sayilir", kn["PASS"] is True and kn["tum_goruntu_ton_piksel"] > 0, str(kn.get("ton_kume_alanlari")))
 a = np.asarray(im0).copy()
 for i, (x, y) in enumerate(((50, 50), (700, 60), (60, 1000), (780, 1040), (420, 820))):
     a[y, x] = (220, 40, 40)                                           # tam cozunurlukte gorulen DAGINIK tek pikseller (21 Kas uctan uca)
 bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
-kn = K.kirmizi_tara(Image.open(bb))
+kn = K.kirmizi_tara(Image.open(bb), dijital=True)
 kontrol("bilinen PASS: 5 daginik tek piksel (yanlis FAIL veren durum) -> PASS", kn["PASS"] is True and kn["ton_kume_buyuk"] == 0, str(kn.get("ton_kume_alanlari")))
 for ad, (x, y), (w, h), renk in (("2x2 ic", (400, 300), (2, 2), (220, 40, 40)), ("3x3 altina degen", (14, 690), (3, 3), (210, 35, 35)),
                                  ("koyu kirmizi 2x2", (700, 900), (2, 2), (140, 20, 25)), ("sag kenar 3x2", (817, 500), (3, 2), (200, 30, 30))):
     a = np.asarray(im0).copy(); a[y:y + h, x:x + w] = renk
     bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
-    kn = K.kirmizi_tara(Image.open(bb))
-    kontrol(f"bilinen FAIL: gercek MB altini + kirmizi nokta ({ad})", kn["PASS"] is False and kn["ton_kume_buyuk"] > 0, str(kn.get("ton_kume_alanlari")))
+    kn = K.kirmizi_tara(Image.open(bb), dijital=True)
+    kontrol(f"bilinen FAIL: gercek MB altini + kirmizi nokta ({ad}), dijital", kn["PASS"] is False and kn["ton_kume_buyuk"] > 0, str(kn.get("ton_kume_alanlari")))
+    kb = K.kirmizi_tara(Image.open(bb))
+    kenar_degdi = any(kb[s_]["piksel"] for s_ in ("sol", "sag", "ust", "alt"))
+    kontrol(f"22 Kas P1: ayni nokta BASKI -> karar yalniz kenar seridi ({ad}: kenar {'var -> FAIL' if kenar_degdi else 'yok -> PASS, bilgi'})",
+            kb["PASS"] is (not kenar_degdi) and kb["ton_kume_buyuk"] == 0 and kb.get("ton_kume_bilgi", 0) >= 1, str({k: kb.get(k) for k in ("ton_kume_bilgi", "sag", "PASS")}))
+# 22 Kas P1: BASKI karari main (eb6dcec2) kirmizi_tara ile AYNI olmali. Asagidaki main_kenar = eb6dcec2 kesit_olcum.kirmizi_tara karar satirlarinin kopyasi.
+def main_kenar(im):
+    a = np.asarray(im.convert("RGB")).astype(np.int16); H, W = a.shape[:2]; k = K.KENAR_PX
+    m = ((a[..., 0] - a[..., 1]) > K.ESIK_KIRMIZI) & ((a[..., 0] - a[..., 2]) > K.ESIK_KIRMIZI)
+    return int(sum(m[y0:y1, x0:x1].sum() for x0, y0, x1, y1 in ((0, 0, k, H), (W - k, 0, W, H), (0, 0, W, k), (0, H - k, W, H)))) == 0
+
+
+esler = []
+for ad, (x, y), (w, h), renk in (("temiz", (0, 0), (0, 0), (0, 0, 0)), ("ic 2x2", (400, 300), (2, 2), (220, 40, 40)), ("sol kenar 2x2", (3, 400), (2, 2), (220, 40, 40)),
+                                 ("alt kenar 3x3", (300, im0.size[1] - 4), (3, 3), (210, 35, 35)), ("kenardan 11 px", (11, 600), (3, 3), (220, 40, 40))):
+    a = np.asarray(im0).copy(); a[y:y + h, x:x + w] = renk
+    bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
+    esler.append((ad, K.kirmizi_tara(Image.open(bb))["PASS"], main_kenar(Image.open(bb))))
+kontrol("22 Kas P1: BASKI kirmizi nokta karari main (eb6dcec2) ile ayni (5 durum, en az 1 PASS ve 1 FAIL)", all(b == m for _, b, m in esler)
+        and {m for _, _, m in esler} == {True, False}, str(esler))
 # 21 Kas Serdar karari (KARARLAR_20261121_119, a): DIJITAL dosyada oge kenarina bitisik <= 5 px koyu kirmizi sacak bilgi; ic nokta ve > 5 px FAIL;
 # BASKI degismez. Dosyalar uretimdeki dijital tablolarla (halka_kodla.tablolar, C3 / C4) kodlanir.
 sys.path.insert(0, str(Path(__file__).resolve().parent / "halka_yama"))
@@ -185,7 +215,8 @@ for lq, cq in ((85, 3), (80, 4)):
     kontrol(f"bilinen PASS (Serdar 21 Kas a): L{lq}_C{cq} altin kenarinda 4 px koyu kirmizi sacak, dijital -> bilgi", kn["PASS"] is True
             and kn.get("ton_sacak_bilgi", 0) >= 1, str({k: kn.get(k) for k in ("ton_kume_alanlari", "ton_sacak_bilgi", "ton_kume_buyuk")}))
     kb = kodla_tara(a, lq, cq, False)
-    kontrol(f"bilinen FAIL: ayni sacak BASKI yolunda (istisna yok) -> FAIL", kb["PASS"] is False, str(kb.get("ton_kume_alanlari")))
+    kontrol(f"22 Kas P1: ayni sacak BASKI yolunda -> tum goruntu yalniz bilgi (ton_kume_bilgi >= 1), PASS", kb["PASS"] is True
+            and kb.get("ton_kume_bilgi", 0) >= 1 and kb.get("tum_goruntu_karar") is False, str(kb.get("ton_kume_alanlari")))
     a = A0.copy(); a[1020:1022, 650:653] = (85, 15, 15)                        # ic bolge, oge yok: 3x2 koyu kirmizi
     ki = kodla_tara(a, lq, cq, True)
     kontrol(f"bilinen FAIL: L{lq}_C{cq} ic bolgede 3x2 koyu kirmizi nokta, dijital", ki["PASS"] is False and ki.get("ton_kume_buyuk", 0) >= 1,
@@ -215,7 +246,7 @@ for lq, cq in ((85, 3), (80, 4)):
                 str({k: kn.get(k) for k in ("ton_kume_alanlari", "ton_sacak_bilgi", "ton_kume_buyuk")}))
 a = np.asarray(im0).copy(); a[300:303, 600:603] = (230, 90, 40)
 bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
-kontrol("bilinen KOR ALAN (belgelenir): turuncu-kirmizi (ton ~16) ic noktayi ton olcutu yakalamaz", K.kirmizi_tara(Image.open(bb))["PASS"] is True)
+kontrol("bilinen KOR ALAN (belgelenir): turuncu-kirmizi (ton ~16) ic noktayi ton olcutu yakalamaz", K.kirmizi_tara(Image.open(bb), dijital=True)["PASS"] is True)
 rc, oz, kes, err = kos(W=2400, H=3000)
 kontrol("bilinen FAIL: yanlis olcu (2400x3000)", rc == 1 and oz.get("teslim", {}).get("PASS") is False)
 rc, oz, kes, err = kos(isim1_etsy="Mila")

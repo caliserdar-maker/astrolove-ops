@@ -196,7 +196,14 @@ Asagidaki TEST 4 kapisi (1 Eki, "5 PDF" bitti tanimi) ESKIDIR; yalniz tarih kayd
 - [ ] Cift alfabetik; isim1 = cift adindaki ilk burcun altindaki isim (siparis_v2_girdi otomatik denetler; harf harf esitlik kesit_olcum `girdi`).
 - [ ] Bitti tanimi: gizli `ASTROLOVE/SIPARIS/<receipt>/V2_<kosu>/` icinde teslim JPG (olcunun tam pikseli, 300 dpi, 4:4:4, baski < 100 MB /
       dijital < 20 MB) + `_Preview.jpg` (teslim dosyasindan) + `KESIT_1x1_*.jpg` + KAPI / KESIT_OZET / HALKA_KAPI JSON; `TUM_RC` 0; kirmizi
-      nokta (kenar + tum goruntu ton) 0; halka kapisi (kodlama bandi + 0.10 tavan) PASS. Bir kapi FAIL ise musteri dosyasi YUKLENMEZ.
+      nokta PASS (asagidaki kural); halka kapisi (kodlama bandi + 0.10 tavan) PASS. Bir kapi FAIL ise musteri dosyasi YUKLENMEZ.
+- Kirmizi nokta kurali (Serdar 22 Kas, KARARLAR_20261122_36, P1; `kesit_olcum.kirmizi_tara`):
+  - BASKI = main (eb6dcec2) davranisi: karar yalniz 4 kenar seridinden (10 px, R - G > 60 ve R - B > 60). Tum goruntu ton < 8 sayimi
+    baskida yalniz BILGI (`ton_kume_bilgi`, `tum_goruntu_karar` false). Neden: sahte 24x36 / 20x30 baskida altin kenari koyu sacak
+    kumeleri (6-13 px) kodlama ONCESI kaynakta var (kosu 45000199318, RAPOR_DENETIM_SIPARIS_HATTI_DIJITAL_20261122_1058). Bilinen kor alan:
+    baskida kenar seridi disindaki gercek kirmizi nokta karar vermez (main'de de boyleydi); 1:1 kesit goz kontrolu surer.
+  - DIJITAL: kenar seridi 0 VE tum goruntu ton < 8, >= 3 px kume yok; altin (ton >= 20) ya da beyaz ogeye <= 2 px, <= 5 px, R <= 130 kume
+    sacak = bilgi (B', KARARLAR_20261122_7 ve _12).
 - [ ] Kosu kayitlari silindi: `kosu_sil` (oku + tara), her biri 404.
 - [ ] Teslimden once: Merkez 1:1 kesitte isim-burc ve mesaji gozle kontrol eder; teslim ve mesaj yalniz Serdar onayiyla.
 - [ ] Saat `TZ=Europe/Istanbul date`; kosu boyunca 2 dk'da bir durum.

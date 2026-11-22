@@ -103,7 +103,7 @@ def kirmizi_maske(a, ton=None):
 
 ESIK_SACAK_PX = 5        # 21 Kas Serdar karari (KARARLAR_20261121_119, secenek a): DIJITAL dosyada yildiz / altin oge kenarina bitisik (<= SACAK_MESAFE
 SACAK_MESAFE = 2         # px), <= 5 px KOYU kirmizi kume (kroma adimi 3-4 kodlama sacagi) KUSUR SAYILMAZ (bilgi). Oge kenarina degmeyen, > 5 px ya da
-                         # parlak (R > SACAK_MAX_R) kume FAIL kalir. BASKI yolunda bu istisna YOK.
+                         # parlak (R > SACAK_MAX_R) kume FAIL kalir. BASKI yolunda tum goruntu sayimi zaten yalniz bilgi (P1, 22 Kas).
 SACAK_MAX_R = 130        # koyu: kumenin en parlak R'si; uctan uca sacak ornekleri R 75-108 (3 kosu, KESIT_OZET ton_ornek); parlak kirmizi (220,40,40) FAIL
 
 
@@ -121,7 +121,9 @@ def oge_maskesi(a):
 def kirmizi_tara(im, dijital=False):
     """Kirmizi nokta: 4 kenar seridinde (KENAR_PX) eski olcut (13 Kas dersi) + 21 Kas: TUM GORUNTUDE ton < ESIK_TON pikselleri, karar >= ESIK_TON_KUME px
     bitisik kume. dijital=True: parlak oge kenarina (SACAK_MESAFE px) bitisik ve <= ESIK_SACAK_PX kume sacak sayilir (bilgi, karar vermez).
-    PASS = kenar 0 ve sayilan buyuk kume 0."""
+    22 Kas Serdar karari (KARARLAR_20261122_36, P1): BASKI (dijital=False) karari main ile ayni: yalniz 4 kenar seridi; tum goruntu ton sayimi
+    baskida yalniz BILGI (ton_kume_bilgi; karar vermez). Neden: 24x36 / 20x30 sahte baskida altin kenari koyu sacak kumeleri (6-13 px) kodlama
+    ONCESI kaynakta var (kosu 45000199318, rapor 20261122_1058). DIJITAL: kenar 0 ve sayilan buyuk kume 0 (B' + 3 px)."""
     a = np.asarray(im.convert("RGB")).astype(np.int16)
     H, W = a.shape[:2]
     m = kirmizi_maske(a)
@@ -169,8 +171,9 @@ def kirmizi_tara(im, dijital=False):
             o["ton_sacak_bilgi"] = sacak                 # Serdar 21 Kas (a): kusur sayilmaz, sayi raporlanir
             o["ton_kume_buyuk"] = buyuk
         else:
-            o["ton_kume_buyuk"] = sum(1 for v in alan if v >= ESIK_TON_KUME)
-    o["PASS"] = toplam == 0 and o["ton_kume_buyuk"] == 0
+            o["ton_kume_bilgi"] = sum(1 for v in alan if v >= ESIK_TON_KUME)     # BASKI: yalniz bilgi (P1, Serdar 22 Kas); ton_kume_buyuk 0 kalir
+    o["tum_goruntu_karar"] = bool(dijital)
+    o["PASS"] = toplam == 0 and (o["ton_kume_buyuk"] == 0 if dijital else True)
     return o
 
 
