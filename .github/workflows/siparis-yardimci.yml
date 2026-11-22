@@ -401,9 +401,11 @@ jobs:
           if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
             grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
       - name: Teshis (yalniz sahte siparis)
-        env: {R: "${{ inputs.receipt }}", U: "${{ inputs.uretim_kosu }}", CO: "${{ inputs.tani }}"}
+        env: {U: "${{ inputs.uretim_kosu }}", CO: "${{ inputs.tani }}"}
         run: |
+          RC_=$(jq -r '.inputs.receipt // empty' "$GITHUB_EVENT_PATH"); [ -z "$RC_" ] || echo "::add-mask::$RC_"
           set -euo pipefail
+          R="$RC_"
           [ -n "$R" ] && [ -n "$U" ] && [ -n "$CO" ] || { echo "::error::receipt, uretim_kosu, tani gerekli"; exit 1; }
           [[ "$R" =~ ^900000000[1-9]$ ]] || { echo "::error::yalniz SAHTE receipt (900000000N)"; exit 1; }
           [[ "$U" =~ ^[0-9]+$ ]] && [[ "$CO" =~ ^[A-Z]+_[A-Z]+:[0-9A]+x?[0-9]*$ ]] || { echo "::error::girdi bicimi"; exit 1; }
