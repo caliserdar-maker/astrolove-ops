@@ -6,7 +6,8 @@ ustunden mesaj altina, pay ile, tam genislik, olcekleme yok.
 Ek kapilar (deger YAZILMAZ, yalniz True / False ve sayi): uretim girdisi (siparis.json) Etsy okumasiyla (KISISEL.json) harf harf ayni;
 dosya adi, piksel, dpi, 4:4:4, < 20 MB; uretim kapilari (KAPI.json).
 18 Kas (Merkez STEP 2, siparis baski): Format "Print" kabul (Digital File da); kirmizi nokta taramasi: teslim dosyasinin 4 kenarinda 10 px serit,
-R - G > 60 ve R - B > 60 olan piksel varsa FAIL (13 Kas Deep Black sag kenar 3x2 px nokta dersi; altin murekkep R - G < 60 oldugu icin sayilmaz).
+R - G > 60 ve R - B > 60 olan piksel varsa FAIL (13 Kas Deep Black sag kenar 3x2 px nokta dersi). 21 Kas: tum goruntude ayrica ton < ESIK_TON
+olcutu karar verir (MB altini R - G > 60 olabildigi icin eski olcut ic bolgede kordu).
 Kullanim: kesit_olcum.py URETIM_DIR KISISEL.json CIKTI_DIR   -> cikis 0 = hepsi PASS, 1 = FAIL (kesit yine yazilir, OZET'te neden)"""
 import hashlib
 import json
@@ -23,6 +24,13 @@ ESIK_RB = 60            # altin: R - B > 60 (zemin mavi: R < B; beyaz yildiz: R 
 ESIK_MUREKKEP = 3e-4    # bant murekkebi / W^2
 KENAR_PX = 10           # kirmizi nokta taramasi: kenar seridi genisligi (px)
 ESIK_KIRMIZI = 60       # kirmizi: R - G > 60 ve R - B > 60
+ESIK_TON_KUME = 3       # 21 Kas: karar = en az 3 px bitisik (8 komsu) ton kumesi. ONAY BEKLER (Serdar): ayni gun konan "tek piksel" kuralina gore
+                        # gevsetmedir; 4 sahte dijital uctan uca kosuda A3 yalniz tekil piksel (5), 16x20 / 18x24 / 20x30 ise kroma adimi 3-4
+                        # kodlamasinda yildiz kenarinda 3-5 px koyu kirmizi kume verdi (FAIL). 1-2 px ic nokta kor alan (raporda).
+ESIK_TON = 8.0          # 21 Kas (GOREV SIPARIS_HATTI_DIJITAL 2): tum goruntu karari icin ek ton siniri (derece, 60*(G-B)/(R-B)). Midnight Blue
+                        # altininda R - G > 60 olan piksel cok (olculdu: altinin yaklasik yarisi); olcum (sahte MB 11x14 onizleme): altin
+                        # tonu p0.01 13.98, R - G > 60 olan altinda en dusuk 10.5; ton < 8 temiz goruntude 0 piksel, gomulu kirmizi noktalarin hepsi
+                        # (1x1 dahil, altina degen dahil) yakalanir. Turuncu-kirmizi (ton >= 8) altindan ayrilamaz: kor alan (raporda).
 FORMATLAR = ("Digital File", "Print")
 BEKLENEN_FORMAT = os.environ.get("BEKLENEN_FORMAT", "Print")   # siparis turu: baski siparisinde yalniz "Print" gecer (inceleme LOW 6)
 URETIM_KOSU = os.environ.get("URETIM_KOSU", "")                # verilirse SURE.json kosu no ayni olmali (eski klasor dosyasi karismasin)
@@ -40,8 +48,12 @@ def olcu_oku(deger):
         return m.group(1)
     m = re.search(r"(?<![\d.])(\d+)\s*[″\"]?\s*[x×X]\s*(\d+)(?![\d.])", deger or "")
     return f"{m.group(1)}x{m.group(2)}" if m else ""
+# 21 Kas: BAGIMSIZ piksel hedefi (uretimin tablosundan DEGIL; inceleme ORTA: kapi kendi kaynagini dogrulamasin). Inc x 300 ve ISO A mm / 25.4
+# x 300 (yuvarlama). Eski INC sozlugunde A4/A3/A2 YOKTU (KeyError). test_olcu_tablo: bu tablo == halka_yama/olcu.py OLCU.
 INC = {"5x7": (5, 7), "8x10": (8, 10), "11x14": (11, 14), "12x16": (12, 16), "12x18": (12, 18), "16x20": (16, 20), "16x24": (16, 24),
        "18x24": (18, 24), "20x30": (20, 30), "24x30": (24, 30), "24x36": (24, 36)}
+ISO_MM = {"A4": (210, 297), "A3": (297, 420), "A2": (420, 594)}
+PX = {**{o: (w * 300, h * 300) for o, (w, h) in INC.items()}, **{o: (round(w / 25.4 * 300), round(h / 25.4 * 300)) for o, (w, h) in ISO_MM.items()}}
 
 
 def sha(p):
@@ -80,14 +92,44 @@ def bantlar(m):
     return out
 
 
-def kirmizi_tara(im):
-    """Teslim dosyasinin 4 kenar seridinde (KENAR_PX) kirmizi piksel: sayi + kutular (x0, y0, x1, y1). PASS = hic yok."""
+def kirmizi_maske(a, ton=None):
+    """a: HxWx3 int16. Eski kenar olcutu (R - G > 60 ve R - B > 60); ton verilirse ayrica ton < ton derece (altin disi)."""
+    m = ((a[..., 0] - a[..., 1]) > ESIK_KIRMIZI) & ((a[..., 0] - a[..., 2]) > ESIK_KIRMIZI)
+    if ton is not None:
+        r_b = np.maximum(a[..., 0] - a[..., 2], 1).astype(np.float32)
+        m &= (60.0 * (a[..., 1] - a[..., 2]) / r_b) < ton
+    return m
+
+
+ESIK_SACAK_PX = 5        # 21 Kas Serdar karari (KARARLAR_20261121_119, secenek a): DIJITAL dosyada yildiz / altin oge kenarina bitisik (<= SACAK_MESAFE
+SACAK_MESAFE = 2         # px), <= 5 px KOYU kirmizi kume (kroma adimi 3-4 kodlama sacagi) KUSUR SAYILMAZ (bilgi). Oge kenarina degmeyen, > 5 px ya da
+                         # parlak (R > SACAK_MAX_R) kume FAIL kalir. BASKI yolunda tum goruntu sayimi zaten yalniz bilgi (P1, 22 Kas).
+SACAK_MAX_R = 130        # koyu: kumenin en parlak R'si; uctan uca sacak ornekleri R 75-108 (3 kosu, KESIT_OZET ton_ornek); parlak kirmizi (220,40,40) FAIL
+
+
+def oge_maskesi(a):
+    """Parlak oge: altin (R > 120, R - B > 40, ton >= 20 derece) ya da beyaz / acik yildiz (uc kanal > 120). Kirmizi nokta (ton < 8) oge sayilmaz.
+    22 Kas Serdar karari B' (KARARLAR_20261122_7): ton >= 28 surumu 20x30 sahte dosyada yanlis FAIL verdi (altin kenar pikselleri ton 20-28,
+    teshis kosusu 44985451703). BILINEN KOR ALAN: kendi turuncu halkasi (ton >= 20) icindeki KOYU kirmizi ic nokta sacak sayilabilir."""
+    R, G, B = (a[..., i].astype(np.float32) for i in range(3))
+    ton = 60.0 * (G - B) / np.maximum(R - B, 1)
+    altin = (R > 120) & ((R - B) > 40) & (ton >= 20)                    # B' (Serdar 22 Kas): 20; parlak kirmizi SACAK_MAX_R ile FAIL kalir
+    beyaz = (R > 120) & (G > 120) & (B > 120)
+    return altin | beyaz
+
+
+def kirmizi_tara(im, dijital=False):
+    """Kirmizi nokta: 4 kenar seridinde (KENAR_PX) eski olcut (13 Kas dersi) + 21 Kas: TUM GORUNTUDE ton < ESIK_TON pikselleri, karar >= ESIK_TON_KUME px
+    bitisik kume. dijital=True: parlak oge kenarina (SACAK_MESAFE px) bitisik ve <= ESIK_SACAK_PX kume sacak sayilir (bilgi, karar vermez).
+    22 Kas Serdar karari (KARARLAR_20261122_36, P1): BASKI (dijital=False) karari main ile ayni: yalniz 4 kenar seridi; tum goruntu ton sayimi
+    baskida yalniz BILGI (ton_kume_bilgi; karar vermez). Neden: 24x36 / 20x30 sahte baskida altin kenari koyu sacak kumeleri (6-13 px) kodlama
+    ONCESI kaynakta var (kosu 45000199318, rapor 20261122_1058). DIJITAL: kenar 0 ve sayilan buyuk kume 0 (B' + 3 px)."""
     a = np.asarray(im.convert("RGB")).astype(np.int16)
     H, W = a.shape[:2]
-    m = ((a[..., 0] - a[..., 1]) > ESIK_KIRMIZI) & ((a[..., 0] - a[..., 2]) > ESIK_KIRMIZI)
+    m = kirmizi_maske(a)
     k = KENAR_PX
     seritler = {"sol": (0, 0, k, H), "sag": (W - k, 0, W, H), "ust": (0, 0, W, k), "alt": (0, H - k, W, H)}
-    o = {"serit_px": k, "esik": ESIK_KIRMIZI}
+    o = {"serit_px": k, "esik": ESIK_KIRMIZI, "ton_esik": ESIK_TON}
     toplam = 0
     for ad, (x0, y0, x1, y1) in seritler.items():
         s = m[y0:y1, x0:x1]
@@ -97,8 +139,41 @@ def kirmizi_tara(im):
             ys, xs = np.nonzero(s)
             kutu = [int(xs.min()) + x0, int(ys.min()) + y0, int(xs.max()) + x0 + 1, int(ys.max()) + y0 + 1]
         o[ad] = dict(piksel=n, kutu=kutu)
-    o["tum_goruntu_piksel"] = int(m.sum())          # bilgi: kenar disi kirmizi (karar yalniz kenar seritlerinden)
-    o["PASS"] = toplam == 0
+    o["tum_goruntu_piksel"] = int(m.sum())          # bilgi: eski olcut tum goruntu (MB altininda yuksek; karar vermez)
+    mt = kirmizi_maske(a, ESIK_TON)
+    o["tum_goruntu_ton_piksel"] = int(mt.sum())
+    o["ton_kume_esik_px"] = ESIK_TON_KUME
+    o["ton_kume_buyuk"] = 0
+    if mt.any():
+        ys, xs = np.nonzero(mt)
+        o["tum_goruntu_ton_kutu"] = [int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1]
+        o["ton_ornek"] = [[int(x), int(y), *[int(c) for c in a[y, x]]] for y, x in list(zip(ys, xs))[:20]]   # tani: x, y, R, G, B (sahte/gizli klasor)
+        import cv2
+        n, lab, st, _ = cv2.connectedComponentsWithStats(mt.astype(np.uint8), connectivity=8)
+        alan = sorted((int(v) for v in st[1:, 4]), reverse=True)
+        o["ton_kume_alanlari"] = alan[:15]
+        o["dijital_sacak_istisnasi"] = bool(dijital)
+        if dijital:
+            yakin = cv2.dilate(oge_maskesi(a).astype(np.uint8), np.ones((2 * SACAK_MESAFE + 1, 2 * SACAK_MESAFE + 1), np.uint8)) > 0
+            sacak = buyuk = 0
+            for i in range(1, n):
+                ar = int(st[i, 4])
+                if ar < ESIK_TON_KUME:
+                    continue
+                x, y, w, h = (int(v) for v in st[i, :4])
+                kume = lab[y:y + h, x:x + w] == i
+                kenarda = bool((yakin[y:y + h, x:x + w] & kume).any())
+                koyu = int(a[y:y + h, x:x + w, 0][kume].max()) <= SACAK_MAX_R
+                if kenarda and koyu and ar <= ESIK_SACAK_PX:
+                    sacak += 1
+                else:
+                    buyuk += 1
+            o["ton_sacak_bilgi"] = sacak                 # Serdar 21 Kas (a): kusur sayilmaz, sayi raporlanir
+            o["ton_kume_buyuk"] = buyuk
+        else:
+            o["ton_kume_bilgi"] = sum(1 for v in alan if v >= ESIK_TON_KUME)     # BASKI: yalniz bilgi (P1, Serdar 22 Kas); ton_kume_buyuk 0 kalir
+    o["tum_goruntu_karar"] = bool(dijital)
+    o["PASS"] = toplam == 0 and (o["ton_kume_buyuk"] == 0 if dijital else True)
     return o
 
 
@@ -201,12 +276,12 @@ def main():
     if teslim.exists():
         h0 = sha(teslim)
         im = Image.open(teslim)
-        w, h = INC[s["olcu"]]
-        d.update(boyut=list(im.size), hedef=[w * 300, h * 300], dpi=[round(float(x)) for x in im.info.get("dpi", (0, 0))],
+        w, h = PX[s["olcu"]]
+        d.update(boyut=list(im.size), hedef=[w, h], dpi=[round(float(x)) for x in im.info.get("dpi", (0, 0))],
                  ornekleme_444=JpegImagePlugin.get_sampling(im) == 0, bayt=teslim.stat().st_size, bicim=im.format)
         d["sinir_bayt"] = boyut_siniri(BEKLENEN_FORMAT)
         d["PASS"] = bool(d["boyut"] == d["hedef"] and d["dpi"] == [300, 300] and d["ornekleme_444"] and d["bayt"] < d["sinir_bayt"] and d["bicim"] == "JPEG")
-        oz["kirmizi_nokta"] = kirmizi_tara(im)
+        oz["kirmizi_nokta"] = kirmizi_tara(im, dijital=BEKLENEN_FORMAT == "Digital File")
         kutu, oz["kesit"] = olc(im)
         if kutu:
             kes = im.convert("RGB").crop(kutu)

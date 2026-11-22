@@ -180,7 +180,35 @@ Koordinator (2 Eki)
 47. Musteri mailinde zaman cizelgesi son tarihten basladi ("30 Eyl"), oncesi bos gorundu. Durum anlatilirken
     ilk tarihten (23 Eyl) baslanir.
 
-## TEST 4 BASLANGIC KAPISI (hepsi EVET olmadan dispatch yok; Serdar'a madde madde gosterilir)
+## SIPARIS BASLANGIC KAPISI (21 Kas 2026; GOREV_CEO_DENETIM_SIPARIS_HATTI_DIJITAL 3; hepsi EVET olmadan dispatch yok)
+
+Gecerli yol: MIDNIGHT_BLUE siparisinde baski VE dijital `siparis-yardimci.yml mod=siparis_v2` (format = Etsy'deki Format).
+Asagidaki TEST 4 kapisi (1 Eki, "5 PDF" bitti tanimi) ESKIDIR; yalniz tarih kaydi.
+
+- [ ] Etsy okumasi: `siparis-kisisel-oku` kosusu gizli `ASTROLOVE/SIPARIS/<receipt>/OKUMA_<kosu>/KISISEL.json` yazdi. Isim ve mesaj
+      dispatch girdisine YAZILMAZ (siparis_v2 Etsy okumasindan okur, ilk is maskeler).
+- [ ] Yol ve renk: Format "Print" -> `format=Print`; "Digital File" -> `format=Digital File` (Etsy okumasiyla ayni olmali, siparis_v2_girdi
+      denetler). Renk MIDNIGHT_BLUE. Baska renk siparis_v2'de YOK: `siparis-giris` (eski kapilar; 1:1 kesit / kirmizi nokta yok) -> Acik is.
+- [ ] Olcu: `docs/OLCU_TABLOSU.md`'de var. Dijitalde olcunun kodlamasi `halka_kodla.DIJITAL_KODLAMA`'da var (yoksa q100; 20 MB'i asarsa
+      kapi g FAIL ve dosya yuklenmez). 24x30 ve 24x36 dijital durumu raporda.
+- [ ] Kod sabit: kosulacak ref (main SHA) ve motor `d2b414ee` not edildi; o SHA'nin CI kosulari yesil; siparis hatti testleri cikis 0.
+- [ ] Calisan kosu yok (GitHub API: in_progress 0, queued 0); Etsy kilidi bos.
+- [ ] Cift alfabetik; isim1 = cift adindaki ilk burcun altindaki isim (siparis_v2_girdi otomatik denetler; harf harf esitlik kesit_olcum `girdi`).
+- [ ] Bitti tanimi: gizli `ASTROLOVE/SIPARIS/<receipt>/V2_<kosu>/` icinde teslim JPG (olcunun tam pikseli, 300 dpi, 4:4:4, baski < 100 MB /
+      dijital < 20 MB) + `_Preview.jpg` (teslim dosyasindan) + `KESIT_1x1_*.jpg` + KAPI / KESIT_OZET / HALKA_KAPI JSON; `TUM_RC` 0; kirmizi
+      nokta PASS (asagidaki kural); halka kapisi (kodlama bandi + 0.10 tavan) PASS. Bir kapi FAIL ise musteri dosyasi YUKLENMEZ.
+- Kirmizi nokta kurali (Serdar 22 Kas, KARARLAR_20261122_36, P1; `kesit_olcum.kirmizi_tara`):
+  - BASKI = main (eb6dcec2) davranisi: karar yalniz 4 kenar seridinden (10 px, R - G > 60 ve R - B > 60). Tum goruntu ton < 8 sayimi
+    baskida yalniz BILGI (`ton_kume_bilgi`, `tum_goruntu_karar` false). Neden: sahte 24x36 / 20x30 baskida altin kenari koyu sacak
+    kumeleri (6-13 px) kodlama ONCESI kaynakta var (kosu 45000199318, RAPOR_DENETIM_SIPARIS_HATTI_DIJITAL_20261122_1058). Bilinen kor alan:
+    baskida kenar seridi disindaki gercek kirmizi nokta karar vermez (main'de de boyleydi); 1:1 kesit goz kontrolu surer.
+  - DIJITAL: kenar seridi 0 VE tum goruntu ton < 8, >= 3 px kume yok; altin (ton >= 20) ya da beyaz ogeye <= 2 px, <= 5 px, R <= 130 kume
+    sacak = bilgi (B', KARARLAR_20261122_7 ve _12).
+- [ ] Kosu kayitlari silindi: `kosu_sil` (oku + tara), her biri 404.
+- [ ] Teslimden once: Merkez 1:1 kesitte isim-burc ve mesaji gozle kontrol eder; teslim ve mesaj yalniz Serdar onayiyla.
+- [ ] Saat `TZ=Europe/Istanbul date`; kosu boyunca 2 dk'da bir durum.
+
+## TEST 4 BASLANGIC KAPISI (ESKI, 1 Eki; hepsi EVET olmadan dispatch yok; Serdar'a madde madde gosterilir)
 
 - [ ] Acik is listesi bos: Test 3 MB 11x14 + 24x36 duzeldi, Test 3 OZET 5/5 PASS.
 - [ ] Kaynak on testi: tum ciftler x 5 renk x 5 siparis boyu PASS (yalniz MB degil).

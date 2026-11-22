@@ -13,8 +13,46 @@ YCC = np.array([[0.299, 0.587, 0.114], [-0.168736, -0.331264, 0.5], [0.5, -0.418
 KROMA_SIGMA = 1.0
 
 
-def ycc_kaydet(rgb, yol, rng, agirlik=None, kroma_sigma=KROMA_SIGMA, icc=None):
-    """rgb: HxWx3 kayan nokta sRGB 0-255; agirlik: HxW (1 = zemin, kroma gurultusu tam; 0 = oge) ya da None (her yer zemin)."""
+def tablolar(luma_q=100, kroma_adim=1):
+    """Nicemleme tablolari (21 Kas, dijital 20 MB): luma = libjpeg standart tablosu `luma_q` kalitesinde (100 = tum 1), kroma = duz
+    `kroma_adim` (halka kroma nicemlemesinden geliyordu: standart kroma tablosu YOK). Pillow'un kendi urettigi tablo geri okunur
+    (sira donusumu Pillow'da; kesit_olcum.onizleme_yap ile ayni yontem)."""
+    import io
+    if luma_q >= 100:
+        luma = [1] * 64
+    else:
+        b = io.BytesIO(); Image.new("RGB", (8, 8)).save(b, "JPEG", quality=int(luma_q)); luma = list(Image.open(b).quantization[0])
+    return [luma, [int(kroma_adim)] * 64, [int(kroma_adim)] * 64]
+
+
+# 21 Kas (GOREV SIPARIS_HATTI_DIJITAL 1): DIJITAL teslimde (TESLIM_TUR=dijital) olcu basina kodlama. Deger = dijital_olcum kosusunda
+# (sahte isim, 2 cift) 20 MB altina giren ve halka kapisini (kodlama bandi + 0.10 tavan) gecen EN YUKSEK kaliteli aday. Tabloda olmayan olcu
+# q100 ile kodlanir; 20 MB'i asarsa uretim kapisi g FAIL verir ve musteri dosyasi yuklenmez (sessiz dusurme yok).
+# Olcum: siparis-yardimci dijital_olcum kosulari 44927861906 + 44930704703 (21 Kas, CANCER_LEO + SCORPIO_VIRGO); secim kurali: iki ciftte de halka kapisi
+# PASS ve <= 19.0 MB (20 MB'a >= 1 MB pay), aday sirasinda ilk (en yuksek kalite). 24x30 / 24x36: o kosuda sigan tek aday (L75_C5) kodlama
+# bandi FAIL; 44930704703 C4 adaylari 19.6-22.3 MB (kroma gurultusu baskin): tabloda YOK -> q100 -> 20 MB kapisi FAIL -> dosya yuklenmez.
+DIJITAL_KODLAMA = {"5x7": "L100_C1", "8x10": "L100_C1", "11x14": "L100_C1", "A4": "L100_C1", "12x16": "L95_C1", "16x20": "L90_C3",
+                   "A3": "L95_C1", "12x18": "L92_C1", "18x24": "L85_C3", "16x24": "L90_C3", "A2": "L90_C3", "20x30": "L80_C4"}
+
+
+def teslim_tablolari(olcu):
+    """Teslim dosyasinin nicemleme tablolari: baski ya da tabloda olmayan olcu -> None (q100, bugunku yol); dijital -> tablolar(aday)."""
+    import os
+    if os.environ.get("TESLIM_TUR") != "dijital" or DIJITAL_KODLAMA.get(olcu, "L100_C1") == "L100_C1":
+        return None                                                    # L100_C1 = bugunku q100 yolu bayt bayt (qtables 3 DQT yazar, +69 bayt)
+    L, C = DIJITAL_KODLAMA[olcu].split("_")
+    return tablolar(int(L[1:]), int(C[1:]))
+
+
+def kodlama_adi(olcu):
+    """Rapor: kullanilan kodlamanin adi (L100_C1 = q100)."""
+    import os
+    return DIJITAL_KODLAMA.get(olcu, "L100_C1") if os.environ.get("TESLIM_TUR") == "dijital" else "L100_C1"
+
+
+def ycc_kaydet(rgb, yol, rng, agirlik=None, kroma_sigma=KROMA_SIGMA, icc=None, qtables=None):
+    """rgb: HxWx3 kayan nokta sRGB 0-255; agirlik: HxW (1 = zemin, kroma gurultusu tam; 0 = oge) ya da None (her yer zemin).
+    qtables: None = q100 (tum 1, bugunku yol, bayt bayt ayni); verilirse tablolar(...) ciktisi (dijital 20 MB kodlamasi)."""
     H = rgb.shape[0]; ycc8 = np.empty(rgb.shape, np.uint8)
     for y0 in range(0, H, 1200):
         s = rgb[y0:y0 + 1200].astype(np.float32) @ YCC.T; s[..., 1:] += 128
@@ -25,7 +63,7 @@ def ycc_kaydet(rgb, yol, rng, agirlik=None, kroma_sigma=KROMA_SIGMA, icc=None):
             g = rng.standard_normal(s[..., 1:].shape, dtype=np.float32) * kroma_sigma
             s[..., 1:] += g if ag is None else g * ag
         ycc8[y0:y0 + 1200] = np.clip(np.rint(s), 0, 255).astype(np.uint8)
-    k = dict(quality=100, subsampling=0, dpi=(300, 300))
+    k = dict(quality=100, subsampling=0, dpi=(300, 300)) if qtables is None else dict(qtables=qtables, subsampling=0, dpi=(300, 300))
     if icc:
         k['icc_profile'] = icc
     Image.fromarray(ycc8, 'YCbCr').save(yol, 'JPEG', **k)

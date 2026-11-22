@@ -7,7 +7,7 @@ Ag kapali, sahte veri (sahte receipt 900000001, gercek goruntu YOK). Gercek kod 
      konarak: bayrak karari (MB 24x36 baski = acik, MB 24x36 dijital = kapali, baska renk = kapali), teslim zorunlu (yoksa `yeni` durur),
      Kapilar adimi (halka FAIL -> HALKA_RC=1 + ::error + adim ozeti), Drive'a yaz (HALKA_RC=1 / tanimsiz+bayrak -> AstroLoveArt YUKLENMEZ;
      0 -> yuklenir), Sonuc adimi (HALKA_RC=1 -> is kirmizi).
-  3) siparis-yardimci.yml siparis_v2 Girdi adimi: 2:3 (24x36) artik reddedilmez; Digital Format yine reddedilir.
+  3) siparis-yardimci.yml siparis_v2 Girdi adimi: 2:3 (24x36) artik reddedilmez; 21 Kas: Digital File kabul (Etsy okumasiyla ayni), bilinmeyen Format red.
 Adim metninde yalniz MUTLAK yollar test dizinine cevrilir (/tmp/is, /tmp/g, /tmp/vo/bin/python, /home/claude/blender/venv/bin/python);
 mantik satirlari degistirilmez."""
 import json
@@ -286,7 +286,7 @@ YARD = yaml.safe_load((KOK / ".github/workflows/siparis-yardimci.yml").read_text
 GIRDI = next(s for s in YARD if s.get("name", "").startswith("Girdi (KISISEL.json)"))["run"]
 
 
-def v2(co, fmt, boy):
+def v2(co, fmt, boy, etsy_fmt="Print"):
     with tempfile.TemporaryDirectory() as t:
         d = Path(t); g = d / "g"
         sahte_py = d / "vo_py"
@@ -295,7 +295,7 @@ def v2(co, fmt, boy):
         metin = GIRDI.replace("/tmp/vo/bin/python", str(sahte_py)).replace("/tmp/g", str(g)); assert "/tmp/g/" not in metin and "/tmp/vo/" not in metin
         (d / "scripts").symlink_to(KOK / "scripts")
         var = [dict(ad="Name under Cancer", deger="Milo"), dict(ad="Name under Leo", deger="Harper"), dict(ad="Your message", deger="Always Yours"),
-               dict(ad="Color", deger="Midnight Blue"), dict(ad="Size", deger=boy), dict(ad="Format", deger="Print")]
+               dict(ad="Color", deger="Midnight Blue"), dict(ad="Size", deger=boy), dict(ad="Format", deger=etsy_fmt)]
         kis = {"receipt_id": 900000001, "kalemler": [{"varyasyon": var}]}
         src = d / "drive_src" / "OKUMA_1"; src.mkdir(parents=True); (src / "KISISEL.json").write_text(json.dumps(kis))
         (d / "olay.json").write_text(json.dumps({"inputs": {"receipt": "900000001"}}))
@@ -310,8 +310,17 @@ def v2(co, fmt, boy):
 rc, out, genv, ist = v2("CANCER_LEO:24x36", "Print", "24x36 in")
 kontrol("siparis_v2: 2:3 (24x36) Print artik REDDEDILMEZ (istek yazilir, OLCU=24x36)", rc == 0 and ist is not None and ist.get("olcu") == "24x36"
         and genv.get("OLCU") == "24x36" and "2:3" not in out and "Milo" not in out.replace("::add-mask::Milo", ""), f"rc {rc} {out[-300:]}")
+kontrol("siparis_v2: Print -> TESLIM_TUR=baski", genv.get("TESLIM_TUR") == "baski" and genv.get("FMT") == "Print", str(genv))
+# 21 Kas (GOREV SIPARIS_HATTI_DIJITAL 1): dijital siparis siparis_v2'de; Format Etsy okumasiyla ayni olmali
+rc, out, genv, ist = v2("CANCER_LEO:16x20", "Digital File", "16x20 in", "Digital File")
+kontrol("siparis_v2: Digital File (Etsy de Digital File) KABUL, TESLIM_TUR=dijital", rc == 0 and ist is not None and genv.get("TESLIM_TUR") == "dijital"
+        and genv.get("FMT") == "Digital File" and genv.get("OLCU") == "16x20", f"rc {rc} {out[-300:]}")
+rc, out, genv, ist = v2("CANCER_LEO:16x20", "Digital File", "16x20 in", "Print")
+kontrol("siparis_v2: girdi Digital File ama Etsy Print (bilinen FAIL)", rc != 0 and ist is None and genv.get("TESLIM_TUR") != "baski", f"rc {rc}")
+rc, out, genv, ist = v2("CANCER_LEO:16x20", "Print", "16x20 in", "Digital File")
+kontrol("siparis_v2: girdi Print ama Etsy Digital File (bilinen FAIL)", rc != 0 and ist is None, f"rc {rc}")
 rc, out, genv, ist = v2("CANCER_LEO:24x36", "Digital", "24x36 in")
-kontrol("siparis_v2: Format Digital yine reddedilir (bilinen FAIL)", rc != 0 and ist is None and "yalniz baski" in out, f"rc {rc}")
+kontrol("siparis_v2: bilinmeyen Format 'Digital' reddedilir (bilinen FAIL)", rc != 0 and ist is None and "format Print | Digital File" in out, f"rc {rc}")
 rc, out, genv, ist = v2("CANCER_LEO:24x36", "Print", "11x14 in")
 kontrol("siparis_v2: Etsy olcusu farkli (bilinen FAIL)", rc != 0 and ist is None, f"rc {rc}")
 print("halka 2:3 + akis testi: %d FAIL" % len(HATA))
