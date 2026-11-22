@@ -402,6 +402,14 @@ def senaryo_inceleme_bulgulari():
     rc, _ = kos(otr, "yayin")
     kontrol("FAIL eski BEKLIYOR: uyari, yayin yok", rc == 1 and "BEKLIYOR 1 saatten eski" in
             "".join(p.read_text() for p in DRIVE.rglob("SOSYAL_HATA_*")) and not any(c[1].endswith("/threads") for c in otr.cagri))
+    kontrol("eski BEKLIYOR: UYARILDI isareti", "UYARILDI" in satir_al(otr, 3)["not"])
+    rc2, _ = kos(otr, "yayin")
+    kontrol("eski BEKLIYOR: ikinci kosuda tekrar uyari yok", rc2 == 0)
+    sifirla()
+    cok = (SIMDI - timedelta(minutes=150)).strftime("%Y-%m-%dT%H:%M%z")
+    otr = Oturum([satir(3, "threads", "metin", durum=f"BEKLIYOR {cok}")])
+    rc, _ = kos(otr, "yayin")
+    kontrol("FAIL 150 dk eski BEKLIYOR da uyarir (zaman asimi boslugu yok)", rc == 1)
     sifirla()
     otr = Oturum([satir(3, "threads", "metin", saat=+5, onay=False)])
     otr.satirlar[0][otr.baslik.index("yz_beyani")] = ""

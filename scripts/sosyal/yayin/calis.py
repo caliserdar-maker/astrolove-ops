@@ -52,7 +52,7 @@ def uyari_yaz(satirlar, simdi):
 
 
 def _bekliyor_eski(s, simdi):
-    """BEKLIYOR 1 saatten eski ve 1,5 saatten yeniyse True (tek uyari; yarim kalmis kosu)."""
+    """BEKLIYOR 1 saatten eskiyse ve daha once uyarilmadiysa True (yarim kalmis kosu; tek uyari, isaret `not` hucresinde)."""
     p = (s.get("DURUM") or "").split()
     if not p or p[0] != "BEKLIYOR" or len(p) < 2:
         return False
@@ -60,7 +60,7 @@ def _bekliyor_eski(s, simdi):
         t = datetime.strptime(p[1], "%Y-%m-%dT%H:%M%z")
     except ValueError:
         return False
-    return timedelta(hours=1) <= simdi - t < timedelta(minutes=90)
+    return simdi - t >= timedelta(hours=1) and "UYARILDI" not in (s.get("not") or "")
 
 
 def yayin(http, tk, simdi, kuru, uyku=None):
@@ -74,6 +74,13 @@ def yayin(http, tk, simdi, kuru, uyku=None):
             kod, neden = secim.karar(s, simdi, acik if not kuru else set(MODUL))
             if kod == "ATLA" and _bekliyor_eski(s, simdi):
                 uyari.append(f"{etiket}: BEKLIYOR 1 saatten eski (kosu yarim kalmis olabilir; platformda elle bakin, satiri elle duzeltin)")
+                if not kuru:
+                    try:
+                        tk.tazele(s)
+                        tk.yaz(s, **{"not": ((s.get("not") or "") + " UYARILDI").strip()})
+                    except Exception as e:
+                        uyari.append(f"DUR {etiket}: {temizle(e)}")
+                        break
             if kod == "YAYINLA":
                 try:
                     md = M.indir(s, Path(td) / s["satir_no"])
