@@ -10,7 +10,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      mod: {description: "siparis_v2 | kosu_sil | halka_ornek | halka_olcum | dijital_olcum | kirmizi_teshis | gizli_kontrol", required: true}
+      mod: {description: "siparis_v2 | kosu_sil | halka_ornek | halka_olcum | dijital_olcum | kirmizi_teshis | kirmizi_kaynak | gizli_kontrol", required: true}
       hedef: {description: "halka_ornek / halka_olcum: OFIS DENEME klasor id (sahte veri). siparis_v2'de VERILMEZ", required: false, default: ""}
       kosular: {description: "kosu_sil: id:tur virgullu (tur: oku | giris | giris_pr | tara | ci)", required: false, default: ""}
       sinir_utc: {description: "kosu_sil: bu siparis isinin baslangici (UTC, 2026-11-18T19:00:00Z); daha eski kosu silinmez", required: false, default: ""}
@@ -417,6 +417,73 @@ jobs:
           rclone copy /tmp/t "$D" --include KIRMIZI_TESHIS.json -q
       - if: always()
         run: rm -rf /tmp/t ~/.config/rclone
+
+  kirmizi_kaynak:
+    # SALT OLCUM (22 Kas, Merkez 10:3x TR; kapi DEGISMEZ): SAHTE isimli BASKI uretimi (d2b414ee + halka_yama, HALKA_DUZELT=1, TESLIM_TUR=baski)
+    # ve kirmizi_teshis.py hem kodlama oncesi kaynakta (son/<CIFT>_teslim_REF.png) hem teslim JPG'de: ton < 8 kumeleri sanattan mi kodlamadan mi.
+    # Cikti yalniz JSON (hedef: OFIS olcum klasoru). Etsy / musteri verisi / tedarikci YOK.
+    if: ${{ inputs.mod == 'kirmizi_kaynak' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        olcu: ["24x36", "20x30"]
+    env: {CIFT: "SCORPIO_VIRGO", OLCU: "${{ matrix.olcu }}", RENK: "MIDNIGHT_BLUE", TESLIM_TUR: "baski", HALKA_DUZELT: "1"}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: { ref: "d2b414ee270ec029bd5abcef4a6535414ae7d1e1", fetch-depth: 1, sparse-checkout: "motor_gpt", path: mg }
+      - name: rclone (motor SISTEM python3 ile)
+        run: |
+          set -euo pipefail
+          echo "SYS_PY=$(command -v python3)" >> "$GITHUB_ENV"
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+      - name: Kaynak + motor ortami + halka_yama
+        run: |
+          set -euo pipefail
+          K="gdrive,root_folder_id=1ZQGR0fI0HQNq1D2Lbmr2qlkNVbD8jRyD:"
+          mkdir -p /tmp/k
+          rclone copy "$K" /tmp/k --include "${CIFT}_ana.png" --include "${CIFT}_ana.png.json" --include "${CIFT}_std_alfa.npz" --include "ek/**"
+          [ -s "/tmp/k/${CIFT}_ana.png" ] || { echo "::error::kaynak eksik"; exit 1; }
+          sudo mkdir -p /home/claude/ao/KANIT /home/claude/motor_klon/motor && sudo chown -R "$USER" /home/claude
+          ln -s "$GITHUB_WORKSPACE/mg/motor_gpt" /home/claude/blender
+          ln -s "$GITHUB_WORKSPACE/mg/motor_gpt/font" /home/claude/motor_klon/motor/font
+          ln -s "$GITHUB_WORKSPACE/mg/motor_gpt/ref" /home/claude/ref
+          "$SYS_PY" -m venv /home/claude/blender/venv
+          /home/claude/blender/venv/bin/pip install -q numpy==2.5.3 opencv-python-headless==5.0.0.93 pillow==12.3.0 scipy==1.18.1 scikit-image==0.26.0 potracer==0.0.4
+          ln -s /tmp/k/ek/SCORPIO_VIRGO_T5_FAIL_tam.png /home/claude/ao/KANIT/SCORPIO_VIRGO_T5_FAIL_tam.png
+          bash scripts/siparis_onizle/halka_yama/bindir.sh mg/motor_gpt
+          python3 -m venv /tmp/vo && /tmp/vo/bin/pip install -q pillow==11.0.0 numpy==2.1.3 opencv-python-headless==4.10.0.84
+      - name: Uret (SAHTE isimler) + kaynak / teslim teshisi
+        env: {T: "${{ inputs.hedef }}"}
+        run: |
+          set -uo pipefail
+          [[ "$T" =~ ^[A-Za-z0-9_-]{20,}$ ]] || { echo "::error::hedef id"; exit 1; }
+          M=$(printf %s 'Always-and-Forever Yours' | base64)
+          /home/claude/blender/venv/bin/python /home/claude/blender/siparis_uret.py "$CIFT" Milo Harper "$M" "/tmp/k/${CIFT}_ana.png" /tmp/is > /tmp/uret.log 2>&1 || { tail -30 /tmp/uret.log; exit 1; }
+          B12=$(echo "$CIFT" | tr '_' '\n' | sed 's/.*/\L&/;s/^./\u&/' | paste -sd_)
+          J="/tmp/is/AstroLoveArt_${B12}_${OLCU}.jpg"; R="/tmp/is/son/${CIFT}_teslim_REF.png"
+          [ -s "$J" ] && [ -s "$R" ] || { echo "::error::teslim ya da REF yok"; ls /tmp/is /tmp/is/son | head -40; exit 1; }
+          mkdir -p /tmp/o; RC=0
+          /tmp/vo/bin/python scripts/siparis_onizle/kirmizi_teshis.py "$R" "/tmp/o/KIRMIZI_KAYNAK_REF_${CIFT}_${OLCU}.json" || RC=1
+          /tmp/vo/bin/python scripts/siparis_onizle/kirmizi_teshis.py "$J" "/tmp/o/KIRMIZI_KAYNAK_JPG_${CIFT}_${OLCU}.json" || RC=1
+          ls -la "$J" | awk '{print "teslim bayt", $5}'
+          rclone copy /tmp/o "gdrive,root_folder_id=$T:" -q || RC=1
+          exit $RC
+      - if: always()
+        run: rm -rf /tmp/is /tmp/k /tmp/o ~/.config/rclone
 
   gizli_kontrol:
     # 19 Kas (GOREV HALKA_KALICI_2 B): ozel kosudan ONCE sir varlik kontrolu. YALNIZ var / yok basilir, deger ASLA. Drive / Etsy / siparis YOK.
