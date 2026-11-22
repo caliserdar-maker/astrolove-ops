@@ -11,7 +11,7 @@ uzerinden veya lokalde elle calistirilabilir.
 | Yol | Icerik |
 | --- | --- |
 | `scripts/etsy/` | Etsy API scriptleri (listeleme, siparis, envanter) |
-| `scripts/instagram/` | Instagram scriptleri: `build_carousel.py` (5 slaytlik carousel uretimi), `publish.py` (gunluk REEL/CAROUSEL/STORY yayini) |
+| `scripts/instagram/` | Instagram scriptleri: `build_carousel.py` (5 slaytlik carousel uretimi), `publish.py` (elle REEL/CAROUSEL/STORY yayini) |
 | `scripts/pinterest/` | Pinterest scriptleri: `build_pins_v4.py` (pin gorselleri: poster 1000x1500, PIN_MEDIA_V2), `merge_week.py` (haftalik toplu-pin CSV'si), `pin_media_perms.py` (Drive "anyone" izin araci) |
 | `scripts/common/` | Ortak yardimci moduller; `gh_secrets.py` (GitHub secret/variable yazma, OPS_ADMIN_TOKEN ile) |
 | `.github/workflows/` | Zamanlanmis ve manuel GitHub Actions workflow'lari |
@@ -43,7 +43,7 @@ zaman depoya yazilmaz.
 | `pin-media-perms` | elle (`mode`, `apply`, `folder_id`, `keep_id`) | `fix`: agactaki "anyone" iznini reader'a ceker; `remove`: anyone iznini kaldirir, `keep_id` agacini korur ve anonim HTTP ile dogrular. Varsayilan dry-run |
 | `start-here-append` | elle (`record_file`) | Depodaki `docs/start_here/Bnn.txt` kaydini Drive'daki START_HERE dokumaninin sonuna ekler (Docs API); ayni numara varsa yazmaz |
 | `ig-media-sync` | elle (`days`, `dry_run`) | `TEMP/IG_CAROUSEL_V2` slaytlarini `astrolove-media/carousel_v2/` olarak GitHub Pages'e iter |
-| `ig-publish` | elle (`dry_run` varsayilan acik) + gunluk 06:00 UTC (`IG_PUBLISH_ENABLED=true` ise) | WA_IG_PLAN'daki bugunun satirini Instagram'da yayinlar, durum sutunlarini gunceller |
+| `ig-publish` | yalniz elle (`dry_run` varsayilan acik; zamanlama 22 Kas kaldirildi) | WA_IG_PLAN'daki bir gunun (varsayilan bugun) satirini Instagram'da yayinlar, durum sutunlarini gunceller |
 | `prodigi-quote` | elle (`limit` 0=hepsi, `discover`, `skus`) | Prodigi pilot katalog + ABD fiyat/kargo okuma (salt okur); cikti Drive `TEMP/PRODIGI/` + artifact |
 | `pod-gallery-sample` | elle (`pair`, `editions`) | POD galeri ornegi: ETSY_UPLOAD_SETS'ten 10 kare (6 mockup + symbol + crafted + 3 yeni kart) -> Drive `TEMP/POD_SAMPLE/<PAIR>/` + kontak sayfalari |
 | `pod-gallery-build` | elle (`pairs` ALL/liste, `shards`, `force`) | 78 cift POD galerisi: cift x 5 edisyon x 10 kare (11_EXTRA yok), 05/08/10 kartlari cizilir, kart basina QC (boyut, ust bant, rozet, 6 bosluk, palet/geometri); Drive `TEMP/POD_GALLERY/<PAIR>/<ED>/` + `_CONTACT/`; shard STATE `TEMP/POD_GALLERY_STATE/shard_n.csv`, birlesik `TEMP/POD_GALLERY_STATE.csv` + `POD_GALLERY_REPORT.md`; FAIL cift STATE'e yazilir, kosu surer; resume |

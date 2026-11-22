@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Instagram gunluk yayin scripti (REEL / CAROUSEL / STORY).
+Instagram yayin scripti (yalniz elle tetiklenir) (REEL / CAROUSEL / STORY).
 
 Plan: Drive'daki WA_IG_PLAN sheet'i (Sheets API, rclone.conf'daki OAuth
 kimligiyle). Bugunun (Europe/Istanbul) satiri bulunur; uc tur birbirinden

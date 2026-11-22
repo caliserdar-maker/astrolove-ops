@@ -21,7 +21,7 @@ versiyonlanmayan bir `.env` dosyasinda tutulur.
 
 | Degisken | Aciklama |
 | --- | --- |
-| `IG_PUBLISH_ENABLED` | `true` olmadikca `ig-publish`'in zamanlanmis (06:00 UTC) kosusu atlanir. Yayina gecis karari bu degiskenle verilir; elle tetikleme `dry_run` varsayilani ile her zaman calisir. |
+| `IG_PUBLISH_ENABLED` | KULLANILMIYOR (22 Kas 2026): `ig-publish` zamanlamasi ve bu anahtar kaldirildi; is akisi yalniz elle, `dry_run` varsayilani ile calisir. Degisken tanimliysa etkisizdir. |
 
 ## Otomasyon kurali (KARAR, 2 Eylul 2026)
 

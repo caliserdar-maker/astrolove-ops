@@ -9,11 +9,11 @@ yaptirilmaz. Yetki OPS_ADMIN_TOKEN'dan gelir (fine-grained PAT: astrolove-ops
 Kullanim (kod icinden):
     from gh_secrets import set_secret, set_variable
     set_secret("astrolove-ops", "IG_TOKEN", value, admin_token)
-    set_variable("astrolove-ops", "IG_PUBLISH_ENABLED", "true", admin_token)
+    set_variable("astrolove-ops", "ORNEK_DEGISKEN", "true", admin_token)
 
 Komut satiri (deger STDIN'den, sohbet/loga dusmesin):
     printf '%s' "$VALUE" | python gh_secrets.py secret astrolove-ops IG_TOKEN
-    python gh_secrets.py variable astrolove-ops IG_PUBLISH_ENABLED true
+    python gh_secrets.py variable astrolove-ops ORNEK_DEGISKEN true
 Admin token: --token, yoksa OPS_ADMIN_TOKEN ortam degiskeni.
 """
 import argparse

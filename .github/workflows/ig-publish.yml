@@ -1,11 +1,12 @@
 name: ig-publish
 
-# Gunluk Instagram yayini: WA_IG_PLAN'daki bugunun satirini REEL / CAROUSEL /
-# STORY olarak yayinlar, durum sutunlarini gunceller. Tekrar yayin korumasi
-# scriptte (PENDING -> OK/ERR, SKIP_DUP); burada ayrica concurrency kilidi.
+# Instagram yayini (yalniz elle): WA_IG_PLAN'daki bir gunun satirini REEL /
+# CAROUSEL / STORY olarak yayinlar, durum sutunlarini gunceller. Tekrar yayin
+# korumasi scriptte (PENDING -> OK/ERR, SKIP_DUP); burada ayrica concurrency kilidi.
 #
-# Zamanlanmis kosu yalniz repo degiskeni IG_PUBLISH_ENABLED=true ise calisir;
-# elle tetiklemede dry_run varsayilan olarak ACIK.
+# Zamanlanmis kosu ve IG_PUBLISH_ENABLED anahtari KALDIRILDI (Serdar 22 Kas
+# "evet"; PLAN_KENDI_PAYLASIM_SISTEMI_20261122: yeni sistemle cift paylasim
+# riski). Elle tetiklemede dry_run varsayilan olarak ACIK.
 
 permissions:
   contents: read
@@ -25,8 +26,6 @@ on:
         description: "Tur filtresi, or. reel,story (bos = hepsi)"
         required: false
         default: ""
-  schedule:
-    - cron: "0 6 * * *"        # 09:00 Europe/Istanbul (yil boyu UTC+3)
 
 concurrency:
   group: ig-publish
@@ -36,7 +35,6 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: ${{ github.event_name != 'schedule' || vars.IG_PUBLISH_ENABLED == 'true' }}
 
     steps:
       - name: Checkout
@@ -85,7 +83,7 @@ jobs:
           # Instagram kimligi Drive TEMP/ig_token.json'dan (rclone); GitHub secret yok.
           IG_PLAN_SHEET_ID: 1Cg--wybFqdCON9XCE-xF3F9FTiE5n6gIDnzJcpFdYhY
           MEDIA_BASE: https://caliserdar-maker.github.io/astrolove-media
-          DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || inputs.dry_run }}
+          DRY_RUN: ${{ inputs.dry_run }}
           PLAN_DATE: ${{ inputs.date }}
           ONLY: ${{ inputs.only }}
         run: |
