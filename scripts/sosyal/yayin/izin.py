@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Ilk baglanti (plan 4.5; kurulum S7). Sir ya da izin kodu is akisi GIRDISI olmaz.
-  link  <platform>   izin ekrani linki (client_id sir degil) + state; state Drive TEMP'e yazilir, linkle birlikte gosterilir
+  link  <platform>   izin ekrani linki + state Drive TEMP'e yazilir (loga YAZILMAZ); Serdar donus sayfasinda state'i karsilastirir
   cevir <platform>   OAUTH_KOD_<IG|FB|THREADS|YT> (GitHub Secret, ortam degiskeni) -> uzun omurlu token -> Drive TEMP;
                      sonra kod sirri GitHub'dan silinir (OPS_ADMIN_TOKEN). Token ve kod loga yazilmaz.
 Donus adresi tek: DONUS (astrolove-media app/oauth.html)."""
@@ -64,9 +64,9 @@ def link(p, simdi=None):
     simdi = simdi or datetime.now(timezone.utc)
     drive_yaz(state_yolu(p), json.dumps({"state": st, "olusturma": simdi.isoformat()}))
     adres = u + "?" + urllib.parse.urlencode(q)
-    log(f"izin linki hazir ({p}); state Drive'a yazildi")
-    print(f"IZIN_LINKI={adres}", flush=True)  # temizle() disinda: yalniz client_id, donus adresi, kapsam, state (sir degil)
-    print(f"STATE={st}", flush=True)
+    # Link ve state herkese acik loga yazilmaz (state CSRF degeridir); Merkez Drive'dan okuyup Serdar'a verir.
+    drive_yaz(f"{kimlik.KOK}/SOSYAL_IZIN_LINK_{p.upper()}.txt", f"{adres}\nSTATE={st}\n")
+    log(f"izin linki Drive'a yazildi: {kimlik.KOK}/SOSYAL_IZIN_LINK_{p.upper()}.txt")
     return adres, st
 
 

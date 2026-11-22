@@ -3,7 +3,7 @@
 Takvim: Drive Google Sheet SOSYAL_TAKVIM (depoya yazilmaz). Ilk satir baslik; sutun adlari asagidaki SUTUNLAR.
 Durum makinesi (tekrar paylasim korumasi, publish.py modeli):
   bos       -> zamani geldiyse ve onayliysa yayinla (once BEKLIYOR yazilir)
-  BEKLIYOR  -> ATLA (onceki kosu yarim kaldi; elle bakilir, otomatik yeniden deneme YOK)
+  BEKLIYOR  -> ATLA (onceki kosu yarim kaldi; elle bakilir, otomatik yeniden deneme YOK; 1 saatten eskiyse bir kez uyari)
   TAMAM / HATA / KACTI -> atla
 Onay: ONAY = SERDAR_<YYYYMMDD>; ONAY_OZET = onay anindaki satir + medya md5 ozeti; farkliysa yayin YOK."""
 import hashlib
@@ -85,12 +85,12 @@ def karar(satir, simdi, acik, md5ler=None):
     durum = (satir.get("DURUM") or "").strip()
     if durum:
         return ("ATLA", f"durum {durum.split()[0]}")
+    t = zaman(satir)
+    if t is not None and t > simdi:
+        return ("BEKLE", "zamani gelmedi")
     h = dogrula(satir)
     if h:
         return ("GECERSIZ", "; ".join(h))
-    t = zaman(satir)
-    if t > simdi:
-        return ("BEKLE", "zamani gelmedi")
     if satir["platform"].strip() not in acik:
         return ("KAPALI", f"{satir['platform']} anahtari kapali")
     if not ONAY_RX.match((satir.get("ONAY") or "").strip()):

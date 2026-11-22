@@ -78,6 +78,18 @@ class Takvim:
     def hucre(self, satir, sutun):
         return f"{self.sayfa}!{_harf(self.baslik.index(sutun))}{satir['_sheet_satir']}"
 
+    def tazele(self, satir):
+        """Satirin bulundugu yeri yeniden okur; satir_no ve ONAY_OZET ayni degilse Hata (siralama / satir ekleme kaymasi)."""
+        son = _harf(len(self.baslik) - 1)
+        n = satir["_sheet_satir"]
+        j, _ = self.http.iste("GET", f"{API}/{self.id}/values/{self.sayfa}!A{n}:{son}{n}", token=self.token)
+        r = (j.get("values") or [[]])[0]
+        d = {c: (r[k] if k < len(r) else "") for k, c in enumerate(self.baslik)}
+        for alan in ("satir_no", "ONAY_OZET"):
+            if (d.get(alan) or "").strip() != (satir.get(alan) or "").strip():
+                raise Hata(f"takvim satiri kaydi (Sheet satir {n}: {alan} degisti); kosu durdu")
+        return d
+
     def durum_oku(self, satir):
         """Yazmadan hemen once DURUM'u tazeden okur (baska kosu yazdiysa bos degildir)."""
         j, _ = self.http.iste("GET", f"{API}/{self.id}/values/{self.hucre(satir, 'DURUM')}", token=self.token)

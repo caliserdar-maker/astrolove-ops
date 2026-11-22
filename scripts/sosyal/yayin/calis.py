@@ -3,17 +3,18 @@
 
 Modlar:
   yayin  [--kuru]                      zamani gelmis + ONAY'li + DURUM'u bos satirlari paylasir (kuru: hicbir sey yazmaz)
-  onayla --satirlar 3,4 --onay SERDAR_YYYYMMDD [--kuru]
-                                       Serdar onayindan sonra Merkez kosar: satir dogrulanir, medya indirilir,
-                                       ONAY + ONAY_OZET yazilir, IG/Threads medyasi --medya-kok altina konur
+  onayla --satirlar 3,4 --onay SERDAR_YYYYMMDD --asama hazirla|yaz [--plan F] [--kuru]
+                                       Serdar onayindan sonra Merkez kosar. hazirla: dogrula, medya indir, IG/Threads
+                                       medyasini --medya-kok altina koy, plan yaz. yaz: (medya push'undan sonra) ONAY + ONAY_OZET
   kontrol                              acik platformlarin kimligini salt okuma ile dogrular (yazim yok)
 Anahtarlar: SOSYAL_YAYIN_ACIK=true ve YAYIN_IG / YAYIN_FB / YAYIN_THREADS / YAYIN_YT = true (yoksa o platform KAPALI).
 Hata ya da KACTI: Drive <SOSYAL_UYARI_KLASOR>/SOSYAL_HATA_<YYYYMMDD>.md (token yok). Cikis 1 = en az bir HATA/KACTI."""
 import argparse
+import json
 import os
 import sys
 import tempfile
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -50,6 +51,18 @@ def uyari_yaz(satirlar, simdi):
     drive_yaz(yol, eski + "".join(f"- {ts(simdi)} {temizle(s)}\n" for s in satirlar))
 
 
+def _bekliyor_eski(s, simdi):
+    """BEKLIYOR 1 saatten eski ve 1,5 saatten yeniyse True (tek uyari; yarim kalmis kosu)."""
+    p = (s.get("DURUM") or "").split()
+    if not p or p[0] != "BEKLIYOR" or len(p) < 2:
+        return False
+    try:
+        t = datetime.strptime(p[1], "%Y-%m-%dT%H:%M%z")
+    except ValueError:
+        return False
+    return timedelta(hours=1) <= simdi - t < timedelta(minutes=90)
+
+
 def yayin(http, tk, simdi, kuru, uyku=None):
     acik = acik_platformlar()
     satirlar = tk.oku()
@@ -57,7 +70,10 @@ def yayin(http, tk, simdi, kuru, uyku=None):
     kimlikler = {}
     with tempfile.TemporaryDirectory() as td:
         for s in satirlar:
+            etiket = f"satir {s.get('satir_no')} {s.get('platform')}/{s.get('tur')}"
             kod, neden = secim.karar(s, simdi, acik if not kuru else set(MODUL))
+            if kod == "ATLA" and _bekliyor_eski(s, simdi):
+                uyari.append(f"{etiket}: BEKLIYOR 1 saatten eski (kosu yarim kalmis olabilir; platformda elle bakin, satiri elle duzeltin)")
             if kod == "YAYINLA":
                 try:
                     md = M.indir(s, Path(td) / s["satir_no"])
@@ -67,7 +83,6 @@ def yayin(http, tk, simdi, kuru, uyku=None):
                 except Hata as e:
                     kod, neden = "MEDYA", str(e)
             ozet_say[kod] = ozet_say.get(kod, 0) + 1
-            etiket = f"satir {s['satir_no']} {s.get('platform')}/{s.get('tur')}"
             if kod in ("BEKLE", "ATLA", "ONAYSIZ", "KAPALI"):
                 continue
             if kod in ("GECERSIZ", "OZET_FARKLI", "MEDYA"):
@@ -76,15 +91,26 @@ def yayin(http, tk, simdi, kuru, uyku=None):
                 continue
             if kod == "KACTI":
                 log(f"{etiket}: KACTI")
-                if not kuru:
-                    tk.yaz(s, DURUM=f"KACTI {ts(simdi)}")
                 uyari.append(f"{etiket}: KACTI ({neden})")
+                if not kuru:
+                    try:
+                        tk.tazele(s)
+                        tk.yaz(s, DURUM=f"KACTI {ts(simdi)}")
+                    except Exception as e:
+                        uyari.append(f"DUR {etiket}: {temizle(e)}")
+                        break
                 continue
             # YAYINLA
             if kuru:
                 log(f"{etiket}: KURU yayinlanirdi ({len(md)} medya)")
                 continue
-            if tk.durum_oku(s):
+            try:
+                taze = tk.tazele(s)  # satir kaymasi: satir_no + ONAY_OZET ayni yerde mi
+            except Hata as e:
+                uyari.append(f"DUR {etiket}: {e}")
+                log(f"DUR {etiket}: {e}")
+                break
+            if (taze.get("DURUM") or "").strip():
                 log(f"{etiket}: ATLA (DURUM baska kosuca yazilmis)")
                 continue
             tk.yaz(s, DURUM=f"BEKLIYOR {ts(simdi)}")
@@ -93,22 +119,41 @@ def yayin(http, tk, simdi, kuru, uyku=None):
                     kimlikler[s["platform"]] = kimlik.oku(s["platform"])
                 arg = {} if uyku is None else {"uyku": uyku}
                 no = MODUL[s["platform"]].yayinla(http, kimlikler[s["platform"]], s, md, **arg)
+            except Hata as e:
+                _hata_yaz(tk, s, simdi, ("BELIRSIZ " if e.belirsiz else "") + str(e)[:200], uyari)
+                uyari.append(f"{etiket}: HATA {'(belirsiz: platformda elle bak) ' if e.belirsiz else ''}{e}")
+                log(f"{etiket}: HATA {e}")
+                continue
+            except Exception as e:  # beklenmeyen: metin temizlenir, satir HATA kalir (yeniden deneme yok)
+                _hata_yaz(tk, s, simdi, f"BELIRSIZ {type(e).__name__}", uyari)
+                uyari.append(f"{etiket}: HATA (belirsiz) {type(e).__name__} {temizle(e)}")
+                continue
+            # YAYINLANDI: bundan sonraki her hata "yayinlandi" diye raporlanir, HATA yazilmaz (yeniden paylasim riski)
+            try:
+                tk.tazele(s)
                 tk.yaz(s, DURUM=f"TAMAM {ts(simdi)}", sonuc_no=str(no))
                 log(f"{etiket}: TAMAM {no}")
-            except Hata as e:
-                tk.yaz(s, DURUM=f"HATA {ts(simdi)}", **{"not": ("BELIRSIZ " if e.belirsiz else "") + str(e)[:200]})
-                log(f"{etiket}: HATA {e}")
-                uyari.append(f"{etiket}: HATA {'(belirsiz: platformda elle bak) ' if e.belirsiz else ''}{e}")
-            except Exception as e:  # beklenmeyen: metin temizlenir, satir HATA kalir (yeniden deneme yok)
-                tk.yaz(s, DURUM=f"HATA {ts(simdi)}", **{"not": f"BELIRSIZ {type(e).__name__}"})
-                uyari.append(f"{etiket}: HATA (belirsiz) {type(e).__name__} {temizle(e)}")
+            except Exception as e:
+                uyari.append(f"{etiket}: YAYINLANDI no={no} ama takvime TAMAM yazilamadi ({temizle(e)}); satiri elle TAMAM {no} yapin")
+                log(f"DUR {etiket}: YAYINLANDI no={no}, TAMAM yazilamadi")
+                break
     log("OZET " + " ".join(f"{k}={v}" for k, v in sorted(ozet_say.items())) + f" | acik={','.join(sorted(acik)) or '-'} | kuru={kuru}")
     if not kuru:
         uyari_yaz(uyari, simdi)
     return 1 if uyari else 0
 
 
-def onayla(http, tk, nolar, onay, medya_kok, kuru):
+def _hata_yaz(tk, s, simdi, notu, uyari):
+    try:
+        tk.yaz(s, DURUM=f"HATA {ts(simdi)}", **{"not": notu})
+    except Exception as e:
+        uyari.append(f"satir {s.get('satir_no')}: HATA takvime yazilamadi ({temizle(e)}); DURUM BEKLIYOR kaldi")
+
+
+def onayla(http, tk, nolar, onay, medya_kok, kuru, plan_yolu, asama):
+    """Iki asama (inceleme bulgusu: ONAY, medya yayina girmeden yazilmaz).
+    hazirla: satir dogrulanir, medya indirilir, IG/Threads medyasi --medya-kok altina konur, plan JSON yazilir (takvime yazim yok).
+    yaz:     (is akisi medyayi push ettikten sonra) plan okunur; satir hala ayniysa (ozet, kayitli md5 ile) ONAY + ONAY_OZET yazilir."""
     if not secim.ONAY_RX.match(onay):
         raise Hata("onay bicimi SERDAR_YYYYMMDD degil")
     satirlar = {s["satir_no"].strip(): s for s in tk.oku()}
@@ -116,6 +161,25 @@ def onayla(http, tk, nolar, onay, medya_kok, kuru):
     if eksik:
         raise Hata(f"takvimde yok: {','.join(eksik)}")
     hata = 0
+    if asama == "yaz":
+        plan = json.loads(Path(plan_yolu).read_text())
+        if plan.get("onay") != onay:
+            raise Hata("plan onayi girdiyle ayni degil")
+        for n in nolar:
+            if n not in plan["satirlar"]:
+                log(f"satir {n}: ONAYLANMADI (hazirla asamasinda gecmedi)")
+                hata = 1
+                continue
+            s, p = satirlar[n], plan["satirlar"][n]
+            oz = secim.ozet(s, p["md5"])
+            if oz != p["ozet"] or (s.get("DURUM") or "").strip():
+                log(f"satir {n}: ONAYLANMADI (hazirliktan sonra satir degisti)")
+                hata = 1
+                continue
+            tk.yaz(s, ONAY=onay, ONAY_OZET=oz)
+            log(f"satir {n}: ONAY {onay} ozet={oz}")
+        return hata
+    plan = {"onay": onay, "satirlar": {}}
     with tempfile.TemporaryDirectory() as td:
         for n in nolar:
             s = satirlar[n]
@@ -137,8 +201,10 @@ def onayla(http, tk, nolar, onay, medya_kok, kuru):
                 log(f"satir {n}: KURU onaylanirdi ozet={oz}")
                 continue
             M.genele_koy(md, medya_kok)
-            tk.yaz(s, ONAY=onay, ONAY_OZET=oz)
-            log(f"satir {n}: ONAY {onay} ozet={oz}")
+            plan["satirlar"][n] = {"ozet": oz, "md5": [m["md5"] for m in md]}
+            log(f"satir {n}: hazir ozet={oz} (ONAY medya push'undan sonra yazilir)")
+    if not kuru:
+        Path(plan_yolu).write_text(json.dumps(plan))
     return hata
 
 
@@ -162,6 +228,8 @@ def main(argv=None, http=None, simdi=None, uyku=None):
     ap.add_argument("--satirlar", default="")
     ap.add_argument("--onay", default="")
     ap.add_argument("--medya-kok", default="media")
+    ap.add_argument("--asama", choices=["hazirla", "yaz"], default="hazirla")
+    ap.add_argument("--plan", default="_onay_plan.json")
     a = ap.parse_args(argv)
     http = http or Http()
     simdi = simdi or datetime.now(secim.TZ)
@@ -174,7 +242,7 @@ def main(argv=None, http=None, simdi=None, uyku=None):
         nolar = [x.strip() for x in a.satirlar.split(",") if x.strip()]
         if not nolar:
             raise Hata("--satirlar bos")
-        return onayla(http, tk, nolar, a.onay.strip(), a.medya_kok, a.kuru)
+        return onayla(http, tk, nolar, a.onay.strip(), a.medya_kok, a.kuru, a.plan, a.asama)
     except Hata as e:
         log(f"DUR: {e}")
         return 2

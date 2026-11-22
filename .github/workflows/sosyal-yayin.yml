@@ -3,7 +3,8 @@ name: sosyal-yayin
 # Kendi paylasim sistemi (PLAN_KENDI_PAYLASIM_SISTEMI_20261122 bolum 4; scripts/sosyal/yayin/).
 # Zamanli kosu (her 30 dk, :07 ve :37) YALNIZ repo degiskeni SOSYAL_YAYIN_ACIK=true ise calisir; platform basina
 # YAYIN_IG / YAYIN_FB / YAYIN_THREADS / YAYIN_YT = true olmayan platform yayinlanmaz. ONAY'siz satir asla paylasilmaz.
-# Elle tetikleme: kuru varsayilan ACIK. mod=onayla: Serdar onayindan sonra Merkez kosar (satirlar + onay).
+# Elle tetikleme: kuru varsayilan ACIK. mod=onayla: Serdar onayindan sonra Merkez kosar (satirlar + onay); iki asama:
+# hazirla (medya + plan) -> medya push -> ONAY yaz (ONAY, medya yayina girmeden yazilmaz).
 # Sir ya da izin kodu girdi olarak verilmez. Etsy yok. Otomatik yeniden deneme yok (cift paylasim riski).
 
 permissions:
@@ -32,15 +33,16 @@ on:
   schedule:
     - cron: "7,37 * * * *"
 
-concurrency:
-  group: sosyal-yayin
-  cancel-in-progress: false
-
 jobs:
   yayin:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 90
     if: ${{ github.event_name != 'schedule' || vars.SOSYAL_YAYIN_ACIK == 'true' }}
+    # Is duzeyinde kilit; onayla ayri grupta (bekleyen onayla, sonraki zamanli kosu tarafindan iptal edilmesin).
+    # Bekleyen bir zamanli kosunun yerini yenisi alabilir: ayni isi yapar, satir kaybi olmaz (DURUM korumasi).
+    concurrency:
+      group: sosyal-yayin-${{ inputs.mod == 'onayla' && 'onayla' || 'yayin' }}
+      cancel-in-progress: false
     env:
       SOSYAL_TAKVIM_ID: ${{ vars.SOSYAL_TAKVIM_ID }}
       SOSYAL_YAYIN_ACIK: ${{ vars.SOSYAL_YAYIN_ACIK }}
@@ -89,6 +91,7 @@ jobs:
           sparse-checkout-cone-mode: true
 
       - name: Calistir
+        id: calis
         env:
           MOD: ${{ github.event_name == 'schedule' && 'yayin' || inputs.mod }}
           KURU: ${{ github.event_name == 'schedule' && 'false' || inputs.kuru }}
@@ -103,9 +106,13 @@ jobs:
           if [ "$MOD" = "onayla" ]; then
             [[ "$SATIRLAR" =~ ^[0-9]+(,[0-9]+)*$ ]] || { echo "::error::satirlar bicimi"; exit 1; }
             [[ "$ONAY" =~ ^SERDAR_20[0-9]{6}$ ]] || { echo "::error::onay bicimi"; exit 1; }
-            args+=(--satirlar "$SATIRLAR" --onay "$ONAY" --medya-kok "$GITHUB_WORKSPACE/media")
+            args+=(--satirlar "$SATIRLAR" --onay "$ONAY" --medya-kok "$GITHUB_WORKSPACE/media" --asama hazirla --plan "$RUNNER_TEMP/onay_plan.json")
           fi
-          python3 scripts/sosyal/yayin/calis.py "${args[@]}" 2>&1 | python3 scripts/guvenlik/sir_koru.py tee "$GITHUB_STEP_SUMMARY"
+          RC=0
+          python3 scripts/sosyal/yayin/calis.py "${args[@]}" 2>&1 | python3 scripts/guvenlik/sir_koru.py tee "$GITHUB_STEP_SUMMARY" || RC=$?
+          echo "rc=$RC" >> "$GITHUB_OUTPUT"
+          # onayla: hazirlikta gecmeyen satir olsa da gecenlerin medyasi push edilir, ONAY yazilir; sonuc son adimda
+          if [ "$MOD" != "onayla" ] || [ "$KURU" = "true" ]; then exit "$RC"; fi
 
       - name: Medya push (yalniz onayla)
         if: ${{ inputs.mod == 'onayla' && !inputs.kuru }}
@@ -122,3 +129,17 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git commit -qm "yayin: onayli medya ($(wc -l < ../_d.txt) dosya)"
           git push
+
+      - name: ONAY yaz (yalniz onayla, medya push'undan sonra)
+        if: ${{ inputs.mod == 'onayla' && !inputs.kuru }}
+        env:
+          SATIRLAR: ${{ inputs.satirlar }}
+          ONAY: ${{ inputs.onay }}
+          RC1: ${{ steps.calis.outputs.rc }}
+        run: |
+          set -euo pipefail
+          [ -n "$RC1" ] || { echo "::error::hazirla sonucu yok"; exit 1; }
+          [ -f "$RUNNER_TEMP/onay_plan.json" ] || { echo "::error::plan yok (hazirla DUR verdi)"; exit 1; }
+          RC2=0
+          python3 scripts/sosyal/yayin/calis.py onayla --satirlar "$SATIRLAR" --onay "$ONAY" --asama yaz --plan "$RUNNER_TEMP/onay_plan.json" 2>&1 | python3 scripts/guvenlik/sir_koru.py tee "$GITHUB_STEP_SUMMARY" || RC2=$?
+          [ "$RC1" = 0 ] && [ "$RC2" = 0 ] || { echo "::error::onaylanmayan satir var (hazirla $RC1, yaz $RC2)"; exit 1; }

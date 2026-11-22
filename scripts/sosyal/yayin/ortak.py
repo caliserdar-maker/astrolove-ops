@@ -33,6 +33,7 @@ def gizle(*degerler):
 
 _URL = re.compile(r"https?://[^\s'\"<>]+")
 _ANAHTAR = re.compile(r"(?i)\b(access_token|client_secret|refresh_token|fb_exchange_token|code|token|th_exchange_token|ig_exchange_token)=[^&\s'\"]+")
+_JSON_ANAHTAR = re.compile(r"(?i)([\"']?(?:access_token|client_secret|refresh_token|id_token|token|code|upload_url)[\"']?\s*[:=]\s*[\"'])[^\"']+")
 
 
 def temizle(metin):
@@ -40,6 +41,7 @@ def temizle(metin):
     for s in sorted(_SIRLAR, key=len, reverse=True):
         t = t.replace(s, "***")
     t = _ANAHTAR.sub(lambda m: m.group(1) + "=***", t)
+    t = _JSON_ANAHTAR.sub(lambda m: m.group(1) + "***", t)
     t = _URL.sub(lambda m: m.group(0).split("?", 1)[0] + ("?***" if "?" in m.group(0) else ""), t)
     t = re.sub(r"(?i)(bearer|oauth)\s+[A-Za-z0-9._\-|]{8,}", r"\1 ***", t)
     return t
@@ -99,7 +101,9 @@ class Http:
             msg = j.get("error") if isinstance(j, dict) else None
             if isinstance(msg, dict):
                 msg = msg.get("message") or msg.get("error_user_msg") or json.dumps(msg)[:200]
-            raise Hata(f"{yontem} {url}: HTTP {r.status_code} {msg or j}", belirsiz=(yontem != "GET" and r.status_code >= 500),
+            if not isinstance(msg, str):  # ham govde hata metnine girmez (bilinmeyen alanlarda sir olabilir)
+                msg = "govde gizlendi"
+            raise Hata(f"{yontem} {url}: HTTP {r.status_code} {msg}", belirsiz=(yontem != "GET" and r.status_code >= 500),
                        kod=r.status_code)
         return j, r
 

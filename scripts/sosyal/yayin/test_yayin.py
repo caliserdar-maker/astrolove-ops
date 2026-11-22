@@ -95,6 +95,8 @@ class Oturum:
         self.son_an_durum = False
         self.hata_tokenli = False
         self.yenile_hata = False
+        self.kaydir = False
+        self.tamam_yaz_hata = False
 
     def _hucre(self, rng):
         a1 = rng.split("!")[1]
@@ -118,12 +120,22 @@ class Oturum:
             assert auth == "Bearer GACCESS_SAHTE_99"
             if m == "GET" and "!" not in url:
                 return Y(j={"values": [self.baslik] + self.satirlar})
+            if m == "GET" and ":" in url.rsplit("/", 1)[1]:
+                r, _ = self._hucre(url.rsplit("/", 1)[1].split(":")[0])
+                row = list(self.satirlar[r])
+                if self.kaydir:
+                    row[0] = "999"
+                if self.son_an_durum:
+                    row[self.baslik.index("DURUM")] = "BEKLIYOR baska"
+                return Y(j={"values": [row]})
             if m == "GET":
                 r, c = self._hucre(url.rsplit("/", 1)[1])
                 v = self.satirlar[r][c] if c < len(self.satirlar[r]) else ""
                 if self.son_an_durum:
                     v = "BEKLIYOR baska"
                 return Y(j={"values": [[v]]} if v else {})
+            if self.tamam_yaz_hata and any(str(d["values"][0][0]).startswith("TAMAM") for d in json["data"]):
+                return Y(500, {"error": {"message": "backend"}})
             for d in json["data"]:
                 r, c = self._hucre(d["range"])
                 self.satirlar[r][c] = d["values"][0][0]
@@ -157,6 +169,7 @@ class Oturum:
             if url.endswith("/threads_publish"):
                 return Y(j={"id": "THPOST1"})
             if url.endswith("/threads"):
+                assert "access_token" not in (data or {})
                 return Y(j={"id": "THC1"})
             return Y(j={"status": "FINISHED"})
         if "rupload.facebook.com" in url:
@@ -348,15 +361,91 @@ def senaryo_onayla():
     s = satir(2, "instagram", "karusel", "SOSYAL/a.jpg;SOSYAL/b.jpg", onay=False)
     bozuk = satir(5, "instagram", "reel", "SOSYAL/yok.mp4", onay=False)
     otr = Oturum([s, bozuk])
-    mk = TMP / "media"
-    rc, out = kos(otr, "onayla", "--satirlar", "2,5", "--onay", "SERDAR_20261207", "--medya-kok", str(mk))
+    mk, plan = TMP / "media", TMP / "plan.json"
+    rc, out = kos(otr, "onayla", "--satirlar", "2,5", "--onay", "SERDAR_20261207", "--medya-kok", str(mk),
+                  "--asama", "hazirla", "--plan", str(plan))
+    kontrol("onayla hazirla: takvime ONAY yazilmadi", satir_al(otr, 2)["ONAY"] == "" and plan.exists())
+    kontrol("onayla hazirla: genel medya konuldu", (mk / "yayin/202612/2_2.jpg").read_bytes() == b"JPG-B")
+    kontrol("FAIL onayla: medyasi olmayan satir hazirlanmadi", rc == 1 and "5" not in json.loads(plan.read_text())["satirlar"])
+    rc, out = kos(otr, "onayla", "--satirlar", "2,5", "--onay", "SERDAR_20261207", "--asama", "yaz", "--plan", str(plan))
     d = satir_al(otr, 2)
     md5 = [hashlib.md5(b"JPG-A").hexdigest(), hashlib.md5(b"JPG-B").hexdigest()]
-    kontrol("onayla: ONAY + ozet", d["ONAY"] == "SERDAR_20261207" and d["ONAY_OZET"] == secim.ozet(d, md5))
-    kontrol("onayla: genel medya konuldu", (mk / "yayin/202612/2_2.jpg").read_bytes() == b"JPG-B")
-    kontrol("FAIL onayla: medyasi olmayan satir onaylanmadi", satir_al(otr, 5)["ONAY"] == "" and rc == 1)
+    kontrol("onayla yaz: ONAY + ozet", d["ONAY"] == "SERDAR_20261207" and d["ONAY_OZET"] == secim.ozet(d, md5))
+    kontrol("FAIL onayla yaz: hazirlanmayan satir onaylanmadi", satir_al(otr, 5)["ONAY"] == "" and rc == 1)
+    otr2 = Oturum([satir(2, "instagram", "karusel", "SOSYAL/a.jpg;SOSYAL/b.jpg", onay=False, metin="sonradan degisti")])
+    rc, _ = kos(otr2, "onayla", "--satirlar", "2", "--onay", "SERDAR_20261207", "--asama", "yaz", "--plan", str(plan))
+    kontrol("FAIL onayla yaz: hazirliktan sonra degisen satir onaylanmadi", satir_al(otr2, 2)["ONAY"] == "" and rc == 1)
     rc2, _ = kos(otr, "onayla", "--satirlar", "2", "--onay", "serdar")
     kontrol("FAIL onayla: onay bicimi", rc2 == 2)
+
+
+def senaryo_inceleme_bulgulari():
+    sifirla()
+    acik()
+    otr = Oturum([satir(3, "threads", "metin")])
+    otr.kaydir = True
+    rc, out = kos(otr, "yayin")
+    kontrol("FAIL satir kaymasi: yayin yok + DUR uyarisi", not any(c[1].endswith("/threads") for c in otr.cagri) and rc == 1
+            and "kaydi" in "".join(p.read_text() for p in DRIVE.rglob("SOSYAL_HATA_*")))
+    sifirla()
+    otr = Oturum([satir(3, "threads", "metin"), satir(4, "threads", "metin")])
+    otr.tamam_yaz_hata = True
+    rc, out = kos(otr, "yayin")
+    uy = "".join(p.read_text() for p in DRIVE.rglob("SOSYAL_HATA_*"))
+    d3 = satir_al(otr, 3)
+    kontrol("FAIL TAMAM yazilamadi: HATA yazilmaz, YAYINLANDI uyarisi, kosu durur",
+            d3["DURUM"].startswith("BEKLIYOR") and "YAYINLANDI no=THPOST1" in uy and satir_al(otr, 4)["DURUM"] == ""
+            and sum(1 for c in otr.cagri if c[1].endswith("/threads_publish")) == 1)
+    sifirla()
+    eski = (SIMDI - timedelta(minutes=70)).strftime("%Y-%m-%dT%H:%M%z")
+    otr = Oturum([satir(3, "threads", "metin", durum=f"BEKLIYOR {eski}")])
+    rc, _ = kos(otr, "yayin")
+    kontrol("FAIL eski BEKLIYOR: uyari, yayin yok", rc == 1 and "BEKLIYOR 1 saatten eski" in
+            "".join(p.read_text() for p in DRIVE.rglob("SOSYAL_HATA_*")) and not any(c[1].endswith("/threads") for c in otr.cagri))
+    sifirla()
+    otr = Oturum([satir(3, "threads", "metin", saat=+5, onay=False)])
+    otr.satirlar[0][otr.baslik.index("yz_beyani")] = ""
+    rc, _ = kos(otr, "yayin")
+    kontrol("gelecek tarihli eksik taslak uyari vermez", rc == 0 and not list(DRIVE.rglob("SOSYAL_HATA_*")))
+    sifirla()
+    genel(12, 1, ".jpg", b"JPG-A")
+    genel(13, 1, ".jpg", b"JPG-A")
+    otr = Oturum([satir(12, "threads", "gorsel", "SOSYAL/a.jpg"), satir(13, "instagram", "hikaye", "SOSYAL/a.jpg")])
+    rc, _ = kos(otr, "yayin")
+    th = [c for c in otr.cagri if c[1].endswith("/threads") and c[0] == "POST"]
+    ig = [c for c in otr.cagri if c[1].endswith("/media") and c[0] == "POST"]
+    kontrol("Threads gorsel: IMAGE + image_url", rc == 0 and th and th[0][3]["media_type"] == "IMAGE" and th[0][3]["image_url"].endswith("/yayin/202612/12_1.jpg"))
+    kontrol("IG hikaye: STORIES + image_url", ig and ig[0][3]["media_type"] == "STORIES" and "image_url" in ig[0][3])
+    ortak.gizle("XYZTOKEN98765")
+    t = ortak.temizle('{"access_token": "ABCDEF123456789", "refresh_token":"QWERTY987654321", "upload_url": "https://x/y"}')
+    kontrol("temizle JSON anahtarlari", "ABCDEF123456789" not in t and "QWERTY987654321" not in t and "https://x/y" not in t)
+    try:
+        ortak.Http(type("O", (), {"request": lambda *a, **k: Y(418, {"weird": "LEAKVALUE123"})})()).iste("GET", "https://a.b/c")
+    except ortak.Hata as e:
+        kontrol("FAIL bilinmeyen hata govdesi metne girmez", "LEAKVALUE123" not in str(e))
+    out = io.StringIO()
+    os.environ["YT_CLIENT_ID"] = "ytcid"
+    with contextlib.redirect_stdout(out):
+        izin.main(["link", "youtube"])
+    st = json.loads((DRIVE / "ASTROLOVE/TEMP/SOSYAL_IZIN_STATE_YOUTUBE.json").read_text())["state"]
+    kontrol("izin link: link ve state loga yazilmaz, Drive'da", st not in out.getvalue() and "accounts.google.com" not in out.getvalue()
+            and st in (DRIVE / "ASTROLOVE/TEMP/SOSYAL_IZIN_LINK_YOUTUBE.txt").read_text())
+
+
+def senaryo_yml():
+    import yaml
+    w = KOK.parents[2] / ".github/workflows"
+    d = yaml.safe_load((w / "sosyal-yayin.yml").read_text())
+    j = d["jobs"]["yayin"]
+    kontrol("yml: zamanli kosu anahtara bagli", "vars.SOSYAL_YAYIN_ACIK == 'true'" in j["if"] and "schedule" in j["if"])
+    kontrol("yml: is duzeyi kilit, onayla ayri grup", "onayla" in j["concurrency"]["group"] and "concurrency" not in d)
+    kontrol("yml: elle kuru varsayilan acik", d[True]["workflow_dispatch"]["inputs"]["kuru"]["default"] is True)
+    adim = [x.get("name") for x in j["steps"]]
+    kontrol("yml: ONAY yazimi medya push'undan sonra", adim.index("ONAY yaz (yalniz onayla, medya push'undan sonra)") > adim.index("Medya push (yalniz onayla)"))
+    for f in ("sosyal-izin.yml", "sosyal-token-yenile.yml", "sosyal-olcum-kendi.yml", "sosyal-yayin.yml"):
+        y = yaml.safe_load((w / f).read_text())
+        girdiler = (y[True].get("workflow_dispatch") or {}).get("inputs") or {}
+        kontrol(f"yml {f}: sir girdi degil", not any(k.upper().startswith(("OAUTH", "TOKEN", "SECRET", "KOD")) for k in girdiler))
 
 
 def senaryo_http_kurali():
@@ -386,8 +475,10 @@ def senaryo_izin():
     out = io.StringIO()
     with contextlib.redirect_stdout(out):
         rc = izin.main(["link", "youtube"])
-    kontrol("izin link YT: state Drive'da, link basildi", rc == 0 and "IZIN_LINKI=https://accounts.google.com" in out.getvalue()
-            and (DRIVE / "ASTROLOVE/TEMP/SOSYAL_IZIN_STATE_YOUTUBE.json").exists() and "YTSECRET" not in out.getvalue())
+    lk = (DRIVE / "ASTROLOVE/TEMP/SOSYAL_IZIN_LINK_YOUTUBE.txt")
+    kontrol("izin link YT: link + state Drive'da, sir yok", rc == 0 and lk.exists() and lk.read_text().startswith("https://accounts.google.com")
+            and "redirect_uri=https%3A%2F%2Fcaliserdar-maker.github.io%2Fastrolove-media%2Fapp%2Foauth.html" in lk.read_text()
+            and "YTSECRET" not in lk.read_text() + out.getvalue())
     with contextlib.redirect_stdout(io.StringIO()):
         rc = izin.main(["cevir", "instagram"], http=ortak.Http(Oturum([])))
     kontrol("FAIL izin cevir: kod sirri yok", rc == 1)
@@ -453,7 +544,7 @@ def mutasyon():
 if __name__ == "__main__":
     try:
         for f in (senaryo_ana, senaryo_kuru, senaryo_kapali, senaryo_medya_farkli, senaryo_publish_500, senaryo_son_an,
-                  senaryo_onayla, senaryo_http_kurali, senaryo_izin, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
+                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
             try:
                 f()
             except Exception as e:
