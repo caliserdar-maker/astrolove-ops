@@ -1,6 +1,6 @@
 """kirmizi_teshis testi (21 Kas; ag YOK; sahte isimli MB altin kesiti, uretim dijital tablosu L85_C3).
 Bilinen durumlar: koyu sacak beyaz yildizda (A ve B sacak), parlak kirmizi yildiz yaninda (A sacak, B FAIL 'parlak'), koyu kume ton ~24 altin
-kenarinda (A sacak, B FAIL 'oge_uzak' = 20-28 ton dusmesi), ic koyu nokta (A ve B FAIL; neden alan > 5 ise 'alan'). Tutarlilik: teshisin B sayilari ==
+kenarinda (A ve B' sacak; eski B >= 28 maskesinde uzak), ic koyu nokta (A ve B FAIL; neden alan > 5 ise 'alan'). Tutarlilik: teshisin B sayilari ==
 kesit_olcum.kirmizi_tara(dijital=True) (gercek kapi)."""
 import io
 import socket
@@ -66,8 +66,8 @@ k = sonuc["parlak_yildiz"]["kumeler"]
 kontrol("bilinen FAIL nedeni: parlak kirmizi yildiz yaninda -> A sacak, B FAIL 'parlak', max_R > 130",
         any(c["A_sacak"] and not c["B_sacak"] and c["B_FAIL_nedeni"] == "parlak" and c["max_R"] > 130 for c in k), str(k))
 k = sonuc["ton24_kenar"]["kumeler"]
-kontrol("bilinen FAIL nedeni: ton ~24 'altin' kenari -> A sacak (ton >= 20), B FAIL 'oge_uzak' (ton < 28), kenar ton araligi 20-28 icinde",
-        any(c["A_sacak"] and c["B_FAIL_nedeni"] == "oge_uzak" and c["yakin_altin_benzeri_ton"] and 20 <= c["yakin_altin_benzeri_ton"][1] < 28 for c in k), str(k))
+kontrol("B' (22 Kas): ton ~24 altin kenari -> A ve B' sacak (altin ton >= 20); eski B (>= 28) maskesinde uzak", any(c["A_sacak"] and c["B_sacak"]
+        and "altin_B" not in c["maske_2px"] for c in k), str(k))
 k = sonuc["ic_koyu"]["kumeler"]
 kontrol("bilinen FAIL: ic koyu nokta (oge 2 px icinde yok) -> A ve B FAIL", len(k) >= 1 and all(not c["A_sacak"] and not c["B_sacak"] and c["maske_2px"] == []
         and c["B_FAIL_nedeni"] in ("oge_uzak", "alan") for c in k), str(k))

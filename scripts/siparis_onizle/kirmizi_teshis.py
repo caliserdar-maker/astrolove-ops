@@ -1,7 +1,7 @@
 """Kirmizi nokta teshisi (21 Kas, Merkez 23:1x TR; SALT OKUMA, kapi DEGISMEZ). Teslim dosyasindaki her ton < ESIK_TON kumesi (>= ESIK_TON_KUME px)
 icin: alan, kutu, TUM piksellerde en parlak R ve ortalama R, en yakin oge pikseline uzaklik (altin surum B ton >= 28, altin surum A ton >= 20,
 beyaz yildiz), 2 px icinde hangi maske, en yakin "altin benzeri" kenar piksellerinin (R > 120, R - B > 40, ton >= 8) ton araligi, ve kesit_olcum
-surum A (ed601c14) / surum B (bu kod) kararlari. Yalniz SAHTE dosya icin kullanilir; isim / mesaj yok (yalniz koordinat ve renk sayisi).
+surum A (ed601c14) / B' (bu kod: R <= 130 + altin ton >= 20; 22 Kas) kararlari. altin_B (ton >= 28, eski B) yalniz bilgi. Yalniz SAHTE dosya icin kullanilir; isim / mesaj yok (yalniz koordinat ve renk sayisi).
 Kullanim: kirmizi_teshis.py TESLIM_JPG CIKTI_JSON"""
 import json
 import sys
@@ -52,7 +52,7 @@ def teshis(a):
         kenar = cev & M["altin_benzeri"] & ~k
         tonlar = ton[kenar]
         A_kenar = dk["altin_A"] <= K.SACAK_MESAFE or dk["beyaz"] <= K.SACAK_MESAFE     # kapi ile ayni kare olcu (22 Kas duzeltmesi)
-        B_kenar = dk["altin_B"] <= K.SACAK_MESAFE or dk["beyaz"] <= K.SACAK_MESAFE
+        B_kenar = dk["altin_A"] <= K.SACAK_MESAFE or dk["beyaz"] <= K.SACAK_MESAFE     # B' (22 Kas): kapi altin ton >= 20; altin_B (>= 28) yalniz bilgi
         maxR = int(Rk.max())
         A_sacak = A_kenar and ar <= K.ESIK_SACAK_PX
         B_sacak = B_kenar and ar <= K.ESIK_SACAK_PX and maxR <= K.SACAK_MAX_R

@@ -108,11 +108,12 @@ SACAK_MAX_R = 130        # koyu: kumenin en parlak R'si; uctan uca sacak ornekle
 
 
 def oge_maskesi(a):
-    """Parlak oge (kirmizi DEGIL): altin (R > 120, R - B > 40, ton >= 28 derece) ya da beyaz / acik yildiz (uc kanal > 120). Kirmizi nokta
-    (ton < 8) ve onun turuncu JPEG halesi (ton < 28) oge sayilmaz."""
+    """Parlak oge: altin (R > 120, R - B > 40, ton >= 20 derece) ya da beyaz / acik yildiz (uc kanal > 120). Kirmizi nokta (ton < 8) oge sayilmaz.
+    22 Kas Serdar karari B' (KARARLAR_20261122_7): ton >= 28 surumu 20x30 sahte dosyada yanlis FAIL verdi (altin kenar pikselleri ton 20-28,
+    teshis kosusu 44985451703). BILINEN KOR ALAN: kendi turuncu halkasi (ton >= 20) icindeki KOYU kirmizi ic nokta sacak sayilabilir."""
     R, G, B = (a[..., i].astype(np.float32) for i in range(3))
     ton = 60.0 * (G - B) / np.maximum(R - B, 1)
-    altin = (R > 120) & ((R - B) > 40) & (ton >= 28)                    # altin tonu p1 31.5 (olcum); turuncu hale (~21) oge SAYILMAZ
+    altin = (R > 120) & ((R - B) > 40) & (ton >= 20)                    # B' (Serdar 22 Kas): 20; parlak kirmizi SACAK_MAX_R ile FAIL kalir
     beyaz = (R > 120) & (G > 120) & (B > 120)
     return altin | beyaz
 

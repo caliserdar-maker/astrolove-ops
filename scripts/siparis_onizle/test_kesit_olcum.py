@@ -204,10 +204,15 @@ for lq, cq in ((85, 3), (80, 4)):
     kn = kodla_tara(a, lq, cq, True)
     kontrol(f"bilinen FAIL: L{lq}_C{cq} yildiz yaninda PARLAK kirmizi 2x2, dijital", kn["PASS"] is False and kn.get("ton_kume_buyuk", 0) >= 1,
             str({k: kn.get(k) for k in ("ton_kume_alanlari", "ton_sacak_bilgi", "ton_kume_buyuk")}))
-    a = A0.copy(); a[1018:1024, 648:654] = (235, 110, 40); a[1020:1022, 650:652] = (210, 30, 30)       # ic: turuncu halkali kirmizi 2x2, oge yok
+    a = A0.copy(); a[1018:1024, 648:654] = (235, 110, 40); a[1020:1022, 650:652] = (210, 30, 30)       # ic: turuncu halkali PARLAK kirmizi 2x2
     kn = kodla_tara(a, lq, cq, True)
-    kontrol(f"bilinen FAIL: L{lq}_C{cq} turuncu haleli ic kirmizi nokta (hale oge sayilmaz), dijital", kn["PASS"] is False,
+    kontrol(f"bilinen FAIL: L{lq}_C{cq} turuncu halkali PARLAK kirmizi ic nokta (R > 130), dijital", kn["PASS"] is False,
             str({k: kn.get(k) for k in ("ton_kume_alanlari", "ton_sacak_bilgi", "ton_kume_buyuk")}))
+    for halka, ad in (((235, 110, 40), "~21"), ((235, 145, 50), "~31")):      # B' (Serdar 22 Kas): koyu nokta kendi turuncu halkasinda = KOR ALAN
+        a = A0.copy(); a[1018:1024, 648:654] = halka; a[1020:1022, 650:652] = (110, 20, 20)
+        kn = kodla_tara(a, lq, cq, True)
+        kontrol(f"bilinen KOR ALAN (belgelenir, Serdar 22 Kas B'): L{lq}_C{cq} ton {ad} turuncu halkali KOYU kirmizi ic nokta sacak sayilir", kn["PASS"] is True,
+                str({k: kn.get(k) for k in ("ton_kume_alanlari", "ton_sacak_bilgi", "ton_kume_buyuk")}))
 a = np.asarray(im0).copy(); a[300:303, 600:603] = (230, 90, 40)
 bb = io.BytesIO(); Image.fromarray(a).save(bb, "JPEG", quality=95, subsampling=0)
 kontrol("bilinen KOR ALAN (belgelenir): turuncu-kirmizi (ton ~16) ic noktayi ton olcutu yakalamaz", K.kirmizi_tara(Image.open(bb))["PASS"] is True)
