@@ -4,14 +4,20 @@ name: media-app-sayfa
 #   app/index.html (ic arac tanimi) + app/privacy.html (gizlilik). Kaynak: pages/media_app/ (bu depo).
 #   Iletisim e-postasi YAZILMAZ; Etsy magaza baglantisi (Serdar 22 Eki).
 # Yalniz app/ altina yazar; baska yol degisirse DUR. Mevcut pin/IG yollarina dokunmaz. Etsy yok.
-# Kapilar: uzun/orta tire 0, "AstroLove" yalniz (Art'siz) 0, e-posta 0, diff yalniz 2 dosya; yayindan sonra iki URL 200 + icerik,
-# kontrol icin mevcut bir medya dosyasi 200.
+# 22 Kas 2026 (Yayin Araci, PLAN_KENDI_PAYLASIM_SISTEMI_20261122 S2): + app/oauth.html (OAuth donus sayfasi; yalniz
+#   adres cubugundaki kodu gosterir, hicbir yere gondermez) + app/veri-silme.html (veri silme talimati, Meta "Live" mod) + app/yayin-gizlilik.html (yayin aracinin gizlilik
+#   politikasi; Meta + YouTube API; privacy.html Google Drive uygulamasinindir, degismez).
+# Kapilar: uzun/orta tire 0, "AstroLove" yalniz (Art'siz) 0, e-posta 0, diff yalniz 5 dosya; oauth.html'de dis kaynak /
+# ag cagrisi 0; yayindan sonra bes URL 200 + icerik, kontrol icin mevcut bir medya dosyasi 200.
 
 permissions:
   contents: read
 
 on:
   workflow_dispatch:
+
+env:
+  SAYFALAR: "index.html privacy.html oauth.html veri-silme.html yayin-gizlilik.html"
 
 jobs:
   sayfa:
@@ -29,22 +35,34 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p media/app
-          cp ops/pages/media_app/index.html media/app/index.html
-          cp ops/pages/media_app/privacy.html media/app/privacy.html
+          for f in $SAYFALAR; do cp "ops/pages/media_app/$f" "media/app/$f"; done
           python3 - <<'PY'
           import re, sys
           hata = 0
-          for f in ("media/app/index.html", "media/app/privacy.html"):
+          import os
+          for f in ["media/app/" + x for x in os.environ["SAYFALAR"].split()]:
               t = open(f, encoding="utf-8").read()
               for ad, rx in (("e-posta", r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z]"), ("uzun/orta tire", "[—–]"), ("AstroLove (Art'siz, harf duyarsiz)", r"(?i)astrolove(?!art)"), ("tire entity", r"&(mdash|ndash);|&#(8211|8212|x201[34]);")):
                   n = len(re.findall(rx, t))
                   print(f"{f} {ad}: {n}")
                   hata += n
+          # OAuth donus sayfasi: kod disari gitmesin (dis kaynak, ag API'si, form yok; referrer kapali; CSP default-src none)
+          t = open("media/app/oauth.html", encoding="utf-8").read()
+          for ad, rx in (("dis kaynak (src/href http veya //)", r"(?i)(src|href|action)\s*=\s*[\"']?(https?:|//)"), ("ag API", r"(?i)\b(fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource|importScripts|RTCPeerConnection)\b|\.src\s*=|\.open\s*\("), ("yonlendirme", r"(?i)\blocation\b(?!\.(search|pathname)\b)|http-equiv\s*=\s*[\"']?refresh"), ("form", r"(?i)<form"), ("img/iframe/link/script src", r"(?i)<(img|iframe|link|script|object|embed)[^>]*\s(src|href|data)=")):
+              n = len(re.findall(rx, t))
+              print(f"oauth.html {ad}: {n}")
+              hata += n
+          bas = t.split("<script", 1)[0]   # meta etiketleri ilk <script>'ten ONCE olmali (yorumda gecmesi yetmez)
+          bas = re.sub(r"(?s)<!--.*?-->", "", bas)
+          for ad, gerek in (("referrer no-referrer", r'<meta\s+name="referrer"\s+content="no-referrer">'), ("CSP default-src none", r'<meta\s+http-equiv="Content-Security-Policy"\s+content="default-src \'none\';')):
+              v = re.search(gerek, bas) is not None
+              print(f"oauth.html {ad}: {'VAR' if v else 'YOK'}")
+              hata += 0 if v else 1
           sys.exit(1 if hata else 0)
           PY
           cd media && git add -A app
           git diff --cached --name-only | tee _d.txt
-          bad=$(grep -vxE "app/(index|privacy)\.html" _d.txt || true); rm -f _d.txt
+          bad=$(grep -vxE "app/(index|privacy|oauth|veri-silme|yayin-gizlilik)\.html" _d.txt || true); rm -f _d.txt
           [ -z "$bad" ] || { echo "::error::app/ disinda degisiklik"; exit 1; }
       - name: Push
         working-directory: media
@@ -53,7 +71,7 @@ jobs:
           if git diff --cached --quiet; then echo "degisiklik yok"; exit 0; fi
           git config user.name "astrolove-ops"
           git config user.email "actions@users.noreply.github.com"
-          git commit -qm "app: AstroLoveArt Drive Automation ana sayfa + gizlilik (Google Branding)"
+          git commit -qm "app: ana sayfa, gizlilik, OAuth donus, veri silme, yayin araci gizlilik"
           git push
           echo "push: $(git rev-parse --short HEAD)"
       - name: Yayin probu (en fazla 10 dk)
@@ -63,14 +81,18 @@ jobs:
           (cd media && git ls-files pinterest) > _liste.txt   # boru + head pipefail altinda SIGPIPE (141) veriyordu
           ornek=$(awk '!/(^|\/)[_.]/ && tolower($0) ~ /\.(jpg|png)$/ {print; exit}' _liste.txt)   # Jekyll '_'/'.' yayinlamaz
           [ -n "$ornek" ] || { echo "::error::ornek medya yok"; exit 1; }
+          [ -n "$SAYFALAR" ] || { echo "::error::SAYFALAR bos"; exit 1; }
           for i in $(seq 1 40); do
-            a=$(curl -s -o _a.html -w '%{http_code}' "$K/app/index.html"); b=$(curl -s -o _b.html -w '%{http_code}' "$K/app/privacy.html")
-            if [ "$a" = 200 ] && [ "$b" = 200 ] && cmp -s _a.html media/app/index.html && cmp -s _b.html media/app/privacy.html; then break; fi   # yayin = kaynak bayt
-            echo "[$i/40] index $a privacy $b; 15 sn"; sleep 15
+            tamam=1; satir=""
+            for f in $SAYFALAR; do
+              k=$(curl -s -o "_y_$f" -w '%{http_code}' "$K/app/$f") || k=000
+              satir="$satir $f=$k"
+              { [ "$k" = 200 ] && cmp -s "_y_$f" "media/app/$f"; } || tamam=0   # yayin = kaynak bayt
+            done
+            [ "$tamam" = 1 ] && break
+            echo "[$i/40]$satir; 15 sn"; sleep 15
           done
-          c=$(curl -s -o /dev/null -w '%{http_code}' "$K/$ornek")
-          echo "SONUC index $a | privacy $b | mevcut medya ornegi $c"
-          cmp -s _a.html media/app/index.html && cmp -s _b.html media/app/privacy.html && e=AYNI || e=FARKLI
-          echo "yayindaki icerik = kaynak: $e"
-          [ "$a" = 200 ] && [ "$b" = 200 ] && [ "$c" = 200 ] && [ "$e" = AYNI ] || { echo "::error::prob FAIL"; exit 1; }
+          c=$(curl -s -o /dev/null -w '%{http_code}' "$K/$ornek") || c=000
+          echo "SONUC$satir | mevcut medya ornegi $c | yayindaki icerik = kaynak: $([ "$tamam" = 1 ] && echo AYNI || echo FARKLI)"
+          [ "$tamam" = 1 ] && [ "$c" = 200 ] || { echo "::error::prob FAIL"; exit 1; }
           echo "PASS"

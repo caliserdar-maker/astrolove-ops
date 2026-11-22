@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<meta name="robots" content="noindex, nofollow">
+<title>AstroLoveArt Authorization Code</title>
+<style>
+  body { font-family: Georgia, "Times New Roman", serif; max-width: 680px; margin: 48px auto; padding: 0 16px; color: #1c1c28; background: #faf8f3; line-height: 1.6; }
+  h1 { font-weight: normal; font-size: 1.6em; }
+  .kod { font-family: Menlo, Consolas, monospace; font-size: 0.95em; word-break: break-all; background: #fff; border: 1px solid #c9c4b8; padding: 12px; border-radius: 4px; min-height: 1.6em; }
+  button { font-size: 1em; padding: 8px 18px; margin-top: 12px; cursor: pointer; }
+  .not { color: #666; font-size: 0.9em; }
+  .hata { color: #8a1f1f; }
+</style>
+</head>
+<body>
+<h1>Authorization code</h1>
+<p id="durum">Reading the code from the address bar.</p>
+<div class="kod" id="kod" aria-live="polite"></div>
+<button id="kopyala" type="button" hidden>Copy</button>
+<p id="state" class="not" hidden></p>
+<p id="kopyalandi" class="not" hidden>Copied.</p>
+<p class="not">This page only shows the code that the sign in screen added to the address. It sends nothing anywhere and loads nothing from other sites. Paste the code into the GitHub secret named by the setup list, then close this page.</p>
+<noscript><p class="hata">JavaScript is off. Copy the text after "code=" in the address bar, up to the next "&amp;" or "#".</p></noscript>
+<script>
+(function () {
+  var q = new URLSearchParams(window.location.search);
+  var kod = q.get("code") || "";
+  var hata = q.get("error") || q.get("error_code") || "";
+  var aciklama = q.get("error_description") || q.get("error_message") || "";
+  var state = q.get("state") || "";
+  // Instagram adds "#_" after the code; it is in the hash, not in the query. Strip it if it ever lands in the value.
+  kod = kod.replace(/#_$/, "");
+  var durum = document.getElementById("durum");
+  var kutu = document.getElementById("kod");
+  if (kod) {
+    durum.textContent = "Your code (it expires quickly, use it now):";
+    kutu.textContent = kod;
+    var b = document.getElementById("kopyala");
+    b.hidden = false;
+    if (state) {
+      var sp = document.getElementById("state");
+      sp.textContent = "State: " + state + " (it must match the state in the authorization link you opened; if not, do not use this code).";
+      sp.hidden = false;
+    }
+    b.addEventListener("click", function () {
+      var bitti = function () { document.getElementById("kopyalandi").hidden = false; };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(kod).then(bitti, function () { secVeKopyala(); bitti(); });
+      } else { secVeKopyala(); bitti(); }
+    });
+  } else if (hata) {
+    durum.className = "hata";
+    durum.textContent = "The sign in screen returned an error: " + hata + (aciklama ? " (" + aciklama + ")" : "") + ". Open the authorization link again.";
+  } else {
+    durum.className = "hata";
+    durum.textContent = "No code found in the address. Open the authorization link again.";
+  }
+  function secVeKopyala() {
+    var r = document.createRange(); r.selectNodeContents(kutu);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    try { document.execCommand("copy"); } catch (e) {}
+  }
+  // Drop query and hash from the address bar after reading. The browser may already have recorded the full
+  // address in its history; the code is short lived and cannot be exchanged without the app secret.
+  if (window.history && window.history.replaceState) {
+    window.history.replaceState(null, "", window.location.pathname);
+  }
+})();
+</script>
+</body>
+</html>
