@@ -25,15 +25,17 @@ def maskeler(a):
                 altin_benzeri=taban & (ton >= 8)), ton
 
 
-def uzaklik(m):
-    """Her piksel icin m maskesindeki en yakin piksele Oklid uzakligi (px)."""
-    return cv2.distanceTransform((~m).astype(np.uint8), cv2.DIST_L2, 5)
+def uzaklik(m, kare=False):
+    """Her piksel icin m maskesindeki en yakin piksele uzaklik (px). kare=True: satranc tahtasi (Chebyshev) = kapinin 5x5 genisletmesiyle
+    ayni olcu (karar icin); kare=False: DIST_L2 maske 5 pah yaklasimi (yalniz rapor)."""
+    return cv2.distanceTransform((~m).astype(np.uint8), cv2.DIST_C if kare else cv2.DIST_L2, 3 if kare else 5)
 
 
 def teshis(a):
     mt = K.kirmizi_maske(a, K.ESIK_TON)
     M, ton = maskeler(a)
     U = {k: uzaklik(v) for k, v in M.items() if k != "altin_benzeri"}
+    UK = {k: uzaklik(v, kare=True) for k, v in M.items() if k != "altin_benzeri"}
     n, lab, st, _ = cv2.connectedComponentsWithStats(mt.astype(np.uint8), connectivity=8)
     yakin_ab = cv2.dilate(M["altin_benzeri"].astype(np.uint8), np.ones((7, 7), np.uint8)) > 0
     kumeler = []
@@ -45,17 +47,18 @@ def teshis(a):
         k = lab == i
         Rk = a[..., 0][k]
         d = {m: round(float(U[m][k].min()), 2) for m in U}
+        dk = {m: int(round(float(UK[m][k].min()))) for m in UK}
         cev = np.zeros_like(k); cev[max(0, y - 3):y + h + 3, max(0, x - 3):x + w + 3] = True
         kenar = cev & M["altin_benzeri"] & ~k
         tonlar = ton[kenar]
-        A_kenar = d["altin_A"] <= K.SACAK_MESAFE or d["beyaz"] <= K.SACAK_MESAFE
-        B_kenar = d["altin_B"] <= K.SACAK_MESAFE or d["beyaz"] <= K.SACAK_MESAFE
+        A_kenar = dk["altin_A"] <= K.SACAK_MESAFE or dk["beyaz"] <= K.SACAK_MESAFE     # kapi ile ayni kare olcu (22 Kas duzeltmesi)
+        B_kenar = dk["altin_B"] <= K.SACAK_MESAFE or dk["beyaz"] <= K.SACAK_MESAFE
         maxR = int(Rk.max())
         A_sacak = A_kenar and ar <= K.ESIK_SACAK_PX
         B_sacak = B_kenar and ar <= K.ESIK_SACAK_PX and maxR <= K.SACAK_MAX_R
         neden_B = None if B_sacak else ("alan" if ar > K.ESIK_SACAK_PX else ("parlak" if maxR > K.SACAK_MAX_R else "oge_uzak"))
-        kumeler.append(dict(alan=ar, kutu=[x, y, x + w, y + h], max_R=maxR, ort_R=round(float(Rk.mean()), 1), uzaklik=d,
-                            maske_2px=[m for m in ("altin_B", "altin_A", "beyaz") if d[m] <= K.SACAK_MESAFE],
+        kumeler.append(dict(alan=ar, kutu=[x, y, x + w, y + h], max_R=maxR, ort_R=round(float(Rk.mean()), 1), uzaklik=d, uzaklik_kare=dk,
+                            maske_2px=[m for m in ("altin_B", "altin_A", "beyaz") if dk[m] <= K.SACAK_MESAFE],
                             yakin_altin_benzeri_ton=[round(float(tonlar.min()), 1), round(float(tonlar.max()), 1)] if tonlar.size else None,
                             yakin_altin_benzeri_px=int(kenar.sum()), A_sacak=bool(A_sacak), B_sacak=bool(B_sacak), B_FAIL_nedeni=neden_B,
                             ic_yakinda_altin_benzeri=bool((yakin_ab & k).any())))

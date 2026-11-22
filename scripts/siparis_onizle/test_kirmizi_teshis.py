@@ -48,6 +48,8 @@ durumlar = {
     "ton24_kenar": lambda a: (a.__setitem__((slice(1030, 1040), slice(200, 212)), (215, 115, 40)),
                               a.__setitem__((slice(1040, 1042), slice(204, 206)), (95, 15, 15))),
     "ic_koyu": lambda a: a.__setitem__((slice(1020, 1022), slice(650, 653)), (85, 15, 15)),
+    "capraz_yildiz": lambda a: (a.__setitem__((slice(1000, 1002), slice(400, 402)), (235, 235, 230)),     # yildiz; sacak capraz (2,2) uzakta
+                                a.__setitem__((slice(1003, 1005), slice(403, 405)), (95, 15, 15))),
 }
 sonuc = {}
 for ad, f in durumlar.items():
@@ -69,5 +71,8 @@ kontrol("bilinen FAIL nedeni: ton ~24 'altin' kenari -> A sacak (ton >= 20), B F
 k = sonuc["ic_koyu"]["kumeler"]
 kontrol("bilinen FAIL: ic koyu nokta (oge 2 px icinde yok) -> A ve B FAIL", len(k) >= 1 and all(not c["A_sacak"] and not c["B_sacak"] and c["maske_2px"] == []
         and c["B_FAIL_nedeni"] in ("oge_uzak", "alan") for c in k), str(k))
+k = sonuc["capraz_yildiz"]["kumeler"]
+kontrol("capraz (2,2) uzaklik: kare olcude 2 (kapi ile ayni) -> A ve B sacak (22 Kas: L2 2.83 yanlis 'uzak' sayiyordu)",
+        len(k) >= 1 and all(c["uzaklik_kare"]["beyaz"] <= 2 and c["A_sacak"] and c["B_sacak"] for c in k), str(k))
 print(f"SONUC: {sum(SONUC)}/{len(SONUC)} PASS")
 sys.exit(0 if all(SONUC) else 1)
