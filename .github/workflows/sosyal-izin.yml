@@ -1,6 +1,6 @@
 name: sosyal-izin
 
-# Ilk baglanti (kurulum S7): islem=link izin ekrani linkini adim ozetine yazar (client_id ve state sir degil);
+# Ilk baglanti (kurulum S7): islem=link izin ekrani linkini ve state'i Drive TEMP SOSYAL_IZIN_LINK_<PLATFORM>.txt dosyasina yazar (loga yazmaz);
 # islem=cevir OAUTH_KOD_<IG|FB|THREADS|YT> sirrini token'a cevirir, Drive TEMP'e yazar ve kod sirrini siler.
 # Kod ya da sir is akisi girdisi OLMAZ (docs/SECRETS.md DERS). Hicbir platforma gonderi yapmaz.
 
