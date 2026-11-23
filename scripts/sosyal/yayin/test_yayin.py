@@ -199,6 +199,8 @@ class Oturum:
             assert auth == "Bearer FBUZUN_SAHTE_0002" and "access_token" in params["fields"].split(",")
             pid = url.rsplit("/", 1)[1]
             return Y(j={"id": pid, "name": "AstroLoveArt", **({"access_token": TOK["facebook"]} if self.fb["sayfa_token"] else {})})
+        if "graph.facebook.com" in url and url.endswith("/me"):
+            return Y(j={"id": "9001", "name": "AstroLoveArt"})
         if "graph.facebook.com" in url:
             if url.endswith("/video_reels"):
                 return Y(j={"video_id": "FBV1"} if data["upload_phase"] == "start" else {"success": True})
@@ -570,7 +572,20 @@ def senaryo_fb_cevir():
         izin.main(["link", "facebook"])
     lk2 = (DRIVE / "ASTROLOVE/TEMP/SOSYAL_IZIN_LINK_FACEBOOK.txt").read_text()
     kontrol("FB link: FB_CONFIG_ID varsa config_id, scope yok", "config_id=CFG123" in lk1 and "scope=" not in lk1)
-    kontrol("FB link: config yoksa scope + business_management", "business_management" in lk2 and "config_id" not in lk2)
+    kontrol("FB link: config yoksa scope, business_management YOK (varsayilan)", "scope=" in lk2 and "business_management" not in lk2 and "config_id" not in lk2)
+    os.environ["FB_ISLETME_IZNI"] = "true"
+    with contextlib.redirect_stdout(io.StringIO()):
+        izin.main(["link", "facebook"])
+    os.environ["FB_ISLETME_IZNI"] = ""
+    kontrol("FB link: FB_ISLETME_IZNI=true ise business_management", "business_management" in (DRIVE / "ASTROLOVE/TEMP/SOSYAL_IZIN_LINK_FACEBOOK.txt").read_text())
+    for gun, beklenen in ((5, 1), (40, 0)):
+        sifirla()
+        bit = int((datetime.now(secim.TZ) + timedelta(days=gun)).timestamp())
+        drive_koy("ASTROLOVE/TEMP/SOSYAL_FACEBOOK_TOKEN.json", json.dumps({"token": TOK["facebook"], "page_id": "9001", "veri_erisim_bitis": str(bit)}).encode())
+        otr = Oturum([])
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = token_yenile.main(["facebook"], http=ortak.Http(otr))
+        kontrol(f"{'FAIL ' if beklenen else ''}yenile FB: veri erisimi {gun} gun kala -> cikis {beklenen}", rc == beklenen)
 
 
 def senaryo_yenile():

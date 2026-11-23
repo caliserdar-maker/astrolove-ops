@@ -33,6 +33,7 @@ jobs:
       YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
       FB_PAGE_ID: ${{ vars.FB_PAGE_ID }}
       FB_CONFIG_ID: ${{ vars.FB_CONFIG_ID }}
+      FB_ISLETME_IZNI: ${{ vars.FB_ISLETME_IZNI }}
       YT_KANAL_ID: ${{ vars.YT_KANAL_ID }}
     steps:
       - uses: actions/checkout@v4

@@ -49,6 +49,11 @@ def yenile(http, platformlar, simdi=None):
                 kalan = datetime.fromisoformat(b) - simdi
                 if kalan < timedelta(days=UYARI_GUN):
                     uyari.append(f"token {p}: bitise {kalan.days} gun")
+            v = str(k.get("veri_erisim_bitis") or "")
+            if v.isdigit():  # Meta veri erisimi (data_access_expires_at, unix sn): bitince izin yeniden verilir
+                kalan = datetime.fromtimestamp(int(v), timezone.utc) - simdi
+                if kalan < timedelta(days=UYARI_GUN):
+                    uyari.append(f"token {p}: veri erisimi bitisine {kalan.days} gun (izin ekrani yeniden)")
             log(f"{p}: PASS (bitis {b or '-'})")
         except Hata as e:
             uyari.append(f"token {p}: {e}")

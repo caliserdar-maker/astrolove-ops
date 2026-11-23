@@ -56,8 +56,11 @@ def link(p, simdi=None):
         cfg = os.environ.get("FB_CONFIG_ID", "").strip()
         if cfg:  # Facebook Login for Business: yapilandirma kimligi scope'un yerine gecer (izinler yapilandirmada)
             q["config_id"] = cfg
-        else:  # business_management: isletme portfoyune bagli Sayfa icin (23 Kas: /me/accounts bos dondu)
-            q["scope"] = "pages_show_list,pages_read_engagement,pages_manage_posts,read_insights,business_management"
+        else:
+            q["scope"] = "pages_show_list,pages_read_engagement,pages_manage_posts,read_insights"
+            # business_management isletme portfoyunun tum varliklarina yetki verir: yalniz Serdar karariyla (repo degiskeni)
+            if os.environ.get("FB_ISLETME_IZNI", "").strip() == "true":
+                q["scope"] += ",business_management"
     elif p == "threads":
         u = "https://threads.net/oauth/authorize"
         q["scope"] = "threads_basic,threads_content_publish,threads_manage_insights"
@@ -120,7 +123,7 @@ def _fb_sayfa(http, cid, csec, uzun):
     x, _ = http.iste("GET", f"{FB_G}/{aday}", token=uzun, params={"fields": "id,name,access_token"})
     gizle(x.get("access_token", ""))
     if not x.get("access_token") or str(x.get("id")) != aday:
-        raise Hata("Sayfa token'i alinamadi; yapilandirmaya business_management izni ekleyip izni yeniden verin")
+        raise Hata("Sayfa token'i alinamadi; Serdar karariyla business_management (FB_ISLETME_IZNI=true ya da yapilandirma) eklenip izin yeniden verilir")
     log("facebook: Sayfa secilen Sayfa kimligiyle bulundu")
     k = {"token": x["access_token"], "page_id": aday, "hesap": x.get("name", ""), "bitis": ""}
     if veri.get("data_access_expires_at"):
