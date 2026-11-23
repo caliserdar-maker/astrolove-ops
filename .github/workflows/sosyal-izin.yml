@@ -32,6 +32,7 @@ jobs:
       YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
       YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
       FB_PAGE_ID: ${{ vars.FB_PAGE_ID }}
+      FB_CONFIG_ID: ${{ vars.FB_CONFIG_ID }}
       YT_KANAL_ID: ${{ vars.YT_KANAL_ID }}
     steps:
       - uses: actions/checkout@v4

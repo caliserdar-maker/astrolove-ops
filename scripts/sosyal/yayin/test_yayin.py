@@ -96,7 +96,7 @@ class Oturum:
         self.hata_tokenli = False
         self.yenile_hata = False
         self.kaydir = False
-        self.fb = {"hesaplar": [], "hedef": ["9001"], "sayfa_token": True}
+        self.fb = {"hesaplar": [], "hedef": ["9001"], "sayfa_token": True, "gecerli": True, "liste_hedef": None}
         self.tamam_yaz_hata = False
 
     def _hucre(self, rng):
@@ -177,7 +177,7 @@ class Oturum:
             assert auth.startswith("OAuth ")
             return Y(j={"success": True})
         if "graph.facebook.com" in url and (url.endswith("/oauth/access_token") or url.endswith("/me/accounts")
-                                            or url.endswith("/debug_token") or url.endswith("/9001") or url.endswith("/7777")):
+                                            or url.endswith("/debug_token") or url.endswith(("/9001", "/9002", "/7777"))):
             if url.endswith("/oauth/access_token"):
                 if params.get("grant_type") == "fb_exchange_token":
                     assert params["fb_exchange_token"] == "FBKISA_SAHTE_0001"
@@ -189,10 +189,14 @@ class Oturum:
                 return Y(j={"data": self.fb["hesaplar"]})
             if url.endswith("/debug_token"):
                 assert params["input_token"] == "FBUZUN_SAHTE_0002" and params["access_token"] == "1609743017476204|METASECRET0123456"
-                return Y(j={"data": {"scopes": ["pages_show_list", "pages_manage_posts"], "granular_scopes":
-                            [{"scope": "pages_show_list", "target_ids": self.fb["hedef"]},
-                             {"scope": "pages_manage_posts", "target_ids": self.fb["hedef"]}]}})
-            assert auth == "Bearer FBUZUN_SAHTE_0002"
+                if not self.fb["gecerli"]:
+                    return Y(j={"data": {"is_valid": False, "error": {"message": "Session has expired"}}})
+                gs = [{"scope": "pages_show_list", "target_ids": self.fb["liste_hedef"] or self.fb["hedef"]}]
+                if self.fb["hedef"] is not None:
+                    gs.append({"scope": "pages_manage_posts", **({"target_ids": self.fb["hedef"]} if self.fb["hedef"] else {})})
+                sc = ["pages_show_list"] + (["pages_manage_posts"] if self.fb["hedef"] is not None else [])
+                return Y(j={"data": {"is_valid": True, "scopes": sc, "granular_scopes": gs, "data_access_expires_at": 1790000000}})
+            assert auth == "Bearer FBUZUN_SAHTE_0002" and "access_token" in params["fields"].split(",")
             pid = url.rsplit("/", 1)[1]
             return Y(j={"id": pid, "name": "AstroLoveArt", **({"access_token": TOK["facebook"]} if self.fb["sayfa_token"] else {})})
         if "graph.facebook.com" in url:
@@ -518,13 +522,13 @@ def senaryo_izin():
 def senaryo_fb_cevir():
     os.environ.update(META_APP_ID="1609743017476204", META_APP_SECRET="METASECRET0123456")
 
-    def kos_fb(hesaplar, hedef, sayfa_token=True, page_id=""):
+    def kos_fb(hesaplar, hedef, sayfa_token=True, page_id="", gecerli=True, liste_hedef=None):
         sifirla()
         (DRIVE / "ASTROLOVE/TEMP/SOSYAL_FACEBOOK_TOKEN.json").unlink()
         os.environ["OAUTH_KOD_FB"] = "KODSAHTE123456"
         os.environ["FB_PAGE_ID"] = page_id
         otr = Oturum([])
-        otr.fb = {"hesaplar": hesaplar, "hedef": hedef, "sayfa_token": sayfa_token}
+        otr.fb = {"hesaplar": hesaplar, "hedef": hedef, "sayfa_token": sayfa_token, "gecerli": gecerli, "liste_hedef": liste_hedef}
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
             rc = izin.main(["cevir", "facebook"], http=ortak.Http(otr))
@@ -540,15 +544,33 @@ def senaryo_fb_cevir():
     kontrol("FB cevir: /me/accounts BOS -> debug_token secilen Sayfa -> Sayfa token (23 Kas FAIL senaryosu)",
             rc == 0 and k.get("page_id") == "9001" and k.get("token") == TOK["facebook"] and any(c[1].endswith("/debug_token") for c in otr.cagri))
     kontrol("FB cevir: logda sir yok", sizinti_yok(out))
+    kontrol("FB cevir: veri erisim bitisi kaydedildi", k.get("veri_erisim_bitis") == "1790000000")
     rc, k, out, _ = kos_fb([], [], page_id="9001")
-    kontrol("FB cevir: bos + target yok + FB_PAGE_ID -> Sayfa token", rc == 0 and k.get("page_id") == "9001")
-    rc, k, out, _ = kos_fb([], ["9001"], sayfa_token=False)
-    kontrol("FAIL FB cevir: Sayfa token vermezse DUR (business_management onerisi), Drive'a yazim yok",
-            rc == 1 and not k and "business_management" in out)
-    rc, k, out, _ = kos_fb([], ["9001"], page_id="7777")
-    kontrol("FAIL FB cevir: izin verilmeyen FB_PAGE_ID reddedilir", rc == 1 and not k)
-    rc, k, out, _ = kos_fb([], ["9001", "9002"])
-    kontrol("FAIL FB cevir: birden cok izinli Sayfa + FB_PAGE_ID yok -> DUR", rc == 1 and not k)
+    kontrol("FB cevir: izin tum Sayfalara (target yok) + FB_PAGE_ID -> Sayfa token", rc == 0 and k.get("page_id") == "9001")
+    rc, k, out, _ = kos_fb([], ["9001", "9002"], page_id="9002")
+    kontrol("FB cevir: birden cok izinli Sayfa icinden FB_PAGE_ID", rc == 0 and k.get("page_id") == "9002")
+    ciktilar = []
+    for ad, arg in (("Sayfa token vermezse DUR (business_management onerisi)", dict(hesaplar=[], hedef=["9001"], sayfa_token=False)),
+                    ("izin verilmeyen FB_PAGE_ID reddedilir", dict(hesaplar=[], hedef=["9001"], page_id="7777")),
+                    ("birden cok izinli Sayfa + FB_PAGE_ID yok -> DUR", dict(hesaplar=[], hedef=["9001", "9002"])),
+                    ("debug_token is_valid=false -> DUR", dict(hesaplar=[], hedef=["9001"], gecerli=False)),
+                    ("yalniz pages_show_list hedefi olan Sayfa secilmez", dict(hesaplar=[], hedef=["9001"], liste_hedef=["7777"], page_id="7777")),
+                    ("pages_manage_posts izni yok -> DUR", dict(hesaplar=[], hedef=None, liste_hedef=["9001"]))):
+        rc, k, out, _ = kos_fb(**arg)
+        ciktilar.append(out)
+        kontrol(f"FAIL FB cevir: {ad}, Drive'a yazim yok", rc == 1 and not k and (not ad.startswith("Sayfa token") or "business_management" in out))
+    kontrol("FB cevir: DUR ciktilarinda sir yok", sizinti_yok(*ciktilar))
+    sifirla()
+    os.environ["FB_CONFIG_ID"] = "CFG123"
+    with contextlib.redirect_stdout(io.StringIO()):
+        izin.main(["link", "facebook"])
+    lk1 = (DRIVE / "ASTROLOVE/TEMP/SOSYAL_IZIN_LINK_FACEBOOK.txt").read_text()
+    os.environ["FB_CONFIG_ID"] = ""
+    with contextlib.redirect_stdout(io.StringIO()):
+        izin.main(["link", "facebook"])
+    lk2 = (DRIVE / "ASTROLOVE/TEMP/SOSYAL_IZIN_LINK_FACEBOOK.txt").read_text()
+    kontrol("FB link: FB_CONFIG_ID varsa config_id, scope yok", "config_id=CFG123" in lk1 and "scope=" not in lk1)
+    kontrol("FB link: config yoksa scope + business_management", "business_management" in lk2 and "config_id" not in lk2)
 
 
 def senaryo_yenile():

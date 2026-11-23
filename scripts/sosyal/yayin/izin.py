@@ -53,7 +53,11 @@ def link(p, simdi=None):
         q["scope"] = "instagram_business_basic,instagram_business_content_publish,instagram_business_manage_insights"
     elif p == "facebook":
         u = "https://www.facebook.com/" + os.environ.get("FB_API_VERSION", "v21.0") + "/dialog/oauth"
-        q["scope"] = "pages_show_list,pages_read_engagement,pages_manage_posts,read_insights"
+        cfg = os.environ.get("FB_CONFIG_ID", "").strip()
+        if cfg:  # Facebook Login for Business: yapilandirma kimligi scope'un yerine gecer (izinler yapilandirmada)
+            q["config_id"] = cfg
+        else:  # business_management: isletme portfoyune bagli Sayfa icin (23 Kas: /me/accounts bos dondu)
+            q["scope"] = "pages_show_list,pages_read_engagement,pages_manage_posts,read_insights,business_management"
     elif p == "threads":
         u = "https://threads.net/oauth/authorize"
         q["scope"] = "threads_basic,threads_content_publish,threads_manage_insights"
@@ -91,30 +95,37 @@ def _fb_sayfa(http, cid, csec, uzun):
         x = sec[0]
         log("facebook: Sayfa /me/accounts ile bulundu")
         return {"token": x["access_token"], "page_id": x["id"], "hesap": x.get("name", ""), "bitis": ""}
-    # 2) secilen Sayfa kimligi
+    # 2) secilen Sayfa kimligi (yalniz paylasim izni verilen Sayfalar: pages_manage_posts hedefleri)
     d, _ = http.iste("GET", f"{FB_G}/debug_token", sorgu_sirri=True,
                      params={"input_token": uzun, "access_token": f"{cid}|{csec}"})
     veri = d.get("data", {})
-    hedefler = set()
-    for g in veri.get("granular_scopes", []):
-        if g.get("scope") in ("pages_show_list", "pages_manage_posts"):
-            hedefler.update(str(t) for t in g.get("target_ids", []))
-    log(f"facebook: /me/accounts bos; izinli Sayfa sayisi (debug_token) {len(hedefler)}; izinler "
-        + ",".join(sorted(veri.get("scopes", []))))
+    if not veri.get("is_valid"):
+        raise Hata(f"debug_token: token gecersiz ({(veri.get('error') or {}).get('message', 'neden yok')})")
+    izinler = sorted(veri.get("scopes", []))
+    paylasim = [g for g in veri.get("granular_scopes", []) if g.get("scope") == "pages_manage_posts"]
+    log(f"facebook: /me/accounts bos; izinler {','.join(izinler)}")
+    if "pages_manage_posts" not in izinler:
+        raise Hata("pages_manage_posts izni verilmemis; izni yeniden verin")
+    hedefler = {str(t) for g in paylasim for t in g.get("target_ids", [])}
+    hepsi = bool(paylasim) and not hedefler  # belge: izin tum varliklara gecerliyse target_ids gosterilmez
+    log(f"facebook: paylasim izinli Sayfa sayisi {len(hedefler) if not hepsi else 'tum'}")
     if hedef:
-        if hedefler and hedef not in hedefler:
-            raise Hata("FB_PAGE_ID izin verilen Sayfalar arasinda degil")
+        if not hepsi and hedef not in hedefler:
+            raise Hata("FB_PAGE_ID paylasim izni verilen Sayfalar arasinda degil")
         aday = hedef
     elif len(hedefler) == 1:
         aday = next(iter(hedefler))
     else:
-        raise Hata(f"Sayfa secilemedi (/me/accounts bos, izinli Sayfa {len(hedefler)}; FB_PAGE_ID ile secin)")
+        raise Hata(f"Sayfa secilemedi (/me/accounts bos, paylasim izinli Sayfa {len(hedefler) if not hepsi else 'tum'}; FB_PAGE_ID ile secin)")
     x, _ = http.iste("GET", f"{FB_G}/{aday}", token=uzun, params={"fields": "id,name,access_token"})
     gizle(x.get("access_token", ""))
     if not x.get("access_token") or str(x.get("id")) != aday:
         raise Hata("Sayfa token'i alinamadi; yapilandirmaya business_management izni ekleyip izni yeniden verin")
     log("facebook: Sayfa secilen Sayfa kimligiyle bulundu")
-    return {"token": x["access_token"], "page_id": aday, "hesap": x.get("name", ""), "bitis": ""}
+    k = {"token": x["access_token"], "page_id": aday, "hesap": x.get("name", ""), "bitis": ""}
+    if veri.get("data_access_expires_at"):
+        k["veri_erisim_bitis"] = str(veri["data_access_expires_at"])
+    return k
 
 
 def cevir(p, http, simdi=None):
