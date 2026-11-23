@@ -74,6 +74,49 @@ def _bitis(sn, simdi):
     return (simdi + timedelta(seconds=int(sn or 0))).isoformat() if sn else ""
 
 
+def _fb_sayfa(http, cid, csec, uzun):
+    """Sayfa token'i. 1) /me/accounts. 2) Bossa (Facebook Login for Business + isletme portfoyune bagli Sayfa;
+    23 Kas olcumu kosu 45142527416): debug_token granular_scopes target_ids (secilen Sayfa) ya da FB_PAGE_ID ->
+    GET /{sayfa}?fields=id,name,access_token. 3) O da token vermezse DUR (yapilandirmaya business_management)."""
+    hedef = os.environ.get("FB_PAGE_ID", "").strip()
+    s, _ = http.iste("GET", f"{FB_G}/me/accounts", token=uzun, params={"fields": "id,name,access_token"})
+    sayfalar = s.get("data", [])
+    for x in sayfalar:
+        gizle(x.get("access_token", ""))
+    if sayfalar:
+        sec = [x for x in sayfalar if not hedef or x.get("id") == hedef]
+        if len(sec) != 1 or not sec[0].get("access_token"):
+            raise Hata(f"Sayfa secilemedi ({len(sayfalar)} sayfa; FB_PAGE_ID ile secin): "
+                       + ", ".join(f"{x.get('name')}={x.get('id')}" for x in sayfalar))
+        x = sec[0]
+        log("facebook: Sayfa /me/accounts ile bulundu")
+        return {"token": x["access_token"], "page_id": x["id"], "hesap": x.get("name", ""), "bitis": ""}
+    # 2) secilen Sayfa kimligi
+    d, _ = http.iste("GET", f"{FB_G}/debug_token", sorgu_sirri=True,
+                     params={"input_token": uzun, "access_token": f"{cid}|{csec}"})
+    veri = d.get("data", {})
+    hedefler = set()
+    for g in veri.get("granular_scopes", []):
+        if g.get("scope") in ("pages_show_list", "pages_manage_posts"):
+            hedefler.update(str(t) for t in g.get("target_ids", []))
+    log(f"facebook: /me/accounts bos; izinli Sayfa sayisi (debug_token) {len(hedefler)}; izinler "
+        + ",".join(sorted(veri.get("scopes", []))))
+    if hedef:
+        if hedefler and hedef not in hedefler:
+            raise Hata("FB_PAGE_ID izin verilen Sayfalar arasinda degil")
+        aday = hedef
+    elif len(hedefler) == 1:
+        aday = next(iter(hedefler))
+    else:
+        raise Hata(f"Sayfa secilemedi (/me/accounts bos, izinli Sayfa {len(hedefler)}; FB_PAGE_ID ile secin)")
+    x, _ = http.iste("GET", f"{FB_G}/{aday}", token=uzun, params={"fields": "id,name,access_token"})
+    gizle(x.get("access_token", ""))
+    if not x.get("access_token") or str(x.get("id")) != aday:
+        raise Hata("Sayfa token'i alinamadi; yapilandirmaya business_management izni ekleyip izni yeniden verin")
+    log("facebook: Sayfa secilen Sayfa kimligiyle bulundu")
+    return {"token": x["access_token"], "page_id": aday, "hesap": x.get("name", ""), "bitis": ""}
+
+
 def cevir(p, http, simdi=None):
     simdi = simdi or datetime.now(timezone.utc)
     ad = f"OAUTH_KOD_{KISA[p]}"
@@ -115,16 +158,7 @@ def cevir(p, http, simdi=None):
                                  "fb_exchange_token": kisa})
         uzun = u.get("access_token") or ""
         gizle(uzun)
-        s, _ = http.iste("GET", f"{FB_G}/me/accounts", token=uzun, params={"fields": "id,name,access_token"})
-        sayfalar = s.get("data", [])
-        for x in sayfalar:
-            gizle(x.get("access_token", ""))
-        hedef = os.environ.get("FB_PAGE_ID", "").strip()
-        sec = [x for x in sayfalar if not hedef or x.get("id") == hedef]
-        if len(sec) != 1:
-            raise Hata(f"Sayfa secilemedi ({len(sayfalar)} sayfa; FB_PAGE_ID ile secin): "
-                       + ", ".join(f"{x.get('name')}={x.get('id')}" for x in sayfalar))
-        k = {"token": sec[0]["access_token"], "page_id": sec[0]["id"], "hesap": sec[0].get("name", ""), "bitis": ""}
+        k = _fb_sayfa(http, cid, csec, uzun)
     else:
         j, _ = http.iste("POST", GOOGLE_TOKEN, data={"code": kod, "client_id": cid, "client_secret": csec,
                          "redirect_uri": DONUS, "grant_type": "authorization_code"})

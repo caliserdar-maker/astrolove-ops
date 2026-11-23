@@ -68,7 +68,7 @@ import token_yenile  # noqa: E402
 TOK = {"instagram": "IGTOKEN_SAHTE_0123456789", "threads": "THTOKEN_SAHTE_0123456789",
        "facebook": "FBPAGETOKEN_SAHTE_0123456789", "youtube": "YTREFRESH_SAHTE_0123456789"}
 SIRLAR = list(TOK.values()) + ["GSECRET0123456789", "GREFRESH0123456789", "ghADMIN0123456789", "YTSECRET0123456789",
-                               "IGSECRET0123456789", "GACCESS_SAHTE_99", "YTACCESS_SAHTE_99", "KODSAHTE123456", "IGYENI_SAHTE_0123456789"]
+                               "IGSECRET0123456789", "METASECRET0123456", "FBKISA_SAHTE_0001", "FBUZUN_SAHTE_0002", "GACCESS_SAHTE_99", "YTACCESS_SAHTE_99", "KODSAHTE123456", "IGYENI_SAHTE_0123456789"]
 MEDIA = {}  # genel url -> bayt
 SIMDI = datetime(2026, 12, 8, 10, 0, tzinfo=secim.TZ)
 KANAL = {"instagram": ("ig_id", "1784"), "threads": ("th_id", "2555"), "facebook": ("page_id", "9001"),
@@ -96,6 +96,7 @@ class Oturum:
         self.hata_tokenli = False
         self.yenile_hata = False
         self.kaydir = False
+        self.fb = {"hesaplar": [], "hedef": ["9001"], "sayfa_token": True}
         self.tamam_yaz_hata = False
 
     def _hucre(self, rng):
@@ -175,6 +176,25 @@ class Oturum:
         if "rupload.facebook.com" in url:
             assert auth.startswith("OAuth ")
             return Y(j={"success": True})
+        if "graph.facebook.com" in url and (url.endswith("/oauth/access_token") or url.endswith("/me/accounts")
+                                            or url.endswith("/debug_token") or url.endswith("/9001") or url.endswith("/7777")):
+            if url.endswith("/oauth/access_token"):
+                if params.get("grant_type") == "fb_exchange_token":
+                    assert params["fb_exchange_token"] == "FBKISA_SAHTE_0001"
+                    return Y(j={"access_token": "FBUZUN_SAHTE_0002"})
+                assert params["code"] == "KODSAHTE123456"
+                return Y(j={"access_token": "FBKISA_SAHTE_0001"})
+            if url.endswith("/me/accounts"):
+                assert auth == "Bearer FBUZUN_SAHTE_0002"
+                return Y(j={"data": self.fb["hesaplar"]})
+            if url.endswith("/debug_token"):
+                assert params["input_token"] == "FBUZUN_SAHTE_0002" and params["access_token"] == "1609743017476204|METASECRET0123456"
+                return Y(j={"data": {"scopes": ["pages_show_list", "pages_manage_posts"], "granular_scopes":
+                            [{"scope": "pages_show_list", "target_ids": self.fb["hedef"]},
+                             {"scope": "pages_manage_posts", "target_ids": self.fb["hedef"]}]}})
+            assert auth == "Bearer FBUZUN_SAHTE_0002"
+            pid = url.rsplit("/", 1)[1]
+            return Y(j={"id": pid, "name": "AstroLoveArt", **({"access_token": TOK["facebook"]} if self.fb["sayfa_token"] else {})})
         if "graph.facebook.com" in url:
             if url.endswith("/video_reels"):
                 return Y(j={"video_id": "FBV1"} if data["upload_phase"] == "start" else {"success": True})
@@ -495,6 +515,42 @@ def senaryo_izin():
     kontrol("FAIL izin cevir: kod sirri yok", rc == 1)
 
 
+def senaryo_fb_cevir():
+    os.environ.update(META_APP_ID="1609743017476204", META_APP_SECRET="METASECRET0123456")
+
+    def kos_fb(hesaplar, hedef, sayfa_token=True, page_id=""):
+        sifirla()
+        (DRIVE / "ASTROLOVE/TEMP/SOSYAL_FACEBOOK_TOKEN.json").unlink()
+        os.environ["OAUTH_KOD_FB"] = "KODSAHTE123456"
+        os.environ["FB_PAGE_ID"] = page_id
+        otr = Oturum([])
+        otr.fb = {"hesaplar": hesaplar, "hedef": hedef, "sayfa_token": sayfa_token}
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc = izin.main(["cevir", "facebook"], http=ortak.Http(otr))
+        f = DRIVE / "ASTROLOVE/TEMP/SOSYAL_FACEBOOK_TOKEN.json"
+        k = json.loads(f.read_text()) if f.exists() else {}
+        os.environ.pop("OAUTH_KOD_FB", None)
+        os.environ["FB_PAGE_ID"] = ""
+        return rc, k, out.getvalue(), otr
+
+    rc, k, out, _ = kos_fb([{"id": "9001", "name": "AstroLoveArt", "access_token": TOK["facebook"]}], [])
+    kontrol("FB cevir: /me/accounts dolu -> Sayfa token", rc == 0 and k.get("page_id") == "9001" and k.get("token") == TOK["facebook"])
+    rc, k, out, otr = kos_fb([], ["9001"])
+    kontrol("FB cevir: /me/accounts BOS -> debug_token secilen Sayfa -> Sayfa token (23 Kas FAIL senaryosu)",
+            rc == 0 and k.get("page_id") == "9001" and k.get("token") == TOK["facebook"] and any(c[1].endswith("/debug_token") for c in otr.cagri))
+    kontrol("FB cevir: logda sir yok", sizinti_yok(out))
+    rc, k, out, _ = kos_fb([], [], page_id="9001")
+    kontrol("FB cevir: bos + target yok + FB_PAGE_ID -> Sayfa token", rc == 0 and k.get("page_id") == "9001")
+    rc, k, out, _ = kos_fb([], ["9001"], sayfa_token=False)
+    kontrol("FAIL FB cevir: Sayfa token vermezse DUR (business_management onerisi), Drive'a yazim yok",
+            rc == 1 and not k and "business_management" in out)
+    rc, k, out, _ = kos_fb([], ["9001"], page_id="7777")
+    kontrol("FAIL FB cevir: izin verilmeyen FB_PAGE_ID reddedilir", rc == 1 and not k)
+    rc, k, out, _ = kos_fb([], ["9001", "9002"])
+    kontrol("FAIL FB cevir: birden cok izinli Sayfa + FB_PAGE_ID yok -> DUR", rc == 1 and not k)
+
+
 def senaryo_yenile():
     sifirla()
     otr = Oturum([])
@@ -555,7 +611,7 @@ def mutasyon():
 if __name__ == "__main__":
     try:
         for f in (senaryo_ana, senaryo_kuru, senaryo_kapali, senaryo_medya_farkli, senaryo_publish_500, senaryo_son_an,
-                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
+                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
             try:
                 f()
             except Exception as e:
