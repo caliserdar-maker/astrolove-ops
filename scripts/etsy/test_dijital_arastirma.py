@@ -47,8 +47,13 @@ for yap, tip in YAPRAK.items():
             t = "both"
         ILAN[lid] = {"listing_id": lid, "shop_id": 70000000 + (k % 23), "title": f"Ilan {k}", "url": f"https://etsy/{lid}",
                      "listing_type": t, "is_personalizable": (k % 7 == 3), "taxonomy_id": yap, "num_favorers": k,
-                     "views": 0, "price": {"amount": 100 + k * 10, "divisor": 100, "currency_code": "USD"},
+                     "views": 0, "price": {"amount": 100 + k * 10, "divisor": 100, "currency_code": "EUR" if k % 5 == 0 else "USD"},
                      "tags": ["a", "b"], "created_timestamp": 1760000000 + k * 1000, "updated_timestamp": 1760000000 + k}
+
+
+HATALI = 942900001     # kimliginde "429" geciyor; yorum ucu 404 (inceleme madde 1)
+ILAN[HATALI] = dict(ILAN[900111000], listing_id=HATALI, url="https://etsy/x", is_personalizable=False, listing_type="download",
+                    created_timestamp=1799999999, price={"amount": 500, "divisor": 100, "currency_code": "USD"})
 
 
 def altlar(tid):
@@ -133,6 +138,8 @@ class Sahte:
             return Yanit(200, {"shop_id": int(p.split("/")[2]), "shop_name": "S", "transaction_sold_count": 50}, self.kalan)
         if p.endswith("/reviews"):
             lid = int(p.split("/")[2])
+            if lid == HATALI:
+                return Yanit(404, {"error": "yok"}, self.kalan)
             y = yorumlar(lid)
             off, lim = int(params.get("offset", 0)), int(params.get("limit", 25))
             return Yanit(200, {"count": len(y), "results": y[off:off + lim]}, self.kalan)
@@ -194,7 +201,8 @@ def main():
         kontrol("grup basina 15", all(sum(1 for r in il if r["tur_id"] == t and r["grup"] == g) == 15
                                       for t in ("111", "1211") for g in ("relevans", "yeni")))
         y = oku(d1, "YORUMLAR.csv")
-        beklenen = sum(len(yorumlar(int(r["listing_id"]))) for r in il)
+        kontrol("hatali (429 kimlikli, 404) ilan orneklemde", any(int(r["listing_id"]) == HATALI for r in il))
+        beklenen = sum(len(yorumlar(int(r["listing_id"]))) for r in il if int(r["listing_id"]) != HATALI)
         kontrol(f"butun yorumlar ({len(y)}/{beklenen})", len(y) == beklenen)
         ham = (d1 / "YORUMLAR.csv").read_text(encoding="utf-8")
         kontrol("yorumcu kimligi yok", "buyer_user_id" not in ham and "444000" not in ham and "555000" not in ham)
@@ -204,6 +212,10 @@ def main():
         kontrol("ozet kanitli satis = api yorum toplami", all(int(o["kanitli_satis_toplam"]) == int(o["yorum_toplami_api"]) for o in h))
         kontrol("ozet olumsuz sayimi", all(int(o["olumsuz"]) == sum(1 for r in y if r["tur_id"] == o["tur_id"] and int(r["rating"]) <= 3) for o in h))
         kontrol("ozet tema", any(o["olumlu_ilk3_tema"] for o in h))
+        kontrol("ozet hatali ilan sayilir, tam sayilmaz", sum(int(o["yorum_hatali_ilan"]) for o in h) == 1)
+        kontrol("ozet fiyat tek para biriminde", all(o["fiyat_para_birimi"] == "USD" and int(o["diger_para_birimi_n"]) > 0 for o in h))
+        usd = sorted(float(r["price"]) for r in il if r["tur_id"] == "111" and r["currency"] == "USD")
+        kontrol("ozet fiyat medyan (USD)", abs(float(next(o for o in h if o["tur_id"] == "111")["fiyat_medyan"]) - D.yuzdelik(usd, .5)) < 1e-9)
         for f in ("API_OLCUM.json", "TAKSONOMI.csv", "MAGAZALAR.csv", "EKSIK_ALAN.csv", "YORUMLAR_ETIKETLI.csv"):
             kontrol(f"dosya {f}", (d1 / f).exists())
         api = json.loads((d1 / "API_OLCUM.json").read_text())
@@ -233,6 +245,43 @@ def main():
         kontrol("kota sonrasi devam bitti", durum(d2)["asama"] == "bitti")
         kontrol("devam sonucu ayni (yorum)", len(oku(d2, "YORUMLAR.csv")) == len(y))
         kontrol("devam sonucu ayni (ilan)", len(oku(d2, "ILANLAR.csv")) == len(il))
+        # 2b) her noktada kesinti (kota k istekte bir): sonuc tam akisla birebir ayni (inceleme madde 2, 3, 12)
+        imza = sorted((r["tur_id"], r["grup"], r["sira"], r["listing_id"]) for r in il)
+        for k_ in (3, 7, 13, 29):
+            s5 = Sahte()
+            d5 = tmp / f"k{k_}"
+            s5.kalan = 2000 + 60          # olc asamasi atomik (yeniden baslar): ilk kosu olc'u bitirsin
+            kos(s5, d5)
+            for _ in range(2000):
+                s5.kalan = 2000 + k_
+                kos(s5, d5)
+                if durum(d5)["asama"] == "bitti":
+                    break
+            il5 = oku(d5, "ILANLAR.csv")
+            kontrol(f"kesinti her {k_} istekte: bitti", durum(d5)["asama"] == "bitti")
+            kontrol(f"kesinti her {k_} istekte: ilan kumesi + sira ayni", sorted((r["tur_id"], r["grup"], r["sira"], r["listing_id"]) for r in il5) == imza)
+            kontrol(f"kesinti her {k_} istekte: yorum sayisi ayni", len(oku(d5, "YORUMLAR.csv")) == len(y))
+            kontrol(f"kesinti her {k_} istekte: magaza ayni", len(oku(d5, "MAGAZALAR.csv")) == len(oku(d1, "MAGAZALAR.csv")))
+        # 2c) gercek main(): ham stdout'ta kimlik / metin yok (KimlikSuz main'de)
+        s7 = Sahte()
+        d7 = tmp / "m"
+        buf = io.StringIO()
+        eski_ping, eski_argv, eski_out, eski_err = D.ham_ping, sys.argv, sys.stdout, sys.stderr
+        D.ham_ping = lambda st: s7.ping
+        E.requests.request = s7
+        sys.argv = ["x", "--out", str(d7), "--dk", "60"]
+        import os as _os
+        _os.environ["ETSY_API_KEY"], _os.environ["ETSY_SHARED_SECRET"] = "anahtar", "sir"
+        sys.stdout = sys.stderr = buf
+        try:
+            D.main()
+            print("ilan x:900111001 ve 942900001")
+        finally:
+            sys.stdout, sys.stderr, sys.argv, D.ham_ping = eski_out, eski_err, eski_argv, eski_ping
+        ham_log = buf.getvalue()
+        kontrol("main ham log: 6+ haneli kimlik yok", not __import__("re").search(r"\d{6,}", ham_log))
+        kontrol("main ham log: baslik / yorum / magaza adi yok", "Ilan " not in ham_log and "love it" not in ham_log and "etsy/" not in ham_log)
+        kontrol("main bitti", durum(d7)["asama"] == "bitti")
         # 3) yol verme
         s3 = Sahte()
         d3 = tmp / "c"

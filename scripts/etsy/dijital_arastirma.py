@@ -43,6 +43,7 @@ D4_AZAMI = 300         # derinlik 4 icin en fazla istek
 HEDEF = 50             # tur basina olumsuz ve olumlu hedefi
 KOTA_PAY = 0.20        # kalan < KOTA_PAY * gunluk sinir -> dur
 YOL_VER_SN = 60        # baska Etsy kosusu kontrol araligi
+DK_AZAMI = 45          # kosu basina Etsy okuma suresi tavani (kilit tutma)
 
 
 class KotaDur(Exception):
@@ -59,7 +60,7 @@ class SureDoldu(Exception):
 
 class KimlikSuz:
     """stdout/stderr suzgeci: 6+ haneli sayilar '<id>' (ilan / magaza / taksonomi kimlikleri loga girmez)."""
-    RX = re.compile(r"(?<![\w:])\d{6,}")
+    RX = re.compile(r"(?<!\w)\d{6,}")
 
     def __init__(self, akis):
         self.akis = akis
@@ -71,6 +72,12 @@ class KimlikSuz:
 
     def flush(self):
         return self.akis.flush()
+
+
+def kisa_hata(m):
+    """'HATA: GET /yol -> 404: <govde>' -> govdesiz ilk kisim (Etsy hata govdesi loga girmez)."""
+    k = str(m).split(": ", 2)
+    return ": ".join(k[:2])[:160]
 
 
 def log(m):
@@ -98,6 +105,7 @@ class Okuyucu:
         self._son_kontrol = saat()
         self.limit_gun = None
         self.ham_get = ham_get   # basliklar icin (olc)
+        self.hata = 0
 
     def kontrol(self):
         if self.saat() >= self.bitis:
@@ -116,23 +124,29 @@ class Okuyucu:
             return self.api.get(path, params=params)
         except SystemExit as e:
             m = str(e)
-            if "429" in m or "kota" in m.lower():
+            if m.startswith(("HATA: 429", "DUR: kota")):
                 raise KotaDur() from None
+            self.hata += 1
             if hata_bos:
                 return None
-            raise
+            raise SystemExit(kisa_hata(m)) from None
+        except (OSError, ValueError) as e:   # requests Timeout/ConnectionError (OSError), bozuk JSON (ValueError)
+            self.hata += 1
+            if hata_bos:
+                return None
+            raise SystemExit(f"HATA: ag {type(e).__name__}") from None
 
 
 # ------------------------------------------------------------------ dosyalar
 ILAN_ALAN = ["tur_id", "grup", "sira", "listing_id", "url", "shop_id", "title", "price", "currency", "num_favorers", "views",
              "tags", "created_timestamp", "updated_timestamp", "original_creation_timestamp", "listing_type",
              "is_personalizable", "taxonomy_id", "quantity", "has_variations", "review_count_api"]
-YORUM_ALAN = ["tur_id", "listing_id", "url", "shop_id", "rating", "created_timestamp", "tarih", "language", "review"]
+YORUM_ALAN = ["tur_id", "listing_id", "url", "shop_id", "rating", "created_timestamp", "tarih", "language", "review", "yorum_sira"]
 MAGAZA_ALAN = ["shop_id", "shop_name", "url", "transaction_sold_count", "review_count", "review_average", "create_date",
                "created_timestamp", "listing_active_count", "digital_listing_count", "num_favorers",
                "shop_location_country_iso", "is_vacation"]
 TUR_ALAN = ["tur_id", "derinlik", "ad", "yol", "ust_id", "cocuk_sayisi", "ilan_sayisi_api", "orneklenen", "download_n",
-            "download_oran", "both_n", "download_kisisel_n", "aday", "tur"]
+            "download_oran", "both_n", "download_kisisel_n", "uygun_oran", "aday", "tur"]
 
 
 def oku_csv(p):
@@ -167,7 +181,7 @@ class Depo:
 
     @staticmethod
     def yorum_anahtar(r):
-        return (str(r["tur_id"]), str(r["listing_id"]), str(r["created_timestamp"]), str(r["rating"]), (r.get("review") or "")[:60])
+        return (str(r["tur_id"]), str(r["listing_id"]), str(r.get("yorum_sira", "")), str(r["created_timestamp"]))
 
     def kaydet(self):
         yaz_csv(self.out / "TURLER.csv", TUR_ALAN, sorted(self.dugum.values(), key=lambda r: (int(r["derinlik"]), r["yol"])))
@@ -284,6 +298,9 @@ def asama_olc(dp, ok, ham_get):
             continue
         if (jy.get("count") or 0) > 1:
             jy2 = ok.get(f"/listings/{L['listing_id']}/reviews", {"limit": 1, "offset": 1}, hata_bos=True)
+            tsl = [x.get("created_timestamp") or 0 for x in (jy.get("results") or [])]
+            yr["yeniden_eskiye"] = all(a >= b for a, b in zip(tsl, tsl[1:]))
+            dp.d["yorum_sirali"] = yr["yeniden_eskiye"]
             yr.update({"erisim": True, "count": jy.get("count"), "sayfa1": len(jy.get("results") or []),
                        "offset_calisir": jy2 is not None and len((jy2 or {}).get("results") or []) == 1,
                        "alanlar": sorted((jy.get("results") or [{}])[0].keys())})
@@ -312,13 +329,19 @@ def asama_olc(dp, ok, ham_get):
 def dugum_ornekle(dp, ok, n):
     j = ok.get("/listings/active", {"taxonomy_id": n["tur_id"], "limit": ORNEK_N, "sort_on": "created", "sort_order": "desc"},
                hata_bos=True)
+    if j is None:
+        hs = dp.d.setdefault("dugum_hata", {})
+        hs[n["tur_id"]] = hs.get(n["tur_id"], 0) + 1
+        if hs[n["tur_id"]] < 2:
+            return
     res = (j or {}).get("results") or []
     dl = [L for L in res if L.get("listing_type") == "download"]
     r = dict(n)
     r.update({"ilan_sayisi_api": (j or {}).get("count", ""), "orneklenen": len(res), "download_n": len(dl),
               "download_oran": round(len(dl) / len(res), 3) if res else 0,
               "both_n": sum(1 for L in res if L.get("listing_type") == "both"),
-              "download_kisisel_n": sum(1 for L in dl if L.get("is_personalizable")), "aday": "", "tur": ""})
+              "download_kisisel_n": sum(1 for L in dl if L.get("is_personalizable")),
+              "uygun_oran": round(sum(1 for L in res if uygun(L)) / len(res), 3) if res else 0, "aday": "", "tur": ""})
     dp.dugum[n["tur_id"]] = r
 
 
@@ -346,7 +369,12 @@ def asama_agac(dp, ok):
             if k % 50 == 0:
                 dp.kaydet()
                 log(f"agac d3: {k}/{len(d3)} | kota {ok.api.remaining}")
-    d4 = [n for p in d3 if oran(p["tur_id"]) >= ADAY_ORAN for n in cocuk.get(p["tur_id"], [])][:D4_AZAMI]
+    d3_tum = sum(1 for n in tak if int(n["derinlik"]) == 3)
+    d4_tum = [n for p in d3 if oran(p["tur_id"]) >= ADAY_ORAN for n in cocuk.get(p["tur_id"], [])]
+    d4 = d4_tum[:D4_AZAMI]
+    dp.d["agac_kapsam"] = {"d3_toplam": d3_tum, "d3_orneklenen": len(d3), "d4_aday": len(d4_tum), "d4_orneklenen": len(d4),
+                           "d5_ve_alti": sum(1 for n in tak if int(n["derinlik"]) >= 5)}
+    log(f"agac kapsam: d3 {len(d3)}/{d3_tum} | d4 {len(d4)}/{len(d4_tum)} | d5+ {dp.d['agac_kapsam']['d5_ve_alti']}")
     for k, n in enumerate(d4):
         if n["tur_id"] not in dp.dugum:
             dugum_ornekle(dp, ok, n)
@@ -361,7 +389,7 @@ def asama_agac(dp, ok):
 
 def tur_sec(dp):
     for r in dp.dugum.values():
-        r["aday"] = "1" if int(r.get("orneklenen") or 0) >= ADAY_MIN_N and float(r.get("download_oran") or 0) >= ADAY_ORAN else ""
+        r["aday"] = "1" if int(r.get("orneklenen") or 0) >= ADAY_MIN_N and float(r.get("uygun_oran") or 0) >= ADAY_ORAN else ""
     aday = {t for t, r in dp.dugum.items() if r["aday"]}
     ust = {t: r["ust_id"] for t, r in dp.dugum.items()}
 
@@ -383,19 +411,22 @@ def grup_topla(ok, tur, grup, mevcut, n_ek, offset0):
     else:
         params.update({"sort_on": "created", "sort_order": "desc"})
     secilen, offset = [], offset0
+    gorulen = set()
     for _ in range(4):
         params["offset"] = offset
         j = ok.get("/listings/active", dict(params), hata_bos=True)
         res = (j or {}).get("results") or []
         for L in res:
-            if uygun(L) and str(L["listing_id"]) not in mevcut:
+            if uygun(L) and str(L["listing_id"]) not in mevcut and str(L["listing_id"]) not in gorulen:
                 secilen.append(L)
-                mevcut.add(str(L["listing_id"]))
+                gorulen.add(str(L["listing_id"]))
                 if len(secilen) >= n_ek:
+                    mevcut |= gorulen
                     return secilen, offset + 100
         offset += 100
         if len(res) < 100:
             break
+    mevcut |= gorulen
     return secilen, offset
 
 
@@ -408,17 +439,20 @@ def asama_ornek(dp, ok, ek=False):
     ofs = dp.d.setdefault("ornek_offset", {})
     hedef_ek = dp.d.get("ek_ornek", []) if ek else None
     for k, t in enumerate(turler):
-        anahtar = t["tur_id"] + (":ek" if ek else "")
-        if anahtar in yap or (ek and t["tur_id"] not in hedef_ek):
+        if ek and t["tur_id"] not in hedef_ek:
             continue
         mevcut = var.setdefault(t["tur_id"], set())
         for grup in ("relevans", "yeni"):
+            anahtar = f"{t['tur_id']}:{grup}" + (":ek" if ek else "")
+            if anahtar in yap:
+                continue
             o0 = ofs.get(f"{t['tur_id']}:{grup}", 0)
             sec, o1 = grup_topla(ok, t, grup, mevcut, GRUP_N, o0)
+            # ayni adimda (arada istek yok): satirlar + offset + bitti
             ofs[f"{t['tur_id']}:{grup}"] = o1
             for i, L in enumerate(sec):
                 dp.ilan.append(ilan_satiri(L, t["tur_id"], grup + ("_ek" if ek else ""), i + 1))
-        yap.append(anahtar)
+            yap.append(anahtar)
         if k % 10 == 0:
             dp.kaydet()
             log(f"ornek{' ek' if ek else ''}: tur {k + 1}/{len(turler)} | ilan {len(dp.ilan)} | kota {ok.api.remaining}")
@@ -456,13 +490,13 @@ def magaza_topla(dp, ok):
 
 
 # ------------------------------------------------------------------ asama: yorum
-def yorum_isle(dp, s, res):
-    for y in res:
+def yorum_isle(dp, s, res, offset=0):
+    for i, y in enumerate(res):
         ts = y.get("created_timestamp") or y.get("create_timestamp") or ""
         r = {"tur_id": s["tur_id"], "listing_id": s["listing_id"], "url": s["url"], "shop_id": s["shop_id"],
              "rating": y.get("rating", ""), "created_timestamp": ts,
              "tarih": datetime.fromtimestamp(int(ts), timezone.utc).strftime("%Y-%m-%d") if str(ts).isdigit() else "",
-             "language": y.get("language", ""), "review": (y.get("review") or "").replace("\r", " ")}
+             "language": y.get("language", ""), "review": (y.get("review") or "").replace("\r", " "), "yorum_sira": offset + i}
         dp.yorum[dp.yorum_anahtar(r)] = r
 
 
@@ -486,12 +520,14 @@ def sayfa_al(dp, ok, s, yd):
     st = yd.setdefault(k, {"count": None, "offset": 0, "bitti": False})
     j = ok.get(f"/listings/{s['listing_id']}/reviews", {"limit": 100, "offset": st["offset"]}, hata_bos=True)
     if j is None:
-        st["bitti"] = True
-        st["hata"] = True
+        st["hata"] = st.get("hata", 0) + 1
+        if st["hata"] >= 2:
+            st["bitti"] = True
         return
     res = j.get("results") or []
     st["count"] = j.get("count")
-    yorum_isle(dp, s, res)
+    st.pop("hata", None)
+    yorum_isle(dp, s, res, st["offset"])
     st["offset"] += 100
     if not res or st["offset"] >= int(st["count"] or 0):
         st["bitti"] = True
@@ -502,7 +538,10 @@ def asama_yorum(dp, ok):
     yd = dp.d.setdefault("yorum", {})
     t0 = time.monotonic()
     # 1) her ilanin ilk sayfasi (turler arasinda donusumlu)
-    bekleyen = [s for s in dp.ilan if f"{s['tur_id']}:{s['listing_id']}" not in yd]
+    def yeniden(s):
+        st = yd.get(f"{s['tur_id']}:{s['listing_id']}")
+        return st is None or (st["count"] is None and not st["bitti"])
+    bekleyen = [s for s in dp.ilan if yeniden(s)]
     bekleyen.sort(key=lambda s: (int(s["sira"]), s["grup"], s["tur_id"]))
     for i, s in enumerate(bekleyen):
         sayfa_al(dp, ok, s, yd)
@@ -521,7 +560,7 @@ def asama_yorum(dp, ok):
             adaylar = {}
             for s in dp.ilan:
                 st = yd.get(f"{s['tur_id']}:{s['listing_id']}")
-                if not st or st["bitti"]:
+                if not st or st["bitti"] or st["count"] is None:
                     continue
                 neg, pos = say.get(s["tur_id"], [0, 0])
                 if mod == "hedef" and neg >= HEDEF and pos >= HEDEF:
@@ -549,9 +588,14 @@ def asama_yorum(dp, ok):
                     ek.append(t)
             if ek:
                 dp.d.setdefault("ek_ornek", []).extend(ek)
-                dp.kaydet()
                 log(f"ek orneklem: {len(ek)} tur")
-                asama_ornek(dp, ok, ek=True)
+            bitti = set(dp.d.get("ornek_bitti", []))
+            yarim = [t for t in dp.d.get("ek_ornek", []) if f"{t}:relevans:ek" not in bitti or f"{t}:yeni:ek" not in bitti]
+            magaza_eksik = any(str(s["shop_id"]) not in dp.magaza for s in dp.ilan)
+            ilk_eksik = any(yeniden(s) for s in dp.ilan)
+            if yarim or magaza_eksik or ilk_eksik:
+                if yarim or magaza_eksik:
+                    asama_ornek(dp, ok, ek=True)
                 return asama_yorum(dp, ok)
     dp.d["asama"] = "ozet"
     log(f"YORUM: bitti | yorum {len(dp.yorum)} | ilan {len(dp.ilan)}")
@@ -619,8 +663,9 @@ def asama_ozet(dp, simdi=None):
             yorumlar = [y for y in yor_by.get(t, []) if str(y["listing_id"]) in lid]
             api_top = sum(int(s.get("review_count_api") or 0) for s in ilanlar)
             y12 = [y for y in yorumlar if str(y["created_timestamp"]).isdigit() and int(y["created_timestamp"]) >= yil_once]
-            tam12 = all(yd.get(f"{t}:{s['listing_id']}", {}).get("bitti") or
-                        any(str(y["listing_id"]) == str(s["listing_id"]) and str(y["created_timestamp"]).isdigit()
+            sirali = dp.d.get("yorum_sirali", False)
+            tam12 = all((yd.get(f"{t}:{s['listing_id']}", {}).get("bitti") and not yd.get(f"{t}:{s['listing_id']}", {}).get("hata"))
+                        or sirali and any(str(y["listing_id"]) == str(s["listing_id"]) and str(y["created_timestamp"]).isdigit()
                             and int(y["created_timestamp"]) < yil_once for y in yorumlar) for s in ilanlar)
             neg = [y for y in yorumlar if y["duygu"] == "olumsuz"]
             pos = [y for y in yorumlar if y["duygu"] == "olumlu"]
@@ -632,17 +677,24 @@ def asama_ozet(dp, simdi=None):
                         c[k] = c.get(k, 0) + 1
                 return "; ".join(f"{k} {v}" for k, v in sorted(c.items(), key=lambda x: -x[1])[:3])
 
-            fiyatlar = [float(s["price"]) for s in ilanlar if s.get("price") not in ("", None)]
+            pb = {}
+            for s in ilanlar:
+                if s.get("price") not in ("", None) and s.get("currency"):
+                    pb.setdefault(s["currency"], []).append(float(s["price"]))
+            ana_pb = max(pb, key=lambda k: len(pb[k])) if pb else ""
+            fiyatlar = pb.get(ana_pb, [])
             magaza_pay = {}
             for s in ilanlar:
                 magaza_pay[s["shop_id"]] = magaza_pay.get(s["shop_id"], 0) + int(s.get("review_count_api") or 0)
             ilk10 = sum(sorted(magaza_pay.values(), reverse=True)[:10])
-            yorum_tam = sum(1 for s in ilanlar if yd.get(f"{t}:{s['listing_id']}", {}).get("bitti"))
+            yorum_tam = sum(1 for s in ilanlar if yd.get(f"{t}:{s['listing_id']}", {}).get("bitti")
+                            and not yd.get(f"{t}:{s['listing_id']}", {}).get("hata"))
+            yorum_hata = sum(1 for s in ilanlar if yd.get(f"{t}:{s['listing_id']}", {}).get("hata"))
             ozet.append({
                 "tur_id": t, "tur_yolu": r["yol"], "grup": grup, "download_oran": r["download_oran"],
                 "ilan_sayisi_kategori_api": r["ilan_sayisi_api"], "ilan_sayisi": len(ilanlar),
                 "yorum_sayisi_toplanan": len(yorumlar), "yorum_toplami_api": api_top,
-                "yorumu_tam_ilan": yorum_tam,
+                "yorumu_tam_ilan": yorum_tam, "yorum_hatali_ilan": yorum_hata,
                 "kanitli_satis_toplam": api_top, "kanitli_satis_12ay": len(y12),
                 "kanitli_satis_12ay_tam": "evet" if tam12 else "alt_sinir",
                 "kanitli_satis_aylik": round(len(y12) / 12, 1),
@@ -651,9 +703,11 @@ def asama_ozet(dp, simdi=None):
                 "hedef_durumu": ("tamam" if len(neg) >= HEDEF and len(pos) >= HEDEF
                                  else f"yetersiz: olumsuz {len(neg)}, olumlu {len(pos)}"),
                 "fiyat_p25": yuzdelik(fiyatlar, .25), "fiyat_medyan": yuzdelik(fiyatlar, .5), "fiyat_p75": yuzdelik(fiyatlar, .75),
-                "para_birimi": "|".join(sorted({s["currency"] for s in ilanlar if s.get("currency")})),
+                "fiyat_para_birimi": ana_pb, "fiyat_n": len(fiyatlar),
+                "diger_para_birimi_n": sum(len(v) for k, v in pb.items() if k != ana_pb),
                 "magaza_sayisi": len(magaza_pay),
                 "ilk10_magaza_kanitli_satis_payi": round(ilk10 / api_top, 3) if api_top else "",
+                "not": "ilk10 payi yalniz orneklem ilanlarinin API yorum sayisindan; magaza <= 10 ise 1.0",
             })
     alanlar = list(ozet[0].keys()) if ozet else ["tur_id"]
     yaz_csv(dp.out / "TUR_OZET.csv", alanlar, ozet)
@@ -672,7 +726,11 @@ def asama_ozet(dp, simdi=None):
 
 
 # ------------------------------------------------------------------ GitHub: baska Etsy kosusu var mi
+_GORULEN = {}
+
+
 def yol_ver_gh():
+    """Kilit kumesinde baska aktif kosu 3 ardisik kontrolde (>= 2 dk) gorulurse yol ver (kisa --mod atla turlari beklenir)."""
     import kilit_bekle as K
     kume = K.kilit_kumesi(".", "etsy")
     benim = int(os.environ["GITHUB_RUN_ID"])
@@ -680,8 +738,13 @@ def yol_ver_gh():
         kosular = K.api_kosular()
     except Exception:   # noqa: BLE001 okunamazsa devam (kilit zaten bizde; yalniz nezaket kontrolu)
         return False
-    aktif = [k for k in kosular if k.get("path") in kume and k.get("status") in K.AKTIF and int(k.get("id")) != benim]
-    return bool(aktif)
+    aktif = {int(k.get("id")) for k in kosular if k.get("path") in kume and k.get("status") in K.AKTIF and int(k.get("id")) != benim}
+    for i in list(_GORULEN):
+        if i not in aktif:
+            del _GORULEN[i]
+    for i in aktif:
+        _GORULEN[i] = _GORULEN.get(i, 0) + 1
+    return any(v >= 3 for v in _GORULEN.values())
 
 
 def ham_ping(store):
@@ -694,7 +757,12 @@ def ham_ping(store):
 
 
 def calis(out, dk, api, yol_ver_fn=None, ham_get=None, simdi=None):
-    dp = Depo(out)
+    dk = max(0.0, min(float(dk), DK_AZAMI))
+    try:
+        dp = Depo(out)
+    except Exception as e:  # noqa: BLE001 icerik loga girmez
+        log(f"HATA: durum okunamadi ({type(e).__name__})")
+        return 1
     dp.d["kosu"] = dp.d.get("kosu", 0) + 1
     if dp.d.get("pace"):
         api.pace = float(dp.d["pace"])
@@ -727,7 +795,7 @@ def calis(out, dk, api, yol_ver_fn=None, ham_get=None, simdi=None):
         log("SURE DOLDU: durum kaydedildi")
     except SystemExit as e:
         kod = 1
-        log(f"HATA: {str(e)[:200]}")
+        log(f"HATA: {kisa_hata(e)}")
     except Exception as e:  # noqa: BLE001 durum yine kaydedilir
         kod = 1
         log(f"HATA: {type(e).__name__}")
@@ -736,8 +804,12 @@ def calis(out, dk, api, yol_ver_fn=None, ham_get=None, simdi=None):
     except Exception as e:  # noqa: BLE001
         kod = kod or 1
         log(f"HATA (ozet): {type(e).__name__}")
-    dp.kaydet()
-    log(f"KOSU {dp.d['kosu']}: asama {dp.d['asama']} | istek {api.calls} | kota {bas_kalan} -> {api.remaining}"
+    try:
+        dp.kaydet()
+    except Exception as e:  # noqa: BLE001
+        log(f"HATA (kaydet): {type(e).__name__}")
+        return 1
+    log(f"KOSU {dp.d['kosu']}: asama {dp.d['asama']} | istek {api.calls} | hata {ok.hata} | kota {bas_kalan} -> {api.remaining}"
         f" | ilan {len(dp.ilan)} | yorum {len(dp.yorum)} | magaza {len(dp.magaza)}")
     return kod
 

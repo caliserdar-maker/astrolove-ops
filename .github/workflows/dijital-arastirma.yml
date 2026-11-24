@@ -55,6 +55,8 @@ jobs:
         run: |
           set -euo pipefail
           umask 077; mkdir -p out
+          rclone lsf "gdrive:ASTROLOVE" --dirs-only -q > /dev/null || { echo "::error::Drive ASTROLOVE okunamadi"; exit 1; }
+          rclone mkdir "gdrive:ASTROLOVE/DIJITAL_ARASTIRMA_20261125" -q || { echo "::error::Drive klasoru acilamadi"; exit 1; }
           rclone copy "gdrive:ASTROLOVE/DIJITAL_ARASTIRMA_20261125" out -q || { echo "::error::Drive okunamadi"; exit 1; }
           echo "durum dosyasi: $([ -f out/durum.json ] && echo var || echo yok) | dosya $(find out -type f | wc -l)"
       - name: Oku (salt okur)
