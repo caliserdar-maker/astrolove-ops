@@ -6,15 +6,23 @@ name: dijital-arastirma
 # Kilit: kilit_bekle (Etsy kumesi). Kosu en fazla --dk dk Etsy okur; kilit kumesinde baska aktif kosu gorurse 60 sn icinde yol
 # verir (durum kaydedilir, cikis 4). Kota: kalan < %20 gunluk sinir -> DUR (cikis 3); etsy_common sert tabani 10 aynen.
 # Tetik: yalniz main'de config/dijital_arastirma.trigger degisikligi (emsal pod-audit) ya da elle. Zamanlama YOK.
+# ZINCIR (Merkez 25 Kas, Serdar "hicbir oturum beni beklemeyecek"): kosu durumu Drive'a yazdiysa, cikis 0 (sure doldu) ya da 4 (yol
+# verildi) ve asama 'bitti' degilse kendini workflow_dispatch ile yeniden tetikler (gh workflow run, github.token; emsal
+# siparis-giris). Durur: kota (3), hata (1), bitti, zincir >= ZINCIR_AZAMI ya da saat >= SON_UTC (09:00 TR teslim icin 05:15Z).
 on:
   push:
     branches: [main]
     paths:
       - "config/dijital_arastirma.trigger"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      zincir:
+        description: "zincir sirasi (otomatik)"
+        required: false
+        default: "0"
 permissions:
   contents: read
-  actions: read
+  actions: write
 jobs:
   oku:
     runs-on: ubuntu-latest
@@ -89,8 +97,30 @@ jobs:
           rclone copy out "gdrive:ASTROLOVE/DIJITAL_ARASTIRMA_20261125" -q
           A=$(python3 -c "import json; d=json.load(open('out/durum.json')); print(d.get('asama'), d.get('kosu'))")
           echo "::notice::Drive: ASTROLOVE/DIJITAL_ARASTIRMA_20261125/ ($(find out -type f | wc -l) dosya) | asama/kosu $A"
+          echo "ASAMA=${A%% *}" >> "$GITHUB_ENV"
+          echo "YAZILDI=1" >> "$GITHUB_ENV"
       - if: always()
         run: rm -rf ~/.config/rclone out _t.log
+      - name: Zincir (kendini yeniden tetikle)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ZINCIR: ${{ github.event.inputs.zincir || '0' }}
+          ZINCIR_AZAMI: "30"
+          SON_UTC: "2026-11-25T05:15:00Z"
+        run: |
+          set -euo pipefail
+          K="${KOD:-1}"; A="${ASAMA:-}"; Y="${YAZILDI:-0}"
+          case "$ZINCIR" in ''|*[!0-9]*) echo "::error::zincir girdisi gecersiz"; exit 1;; esac
+          SIMDI=$(date -u +%s); SON=$(date -u -d "$SON_UTC" +%s)
+          if [ "$Y" != 1 ]; then echo "::notice::ZINCIR DUR: durum Drive'a yazilmadi"; exit 0; fi
+          if [ -z "$A" ] || [ "$A" = bitti ]; then echo "::notice::ZINCIR DUR: asama ${A:-bos}"; exit 0; fi
+          if [ "$K" != 0 ] && [ "$K" != 4 ]; then echo "::notice::ZINCIR DUR: cikis $K (3 kota, 1 hata)"; exit 0; fi
+          if [ "$ZINCIR" -ge "$ZINCIR_AZAMI" ]; then echo "::notice::ZINCIR DUR: azami $ZINCIR_AZAMI"; exit 0; fi
+          if [ "$SIMDI" -ge "$SON" ]; then echo "::notice::ZINCIR DUR: saat >= $SON_UTC"; exit 0; fi
+          N=$((ZINCIR + 1))
+          gh workflow run dijital-arastirma.yml -R "$GITHUB_REPOSITORY" --ref main -f zincir="$N"
+          echo "::notice::ZINCIR: sonraki kosu tetiklendi (zincir $N, asama $A, cikis $K)"
       - name: Sonuc (1 ise kirmizi)
         run: |
           echo "cikis kodu: ${KOD:-?}"
