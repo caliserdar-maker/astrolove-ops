@@ -12,6 +12,8 @@ import re
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import video_kaynak
+
 TZ = ZoneInfo("Europe/Istanbul")
 SUTUNLAR = ["satir_no", "tarih_saat_TR", "platform", "tur", "medya", "metin", "link", "pano", "yz_beyani",
             "gorunurluk", "ONAY", "ONAY_OZET", "DURUM", "sonuc_no", "not"]
@@ -68,6 +70,10 @@ def dogrula(satir):
         h.append("karusel 2-10 medya")
     if tur not in ("karusel",) and len(m) > 1:
         h.append("bu turde tek medya")
+    for mm in m:
+        vh = video_kaynak.medya_hatasi(mm)
+        if vh:
+            h.append(vh)
     if (satir.get("yz_beyani") or "").strip() not in ("evet", "hayir"):
         h.append("yz_beyani evet/hayir degil")
     if p == "youtube" and (satir.get("gorunurluk") or "").strip() not in ("public", "private", "unlisted"):

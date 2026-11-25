@@ -56,6 +56,9 @@ CONF = TMP / "rclone.conf"
 CONF.write_text('[gdrive]\ntype = drive\nclient_id = cid\nclient_secret = GSECRET0123456789\ntoken = {"refresh_token": "GREFRESH0123456789"}\n')
 os.environ.update(RCLONE_CONFIG=str(CONF), SOSYAL_TAKVIM_ID="SHEET1", GITHUB_ACTIONS="", OPS_ADMIN_TOKEN="ghADMIN0123456789",
                   YT_CLIENT_ID="ytcid", YT_CLIENT_SECRET="YTSECRET0123456789", IG_APP_ID="igapp", IG_APP_SECRET="IGSECRET0123456789")
+VAYAR = TMP / "video_kaynak.json"
+VAYAR.write_text(json.dumps({"klasor": "SOSYAL", "ad_kalibi": "{a}-and-{b}-pin-video.mp4", "onay": "SERDAR_20261126"}))
+os.environ["SOSYAL_VIDEO_KAYNAK"] = str(VAYAR)
 for k in ("RCLONE_CONFIG_GDRIVE_CLIENT_ID", "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET"):
     os.environ.pop(k, None)
 
@@ -283,10 +286,10 @@ def sifirla():
     DRIVE.mkdir()
     MEDIA.clear()
     kimlikleri_koy()
-    drive_koy("SOSYAL/r.mp4", b"REEL")
+    drive_koy("SOSYAL/cancer-and-libra-pin-video.mp4", b"REEL")
     drive_koy("SOSYAL/a.jpg", b"JPG-A")
     drive_koy("SOSYAL/b.jpg", b"JPG-B")
-    drive_koy("SOSYAL/s.mp4", b"SHORT")
+    drive_koy("SOSYAL/aries-and-leo-pin-video.mp4", b"SHORT")
     genel(1, 1, ".mp4", b"REEL")
     genel(2, 1, ".jpg", b"JPG-A")
     genel(2, 2, ".jpg", b"JPG-B")
@@ -295,10 +298,10 @@ def sifirla():
 def senaryo_ana():
     sifirla()
     acik()
-    rows = [satir(1, "instagram", "reel", "SOSYAL/r.mp4"), satir(2, "instagram", "karusel", "SOSYAL/a.jpg;SOSYAL/b.jpg"),
-            satir(3, "threads", "metin"), satir(4, "facebook", "reel", "SOSYAL/r.mp4"),
-            satir(5, "facebook", "gorsel", "SOSYAL/a.jpg"), satir(6, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="private"),
-            satir(7, "instagram", "reel", "SOSYAL/r.mp4", onay=False),
+    rows = [satir(1, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4"), satir(2, "instagram", "karusel", "SOSYAL/a.jpg;SOSYAL/b.jpg"),
+            satir(3, "threads", "metin"), satir(4, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4"),
+            satir(5, "facebook", "gorsel", "SOSYAL/a.jpg"), satir(6, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="private"),
+            satir(7, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", onay=False),
             satir(8, "threads", "metin", durum="BEKLIYOR 2026-12-08T09:00"),
             satir(9, "threads", "metin", saat=-7), satir(10, "threads", "metin", saat=+2)]
     r11 = satir(11, "threads", "metin")
@@ -333,7 +336,7 @@ def senaryo_ana():
 def senaryo_kuru():
     sifirla()
     acik(hepsi=[])
-    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/r.mp4"), satir(9, "threads", "metin", saat=-7)])
+    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4"), satir(9, "threads", "metin", saat=-7)])
     rc, out = kos(otr, "yayin", "--kuru")
     yazim = [c for c in otr.cagri if c[0] != "GET" and "oauth2" not in c[1]]
     kontrol("kuru: yazim 0", not yazim and not list(DRIVE.rglob("SOSYAL_HATA_*")))
@@ -343,7 +346,7 @@ def senaryo_kuru():
 def senaryo_kapali():
     sifirla()
     acik(hepsi=["YAYIN_FB"])
-    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/r.mp4")])
+    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4")])
     kos(otr, "yayin")
     kontrol("FAIL anahtar kapali: yayin yok", satir_al(otr, 1)["DURUM"] == "" and not any("/media" in c[1] for c in otr.cagri))
     os.environ["SOSYAL_YAYIN_ACIK"] = ""
@@ -355,7 +358,7 @@ def senaryo_medya_farkli():
     sifirla()
     acik()
     genel(1, 1, ".mp4", b"BASKA")
-    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/r.mp4")])
+    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4")])
     rc, out = kos(otr, "yayin")
     kontrol("FAIL genel medya farkli: yayin yok", satir_al(otr, 1)["DURUM"] == "" and rc == 1 and "MEDYA" in out)
 
@@ -363,7 +366,7 @@ def senaryo_medya_farkli():
 def senaryo_publish_500():
     sifirla()
     acik()
-    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/r.mp4")])
+    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4")])
     otr.publish_500 = True
     rc, out = kos(otr, "yayin")
     d = satir_al(otr, 1)
@@ -471,12 +474,12 @@ def senaryo_gizli_test():
     os.environ["SOSYAL_YAYIN_ACIK"] = ""
     for x in calis.ANAHTAR.values():
         os.environ[x] = ""
-    rows = [satir(20, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="private"),
-            satir(21, "facebook", "reel", "SOSYAL/r.mp4", gorunurluk="taslak"),
+    rows = [satir(20, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="private"),
+            satir(21, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", gorunurluk="taslak"),
             satir(24, "facebook", "gorsel", "SOSYAL/a.jpg", gorunurluk="taslak"),
-            satir(22, "instagram", "reel", "SOSYAL/r.mp4"),
-            satir(23, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="public"),
-            satir(25, "facebook", "reel", "SOSYAL/r.mp4")]
+            satir(22, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4"),
+            satir(23, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="public"),
+            satir(25, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4")]
     genel(22, 1, ".mp4", b"REEL")
     otr = Oturum(rows)
     rc, out = kos(otr, "yayin", "--gizli-test", "20")
@@ -496,21 +499,52 @@ def senaryo_gizli_test():
         rc, out = kos(otr, "yayin", "--gizli-test", n)
         yazim = [c for c in otr.cagri[once:] if c[0] != "GET" and "oauth2" not in c[1]]
         kontrol(f"FAIL gizli test {ad}: DUR, yazim yok", rc == 2 and not yazim and "DUR" in out)
-    otr2 = Oturum([satir(28, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="private", onay=False),
-                   satir(29, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="private", saat=+3)])
+    otr2 = Oturum([satir(28, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="private", onay=False),
+                   satir(29, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="private", saat=+3)])
     for n, ad in (("28", "onaysiz"), ("29", "zamani gelmemis")):
         rc, out = kos(otr2, "yayin", "--gizli-test", n)
         kontrol(f"FAIL gizli test {ad}: cikis 1 + 'yayinlanmadi'", rc == 1 and "yayinlanmadi" in out
                 and not any("upload/youtube" in c[1] for c in otr2.cagri))
     sifirla()
     acik()
-    otr = Oturum([satir(26, "facebook", "reel", "SOSYAL/r.mp4")])
+    otr = Oturum([satir(26, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4")])
     kos(otr, "yayin")
     fin = [c for c in otr.cagri if c[1].endswith("/video_reels") and (c[3] or {}).get("upload_phase") == "finish"]
     kontrol("FB normal satir: PUBLISHED (gizli kip yalniz taslakta)", fin and fin[0][3]["video_state"] == "PUBLISHED")
-    otr = Oturum([satir(27, "facebook", "reel", "SOSYAL/r.mp4", gorunurluk="gizli")])
+    otr = Oturum([satir(27, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", gorunurluk="gizli")])
     rc, _ = kos(otr, "yayin")
     kontrol("FAIL FB gecersiz gorunurluk: GECERSIZ, yayin yok", rc == 1 and not any(c[1].endswith("/video_reels") for c in otr.cagri))
+
+
+def senaryo_video_kaynak():
+    import video_kaynak as V
+    sifirla()
+    eski = VAYAR.read_text()
+    tam = json.loads(eski)
+    kontrol("video kaynagi: dogru yol gecer", V.medya_hatasi("SOSYAL/cancer-and-libra-pin-video.mp4") == "")
+    kontrol("video kaynagi: yol yardimcisi", V.yol("CANCER_LIBRA") == "SOSYAL/cancer-and-libra-pin-video.mp4")
+    kontrol("video kaynagi: ayni burc cifti gecer", V.medya_hatasi("SOSYAL/leo-and-leo-pin-video.mp4") == "")
+    kontrol("video kaynagi: JPEG kontrol disi", V.medya_hatasi("BASKA/a.jpg") == "")
+    for yol, ad in (("ASTROLOVE/TEMP/SOSYAL_VIDEO_P_78_20261020/cancer-and-libra-astroloveart-reel.mp4", "eski mockup videosu"),
+                    ("BASKA/cancer-and-libra-pin-video.mp4", "yanlis klasor"), ("SOSYAL/libra-and-cancer-pin-video.mp4", "alfabetik degil"),
+                    ("SOSYAL/cancer-and-dragon-pin-video.mp4", "gecersiz burc"), ("SOSYAL/sub/cancer-and-libra-pin-video.mp4", "alt klasor")):
+        kontrol(f"FAIL video kaynagi: {ad}", V.medya_hatasi(yol) != "")
+    for bozuk, ad in (({**tam, "onay": ""}, "onay bos"), ({**tam, "klasor": ""}, "klasor bos"), ({**tam, "onay": "serdar"}, "onay bicimi")):
+        VAYAR.write_text(json.dumps(bozuk))
+        kontrol(f"FAIL video kaynagi ayari {ad}: hicbir mp4 gecmez", V.medya_hatasi("SOSYAL/cancer-and-libra-pin-video.mp4") != "")
+    VAYAR.write_text(json.dumps({**tam, "onay": ""}))
+    acik()
+    otr = Oturum([satir(30, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="private")])
+    rc, _ = kos(otr, "yayin")
+    kontrol("FAIL ayar onaysizken onayli video satiri yayinlanmaz (GECERSIZ)", rc == 1 and satir_al(otr, 30)["DURUM"] == ""
+            and not any("upload/youtube" in c[1] for c in otr.cagri))
+    otr = Oturum([satir(31, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", onay=False)])
+    rc, _ = kos(otr, "onayla", "--satirlar", "31", "--onay", "SERDAR_20261207", "--asama", "hazirla", "--plan", str(TMP / "p31.json"))
+    kontrol("FAIL ayar onaysizken onayla video satirini hazirlamaz", rc == 1 and "31" not in json.loads((TMP / "p31.json").read_text())["satirlar"])
+    VAYAR.write_text(eski)
+    gercek = json.loads((KOK.parents[2] / "config/sosyal_video_kaynak.json").read_text())
+    kontrol("depodaki ayar: klasor ve onay BOS (video B onayina kadar yayin yok)", gercek.get("klasor") == "" and gercek.get("onay") == ""
+            and gercek.get("ad_kalibi") == "{a}-and-{b}-pin-video.mp4")
 
 
 def senaryo_yml():
@@ -659,7 +693,7 @@ def senaryo_yenile():
 def senaryo_istatistik_kontrol():
     import istatistik
     sifirla()
-    r = satir(1, "instagram", "reel", "SOSYAL/r.mp4", durum="TAMAM 2026-12-08T09:00")
+    r = satir(1, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", durum="TAMAM 2026-12-08T09:00")
     r["sonuc_no"] = "IGMEDIA77"
     otr = Oturum([r, satir(2, "threads", "metin")])
     with contextlib.redirect_stdout(io.StringIO()):
@@ -685,7 +719,7 @@ def mutasyon():
     secim.ONAY_RX = re.compile(r".*")
     sifirla()
     acik()
-    otr = Oturum([satir(7, "instagram", "reel", "SOSYAL/r.mp4", onay=False)])
+    otr = Oturum([satir(7, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", onay=False)])
     genel(7, 1, ".mp4", b"REEL")
     otr.satirlar[0][otr.baslik.index("ONAY_OZET")] = secim.ozet(satir_al(otr, 7), [hashlib.md5(b"REEL").hexdigest()])
     kos(otr, "yayin")
@@ -697,7 +731,7 @@ def mutasyon():
 if __name__ == "__main__":
     try:
         for f in (senaryo_ana, senaryo_kuru, senaryo_kapali, senaryo_medya_farkli, senaryo_publish_500, senaryo_son_an,
-                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_gizli_test, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
+                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_gizli_test, senaryo_video_kaynak, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
             try:
                 f()
             except Exception as e:

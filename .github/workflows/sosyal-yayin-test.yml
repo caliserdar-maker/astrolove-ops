@@ -9,6 +9,7 @@ on:
   push:
     paths:
       - "scripts/sosyal/yayin/**"
+      - "config/sosyal_video_kaynak.json"
       - ".github/workflows/sosyal-yayin*.yml"
       - ".github/workflows/sosyal-izin.yml"
       - ".github/workflows/sosyal-token-yenile.yml"
