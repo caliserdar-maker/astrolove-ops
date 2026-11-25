@@ -145,7 +145,9 @@ jobs:
         c.save(os.path.join(o, 'KONTAK_SEVGILILER_ORNEK.jpg'), quality=92)
         PY
         ls -la _o _o/video_kareler
-        rclone sync _o "gdrive:$KLASOR" --drive-root-folder-id "$OFIS" -q && echo "::warning::DRIVE OFIS/$KLASOR $(rclone lsf "gdrive:$KLASOR" --drive-root-folder-id "$OFIS" | tr '\n' ' ')"
+        HEDEF="$KLASOR"
+        if [ "${PIN_RC:-1}" != 0 ] || [ "${VIDEO_RC:-1}" != 0 ]; then HEDEF="$KLASOR/FAIL_${{ github.run_id }}"; fi   # FAIL ciktisi onayli adlarla karismaz
+        rclone copy _o "gdrive:$HEDEF" --drive-root-folder-id "$OFIS" -q && echo "::warning::DRIVE OFIS/$HEDEF $(rclone lsf "gdrive:$HEDEF" --drive-root-folder-id "$OFIS" | tr '\n' ' ')"
         rm -rf _w ~/.config/rclone
         echo "::warning::SONUC PIN_RC=${PIN_RC:-1} VIDEO_RC=${VIDEO_RC:-1}"
         [ "${PIN_RC:-1}" = 0 ] && [ "${VIDEO_RC:-1}" = 0 ]

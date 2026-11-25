@@ -15,7 +15,8 @@ sys.path.insert(0, os.path.join(KOK, 'scripts', 'etsy'))
 from etsy_common import METIN_KESIN  # noqa: E402
 
 EK = [('free', r'\bfree\b'), ('fiyat', r'\$\s*\d|\bUSD\b'),
-      ('tarih/sure vaadi', r'\bby\s+(?:feb|february|valentine)|\bfebruary\s+\d|\bwithin\s+\d+\s+(?:hours?|days?)\b|\barrives?\b|\bguarantee'),
+      ('tarih/sure vaadi', r'\bby\s+(?:feb|february|valentine)|\bfebruary\s+\d|\bfeb\s+\d|\bwithin\s+\d+\s+(?:hours?|days?)\b|\barrives?\b|\bguarantee'
+      r'|\bin\s+time\s+for\b|\bships?\s+(?:in|within)\b|\bnext[\s-]day\b|\bfast\s+(?:delivery|shipping)\b|\bexpress\b|\bovernight\b'),
       ('marka AstroLove (Art yok)', r'\bAstroLove(?!Art)\b')]
 TERIM = ['zodiac couple wall art', 'astrology gift ideas for couples', 'zodiac compatibility']
 
@@ -54,7 +55,9 @@ def main():
         ok = all(o for _, o, _ in kontrol(rows))
         kotu = dict(rows[0])
         testler = {'uzun tire': dict(kotu, aciklama=kotu['aciklama'] + ' — x'), 'free': dict(kotu, baslik=kotu['baslik'] + ' free'),
-                   'tarih': dict(kotu, aciklama='Arrives by Feb 14.'), 'uzunluk': dict(kotu, aciklama='a ' * 300),
+                   'tarih': dict(kotu, aciklama='Arrives by Feb 14.'), 'zamaninda': dict(kotu, aciklama='In time for Valentine.'),
+                   'kargo': dict(kotu, aciklama='Ships in 2 days.'), 'ertesi gun': dict(kotu, aciklama='Next day delivery.'),
+                   'hizli': dict(kotu, aciklama='Fast shipping.'), 'uzunluk': dict(kotu, aciklama='a ' * 300),
                    'marka': dict(kotu, alt_metin='AstroLove poster'), 'kalip': dict(kotu, baslik='Valentine gift'),
                    'link': dict(kotu, link='https://astroloveart.etsy.com/listing/1'), 'premium': dict(kotu, aciklama='premium paper')}
         sonuc = [('bilinen PASS', ok)] + [(f'FAIL: {ad}', not all(o for _, o, _ in kontrol([r]))) for ad, r in testler.items()]
