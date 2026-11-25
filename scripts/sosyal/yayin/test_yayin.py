@@ -460,8 +460,9 @@ def senaryo_inceleme_bulgulari():
     kontrol("gelecek tarihli eksik taslak uyari vermez", rc == 0 and not list(DRIVE.rglob("SOSYAL_HATA_*")))
     sifirla()
     genel(12, 1, ".jpg", JPG_A)
-    genel(13, 1, ".jpg", JPG_A)
-    otr = Oturum([satir(12, "threads", "gorsel", "SOSYAL/a.jpg"), satir(13, "instagram", "hikaye", "SOSYAL/a.jpg")])
+    drive_koy("SOSYAL/h916.jpg", jpeg(1080, 1920))
+    genel(13, 1, ".jpg", jpeg(1080, 1920))
+    otr = Oturum([satir(12, "threads", "gorsel", "SOSYAL/a.jpg"), satir(13, "instagram", "hikaye", "SOSYAL/h916.jpg")])
     rc, _ = kos(otr, "yayin")
     th = [c for c in otr.cagri if c[1].endswith("/threads") and c[0] == "POST"]
     ig = [c for c in otr.cagri if c[1].endswith("/media") and c[0] == "POST"]
@@ -686,6 +687,17 @@ def senaryo_boyut():
     for veri, beklenen, ad in ((JPG_A, (1080, 1350), "4:5"), (JPG_23, (1000, 1500), "2:3"), (b"JPG degil", None, "bozuk")):
         f.write_bytes(veri)
         kontrol(f"jpeg_boyut: {ad}", M.jpeg_boyut(f) == beklenen)
+    def exifli(yon):   # CI'da Pillow yok: APP1 Exif elle (MM, IFD0, Orientation SHORT)
+        tiff = b"MM\x00*\x00\x00\x00\x08" + (1).to_bytes(2, "big") + (0x0112).to_bytes(2, "big") + (3).to_bytes(2, "big") \
+            + (1).to_bytes(4, "big") + yon.to_bytes(2, "big") + b"\x00\x00" + b"\x00\x00\x00\x00"
+        app1 = b"Exif\x00\x00" + tiff
+        return JPG_A[:2] + b"\xff\xe1" + (len(app1) + 2).to_bytes(2, "big") + app1 + JPG_A[2:]
+    f.write_bytes(exifli(6))
+    kontrol("FAIL jpeg_boyut: EXIF yon 6 reddedilir", M.jpeg_boyut(f) is None)
+    f.write_bytes(exifli(1))
+    kontrol("jpeg_boyut: EXIF yon 1 gecer", M.jpeg_boyut(f) == (1080, 1350))
+    f.write_bytes(JPG_A[:2] + b"\xff\xff" + JPG_A[2:])
+    kontrol("jpeg_boyut: 0xFF dolgu baytlari", M.jpeg_boyut(f) == (1080, 1350))
     sifirla()
     drive_koy("SOSYAL/p23.jpg", JPG_23)
     acik()
@@ -695,6 +707,11 @@ def senaryo_boyut():
         rc, out = kos(otr, "yayin")
         kontrol(f"FAIL {p}: 2:3 pin gonderilmez (MEDYA)", rc == 1 and "1080x1350" in out and satir_al(otr, 60)["DURUM"] == ""
                 and not any(c[0] == "POST" and ("/media" in c[1] or "/photos" in c[1] or c[1].endswith("/threads")) for c in otr.cagri))
+    drive_koy("SOSYAL/h.jpg", jpeg(1080, 1920))
+    genel(62, 1, ".jpg", jpeg(1080, 1920))
+    otr = Oturum([satir(62, "instagram", "hikaye", "SOSYAL/h.jpg")])
+    rc, _ = kos(otr, "yayin")
+    kontrol("IG hikaye: 9:16 1080x1920 gecer", rc == 0 and satir_al(otr, 62)["DURUM"].startswith("TAMAM"))
     otr = Oturum([satir(61, "instagram", "gorsel", "SOSYAL/p23.jpg", onay=False)])
     rc, _ = kos(otr, "onayla", "--satirlar", "61", "--onay", "SERDAR_20261207", "--asama", "hazirla", "--plan", str(TMP / "p61.json"), "--medya-kok", str(TMP / "m61"))
     kontrol("FAIL onayla: 2:3 gorsel IG satiri hazirlanmaz", rc == 1 and "61" not in json.loads((TMP / "p61.json").read_text())["satirlar"])
