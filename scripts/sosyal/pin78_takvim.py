@@ -16,7 +16,7 @@ Kontrol (PASS/FAIL, cikis 1): 312 satir, cift basina 4 (her turden 1), TAKVIM GU
 Not: Metricool kuyrugunda 12 Ara'ya kadar gunde ~4 kupa pini daha var (strateji 7.1 [09]); gunluk toplam ~11 olur.
 Kullanim: pin78_takvim.py --cikti TAKVIM.csv [--baslangic 2026-11-25]
 """
-import argparse, csv, os, sys
+import argparse, csv, os, re, sys
 from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta
 
@@ -51,7 +51,7 @@ def plan(bas):
             hh = SAAT[s]; t = datetime.combine(gun + timedelta(days=1), datetime.strptime(hh, '%H:%M').time())
             sur = 'sevgililer' if t.date() < GENEL_BAS else 'genel'
             out.append({'plan_gunu': g + 1, 'tarih_saat_tr': t.strftime('%Y-%m-%d %H:%M'), 'cift': c, 'tur': tur,
-                        'listing_id': ids.get(c, ''), 'link': f"https://www.etsy.com/listing/{ids.get(c, '')}",
+                        'listing_id': ids.get(c, ''), 'link': f"https://astroloveart.etsy.com/listing/{ids.get(c, '')}",   # Share & Save bicimi (KARARLAR_20261125_57)
                         'pano': PANO[(tur, sur)][0], 'pano_bolumu': PANO[(tur, sur)][1],
                         'kanal': 'Metricool' if t.date() < METRICOOL_SON else 'kendi sistem (Pinterest yolu HAZIR DEGIL)',
                         'metin_surumu': sur})
@@ -77,7 +77,9 @@ def kontrol(out):
             minara = min(minara, (t - son[r['listing_id']]).total_seconds() / 86400)
         son[r['listing_id']] = t
     S.append(('ayni ilan arasi >= 7 gun', minara >= 7, f'en az {minara:.2f} gun'))
-    S.append(('78 ilan id, link bicimi', len({r['listing_id'] for r in out if r['listing_id'].isdigit()}) == 78, ''))
+    S.append(('78 ilan id', len({r['listing_id'] for r in out if r['listing_id'].isdigit()}) == 78, ''))
+    S.append(('link Share & Save bicimi (astroloveart.etsy.com/listing/<id>)',
+              all(re.fullmatch(r'https://astroloveart\.etsy\.com/listing/\d+', r['link']) for r in out), ''))
     pano = Counter((r['pano'], r['pano_bolumu']) for r in out)
     for k, n in MEVCUT.items():
         if k in pano:          # yalniz bu planin pin ekledigi pano/bolum

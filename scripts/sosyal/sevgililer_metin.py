@@ -4,7 +4,7 @@ Kapilar (PASS/FAIL), her satir: baslik <= 100, aciklama <= 500, alt metin <= 500
 etsy_common.METIN_KESIN (tek kaynak: tire, premium, long-lasting, kagit/tedarikci adi ...) + "free" + fiyat ($, USD) +
 kesin tarih/sure vaadi ("by Feb", "February 14", "within N hours/days", "arrives", "guaranteed"); marka "AstroLove" yalniz
 "AstroLoveArt" olarak; baslik "<A> and <B> Combined Zodiac Symbol" kalibiyla baslar (PINLER_ORNEK kalibi); link
-https://www.etsy.com/listing/<rakam>; ayni setteki aciklamalarda 12+ kelimelik ortak dizi yok (kopya cumle).
+https://astroloveart.etsy.com/listing/<rakam> (Share & Save); ayni setteki aciklamalarda 12+ kelimelik ortak dizi yok (kopya cumle).
 Set geneli: aranan terimlerden en az biri her aciklamada ("zodiac couple wall art", "astrology gift ideas for couples",
 "zodiac compatibility"). --oz-test: bilinen PASS (gercek dosya) + bilinen FAIL satirlari.
 """
@@ -18,6 +18,7 @@ EK = [('free', r'\bfree\b'), ('fiyat', r'\$\s*\d|\bUSD\b'),
       ('tarih/sure vaadi', r'\bby\s+(?:feb|february|valentine)|\bfebruary\s+\d|\bfeb\s+\d|\bwithin\s+\d+\s+(?:hours?|days?)\b|\barrives?\b|\bguarantee'
       r'|\bin\s+time\s+for\b|\bships?\s+(?:in|within)\b|\bnext[\s-]day\b|\bfast\s+(?:delivery|shipping)\b|\bexpress\b|\bovernight\b'),
       ('marka AstroLove (Art yok)', r'\bAstroLove(?!Art)\b')]
+LINK_RX = r'https://astroloveart\.etsy\.com/listing/\d+'
 TERIM = ['zodiac couple wall art', 'astrology gift ideas for couples', 'zodiac compatibility']
 
 
@@ -34,7 +35,8 @@ def kontrol(rows):
         S.append((f'{k} aciklama <= 500', len(r['aciklama']) <= 500, len(r['aciklama'])))
         S.append((f'{k} alt metin <= 500', len(r['alt_metin']) <= 500, len(r['alt_metin'])))
         S.append((f'{k} baslik kalibi', r['baslik'].startswith(f'{a} and {b} Combined Zodiac Symbol'), r['baslik'][:45]))
-        S.append((f'{k} link bicimi', re.fullmatch(r'https://www\.etsy\.com/listing/\d+', r['link']) is not None, r['link']))
+        # Share & Save (Serdar 25 Kas, KARARLAR_20261125_57): magaza alt alan adi + ilan no; Etsy: uygun linkler shopname.etsy.com bicimi
+        S.append((f'{k} link bicimi (Share & Save)', re.fullmatch(LINK_RX, r['link']) is not None, r['link']))
         for alan in ('baslik', 'aciklama', 'alt_metin'):
             y = tara(r[alan]); S.append((f'{k} {alan} yasak yok', not y, y))
         S.append((f'{k} aranan terim', any(t in r['aciklama'].lower() for t in TERIM), ''))
@@ -65,7 +67,7 @@ def main():
                    'kargo': dict(kotu, aciklama='Ships in 2 days.'), 'ertesi gun': dict(kotu, aciklama='Next day delivery.'),
                    'hizli': dict(kotu, aciklama='Fast shipping.'), 'uzunluk': dict(kotu, aciklama='a ' * 300),
                    'marka': dict(kotu, alt_metin='AstroLove poster'), 'kalip': dict(kotu, baslik='Valentine gift'),
-                   'link': dict(kotu, link='https://astroloveart.etsy.com/listing/1'), 'premium': dict(kotu, aciklama='premium paper')}
+                   'link': dict(kotu, link='https://www.etsy.com/listing/1'), 'premium': dict(kotu, aciklama='premium paper')}
         sonuc = [('bilinen PASS', ok)] + [(f'FAIL: {ad}', not all(o for _, o, _ in kontrol([r]))) for ad, r in testler.items()]
         if any(r.get('surum') == 'genel' for r in rows):
             gr = next(r for r in rows if r.get('surum') == 'genel')
