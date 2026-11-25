@@ -11,8 +11,9 @@ Kapilar (PASS/FAIL):
      3.0-4.0 sn;
      tam gorunur sure (>= %90) bilgi olarak yazilir.
   6) Muzik: integrated -16 LUFS +-1.0 (muzik_ekle.py kurali), --muzik verilirse.
-  7) Onayli Drive P videosuyla (--onayli_mp4) 2 / 5 / 8 / 10.5 sn karelerinde ortalama fark <= 2.0 (kapak_basa.py ESIK;
-     25 Kas ilk olcum 0.86-1.32). Ilk 1.5 sn (kapak + gecis) ve son kararma bu kapinin disinda.
+  7) Onayli Drive P videosuyla (--onayli_mp4) 2 / 5 / 8 / 10.5 sn karelerinde ortalama fark <= 2.0 (kapak_basa.py ESIK) VE
+     p99 <= 10 (25 Kas olcum: ayni kaynak ort 0.86-1.32 p99 4-5; farkli isimli poster ort 1.03-1.86 p99 6-20, ortalama tek basina
+     ayirt edemedi). Ilk 1.5 sn (kapak + gecis) ve son kararma bu kapinin disinda.
 Kullanim: pin78_video_qc.py --b DIR --p DIR --bilgi bilgi.json --sure 15 --video V.mp4 --kapak_qc Q.json [--onayli_mp4 O.mp4] [--oz-test]
 """
 import argparse, glob, json, os, shutil, subprocess, sys, tempfile
@@ -112,7 +113,7 @@ def kapilar(g):
         S.append(('muzik -16 LUFS +-1.0', L is not None and abs(L + 16) <= 1.0, L))
     if g.video and g.onayli_mp4:
         for s_, m, p in kiyas(g.video, g.onayli_mp4, [2, 5, 8, 10.5]):
-            S.append((f'onayli P mp4 kare {s_:g}s ort fark <= 2.0', m <= 2.0, f'ort {m:.2f} p99 {p:.0f}'))
+            S.append((f'onayli P mp4 kare {s_:g}s ort <= 2.0 ve p99 <= 10', m <= 2.0 and p <= 10, f'ort {m:.2f} p99 {p:.0f}'))
     if g.kapak_qc:
         q = json.load(open(g.kapak_qc)) if os.path.exists(g.kapak_qc) else {}
         S.append(('kapak_basa QC PASS', q.get('sonuc') == 'PASS', q.get('sonuc', 'yok')))
@@ -141,7 +142,7 @@ def main():
             sonuc.append(('FAIL: yanlis sure beklentisi', not all(o for _, o, _ in video(g.video, g.sure + 1))))
         if g.video and g.onayli_mp4:
             # bilinen FAIL: 3 sn kaymis kare (ayni olmayan goruntu) kiyas kapisini gecemez
-            sonuc.append(('FAIL: kaymis kare kiyasi', any(m > 2.0 for _, m, _ in kiyas(g.video, g.onayli_mp4, [5], ofs=3.0))))
+            sonuc.append(('FAIL: kaymis kare kiyasi', any(m > 2.0 or p > 10 for _, m, p in kiyas(g.video, g.onayli_mp4, [5], ofs=3.0))))
             # bilinen FAIL: onayli 24 sn P videosunda son kart ~13 sn, 3-4 sn kapisini gecemez
             gor, _ = son_kart_sure(g.onayli_mp4, 22.0)
             sonuc.append((f'FAIL: 24 sn videoda olculen son kart ({gor:.1f} sn)', not (SON_ALT <= gor <= SON_UST)))
