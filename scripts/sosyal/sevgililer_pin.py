@@ -30,7 +30,17 @@ ALT_BANT = (160, 256)          # alt baslik (murekkep 172-244)
 CTA_BANT = (1365, 1475)        # alt satir (murekkep 1377-1463)
 B_SEMBOL_X1 = 690              # PIN_02 birlesik sembol murekkebi x 341-658 (+ pay)
 B_ETIKET_Y1 = 800              # PIN_02 burc etiketleri ve egri murekkebi y <= 793
-YASAK = ['—', '–', 'free', 'premium']
+KOK = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(KOK, 'scripts', 'etsy'))
+from etsy_common import METIN_KESIN  # noqa: E402
+import re  # noqa: E402
+PAY = 60                       # yazi ve kucuk poster icin kenar payi (px)
+MUREKKEP_ORAN = 87 / 88        # onayli "Add your names": 88 px yazi -> 87 px murekkep yuksekligi (olculdu 25 Kas)
+
+
+def yasak(metin):
+    bul = [ad for ad, rx in METIN_KESIN if re.search(rx, metin, re.I)]
+    return bul + (['free'] if re.search(r'\bfree\b', metin, re.I) else [])
 
 
 def murekkep(a, esik=60):
@@ -79,12 +89,16 @@ def uret(girdi, out, font_yol=FONT):
     pk = poster_kirp(p1)
     olcek = 0.30
     kp = pk.resize((round(pk.size[0] * olcek), round(pk.size[1] * olcek)), Image.LANCZOS)
-    px = 1000 - 50 - kp.size[0]; py = 840
+    px = 1000 - PAY - kp.size[0]; py = 840
     b2.paste(kp, (px, py))
     bilgi['B2_poster'] = {'kaynak': list(pk.size), 'olcek': olcek, 'kutu': [px, py, px + kp.size[0], py + kp.size[1]]}
     yol = {'K1_A2': os.path.join(out, 'SEVGILILER_K1_A2_CANCER_LEO_POSTER.jpg'),
            'K3_B2': os.path.join(out, 'SEVGILILER_K3_B2_CANCER_LEO_KART.jpg')}
     a2.save(yol['K1_A2'], quality=95, subsampling=0)
+    # 168 px telefon akisi benzetimi (1x, bicubic; en kotu durum, PINLER_ORNEK 6.2 yontemi)
+    ok = Image.new('RGB', (2 * 168 + 30, 252 + 20), (255, 255, 255))
+    ok.paste(a2.resize((168, 252), Image.BICUBIC), (10, 10)); ok.paste(b2.resize((168, 252), Image.BICUBIC), (188, 10))
+    ok.save(os.path.join(out, 'OKUNURLUK_168PX.png'))
     b2.save(yol['K3_B2'], quality=95, subsampling=0)
     return {'A2': a2, 'B2': b2, 'P1': p1, 'P2': p2}, bilgi, yol
 
@@ -107,14 +121,18 @@ def qc(g, bilgi, font_yol=FONT):
     kontrol('B2 bant/poster disi fark 0 (sembol, etiket, baslik onayli)', int(np.abs(B2 - P2)[m].max()) == 0,
             f'max {int(np.abs(B2 - P2)[m].max())}')
     kontrol('B2 poster sembol bandina degmez', kx[0] >= B_SEMBOL_X1 and kx[1] >= B_ETIKET_Y1, f'kutu {kx}')
+    kontrol('B2 poster kenar payi >= 60 px', kx[2] <= 1000 - PAY, f'sag kenar {kx[2]}')
     kontrol('B2 poster alt satira degmez', kx[3] <= CTA_BANT[0] - 40, f'alt {kx[3]}')
     kontrol('B2 poster yalniz kucultme', bilgi['B2_poster']['olcek'] <= 1.0, str(bilgi['B2_poster']['olcek']))
     for k, ban, boy, metin in (('A2', ALT_BANT, ALT_BOY, SUBTITLE_A2), ('B2', CTA_BANT, CTA_BOY, CTA_B2)):
         arr = np.asarray(g[k])[ban[0]:ban[1]]
         mk = murekkep(arr)
-        kontrol(f'{k} yazi kenar payi >= 60 px', mk is not None and mk[0] >= 60 and mk[2] <= 940, f'murekkep {mk}')
-        kontrol(f'{k} yazi 168 px akista >= 11 CSS px', boy * 0.168 >= 11, f'{boy} px -> {boy * 0.168:.1f}')
-        kontrol(f'{k} yazi yasak ifade yok', not any(y in metin.lower() for y in YASAK), metin)
+        kontrol(f'{k} yazi kenar payi >= 60 px', mk is not None and mk[0] >= PAY and mk[2] <= 1000 - PAY, f'murekkep {mk}')
+        # okunurluk CIKTIDAN: murekkep yuksekligi -> esdeger yazi boyu (onayli oran) -> 168 px akista CSS px
+        es = (mk[3] - mk[1] + 1) / MUREKKEP_ORAN if mk else 0
+        kontrol(f'{k} yazi 168 px akista >= 11 CSS px (olculen)', es * 0.168 >= 11, f'murekkep h {mk[3] - mk[1] + 1 if mk else 0} -> {es * 0.168:.1f}')
+        y = yasak(metin)
+        kontrol(f'{k} yazi yasak ifade yok (METIN_KESIN + free)', not y, f'{metin} {y}')
     return S
 
 
@@ -130,6 +148,16 @@ def oz_test(girdi):
     # FAIL 2: posteri sembol bandina tasiyan yerlesim
     b2 = dict(bilgi); b2['B2_poster'] = dict(bilgi['B2_poster']); b2['B2_poster']['kutu'] = [500, 840, 711, 1160]
     sonuc.append(('FAIL: poster sembol bandinda', any(s['sonuc'] == 'FAIL' for s in qc(g, b2))))
+    # FAIL 4: kenara tasan ve kucuk yazi (gercek qc() olcer)
+    g4 = dict(g); a = g['A2'].copy(); ImageDraw.Draw(a).rectangle([0, ALT_BANT[0], 999, ALT_BANT[1] - 1], fill=BG)
+    ImageDraw.Draw(a).text((10, ALT_BANT[0] + 40), 'tiny', font=ImageFont.truetype(FONT, 30), fill=RENK); g4['A2'] = a
+    s4 = {x['kapi']: x['sonuc'] for x in qc(g4, bilgi)}
+    sonuc.append(('FAIL: kenar payi', s4.get('A2 yazi kenar payi >= 60 px') == 'FAIL'))
+    sonuc.append(('FAIL: kucuk yazi', s4.get('A2 yazi 168 px akista >= 11 CSS px (olculen)') == 'FAIL'))
+    # FAIL 5: poster kenara tasiyor
+    b5 = dict(bilgi); b5['B2_poster'] = dict(bilgi['B2_poster']); b5['B2_poster']['kutu'] = [750, 840, 990, 1160]
+    sonuc.append(('FAIL: poster kenar payi', any(x['sonuc'] == 'FAIL' and 'poster kenar' in x['kapi'] for x in qc(g, b5))))
+    sonuc.append(('FAIL: yasak metin', bool(yasak('Free premium gift \u2014 long-lasting'))))
     # FAIL 3: baslik bandi degismis A2
     g3 = dict(g); a = g['A2'].copy(); ImageDraw.Draw(a).rectangle([480, 60, 500, 80], fill=BG); g3['A2'] = a
     sonuc.append(('FAIL: baslik degisti', any(s['sonuc'] == 'FAIL' for s in qc(g3, bilgi))))
