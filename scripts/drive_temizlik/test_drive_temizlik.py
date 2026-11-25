@@ -197,6 +197,8 @@ def kur(tmp):
     e("Q6", "DIJITAL_ESKI_V2", "TEMP", KL, 0); e("Q6a", "eski_dijital.png", "Q6", size=700)
     e("Q7", "KARISIK_GRUP_KL", "TEMP", KL, 0); e("Q7a", "uygun_dosya.png", "Q7"); e("Q7b", "baska_grup_dosya.png", "Q7")
     e("Q8", "KLASOR_GRUPLU_DOSYA.png", "TEMP")
+    e("Q9", "BOS_ESKI_KLASOR", "TEMP", KL, 0)
+    e("T22", "MUAF_SONRASI_AD", "TEMP", KL, 0); e("T22a", "muaf_alti.png", "T22")
     e(DOC_KIMLIK, "ESKI_TABLO_X", "TEMP", "application/vnd.google-apps.spreadsheet")
     e("T20", "KART_ON_20261001", "TEMP", KL, 0); e("T20s", "ALT_KART_KL", "T20", KL, 0); e("T20x", "kart_child.png", "T20s")
     e("T20y", "kart_yakin.png", "T20", mod=YAKIN)
@@ -221,9 +223,9 @@ def kur(tmp):
     kat = {fid: "KEEP" for fid in S.f}
     for fid in ["T1", "T1a", "T1b", "T2", "T2s", "T2s1", "T2y", "T2e", "T3", "T3a", "T4", "T4a", "T5", "T6", "T7", "T8",
                 "T9", "T10", "T11", "T11a", KOD_KIMLIK, "T12a", "T13", "T13a", "T14", "T15", "T16", "T16s", "T16x", "T16y",
-                "T17", "T17a", "T18", "T19", "T19n", "T19a", "S7", DOC_KIMLIK, "T20", "T20s", "T20x", "T20y", "T21a", BITISIK]:
+                "T17", "T17a", "T18", "T19", "T19n", "T19a", "S7", DOC_KIMLIK, "T20", "T20s", "T20x", "T20y", "T21a", BITISIK, "T22", "T22a"]:
         kat[fid] = "TRASH"
-    for fid in ["Q1", "Q1a", "Q2", "Q2a", "Q3", "Q3a", "Q4", "NOK", "Q5", "Q5a", "Q6", "Q6a", "Q7", "Q7a", "Q7b", "Q8"]:
+    for fid in ["Q1", "Q1a", "Q2", "Q2a", "Q3", "Q3a", "Q4", "NOK", "Q5", "Q5a", "Q6", "Q6a", "Q7", "Q7a", "Q7b", "Q8", "Q9"]:
         kat[fid] = "SERDAR_QUESTION"
     for fid in ["R1", "R1a", "R2", "R2a", "R3", "R3a", "R4"]:
         kat[fid] = "ARCHIVE"
@@ -242,7 +244,7 @@ def kur(tmp):
         if fid == "T6":
             mod = ESKI
         g = "Baska" if fid.startswith("Q5") or fid == "Q7b" else "Eski is akisi girdisi"
-        if fid in ("Q6", "Q7", "Q8"):
+        if fid in ("Q6", "Q7", "Q8", "Q9"):
             g = M.J3_KLASOR_GRUP
         sat.append([fid, o["name"], p, o["mimeType"], o["size"], ESKI, mod, k, "r", g, int(o["mimeType"] == KL), ""])
     for i in range(15):
@@ -255,7 +257,7 @@ def kur(tmp):
     Path(depo, "a.yml").write_text("girdi: gdrive:ASTROLOVE/TEMP/KODDA_GECEN_KLASOR/x\nb: TEMP/BANNER_${damga}\n"
                                    f"root_folder_id={KOD_KIMLIK}\nc: TEMP/UST_OKUNAN/\nd: TEMP/POD_GALLERY/\n"
                                    f"tablo: {DOC_KIMLIK}\ne: TEMP/OKUNAN_KEEP_KL\nf: {BITISIK}_ana\n"
-                                   f"T=\"gdrive,root_folder_id={TEMP_ID}:\"\n")
+                                   f"T=\"gdrive,root_folder_id={TEMP_ID}:\"\nU: gdrive,root_folder_id={TEMP_ID}:MUAF_SONRASI_AD/x\n")
     Path(depo, "k.py").write_text('yol = f"gdrive:ASTROLOVE/TEMP/KART_ON_{tarih}"\n')
     g = ["git", "-C", depo, "-c", "user.email=t@t", "-c", "user.name=t"]
     for c in (["init", "-q"], ["add", "."], ["commit", "-qm", "t"], ["checkout", "-qb", "eski"]):
@@ -317,6 +319,8 @@ def main():
         kontrol("yedek deseni atlanir", "T18" not in hep and at.get("T18") == "yedek_deseni")
         kontrol("ic '.' klasoru korunur", "T19" not in hep and "T19a" not in hep and at.get("T19n") == "kisisel_nokta")
         kontrol("J3 klasor grubu kok + secili grup birim", "Q6" in b and b["Q6"]["is_"] == "J3" and b["Q6"]["dosya"] == 1)
+        kontrol("J3 bos klasor tasinmaz", "Q9" not in hep and at.get("Q9") == "j3_bos_klasor")
+        kontrol("muaf kimlik sonrasi ad korunur", "T22" not in hep and at.get("T22") == "kodda_geciyor")
         kontrol("J3 klasor grubundaki DOSYA satiri secilmez", "Q8" not in hep and "Q8" not in at)
         kontrol("J3 klasorde baska grup dosya: bolunur", "Q7" not in hep and "Q7a" in b and at.get("Q7b") == "kategori_farkli")
         kontrol("TEMP kimligi kodda ama muaf (J1 calisir)", "T1" in b and "kimlik muafiyeti: 2 genel klasor" in log)
@@ -426,6 +430,28 @@ def main():
         for c in (["add", "."], ["commit", "-qm", "y"]):
             subprocess.run(g2 + c, check=True, capture_output=True)
         kontrol("alt cizgili damga ref sayilmaz", M.Kod.sabit_refler(type("K", (), {"depo": dp2})()) == ["abc1234"])
+        # muafiyet DUR yollari (dogrudan)
+        def muaf_dene(metin, kimlikler):
+            dp = tempfile.mkdtemp(dir=tmp)
+            Path(dp, "w.yml").write_text(metin)
+            gg = ["git", "-C", dp, "-c", "user.email=t@t", "-c", "user.name=t"]
+            for c in (["init", "-q"], ["add", "."], ["commit", "-qm", "t"]):
+                subprocess.run(gg + c, check=True, capture_output=True)
+            kk = M.Kuru.__new__(M.Kuru)
+            kk.kod = M.Kod(dp, ["HEAD"])
+            kk.kod_id = kk.kod.idler()
+            kk.kod_uzun = [t for t in kk.kod_id if len(t) > 33]
+            try:
+                kk.muaf(*kimlikler)
+                return "ok", kk
+            except SystemExit:
+                return "DUR", kk
+        r, _ = muaf_dene(f"T=root_folder_id={TEMP_ID}:${{KLASOR}}/x\n", [TEMP_ID])
+        kontrol("muaf kimlik sonrasi degisken -> DUR", r == "DUR")
+        r, _ = muaf_dene(f"a: {TEMP_ID}_ek1\nb: {TEMP_ID}_ek2\n", [TEMP_ID])
+        kontrol("muafiyet fazla token -> DUR", r == "DUR")
+        r, kk = muaf_dene(f"a: root_folder_id={TEMP_ID}:KISA/x\n", [TEMP_ID])
+        kontrol("muaf kimlik sonrasi ad toplanir", r == "ok" and kk.ek_ad == {"KISA"})
         bad = os.path.join(tmp, "bad"); os.makedirs(bad)
         Path(bad, "ENVANTER_PARCA_01A.csv").write_text("id,title\nx,y\n")
         rc, _ = kos(["--mod", "kuru", "--envanter", bad, "--depo", depo, "--cikti", out])
