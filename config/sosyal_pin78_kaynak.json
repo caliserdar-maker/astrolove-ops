@@ -1,0 +1,8 @@
+{
+  "aciklama": "IG / FB / YouTube 78 cift plani kaynaklari (Serdar 25 Kas karari: Pinterest seti gibi cift basina 3 gorsel + 1 video). Klasorler Pinterest toplu uretimi bitince ve Serdar onayiyla PR ile doldurulur; bosken plan uretilir ama satirlar 'kaynak yok' isaretlenir.",
+  "gorsel_klasor": "",
+  "gorsel_dosya": {"poster": "PIN_POSTER_{CIFT}_v6.jpg", "kart": "PIN_KART_{CIFT}_v6.jpg", "altin": "PIN_ALTIN_{CIFT}.jpg"},
+  "ig_gorsel_klasor": "",
+  "ig_gorsel_dosya": {"poster": "PIN_POSTER_{CIFT}_IG45.jpg", "kart": "PIN_KART_{CIFT}_IG45.jpg", "altin": "PIN_ALTIN_{CIFT}_IG45.jpg"},
+  "ig_not": "Instagram API gorsel orani 4:5 ile 1.91:1 arasi (resmi IG User Media). Pinler 1000x1500 (2:3) bu araligin disinda: IG icin 4:5 surum gerekir (uretim karari Merkez/Serdar)."
+}

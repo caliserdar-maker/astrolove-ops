@@ -14,6 +14,8 @@ import stat
 import sys
 import tempfile
 import contextlib
+import csv
+from collections import Counter
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -549,6 +551,38 @@ def senaryo_video_kaynak():
             and gercek.get("ad_kalibi") == "{a}-and-{b}-pin-video.mp4")
 
 
+def senaryo_plan78():
+    import plan78
+    yol = KOK.parents[2] / "data/sosyal/pinterest/pin78/ORNEK_METIN_CANCER_LEO.csv"
+    out = TMP / "plan.csv"
+    with contextlib.redirect_stdout(io.StringIO()) as o:
+        rc = plan78.main(["--metin", str(yol), "--baslangic", "2026-12-13", "--cikti", str(out)])
+    r = list(csv.DictReader(open(out)))
+    leo = [x for x in r if "CANCER_LEO" in x["not"]]
+    kontrol("plan78: 702 satir, kapi PASS", rc == 0 and len(r) == 702 and "KAPI PASS" in o.getvalue())
+    kontrol("plan78: cift basina 9 (IG 4, FB 4, YT 1)", Counter(x["platform"] for x in leo) == Counter(instagram=4, facebook=4, youtube=1))
+    kontrol("plan78: YT yalniz short, IG/FB 3 gorsel + 1 reel", {x["tur"] for x in r if x["platform"] == "youtube"} == {"short"}
+            and Counter(x["tur"] for x in leo if x["platform"] == "instagram") == Counter(gorsel=3, reel=1))
+    kontrol("plan78: ilk gun video da var (tur karisimi)", any(x["tur"] in ("reel", "short") for x in r if x["tarih_saat_TR"].startswith("2026-12-13")))
+    kontrol("plan78: ONAY/DURUM bos, metin genel surum + Etsy linki", all(x["ONAY"] == "" and x["DURUM"] == "" for x in r)
+            and all(x["metin"].endswith("https://astroloveart.etsy.com/listing/4570143387") for x in leo) and not any("Valentine" in x["metin"] for x in r))
+    bozuk = TMP / "bozuk.csv"
+    rows = list(csv.DictReader(open(yol)))
+    for x in rows:
+        if x["surum"] == "genel" and x["konsept"] == "kart":
+            x["aciklama"] += " A perfect Valentine gift — 2027."
+    with open(bozuk, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=rows[0].keys())
+        w.writeheader()
+        w.writerows(rows)
+    with contextlib.redirect_stdout(io.StringIO()) as o:
+        rc = plan78.main(["--metin", str(bozuk), "--baslangic", "2026-12-13", "--cikti", str(TMP / "p2.csv")])
+    kontrol("FAIL plan78: sezonluk/uzun tire/yil ifadesi kapida", rc == 1 and "yasak/sezonluk" in o.getvalue())
+    with contextlib.redirect_stdout(io.StringIO()) as o:
+        rc = plan78.main(["--metin", str(yol), "--baslangic", "2026-12-13", "--cikti", str(TMP / "p3.csv"), "--yt", "9"])
+    kontrol("FAIL plan78: desteklenmeyen gunluk sayi DUR", rc == 2)
+
+
 def senaryo_yml():
     import yaml
     w = KOK.parents[2] / ".github/workflows"
@@ -733,7 +767,7 @@ def mutasyon():
 if __name__ == "__main__":
     try:
         for f in (senaryo_ana, senaryo_kuru, senaryo_kapali, senaryo_medya_farkli, senaryo_publish_500, senaryo_son_an,
-                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_gizli_test, senaryo_video_kaynak, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
+                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_gizli_test, senaryo_video_kaynak, senaryo_plan78, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
             try:
                 f()
             except Exception as e:
