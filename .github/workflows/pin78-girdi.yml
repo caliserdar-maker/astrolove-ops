@@ -1,0 +1,76 @@
+name: pin78-girdi
+# Pinterest 78 x 4 toplu uretim (Merkez "BASLA" 25 Kas 2026) icin GIRDI ENVANTERI + yerel gelistirme ornekleri. Salt okuma (Drive).
+# 1) TEMP/POSTER_GALERI_V11_YEDEK altindaki damgalar: her damgada cift klasoru sayisi, r2 (kart) sayisi -> ENVANTER.txt
+# 2) Ornek ciftler: _POSTER2000 posteri + secilen damganin r2 karti + onayli kapak -> gecici/pin78-girdi dali (yalniz ornek,
+#    musteri verisi yok). Etsy / Pinterest / Metricool YOK.
+permissions:
+  contents: write
+on:
+  workflow_dispatch:
+    inputs:
+      ciftler:
+        description: 'ornek ciftler'
+        default: 'CANCER_LEO,CANCER_LIBRA,SCORPIO_TAURUS,PISCES_VIRGO,CAPRICORN_SAGITTARIUS,AQUARIUS_SAGITTARIUS,ARIES_GEMINI'
+jobs:
+  girdi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      T: gdrive:ASTROLOVE/TEMP
+      CIFTLER: ${{ inputs.ciftler }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Kurulum
+      run: |
+        set -euo pipefail
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Envanter + ornekler
+      run: |
+        set -euo pipefail
+        case "$CIFTLER" in *[!A-Z_,]*|'') echo "::error::ciftler gecersiz"; exit 1 ;; esac
+        mkdir -p _g
+        Y="$T/POSTER_GALERI_V11_YEDEK"
+        rclone lsf "$Y" --dirs-only | sed 's#/$##' | sort > _g/DAMGALAR.txt
+        [ -s _g/DAMGALAR.txt ] || { echo "::error::damga yok"; exit 1; }
+        : > _g/ENVANTER.txt
+        while read -r D; do
+          [ -n "$D" ] || continue
+          rclone lsf "$Y/$D" -R --files-only --include "*/r2_*.jpg" > _g/r2_$D.txt || true
+          N=$(rclone lsf "$Y/$D" --dirs-only | wc -l); R2=$(wc -l < _g/r2_$D.txt)
+          echo "$D cift_klasoru=$N r2=$R2" | tee -a _g/ENVANTER.txt
+        done < _g/DAMGALAR.txt
+        N78=$(rclone lsf "$T/PIN_V6_20261012/_POSTER2000" --files-only --include "*.jpg" | wc -l); echo "POSTER2000 $N78" | tee -a _g/ENVANTER.txt
+        NK=$(rclone lsf "$T/VIDEO_V9_20261012/KAPAK" --files-only --include "*-astroloveart-kapak.jpg" | wc -l); echo "KAPAK $NK" | tee -a _g/ENVANTER.txt
+        # ornek ciftler: r2 her damgadan (en fazla 4 damga: ilk 6 Kas tarihli ve son 3), poster, kapak
+        SEC=$( { awk '$0 >= "20261106" && $0 < "20261107"' _g/DAMGALAR.txt | head -1; tail -3 _g/DAMGALAR.txt; } | sort -u)
+        echo "SECILEN DAMGALAR: $SEC" | tee -a _g/ENVANTER.txt
+        for C in ${CIFTLER//,/ }; do
+          rclone copyto "$T/PIN_V6_20261012/_POSTER2000/$C.jpg" "_g/POSTER_$C.jpg" -q || echo "::warning::poster yok $C"
+          for D in $SEC; do
+            f=$(grep "_$C/r2_" "_g/r2_$D.txt" | head -1 || true)
+            [ -n "$f" ] && rclone copyto "$Y/$D/$f" "_g/KART_${D}_$C.jpg" -q || echo "::warning::r2 yok $D $C"
+          done
+        done
+        ls -la _g | head -60
+    - name: Gecici dal
+      run: |
+        set -euo pipefail
+        B=gecici/pin78-girdi
+        git config user.name "github-actions"; git config user.email "actions@github.com"
+        git worktree add -q --detach _gw
+        cd _gw && git checkout -q --orphan tmp && git rm -rqf . && cp ../_g/* . && git add -A
+        git commit -qm "pin78 girdi (kosu ${{ github.run_id }})" && git push -qf origin HEAD:refs/heads/$B
+        echo "::warning::DAL $B"
+    - name: Temizlik
+      if: ${{ always() }}
+      run: rm -rf ~/.config/rclone
