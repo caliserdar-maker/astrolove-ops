@@ -1,0 +1,61 @@
+name: sevgililer-pin-girdi
+# Pinterest Sevgililer ornek seti (Serdar "ok" 25 Kas 2026, KARARLAR_20261125_31). YALNIZ GIRDI: Drive'dan salt okuma.
+# Onayli pin v6 gorselleri (OFIS PINTEREST_YENI_PIN_ORNEK_20261122, KARARLAR_20261122_45 + 20261123_1), dummy siparis
+# posterleri (9000000041 Cancer Leo, 9000000532 Cancer Libra; musteri verisi yok) ve onayli sosyal video posteri
+# (_POSTER2000 CANCER_LEO) gecici/sevgililer-girdi dalina yazilir. Etsy / Pinterest / Metricool YOK.
+permissions:
+  contents: write
+on:
+  workflow_dispatch: {}
+jobs:
+  girdi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v4
+    - name: Kurulum
+      run: |
+        set -euo pipefail
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Indir
+      run: |
+        set -euo pipefail
+        mkdir -p _g
+        while read -r ID AD; do
+          [ -n "$ID" ] && [ -n "$AD" ] || { echo "::error::bos satir"; exit 1; }
+          rclone backend copyid gdrive: "$ID" "_g/$AD" -q
+          [ -s "_g/$AD" ] || { echo "::error::inmedi $AD"; exit 1; }
+        done <<'EOF'
+        1-U_CIzLqT7nIkbUlrHNXcOjFwRbD_RWs PIN_01_CANCER_LEO_A_POSTER_v6.jpg
+        13gIzmVN51F0DUF3c5vl4p77jXsq2tSo_ PIN_02_CANCER_LEO_B_SYMBOL_v6.jpg
+        1X0LFYUuVeAyIN_fm9J3xPOx23X5FQ9vt PIN_03_SCORPIO_TAURUS_A_GOLD_v6.jpg
+        1sMoE0nATpLnE1zRTLLesM3RWge54On2y PIN_07_CANCER_LIBRA_A_POSTER_v6.jpg
+        17GgApVpeevFqJ5ZCQ2-oXzxW0GANHylQ PIN_08_CANCER_LIBRA_B_SYMBOL_v6.jpg
+        1RpExFjyH-7PPX0T4JQfeB5jOTuFXmrha GPT_9000000041_Cancer_Leo_Midnight_Blue_2000.jpg
+        1nCbiepEjZPaS_mrBKee4r4t94vIgbVfT GPT_9000000532_Cancer_Libra_Midnight_Blue_2000.jpg
+        EOF
+        rclone copyto gdrive:ASTROLOVE/TEMP/PIN_V6_20261012/_POSTER2000/CANCER_LEO.jpg _g/POSTER2000_CANCER_LEO.jpg -q
+        rclone copyto gdrive:ASTROLOVE/TEMP/SOSYAL_ACILIS_P_20261020/P_kare.png _g/ONAYLI_P_kare_CANCER_LIBRA.png -q
+        ls -la _g
+    - name: Gecici dal
+      run: |
+        set -euo pipefail
+        B=gecici/sevgililer-girdi
+        git config user.name "github-actions"; git config user.email "actions@github.com"
+        git worktree add -q --detach _gw
+        cd _gw && git checkout -q --orphan tmp && git rm -rqf . && cp ../_g/* . && git add -A
+        git commit -qm "sevgililer pin girdi (kosu ${{ github.run_id }})" && git push -qf origin HEAD:refs/heads/$B
+        echo "::warning::DAL $B"
+    - name: Temizlik
+      if: ${{ always() }}
+      run: rm -rf ~/.config/rclone
