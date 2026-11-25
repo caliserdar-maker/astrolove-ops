@@ -41,6 +41,9 @@ GLIF_H, GLIF_Y = 76, (848, 923)
 AD_H, AD_Y = 49, (943, 991)
 GLIF_CX = (206, 576)                               # PIN_03 glif satiri x 168-614: sol/sag glif merkezleri (panel ici)
 PAY, BOSLUK = 24, 12
+# Serdar 25 Kas karari A (Merkez aktarimi): bu 6 ciftte ad BUYUK HARF, sigan en buyuk boyda (36-44 px); 45 px kapisina istisna
+AD_ISTISNA = {'AQUARIUS_CAPRICORN', 'AQUARIUS_SAGITTARIUS', 'CAPRICORN_CAPRICORN', 'CAPRICORN_SAGITTARIUS', 'SAGITTARIUS_SAGITTARIUS',
+              'SAGITTARIUS_SCORPIO'}
 
 
 def altin_maske(p):
@@ -150,15 +153,26 @@ def panel(poster, A, B, kart, olc, buyut=False):
     logo = Image.open(LOGO).convert('RGBA')
     put(lib.scale_h(logo, round(GLIF_H * 0.55)), PW / 2, yb)
     ya = (AD_Y[0] + AD_Y[1]) / 2
-    pay_genis = (GLIF_CX[1] - GLIF_CX[0]) - 40      # iki ad arasinda >= 40 px
+    # ad glif merkezine ortali; panel payini asarsa iceri kaydirilir (Serdar 25 Kas: 18 ciftte kaydirma uygun); sigmazsa sigan en buyuk
+    # boy (Serdar 25 Kas A: 6 ciftte 45 px kapisina istisna, BUYUK HARF)
     h = AD_H
     while True:
         ma, sa_ = ad_maske(A.upper(), h); mb, sb_ = ad_maske(B.upper(), h)
-        if ma.size[0] / 2 + mb.size[0] / 2 <= pay_genis and GLIF_CX[0] - ma.size[0] / 2 >= PAY and GLIF_CX[1] + mb.size[0] / 2 <= PW - PAY:
+        xa = min(max(GLIF_CX[0], PAY + ma.size[0] / 2), PW - PAY - ma.size[0] / 2)
+        xb = max(min(GLIF_CX[1], PW - PAY - mb.size[0] / 2), PAY + mb.size[0] / 2)
+        eksik = 40 - ((xb - mb.size[0] / 2) - (xa + ma.size[0] / 2))
+        if eksik > 0:          # adlar disari (sol ada sola, sag ada saga) payi gecmeden, esit paylasarak kayar
+            la = max(0.0, xa - (PAY + ma.size[0] / 2)); rb = max(0.0, (PW - PAY - mb.size[0] / 2) - xb)
+            da = min(la, max(eksik / 2, eksik - rb)); db = min(rb, eksik - da)
+            xa -= da; xb += db
+        if (xb - mb.size[0] / 2) - (xa + ma.size[0] / 2) >= 40 and xa - ma.size[0] / 2 >= PAY and xb + mb.size[0] / 2 <= PW - PAY:
             break
         h -= 1
-    bilgi['ad_buyuk_harf_px'] = h; bilgi['ad_punto'] = sa_
-    put(boya(ma, olc['ad']), GLIF_CX[0], ya); put(boya(mb, olc['ad']), GLIF_CX[1], ya)
+        if h < 20:
+            raise SystemExit('DUR: ad 20 px altinda bile sigmiyor')
+    bilgi['ad_buyuk_harf_px'] = h; bilgi['ad_punto'] = sa_; bilgi['ad_x'] = [round(xa, 1), round(xb, 1)]
+    bilgi['cift'] = f'{A.upper()}_{B.upper()}'
+    put(boya(ma, olc['ad']), xa, ya); put(boya(mb, olc['ad']), xb, ya)
     return cv.convert('RGB'), bilgi
 
 
@@ -198,7 +212,10 @@ def qc(yol, bilgi, olc, cerceve, baslik):
     for ad, (y0, y1) in (('glif satiri', GLIF_Y), ('ad satiri', AD_Y)):
         c1 = p[y0:y1 + 1][altin_maske(p[y0:y1 + 1])].mean(0); c3 = p3[y0:y1 + 1][altin_maske(p3[y0:y1 + 1])].mean(0)
         k(f'{ad} altin rengi PIN_03 ile kanal farki <= 15', np.abs(c1 - c3).max() <= 15, f'{c1.round()} / {c3.round()}')
-    k('ad buyuk harf >= 45 px (168 akista >= 11 CSS px)', bilgi['ad_buyuk_harf_px'] >= 45, bilgi['ad_buyuk_harf_px'])
+    if bilgi.get('cift') in AD_ISTISNA:
+        k('ad buyuk harf >= 36 px (Serdar 25 Kas A istisnasi: sigan en buyuk boy)', bilgi['ad_buyuk_harf_px'] >= 36, bilgi['ad_buyuk_harf_px'])
+    else:
+        k('ad buyuk harf >= 45 px (168 akista >= 11 CSS px)', bilgi['ad_buyuk_harf_px'] >= 45, bilgi['ad_buyuk_harf_px'])
     ol = bilgi['sembol_cikti'][0] / bilgi['sembol_kaynak'][0]
     k('sembol yalniz kucultme (cikti / kaynak <= 1)', ol <= 1.0, round(ol, 4))
     R = kutular(p)
@@ -235,9 +252,16 @@ def main():
         im2, bi2, _ = uret(g.poster, g.a, g.b, g.cerceve, g.baslik, g.kart, buyut=True)
         im2.save(os.path.join(t, 'b2.jpg'), quality=95, subsampling=0)
         sonuc.append(('FAIL: buyutme', any(s['sonuc'] == 'FAIL' for s in qc(os.path.join(t, 'b2.jpg'), bi2, olc, g.cerceve, g.baslik))))
-        # FAIL 3: cok uzun adlar -> ad kuculur (< 45 px)
-        _, bi3, _ = uret(g.poster, 'Sagittarius', 'Sagittarius', g.cerceve, g.baslik, g.kart)
-        sonuc.append((f"FAIL: uzun ad kuculmesi ({bi3['ad_buyuk_harf_px']} px)", bi3['ad_buyuk_harf_px'] < 45))
+        # FAIL 3: istisna listesinde olmayan cok uzun adlar -> ad < 45 px -> kapi FAIL
+        im3, bi3, _ = uret(g.poster, 'Sagittariuss', 'Capricornn', g.cerceve, g.baslik, g.kart)
+        im3.save(os.path.join(t, 'b3.jpg'), quality=95, subsampling=0)
+        sonuc.append((f"FAIL: istisna disi uzun ad ({bi3['ad_buyuk_harf_px']} px)",
+                      any(s['sonuc'] == 'FAIL' and 'ad buyuk' in s['kapi'] for s in qc(os.path.join(t, 'b3.jpg'), bi3, olc, g.cerceve, g.baslik))))
+        # PASS 2: istisna cifti (SAGITTARIUS_SAGITTARIUS) 36 px ile ad kapisindan gecer
+        im5, bi5, _ = uret(g.poster, 'Sagittarius', 'Sagittarius', g.cerceve, g.baslik, g.kart)
+        im5.save(os.path.join(t, 'b5.jpg'), quality=95, subsampling=0)
+        sonuc.append((f"istisna cifti ad kapisi PASS ({bi5['ad_buyuk_harf_px']} px)",
+                      all(s['sonuc'] == 'PASS' for s in qc(os.path.join(t, 'b5.jpg'), bi5, olc, g.cerceve, g.baslik) if 'ad buyuk' in s['kapi'])))
         # FAIL 4: cerceve bozulmasi
         b4 = im.copy(); b4.paste((0, 0, 0), (20, 1400, 60, 1440)); b4.save(os.path.join(t, 'b4.jpg'), quality=95, subsampling=0)
         sonuc.append(('FAIL: cerceve', any(s['sonuc'] == 'FAIL' for s in qc(os.path.join(t, 'b4.jpg'), bilgi, olc, g.cerceve, g.baslik))))

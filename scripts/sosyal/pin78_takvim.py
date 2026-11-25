@@ -7,6 +7,7 @@ yayin 1 Mar 2027'den once "sevgililer", sonra "genel". Sira: oncelikli 4 cift (s
 PISCES_VIRGO, CANCER_LIBRA; kayit [ER] + PINLER_ORNEK), sonra data/sosyal/pinterest/SIRA_78.csv. Tur sirasi: once 78 poster,
 sonra 78 kart, 78 altin yakin cekim, 78 video (ayni cift turlar arasi ~11 gun). Saatler: Serdar KARAR 10 (SOSYAL_KARAR 20 Eki)
 "saatler 09:00-23:30 yayilir": 7 slot esit aralik (09:00 ... 23:30, Europe/Istanbul). Baslangic: --baslangic gununun --simdi sonrasi ilk slotu (Serdar: takvim bugunden).
+SAAT (Serdar 25 Kas, ABD): Istanbul 15:00-07:00, 7 slot; tarih_saat_et sutunu New York saati (bilgi).
 Tur dagilimi: her gun turler karisik (cift i, tur k -> TURLER[(i + k) % 4]).
 Pano / bolum (strateji 7.5 onerisi, Serdar onayi gerekir; bolumler Pinterest'te YOK, acilmasi yazim): sevgililer surumu:
 poster -> Valentine's Day Gifts for Couples / Posters, video -> ayni pano / Videos, kart -> Zodiac Compatibility Art / Combined
@@ -20,10 +21,15 @@ Kullanim: pin78_takvim.py --cikti TAKVIM.csv [--baslangic 2026-11-25]
 import argparse, csv, os, re, sys
 from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
+TR, ET = ZoneInfo('Europe/Istanbul'), ZoneInfo('America/New_York')
 
 KOK = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ONCELIK = ['CANCER_LEO', 'SCORPIO_TAURUS', 'PISCES_VIRGO', 'CANCER_LIBRA']
-SAAT = ['09:00', '11:25', '13:50', '16:15', '18:40', '21:05', '23:30']   # KARAR 10: 09:00-23:30 esit aralik
+# Serdar 25 Kas (ABD kitlesi, Merkez aktarimi; RAPOR_SOSYAL_ABD_DENETIM_20261125): Istanbul 15:00-07:00 (ABD gunduz); 7 slot esit aralik
+# (2 sa 40 dk). 20 Eki KARAR 10 (09:00-23:30) yerine. Gece yarisini gecen slotlar (01:40, 04:20, 07:00) pencerenin ertesi gunundedir.
+SAAT = ['15:00', '17:40', '20:20', '23:00', '01:40', '04:20', '07:00']
+PENCERE_BAS = '15:00'
 TURLER = ('poster', 'kart', 'altin', 'video')
 PANO = {('poster', 'sevgililer'): ("Valentine's Day Gifts for Couples", 'Posters'),
         ('video', 'sevgililer'): ("Valentine's Day Gifts for Couples", 'Videos'),
@@ -47,7 +53,8 @@ def slotlar(bas, simdi):
     g = 0
     while True:
         for hh in SAAT:
-            t = datetime.combine(bas + timedelta(days=g), datetime.strptime(hh, '%H:%M').time())
+            ek = 1 if hh < PENCERE_BAS else 0          # 15:00 penceresinin gece yarisi sonrasi slotlari
+            t = datetime.combine(bas + timedelta(days=g + ek), datetime.strptime(hh, '%H:%M').time())
             if t > simdi:
                 yield t
         g += 1
@@ -66,7 +73,9 @@ def plan(bas, simdi=None):
             t = next(sl)
             g = (t.date() - bas).days
             sur = 'sevgililer' if t.date() < GENEL_BAS else 'genel'
-            out.append({'plan_gunu': g + 1, 'tarih_saat_tr': t.strftime('%Y-%m-%d %H:%M'), 'cift': c, 'tur': tur,
+            et = t.replace(tzinfo=TR).astimezone(ET)
+            out.append({'plan_gunu': g + 1, 'tarih_saat_tr': t.strftime('%Y-%m-%d %H:%M'), 'tarih_saat_et': et.strftime('%Y-%m-%d %H:%M'),
+                        'cift': c, 'tur': tur,
                         'listing_id': ids.get(c, ''), 'link': f"https://astroloveart.etsy.com/listing/{ids.get(c, '')}",   # Share & Save bicimi (KARARLAR_20261125_57)
                         'pano': PANO[(tur, sur)][0], 'pano_bolumu': PANO[(tur, sur)][1],
                         'kanal': 'Metricool' if t.date() < METRICOOL_SON else 'kendi sistem (Pinterest yolu HAZIR DEGIL)',
@@ -85,6 +94,9 @@ def kontrol(out):
     S.append(('genel surum Sevgililer panosunda degil', not any(r['metin_surumu'] == 'genel' and 'valentine' in r['pano'].lower() for r in out), ''))
     gun = Counter(r['tarih_saat_tr'][:10] for r in out)
     S.append(('takvim gunu basina <= 7', max(gun.values()) <= 7, max(gun.values())))
+    # Serdar 25 Kas: yayin Istanbul 15:00-07:00 (07:00 dahil)
+    S.append(('saat Istanbul 15:00-07:00 icinde', all(r['tarih_saat_tr'][11:] >= '15:00' or r['tarih_saat_tr'][11:] <= '07:00' for r in out),
+              sorted({r['tarih_saat_tr'][11:] for r in out})))
     S.append(('Metricool satirlari 12 Ara oncesi', all(r['tarih_saat_tr'][:10] < str(METRICOOL_SON) for r in out if r['kanal'] == 'Metricool'), ''))
     son = {}; minara = 999
     for r in sorted(out, key=lambda r: r['tarih_saat_tr']):
@@ -121,9 +133,11 @@ def main():
         yakin[i]['tarih_saat_tr'] = (datetime.strptime(yakin[0]['tarih_saat_tr'], '%Y-%m-%d %H:%M') + timedelta(days=2)).strftime('%Y-%m-%d %H:%M')
         k2 = not all(o for _, o, _ in kontrol(yakin))
         k0 = all(o for _, o, _ in kontrol(out))
-        for ad, v in (('bilinen PASS', k0), ('FAIL: gunde 8 pin', k1), ('FAIL: ayni ilan 2 gun arayla', k2)):
+        sa = [dict(r) for r in out]; sa[5]['tarih_saat_tr'] = sa[5]['tarih_saat_tr'][:11] + '11:25'
+        k3 = not all(o for _, o, _ in kontrol(sa))
+        for ad, v in (('bilinen PASS', k0), ('FAIL: gunde 8 pin', k1), ('FAIL: ayni ilan 2 gun arayla', k2), ('FAIL: 11:25 (ABD gecesi)', k3)):
             print(('PASS ' if v else 'FAIL ') + 'oz-test ' + ad)
-        sys.exit(0 if (k0 and k1 and k2) else 1)
+        sys.exit(0 if (k0 and k1 and k2 and k3) else 1)
     with open(a.cikti, 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=list(out[0]), lineterminator='\n'); w.writeheader(); w.writerows(out)
     S = kontrol(out)
