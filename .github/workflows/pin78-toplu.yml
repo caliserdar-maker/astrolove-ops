@@ -212,6 +212,18 @@ jobs:
         [ -d _o ] || exit 1
         mv _o/SONUC_PARCA.txt "_o/QC/SONUC_${{ strategy.job-index }}.txt" 2>/dev/null || { mkdir -p _o/QC; mv _o/SONUC_PARCA.txt "_o/QC/SONUC_${{ strategy.job-index }}.txt"; }
         rclone copy _o "gdrive:$KLASOR" --drive-root-folder-id "$OFIS" -q; R=$?
+        # yeniden koşuda PASS olan ciftin onceki FAIL klasoru ESKI_FAIL altina tasinir (silinmez; ozet FAIL'deki cifti hazir saymaz)
+        rclone lsf "gdrive:$KLASOR/FAIL" --drive-root-folder-id "$OFIS" --dirs-only > _fail_eski.txt 2>/dev/null
+        while read -r C RCS; do
+          [ -n "$C" ] && [ "$RCS" = "RC=0" ] || continue
+          SL=$(python3 -c "import sys; a, b = sys.argv[1].split('_'); print(a.lower() + '-and-' + b.lower())" "$C")
+          [ -n "$SL" ] || continue
+          if grep -qx "$SL/" _fail_eski.txt; then
+            rclone move "gdrive:$KLASOR/FAIL/$SL" "gdrive:$KLASOR/ESKI_FAIL/$SL-${{ github.run_id }}" --drive-root-folder-id "$OFIS" --delete-empty-src-dirs -q \
+              && rclone rmdir "gdrive:$KLASOR/FAIL/$SL" --drive-root-folder-id "$OFIS" 2>/dev/null
+            echo "::warning::$C onceki FAIL klasoru ESKI_FAIL/$SL-${{ github.run_id }} altina tasindi"
+          fi
+        done < <(cat _o/QC/SONUC_*.txt 2>/dev/null)
         echo "::warning::DRIVE OFIS/$KLASOR yukleme rc=$R; $(cat _o/QC/SONUC_*.txt | tr '\n' ' ')"
         rm -rf _w ~/.config/rclone
         [ "$R" = 0 ] && [ "${GENEL:-1}" = 0 ]

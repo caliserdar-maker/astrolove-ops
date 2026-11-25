@@ -64,7 +64,7 @@ def iki_satir_bant(pin, A, B):
         bb = f.getbbox(t)
         d.text((round(W45 / 2 - (bb[0] + bb[2]) / 2), y - H[1]), t, font=f, fill=LACIVERT)
     bant.paste(alt_b, (0, y_sub))
-    return bant, (IKI_UST - 10, baslik_alt + 10)
+    return bant, (IKI_UST - 10, baslik_alt + round(IKI_CAP * 0.3))      # pencere Q kuyrugunu (~0.2 x buyuk harf) kapsar
 
 
 def dorde_bes(pin, A=None, B=None, iki_izin=False, zorla=False):
@@ -163,9 +163,16 @@ def kontrol_gorsel(ad, a, ust_h, alt_y, S, gorunumler, pencere=None, iki=False):
         ara = min(bl[i + 1][0] - taban(dm, bl[i][0], bl[i][1])[0] - 1 for i in range(len(bl) - 1))   # taban cizgisinden (Q kuyrugu haric)
         S.append((f'{ad} iki satirli baslik: satir arasi (taban cizgisinden) >= 20 px', ara >= 20, ara))
         S.append((f'{ad} iki satirli baslik: ust bosluk >= 30 px', bl[0][0] >= 30, bl[0][0]))
-        alt_b = np.where(dm[bl[-1][1] + 1:ust_h].any(1))[0]
-        gb = int(alt_b[0]) if len(alt_b) else -1
-        S.append((f'{ad} iki satirli baslik: alt basliga bosluk >= 20 px', gb >= 20, gb))
+        # alt baslik ust kenari: ikinci satirin taban cizgisinden sonra, Q kuyrugu bitince baslayan son murekkep blogu
+        # (inceleme sonrasi koşu 45660058528: AQUARIUS_AQUARIUS'ta Q kuyrugu pencereden tasip bosluk 0 olculdu)
+        tb2 = taban(dm, bl[-1][0], bl[-1][1])[0]
+        rr = np.where(dm[tb2 + 1:ust_h].any(1))[0]
+        if len(rr):
+            bloklar = np.split(rr, np.where(np.diff(rr) > 1)[0] + 1)
+            gb = int(bloklar[-1][0])                      # alt baslik = son blok; bosluk taban cizgisinden
+        else:
+            gb = -1
+        S.append((f'{ad} iki satirli baslik: alt basliga bosluk (taban cizgisinden) >= 20 px', gb >= 20, gb))
     for s in ('baslik', 'alt_satir'):
         if s not in st:
             S.append((f'{ad} {s} bulundu', False, 'yok')); continue
