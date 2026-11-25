@@ -1,33 +1,31 @@
 name: dijital-arastirma
-# DIJITAL URUN ARASTIRMASI (Serdar onayi 25 Kas 2026: Etsy resmi API salt okuma). SALT OKUMA: yalniz GET, yalniz API anahtari
-# (OAuth token indirilmez / yenilenmez). Betik scripts/etsy/dijital_arastirma.py, test scripts/etsy/test_dijital_arastirma.py.
+# DIJITAL URUN ARASTIRMASI: DERIN TOPLAYICI (huni Asama 2; Serdar 26 Kas "Evet derhal basla", KARARLAR_20261126_2). SALT OKUMA: yalniz
+# GET, yalniz API anahtari (OAuth token indirilmez / yenilenmez). Betik scripts/etsy/dijital_arastirma.py, test
+# scripts/etsy/test_dijital_arastirma.py. Girdi: Serdar'in isaretledigi 1-8 terim (config/dijital_terimler.txt icinden).
 # Depo herkese acik: toplanan veri commit'e, loga, artifact'e GIRMEZ. Cikti ve devam durumu yalniz gizli Drive:
-# ASTROLOVE/DIJITAL_ARASTIRMA_20261125/ (kosu basinda indirilir, sonunda geri yazilir). Logda yalniz sayilar (KimlikSuz).
+# ASTROLOVE/DIJITAL_ARASTIRMA_20261125/DERIN_<etiket>/ (kosu basinda indirilir, sonunda geri yazilir; ust klasordeki 25 Kas
+# taksonomi verisine dokunulmaz). Durum terim kumesine baglidir: baska kume icin baska etiket. Logda yalniz sayilar (KimlikSuz).
 # Kilit: kilit_bekle (Etsy kumesi). Kosu en fazla --dk dk Etsy okur; kilit kumesinde baska aktif kosu gorurse 60 sn icinde yol
 # verir (durum kaydedilir, cikis 4). Kota: kalan < %20 gunluk sinir -> DUR (cikis 3); etsy_common sert tabani 10 aynen.
-# Tetik: yalniz main'de config/dijital_arastirma.trigger degisikligi (emsal pod-audit), elle ya da saatlik schedule (asagida).
-# ZINCIR (Merkez 25 Kas, Serdar "hicbir oturum beni beklemeyecek"): kosu durumu Drive'a yazdiysa, cikis 0 (sure doldu) ya da 4 (yol
-# verildi) ve asama 'bitti' degilse kendini workflow_dispatch ile yeniden tetikler (gh workflow run, github.token; emsal
-# siparis-giris). Durur: kota (3), hata (1), bitti ya da zincir >= ZINCIR_AZAMI.
-# SAATLIK (Merkez 25 Kas sabah onerisi): schedule her saat; kilit kumesinde baska aktif kosu varsa atlar (kilit_bekle --mod atla,
-# emsal pod-order-router). Bekleyen is yoksa (asama bitti) Etsy'ye istek yok; kota %20 altindaysa ilk istekte DUR (kod 3).
-# Boylece kota DUR'undan sonra kayan pencerede kendiliginden kaldigi yerden surer.
+# Tetik YALNIZ elle (workflow_dispatch). 26 Kas (Serdar huni karari): saatlik schedule, config tetigi ve kendini yeniden tetikleyen
+# zincir KALDIRILDI; devam icin kosu elle yeniden baslatilir (ayni terimler + ayni etiket).
 on:
-  schedule:
-    - cron: "23 * * * *"
-  push:
-    branches: [main]
-    paths:
-      - "config/dijital_arastirma.trigger"
   workflow_dispatch:
     inputs:
-      zincir:
-        description: "zincir sirasi (otomatik)"
+      terimler:
+        description: "1-8 terim, ';' ile ayrilmis (config/dijital_terimler.txt icinden)"
+        required: true
+      etiket:
+        description: "Drive alt klasoru DERIN_<etiket> (harf, rakam, _ -; en cok 20)"
+        required: true
+        default: "1"
+      dk:
+        description: "Etsy okuma suresi (dk, en cok 45)"
         required: false
-        default: "0"
+        default: "40"
 permissions:
   contents: read
-  actions: write
+  actions: read
 jobs:
   oku:
     runs-on: ubuntu-latest
@@ -37,6 +35,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Girdi kapisi
+        env:
+          DK_G: ${{ github.event.inputs.dk }}
+          ETIKET_G: ${{ github.event.inputs.etiket }}
+        run: |
+          set -euo pipefail
+          DK="${DK_G:-40}"
+          case "$DK" in ''|*[!0-9]*) echo "::error::dk tam sayi olmali"; exit 1;; esac
+          [ "$DK" -ge 1 ] && [ "$DK" -le 45 ] || { echo "::error::dk 1-45 olmali"; exit 1; }
+          [ -n "${ETIKET_G:-}" ] || { echo "::error::etiket bos"; exit 1; }
+          printf '%s' "$ETIKET_G" | grep -qE '^[A-Za-z0-9_-]{1,20}$' || { echo "::error::etiket gecersiz"; exit 1; }
+          echo "DK=$DK" >> "$GITHUB_ENV"
+          echo "ETIKET=$ETIKET_G" >> "$GITHUB_ENV"
       - name: Kurulum
         run: |
           set -euo pipefail
@@ -60,81 +71,62 @@ jobs:
             echo "::add-mask::$GOOGLE_CLIENT_SECRET"
             echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
           fi
-      - name: Etsy kilidi (sira bekle, iptal yok; saatlik turda mesgulse atla)
+      - name: Etsy kilidi (sira bekle, iptal yok)
         env:
           GH_TOKEN: ${{ github.token }}
-          OLAY: ${{ github.event_name }}
-        run: |
-          set -euo pipefail
-          if [ "$OLAY" = schedule ]; then
-            python3 scripts/etsy/kilit_bekle.py --mod atla
-            if grep -q '^atla=true' "$GITHUB_OUTPUT" 2>/dev/null; then echo "ATLA=1" >> "$GITHUB_ENV"; echo "::notice::saatlik tur atlandi (Etsy kosusu aktif)"; fi
-          else
-            python3 scripts/etsy/kilit_bekle.py
-          fi
+        run: python3 scripts/etsy/kilit_bekle.py
       - name: Durumu Drive'dan al (kilitten sonra)
-        if: env.ATLA != '1'
         run: |
           set -euo pipefail
           umask 077; mkdir -p out
+          [ -n "${ETIKET:-}" ] || { echo "::error::etiket bos"; exit 1; }
+          U="gdrive:ASTROLOVE/DIJITAL_ARASTIRMA_20261125/DERIN_${ETIKET}"
           rclone lsf "gdrive:ASTROLOVE" --dirs-only -q > /dev/null || { echo "::error::Drive ASTROLOVE okunamadi"; exit 1; }
-          rclone mkdir "gdrive:ASTROLOVE/DIJITAL_ARASTIRMA_20261125" -q || { echo "::error::Drive klasoru acilamadi"; exit 1; }
-          rclone copy "gdrive:ASTROLOVE/DIJITAL_ARASTIRMA_20261125" out -q || { echo "::error::Drive okunamadi"; exit 1; }
+          rclone mkdir "$U" -q || { echo "::error::Drive klasoru acilamadi"; exit 1; }
+          rclone copy "$U" out -q || { echo "::error::Drive okunamadi"; exit 1; }
           echo "durum dosyasi: $([ -f out/durum.json ] && echo var || echo yok) | dosya $(find out -type f | wc -l)"
       - name: Oku (salt okur)
-        if: env.ATLA != '1'
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
           GH_TOKEN: ${{ github.token }}
+          TERIMLER: ${{ github.event.inputs.terimler }}
         run: |
           set -uo pipefail
           set +e
-          DK=$(python3 -c "import json; print(float(json.load(open('config/dijital_arastirma.trigger')).get('dk', 40)))" 2>/dev/null)
-          [ -n "$DK" ] || DK=40
-          python scripts/etsy/dijital_arastirma.py --out out --dk "$DK"
-          kod=$?
+          umask 077; mkdir -p out          # sir_koru tee log dosyasini betikten once acar
+          SJ="$RUNNER_TEMP/sir.json"
+          python3 -c 'import json, os, sys; json.dump({"etsy_api_key": os.environ["ETSY_API_KEY"], "etsy_shared_secret": os.environ["ETSY_SHARED_SECRET"]}, open(sys.argv[1], "w"))' "$SJ"
+          python scripts/etsy/dijital_arastirma.py --out out --dk "$DK" --terimler "${TERIMLER:-}" 2>&1 \
+            | python3 scripts/guvenlik/sir_koru.py tee --sir-json "$SJ" out/DERIN_KOSU_LOG.txt
+          RC=("${PIPESTATUS[@]}")
+          rm -f "$SJ"
+          kod="${RC[0]}"
+          [ "${RC[1]}" = 0 ] || { echo "::error::log sir taramasi FAIL"; kod=1; }
           echo "KOD=$kod" >> "$GITHUB_ENV"
           echo "::notice::dijital_arastirma cikis $kod (0 tamam/sure, 3 kota, 4 yol verildi, 1 hata)"
           exit 0
       - name: Drive'a yaz (sir taramasi)
-        if: always() && env.ATLA != '1'
+        if: always()
         env:
           ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
           ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
         run: |
           set -euo pipefail
           [ -f out/durum.json ] || { echo "durum yok, yazilmadi"; exit 0; }
+          [ -n "${ETIKET:-}" ] || { echo "::error::etiket bos"; exit 1; }
           for v in "${ETSY_API_KEY:-}" "${ETSY_SHARED_SECRET:-}" "${RCLONE_CONFIG_GDRIVE_CLIENT_SECRET:-}"; do
             if [ -n "$v" ] && grep -rqF -- "$v" out; then echo "::error::DUR: ciktida sir, Drive'a yazilmadi"; exit 1; fi
           done
+          T=(out/durum.json); [ -f out/DERIN_KOSU_LOG.txt ] && T+=(out/DERIN_KOSU_LOG.txt)
+          python3 scripts/guvenlik/sir_koru.py tara "${T[@]}" || { echo "::error::DUR: log / durumda sir deseni, Drive'a yazilmadi"; exit 1; }
           find out -name '*.tmp' -delete
-          rclone copy out "gdrive:ASTROLOVE/DIJITAL_ARASTIRMA_20261125" -q
-          A=$(python3 -c "import json; d=json.load(open('out/durum.json')); print(d.get('asama'), d.get('kosu'))")
-          echo "::notice::Drive: ASTROLOVE/DIJITAL_ARASTIRMA_20261125/ ($(find out -type f | wc -l) dosya) | asama/kosu $A"
-          echo "ASAMA=${A%% *}" >> "$GITHUB_ENV"
-          echo "YAZILDI=1" >> "$GITHUB_ENV"
+          rclone copy out "gdrive:ASTROLOVE/DIJITAL_ARASTIRMA_20261125/DERIN_${ETIKET}" -q
+          A=$(python3 -c "import json; d=json.load(open('out/durum.json')); print(d.get('asama'), d.get('kosu'), d.get('istek_toplam'))")
+          echo "::notice::Drive: DERIN_${ETIKET}/ ($(find out -type f | wc -l) dosya) | asama / kosu / toplam istek: $A"
       - if: always()
         run: rm -rf ~/.config/rclone out _t.log
-      - name: Zincir (kendini yeniden tetikle)
-        if: always() && env.ATLA != '1'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          ZINCIR: ${{ github.event.inputs.zincir || '0' }}
-          ZINCIR_AZAMI: "30"
-        run: |
-          set -euo pipefail
-          K="${KOD:-1}"; A="${ASAMA:-}"; Y="${YAZILDI:-0}"
-          case "$ZINCIR" in ''|*[!0-9]*) echo "::error::zincir girdisi gecersiz"; exit 1;; esac
-          if [ "$Y" != 1 ]; then echo "::notice::ZINCIR DUR: durum Drive'a yazilmadi"; exit 0; fi
-          if [ -z "$A" ] || [ "$A" = bitti ]; then echo "::notice::ZINCIR DUR: asama ${A:-bos}"; exit 0; fi
-          if [ "$K" != 0 ] && [ "$K" != 4 ]; then echo "::notice::ZINCIR DUR: cikis $K (3 kota, 1 hata)"; exit 0; fi
-          if [ "$ZINCIR" -ge "$ZINCIR_AZAMI" ]; then echo "::notice::ZINCIR DUR: azami $ZINCIR_AZAMI"; exit 0; fi
-          N=$((ZINCIR + 1))
-          gh workflow run dijital-arastirma.yml -R "$GITHUB_REPOSITORY" --ref main -f zincir="$N"
-          echo "::notice::ZINCIR: sonraki kosu tetiklendi (zincir $N, asama $A, cikis $K)"
       - name: Sonuc (1 ise kirmizi)
         run: |
-          if [ "${ATLA:-0}" = 1 ]; then echo "atlandi"; exit 0; fi
           echo "cikis kodu: ${KOD:-?}"
           [ "${KOD:-1}" != "1" ]

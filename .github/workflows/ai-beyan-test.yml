@@ -64,3 +64,20 @@ jobs:
                    scripts/siparis_onizle/test_halka_23_akis.py scripts/siparis_onizle/test_dijital_kodlama.py scripts/siparis_onizle/test_olcu_tablo.py; do
             echo "== $t"; /tmp/v/bin/python "$t" > _t.log 2>&1 || { tail -40 _t.log; exit 1; }; tail -1 _t.log
           done
+  dijital-arastirma-test:
+    # 26 Kas (Serdar huni karari, KARARLAR_20261126_2): terim taramasi + derin toplayici sahte Etsy testleri ve is akisi kabuk testi.
+    # ETSY YOK, sir yok, ag yok (testler socket / urllib kapatir, rclone / curl / gh sahte). Her test tek basina, cikis kodu ayri.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0     # test_dijital_is_akisi origin/main surumunu okur (yoksa o kontrol atlanir)
+      - name: Kurulum
+        run: pip install -q requests==2.34.2
+      - name: Testler
+        run: |
+          set -euo pipefail
+          for t in scripts/etsy/test_terim_tarama.py scripts/etsy/test_dijital_arastirma.py scripts/etsy/test_dijital_is_akisi.py; do
+            echo "== $t"; python3 "$t" > _t.log 2>&1 || { tail -40 _t.log; exit 1; }; tail -1 _t.log
+          done
