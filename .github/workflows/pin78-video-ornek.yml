@@ -17,7 +17,7 @@ on:
         default: CANCER_LEO
 env:
   OFIS: 1KBuisCudYyac5ThyLs19eZW4MQZgwp0W
-  KLASOR: PINTEREST_PIN78_ORNEK_20261125
+  KLASOR: PINTEREST_PIN78_ORNEK_20261125_v2
   REF_DIR: 1_rcZ69bhw00QfHedBiWywEoHPu9Y4bkB
   P2000: gdrive:ASTROLOVE/TEMP/PIN_V6_20261012/_POSTER2000
   KAPAKD: gdrive:ASTROLOVE/TEMP/VIDEO_V9_20261012/KAPAK
@@ -55,6 +55,8 @@ jobs:
       run: |
         set -euo pipefail
         case "$CIFT" in *[!A-Z_]*|'') echo "::error::cift gecersiz"; exit 1 ;; esac
+        # ORNEK yalniz CANCER_LEO: onayli v6 pinleri ve ornek metin yalniz bu cift icin var (78 uretim yolu ayri is)
+        [ "$CIFT" = CANCER_LEO ] || { echo "::error::ornek yalniz CANCER_LEO; 78 toplu uretim yolu henuz yok"; exit 1; }
         a=$(echo "${CIFT%%_*}" | sed 's/.*/\L&/; s/^./\U&/'); b=$(echo "${CIFT#*_}" | sed 's/.*/\L&/; s/^./\U&/')
         slug=$(echo "$a-and-$b" | tr 'A-Z' 'a-z')
         [ -n "$a" ] && [ -n "$b" ] && [ -n "$slug" ] || { echo "::error::ad bos"; exit 1; }
@@ -64,10 +66,9 @@ jobs:
         rclone copyto "$KAPAKD/$slug-astroloveart-kapak.jpg" _g/kapak.jpg -q
         [ -s _g/poster.jpg ] && [ -s _g/kapak.jpg ] || { echo "::error::poster ya da onayli kapak yok"; exit 1; }
         rclone copyto "$PVID/$slug-astroloveart-reel.mp4" _g/onayli_P.mp4 -q || echo "::warning::onayli P videosu bulunamadi (yalniz bilgi kiyasi)"
-        if [ "$CIFT" = CANCER_LEO ]; then
-          rclone backend copyid gdrive: 1-U_CIzLqT7nIkbUlrHNXcOjFwRbD_RWs _o/PIN_POSTER_CANCER_LEO_v6.jpg -q
-          rclone backend copyid gdrive: 13gIzmVN51F0DUF3c5vl4p77jXsq2tSo_ _o/PIN_KART_CANCER_LEO_v6.jpg -q
-        fi
+        rclone backend copyid gdrive: 1-U_CIzLqT7nIkbUlrHNXcOjFwRbD_RWs _o/PIN_POSTER_CANCER_LEO_v6.jpg -q
+        rclone backend copyid gdrive: 13gIzmVN51F0DUF3c5vl4p77jXsq2tSo_ _o/PIN_KART_CANCER_LEO_v6.jpg -q
+        md5sum _o/PIN_*_v6.jpg | tee _o/v6_md5.txt | sed 's/^/::warning::MD5 /'
         cp _g/kapak.jpg "_o/ONAYLI_KAPAK_$slug.jpg"
         ls -la _g _o
     - name: Metin + takvim
@@ -113,19 +114,29 @@ jobs:
         python3 $V/video_uret.py --poster _g/poster.jpg --a "$A" --b "$B" --out _w/v --acilis B --sure "$SURE" --muzik _w/m/muzik_k.m4a > _w/v.log 2>&1 &
         while [ "$(jobs -rp | wc -l)" -gt 0 ]; do sleep 45; echo "ETA $(grep -o '[0-9]*/[0-9]* kare.*' _w/v.log | tail -1) | gecen $(( $(date +%s) - T0 )) sn"; done
         wait
-        rm -f _w/m/muzik.m4a
+        rm -f _w/m/muzik.m4a   # cozulen tam muzik; kisaltilmis kopya QC'den sonra silinir
         f="_w/v/$SLUG-astroloveart-reel.mp4"
         [ -f "$f" ] || { echo "::error::video uretilemedi"; tail -20 _w/v.log; exit 1; }
-        OUT="_o/$SLUG-pin-video.mp4"
-        python3 $V/kapak_basa.py --video "$f" --kapak _g/kapak.jpg --cikis "$OUT" --tam 0.5 --gecis 0.5 --qc _o/kapak_basa_qc.json > _o/kapak_basa_log.txt 2>&1
         ONAY=""; [ -s _g/onayli_P.mp4 ] && ONAY="--onayli_mp4 _g/onayli_P.mp4"
-        python3 scripts/sosyal/pin78_video_qc.py --b _w/kb --p _w/kp --bilgi _w/bilgi.json --sure "$SURE" --video "$OUT" --kapak_qc _o/kapak_basa_qc.json --oz-test > _o/video_oz_test.txt; VO=$?
-        python3 scripts/sosyal/pin78_video_qc.py --b _w/kb --p _w/kp --bilgi _w/bilgi.json --sure "$SURE" --video "$OUT" --kapak_qc _o/kapak_basa_qc.json $ONAY > _o/video_qc.txt; VQ=$?
-        cat _o/muzik_lufs.txt >> _o/video_qc.txt
-        grep -E "FAIL|BILGI|son kart" _o/video_qc.txt | sed 's/^/::warning::VIDEO /'
-        mkdir -p _o/video_kareler
-        for s in 0 0.6 1.2 3 8 10.5 12.5 14.2; do ffmpeg -v error -y -ss $s -i "$OUT" -frames:v 1 -q:v 2 "_o/video_kareler/kare_${s}s.jpg"; done
-        echo "VIDEO_RC=$(( VO + VQ ))" >> "$GITHUB_ENV"
+        [ -n "$ONAY" ] || echo "::warning::onayli P videosu yok: kiyas kapisi kosmadi"
+        RC=0
+        # iki secenek (Serdar secer, oneri yok): GECIS = kapak 0-0.5 sn + 0.5 sn yumusak gecis (onayli kapak_basa ayari);
+        # KESME = kapak 0-0.5 sn + 1 karelik gecis (sert kesme, ust uste binme yok)
+        for SEC in GECIS KESME; do
+          G=0.5; [ "$SEC" = KESME ] && G=0.0334
+          OUT="_o/$SLUG-pin-video_$SEC.mp4"
+          python3 $V/kapak_basa.py --video "$f" --kapak _g/kapak.jpg --cikis "$OUT" --tam 0.5 --gecis $G --qc "_o/kapak_basa_qc_$SEC.json" > "_o/kapak_basa_log_$SEC.txt" 2>&1
+          python3 scripts/sosyal/pin78_video_qc.py --b _w/kb --p _w/kp --bilgi _w/bilgi.json --sure "$SURE" --video "$OUT" --kapak_qc "_o/kapak_basa_qc_$SEC.json" \
+            --muzik _w/m/muzik_k.m4a $ONAY --oz-test > "_o/video_oz_test_$SEC.txt"; VO=$?
+          python3 scripts/sosyal/pin78_video_qc.py --b _w/kb --p _w/kp --bilgi _w/bilgi.json --sure "$SURE" --video "$OUT" --kapak_qc "_o/kapak_basa_qc_$SEC.json" \
+            --muzik _w/m/muzik_k.m4a $ONAY > "_o/video_qc_$SEC.txt"; VQ=$?
+          grep -E "FAIL|son kart|onayli P|LUFS" "_o/video_qc_$SEC.txt" | sed "s/^/::warning::VIDEO $SEC /"
+          mkdir -p "_o/video_kareler_$SEC"
+          for s in 0 0.5 0.6 0.8 1.0 1.2 3 8 10.5 12.5 14.2; do ffmpeg -v error -y -ss $s -i "$OUT" -frames:v 1 -q:v 2 "_o/video_kareler_$SEC/kare_${s}s.jpg"; done
+          RC=$(( RC + VO + VQ ))
+        done
+        rm -f _w/m/muzik_k.m4a
+        echo "VIDEO_RC=$RC" >> "$GITHUB_ENV"
     - name: Kontak + Drive
       if: ${{ always() }}
       run: |
@@ -138,11 +149,16 @@ jobs:
         x = 40
         for p in pins:
             c.paste(Image.open(p).convert('RGB').resize((600, 900)), (x, 50)); d.text((x, 20), os.path.basename(p) + ' (onayli v6 aynen)', fill=(0, 0, 0)); x += 640
-        kr = sorted(glob.glob(os.path.join(o, 'video_kareler', '*.jpg')), key=lambda f: float(f.split('kare_')[1][:-5]))
-        x2 = 40
-        for k in kr:
-            c.paste(Image.open(k).convert('RGB').resize((280, 498)), (x2, 1000)); d.text((x2, 1505), 'video ' + k.split('kare_')[1][:-4], fill=(0, 0, 0)); x2 += 310
-        c.save(os.path.join(o, 'KONTAK_PIN78_ORNEK.jpg'), quality=92)
+        c.save(os.path.join(o, 'KONTAK_PIN78_ORNEK_PINLER.jpg'), quality=92)
+        for sec in ('GECIS', 'KESME'):
+            kr = sorted(glob.glob(os.path.join(o, f'video_kareler_{sec}', '*.jpg')), key=lambda f: float(f.split('kare_')[1][:-5]))
+            if not kr:
+                continue
+            v = Image.new('RGB', (len(kr) * 230 + 40, 470), (255, 255, 255)); dv = ImageDraw.Draw(v)
+            for i, k in enumerate(kr):
+                v.paste(Image.open(k).convert('RGB').resize((216, 384)), (20 + i * 230, 40)); dv.text((20 + i * 230, 432), k.split('kare_')[1][:-4], fill=(0, 0, 0))
+            dv.text((20, 12), f'VIDEO {sec}: ' + ('kapak 0-0.5 sn + 0.5 sn yumusak gecis' if sec == 'GECIS' else 'kapak 0-0.5 sn + sert kesme'), fill=(0, 0, 0))
+            v.save(os.path.join(o, f'KONTAK_VIDEO_{sec}.jpg'), quality=92)
         PY
         ls -la _o _o/video_kareler
         HEDEF="$KLASOR"

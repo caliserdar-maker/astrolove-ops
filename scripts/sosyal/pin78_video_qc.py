@@ -7,7 +7,12 @@ Kapilar (PASS/FAIL):
   2) Son kart suresi: sure - (19.6 - T_B0) 3.0-4.0 sn (Serdar "3-4 sn").
   3) Son mp4: 1080x1920, 30 fps, kare = 30 x sure, sure +-0.05, h264, ses = sure +-0.05.
   4) kapak_basa QC json: sonuc PASS (ilk kare = kapak < 2.0, 0-1.5 sn parlaklik, kayma, kare/sure/ses ayni).
-Bilgi: onayli Drive P videosu ile son mp4 kare farki (iki kodlama; esik olculmeden kapi yok).
+  5) Son kart ekranda olculen sure (son mp4, 0.1 sn adim, "Make it yours" bandinda yazi maskesi - zemin farki >= tepenin %10'u)
+     3.0-4.0 sn;
+     tam gorunur sure (>= %90) bilgi olarak yazilir.
+  6) Muzik: integrated -16 LUFS +-1.0 (muzik_ekle.py kurali), --muzik verilirse.
+  7) Onayli Drive P videosuyla (--onayli_mp4) 2 / 5 / 8 / 10.5 sn karelerinde ortalama fark <= 2.0 (kapak_basa.py ESIK;
+     25 Kas ilk olcum 0.86-1.32). Ilk 1.5 sn (kapak + gecis) ve son kararma bu kapinin disinda.
 Kullanim: pin78_video_qc.py --b DIR --p DIR --bilgi bilgi.json --sure 15 --video V.mp4 --kapak_qc Q.json [--onayli_mp4 O.mp4] [--oz-test]
 """
 import argparse, glob, json, os, shutil, subprocess, sys, tempfile
@@ -15,6 +20,7 @@ import numpy as np
 from PIL import Image
 
 SON_ALT, SON_UST = 3.0, 4.0
+BANT1 = (576, 704)        # son kart 1. satiri "Make it yours" (CY - 130 = 640)
 
 
 def kareler(d):
@@ -48,19 +54,45 @@ def video(v, sure):
     return [('1080x1920', (s['width'], s['height']) == (1080, 1920), f"{s['width']}x{s['height']}"),
             ('30 fps', s['r_frame_rate'] == '30/1', s['r_frame_rate']),
             (f'{nf} kare', str(s.get('nb_frames')) == str(nf), str(s.get('nb_frames'))),
-            (f'{sure:g} sn', abs(float(s['duration']) - sure) <= 0.05, s['duration']),
+            (f'{sure:g} sn (>= {sure:g}, <= +0.05)', sure <= float(s['duration']) <= sure + 0.05, s['duration']),
             ('h264', s['codec_name'] == 'h264', s['codec_name']),
             (f'ses {sure:g} sn', bool(au) and abs(float(au[0]['duration']) - sure) <= 0.05, au[0]['duration'] if au else 'ses yok')]
 
 
-def kiyas(v, o, ts):
+def son_kart_sure(v, ref_sn):
+    """Son kart gorunurlugu: tam karttaki (ref) yazi maskesinde parlaklik - bant icindeki yazi disi parlaklik. Duvar sahnesinde
+    iki bolge birlikte parlak oldugu icin fark ~0; son kartta yazi parlak, zemin lacivert. Gorunur >= tepenin %10'u, tam >= %90."""
+    t = tempfile.mkdtemp()
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', '9.0', '-i', v, '-vf', 'fps=10', os.path.join(t, 'k_%04d.png')], check=True)
+    fs = sorted(glob.glob(os.path.join(t, 'k_*.png')))
+    br = [np.asarray(Image.open(f).convert('L')).astype(float)[BANT1[0]:BANT1[1]] for f in fs]
+    if not br:
+        return 0.0, 0.0
+    ref = br[min(len(br) - 1, int(round((ref_sn - 9.0) * 10)))]   # tam son kart karesi (sure - 2 sn)
+    m = ref > 120
+    if m.sum() < 50:
+        return 0.0, 0.0
+    fark = [float(x[m].mean() - x[~m].mean()) for x in br]
+    tepe = max(fark)
+    gor = sum(1 for x in fark if x >= 0.1 * tepe) / 10.0
+    tam = sum(1 for x in fark if x >= 0.9 * tepe) / 10.0
+    return gor, tam
+
+
+def lufs(m):
+    r = subprocess.run(['ffmpeg', '-nostats', '-i', m, '-af', 'ebur128', '-f', 'null', '-'], capture_output=True, text=True)
+    v = [l for l in r.stderr.splitlines() if l.strip().startswith('I:')]
+    return float(v[-1].split()[1]) if v else None
+
+
+def kiyas(v, o, ts, ofs=0.0):
     t = tempfile.mkdtemp(); out = []
     for s in ts:
         a, b = os.path.join(t, 'a.png'), os.path.join(t, 'b.png')
-        for src, dst in ((v, a), (o, b)):
-            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{s}', '-i', src, '-frames:v', '1', dst], check=True)
+        for src, dst, ss in ((v, a, s), (o, b, s + ofs)):
+            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{ss}', '-i', src, '-frames:v', '1', dst], check=True)
         d = np.abs(np.asarray(Image.open(a).convert('RGB')).astype(int) - np.asarray(Image.open(b).convert('RGB')).astype(int))
-        out.append(f'{s:g}s ort {d.mean():.2f} p99 {np.percentile(d, 99):.0f}')
+        out.append((s, float(d.mean()), float(np.percentile(d, 99))))
     return out
 
 
@@ -72,6 +104,15 @@ def kapilar(g):
     S.append((f'son kart {SON_ALT:g}-{SON_UST:g} sn', SON_ALT <= sk <= SON_UST, f'{sk} sn ({son_bas}-{g.sure:g})'))
     if g.video:
         S += video(g.video, g.sure)
+    if g.video:
+        gor, tam = son_kart_sure(g.video, g.sure - 2.0)
+        S.append((f'son kart ekranda (olculen) {SON_ALT:g}-{SON_UST:g} sn', SON_ALT <= gor <= SON_UST, f'gorunur {gor:.1f} sn, tam {tam:.1f} sn'))
+    if g.muzik:
+        L = lufs(g.muzik)
+        S.append(('muzik -16 LUFS +-1.0', L is not None and abs(L + 16) <= 1.0, L))
+    if g.video and g.onayli_mp4:
+        for s_, m, p in kiyas(g.video, g.onayli_mp4, [2, 5, 8, 10.5]):
+            S.append((f'onayli P mp4 kare {s_:g}s ort fark <= 2.0', m <= 2.0, f'ort {m:.2f} p99 {p:.0f}'))
     if g.kapak_qc:
         q = json.load(open(g.kapak_qc)) if os.path.exists(g.kapak_qc) else {}
         S.append(('kapak_basa QC PASS', q.get('sonuc') == 'PASS', q.get('sonuc', 'yok')))
@@ -83,29 +124,32 @@ def main():
     for k in ('b', 'p', 'bilgi'):
         ap.add_argument('--' + k, required=True)
     ap.add_argument('--sure', type=float, required=True); ap.add_argument('--video'); ap.add_argument('--kapak_qc')
-    ap.add_argument('--onayli_mp4'); ap.add_argument('--oz-test', action='store_true')
+    ap.add_argument('--onayli_mp4'); ap.add_argument('--muzik'); ap.add_argument('--oz-test', action='store_true')
     g = ap.parse_args()
     S, son_bas, son_fo = kapilar(g)
     if g.oz_test:
-        sonuc = [('bilinen PASS (kare + son kart)', all(o for a, o, _ in S if a.startswith('kare') or a.startswith('son kart')))]
+        sonuc = [('bilinen PASS (tum kapilar)', all(o for _, o, _ in S))]
         t = tempfile.mkdtemp()
         for f in glob.glob(os.path.join(g.b, '*-kare_*.jpg')):
             shutil.copy(f, t)
         k = kareler(t); f0 = k[min(x for x in k if x >= 1.5)]
         a = np.asarray(Image.open(f0)).copy(); a[300:320, 300:320] = 255; Image.fromarray(a).save(f0, quality=95)
         sonuc.append(('FAIL: bozuk kare', not all(o for _, o, _ in esitlik(t, g.p, son_fo))))
-        g24 = argparse.Namespace(**{**vars(g), 'sure': 24.0, 'video': None, 'kapak_qc': None})
+        g24 = argparse.Namespace(**{**vars(g), 'sure': 24.0, 'video': None, 'kapak_qc': None, 'muzik': None, 'onayli_mp4': None})
         sonuc.append(('FAIL: 24 sn (son kart 13 sn)', not all(o for a, o, _ in kapilar(g24)[0] if a.startswith('son kart'))))
         if g.video:
             sonuc.append(('FAIL: yanlis sure beklentisi', not all(o for _, o, _ in video(g.video, g.sure + 1))))
+        if g.video and g.onayli_mp4:
+            # bilinen FAIL: 3 sn kaymis kare (ayni olmayan goruntu) kiyas kapisini gecemez
+            sonuc.append(('FAIL: kaymis kare kiyasi', any(m > 2.0 for _, m, _ in kiyas(g.video, g.onayli_mp4, [5], ofs=3.0))))
+            # bilinen FAIL: onayli 24 sn P videosunda son kart ~13 sn, 3-4 sn kapisini gecemez
+            gor, _ = son_kart_sure(g.onayli_mp4, 22.0)
+            sonuc.append((f'FAIL: 24 sn videoda olculen son kart ({gor:.1f} sn)', not (SON_ALT <= gor <= SON_UST)))
         for ad, v in sonuc:
             print(('PASS ' if v else 'FAIL ') + 'oz-test ' + ad)
         sys.exit(0 if all(v for _, v in sonuc) else 1)
     for ad, o, d in S:
         print(f"{'PASS' if o else 'FAIL'} {ad} | {d}")
-    if g.video and g.onayli_mp4:
-        for s in kiyas(g.video, g.onayli_mp4, [2, 5, 8, 10.5]):
-            print('BILGI onayli P mp4 kiyas ' + s)
     sys.exit(0 if all(o for _, o, _ in S) else 1)
 
 
