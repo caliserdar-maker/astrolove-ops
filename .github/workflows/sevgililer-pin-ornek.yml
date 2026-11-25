@@ -1,0 +1,134 @@
+name: sevgililer-pin-ornek
+# Pinterest Sevgililer ORNEK seti (Serdar "ok" 25 Kas 2026, KARARLAR_20261125_31; RAPOR_PINTEREST_STRATEJI_20261122 bolum 6).
+# YALNIZ ORNEK: toplu uretim yok; Pinterest / Etsy / Metricool YAZMA YOK. Cikti: Drive OFIS/PINTEREST_SEVGILILER_ORNEK_20261125/.
+# K1 A2 + K3 B2 pin: scripts/sosyal/sevgililer_pin.py (onayli pin v6 pikselleri; yalniz yazi satiri / kucuk poster).
+# K2 video: onayli sosyal video (video_v9, acilis P, muzik 2) + --son_satir; poster = PIN_01 v6 ile ayni dummy siparis posteri
+#   (9000000041, MILO / HARPER; musteri verisi yok). Onayli v9 yolu once dogrula.py ile kontrol edilir (Gemini & Leo).
+# QC: sevgililer_pin.py (13 kapi + oz-test), sevgililer_video_qc.py (kare esitligi, video, oz-test), muzik_ekle.py (LUFS).
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      son_satir:
+        description: 'video son kart ilk satiri'
+        default: "A Valentine’s gift"
+env:
+  OFIS: 1KBuisCudYyac5ThyLs19eZW4MQZgwp0W
+  KLASOR: PINTEREST_SEVGILILER_ORNEK_20261125
+  REF_DIR: 1_rcZ69bhw00QfHedBiWywEoHPu9Y4bkB
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      run: |
+        set -euo pipefail
+        pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core fonts-texgyre >/dev/null
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+        curl -fsSL --retry 3 "https://raw.githubusercontent.com/google/fonts/main/ofl/ebgaramond/EBGaramond%5Bwght%5D.ttf" -o "$RUNNER_TEMP/EBGaramond[wght].ttf"
+        test -s /usr/share/texmf/fonts/opentype/public/tex-gyre/texgyrepagella-italic.otf
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Girdi
+      run: |
+        set -euo pipefail
+        mkdir -p _g
+        while read -r ID AD; do
+          [ -n "$ID" ] && [ -n "$AD" ] || { echo "::error::bos satir"; exit 1; }
+          rclone backend copyid gdrive: "$ID" "_g/$AD" -q
+          [ -s "_g/$AD" ] || { echo "::error::inmedi $AD"; exit 1; }
+        done <<'EOF'
+        1-U_CIzLqT7nIkbUlrHNXcOjFwRbD_RWs PIN_01_CANCER_LEO_A_POSTER_v6.jpg
+        13gIzmVN51F0DUF3c5vl4p77jXsq2tSo_ PIN_02_CANCER_LEO_B_SYMBOL_v6.jpg
+        1RpExFjyH-7PPX0T4JQfeB5jOTuFXmrha poster.jpg
+        EOF
+        ls -la _g
+    - name: Pin + QC
+      run: |
+        set +e -uo pipefail
+        mkdir -p _o
+        python3 scripts/sosyal/sevgililer_pin.py --oz-test --girdi _g | tee _o/pin_oz_test.txt; OZ=${PIPESTATUS[0]}
+        python3 scripts/sosyal/sevgililer_pin.py --girdi _g --out _o | tee _o/pin_qc.txt; PQ=${PIPESTATUS[0]}
+        sed 's/^/::warning::PIN /' _o/pin_qc.txt
+        echo "PIN_RC=$(( OZ + PQ ))" >> "$GITHUB_ENV"
+    - name: Video + QC
+      env:
+        SON_SATIR: ${{ inputs.son_satir }}
+      run: |
+        set +e -uo pipefail
+        [ -n "$SON_SATIR" ] || { echo "::error::son_satir bos"; exit 1; }
+        V=sosyal/video_v9; mkdir -p _w/ref _w/dg _w/m _w/ko _w/ky _w/v
+        # 1) onayli v9 yolu degismedi (son_satir varsayilan)
+        rclone copyto gdrive:AstroLoveArt_Gemini_Leo_2000.jpg _w/ref/GEMINI_LEO.jpg --drive-root-folder-id "$REF_DIR" -q
+        python3 $V/video_uret.py --poster _w/ref/GEMINI_LEO.jpg --a Gemini --b Leo --out _w/dg --kareler 2,5,8,13,17,22 >/dev/null \
+          && python3 $V/dogrula.py _w/dg | tee _w/dg.txt; DG=${PIPESTATUS[0]}
+        sed 's/^/::warning::DOGRULA /' _w/dg.txt
+        [ "$DG" = 0 ] || { echo "::error::onayli v9 dogrulamasi FAIL, video uretilmedi"; exit 1; }
+        # 2) muzik 2 (onayli)
+        P=$(rclone cat "gdrive:ASTROLOVE/TEMP/MUZIK_PAROLA.txt" 2>/dev/null | tr -d '\r\n')
+        [ -n "$P" ] && echo "::add-mask::$P"
+        [ -n "$P" ] || { echo "::error::muzik parolasi okunamadi"; exit 1; }
+        MUZIK_PAROLA="$P" openssl enc -d -aes-256-cbc -pbkdf2 -in $V/assets/muzik_2.m4a.enc -out _w/m/muzik.m4a -pass env:MUZIK_PAROLA \
+          || { unset P; echo "::error::muzik cozulemedi"; exit 1; }
+        unset P
+        # 3) P karesi + sessiz video + kareler (onayli metin / Sevgililer metni)
+        python3 $V/acilis_p.py --poster _g/poster.jpg --a Cancer --b Leo --font "$RUNNER_TEMP/EBGaramond[wght].ttf" --out _w/P_kare.png --bilgi _o/p_kare.json \
+          || { echo "::error::P karesi uretilemedi"; exit 1; }
+        K=0.5,1.5,3,7,10,12,16,19,22,23.5
+        python3 $V/video_uret.py --poster _g/poster.jpg --a Cancer --b Leo --out _w/ko --kareler $K --acilis P --acilis_kare _w/P_kare.png >/dev/null
+        python3 $V/video_uret.py --poster _g/poster.jpg --a Cancer --b Leo --out _w/ky --kareler $K --acilis P --acilis_kare _w/P_kare.png --son_satir "$SON_SATIR" >/dev/null
+        T0=$(date +%s)
+        python3 $V/video_uret.py --poster _g/poster.jpg --a Cancer --b Leo --out _w/v --acilis P --acilis_kare _w/P_kare.png --son_satir "$SON_SATIR" > _w/v.log 2>&1 &
+        while [ "$(jobs -rp | wc -l)" -gt 0 ]; do sleep 45; echo "ETA $(grep -o '[0-9]*/720 kare.*' _w/v.log | tail -1) | gecen $(( $(date +%s) - T0 )) sn"; done
+        wait
+        f=_w/v/cancer-and-leo-astroloveart-reel.mp4
+        [ -f "$f" ] || { echo "::error::video uretilemedi"; tail -20 _w/v.log; exit 1; }
+        python3 $V/muzik_ekle.py --muzik _w/m/muzik.m4a --giris "$f" --cikis _w/vm --beklenen 1 | tee _o/muzik_qc.txt; MQ=${PIPESTATUS[0]}
+        rm -f _w/m/muzik.m4a
+        VM=$(ls _w/vm/*.mp4 | head -1)
+        [ -n "$VM" ] && cp "$VM" _o/SEVGILILER_K2_VIDEO_CANCER_LEO.mp4
+        python3 scripts/sosyal/sevgililer_video_qc.py --onayli _w/ko --yeni _w/ky --metin "$SON_SATIR" --oz-test | tee _o/video_oz_test.txt; VO=${PIPESTATUS[0]}
+        python3 scripts/sosyal/sevgililer_video_qc.py --onayli _w/ko --yeni _w/ky --metin "$SON_SATIR" --video _o/SEVGILILER_K2_VIDEO_CANCER_LEO.mp4 | tee _o/video_qc.txt; VQ=${PIPESTATUS[0]}
+        sed 's/^/::warning::VIDEO /' _o/video_qc.txt
+        mkdir -p _o/video_kareler; cp _w/ky/*.jpg _o/video_kareler/
+        echo "VIDEO_RC=$(( MQ + VO + VQ ))" >> "$GITHUB_ENV"
+    - name: Kontak + Drive
+      if: ${{ always() }}
+      run: |
+        set +e -uo pipefail
+        python3 - <<'PY'
+        import glob, os
+        from PIL import Image, ImageDraw
+        o = '_o'; W = 2400
+        pins = [os.path.join(o, f) for f in ('SEVGILILER_K1_A2_CANCER_LEO_POSTER.jpg', 'SEVGILILER_K3_B2_CANCER_LEO_KART.jpg') if os.path.exists(os.path.join(o, f))]
+        kr = sorted(glob.glob(os.path.join(o, 'video_kareler', '*.jpg')), key=lambda f: float(f.split('kare_')[1][:-5]))
+        kr = [k for k in kr if any(k.endswith(f'kare_{s}s.jpg') for s in ('0.5', '3', '7', '10', '22'))]
+        c = Image.new('RGB', (W, 1700), (255, 255, 255)); d = ImageDraw.Draw(c)
+        x = 40
+        for p in pins:
+            c.paste(Image.open(p).convert('RGB').resize((700, 1050)), (x, 60)); d.text((x, 20), os.path.basename(p), fill=(0, 0, 0)); x += 740
+        x2 = 40
+        for k in kr:
+            c.paste(Image.open(k).convert('RGB').resize((300, 533)), (x2 + 0, 1140)); d.text((x2, 1680), 'video ' + k.split('kare_')[1][:-4], fill=(0, 0, 0)); x2 += 320
+        c.save(os.path.join(o, 'KONTAK_SEVGILILER_ORNEK.jpg'), quality=92)
+        PY
+        ls -la _o _o/video_kareler
+        rclone copy _o "gdrive:$KLASOR" --drive-root-folder-id "$OFIS" -q && echo "::warning::DRIVE OFIS/$KLASOR $(rclone lsf "gdrive:$KLASOR" --drive-root-folder-id "$OFIS" | tr '\n' ' ')"
+        rm -rf _w ~/.config/rclone
+        echo "::warning::SONUC PIN_RC=${PIN_RC:-1} VIDEO_RC=${VIDEO_RC:-1}"
+        [ "${PIN_RC:-1}" = 0 ] && [ "${VIDEO_RC:-1}" = 0 ]

@@ -75,7 +75,7 @@ def navy_glow(profile, cy_frac, gain=0.70, sigma=0.42):
     return Image.fromarray(np.clip(np.round(out), 0, 255).astype(np.uint8), 'RGB')
 
 
-def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acilis=None, acilis_kare_yol=None):
+def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acilis=None, acilis_kare_yol=None, son_satir='Make it yours'):
     os.makedirs(out_dir, exist_ok=True)
     slug = f'{A.lower()}-and-{B.lower()}'
     P = PU.PosterR(poster_path)
@@ -134,7 +134,7 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acil
     names = lib.scale_w(P.layer(P.names_row, only_label=False), round(W * 0.74))
     tB = merge_layers([full(names, W / 2, 1150), full(text('Your names, your message', 0.054), W / 2, 1272)])
     end = bg.copy()
-    _e1, _e2, _e3 = text('Make it yours', 0.090), brand(0.046), text('On Etsy', 0.052)
+    _e1, _e2, _e3 = text(son_satir, 0.090), brand(0.046), text('On Etsy', 0.052)
     lib.paste(end, _e1, W / 2, CY - 130); lib.paste(end, _e2, W / 2, CY + 10, shadow=False); lib.paste(end, _e3, W / 2, CY + 135)
     END = np.asarray(end).astype(np.float32)
     kutu = json.load(open(os.path.join(AS, 'wall916_kutu.json')))
@@ -391,11 +391,13 @@ if __name__ == '__main__':
     ap.add_argument('--acilis', choices=['A', 'B', 'B1', 'C', 'P'])
     ap.add_argument('--acilis_kare', help='P: 1080x1920 opening frame from acilis_p.py')
     ap.add_argument('--bilgi', help='write layout/timing info (JSON) here')
+    ap.add_argument('--son_satir', default='Make it yours',
+                    help='end card first line (25 Nov 2026 Valentine sample); default = approved v9 text')
     g = ap.parse_args()
     k = [float(x) for x in g.kareler.split(',')] if g.kareler else None
     bi = {} if g.bilgi else None
     if g.acilis == 'P' and not g.acilis_kare:
         ap.error('--acilis P needs --acilis_kare')
-    print(build(g.poster, g.a, g.b, g.out, g.muzik, k, bi, g.acilis, g.acilis_kare))
+    print(build(g.poster, g.a, g.b, g.out, g.muzik, k, bi, g.acilis, g.acilis_kare, g.son_satir))
     if g.bilgi:
         json.dump(bi, open(g.bilgi, 'w'), indent=1)
