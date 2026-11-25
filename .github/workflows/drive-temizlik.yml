@@ -1,0 +1,109 @@
+name: drive-temizlik
+# Drive temizligi (Serdar 25 Kas 2026): 22 Kas envanterine gore Cop kutusuna (J1-J4) / ASTROLOVE/ARCHIVE'e (J5) tasima.
+# scripts/drive_temizlik/drive_temizlik.py. Kalici silme YOK (istemci DELETE/emptyTrash'i reddeder; yalniz trashed=true).
+# kuru: salt okuma; plan + KURU_DRIVE_TRASH_<ts>.csv/.md Drive OFIS'e (sahip-yalniz). uygula: kuru planini (ts) indirir,
+# her birimi canli yeniden kontrol eder, 200'luk partilerle tasir, geri okur; hata olan partide DUR.
+# Loga yalniz sayi yazilir. Etsy'ye dokunmaz (Etsy kilidi gerekmez).
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      mod: {description: "kuru | uygula", required: true, default: "kuru"}
+      isler: {description: "J1,J2,J3,J4,J5 alt kumesi", required: true, default: "J1,J2,J3,J4,J5"}
+      plan_ts: {description: "uygula: kuru kosunun ts'i (YYYYMMDD_HHMM)", required: false, default: ""}
+      onay: {description: "uygula icin TASI yazin", required: false, default: ""}
+concurrency:
+  group: drive-temizlik
+  cancel-in-progress: false
+jobs:
+  temizlik:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - name: Girdi kapisi
+        env: {MOD: "${{ inputs.mod }}", ONAY: "${{ inputs.onay }}", ISLER: "${{ inputs.isler }}", PTS: "${{ inputs.plan_ts }}"}
+        run: |
+          set -euo pipefail
+          [ -n "$ISLER" ] || { echo "HATA: isler bos"; exit 1; }
+          [[ "$ISLER" =~ ^J[1-5](,J[1-5])*$ ]] || { echo "HATA: isler"; exit 1; }
+          [ -n "$MOD" ] || { echo "HATA: mod bos"; exit 1; }
+          case "$MOD" in
+            kuru) ;;
+            uygula)
+              [ "$ONAY" = "TASI" ] || { echo "HATA: uygula icin onay=TASI"; exit 1; }
+              [[ "$PTS" =~ ^[0-9]{8}_[0-9]{4}$ ]] || { echo "HATA: plan_ts"; exit 1; } ;;
+            *) echo "HATA: mod"; exit 1 ;;
+          esac
+      - uses: actions/checkout@v4
+      - name: rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+            fi
+          fi
+      - name: Kuru / uygula
+        env:
+          MOD: ${{ inputs.mod }}
+          ISLER: ${{ inputs.isler }}
+          PTS: ${{ inputs.plan_ts }}
+          ONAY: ${{ inputs.onay }}
+        run: |
+          set -euo pipefail
+          K="$GITHUB_WORKSPACE"
+          S="$K/scripts/drive_temizlik/drive_temizlik.py"
+          W=/tmp/dt; rm -rf "$W"; mkdir -p "$W/env" "$W/out"
+          # token komutu: rclone istegi tokeni tazeler, dump'tan access_token okunur; deger maskelenir, loga yazilmaz
+          cat > "$W/tok.sh" <<'EOT'
+          rclone lsf gdrive:OFIS --max-depth 1 --dirs-only >/dev/null 2>&1 || exit 1
+          T=$(rclone config dump | jq -r '.gdrive.token' | jq -r '.access_token')
+          [ -n "$T" ] && [ "$T" != null ] || exit 1
+          echo "::add-mask::$T" >&2
+          printf '%s\n' "$T"
+          EOT
+          export DRIVE_TOKEN_KOMUT="bash $W/tok.sh"
+          T=$(bash "$W/tok.sh" 2>/dev/null) || { echo "HATA: Drive token alinamadi"; exit 1; }
+          [ -n "$T" ] || { echo "HATA: Drive token bos"; exit 1; }
+          echo "::add-mask::$T"; unset T
+          TS=$(TZ=Europe/Istanbul date +%Y%m%d_%H%M)
+          [ -n "$TS" ] || { echo "HATA: ts"; exit 1; }
+          set +e
+          if [ "$MOD" = "kuru" ]; then
+            rclone copy "gdrive:OFIS/DRIVE_TEMIZLIK_ENVANTER_20261122" "$W/env" --include "ENVANTER_PARCA_*.csv"
+            N=$(ls "$W/env" | grep -c '^ENVANTER_PARCA_.*\.csv$')
+            echo "envanter parca: $N"
+            if [ "$N" -lt 1 ]; then echo "HATA: envanter indirilemedi"; exit 1; fi
+            python3 -I "$S" --mod kuru --isler "$ISLER" --envanter "$W/env" --depo "$K" --cikti "$W/out" --ts "$TS"
+            RC=$?
+            if [ -f "$W/out/plan.json" ]; then
+              rclone copyto "$W/out/plan.json" "gdrive:OFIS/DRIVE_TEMIZLIK_PLAN_${TS}.json" || RC=1
+              rclone copyto "$W/out/KURU_DRIVE_TRASH_${TS}.csv" "gdrive:OFIS/KURU_DRIVE_TRASH_${TS}.csv" || RC=1
+              rclone copyto "$W/out/KURU_DRIVE_TRASH_${TS}.md" "gdrive:OFIS/KURU_DRIVE_TRASH_${TS}.md" || RC=1
+              echo "kuru ts: $TS (Drive OFIS'e yuklendi)"
+            fi
+          else
+            rclone copyto "gdrive:OFIS/DRIVE_TEMIZLIK_PLAN_${PTS}.json" "$W/plan.json"
+            if [ ! -s "$W/plan.json" ]; then echo "HATA: plan indirilemedi"; exit 1; fi
+            python3 -I "$S" --mod uygula --isler "$ISLER" --plan "$W/plan.json" --onay "$ONAY" --cikti "$W/out" --ts "$TS"
+            RC=$?
+            if [ -f "$W/out/uygula.json" ]; then
+              rclone copyto "$W/out/uygula.json" "gdrive:OFIS/DRIVE_TEMIZLIK_UYGULA_${TS}.json" || RC=1
+              echo "uygula kaydi ts: $TS (Drive OFIS'e yuklendi)"
+            fi
+          fi
+          exit $RC
+      - if: always()
+        run: rm -rf ~/.config/rclone /tmp/dt
