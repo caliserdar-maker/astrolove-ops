@@ -1,5 +1,5 @@
 name: pin78-video-ornek
-# Pinterest 78 cift x 3 tur, 1 CIFT ORNEGI (Serdar 25 Kas 2026, KARARLAR_20261125_49/_50). Yayin YOK, Metricool / Pinterest /
+# Pinterest 78 cift x 4 tur (poster, kart, altin yakin cekim, video), 1 CIFT ORNEGI (Serdar 25 Kas 2026, KARARLAR_20261125_49/_50/_51/_57). Yayin YOK, Metricool / Pinterest /
 # Etsy YAZMA YOK. Cikti: Drive OFIS/PINTEREST_PIN78_ORNEK_20261125/ (herhangi bir kapi FAIL ise FAIL_<kosu> alt klasoru).
 # Poster ve kart pini: onayli v6 AYNEN (Drive kopyasi + md5 kapisi). Altin yakin cekim (KARARLAR_20261125_51): pin78_altin_pin.py
 #   (PIN_03 v6 cercevesi + PIN_01 v6 basligi + onayli kapak_v1 parcalari; '+' yerine onayli altin logo). Metin: data/sosyal/pinterest/pin78 (Sevgililer + genel surum).
@@ -7,7 +7,7 @@ name: pin78-video-ornek
 #   kapak_v1 kapagi (Drive VIDEO_V9_20261012/KAPAK) kapak_basa.py ile 0-0.5 sn tam, 0.5-1.0 sn gecis (onayli 2. yontem, 15 Eki).
 #   Muzik: onayli muzik 2'nin ilk 15 sn'si, son 2 sn yumusak kapanis (yeni muzik yok). Poster: onayli _POSTER2000.
 # QC: pin78_video_qc.py (onayli P ile kare esitligi, son kart 3-4 sn, video/ses, kapak_basa QC; oz-test), sevgililer_metin.py,
-#   pin78_takvim.py (234 pin kuru takvim). Onayli v9 yolu once dogrula.py.
+#   pin78_takvim.py (312 pin kuru takvim, Share & Save linkleri). Onayli v9 yolu once dogrula.py.
 permissions:
   contents: read
 on:
@@ -18,7 +18,7 @@ on:
         default: CANCER_LEO
 env:
   OFIS: 1KBuisCudYyac5ThyLs19eZW4MQZgwp0W
-  KLASOR: PINTEREST_PIN78_ORNEK_20261125_v3
+  KLASOR: PINTEREST_PIN78_ORNEK_20261125_v4
   REF_DIR: 1_rcZ69bhw00QfHedBiWywEoHPu9Y4bkB
   P2000: gdrive:ASTROLOVE/TEMP/PIN_V6_20261012/_POSTER2000
   KAPAKD: gdrive:ASTROLOVE/TEMP/VIDEO_V9_20261012/KAPAK
@@ -39,7 +39,8 @@ jobs:
       run: |
         set -euo pipefail
         pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84 requests
-        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core >/dev/null
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core fonts-texgyre >/dev/null
+        test -s /usr/share/texmf/fonts/opentype/public/tex-gyre/texgyrepagella-regular.otf
         curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
         curl -fsSL --retry 3 "https://raw.githubusercontent.com/google/fonts/main/ofl/ebgaramond/EBGaramond%5Bwght%5D.ttf" -o "$RUNNER_TEMP/EBGaramond[wght].ttf"
     - name: rclone.conf
@@ -80,9 +81,9 @@ jobs:
       run: |
         set +e -uo pipefail
         python3 scripts/sosyal/pin78_altin_pin.py --poster _g/poster.jpg --a "$A" --b "$B" --cerceve _g/PIN_03_SCORPIO_TAURUS_A_GOLD_v6.jpg \
-          --baslik _o/PIN_POSTER_CANCER_LEO_v6.jpg --oz-test > _o/altin_oz_test.txt; AO=$?
+          --baslik _o/PIN_POSTER_CANCER_LEO_v6.jpg --kart _o/PIN_KART_CANCER_LEO_v6.jpg --oz-test > _o/altin_oz_test.txt; AO=$?
         python3 scripts/sosyal/pin78_altin_pin.py --poster _g/poster.jpg --a "$A" --b "$B" --cerceve _g/PIN_03_SCORPIO_TAURUS_A_GOLD_v6.jpg \
-          --baslik _o/PIN_POSTER_CANCER_LEO_v6.jpg --out _o > _o/altin_qc.txt; AQ=$?
+          --baslik _o/PIN_POSTER_CANCER_LEO_v6.jpg --kart _o/PIN_KART_CANCER_LEO_v6.jpg --out _o > _o/altin_qc.txt; AQ=$?
         sed 's/^/::warning::ALTIN /' _o/altin_qc.txt
         echo "ALTIN_RC=$(( AO + AQ ))" >> "$GITHUB_ENV"
     - name: Metin + takvim
@@ -92,7 +93,7 @@ jobs:
         python3 scripts/sosyal/sevgililer_metin.py $M --oz-test > _o/metin_oz_test.txt; MO=$?
         python3 scripts/sosyal/sevgililer_metin.py $M > _o/metin_qc.txt; MT=$?
         python3 scripts/sosyal/pin78_takvim.py --cikti /dev/null --oz-test > _o/takvim_oz_test.txt; TO=$?
-        python3 scripts/sosyal/pin78_takvim.py --cikti _o/TAKVIM_PIN78_20261125.csv > _o/takvim_qc.txt; TQ=$?
+        python3 scripts/sosyal/pin78_takvim.py --cikti _o/TAKVIM_PIN78_20261125.csv --simdi "$(TZ=Europe/Istanbul date '+%Y-%m-%d %H:%M')" > _o/takvim_qc.txt; TQ=$?
         cp $M _o/
         tail -2 _o/takvim_qc.txt | sed 's/^/::warning::TAKVIM /'
         echo "METIN_RC=$(( MO + MT + TO + TQ ))" >> "$GITHUB_ENV"
