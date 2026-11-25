@@ -556,10 +556,11 @@ def senaryo_plan78():
     yol = KOK.parents[2] / "data/sosyal/pinterest/pin78/ORNEK_METIN_CANCER_LEO.csv"
     out = TMP / "plan.csv"
     with contextlib.redirect_stdout(io.StringIO()) as o:
-        rc = plan78.main(["--metin", str(yol), "--baslangic", "2026-12-13", "--cikti", str(out)])
+        rc = plan78.main(["--metin", str(yol), "--baslangic", "2026-12-13", "--cikti", str(out), "--ilk-no", "101", "--mevcut-en-buyuk", "2"])
     r = list(csv.DictReader(open(out)))
     leo = [x for x in r if "CANCER_LEO" in x["not"]]
-    kontrol("plan78: 702 satir, kapi PASS", rc == 0 and len(r) == 702 and "KAPI PASS" in o.getvalue())
+    kontrol("plan78: 702 satir, kapi PASS, eksik metin/medya -> cikis 3 (takvime yazilmaz)", rc == 3 and len(r) == 702
+            and "KAPI PASS" in o.getvalue() and "HAZIRLIK EKSIK" in o.getvalue() and r[0]["satir_no"] == "101")
     kontrol("plan78: cift basina 9 (IG 4, FB 4, YT 1)", Counter(x["platform"] for x in leo) == Counter(instagram=4, facebook=4, youtube=1))
     kontrol("plan78: YT yalniz short, IG/FB 3 gorsel + 1 reel", {x["tur"] for x in r if x["platform"] == "youtube"} == {"short"}
             and Counter(x["tur"] for x in leo if x["platform"] == "instagram") == Counter(gorsel=3, reel=1))
@@ -576,11 +577,18 @@ def senaryo_plan78():
         w.writeheader()
         w.writerows(rows)
     with contextlib.redirect_stdout(io.StringIO()) as o:
-        rc = plan78.main(["--metin", str(bozuk), "--baslangic", "2026-12-13", "--cikti", str(TMP / "p2.csv")])
+        rc = plan78.main(["--metin", str(bozuk), "--baslangic", "2026-12-13", "--cikti", str(TMP / "p2.csv"), "--ilk-no", "101", "--mevcut-en-buyuk", "2"])
     kontrol("FAIL plan78: sezonluk/uzun tire/yil ifadesi kapida", rc == 1 and "yasak/sezonluk" in o.getvalue())
     with contextlib.redirect_stdout(io.StringIO()) as o:
-        rc = plan78.main(["--metin", str(yol), "--baslangic", "2026-12-13", "--cikti", str(TMP / "p3.csv"), "--yt", "9"])
+        rc = plan78.main(["--metin", str(yol), "--baslangic", "2026-12-13", "--cikti", str(TMP / "p3.csv"), "--yt", "9", "--ilk-no", "101", "--mevcut-en-buyuk", "2"])
     kontrol("FAIL plan78: desteklenmeyen gunluk sayi DUR", rc == 2)
+    with contextlib.redirect_stdout(io.StringIO()) as o:
+        rc = plan78.main(["--metin", str(yol), "--baslangic", "2026-12-13", "--cikti", str(TMP / "p5.csv"), "--ilk-no", "2", "--mevcut-en-buyuk", "2"])
+    kontrol("FAIL plan78: satir_no cakismasi DUR", rc == 2 and "cakisir" in o.getvalue())
+    for ifade, ad in (("Printed by Prodigi.", "tedarikci"), ("A free preview.", "free preview"), ("Happy New Year.", "yeni yil"),
+                      ("Made for Easter.", "paskalya"), ("Photo Rag paper.", "Photo Rag")):
+        kontrol(f"FAIL plan78 yasak: {ad}", plan78.yasak_bul(ifade) != "")
+    kontrol("plan78 yasak: Valentina adi ve ilan no rakamlari serbest", plan78.yasak_bul("Valentina and Leo https://astroloveart.etsy.com/listing/4570143387") == "")
 
 
 def senaryo_yml():

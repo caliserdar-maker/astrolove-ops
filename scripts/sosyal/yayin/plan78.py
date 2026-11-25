@@ -9,7 +9,8 @@ Sira: pin78_takvim.ONCELIK + data/sosyal/pinterest/SIRA_78.csv; 4 tur, her turda
 Kapilar (PASS/FAIL): 702 satir, cift basina platform/tur tam, gunluk sinir, ayni cift >= 7 gun, sezon/yasak ifade yok,
 uzun tire yok, "AstroLove" yalniz yok, YouTube basligi <= 100, Threads yok, link bicimi. Medya kaynagi yoksa satir
 'kaynak yok' (bilgi; plan yine yazilir, onayla bu satirlari kabul etmez).
-Kullanim: plan78.py --metin M.csv --baslangic 2026-12-13 --cikti PLAN.csv [--ig 2 --fb 2 --yt 1] [--ilk-no 100]"""
+Cikis: 0 kapi PASS + metin/medya tam; 3 kapi PASS ama eksik (takvime yazilmaz); 1 kapi FAIL; 2 DUR.
+Kullanim: plan78.py --metin M.csv --baslangic 2026-12-13 --cikti PLAN.csv --ilk-no 101 --mevcut-en-buyuk 2 [--ig 2 --fb 2 --yt 1]"""
 import argparse
 import csv
 import json
@@ -29,8 +30,34 @@ TURLER = ('poster', 'kart', 'altin', 'video')
 SAAT = {"instagram": ["11:25", "19:30", "13:50", "21:05"], "facebook": ["13:50", "21:05", "11:25", "18:40"],
         "youtube": ["18:40", "16:15"]}   # oneri; 09:00-23:30 araligi (KARAR 10)
 SINIR = {"instagram": 25, "facebook": 25, "youtube": 6}   # guvenli ust sinir (IG 50/24s, FB Reel 30/24s, YT kota; tahmin pay)
-YASAK = re.compile(r"(?i)valentin|christmas|xmas|holiday|black friday|mother'?s day|father'?s day|halloween|\b20\d\d\b|"
-                   r"premium|long[- ]lasting|hahnem|giclee|museum|100% cotton|[—–]|astrolove(?!art)")
+
+
+def _etsy_yasak():
+    """Tek kaynak etsy_common.METIN_KESIN + METIN_BAGLAM; modul calistirilmadan (ag/requests yok) sabit olarak okunur."""
+    import ast
+    agac = ast.parse(open(os.path.join(KOK, "scripts/etsy/etsy_common.py"), encoding="utf-8").read())
+    d = {}
+    for n in agac.body:
+        if isinstance(n, ast.Assign) and len(n.targets) == 1 and getattr(n.targets[0], "id", "") in ("METIN_KESIN", "METIN_BAGLAM"):
+            d[n.targets[0].id] = ast.literal_eval(n.value)
+    if set(d) != {"METIN_KESIN", "METIN_BAGLAM"} or not d["METIN_KESIN"]:
+        raise SystemExit("DUR: etsy_common METIN_KESIN / METIN_BAGLAM okunamadi")
+    return d["METIN_KESIN"] + d["METIN_BAGLAM"]
+
+
+SEZON = (r"\bvalentine(?:'s|\u2019s|s)?\b|\bchristmas\b|\bxmas\b|\bholidays?\b|\bblack\s+friday\b|\bcyber\s+monday\b|"
+         r"\bmother(?:'s|\u2019s|s)?\s+day\b|\bfather(?:'s|\u2019s|s)?\s+day\b|\bhalloween\b|\beaster\b|\bnew\s+year\b|"
+         r"\b14\s*(?:th\s+)?(?:of\s+)?feb(?:ruary)?\b|\bfeb(?:ruary)?\s+14\b|(?<![/\d])\b20\d\d\b")
+YASAK = [("sezonluk", re.compile(SEZON, re.I)), ("AstroLove (Art'siz)", re.compile(r"(?i)astrolove(?!art)"))] + \
+        [(ad, re.compile(rx, re.I)) for ad, rx in _etsy_yasak()]
+
+
+def yasak_bul(t):
+    for ad, rx in YASAK:
+        m = rx.search(t)
+        if m:
+            return f"{ad} '{m.group(0)}'"
+    return ""
 
 
 def ayar():
@@ -52,7 +79,10 @@ def metinler(yol):
     out = {}
     for r in csv.DictReader(open(yol, encoding="utf-8")):
         if (r.get("surum") or "").strip() == "genel":
-            out[(r["cift"].strip(), r["konsept"].strip())] = r
+            k = (r["cift"].strip(), r["konsept"].strip())
+            if k in out:
+                raise ValueError(f"metin dosyasinda tekrar: {k}")
+            out[k] = r
     return out
 
 
@@ -129,8 +159,11 @@ def kapilar(satirlar, gunluk):
                 break
     for s in satirlar:
         t = s["metin"]
-        if t and YASAK.search(t):
-            h.append(f"satir {s['satir_no']}: yasak/sezonluk ifade '{YASAK.search(t).group(0)}'")
+        y = yasak_bul(t) if t else ""
+        if y:
+            h.append(f"satir {s['satir_no']}: yasak/sezonluk ifade {y}")
+        if s["platform"] == "youtube" and t and re.search(r"[<>]", t.splitlines()[0]):
+            h.append(f"satir {s['satir_no']}: YouTube basliginda < ya da >")
         if t and not re.search(r"https://astroloveart\.etsy\.com/listing/\d+$", t):
             h.append(f"satir {s['satir_no']}: link bicimi")
         if s["platform"] == "youtube" and t and len(t.splitlines()[0]) > 100:
@@ -148,14 +181,22 @@ def main(argv=None):
     ap.add_argument("--ig", type=int, default=2)
     ap.add_argument("--fb", type=int, default=2)
     ap.add_argument("--yt", type=int, default=1)
-    ap.add_argument("--ilk-no", type=int, default=1)
+    ap.add_argument("--ilk-no", type=int, required=True, help="takvimdeki en buyuk satir_no'dan buyuk olmali")
+    ap.add_argument("--mevcut-en-buyuk", type=int, required=True, help="takvimdeki en buyuk satir_no (cakisma kapisi)")
     x = ap.parse_args(argv)
     gunluk = {"instagram": x.ig, "facebook": x.fb, "youtube": x.yt}
     for p, n in gunluk.items():
         if not 1 <= n <= min(len(SAAT[p]), SINIR[p]):
             print(f"DUR: {p} gunluk {n} desteklenmiyor (1-{min(len(SAAT[p]), SINIR[p])})")
             return 2
-    satirlar, eksik = plan(x.metin, date.fromisoformat(x.baslangic), gunluk, x.ilk_no)
+    if x.ilk_no <= x.mevcut_en_buyuk:
+        print(f"DUR: --ilk-no {x.ilk_no} takvimdeki en buyuk satir_no {x.mevcut_en_buyuk} ile cakisir")
+        return 2
+    try:
+        satirlar, eksik = plan(x.metin, date.fromisoformat(x.baslangic), gunluk, x.ilk_no)
+    except ValueError as e:
+        print(f"DUR: {e}")
+        return 2
     h = kapilar(satirlar, gunluk)
     with open(x.cikti, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=secim.SUTUNLAR, extrasaction="ignore")
@@ -168,7 +209,11 @@ def main(argv=None):
     for e in h[:20]:
         print(f"FAIL {e}")
     print("KAPI " + ("PASS" if not h else f"FAIL ({len(h)})"))
-    return 1 if h else 0
+    hazir = not eksik["metin"] and not eksik["medya"]
+    print("HAZIRLIK " + ("TAMAM" if hazir else f"EKSIK (metin {eksik['metin']}, medya {eksik['medya']}): takvime YAZILMAZ"))
+    if h:
+        return 1
+    return 0 if hazir else 3
 
 
 if __name__ == "__main__":
