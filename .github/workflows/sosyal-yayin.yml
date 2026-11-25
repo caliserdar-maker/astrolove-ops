@@ -30,6 +30,10 @@ on:
         description: "onayla icin SERDAR_YYYYMMDD"
         required: false
         default: ""
+      gizli_test_satir:
+        description: "Gizli test: yalniz bu satir_no (youtube private / facebook taslak); ana anahtar acilmaz"
+        required: false
+        default: ""
   schedule:
     - cron: "7,37 * * * *"
 
@@ -83,6 +87,7 @@ jobs:
         env:
           MOD: ${{ github.event_name == 'schedule' && 'yayin' || inputs.mod }}
           KURU: ${{ github.event_name == 'schedule' && 'false' || inputs.kuru }}
+          GIZLI: ${{ github.event_name == 'workflow_dispatch' && inputs.gizli_test_satir || '' }}
         run: |
           set -euo pipefail
           [ -n "$MOD" ] || { echo "::error::MOD bos"; exit 1; }
@@ -90,6 +95,11 @@ jobs:
           case "$MOD" in yayin|kontrol) ;; *) echo "::error::bu iste mod: $MOD"; exit 1;; esac
           args=("$MOD")
           [ "$KURU" = "true" ] && args+=(--kuru)
+          if [ -n "${GIZLI:-}" ]; then
+            [[ "$GIZLI" =~ ^[0-9]+$ ]] || { echo "::error::gizli_test_satir sayi degil"; exit 1; }
+            [ "$MOD" = "yayin" ] || { echo "::error::gizli test yalniz mod=yayin"; exit 1; }
+            args+=(--gizli-test "$GIZLI")
+          fi
           python3 scripts/sosyal/yayin/calis.py "${args[@]}" 2>&1 | python3 scripts/guvenlik/sir_koru.py tee "$GITHUB_STEP_SUMMARY"
 
   onayla:

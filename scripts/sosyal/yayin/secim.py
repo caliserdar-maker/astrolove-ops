@@ -72,6 +72,8 @@ def dogrula(satir):
         h.append("yz_beyani evet/hayir degil")
     if p == "youtube" and (satir.get("gorunurluk") or "").strip() not in ("public", "private", "unlisted"):
         h.append("youtube gorunurluk public/private/unlisted degil")
+    if p == "facebook" and (satir.get("gorunurluk") or "").strip() not in ("", "public", "taslak"):
+        h.append("facebook gorunurluk bos/public/taslak degil")
     if p == "threads" and len(satir.get("metin") or "") > 500:
         h.append("threads metni 500 karakteri asiyor")
     if p == "instagram" and len(satir.get("metin") or "") > 2200:

@@ -1,4 +1,5 @@
 """Facebook Sayfasi (graph.facebook.com). Reel: video_reels start -> rupload -> finish PUBLISHED (plan R4);
+gorunurluk=taslak: reel video_state=DRAFT, gorsel published=false (gizli test; herkese acik degil);
 gorsel: /{page}/photos (yerel dosya yuklenir). Kimlik: {"token" (Sayfa token'i), "page_id"}."""
 import os
 import time
@@ -20,6 +21,7 @@ def kimlik_dogrula(http, k):
 def yayinla(http, k, satir, medya, uyku=time.sleep):
     tur, metin = satir["tur"], satir.get("metin", "")
     m = medya[0]
+    taslak = (satir.get("gorunurluk") or "").strip() == "taslak"  # gizli test: herkese acik gonderi YOK
     if tur == "reel":
         j, _ = http.iste("POST", f"{BASE}/{k['page_id']}/video_reels", token=k["token"], data={"upload_phase": "start"})
         vid = j.get("video_id")
@@ -31,14 +33,15 @@ def yayinla(http, k, satir, medya, uyku=time.sleep):
         if not j.get("success"):
             raise Hata("rupload basarisiz")
         j, _ = http.iste("POST", f"{BASE}/{k['page_id']}/video_reels", token=k["token"],
-                         data={"upload_phase": "finish", "video_id": vid, "video_state": "PUBLISHED", "description": metin})
+                         data={"upload_phase": "finish", "video_id": vid, "video_state": "DRAFT" if taslak else "PUBLISHED",
+                               "description": metin})
         if not j.get("success"):
             raise Hata("reel finish basarisiz", belirsiz=True)
         return vid
     if tur == "gorsel":
         with open(m["yerel"], "rb") as f:
             j, _ = http.iste("POST", f"{BASE}/{k['page_id']}/photos", token=k["token"],
-                             data={"message": metin, "published": "true"}, dosyalar={"source": f})
+                             data={"message": metin, "published": "false" if taslak else "true"}, dosyalar={"source": f})
         no = j.get("post_id") or j.get("id")
         if not no:
             raise Hata("photos no donmedi", belirsiz=True)

@@ -63,9 +63,24 @@ def _bekliyor_eski(s, simdi):
     return simdi - t >= timedelta(hours=1) and "UYARILDI" not in (s.get("not") or "")
 
 
-def yayin(http, tk, simdi, kuru, uyku=None):
+GIZLI = {"youtube": "private", "facebook": "taslak"}
+
+
+def yayin(http, tk, simdi, kuru, uyku=None, gizli_test=""):
     acik = acik_platformlar()
     satirlar = tk.oku()
+    if gizli_test:
+        # Gizli test (Merkez 25 Kas): yalniz bu satir; yalniz YouTube private / Facebook taslak. Ana anahtar ACILMAZ;
+        # bu kosuda yalniz satirin platformu acik sayilir. Onay kapisi (ONAY + ONAY_OZET) aynen gecerli.
+        sec = [s for s in satirlar if (s.get("satir_no") or "").strip() == gizli_test]
+        if len(sec) != 1:
+            raise Hata(f"gizli test: satir {gizli_test} takvimde tek degil ({len(sec)})")
+        s0 = sec[0]
+        p0 = (s0.get("platform") or "").strip()
+        if GIZLI.get(p0) != (s0.get("gorunurluk") or "").strip():
+            raise Hata(f"gizli test: yalniz youtube+private ya da facebook+taslak satiri (satir {gizli_test}: {p0}/{s0.get('gorunurluk')})")
+        satirlar, acik = sec, {p0}
+        log(f"GIZLI TEST satir {gizli_test} {p0}/{GIZLI[p0]}")
     uyari, ozet_say = [], {}
     kimlikler = {}
     with tempfile.TemporaryDirectory() as td:
@@ -237,6 +252,7 @@ def main(argv=None, http=None, simdi=None, uyku=None):
     ap.add_argument("--medya-kok", default="media")
     ap.add_argument("--asama", choices=["hazirla", "yaz"], default="hazirla")
     ap.add_argument("--plan", default="_onay_plan.json")
+    ap.add_argument("--gizli-test", default="", help="yalniz bu satir_no; youtube private / facebook taslak")
     a = ap.parse_args(argv)
     http = http or Http()
     simdi = simdi or datetime.now(secim.TZ)
@@ -245,7 +261,9 @@ def main(argv=None, http=None, simdi=None, uyku=None):
             return kontrol(http)
         tk = T.Takvim(http, T.google_token(http))
         if a.mod == "yayin":
-            return yayin(http, tk, simdi, a.kuru, uyku)
+            if a.gizli_test and not a.gizli_test.isdigit():
+                raise Hata("--gizli-test sayi olmali")
+            return yayin(http, tk, simdi, a.kuru, uyku, a.gizli_test)
         nolar = [x.strip() for x in a.satirlar.split(",") if x.strip()]
         if not nolar:
             raise Hata("--satirlar bos")
