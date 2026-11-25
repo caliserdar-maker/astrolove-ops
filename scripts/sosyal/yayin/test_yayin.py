@@ -70,6 +70,12 @@ import izin  # noqa: E402
 import secim  # noqa: E402
 import token_yenile  # noqa: E402
 
+def jpeg(w, h, ek=b""):
+    sof = b"\xff\xc0" + (17).to_bytes(2, "big") + b"\x08" + h.to_bytes(2, "big") + w.to_bytes(2, "big") + b"\x03" + b"\x01\x11\x00\x02\x11\x00\x03\x11\x00"
+    return b"\xff\xd8" + b"\xff\xe0" + (4 + len(ek)).to_bytes(2, "big") + b"JF" + ek + sof + b"\xff\xd9"
+
+
+JPG_A, JPG_B, JPG_23 = jpeg(1080, 1350, b"A"), jpeg(1080, 1350, b"B"), jpeg(1000, 1500, b"P")
 TOK = {"instagram": "IGTOKEN_SAHTE_0123456789", "threads": "THTOKEN_SAHTE_0123456789",
        "facebook": "FBPAGETOKEN_SAHTE_0123456789", "youtube": "YTREFRESH_SAHTE_0123456789"}
 SIRLAR = list(TOK.values()) + ["GSECRET0123456789", "GREFRESH0123456789", "ghADMIN0123456789", "YTSECRET0123456789",
@@ -295,12 +301,12 @@ def sifirla():
     MEDIA.clear()
     kimlikleri_koy()
     drive_koy("SOSYAL/cancer-and-libra-pin-video.mp4", b"REEL")
-    drive_koy("SOSYAL/a.jpg", b"JPG-A")
-    drive_koy("SOSYAL/b.jpg", b"JPG-B")
+    drive_koy("SOSYAL/a.jpg", JPG_A)
+    drive_koy("SOSYAL/b.jpg", JPG_B)
     drive_koy("SOSYAL/aries-and-leo-pin-video.mp4", b"SHORT")
     genel(1, 1, ".mp4", b"REEL")
-    genel(2, 1, ".jpg", b"JPG-A")
-    genel(2, 2, ".jpg", b"JPG-B")
+    genel(2, 1, ".jpg", JPG_A)
+    genel(2, 2, ".jpg", JPG_B)
 
 
 def senaryo_ana():
@@ -402,11 +408,11 @@ def senaryo_onayla():
     rc, out = kos(otr, "onayla", "--satirlar", "2,5", "--onay", "SERDAR_20261207", "--medya-kok", str(mk),
                   "--asama", "hazirla", "--plan", str(plan))
     kontrol("onayla hazirla: takvime ONAY yazilmadi", satir_al(otr, 2)["ONAY"] == "" and plan.exists())
-    kontrol("onayla hazirla: genel medya konuldu", (mk / "yayin/202612/2_2.jpg").read_bytes() == b"JPG-B")
+    kontrol("onayla hazirla: genel medya konuldu", (mk / "yayin/202612/2_2.jpg").read_bytes() == JPG_B)
     kontrol("FAIL onayla: medyasi olmayan satir hazirlanmadi", rc == 1 and "5" not in json.loads(plan.read_text())["satirlar"])
     rc, out = kos(otr, "onayla", "--satirlar", "2,5", "--onay", "SERDAR_20261207", "--asama", "yaz", "--plan", str(plan))
     d = satir_al(otr, 2)
-    md5 = [hashlib.md5(b"JPG-A").hexdigest(), hashlib.md5(b"JPG-B").hexdigest()]
+    md5 = [hashlib.md5(JPG_A).hexdigest(), hashlib.md5(JPG_B).hexdigest()]
     kontrol("onayla yaz: ONAY + ozet", d["ONAY"] == "SERDAR_20261207" and d["ONAY_OZET"] == secim.ozet(d, md5))
     kontrol("FAIL onayla yaz: hazirlanmayan satir onaylanmadi", satir_al(otr, 5)["ONAY"] == "" and rc == 1)
     otr2 = Oturum([satir(2, "instagram", "karusel", "SOSYAL/a.jpg;SOSYAL/b.jpg", onay=False, metin="sonradan degisti")])
@@ -453,8 +459,8 @@ def senaryo_inceleme_bulgulari():
     rc, _ = kos(otr, "yayin")
     kontrol("gelecek tarihli eksik taslak uyari vermez", rc == 0 and not list(DRIVE.rglob("SOSYAL_HATA_*")))
     sifirla()
-    genel(12, 1, ".jpg", b"JPG-A")
-    genel(13, 1, ".jpg", b"JPG-A")
+    genel(12, 1, ".jpg", JPG_A)
+    genel(13, 1, ".jpg", JPG_A)
     otr = Oturum([satir(12, "threads", "gorsel", "SOSYAL/a.jpg"), satir(13, "instagram", "hikaye", "SOSYAL/a.jpg")])
     rc, _ = kos(otr, "yayin")
     th = [c for c in otr.cagri if c[1].endswith("/threads") and c[0] == "POST"]
@@ -617,8 +623,8 @@ def senaryo_abd():
     sifirla()
     acik()
     L = "https://astroloveart.etsy.com/listing/4570143387"
-    genel(41, 1, ".jpg", b"JPG-A")
-    genel(43, 1, ".jpg", b"JPG-A")
+    genel(41, 1, ".jpg", JPG_A)
+    genel(43, 1, ".jpg", JPG_A)
     otr = Oturum([satir(40, "facebook", "gorsel", "SOSYAL/a.jpg", link=L), satir(41, "instagram", "gorsel", "SOSYAL/a.jpg", alt="Gold symbol on navy"),
                   satir(42, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="public"),
                   satir(43, "threads", "gorsel", "SOSYAL/a.jpg", pano="zodiac art")])
@@ -672,6 +678,26 @@ def senaryo_abd2():
     otr.yorum_hata = True
     kos(otr, "yayin")
     kontrol("FB yorum hatasi: not sutunundaki plan izi korunur", satir_al(otr, 53)["not"].startswith("PLAN78 CANCER_LEO poster UYARI"))
+
+
+def senaryo_boyut():
+    import medya as M
+    f = TMP / "olc.jpg"
+    for veri, beklenen, ad in ((JPG_A, (1080, 1350), "4:5"), (JPG_23, (1000, 1500), "2:3"), (b"JPG degil", None, "bozuk")):
+        f.write_bytes(veri)
+        kontrol(f"jpeg_boyut: {ad}", M.jpeg_boyut(f) == beklenen)
+    sifirla()
+    drive_koy("SOSYAL/p23.jpg", JPG_23)
+    acik()
+    for p in ("instagram", "facebook", "threads"):
+        otr = Oturum([satir(60, p, "gorsel", "SOSYAL/p23.jpg")])
+        genel(60, 1, ".jpg", JPG_23)
+        rc, out = kos(otr, "yayin")
+        kontrol(f"FAIL {p}: 2:3 pin gonderilmez (MEDYA)", rc == 1 and "1080x1350" in out and satir_al(otr, 60)["DURUM"] == ""
+                and not any(c[0] == "POST" and ("/media" in c[1] or "/photos" in c[1] or c[1].endswith("/threads")) for c in otr.cagri))
+    otr = Oturum([satir(61, "instagram", "gorsel", "SOSYAL/p23.jpg", onay=False)])
+    rc, _ = kos(otr, "onayla", "--satirlar", "61", "--onay", "SERDAR_20261207", "--asama", "hazirla", "--plan", str(TMP / "p61.json"), "--medya-kok", str(TMP / "m61"))
+    kontrol("FAIL onayla: 2:3 gorsel IG satiri hazirlanmaz", rc == 1 and "61" not in json.loads((TMP / "p61.json").read_text())["satirlar"])
 
 
 def senaryo_yml():
@@ -858,7 +884,7 @@ def mutasyon():
 if __name__ == "__main__":
     try:
         for f in (senaryo_ana, senaryo_kuru, senaryo_kapali, senaryo_medya_farkli, senaryo_publish_500, senaryo_son_an,
-                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_gizli_test, senaryo_video_kaynak, senaryo_plan78, senaryo_abd, senaryo_abd2, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
+                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_gizli_test, senaryo_video_kaynak, senaryo_plan78, senaryo_abd, senaryo_abd2, senaryo_boyut, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
             try:
                 f()
             except Exception as e:

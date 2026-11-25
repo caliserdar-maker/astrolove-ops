@@ -106,10 +106,11 @@ def medya(cift, tur, platform, a):
             return video_kaynak.yol(cift)
         except ValueError:
             return ""
-    k, d = ("ig_gorsel_klasor", "ig_gorsel_dosya") if platform == "instagram" else ("gorsel_klasor", "gorsel_dosya")
-    if not a.get(k) or not (a.get(d) or {}).get(tur):
+    # IG / FB / Threads: 4:5 (1080x1350) gonderi seti; 2:3 Pinterest pini bu platformlara gonderilmez (Serdar 25 Kas)
+    kalip = (a.get("gonderi45_dosya") or {}).get(tur, "")
+    if not a.get("gonderi45_klasor") or not kalip:
         return ""
-    return f"{a[k].rstrip('/')}/{a[d][tur].format(CIFT=cift, a=a_, b=b_)}"
+    return f"{a['gonderi45_klasor'].rstrip('/')}/{kalip.format(CIFT=cift, a=a_, b=b_)}"
 
 
 def etiketler(cift, platform):
