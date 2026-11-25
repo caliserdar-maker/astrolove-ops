@@ -466,6 +466,47 @@ def senaryo_inceleme_bulgulari():
             and st in (DRIVE / "ASTROLOVE/TEMP/SOSYAL_IZIN_LINK_YOUTUBE.txt").read_text())
 
 
+def senaryo_gizli_test():
+    sifirla()
+    os.environ["SOSYAL_YAYIN_ACIK"] = ""
+    for x in calis.ANAHTAR.values():
+        os.environ[x] = ""
+    rows = [satir(20, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="private"),
+            satir(21, "facebook", "reel", "SOSYAL/r.mp4", gorunurluk="taslak"),
+            satir(24, "facebook", "gorsel", "SOSYAL/a.jpg", gorunurluk="taslak"),
+            satir(22, "instagram", "reel", "SOSYAL/r.mp4"),
+            satir(23, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="public"),
+            satir(25, "facebook", "reel", "SOSYAL/r.mp4")]
+    genel(22, 1, ".mp4", b"REEL")
+    otr = Oturum(rows)
+    rc, out = kos(otr, "yayin", "--gizli-test", "20")
+    yt = [c for c in otr.cagri if "upload/youtube" in c[1] and c[0] == "POST"]
+    kontrol("gizli test YT: private yuklendi, ana anahtar kapaliyken", rc == 0 and satir_al(otr, 20)["DURUM"].startswith("TAMAM")
+            and len(yt) == 1 and yt[0][5]["status"]["privacyStatus"] == "private")
+    kontrol("gizli test YT: diger onayli satirlara dokunulmadi", all(satir_al(otr, n)["DURUM"] == "" for n in (21, 22, 23, 24, 25))
+            and not any(c[1].endswith("/media") for c in otr.cagri))
+    rc, out = kos(otr, "yayin", "--gizli-test", "21")
+    fin = [c for c in otr.cagri if c[1].endswith("/video_reels") and (c[3] or {}).get("upload_phase") == "finish"]
+    kontrol("gizli test FB reel: video_state=DRAFT", rc == 0 and len(fin) == 1 and fin[0][3]["video_state"] == "DRAFT")
+    rc, out = kos(otr, "yayin", "--gizli-test", "24")
+    ph = [c for c in otr.cagri if c[1].endswith("/photos")]
+    kontrol("gizli test FB gorsel: published=false", rc == 0 and len(ph) == 1 and ph[0][3]["published"] == "false")
+    for n, ad in (("23", "youtube public"), ("22", "instagram"), ("25", "facebook bos gorunurluk"), ("99", "olmayan satir")):
+        once = len(otr.cagri)
+        rc, out = kos(otr, "yayin", "--gizli-test", n)
+        yazim = [c for c in otr.cagri[once:] if c[0] != "GET" and "oauth2" not in c[1]]
+        kontrol(f"FAIL gizli test {ad}: DUR, yazim yok", rc == 2 and not yazim and "DUR" in out)
+    sifirla()
+    acik()
+    otr = Oturum([satir(26, "facebook", "reel", "SOSYAL/r.mp4")])
+    kos(otr, "yayin")
+    fin = [c for c in otr.cagri if c[1].endswith("/video_reels") and (c[3] or {}).get("upload_phase") == "finish"]
+    kontrol("FB normal satir: PUBLISHED (gizli kip yalniz taslakta)", fin and fin[0][3]["video_state"] == "PUBLISHED")
+    otr = Oturum([satir(27, "facebook", "reel", "SOSYAL/r.mp4", gorunurluk="gizli")])
+    rc, _ = kos(otr, "yayin")
+    kontrol("FAIL FB gecersiz gorunurluk: GECERSIZ, yayin yok", rc == 1 and not any(c[1].endswith("/video_reels") for c in otr.cagri))
+
+
 def senaryo_yml():
     import yaml
     w = KOK.parents[2] / ".github/workflows"
@@ -477,6 +518,8 @@ def senaryo_yml():
             and "schedule" not in o["if"] and o["steps"][0]["name"] == "Onay kapisi var mi" and "SOSYAL_ONAY_KAPISI" in str(o["steps"][0]))
     kontrol("yml: ayri kilit gruplari", j["concurrency"]["group"] != o["concurrency"]["group"] and "concurrency" not in d)
     kontrol("yml: elle kuru varsayilan acik", d[True]["workflow_dispatch"]["inputs"]["kuru"]["default"] is True)
+    kontrol("yml: gizli test girdisi bos varsayilan, yalniz dispatch", d[True]["workflow_dispatch"]["inputs"]["gizli_test_satir"]["default"] == ""
+            and "workflow_dispatch" in str(j["steps"][-1]["env"]["GIZLI"]))
     adim = [x.get("name") for x in o["steps"]]
     kontrol("yml: ONAY yazimi medya push'undan sonra", adim.index("ONAY yaz (yalniz onayla, medya push'undan sonra)") > adim.index("Medya push (yalniz onayla)"))
     for f in ("sosyal-izin.yml", "sosyal-token-yenile.yml", "sosyal-olcum-kendi.yml", "sosyal-yayin.yml"):
@@ -648,7 +691,7 @@ def mutasyon():
 if __name__ == "__main__":
     try:
         for f in (senaryo_ana, senaryo_kuru, senaryo_kapali, senaryo_medya_farkli, senaryo_publish_500, senaryo_son_an,
-                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
+                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_gizli_test, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
             try:
                 f()
             except Exception as e:
