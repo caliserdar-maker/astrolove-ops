@@ -21,6 +21,8 @@ def ayar():
     try:
         d = json.loads(AYAR.read_text())
     except (OSError, ValueError):
+        d = None
+    if not isinstance(d, dict):  # okunamayan / bicimsiz ayar: kapali (hicbir video gecmez)
         return {"klasor": "", "ad_kalibi": "", "onay": ""}
     return d
 
@@ -45,7 +47,9 @@ def yol(cift_anahtari):
 
 def medya_hatasi(medya_yolu):
     """MP4 medya icin hata metni (bos = gecerli). MP4 degilse kontrol yok."""
-    if not medya_yolu.lower().endswith(".mp4"):
+    if medya_yolu.rstrip() != medya_yolu or medya_yolu.endswith(("/", ".")):
+        return "medya yolu bosluk, '/' ya da '.' ile bitemez"
+    if Path(medya_yolu).suffix.lower() != ".mp4":  # medya.tip ile ayni olcut
         return ""
     d = ayar()
     klasor, kalip, onay = (d.get("klasor") or "").rstrip("/"), d.get("ad_kalibi") or "", (d.get("onay") or "").strip()

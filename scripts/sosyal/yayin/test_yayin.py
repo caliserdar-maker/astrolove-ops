@@ -527,10 +527,12 @@ def senaryo_video_kaynak():
     kontrol("video kaynagi: JPEG kontrol disi", V.medya_hatasi("BASKA/a.jpg") == "")
     for yol, ad in (("ASTROLOVE/TEMP/SOSYAL_VIDEO_P_78_20261020/cancer-and-libra-astroloveart-reel.mp4", "eski mockup videosu"),
                     ("BASKA/cancer-and-libra-pin-video.mp4", "yanlis klasor"), ("SOSYAL/libra-and-cancer-pin-video.mp4", "alfabetik degil"),
-                    ("SOSYAL/cancer-and-dragon-pin-video.mp4", "gecersiz burc"), ("SOSYAL/sub/cancer-and-libra-pin-video.mp4", "alt klasor")):
+                    ("SOSYAL/cancer-and-dragon-pin-video.mp4", "gecersiz burc"), ("SOSYAL/sub/cancer-and-libra-pin-video.mp4", "alt klasor"),
+                    ("X/old-reel.mp4/", "sonda /"), ("SOSYAL/CANCER-and-libra-pin-video.MP4", "buyuk harf"), ("X/eski.mp4 ", "sonda bosluk")):
         kontrol(f"FAIL video kaynagi: {ad}", V.medya_hatasi(yol) != "")
-    for bozuk, ad in (({**tam, "onay": ""}, "onay bos"), ({**tam, "klasor": ""}, "klasor bos"), ({**tam, "onay": "serdar"}, "onay bicimi")):
-        VAYAR.write_text(json.dumps(bozuk))
+    for bozuk, ad in (({**tam, "onay": ""}, "onay bos"), ({**tam, "klasor": ""}, "klasor bos"), ({**tam, "onay": "serdar"}, "onay bicimi"),
+                      ({**tam, "ad_kalibi": ""}, "kalip bos"), ([1], "JSON nesne degil"), ("{bozuk", "JSON bozuk")):
+        VAYAR.write_text(bozuk if isinstance(bozuk, str) else json.dumps(bozuk))
         kontrol(f"FAIL video kaynagi ayari {ad}: hicbir mp4 gecmez", V.medya_hatasi("SOSYAL/cancer-and-libra-pin-video.mp4") != "")
     VAYAR.write_text(json.dumps({**tam, "onay": ""}))
     acik()
