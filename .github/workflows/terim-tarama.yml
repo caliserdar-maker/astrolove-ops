@@ -132,8 +132,8 @@ jobs:
           python3 scripts/guvenlik/sir_koru.py tara "${T[@]}" || { echo "::error::DUR: log / durumda sir deseni, Drive'a yazilmadi"; exit 1; }
           find out -name '*.tmp' -delete
           rclone copy out "gdrive:ASTROLOVE/DIJITAL_ARASTIRMA_20261125" -q
-          D=$(python3 -c "import json; d=json.load(open('out/terim_durum.json')); print(d.get('durum'), d.get('kalan_terim_n'), d.get('istek_toplam'))")
-          echo "::notice::Drive: TERIM_* ($(find out -type f | wc -l) dosya) | durum / kalan terim / toplam istek: $D"
+          D=$(python3 -c "import json; d=json.load(open('out/terim_durum.json')); print(d.get('durum'), d.get('kalan_terim_n'), d.get('hata_terim_n'), len(d.get('yeniden_olculemedi') or []), d.get('istek_toplam'))")
+          echo "::notice::Drive: TERIM_* ($(find out -type f | wc -l) dosya) | durum / kalan terim / hata kapanan / yeniden olculemeyen / toplam istek: $D"
       - if: always()
         run: rm -rf ~/.config/rclone out _t.log
       - name: Sonuc (0 / 3 / 4 disi kirmizi)

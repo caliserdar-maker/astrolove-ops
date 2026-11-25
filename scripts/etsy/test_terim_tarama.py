@@ -357,6 +357,21 @@ def main():
                 and st2["durum"] == "bitti" and st2["hata_terim_n"] == 3)
         k3, _ = kos(sh, dh2, terimler=sira)
         kontrol("kalici hata kapandiktan sonra yeniden denenmez", k3 == 0 and sh.terim_istek["h1"] == 2 * 3)
+        # --yeniden ile kapanmis hatali terim: deneme sayaci sifirlanir (tek hatada yeniden kapanmaz)
+        kos(sh, dh2, terimler=["h1"], yeniden=True)
+        kontrol("yeniden: kapanmis hatali terime yeni deneme hakki", durum(dh2)["terim_hata"].get("h1") == 1
+                and durum(dh2)["yeniden_bekleyen"] == ["h1"])
+        # --yeniden olcumu iki kosuda okunamazsa onceki 'tamam' olcum korunur
+        dy = tmp / "yh"
+        sy = Sahte()
+        kos(sy, dy)
+        onceki = satirlar(dy)["beta terim"]
+        sy.hata_terim = {"beta terim"}
+        kos(sy, dy, terimler=["beta terim"], yeniden=True)
+        kos(sy, dy, terimler=["beta terim"])
+        kontrol("yeniden olculemeyen terimde onceki olcum korunur", satirlar(dy)["beta terim"] == onceki
+                and durum(dy)["yeniden_olculemedi"] == ["beta terim"] and durum(dy)["yeniden_bekleyen"] == []
+                and len([x for x in oku(dy, "TERIM_ILAN.csv") if x["terim"] == "beta terim"]) == 299)
         # 9) secim
         try:
             T.secim_coz(TERIMLER, "alfa terim; yok boyle")

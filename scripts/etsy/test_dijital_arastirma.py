@@ -307,6 +307,20 @@ def main():
         hb = {o["terim"]: o for o in oku(d6b, "TERIM_OZET.csv") if o["grup"] == "hepsi"}
         kontrol("kalici grup hatasi kapanir, ozette grup_okuma_hatasi 1", durum(d6b)["asama"] == "bitti"
                 and hb["planner terim"]["grup_okuma_hatasi"] == "1" and hb["clipart terim"]["grup_okuma_hatasi"] == "0")
+        # kalici magaza hatasi: 2 kosuda okunamazsa kimlikli bos satir, asama ilerler, ozette sayilir
+        s6d = Sahte()
+        s6d.batch_hata = s6d.shop_hata = True
+        d6d = tmp / "hm"
+        k1d, _ = kos(s6d, d6d)
+        k2d, _ = kos(s6d, d6d)
+        for _ in range(3):
+            if durum(d6d)["asama"] == "bitti":
+                break
+            kos(s6d, d6d)
+        hm = {o["terim"]: o for o in oku(d6d, "TERIM_OZET.csv") if o["grup"] == "hepsi"}
+        kontrol("kalici magaza hatasi: 1. kosu kod 1, sonra kapanir ve bitti", k1d == 1 and durum(d6d)["asama"] == "bitti"
+                and len(oku(d6d, "MAGAZALAR.csv")) == 11 and not any(r["shop_name"] for r in oku(d6d, "MAGAZALAR.csv"))
+                and int(hm["planner terim"]["magaza_okunamadi"]) > 0)
         # yorum ilk sayfasi bir kez 404: ayni kosuda yeniden denenir, secim etkilenmez
         s6c = Sahte()
         s6c.yorum_hata = {COK: 1}

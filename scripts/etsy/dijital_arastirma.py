@@ -325,6 +325,7 @@ def asama_ornek(dp, ok, terimler, simdi):
     yap = dp.d.setdefault("ornek_bitti", [])
     ofs = dp.d.setdefault("ornek_offset", {})
     gh = dp.d.setdefault("ornek_hata", {})          # anahtar -> okunamadigi kosu sayisi
+    t0 = time.monotonic()
     bekleyen = 0
     for k, t in enumerate(terimler):
         mevcut = set(dp.terim_ilanlari(t))
@@ -351,7 +352,10 @@ def asama_ornek(dp, ok, terimler, simdi):
             yap.append(anahtar)
             gh.pop(anahtar, None)
         dp.kaydet()
-        log(f"ornek: terim {k + 1}/{len(terimler)} | tekil ilan {len(dp.ilan)} | bag {len(dp.uyelik)} | kota {ok.api.remaining}")
+        gec = time.monotonic() - t0
+        log(f"ornek: terim {k + 1}/{len(terimler)} (%{100 * (k + 1) // len(terimler)}) | gecen {gec / 60:.1f} dk"
+            f" | kalan ~{gec / (k + 1) * (len(terimler) - k - 1) / 60:.1f} dk | tekil ilan {len(dp.ilan)} | bag {len(dp.uyelik)}"
+            f" | kota {ok.api.remaining}")
     eksik = magaza_topla(dp, ok)
     if bekleyen or eksik:
         raise SystemExit(f"HATA: okunamayan grup {bekleyen}, magaza {eksik}; sonraki kosu yeniden dener")

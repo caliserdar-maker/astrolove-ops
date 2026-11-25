@@ -163,11 +163,12 @@ class Depo:
         """TERIM_TARAMA ('tamam' isareti) EN SON: arada kesilirse terim tamam gorunmez, sonraki kosu yeniden okur."""
         D.yaz_csv(self.out / "TERIM_ILAN.csv", ILAN_ALAN, self.ilan)
         D.yaz_csv(self.out / "TERIM_MAGAZA.csv", MAGAZA_ALAN, self.magaza.values())
+        D.yaz_csv(self.out / "TERIM_TARAMA.csv", TARAMA_ALAN, self.tarama.values())
+        # durum (yeniden_bekleyen, sayac) EN SON: TARAMA'dan once kesilirse terim yeniden olculur (zararsiz), tersi olmaz
         self.d["son_guncelleme_utc"] = utc()
         tmp = self.out / "terim_durum.json.tmp"
         tmp.write_text(json.dumps(self.d, ensure_ascii=False, indent=1), encoding="utf-8")
         os.replace(tmp, self.out / "terim_durum.json")
-        D.yaz_csv(self.out / "TERIM_TARAMA.csv", TARAMA_ALAN, self.tarama.values())
 
 
 def taze_magaza(dp, sid, simdi):
@@ -282,8 +283,11 @@ def calis(out, dk, api, terimler, yeniden=False, yol_ver_fn=None, simdi_fn=time.
     kayit = {"kosu": dp.d["kosu"], "bas_utc": utc(), "istek": 0, "kota_bas": None, "kota_son": None, "terim_tamam": 0}
     dp.d.setdefault("kosular", []).append(kayit)
     yb = set(dp.d.get("yeniden_bekleyen") or [])   # yarida kalan --yeniden kosusu sonraki kosuda da yeniden olcer
+    th0 = dp.d.setdefault("terim_hata", {})
     if yeniden:
         yb |= set(terimler)
+        for t in terimler:            # --yeniden: kapanmis hatali terime de tam deneme hakki
+            th0.pop(t, None)
     dp.d["yeniden_bekleyen"] = sorted(yb)
     th = dp.d.setdefault("terim_hata", {})        # terim -> okunamadigi kosu sayisi
     sira = [t for t in terimler if t in yb or not dp.bitti(t)]
@@ -308,7 +312,12 @@ def calis(out, dk, api, terimler, yeniden=False, yol_ver_fn=None, simdi_fn=time.
                 hata_toplam += 1
                 th[t] = int(th.get(t, 0)) + 1
                 if th[t] >= TERIM_HATA_DENEME:      # kalici hata: kapat (kosular takilmasin); --yeniden ile yeniden olculur
-                    dp.tarama[t] = {"terim": t, "durum": "hata", "olcum_utc": utc(simdi)}
+                    if (dp.tarama.get(t) or {}).get("durum") == "tamam":   # onceki gecerli olcum korunur (ham satirlarla tutarli)
+                        dp.d.setdefault("yeniden_olculemedi", [])
+                        if t not in dp.d["yeniden_olculemedi"]:
+                            dp.d["yeniden_olculemedi"].append(t)
+                    else:
+                        dp.tarama[t] = {"terim": t, "durum": "hata", "olcum_utc": utc(simdi)}
                     yb.discard(t)
                     dp.d["yeniden_bekleyen"] = sorted(yb)
                 dp.d["istek_toplam"] = istek_bas + (api.calls - c_bas)
