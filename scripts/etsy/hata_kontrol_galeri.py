@@ -3,7 +3,7 @@
 
 1 GALERI : 04_77_CIFT_LINK_DIZINI.csv'deki her ilanin canli galerisi (sira, gorsel id, alt metin, 570 px kucuk
            gorsel). Her gorsel iki referans kumesine benzerlikle siniflanir:
-             ESKI = pano/codex/veri/kart_seti_20260924 (24 Eyl paketi: 01 kapak .. 11 teslim)
+             ESKI = arsiv/pano_codex/veri/kart_seti_20260924 (24 Eyl paketi: 01 kapak .. 11 teslim)
              YENI = data/pod/cl_galeri_final19 (27-28 Eyl onayli 19'lu set)
            Benzerlik: 64x48 gri kucultme NCC. Sinif = en yakin kume (esik alti -> BILINMIYOR).
 2 ALT    : E08 kontrolu - alt metinde 'mockup' / 'framed room' / 'room' + 'frame' gibi yanlis tanim aranir.
@@ -30,7 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from etsy_common import APIKeyStore, Etsy  # noqa: E402
 
 KOK = Path(__file__).resolve().parents[2]
-ESKI = KOK / 'pano/codex/veri/kart_seti_20260924'
+ESKI = KOK / 'arsiv/pano_codex/veri/kart_seti_20260924'
 YENI = KOK / 'data/pod/cl_galeri_final19'
 KOTA_TABAN = 10  # Serdar 15 Eki: Etsy kota tabani 10
 ALT_YASAK = [r'mock-?up', r'framed room', r'room mock', r'frame mock', r'on a warm stone', r'stone-gray wall']
