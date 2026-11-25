@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Pinterest 78 cift x 4 tur (poster, kart, altin yakin cekim, video) = 312 pin KURU takvimi (Serdar 25 Kas 2026,
 KARARLAR_20261125_49/_50/_51).
-YAZMA YOK (Metricool / Pinterest). Kurallar: gunde 7 pin; ayni ilana iki pin arasi >= 7 gun; baslangic --baslangic;
+YAZMA YOK (Metricool / Pinterest). Kurallar: gunde 7 pin; ayni ilana iki pin arasi >= 7 gun (plan geregi >= 11.1 gun cikar); baslangic --baslangic;
 12 Ara 2026'dan once kanal Metricool, sonra kendi sistem (Metricool 12 Ara'da biter, ANA_LISTE_20261123); metin surumu:
 yayin 1 Mar 2027'den once "sevgililer", sonra "genel". Sira: oncelikli 4 cift (satan/aranan: CANCER_LEO, SCORPIO_TAURUS,
 PISCES_VIRGO, CANCER_LIBRA; kayit [ER] + PINLER_ORNEK), sonra data/sosyal/pinterest/SIRA_78.csv. Tur sirasi: once 78 poster,
 sonra 78 kart, 78 altin yakin cekim, 78 video (ayni cift turlar arasi ~11 gun). Saatler: Serdar KARAR 10 (SOSYAL_KARAR 20 Eki)
-"saatler 09:00-23:30 yayilir": 7 slot esit aralik (09:00 ... 23:30, Europe/Istanbul). Baslangic: --baslangic gununun --simdi sonrasi ilk slotu (Serdar: takvim bugunden).
+"saatler 09:00-23:30" (20 Eki) YERINE Serdar 25 Kas ABD karari: Istanbul 15:00-07:00, 7 slot (asagida SAAT). Baslangic: --baslangic gununun --simdi sonrasi ilk slotu (Serdar: takvim bugunden).
 SAAT (Serdar 25 Kas, ABD): Istanbul 15:00-07:00, 7 slot; tarih_saat_et sutunu New York saati (bilgi).
 Tur dagilimi: her gun turler karisik (cift i, tur k -> TURLER[(i + k) % 4]).
 Pano / bolum (strateji 7.5 onerisi, Serdar onayi gerekir; bolumler Pinterest'te YOK, acilmasi yazim): sevgililer surumu:

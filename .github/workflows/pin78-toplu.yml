@@ -18,7 +18,7 @@ on:
         default: HEPSI
       klasor:
         description: 'OFIS altindaki cikti klasoru'
-        default: PINTEREST_PIN78_20261125
+        default: PINTEREST_PIN78_20261125_v2
 env:
   OFIS: 1KBuisCudYyac5ThyLs19eZW4MQZgwp0W
   REF_DIR: 1_rcZ69bhw00QfHedBiWywEoHPu9Y4bkB
@@ -210,7 +210,7 @@ jobs:
         set +e -uo pipefail
         rm -f _s/muzik.m4a _s/muzik_k.m4a
         [ -d _o ] || exit 1
-        mv _o/SONUC_PARCA.txt "_o/QC/SONUC_${{ strategy.job-index }}.txt" 2>/dev/null || { mkdir -p _o/QC; mv _o/SONUC_PARCA.txt "_o/QC/SONUC_${{ strategy.job-index }}.txt"; }
+        mkdir -p _o/QC; mv _o/SONUC_PARCA.txt "_o/QC/SONUC_${{ github.run_id }}_${{ strategy.job-index }}.txt"   # kosu no: yeniden kosu eski sonucu ezmez
         rclone copy _o "gdrive:$KLASOR" --drive-root-folder-id "$OFIS" -q; R=$?
         # yeniden koşuda PASS olan ciftin onceki FAIL klasoru ESKI_FAIL altina tasinir (silinmez; ozet FAIL'deki cifti hazir saymaz)
         rclone lsf "gdrive:$KLASOR/FAIL" --drive-root-folder-id "$OFIS" --dirs-only > _fail_eski.txt 2>/dev/null
