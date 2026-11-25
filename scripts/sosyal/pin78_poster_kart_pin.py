@@ -24,9 +24,6 @@ LACIVERT = (22, 38, 65)        # baslik rengi (v6 olcumu; kalibrasyon --oz-test 
 ETIKET_RENK = (39, 32, 29)     # v6 etiket murekkep ortalamasi (olcum)
 BASLIK_BANT = (30, 152)        # baslik satiri (altyazi 172-244 sablondan kalir)
 BASLIK_MAX_W = 922             # PIN_03 v6 en genis baslik (SCORPIO & TAURUS, olcum)
-# IG profil izgarasi (3:4 kirpma, 129.3 pt karo; platform_boy.py) icin 11 pt: buyuk harf >= 11 x 0.73 / (1.08 x 129.3 / 1012) = 58 px
-# (0.73 = Pagella 'C' yuksekligi / punto, olcum; 1.08 = 4:5 olcegi)
-BASLIK_MIN_CAP = 60             # 58 + 2 px pay (JPEG/ilk harf olcum farki)
 P_KUTU = (148, 258, 703, 1054)
 K_OLCEK, K_DX, K_DY = 0.5975, -396, 0
 K_BANT = (290, 1180)           # karttan alinan bolge (pin y)
@@ -101,11 +98,9 @@ def poster_pin(kaynak, A, B, sablon):
     im = Image.open(sablon).convert('RGB').copy()
     x, y, w, h = P_KUTU
     im.paste(Image.open(kaynak).convert('RGB').resize((w, h), Image.LANCZOS), (x, y))
-    # BUYUK HARF baslik genislik siniri yuzunden buyuk harf yuksekligi BASLIK_MIN_CAP'in altina inerse (uzun adlar) baslik
-    # "Capricorn & Sagittarius" bicimine gecer (Serdar 25 Kas: ust satir her platformda okunur; Merkez: okunmuyorsa yerlesimi duzelt)
+    # BUYUK HARF (v6) kalir (Merkez 25 Kas: Title case'e GECMEZ). Uzun adlarda 2:3 pinde tek satir 11 pt'yi gecer (Pinterest 183 pt
+    # sutun); 11 pt'nin altina dusen yalniz 4:5 IG profil izgarasi -> iki satirli baslik platform_boy.py 4:5 yerlesiminde.
     metin = f'{A.upper()} & {B.upper()}'
-    if baslik_cap(metin, 104.5) < BASLIK_MIN_CAP:
-        metin = f'{A} & {B}'
     s = baslik(im, metin, 104.5)
     return im, {'baslik_px': s, 'baslik_metni': metin}
 

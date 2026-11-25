@@ -48,12 +48,29 @@ jobs:
         tum = [r['cift'] for r in csv.DictReader(open('data/pod/pod78_ids.csv'))]
         assert len(tum) == 78, len(tum)
         c = os.environ['CIFTLER']
-        sec = tum if c == 'HEPSI' else c.split(',')
+        sec = tum if c == 'HEPSI' else list(dict.fromkeys(c.split(',')))     # tekrar eden cift bir kez
         bad = [x for x in sec if x not in tum]
         assert not bad, f'bilinmeyen cift {bad}'
         p = [','.join(sec[i:i + 6]) for i in range(0, len(sec), 6)]
         print('parcalar=' + json.dumps(p))
         PY
+    - name: Drive klasorleri (paralel islerden ONCE, tek kez)
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        # emsal video-v7-birlesik.yml:44 (26 Eki): paralel isler ayni adla birden cok Drive klasoru acti. Klasorler burada acilir.
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET" || true; fi
+        N=$(rclone lsf gdrive: --drive-root-folder-id "$OFIS" --dirs-only | grep -cx "$KLASOR/" || true)
+        [ "$N" -le 1 ] || { echo "::error::OFIS altinda $N adet $KLASOR"; exit 1; }
+        for d in PINTEREST_2x3 VIDEO GONDERI_4x5 ONIZLEME QC FAIL; do rclone mkdir "gdrive:$KLASOR/$d" --drive-root-folder-id "$OFIS"; done
+        rclone lsf "gdrive:$KLASOR" --drive-root-folder-id "$OFIS" --dirs-only
+        rm -rf ~/.config/rclone
   uret:
     needs: hazirlik
     runs-on: ubuntu-latest
@@ -77,7 +94,7 @@ jobs:
         PG=/usr/share/texmf/fonts/opentype/public/tex-gyre/texgyrepagella-regular.otf
         test -s $PG
         echo "$(md5sum $PG | cut -c1-32) Pagella (yerel olcum ee927992843e53183a6e7c09838e9f82)"
-        [ "$(md5sum $PG | cut -c1-32)" = ee927992843e53183a6e7c09838e9f82 ] || echo "::warning::Pagella yerel olcumden farkli surum"
+        [ "$(md5sum $PG | cut -c1-32)" = ee927992843e53183a6e7c09838e9f82 ] || { echo "::error::Pagella yerel olcumden farkli (baslik olcumleri bu dosyaya bagli)"; exit 1; }
         curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
         curl -fsSL --retry 3 "https://raw.githubusercontent.com/google/fonts/main/ofl/ebgaramond/EBGaramond%5Bwght%5D.ttf" -o "$RUNNER_TEMP/EBGaramond[wght].ttf"
         mkdir -p "$RUNNER_TEMP/font"
@@ -138,7 +155,9 @@ jobs:
           rclone copyto "$P2000/$C.jpg" _w/poster.jpg -q || RC=1
           rclone copyto "$KAPAKD/$SLUG-astroloveart-kapak.jpg" _w/kapak.jpg -q || RC=1
           rclone copyto "$PVID/$SLUG-astroloveart-reel.mp4" _w/onayli_P.mp4 -q || RC=1
-          R2=$(grep "_$C/r2_" _s/r2.txt | head -1)
+          LID=$(awk -F, -v c="$C" '$2==c{print $1}' data/pod/pod78_ids.csv)
+          R2=$(grep "^${LID}_$C/r2_" _s/r2.txt | head -1)     # kart klasoru = ilan no + cift (pod78_ids ile eslesme)
+          [ -n "$LID" ] || { echo "::error::$C ilan no yok"; RC=1; }
           [ -n "$R2" ] && rclone copyto "$KARTD/$R2" _w/kart_r2.jpg -q || RC=1
           [ -s _w/poster.jpg ] && [ -s _w/kapak.jpg ] && [ -s _w/onayli_P.mp4 ] && [ -s _w/kart_r2.jpg ] || { echo "::error::$C girdi eksik"; RC=1; }
           if [ "$RC" = 0 ]; then
@@ -165,8 +184,9 @@ jobs:
               --kapak _w/kapak.jpg --kapak_son_qc $QD/kapak_son_qc.json --son_kapak 1.0 --muzik _s/muzik_k.m4a --onayli_mp4 _w/onayli_P.mp4 > $QD/qc_video.txt || RC=$((RC + 1))
             # platform boylari + mobil onizleme + okunurluk kapisi
             python3 $Q/platform_boy.py --poster "$D/$SLUG-poster.jpg" --kart "$D/$SLUG-kart.jpg" --altin "$D/$SLUG-altin.jpg" --video "$OUT" \
-              --out "$D/P" --slug "$SLUG" > $QD/qc_platform.txt || RC=$((RC + 1))
+              --out "$D/P" --slug "$SLUG" --a "$A" --b "$B" > $QD/qc_platform.txt || RC=$((RC + 1))
           fi
+          cp _w/v.log $QD/video_uret_log.txt 2>/dev/null; cp _w/bilgi.json $QD/video_bilgi.json 2>/dev/null
           grep -hE "^FAIL" $QD/*.txt 2>/dev/null | head -8 | sed "s/^/::warning::$C /"
           echo "$C RC=$RC" | tee -a _o/SONUC_PARCA.txt
           # dagitim: PASS -> yayin klasorleri; FAIL -> FAIL/<slug>/
@@ -231,3 +251,55 @@ jobs:
         rm -rf ~/.config/rclone
         echo "::warning::METIN_RC=$RC drive=$R"
         [ "$RC" = 0 ] && [ "$R" = 0 ]
+  ozet:
+    needs: [uret, metin]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v4
+    - name: Ozet + takvim/metin durum (dosyasi hazir olmayan pin isaretlenir)
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set +e -uo pipefail
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && export RCLONE_CONFIG_GDRIVE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET" || true; fi
+        R="gdrive:$KLASOR"; X="--drive-root-folder-id $OFIS"
+        mkdir -p _z
+        for d in PINTEREST_2x3 VIDEO GONDERI_4x5 ONIZLEME FAIL; do rclone lsf "$R/$d" $X > "_z/$d.txt"; done
+        rclone lsf "$R" $X --dirs-only > _z/kok.txt
+        rclone copyto "$R/TAKVIM_PIN78_20261125.csv" _z/T.csv $X -q; rclone copyto "$R/METIN_PIN78_20261125.csv" _z/M.csv $X -q
+        python3 - <<'PY' > _z/OZET_PIN78.txt
+        import csv, collections, os
+        L = {d: set(x.strip().rstrip('/') for x in open(f'_z/{d}.txt')) for d in ('PINTEREST_2x3', 'VIDEO', 'GONDERI_4x5', 'ONIZLEME', 'FAIL')}
+        kok = [x.strip() for x in open('_z/kok.txt')]
+        tum = [(r['cift'], r['a'].lower() + '-and-' + r['b'].lower()) for r in csv.DictReader(open('data/pod/pod78_ids.csv'))]
+        def hazir(s):
+            return all(f'{s}-{t}.jpg' in L['PINTEREST_2x3'] for t in ('poster', 'kart', 'altin')) and f'{s}-pin-video.mp4' in L['VIDEO'] \
+                and all(f'{s}-{t}-4x5.jpg' in L['GONDERI_4x5'] for t in ('poster', 'kart', 'altin'))
+        H = [c for c, s in tum if hazir(s)]
+        print('KLASOR', os.environ['KLASOR'])
+        print('AYNI ADLI KLASOR (olmamali):', [k for k, n in collections.Counter(kok).items() if n > 1])
+        print('PINTEREST_2x3', len(L['PINTEREST_2x3']), '/ 234; VIDEO', len(L['VIDEO']), '/ 78; GONDERI_4x5', len(L['GONDERI_4x5']),
+              '/ 234; ONIZLEME', len(L['ONIZLEME']), '/ 78; FAIL', sorted(L['FAIL']))
+        print('HAZIR CIFT', len(H), '/ 78; HAZIR OLMAYAN', [c for c, s in tum if c not in H])
+        for ad in ('T', 'M'):
+            if not os.path.exists(f'_z/{ad}.csv'):
+                print(ad, 'csv yok'); continue
+            rows = list(csv.DictReader(open(f'_z/{ad}.csv', encoding='utf-8')))
+            for r in rows:
+                r['dosya_hazir'] = 'EVET' if r['cift'] in H else 'HAYIR'
+            out = '_z/TAKVIM_PIN78_20261125_DURUM.csv' if ad == 'T' else '_z/METIN_PIN78_20261125_DURUM.csv'
+            with open(out, 'w', newline='', encoding='utf-8') as f:
+                w = csv.DictWriter(f, fieldnames=list(rows[0]), lineterminator='\n'); w.writeheader(); w.writerows(rows)
+            print(ad, 'satir', len(rows), 'dosya_hazir=HAYIR', sum(r['dosya_hazir'] == 'HAYIR' for r in rows))
+        PY
+        cat _z/OZET_PIN78.txt | sed 's/^/::warning::/'
+        rclone copy _z "$R" $X --include "OZET_PIN78.txt" --include "*_DURUM.csv" -q
+        rm -rf ~/.config/rclone
+        grep -q "HAZIR CIFT 78 / 78" _z/OZET_PIN78.txt

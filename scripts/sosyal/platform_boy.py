@@ -31,11 +31,52 @@ UI_UST, UI_ALT = 0.14, 0.20          # Merkez karari (Reels/Shorts)
 RESMI_ALT, RESMI_SAG = 0.35, 888     # Google dikey reklam sablonu (bilgi)
 
 
-def dorde_bes(pin):
+PAGELLA = '/usr/share/texmf/fonts/opentype/public/tex-gyre/texgyrepagella-regular.otf'
+LACIVERT = (22, 38, 65)
+IKI_CAP = 66                         # iki satirli 4:5 baslikta buyuk harf (px): 66 / 0.73 x 129.3 / 1012 = 11.6 pt (IG izgara)
+IKI_ARALIK = 28                      # satirlar arasi bosluk (px)
+IKI_UST = 40                         # ust bosluk (px)
+IKI_ALT_BASLIK = 30                  # baslik ile alt baslik arasi (px)
+
+
+def tek_satir_pt(pin):
+    """2:3 pinin tek satir basliginin 4:5 IG izgarasindaki puntosu (ilk harf olcumu)."""
+    a = np.asarray(Image.open(pin).convert('RGB'))
+    st = satirlar(a, UST, ALT)
+    return pt(st['baslik_ilk_harf'] * OL, round(H45 * 3 / 4), IZGARA_PT) if 'baslik' in st else 0.0
+
+
+def iki_satir_bant(pin, A, B):
+    """Merkez 25 Kas: BUYUK HARF baslik tek satira 11 pt'yi gecerek sigmiyorsa iki satir ("CAPRICORN &" / "SAGITTARIUS").
+    Ust bant yeniden kurulur: iki satir Pagella BUYUK HARF (buyuk harf IKI_CAP), altinda pinin kendi alt basligi (1.08 olcek)."""
+    im = Image.open(pin).convert('RGB')
+    f = ImageFont.truetype(PAGELLA, 100); H = f.getbbox('H'); boy = 100 * IKI_CAP / (H[3] - H[1])
+    f = ImageFont.truetype(PAGELLA, boy); H = f.getbbox('H')
+    sat = [f'{A.upper()} &', B.upper()]
+    alt_b = im.crop((0, 160, 1000, 250)); alt_b = alt_b.resize((W45, round(90 * OL)), Image.LANCZOS)
+    ink_ust = round((172 - 160) * OL); ink_alt = round((244 - 160) * OL)
+    y_l2 = IKI_UST + IKI_CAP + IKI_ARALIK
+    baslik_alt = y_l2 + IKI_CAP
+    y_sub = baslik_alt + IKI_ALT_BASLIK - ink_ust
+    yuk = y_sub + ink_alt + round(14 * OL)          # alt baslik ile gorsel arasi (v6 14 px)
+    bant = Image.new('RGB', (W45, yuk), BG); d = ImageDraw.Draw(bant)
+    for t, y in zip(sat, (IKI_UST, y_l2)):
+        bb = f.getbbox(t)
+        d.text((round(W45 / 2 - (bb[0] + bb[2]) / 2), y - H[1]), t, font=f, fill=LACIVERT)
+    bant.paste(alt_b, (0, y_sub))
+    return bant, (IKI_UST - 10, baslik_alt + 10)
+
+
+def dorde_bes(pin, A=None, B=None, iki_izin=False):
     im = Image.open(pin).convert('RGB')
     if im.size != (1000, 1500):
         raise SystemExit(f'DUR: pin boyu {im.size}')
-    ust = im.crop((0, 0, 1000, UST)).resize((W45, round(UST * OL)), Image.LANCZOS)
+    iki = bool(iki_izin and A and B and tek_satir_pt(pin) < MIN_PT + 0.3)
+    if iki:
+        ust, pencere = iki_satir_bant(pin, A, B)
+    else:
+        ust = im.crop((0, 0, 1000, UST)).resize((W45, round(UST * OL)), Image.LANCZOS)
+        pencere = (round(30 * OL), round(153 * OL))
     alt = im.crop((0, ALT, 1000, 1500)).resize((W45, round((1500 - ALT) * OL)), Image.LANCZOS)
     kalan = H45 - ust.size[1] - alt.size[1]
     orta = im.crop((0, UST, 1000, ALT))
@@ -43,7 +84,8 @@ def dorde_bes(pin):
     orta = orta.resize((round(1000 * k), kalan), Image.LANCZOS)
     out = Image.new('RGB', (W45, H45), BG)
     out.paste(ust, (0, 0)); out.paste(orta, ((W45 - orta.size[0]) // 2, ust.size[1])); out.paste(alt, (0, H45 - alt.size[1]))
-    return out, {'orta_olcek': round(k * 1.0, 4), 'ust_h': ust.size[1], 'alt_y': H45 - alt.size[1]}
+    return out, {'orta_olcek': round(k * 1.0, 4), 'ust_h': ust.size[1], 'alt_y': H45 - alt.size[1], 'iki_satir': iki,
+                 'baslik_pencere': list(pencere)}
 
 
 def murekkep(a, y0, y1, esik=60):
@@ -55,7 +97,7 @@ def murekkep(a, y0, y1, esik=60):
     return [int(xs.min()), int(ys.min() + y0), int(xs.max()), int(ys.max() + y0)]
 
 
-def satirlar(a, ust_h, alt_y):
+def satirlar(a, ust_h, alt_y, pencere=None):
     """baslik: ust bant icindeki ilk yazi satiri; alt satir: alt bant icindeki yazi. Buyuk harf yuksekligi icin 'baslik' satirinin
     ust-alt murekkebi (alt uzanti yoksa) kullanilir; olcum muhafazakar: alt uzantili harf satiri buyutur, bu yuzden ayrica
     satir profili ile ana govde yuksekligi (en yogun ardisik satirlar) alinir."""
@@ -73,8 +115,9 @@ def satirlar(a, ust_h, alt_y):
             p = y
         bl.append((s, p))
         return [(b0 + y0, b1 + y0) for b0, b1 in bl]
-    s_ = ust_h / UST                       # 2:3 -> 1.0, 4:5 -> 1.08
-    ub = govde(round(30 * s_), round(153 * s_)); ab = govde(alt_y, H)   # baslik penceresi y30-153 (v6; alt baslik 172-244 disarida)
+    if pencere is None:
+        pencere = (30, 153)                 # 2:3 baslik penceresi y30-153 (v6; alt baslik 172-244 disarida)
+    ub = govde(*pencere); ab = govde(alt_y, H)
     out = {}
     def ilk_harf(y0, y1):
         # satirin ilk harfi (her iki satirda da buyuk harf: burc adinin ilk harfi / 'A'dd): ilk bitisik sutun grubunun murekkep yuksekligi
@@ -84,8 +127,11 @@ def satirlar(a, ust_h, alt_y):
         rr = np.where(d[y0:y1 + 1, xs[0]:x + 1].any(1))[0]
         return int(rr[-1] - rr[0] + 1)
     if ub:
-        y0, y1 = ub[0]; xs = np.where(d[y0:y1 + 1].any(0))[0]
-        out['baslik'] = [int(xs.min()), int(y0), int(xs.max()), int(y1)]; out['baslik_ilk_harf'] = ilk_harf(y0, y1)
+        # baslik: penceredeki tum satirlar (iki satirli 4:5'te iki blok); kutu birlesik, punto en kucuk satirin ilk harfi
+        y0, y1 = ub[0][0], ub[-1][1]; xs = np.where(d[y0:y1 + 1].any(0))[0]
+        out['baslik'] = [int(xs.min()), int(y0), int(xs.max()), int(y1)]
+        out['baslik_ilk_harf'] = min(ilk_harf(b0, b1) for b0, b1 in ub)
+        out['baslik_satir'] = [[int(b0), int(b1)] for b0, b1 in ub]
     if ab:
         y0, y1 = ab[0]; xs = np.where(d[y0:y1 + 1].any(0))[0]
         out['alt_satir'] = [int(xs.min()), int(y0), int(xs.max()), int(y1)]; out['alt_satir_ilk_harf'] = ilk_harf(y0, y1)
@@ -97,9 +143,17 @@ def pt(px_h, img_w, gorunum_pt):
     return px_h / CAP_PT * gorunum_pt / img_w
 
 
-def kontrol_gorsel(ad, a, ust_h, alt_y, S, gorunumler):
+def kontrol_gorsel(ad, a, ust_h, alt_y, S, gorunumler, pencere=None):
     """gorunumler: [(gorunum adi, genislik_pt, kirpma (x0, y0, x1, y1) goruntu px)]"""
-    st = satirlar(a, ust_h, alt_y)
+    st = satirlar(a, ust_h, alt_y, pencere)
+    if len(st.get('baslik_satir', [])) > 1:
+        bl = st['baslik_satir']
+        ara = min(bl[i + 1][0] - bl[i][1] - 1 for i in range(len(bl) - 1))
+        S.append((f'{ad} iki satirli baslik: satir arasi >= 20 px', ara >= 20, ara))
+        S.append((f'{ad} iki satirli baslik: ust bosluk >= 30 px', bl[0][0] >= 30, bl[0][0]))
+        alt_b = np.where((np.abs(a[bl[-1][1] + 1:ust_h].astype(int) - np.array(BG)).sum(2) > 60).any(1))[0]
+        gb = int(alt_b[0]) if len(alt_b) else -1
+        S.append((f'{ad} iki satirli baslik: alt basliga bosluk >= 20 px', gb >= 20, gb))
     for s in ('baslik', 'alt_satir'):
         if s not in st:
             S.append((f'{ad} {s} bulundu', False, 'yok')); continue
@@ -125,13 +179,14 @@ def kareler(video, adim=0.25):
 
 
 def yazi_maske(f):
-    """koyu zemin uzerindeki altin yazi/sembol: altin piksel (R > 120, R - B > 95; altin yazi p50 136) VE 7 px icinde koyu piksel
+    """koyu zemin uzerindeki altin ya da beyaz/krem yazi/sembol: altin piksel (R > 120, R - B > 95; altin yazi p50 136) VE 7 px icinde koyu piksel
     (toplam < 90). Duvar sahnesindeki ahsap raf altin renge yakin (R - B 70-100+) ama yaninda koyu zemin yok (olcum 25 Kas)."""
     from PIL import ImageFilter
     f = f.astype(int)
     altin = (f[..., 0] > 120) & (f[..., 0] - f[..., 2] > 95)
+    acik = f.min(2) > 190                     # beyaz / krem yazi (inceleme 25 Kas: yalniz altin yaziya bakiyordu)
     koyu = Image.fromarray(((f.sum(2) < 90) * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(7))   # yari cozunurlukte ~7 px
-    return altin & (np.asarray(koyu) > 0)
+    return (altin | acik) & (np.asarray(koyu) > 0)
 
 
 def kontrol_video(video, S):
@@ -219,13 +274,14 @@ def calis(g):
     S = []; bilgi = {}
     p45 = []
     for tur, p in (('poster', g.poster), ('kart', g.kart), ('altin', g.altin)):
-        im, b = dorde_bes(p); y = os.path.join(g.out, f'{g.slug}-{tur}-4x5.jpg'); im.save(y, quality=95); p45.append(y); bilgi[tur] = b
+        im, b = dorde_bes(p, g.a, g.b, iki_izin=(tur != 'kart')); y = os.path.join(g.out, f'{g.slug}-{tur}-4x5.jpg')
+        im.save(y, quality=95); p45.append(y); bilgi[tur] = b
         a23 = np.asarray(Image.open(p).convert('RGB')); a45 = np.asarray(Image.open(y).convert('RGB'))
         kontrol_gorsel(f'{tur} 2:3', a23, UST, ALT, S, [('Pinterest akis', PIN_SUTUN_PT, (0, 0, 1000, 1500))])
         cw = round(H45 * 3 / 4); x0 = (W45 - cw) // 2
         kontrol_gorsel(f'{tur} 4:5', a45, b['ust_h'], b['alt_y'], S,
                        [('IG akis', TEL_PT, (0, 0, W45, H45)), ('FB akis', TEL_PT, (0, 0, W45, H45)),
-                        ('IG profil izgarasi 3:4', IZGARA_PT, (x0, 0, x0 + cw, H45))])
+                        ('IG profil izgarasi 3:4', IZGARA_PT, (x0, 0, x0 + cw, H45))], pencere=b['baslik_pencere'])
     K = None
     if g.video:
         K, bv = kontrol_video(g.video, S); bilgi['video'] = bv
@@ -241,6 +297,7 @@ def main():
     for x in ('poster', 'kart', 'altin', 'out'):
         ap.add_argument('--' + x, required=True)
     ap.add_argument('--video'); ap.add_argument('--slug', default='cift'); ap.add_argument('--oz-test', action='store_true')
+    ap.add_argument('--a'); ap.add_argument('--b')
     g = ap.parse_args()
     if g.oz_test:
         import tempfile, copy
@@ -270,6 +327,10 @@ def main():
                 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', g.video, '-t', '2', '-vf', 'drawbox=x=300:y=1700:w=400:h=80:color=0xE0B040:t=fill',
                                 '-an', v2], check=True)
                 S5 = []; kontrol_video(v2, S5); R.append(('FAIL: video alt arayuz alaninda yazi', not all(s[1] for s in S5)))
+                v3 = os.path.join(t, 'v3.mp4')
+                subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', g.video, '-t', '2', '-vf',
+                                'drawbox=x=300:y=60:w=400:h=12:color=0xF4EFE9:t=fill,drawbox=x=300:y=110:w=400:h=12:color=0xFFFFFF:t=fill', '-an', v3], check=True)
+                S6 = []; kontrol_video(v3, S6); R.append(('FAIL: video ust arayuz alaninda beyaz/krem yazi', not all(s[1] for s in S6)))
         for ad_, v in R:
             print(('PASS ' if v else 'FAIL ') + 'oz-test ' + ad_)
         sys.exit(0 if all(v for _, v in R) else 1)

@@ -212,10 +212,31 @@ def qc(yol, bilgi, olc, cerceve, baslik):
     for ad, (y0, y1) in (('glif satiri', GLIF_Y), ('ad satiri', AD_Y)):
         c1 = p[y0:y1 + 1][altin_maske(p[y0:y1 + 1])].mean(0); c3 = p3[y0:y1 + 1][altin_maske(p3[y0:y1 + 1])].mean(0)
         k(f'{ad} altin rengi PIN_03 ile kanal farki <= 15', np.abs(c1 - c3).max() <= 15, f'{c1.round()} / {c3.round()}')
+    # goruntuden olcum (inceleme 25 Kas: kapi uretici beyanina degil goruntuye bakar): ad satiri iki ada en buyuk bosluktan bolunur,
+    # her adin ilk harf yuksekligi; glif satirinin en sol / en sag ogesinin merkezi ilgili adin kutusu icinde olmali
+    am = altin_maske(p[AD_Y[0] - 8:PH]); cols = np.where(am.any(0))[0]
+    gm = altin_maske(p[GLIF_Y[0] - 6:GLIF_Y[1] + 6]); gcols = np.where(gm.any(0))[0]
+    olc_ad = []
+    if len(cols) and len(gcols):
+        bos = np.diff(cols); j = int(np.argmax(bos))
+        adlar = [(cols[0], cols[j]), (cols[j + 1], cols[-1])]
+        for x0, x1 in adlar:
+            c = am[:, x0:x1 + 1].any(0); e = 0
+            while e + 1 < len(c) and c[e + 1]:
+                e += 1
+            rr = np.where(am[:, x0:x0 + e + 1].any(1))[0]; olc_ad.append(int(rr[-1] - rr[0] + 1))
+        gb = np.diff(gcols); gs = np.where(gb > 20)[0]
+        sol = (gcols[0] + gcols[gs[0]]) / 2 if len(gs) else gcols[0]; sag = (gcols[gs[-1] + 1] + gcols[-1]) / 2 if len(gs) else gcols[-1]
+        k('ad glifinin altinda (glif merkezi ad kutusu icinde)', adlar[0][0] <= sol <= adlar[0][1] and adlar[1][0] <= sag <= adlar[1][1],
+          f'adlar {[(int(a_), int(b_)) for a_, b_ in adlar]} glif merkezleri {round(float(sol))}, {round(float(sag))}')
+        k('adlar arasi >= 40 px (olcum)', int(adlar[1][0] - adlar[0][1]) >= 40, int(adlar[1][0] - adlar[0][1]))
+    k('ad olcumu (iki ad, ilk harf) bulundu', len(olc_ad) == 2, olc_ad)
+    h_olc = min(olc_ad) if olc_ad else 0
+    k('olculen ad yuksekligi = uretici beyani (+-3 px)', abs(h_olc - bilgi['ad_buyuk_harf_px']) <= 3, f"olcum {olc_ad} beyan {bilgi['ad_buyuk_harf_px']}")
     if bilgi.get('cift') in AD_ISTISNA:
-        k('ad buyuk harf >= 36 px (Serdar 25 Kas A istisnasi: sigan en buyuk boy)', bilgi['ad_buyuk_harf_px'] >= 36, bilgi['ad_buyuk_harf_px'])
+        k('ad buyuk harf >= 36 px (Serdar 25 Kas A istisnasi: sigan en buyuk boy; olcum)', h_olc >= 36, h_olc)
     else:
-        k('ad buyuk harf >= 45 px (168 akista >= 11 CSS px)', bilgi['ad_buyuk_harf_px'] >= 45, bilgi['ad_buyuk_harf_px'])
+        k('ad buyuk harf >= 45 px (168 akista >= 11 CSS px; olcum)', h_olc >= 45, h_olc)
     ol = bilgi['sembol_cikti'][0] / bilgi['sembol_kaynak'][0]
     k('sembol yalniz kucultme (cikti / kaynak <= 1)', ol <= 1.0, round(ol, 4))
     R = kutular(p)
@@ -262,6 +283,14 @@ def main():
         im5.save(os.path.join(t, 'b5.jpg'), quality=95, subsampling=0)
         sonuc.append((f"istisna cifti ad kapisi PASS ({bi5['ad_buyuk_harf_px']} px)",
                       all(s['sonuc'] == 'PASS' for s in qc(os.path.join(t, 'b5.jpg'), bi5, olc, g.cerceve, g.baslik) if 'ad buyuk' in s['kapi'])))
+        # FAIL 5 (inceleme mutasyonu): ad bandi %60'a kucultulup glif altindan kaydirilir; beyan degismez -> goruntu olcumu FAIL vermeli
+        b5 = im.copy(); y0_, y1_ = PY0 + AD_Y[0] - 8, PY0 + AD_Y[1] + 8
+        band = b5.crop((PX0 + 24, y0_, PX1 - 24, y1_)); kb = band.resize((round(band.size[0] * 0.6), round(band.size[1] * 0.6)), Image.LANCZOS)
+        zem = b5.crop((PX0 + 24, y0_ - (y1_ - y0_) - 4, PX1 - 24, y0_ - 4))       # ustteki bos zemin (glif satiri ile ad arasi degil)
+        zem = Image.new('RGB', band.size, tuple(int(v) for v in np.asarray(b5.crop((PX0 + 30, y1_ + 6, PX0 + 60, y1_ + 12))).reshape(-1, 3).mean(0)))
+        b5.paste(zem, (PX0 + 24, y0_)); b5.paste(kb, (PX0 + 300, y0_ + 8))
+        b5.save(os.path.join(t, 'b5m.jpg'), quality=95, subsampling=0)
+        sonuc.append(('FAIL: ad kucultulup kaydirildi (beyan ayni)', any(s['sonuc'] == 'FAIL' and ('ad ' in s['kapi']) for s in qc(os.path.join(t, 'b5m.jpg'), bilgi, olc, g.cerceve, g.baslik))))
         # FAIL 4: cerceve bozulmasi
         b4 = im.copy(); b4.paste((0, 0, 0), (20, 1400, 60, 1440)); b4.save(os.path.join(t, 'b4.jpg'), quality=95, subsampling=0)
         sonuc.append(('FAIL: cerceve', any(s['sonuc'] == 'FAIL' for s in qc(os.path.join(t, 'b4.jpg'), bilgi, olc, g.cerceve, g.baslik))))

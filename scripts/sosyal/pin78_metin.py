@@ -11,7 +11,8 @@ Etsy Messages ile onizleme. Link: https://astroloveart.etsy.com/listing/<id> (Sh
 Kapilar (PASS/FAIL): sevgililer_metin.tara (etsy_common.METIN_KESIN + free / fiyat / tarih-kargo vaadi / AstroLove marka) tum alanlarda;
 baslik <= 100, aciklama <= 500, alt metin <= 500; baslik "<A> and <B> " + alici terimi ile baslar; 312 baslik benzersiz; ayni
 baslangic kalibi (adlardan sonraki ilk 3 kelime) en cok %20; aciklamada alici ifadesi + iki burc adi; aranan terim; genel surumde
-Valentine / 14 Feb yok (metin + pano); ayni surumde 12+ kelimelik ortak dizi yok (kopya cumle); ABD yazimi (colour/personalised/
+Valentine / 14 Feb yok (metin + pano); kopya cumle: AYNI CIFTIN 4 pininde (ayni surum) 12+ kelimelik ortak dizi yok ve 312 aciklama
+benzersiz (312 pin geneli sablon metin: sevgililer_metin'in set geneli kopya kapisi bu kapsamda uygulanamaz, rapor); ABD yazimi (colour/personalised/
 favourite yok); uzun/orta tire yok (METIN_KESIN).
 Kullanim: pin78_metin.py --cikti METIN.csv [--oz-test]
 """
@@ -73,8 +74,8 @@ ALT = {'poster': '{A} and {B} combined zodiac symbol poster in Midnight Blue wit
                'title {A} and {B} with the gold AstroLoveArt infinity logo between them',
        'altin': 'Close-up of the gold {A} and {B} combined zodiac symbol on navy, with the small {A} and {B} sign symbols, a gold '
                 'infinity logo and the sign names {AU} and {BU}, under the title {AU} & {BU} Combined Zodiac Symbol',
-       'video': 'Short video: the gold {A} and {B} combined zodiac symbol on navy, the poster on a wall, and an end card that says '
-                'Make it yours, AstroLoveArt, On Etsy'}
+       'video': 'Short video: the gold {A} and {B} combined zodiac symbol on navy, the poster on a wall, an end card that says '
+                'Make it yours, AstroLoveArt, On Etsy, and back to the gold symbol'}
 DOSYA = {'poster': '{s}-poster.jpg', 'kart': '{s}-kart.jpg', 'altin': '{s}-altin.jpg', 'video': '{s}-pin-video.mp4'}
 PANO = {('poster', 'sevgililer'): ("Valentine's Day Gifts for Couples", 'Posters'), ('video', 'sevgililer'): ("Valentine's Day Gifts for Couples", 'Videos'),
         ('poster', 'genel'): ('Wedding and Engagement Gifts', ''), ('video', 'genel'): ('Wedding and Engagement Gifts', '')}
