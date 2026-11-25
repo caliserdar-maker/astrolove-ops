@@ -649,6 +649,31 @@ def senaryo_abd():
     kontrol("FAIL Threads konu etiketinde '.' GECERSIZ", rc == 1 and not any(c[1].endswith("/threads") for c in otr.cagri))
 
 
+def senaryo_abd2():
+    import takvim
+    eski = Oturum([satir(50, "threads", "metin")])
+    eski.baslik = [c for c in secim.SUTUNLAR if c != "alt_metin"]
+    eski.satirlar = [r[:-1] for r in eski.satirlar]
+    acik()
+    rc, out = kos(eski, "yayin")
+    kontrol("eski 15 sutunlu takvim: DUR yok, yayin calisir", rc == 0 and "eksik sutun" not in out
+            and any(c[1].endswith("/threads_publish") for c in eski.cagri))
+    s0 = satir(51, "threads", "metin", onay=False)
+    d = dict(s0); d.pop("alt_metin")
+    kontrol("bos alt_metin onay ozetini degistirmez", secim.ozet(s0, []) == secim.ozet(d, []))
+    kontrol("dolu alt_metin ozete girer", secim.ozet({**s0, "alt_metin": "x"}, []) != secim.ozet(s0, []))
+    sifirla()
+    otr = Oturum([satir(52, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", link="https://astroloveart.etsy.com/listing/1")])
+    rc, _ = kos(otr, "yayin")
+    yrm = [c for c in otr.cagri if c[1].endswith("/comments")]
+    kontrol("FB reel: ilk yorum video no uzerine", rc == 0 and len(yrm) == 1 and "/FBV1/comments" in yrm[0][1])
+    otr = Oturum([satir(53, "facebook", "gorsel", "SOSYAL/a.jpg", link="https://astroloveart.etsy.com/listing/1")])
+    otr.satirlar[0][otr.baslik.index("not")] = "PLAN78 CANCER_LEO poster"
+    otr.yorum_hata = True
+    kos(otr, "yayin")
+    kontrol("FB yorum hatasi: not sutunundaki plan izi korunur", satir_al(otr, 53)["not"].startswith("PLAN78 CANCER_LEO poster UYARI"))
+
+
 def senaryo_yml():
     import yaml
     w = KOK.parents[2] / ".github/workflows"
@@ -833,7 +858,7 @@ def mutasyon():
 if __name__ == "__main__":
     try:
         for f in (senaryo_ana, senaryo_kuru, senaryo_kapali, senaryo_medya_farkli, senaryo_publish_500, senaryo_son_an,
-                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_gizli_test, senaryo_video_kaynak, senaryo_plan78, senaryo_abd, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
+                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_gizli_test, senaryo_video_kaynak, senaryo_plan78, senaryo_abd, senaryo_abd2, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
             try:
                 f()
             except Exception as e:

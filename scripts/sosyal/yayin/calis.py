@@ -162,7 +162,7 @@ def yayin(http, tk, simdi, kuru, uyku=None, gizli_test=""):
                 uyari.append(f"{etiket}: YAYINLANDI no={no}; {ek}")
             try:
                 tk.tazele(s)
-                tk.yaz(s, DURUM=f"TAMAM {ts(simdi)}", sonuc_no=str(no), **({"not": f"UYARI {ek}"[:200]} if ek else {}))
+                tk.yaz(s, DURUM=f"TAMAM {ts(simdi)}", sonuc_no=str(no), **({"not": f"{(s.get('not') or '').strip()} UYARI {ek}".strip()[:300]} if ek else {}))
                 log(f"{etiket}: TAMAM {no}")
             except Exception as e:
                 uyari.append(f"{etiket}: YAYINLANDI no={no} ama takvime TAMAM yazilamadi ({temizle(e)}); satiri elle TAMAM {no} yapin")

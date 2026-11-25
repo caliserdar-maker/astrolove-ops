@@ -17,6 +17,7 @@ import video_kaynak
 TZ = ZoneInfo("Europe/Istanbul")
 SUTUNLAR = ["satir_no", "tarih_saat_TR", "platform", "tur", "medya", "metin", "link", "pano", "yz_beyani",
             "gorunurluk", "ONAY", "ONAY_OZET", "DURUM", "sonuc_no", "not", "alt_metin"]
+OPSIYONEL = {"alt_metin"}   # eski takvimde sutun yoksa bos kabul edilir (takvim.oku DUR vermez)
 OZET_ALANLARI = ["satir_no", "tarih_saat_TR", "platform", "tur", "medya", "metin", "link", "pano", "yz_beyani",
                  "gorunurluk", "alt_metin"]
 TURLER = {
@@ -37,6 +38,9 @@ def medya_listesi(satir):
 def ozet(satir, md5ler):
     """Onay anindaki icerigin ozeti (16 hex). md5ler: medya_listesi sirasiyla Drive md5."""
     d = {k: (satir.get(k) or "").strip() for k in OZET_ALANLARI}
+    for k in OPSIYONEL:   # bos opsiyonel alan ozete girmez: sutun eklenmeden once onaylanan satirlarin ozeti degismez
+        if not d.get(k):
+            d.pop(k, None)
     d["_md5"] = list(md5ler)
     return hashlib.sha256(json.dumps(d, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:16]
 

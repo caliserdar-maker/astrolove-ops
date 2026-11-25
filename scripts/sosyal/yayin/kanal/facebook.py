@@ -8,6 +8,7 @@ from ortak import Hata
 
 VER = os.environ.get("FB_API_VERSION", "v21.0")
 BASE = os.environ.get("FB_GRAPH_BASE", "https://graph.facebook.com").rstrip("/") + "/" + VER
+REEL_YORUM_BEKLE = 15   # sn; reel islenirken yorum reddedilebilir (inceleme, dogrulanmadi)
 RUPLOAD = os.environ.get("FB_RUPLOAD_BASE", "https://rupload.facebook.com").rstrip("/") + "/video-upload/" + VER
 
 
@@ -37,7 +38,7 @@ def yayinla(http, k, satir, medya, uyku=time.sleep):
                                "description": metin})
         if not j.get("success"):
             raise Hata("reel finish basarisiz", belirsiz=True)
-        return _ilk_yorum(http, k, vid, satir, taslak)
+        return _ilk_yorum(http, k, vid, satir, taslak, uyku, bekle=REEL_YORUM_BEKLE)
     if tur == "gorsel":
         with open(m["yerel"], "rb") as f:
             j, _ = http.iste("POST", f"{BASE}/{k['page_id']}/photos", token=k["token"],
@@ -49,16 +50,20 @@ def yayinla(http, k, satir, medya, uyku=time.sleep):
     raise Hata(f"facebook tur desteklenmiyor: {tur}")
 
 
-def _ilk_yorum(http, k, no, satir, taslak):
+def _ilk_yorum(http, k, no, satir, taslak, uyku=None, bekle=0):
     """ABD denetimi (Serdar 25 Kas): Etsy linki gonderinin ilk yorumu. Gonderi YAYINLANDI; yorum hatasi gonderiyi HATA yapmaz,
     (no, uyari) dondurulur (calis TAMAM yazar + uyari). Taslakta yorum yok."""
     link = (satir.get("link") or "").strip()
     if taslak or not link:
         return no
+    if bekle and uyku:
+        uyku(bekle)
     try:
         j, _ = http.iste("POST", f"{BASE}/{no}/comments", token=k["token"], data={"message": link})
-        if not j.get("id"):
+        if not isinstance(j, dict) or not j.get("id"):
             return no, "ilk yorum no donmedi"
         return no
     except Hata as e:
         return no, f"ilk yorum yazilamadi: {e}"
+    except Exception as e:  # gonderi yayinda: hicbir hata satiri HATA yapmamali
+        return no, f"ilk yorum yazilamadi: {type(e).__name__}"

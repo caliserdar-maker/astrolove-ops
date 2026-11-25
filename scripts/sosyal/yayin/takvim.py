@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 from ortak import Hata, gizle
-from secim import SUTUNLAR
+from secim import OPSIYONEL, SUTUNLAR
 
 API = "https://sheets.googleapis.com/v4/spreadsheets"
 
@@ -60,7 +60,7 @@ class Takvim:
         if not rows:
             raise Hata("takvim bos")
         self.baslik = [c.strip() for c in rows[0]]
-        eksik = [c for c in SUTUNLAR if c not in self.baslik]
+        eksik = [c for c in SUTUNLAR if c not in self.baslik and c not in OPSIYONEL]
         if eksik:
             raise Hata(f"takvimde eksik sutun: {', '.join(eksik)}")
         out = []

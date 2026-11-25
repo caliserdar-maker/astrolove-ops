@@ -208,7 +208,7 @@ def kapilar(satirlar, gunluk):
             h.append(f"satir {n}: link bicimi")
         if t and re.search(r"https?://", t):
             h.append(f"satir {n}: metinde adres var (IG bio, FB ilk yorum, YT kanal sayfasi)")
-        if t and re.search(r"(?i)link in (?:the )?bio", t) and s["platform"] != "instagram":
+        if t and re.search(r"(?i)link in (?:the |our )?bio", t) and s["platform"] != "instagram":
             h.append(f"satir {n}: 'link in bio' yalniz Instagram'da")
         etk = re.findall(r"#\w+", t)
         a_, b_ = [x.lower() for x in s["_cift"].split("_", 1)]
