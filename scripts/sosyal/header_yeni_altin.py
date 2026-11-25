@@ -56,17 +56,19 @@ def boya(maske, deg):
     return Image.fromarray(np.dstack([rgb, m * 255]).clip(0, 255).astype(np.uint8), 'RGBA')
 
 
-def yazi(t, px, aralik=0.0):
+def yazi(t, px, aralik=0.0, kalin=None):
     """metin maskesi; px = buyuk harf yuksekligi; aralik = harf arasi (em orani)."""
     for s in range(px * 3, 8, -1):
         f = ImageFont.truetype(FONT, s)
         b = f.getbbox('H')
         if b[3] - b[1] <= px:
             break
-    gen = sum(f.getlength(ch) for ch in t) + aralik * s * (len(t) - 1)
+    if kalin is None:
+        kalin = 1 if px <= 22 else 0                 # kucuk yazi: ince harfte kenar karisimi altini koyulastirir (olculdu)
+    gen = sum(f.getlength(ch) for ch in t) + aralik * s * (len(t) - 1) + 2 * kalin * len(t)
     im = Image.new('L', (int(gen) + 40, int(s * 1.6)), 0); d = ImageDraw.Draw(im); x = 20
     for ch in t:
-        d.text((x, int(s * 0.25)), ch, font=f, fill=255); x += f.getlength(ch) + aralik * s
+        d.text((x, int(s * 0.25)), ch, font=f, fill=255, stroke_width=kalin, stroke_fill=255); x += f.getlength(ch) + aralik * s
     return im.crop(im.getbbox())
 
 

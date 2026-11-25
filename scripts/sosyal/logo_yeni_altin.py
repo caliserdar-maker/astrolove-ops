@@ -85,7 +85,29 @@ def kose_doldur(a):
     return out, int(kb.sum())
 
 
-def uret(logo, pin, boy=3000):
+def kesit_profili(rgb, kern, lmin=70):
+    """kabartma kesit profili: altin cekirdek maskesinde kenardan uzaklik / yerel yari genislik (t, 0 kenar - 1 orta),
+    20 kutuda medyan parlaklik. Pin ve logo ayni fonksiyonla olculur."""
+    import cv2
+    Lx = rgb @ LUM
+    core = (((rgb[..., 0] - rgb[..., 2]) > 40) & (Lx > lmin)).astype(np.uint8)
+    d = cv2.distanceTransform(core, cv2.DIST_L2, 5)
+    hw = cv2.dilate(d, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kern, kern)))
+    tt = np.where(core > 0, d / np.maximum(hw, 1e-6), 0)
+    P = []
+    for i in range(20):
+        s = (core > 0) & (tt >= i / 20) & (tt < (i + 1) / 20)
+        P.append(float(np.median(Lx[s])) if s.sum() > 30 else np.nan)
+    return np.array(P), tt, core
+
+
+def pin_profili(pin):
+    p = np.asarray(Image.open(pin).convert('RGB')).astype(float)[PIN_PANEL[1]:PIN_PANEL[3], PIN_PANEL[0]:PIN_PANEL[2]][PIN_SEMBOL_Y[0]:PIN_SEMBOL_Y[1]]
+    P, _, _ = kesit_profili(p, 41)                     # pin kontur yari genisligi en cok ~15 px (olculdu)
+    return P
+
+
+def uret(logo, pin, boy=3000, kabartma=False):   # kabartma denemesi (Merkez 25 Kas karari 1): 2 turda kapi FAIL, varsayilan kapali
     src = Image.open(logo).convert('RGB')
     a = np.asarray(src.resize((boy, boy), Image.LANCZOS)).astype(float)
     a, kose_px = kose_doldur(a)
@@ -103,6 +125,25 @@ def uret(logo, pin, boy=3000):
     alt = x < Lc[0]; f[alt] = x[alt] * Lp[0] / max(Lc[0], 1)                 # en koyu golgeler oranla (0 -> 0)
     ust = x > Lc[-1]; f[ust] = np.minimum(255, Lp[-1] + (x[ust] - Lc[-1]))
     hedef = np.interp(L, x, f)
+    if kabartma:
+        # 1b) kabartma + kenar isigi: pinden OLCULEN kesit profili (kenar -> orta) kurdele cekirdegine uygulanir; kurdelenin
+        #     buyuk olcekli burgu golgesi (25 px Gauss) karekok agirlikla korunur, eski ince doku birakilir
+        from scipy.ndimage import gaussian_filter as gf
+        P = pin_profili(pin); P = np.where(np.isnan(P), np.nanmedian(P), P)
+        _, tt, core = kesit_profili(a, 2 * int(np.ceil(26 * boy / 1254)) + 1, lmin=10)   # golgeli (arka yuz) altin da cekirdekte; olcum: golgeler L 15-55   # logo yari genisligi <= ~26 px @1254 (olculdu)
+        c = core.astype(float)
+        # oran olarak: kesit profili / profil medyani (kenar ~0.96, kenar isigi ~1.07, sirt ~1.12; pinden)
+        oran = np.interp(tt, (np.arange(20) + 0.5) / 20, P / np.median(P))
+        # eski ince doku (JPEG kokenli) tasinmaz: cekirdek icinde normalize 6 px Gauss (yalniz burgu golgesi kalir)
+        duz = gf(hedef * c, 6) / np.maximum(gf(c, 6), 1e-3)
+        Lmod = duz * oran
+        # cekirdekte sira korunarak pin parlaklik dagilimina esleme (PosterR._gold_ramp kantil mantigi): golgeler pin
+        # gibi acilir (pin p5 ~108), parlamalar korunur
+        ci = core > 0
+        sira = np.argsort(np.argsort(Lmod[ci])) / max(1, ci.sum() - 1)
+        Lq = Lmod.copy(); Lq[ci] = np.interp(sira * 255, np.arange(256), Lp)
+        w = np.clip(gf(c, 1.5), 0, 1)
+        hedef = hedef * (1 - w) + Lq * w
     # 2) renk: pin rampasinda hedef parlakliktaki renk (rampa altindaysa ilk rengin olceklenmesi)
     renk = np.stack([np.interp(hedef, Lp + np.arange(256) * 1e-6, yeni[:, c]) for c in range(3)], -1)
     olc = np.clip(hedef / max(Lp[0], 1), 0, 1)[..., None]
@@ -170,8 +211,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--logo', required=True); ap.add_argument('--logo180', required=True)
     ap.add_argument('--pin', required=True); ap.add_argument('--out', required=True)
+    ap.add_argument('--kabartma', action='store_true', help='deneme: pin kesit profiliyle kabartma (25 Kas: p5 87, gorsel bulanik; FAIL)')
     g = ap.parse_args(); os.makedirs(g.out, exist_ok=True)
-    im, bilgi, yeni, eski = uret(g.logo, g.pin)
+    im, bilgi, yeni, eski = uret(g.logo, g.pin, kabartma=g.kabartma)
     yol = os.path.join(g.out, 'LOGO_YENI_ALTIN_3000.png'); im.save(yol, optimize=True)
     S = qc(Image.open(yol).convert('RGB'), g.logo, g.logo180, g.pin, yeni)
     for s in S:
