@@ -6,8 +6,8 @@ Cikti:
   - Onizleme paftasi: Pinterest akis (2 sutun), IG akis 4:5, IG profil izgarasi (3:4 kirpma), FB akis, Reels/Shorts arayuz katmani.
 Kapi (PASS/FAIL), olculen murekkep kutularindan:
   - ust (baslik) ve alt ("Add your names") satir: her gorunumde gorunur alanin icinde (kirpma / arayuz disi) ve
-    yazi boyu >= 11 CSS pt (buyuk harf yuksekligi / 0.69; 0.69 = Pagella buyuk harf / punto, olcum). 11 pt: iOS en kucuk metin
-    stillerinden Caption 2 (Apple HIG, 3. taraf ozetlerinde; dogrulanmadi) yerine onceki kapimiz (168 px akista 11 CSS px).
+    yazi boyu >= 11 CSS pt (ilk harf yuksekligi / 0.73; Pagella harf / punto olcumu). 11 pt: iOS en kucuk metin
+    stillerinden Caption 2 (Apple HIG, dogrulanmadi) yerine onceki kapimiz (168 px akista 11 CSS px). Yazi boyu = ilk harf yuksekligi / 0.73.
   - video: altin/acik yazi murekkebi ust %14 ve alt %20 arayuz alanina girmez (Merkez karari). Bilgi: Google'in resmi dikey
     REKLAM guvenli alan sablonu ust %15 (288 px), alt %35 (672 px), sag 192 px (support.google.com / services.google.com
     universalsafezones-youtube.pdf); organik Reels/Shorts icin resmi piksel degeri bulunamadi. Bilgi olarak %35 alt ve sag sutun
@@ -22,7 +22,7 @@ BG = (244, 239, 233)
 W45, H45 = 1080, 1350
 UST, ALT = 257, 1330                 # 2:3 pin bantlari (v6 olcum: alt baslik y172-244, poster+golge y258-1323, alt satir y1377-1463)
 OL = W45 / 1000                      # 1.08
-CAP_PT = 0.69                        # Pagella buyuk harf yuksekligi / punto (olcum: 104.5 px -> 76 px ~ 0.727; italik 'A' ~0.69; alt sinir)
+CAP_PT = 0.73                        # ilk harf yuksekligi / punto: Pagella H 0.695, A 0.703-0.708, C 0.729 (olcum 25 Kas); en buyuk = en kucuk punto tahmini
 MIN_PT = 11.0
 TEL_PT = 390                         # telefon genisligi (pt): iPhone 12-15 (390 pt, Apple belge degerleri; 3. taraf ozet)
 PIN_SUTUN_PT = (TEL_PT - 3 * 8) / 2  # Pinterest akis: 2 sutun, 8 pt bosluk (tahmin, ekran goruntusu olcumu yok)
@@ -76,12 +76,19 @@ def satirlar(a, ust_h, alt_y):
     s_ = ust_h / UST                       # 2:3 -> 1.0, 4:5 -> 1.08
     ub = govde(round(30 * s_), round(153 * s_)); ab = govde(alt_y, H)   # baslik penceresi y30-153 (v6; alt baslik 172-244 disarida)
     out = {}
+    def ilk_harf(y0, y1):
+        # satirin ilk harfi (her iki satirda da buyuk harf: burc adinin ilk harfi / 'A'dd): ilk bitisik sutun grubunun murekkep yuksekligi
+        cols = d[y0:y1 + 1].any(0); xs = np.where(cols)[0]; x = xs[0]
+        while x + 1 < len(cols) and cols[x + 1]:
+            x += 1
+        rr = np.where(d[y0:y1 + 1, xs[0]:x + 1].any(1))[0]
+        return int(rr[-1] - rr[0] + 1)
     if ub:
         y0, y1 = ub[0]; xs = np.where(d[y0:y1 + 1].any(0))[0]
-        out['baslik'] = [int(xs.min()), int(y0), int(xs.max()), int(y1)]
+        out['baslik'] = [int(xs.min()), int(y0), int(xs.max()), int(y1)]; out['baslik_ilk_harf'] = ilk_harf(y0, y1)
     if ab:
         y0, y1 = ab[0]; xs = np.where(d[y0:y1 + 1].any(0))[0]
-        out['alt_satir'] = [int(xs.min()), int(y0), int(xs.max()), int(y1)]
+        out['alt_satir'] = [int(xs.min()), int(y0), int(xs.max()), int(y1)]; out['alt_satir_ilk_harf'] = ilk_harf(y0, y1)
     return out
 
 
@@ -97,8 +104,7 @@ def kontrol_gorsel(ad, a, ust_h, alt_y, S, gorunumler):
         if s not in st:
             S.append((f'{ad} {s} bulundu', False, 'yok')); continue
         x0, y0, x1, y1 = st[s]
-        # buyuk harf yuksekligi ~ satir yuksekligi (baslik buyuk harf; alt satir italik 'A' + alt uzanti 'y': muhafazakar olarak x0.7)
-        h = (y1 - y0 + 1) * (1.0 if s == 'baslik' else 0.7)
+        h = st[s + '_ilk_harf']          # ilk harf (buyuk) murekkep yuksekligi
         for g, wpt, (cx0, cy0, cx1, cy1) in gorunumler:
             icinde = x0 >= cx0 + 4 and x1 <= cx1 - 4 and y0 >= cy0 + 4 and y1 <= cy1 - 4
             S.append((f'{ad} | {g} | {s} tam gorunur', icinde, f'kutu {st[s]} gorunur {[cx0, cy0, cx1, cy1]}'))
