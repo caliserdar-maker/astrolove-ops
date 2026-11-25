@@ -43,6 +43,7 @@ def zt(**k):
 ESKI, YAKIN = zt(days=-40), zt(days=-3)
 KOD_KIMLIK = "1" + "K" * 32          # depoda gecen Drive kimligi (sahte)
 DOC_KIMLIK = "1" + "D" * 43          # 44 karakterli Docs/Sheets kimligi
+BITISIK = "1" + "B" * 32             # kodda bitisik yaziliyor: <kimlik>_ana
 HATALI = set()
 ILK401 = {"kalan": 0, "kotu": None}
 
@@ -195,6 +196,7 @@ def kur(tmp):
     e("T20", "KART_ON_20261001", "TEMP", KL, 0); e("T20s", "ALT_KART_KL", "T20", KL, 0); e("T20x", "kart_child.png", "T20s")
     e("T20y", "kart_yakin.png", "T20", mod=YAKIN)
     e("T21", "OKUNAN_KEEP_KL", "TEMP", KL, 0); e("T21a", "icerik_trash.json", "T21")
+    e(BITISIK, "BITISIK_KIMLIK_DOSYA.png", "TEMP")
     e("Q4", "aile.jpg", "NOK")
     # J2
     e("S1", "9000000001", "SIP", KL, 0); e("S1a", "KAPI_RAPORU_DB.json", "S1"); e("S1b", "AstroLoveArt_X.pdf", "S1")
@@ -214,7 +216,7 @@ def kur(tmp):
     kat = {fid: "KEEP" for fid in S.f}
     for fid in ["T1", "T1a", "T1b", "T2", "T2s", "T2s1", "T2y", "T2e", "T3", "T3a", "T4", "T4a", "T5", "T6", "T7", "T8",
                 "T9", "T10", "T11", "T11a", KOD_KIMLIK, "T12a", "T13", "T13a", "T14", "T15", "T16", "T16s", "T16x", "T16y",
-                "T17", "T17a", "T18", "T19", "T19n", "T19a", "S7", DOC_KIMLIK, "T20", "T20s", "T20x", "T20y", "T21a"]:
+                "T17", "T17a", "T18", "T19", "T19n", "T19a", "S7", DOC_KIMLIK, "T20", "T20s", "T20x", "T20y", "T21a", BITISIK]:
         kat[fid] = "TRASH"
     for fid in ["Q1", "Q1a", "Q2", "Q2a", "Q3", "Q3a", "Q4", "NOK", "Q5", "Q5a", "Q6", "Q6a"]:
         kat[fid] = "SERDAR_QUESTION"
@@ -245,7 +247,7 @@ def kur(tmp):
     depo = os.path.join(tmp, "depo"); os.makedirs(depo)
     Path(depo, "a.yml").write_text("girdi: gdrive:ASTROLOVE/TEMP/KODDA_GECEN_KLASOR/x\nb: TEMP/BANNER_${damga}\n"
                                    f"root_folder_id={KOD_KIMLIK}\nc: TEMP/UST_OKUNAN/\nd: TEMP/POD_GALLERY/\n"
-                                   f"tablo: {DOC_KIMLIK}\ne: TEMP/OKUNAN_KEEP_KL\n")
+                                   f"tablo: {DOC_KIMLIK}\ne: TEMP/OKUNAN_KEEP_KL\nf: {BITISIK}_ana\n")
     Path(depo, "k.py").write_text('yol = f"gdrive:ASTROLOVE/TEMP/KART_ON_{tarih}"\n')
     g = ["git", "-C", depo, "-c", "user.email=t@t", "-c", "user.name=t"]
     for c in (["init", "-q"], ["add", "."], ["commit", "-qm", "t"], ["checkout", "-qb", "eski"]):
@@ -308,6 +310,8 @@ def main():
         kontrol("ic '.' klasoru korunur", "T19" not in hep and "T19a" not in hep and at.get("T19n") == "kisisel_nokta")
         kontrol("J3 secili grup birim", "Q6" in b and b["Q6"]["is_"] == "J3")
         kontrol("J3 kodda gecen ATLANIR (istisna yok)", "Q1" not in hep and at.get("Q1") == "kodda_geciyor")
+        kontrol("bitisik yazilan kimlik atlanir", BITISIK not in hep and at.get(BITISIK) == "kodda_kimlik")
+        kontrol("plan tam (kismi degil)", plan["kismi"] is False)
         kontrol("44 karakterli kimlik atlanir", DOC_KIMLIK not in hep and at.get(DOC_KIMLIK) == "kodda_kimlik")
         kontrol("f-string onek, ata adinda da", "T20s" not in hep and at.get("T20s") == "kodda_dinamik_onek")
         kontrol("kok ustu ata adi kodda", "T21a" not in hep and at.get("T21a") == "kodda_geciyor")
@@ -406,6 +410,11 @@ def main():
         except SystemExit:
             kontrol("sabit ref yok -> DUR", True)
         kontrol("sabit ref bulunur", M.Kod.sabit_refler(type("K", (), {"depo": dp2})()) == ["abc1234"])
+        kontrol("izinli eksik ref DUR vermez", M.Kod(dp2, ["HEAD"], ["abc1234" + "0" * 33]).eksik_izinli == ["abc1234"])
+        Path(dp2, ".github", "workflows", "y.yml").write_text("plan_damga (sha12): {default: '40377589850_ab5b0d982175'}\n")
+        for c in (["add", "."], ["commit", "-qm", "y"]):
+            subprocess.run(g2 + c, check=True, capture_output=True)
+        kontrol("alt cizgili damga ref sayilmaz", M.Kod.sabit_refler(type("K", (), {"depo": dp2})()) == ["abc1234"])
         bad = os.path.join(tmp, "bad"); os.makedirs(bad)
         Path(bad, "ENVANTER_PARCA_01A.csv").write_text("id,title\nx,y\n")
         rc, _ = kos(["--mod", "kuru", "--envanter", bad, "--depo", depo, "--cikti", out])

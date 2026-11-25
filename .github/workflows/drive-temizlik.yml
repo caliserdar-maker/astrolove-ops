@@ -104,7 +104,10 @@ jobs:
               if git -C "$K" cat-file -e "$c^{commit}" 2>/dev/null; then REFS="$REFS,$c"; else echo "uyari: ref yok ($c)"; fi
             done
             echo "taranan ref: $(echo "$REFS" | tr ',' '\n' | wc -l)"
-            ARGS=(--mod kuru --isler "$ISLER" --envanter "$W/env" --depo "$K" --refler "$REFS" --cikti "$W/out" --ts "$TS")
+            # depoda bilerek olmayan sabit ref: musteri-dal-sil.yml YEDEK_UC (musteri verisi dali 21 Eki'de silindi)
+            IZIN="d1c4848a34752976e632f4169ceb5678a8094871"
+            ARGS=(--mod kuru --isler "$ISLER" --envanter "$W/env" --depo "$K" --refler "$REFS" --eksik-ref-izin "$IZIN"
+                  --cikti "$W/out" --ts "$TS")
             if [ -n "$J3B" ]; then
               J3G=$(printf '%s' "$J3B" | base64 -d) || { echo "HATA: j3 grup cozulemedi"; exit 1; }
               [ -n "$J3G" ] || { echo "HATA: j3 grup bos"; exit 1; }

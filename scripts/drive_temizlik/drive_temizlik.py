@@ -293,11 +293,15 @@ class Yollar:
 
 # ---- kod taramasi (tum dallar) ----
 class Kod:
-    def __init__(self, depo, refler):
+    def __init__(self, depo, refler, eksik_izin=()):
+        """eksik_izin: depoda bilerek bulunmayan commit'ler (orn. silinmis musteri dali ucu); is akisinda gerekcesiyle verilir."""
         self.depo, self.refler = depo, list(refler)
         sabit = self.sabit_refler()
         eksik = [c for c in sabit if subprocess.run(["git", "-C", depo, "cat-file", "-e", c + "^{commit}"],
                                                      capture_output=True).returncode != 0]
+        self.eksik_izinli = [c for c in eksik if any(i.startswith(c) or c.startswith(i) for i in eksik_izin if len(i) >= 7)]
+        eksik = [c for c in eksik if c not in self.eksik_izinli]
+        sabit = [c for c in sabit if c not in self.eksik_izinli]
         if eksik:
             raise SystemExit(f"HATA: is akislarinda sabit {len(eksik)} ref depoda yok (DUR)")
         self.refler += [c for c in sabit if c not in self.refler]
@@ -311,7 +315,7 @@ class Kod:
         out = set()
         for satir in r.stdout.split("\n"):
             satir = satir.split(":", 1)[1] if satir.startswith("HEAD:") else satir
-            for m in re.findall(r"(?<![0-9A-Za-z])([0-9a-f]{7,40})(?![0-9A-Za-z])", satir):
+            for m in re.findall(r"(?<![0-9A-Za-z_])([0-9a-f]{7,40})(?![0-9A-Za-z_])", satir):
                 if re.search(r"[0-9]", m) and re.search(r"[a-f]", m):
                     out.add(m)
         return sorted(out)
@@ -360,6 +364,8 @@ class Kuru:
         self.birim, self.atla = [], []
         self.t_bas = time.time()
         self.kod_id = kod.idler()
+        self.kod_uzun = [t for t in self.kod_id if len(t) > 33]   # bitisik yazilmis kimlikler icin alt dizgi aramasi
+        self.kismi = False
         self.kod_onek = {o for o in kod.onekler() if len(o) >= 4}
         print(f"kod taramasi: ref {len(kod.refler)}, Drive kimligi adayi {len(self.kod_id)}, dinamik onek {len(self.kod_onek)}")
 
@@ -370,7 +376,7 @@ class Kuru:
             return "ebeveyn_sayisi"
         if o.get("shared") or o.get("ownedByMe") is False:
             return "paylasimli_ya_da_baskasinin"
-        if o["id"] in self.kod_id:
+        if o["id"] in self.kod_id or any(o["id"] in t for t in self.kod_uzun):
             return "kodda_kimlik"
         for alan, neden in (("modifiedTime", "son14_degisti"), ("viewedByMeTime", "son14_acildi"),
                             ("createdTime", "son14_olusturuldu")):
@@ -483,7 +489,8 @@ class Kuru:
         at = self.yollar.atalar(o["parents"][0]) if o.get("parents") else None
         if at is None:
             return "ebeveyn_belirsiz"
-        if (at | {o["parents"][0]}) & self.kod_id:
+        zincir = at | {o["parents"][0]}
+        if zincir & self.kod_id or any(z in t for z in zincir for t in self.kod_uzun):
             return "atasi_kodda_kimlik"
         return None
 
@@ -496,6 +503,7 @@ class Kuru:
                 for r in kok[n - 1:]:
                     self.atla.append(dict(is_=is_, id=r["id"], yol=tam_yol(r), neden="kuru_sure_doldu", dosya=0,
                                           bayt=r["boyut"]))
+                self.kismi = True
                 print(f"  {is_}: kuru sure butcesi ({KURU_BUTCE_DK} dk) doldu; kalan {len(kok) - n + 1} kok atlandi")
                 break
             try:
@@ -609,6 +617,8 @@ def gb(b):
 SINIRLAR = ["viewedByMeTime yalniz kullanicinin acmasiyla degisir; API/rclone okumalari 'son 14 gunde acildi' kuralina yansimaz.",
             "Kod taramasi dal uclarini ve is akislarindaki sabit commit'leri kapsar; eski commit'te gecip silinmis adlar ve "
             "tamamen degiskenden kurulan yollar (orn. TEMP/${ON}_...) gorulemez.",
+            "Repo degiskenleri (vars) ve secret'lardaki kimlik/ref'ler, betik icinde sabitlenmis SHA'lar ve os.path.join / "
+            ".format ile kurulan yollar taranmaz.",
             "Kapsamdan bilerek dusenler: OFIS kokundeki Chrome kilit dosyalari (OFIS koku korunur), J1'deki KUPA_SIPARIS_TEST_* "
             "(siparis deseni), J4 Adsiz proje (tetikleyici dogrulanamadi), Drive kokundeki J1 dosyalari."]
 
@@ -658,7 +668,9 @@ def kuru(a):
     d = Drive(os.environ["DRIVE_TOKEN_KOMUT"])
     simdi = datetime.now(timezone.utc)
     refler = [r for r in a.refler.split(",") if r] if a.refler else ["HEAD"]
-    k = Kuru(d, inv, Kod(a.depo, refler), simdi, a.j3_grup)
+    k = Kuru(d, inv, Kod(a.depo, refler, [x for x in a.eksik_ref_izin.split(",") if x]), simdi, a.j3_grup)
+    if k.kod.eksik_izinli:
+        print(f"depoda olmayan izinli sabit ref: {len(k.kod.eksik_izinli)}")
     # kok dogrulamasi: envanterdeki OFIS satiri canli Drive kokundeki OFIS ile ayni olmali
     ofis = [s for s in inv.values() if s["title"] == "OFIS" and s["path"] == "" and s["klasor"]]
     canli = d.liste(f"name = 'OFIS' and mimeType = '{KLASOR}' and 'root' in parents and trashed = false", "id")
@@ -685,7 +697,7 @@ def kuru(a):
                 b["sil"] = True
     k.birim = [b for b in k.birim if not b.get("sil")]
     os.makedirs(a.cikti, exist_ok=True)
-    plan = dict(surum=2, kuru_t=simdi.isoformat(), esik14=k.esik14.isoformat(), j3_grup=a.j3_grup, isler=isler,
+    plan = dict(surum=2, kismi=k.kismi, kuru_t=simdi.isoformat(), esik14=k.esik14.isoformat(), j3_grup=a.j3_grup, isler=isler,
                 birim=k.birim, atla=k.atla)
     pj = os.path.join(a.cikti, "plan.json")
     with open(pj, "w") as h:
@@ -702,7 +714,8 @@ def kuru(a):
     ozet = ozet_tablo(k.birim, k.atla)
     md = [f"# Kuru kosu: Drive temizligi ({ts})", "", "Salt okuma. Drive'da hicbir sey degismedi.", "",
           f"Envanter: {len(inv)} kayit, {parca} parca (22 Kas). Canli kontrol: {simdi.isoformat()[:16]} UTC. "
-          f"14 gun esigi: {k.esik14.isoformat()[:10]}. Drive istek: {d.istek_say}. Plan sha256: {sha}", "",
+          f"14 gun esigi: {k.esik14.isoformat()[:10]}. Drive istek: {d.istek_say}. Plan sha256: {sha}",
+          "", "PLAN KISMI: kuru sure butcesi doldu, kalan kokler atlandi (kuru_sure_doldu)." if k.kismi else "Plan tam.", "",
           "| Is | Tasinacak birim | Dosya | GB | Atlanan dosya | Atlanan GB |", "|---|---|---|---|---|---|"]
     for is_, v in sorted(ozet["is"].items()):
         md.append(f"| {is_} | {v[0]} | {v[1]} | {gb(v[2])} | {v[3]} | {gb(v[4])} |")
@@ -890,7 +903,8 @@ def uygula(a):
 def rapor(a, plan, sonuc, islenmeyen, say):
     ts = a.ts
     md = [f"# Drive temizligi sonuc raporu ({ts})", "",
-          f"Plan: kuru kosu {plan['kuru_t'][:16]} UTC, isler {','.join(plan['isler'])}. Kalici silme yapilmadi.", "",
+          f"Plan: kuru kosu {plan['kuru_t'][:16]} UTC, isler {','.join(plan['isler'])}. Kalici silme yapilmadi."
+          + (" PLAN KISMIYDI (kuru sure butcesi doldu)." if plan.get("kismi") else ""), "",
           "| Is | Durum | Birim | Dosya | GB |", "|---|---|---|---|---|"]
     for (is_, durum), v in sorted(say.items()):
         md.append(f"| {is_} | {durum} | {v[0]} | {v[1]} | {gb(v[2])} |")
@@ -916,6 +930,7 @@ def main():
     ap.add_argument("--envanter")
     ap.add_argument("--depo")
     ap.add_argument("--refler", default="")
+    ap.add_argument("--eksik-ref-izin", default="")
     ap.add_argument("--plan")
     ap.add_argument("--plan-sha", default="")
     ap.add_argument("--onay", default="")
