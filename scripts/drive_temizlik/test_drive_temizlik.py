@@ -44,6 +44,7 @@ ESKI, YAKIN = zt(days=-40), zt(days=-3)
 KOD_KIMLIK = "1" + "K" * 32          # depoda gecen Drive kimligi (sahte)
 DOC_KIMLIK = "1" + "D" * 43          # 44 karakterli Docs/Sheets kimligi
 BITISIK = "1" + "B" * 32             # kodda bitisik yaziliyor: <kimlik>_ana
+TEMP_ID = "1" + "T" * 32             # ASTROLOVE/TEMP; kodda rclone koku olarak gecer (muaf)
 HATALI = set()
 ILK401 = {"kalan": 0, "kotu": None}
 
@@ -53,6 +54,8 @@ class Sahte:
         self.f, self.n, self.yaz = {}, 0, []
 
     def ekle(self, fid, ad, ust, mime="text/plain", size=100, mod=ESKI, view=None, olus=ESKI, shared=False):
+        fid = TEMP_ID if fid == "TEMP" else fid
+        ust = TEMP_ID if ust == "TEMP" else ust
         self.f[fid] = dict(id=fid, name=ad, mimeType=mime, parents=[ust] if ust else [], size=str(size), modifiedTime=mod,
                            viewedByMeTime=view, createdTime=olus, trashed=False, shared=shared, ownedByMe=True,
                            capabilities=dict(canTrash=True, canMoveItemWithinDrive=True))
@@ -192,6 +195,8 @@ def kur(tmp):
     e("Q3", "SIPARIS_ISIM", "TEMP", KL, 0); e("Q3a", "dosya_f.pdf", "Q3")
     e("Q5", "BASKA_GRUP_KL", "TEMP", KL, 0); e("Q5a", "baska_g.png", "Q5")
     e("Q6", "DIJITAL_ESKI_V2", "TEMP", KL, 0); e("Q6a", "eski_dijital.png", "Q6", size=700)
+    e("Q7", "KARISIK_GRUP_KL", "TEMP", KL, 0); e("Q7a", "uygun_dosya.png", "Q7"); e("Q7b", "baska_grup_dosya.png", "Q7")
+    e("Q8", "KLASOR_GRUPLU_DOSYA.png", "TEMP")
     e(DOC_KIMLIK, "ESKI_TABLO_X", "TEMP", "application/vnd.google-apps.spreadsheet")
     e("T20", "KART_ON_20261001", "TEMP", KL, 0); e("T20s", "ALT_KART_KL", "T20", KL, 0); e("T20x", "kart_child.png", "T20s")
     e("T20y", "kart_yakin.png", "T20", mod=YAKIN)
@@ -218,7 +223,7 @@ def kur(tmp):
                 "T9", "T10", "T11", "T11a", KOD_KIMLIK, "T12a", "T13", "T13a", "T14", "T15", "T16", "T16s", "T16x", "T16y",
                 "T17", "T17a", "T18", "T19", "T19n", "T19a", "S7", DOC_KIMLIK, "T20", "T20s", "T20x", "T20y", "T21a", BITISIK]:
         kat[fid] = "TRASH"
-    for fid in ["Q1", "Q1a", "Q2", "Q2a", "Q3", "Q3a", "Q4", "NOK", "Q5", "Q5a", "Q6", "Q6a"]:
+    for fid in ["Q1", "Q1a", "Q2", "Q2a", "Q3", "Q3a", "Q4", "NOK", "Q5", "Q5a", "Q6", "Q6a", "Q7", "Q7a", "Q7b", "Q8"]:
         kat[fid] = "SERDAR_QUESTION"
     for fid in ["R1", "R1a", "R2", "R2a", "R3", "R3a", "R4"]:
         kat[fid] = "ARCHIVE"
@@ -236,7 +241,9 @@ def kur(tmp):
             p = "ASTROLOVE/TEMP"
         if fid == "T6":
             mod = ESKI
-        g = "Baska" if fid.startswith("Q5") else "Eski is akisi girdisi"
+        g = "Baska" if fid.startswith("Q5") or fid == "Q7b" else "Eski is akisi girdisi"
+        if fid in ("Q6", "Q7", "Q8"):
+            g = M.J3_KLASOR_GRUP
         sat.append([fid, o["name"], p, o["mimeType"], o["size"], ESKI, mod, k, "r", g, int(o["mimeType"] == KL), ""])
     for i in range(15):
         with open(os.path.join(envd, f"ENVANTER_PARCA_{i:02d}A.csv"), "w", encoding="utf-8-sig", newline="") as h:
@@ -247,7 +254,8 @@ def kur(tmp):
     depo = os.path.join(tmp, "depo"); os.makedirs(depo)
     Path(depo, "a.yml").write_text("girdi: gdrive:ASTROLOVE/TEMP/KODDA_GECEN_KLASOR/x\nb: TEMP/BANNER_${damga}\n"
                                    f"root_folder_id={KOD_KIMLIK}\nc: TEMP/UST_OKUNAN/\nd: TEMP/POD_GALLERY/\n"
-                                   f"tablo: {DOC_KIMLIK}\ne: TEMP/OKUNAN_KEEP_KL\nf: {BITISIK}_ana\n")
+                                   f"tablo: {DOC_KIMLIK}\ne: TEMP/OKUNAN_KEEP_KL\nf: {BITISIK}_ana\n"
+                                   f"T=\"gdrive,root_folder_id={TEMP_ID}:\"\n")
     Path(depo, "k.py").write_text('yol = f"gdrive:ASTROLOVE/TEMP/KART_ON_{tarih}"\n')
     g = ["git", "-C", depo, "-c", "user.email=t@t", "-c", "user.name=t"]
     for c in (["init", "-q"], ["add", "."], ["commit", "-qm", "t"], ["checkout", "-qb", "eski"]):
@@ -308,7 +316,10 @@ def main():
         kontrol("bolunen klasorun ata adi kodda: cocuk atlanir", "T16s" not in hep and at.get("T16s") == "kodda_geciyor")
         kontrol("yedek deseni atlanir", "T18" not in hep and at.get("T18") == "yedek_deseni")
         kontrol("ic '.' klasoru korunur", "T19" not in hep and "T19a" not in hep and at.get("T19n") == "kisisel_nokta")
-        kontrol("J3 secili grup birim", "Q6" in b and b["Q6"]["is_"] == "J3")
+        kontrol("J3 klasor grubu kok + secili grup birim", "Q6" in b and b["Q6"]["is_"] == "J3" and b["Q6"]["dosya"] == 1)
+        kontrol("J3 klasor grubundaki DOSYA satiri secilmez", "Q8" not in hep and "Q8" not in at)
+        kontrol("J3 klasorde baska grup dosya: bolunur", "Q7" not in hep and "Q7a" in b and at.get("Q7b") == "kategori_farkli")
+        kontrol("TEMP kimligi kodda ama muaf (J1 calisir)", "T1" in b and "kimlik muafiyeti: 2 genel klasor" in log)
         kontrol("J3 kodda gecen ATLANIR (istisna yok)", "Q1" not in hep and at.get("Q1") == "kodda_geciyor")
         kontrol("bitisik yazilan kimlik atlanir", BITISIK not in hep and at.get(BITISIK) == "kodda_kimlik")
         kontrol("plan tam (kismi degil)", plan["kismi"] is False)
