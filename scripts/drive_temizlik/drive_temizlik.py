@@ -58,8 +58,10 @@ KORUMA_SIPARIS = [r"siparis", r"musteri", r"kisisel", r"(^|/|_)isim(/|_|$)", r"t
 KORUMA_RAPOR = [r"rapor", r"soru"]                          # J5'te izinli (14 gun kurali ve OFIS/kok korumasi ayrica)
 TEST_AD = re.compile(r"^900000000[1-9]$")
 GERCEK_RECEIPT = re.compile(r"(?<!\d)[1-9]\d{9}(?!\d)")     # 10 haneli; test numaralari ayrica dislanir
-KOD_ID = re.compile(r"(?<![A-Za-z0-9_-])[01][A-Za-z0-9_-]{32}(?![A-Za-z0-9_-])")
-KOD_ONEK = re.compile(r"TEMP/([A-Za-z0-9_]+)\$\{")
+KOD_ONEK_E = r"/[A-Za-z][A-Za-z0-9_]{3,}(\$\{|\$[A-Za-z_]|\{[A-Za-z_]|[\"'][[:space:]]*\+|%s|%\()"
+KOD_ONEK = re.compile(r"/([A-Za-z][A-Za-z0-9_]{3,})(?:\$\{|\$[A-Za-z_]|\{[A-Za-z_]|[\"']\s*\+|%s|%\()")
+GENEL_ATA = {"ASTROLOVE", "TEMP", "OFIS"}
+KURU_BUTCE_DK = 270
 
 
 def _eslesir(desenler, metin):
@@ -114,14 +116,15 @@ class Drive:
         self.kilit = threading.Lock()
         self.istek_say = 0
 
-    def token(self, yenile=False):
+    def token(self, eski=None):
+        """eski = 401 alan token. Yalniz mevcut token hala o ise yenilenir (eszamanli 401'de tek yenileme)."""
         with self.kilit:
-            if self.tok and not yenile:
+            if self.tok and (eski is None or self.tok != eski):
                 return self.tok
             for i in range(5):
                 out = subprocess.run(["bash", "-c", self.komut], capture_output=True, text=True, timeout=180)
                 tok = out.stdout.strip()
-                if out.returncode == 0 and tok and tok != "null" and (tok != self.tok or not yenile):
+                if out.returncode == 0 and tok and tok != "null" and (eski is None or tok != eski):
                     print("::add-mask::" + tok, flush=True)
                     self.tok = tok
                     return tok
@@ -153,8 +156,9 @@ class Drive:
         veri = json.dumps(govde).encode() if govde is not None else None
         for i in range(deneme):
             self.istek_say += 1
+            kullanilan = self.token()
             req = urllib.request.Request(url, data=veri, method=yontem, headers={
-                "Authorization": "Bearer " + self.token(), "Content-Type": "application/json"})
+                "Authorization": "Bearer " + kullanilan, "Content-Type": "application/json"})
             try:
                 with urllib.request.urlopen(req, timeout=60) as r:
                     b = r.read()
@@ -162,7 +166,7 @@ class Drive:
             except urllib.error.HTTPError as e:
                 ic = e.read() or b""
                 if e.code == 401 and i < deneme - 1:
-                    self.token(yenile=True)
+                    self.token(eski=kullanilan)
                     continue
                 if (e.code in (429, 500, 502, 503) or (e.code == 403 and b"ateLimit" in ic)) and i < deneme - 1:
                     time.sleep(2 ** (i + 1))
@@ -290,7 +294,27 @@ class Yollar:
 # ---- kod taramasi (tum dallar) ----
 class Kod:
     def __init__(self, depo, refler):
-        self.depo, self.refler = depo, refler
+        self.depo, self.refler = depo, list(refler)
+        sabit = self.sabit_refler()
+        eksik = [c for c in sabit if subprocess.run(["git", "-C", depo, "cat-file", "-e", c + "^{commit}"],
+                                                     capture_output=True).returncode != 0]
+        if eksik:
+            raise SystemExit(f"HATA: is akislarinda sabit {len(eksik)} ref depoda yok (DUR)")
+        self.refler += [c for c in sabit if c not in self.refler]
+
+    def sabit_refler(self):
+        """is akisi dosyalarinda sha/ref/commit satirlarindaki sabit commit kimlikleri (HEAD)."""
+        r = subprocess.run(["git", "-C", self.depo, "grep", "-h", "-i", "-E", r"(sha|ref|commit)", "HEAD", "--",
+                            ".github/workflows"], capture_output=True, text=True)
+        if r.returncode not in (0, 1):
+            raise SystemExit("HATA: git grep")
+        out = set()
+        for satir in r.stdout.split("\n"):
+            satir = satir.split(":", 1)[1] if satir.startswith("HEAD:") else satir
+            for m in re.findall(r"(?<![0-9A-Za-z])([0-9a-f]{7,40})(?![0-9A-Za-z])", satir):
+                if re.search(r"[0-9]", m) and re.search(r"[a-f]", m):
+                    out.add(m)
+        return sorted(out)
 
     def _grep(self, args):
         r = subprocess.run(["git", "-C", self.depo, "grep", "-I", "-h", "-o"] + args + self.refler + ["--"],
@@ -309,10 +333,11 @@ class Kod:
         return cikti
 
     def idler(self):
-        return self._grep(["-E", "[01][A-Za-z0-9_-]{32}"])
+        """koddaki 25+ karakterli tum kimlik benzeri tokenler (Drive dosya 33, Docs/Sheets 44 karakter)."""
+        return self._grep(["-E", "[A-Za-z0-9_-]{25,}"])
 
     def onekler(self):
-        return {m for s in self._grep(["-E", r"TEMP/[A-Za-z0-9_]+\$\{"]) for m in KOD_ONEK.findall(s)}
+        return {m for s in self._grep(["-E", KOD_ONEK_E]) for m in KOD_ONEK.findall(s)}
 
     def adlar(self, adlar, yol_dosya):
         adlar = sorted(a for a in adlar if a)
@@ -325,15 +350,6 @@ class Kod:
         finally:
             os.unlink(yol_dosya)
 
-    def dosyalar(self, ad):
-        r = subprocess.run(["git", "-C", self.depo, "grep", "-I", "-l", "-F", "-e", ad] + self.refler[:1] + ["--"],
-                           capture_output=True, text=True)
-        out = []
-        for s in r.stdout.split("\n"):
-            if s:
-                out.append(s.split(":", 1)[1] if ":" in s else s)
-        return out
-
 
 class Kuru:
     def __init__(self, drive, inv, kod, simdi, j3_grup):
@@ -342,6 +358,7 @@ class Kuru:
         self.esik14 = simdi - timedelta(days=GUN14)
         self.yollar = Yollar(drive)
         self.birim, self.atla = [], []
+        self.t_bas = time.time()
         self.kod_id = kod.idler()
         self.kod_onek = {o for o in kod.onekler() if len(o) >= 4}
         print(f"kod taramasi: ref {len(kod.refler)}, Drive kimligi adayi {len(self.kod_id)}, dinamik onek {len(self.kod_onek)}")
@@ -445,7 +462,7 @@ class Kuru:
                 alt = sorted(iz(ogeler[x]) for x in altlar(fid))
                 self.birim.append(dict(is_=is_, id=fid, yol=yol, ust_id=o["parents"][0], klasor=o["mimeType"] == KLASOR,
                                        dosya=say[fid], bayt=boy[fid], modifiedTime=o.get("modifiedTime"), ad=o["name"],
-                                       ata_adlar=[p for p in ust[fid][len(ust_yol):].split("/") if p],
+                                       ata_adlar=[p for p in ust[fid].split("/") if p and p not in GENEL_ATA],
                                        alt_ozet=hashlib.sha256("\n".join(alt).encode()).hexdigest(), alt_say=len(alt)))
                 return
             if neden[fid] is not None or o["mimeType"] != KLASOR:
@@ -475,6 +492,12 @@ class Kuru:
         print(f"{is_}: envanter kok birim {len(kok)}")
         t0 = time.time()
         for n, s in enumerate(kok, 1):
+            if (time.time() - self.t_bas) / 60 > KURU_BUTCE_DK:
+                for r in kok[n - 1:]:
+                    self.atla.append(dict(is_=is_, id=r["id"], yol=tam_yol(r), neden="kuru_sure_doldu", dosya=0,
+                                          bayt=r["boyut"]))
+                print(f"  {is_}: kuru sure butcesi ({KURU_BUTCE_DK} dk) doldu; kalan {len(kok) - n + 1} kok atlandi")
+                break
             try:
                 o = self.d.get(s["id"])
                 u = self.yollar.ust_yol(o)
@@ -497,7 +520,11 @@ class Kuru:
         for o in aday:
             if not TEST_AD.match(o["name"]):
                 continue
-            u = self.yollar.ust_yol(o)
+            try:
+                u = self.yollar.ust_yol(o)
+            except urllib.error.HTTPError as e:
+                self.atla.append(dict(is_="J2", id=o["id"], yol=o["name"], neden=f"okunamadi_{e.code}", dosya=0, bayt=0))
+                continue
             if u is None:
                 continue
             ilk = u.split("/")
@@ -525,30 +552,28 @@ class Kuru:
                                   neden="tetikleyici_dogrulanamadi" + ("_son14_degisti" if m and m >= self.esik14 else "")))
 
     def kod_kontrol(self, gecici):
-        """birim adi ya da ata adlari (>= 6 karakter) kodda geciyorsa: J3'te listele (Serdar kabul etti), digerlerinde ATLA.
-        dinamik onekle (TEMP/<onek>${...}) baslayan ad her iste ATLANIR."""
+        """birim adi ya da ata adlari (>= 6 karakter, ASTROLOVE/TEMP/OFIS haric) taranan herhangi bir ref'te geciyorsa ya da
+        koddaki dinamik onekle basliyorsa ATLANIR (tum isler; J3 istisnasi Serdar 25 Kas onayiyla kaldirildi).
+        J2'de yalniz birimin kendi adi bakilir (ata klasorleri siparis hattinin yazdigi klasorler)."""
         adlar = set()
         for b in self.birim:
             adlar |= {a for a in [b["ad"]] + b["ata_adlar"] if len(a) >= 6}
         bulunan = self.kod.adlar(adlar, gecici)
-        kalan, girdisiz, atilan = [], {}, 0
+        kalan, atilan = [], 0
         for b in self.birim:
-            gecen = [a for a in [b["ad"]] + b["ata_adlar"] if a in bulunan]
-            onek = any(b["ad"].startswith(o) for o in self.kod_onek)
+            bak = [b["ad"]] if b["is_"] == "J2" else [b["ad"]] + b["ata_adlar"]
+            gecen = [a for a in bak if a in bulunan]
+            onek = any(a.startswith(o) for a in bak for o in self.kod_onek)
             if len(b["ad"]) < 6 and b["is_"] != "J2":
                 self.atla.append(dict(b, neden="ad_kisa_kontrol_edilemez")); atilan += 1
             elif onek:
                 self.atla.append(dict(b, neden="kodda_dinamik_onek")); atilan += 1
-            elif gecen and b["is_"] == "J3":
-                for a in gecen:
-                    girdisiz.setdefault(a, set()).update(self.kod.dosyalar(a))
-                kalan.append(b)
-            elif gecen and (b["is_"] != "J2" or b["ad"] in bulunan):
+            elif gecen:
                 self.atla.append(dict(b, neden="kodda_geciyor")); atilan += 1
             else:
                 kalan.append(b)
         self.birim = kalan
-        return atilan, {a: sorted(v) for a, v in girdisiz.items()}
+        return atilan
 
 
 def ic_ice_temizle(birim, atla):
@@ -581,6 +606,13 @@ def gb(b):
     return f"{b / 1e9:.2f}".replace(".", ",")
 
 
+SINIRLAR = ["viewedByMeTime yalniz kullanicinin acmasiyla degisir; API/rclone okumalari 'son 14 gunde acildi' kuralina yansimaz.",
+            "Kod taramasi dal uclarini ve is akislarindaki sabit commit'leri kapsar; eski commit'te gecip silinmis adlar ve "
+            "tamamen degiskenden kurulan yollar (orn. TEMP/${ON}_...) gorulemez.",
+            "Kapsamdan bilerek dusenler: OFIS kokundeki Chrome kilit dosyalari (OFIS koku korunur), J1'deki KUPA_SIPARIS_TEST_* "
+            "(siparis deseni), J4 Adsiz proje (tetikleyici dogrulanamadi), Drive kokundeki J1 dosyalari."]
+
+
 def ozet_tablo(birim, atla):
     o = {"is": {}, "neden": {}}
     for b in birim:
@@ -610,15 +642,17 @@ def kuru(a):
     # J3 grup olcumu (TEMP altindaki SERDAR_QUESTION; POD_PRINT haric) -> yalniz md'ye ad, loga sira no
     grup = {}
     for s in inv.values():
-        if s["category"] == "SERDAR_QUESTION" and tam_yol(s).startswith("ASTROLOVE/TEMP/") and not s["klasor"]:
+        if s["category"] == "SERDAR_QUESTION" and tam_yol(s).startswith("ASTROLOVE/TEMP/"):
             pp = any(p.upper().startswith("POD_PRINT") for p in tam_yol(s).split("/"))
-            g = grup.setdefault(s["group"], [0, 0, 0, 0])
-            if pp:
+            g = grup.setdefault(s["group"], [0, 0, 0, 0, 0])
+            if s["klasor"]:
+                g[4] += 1
+            elif pp:
                 g[2] += 1; g[3] += s["boyut"]
             else:
                 g[0] += 1; g[1] += s["boyut"]
     for i, (g, v) in enumerate(sorted(grup.items())):
-        print(f"  SQ-TEMP grup #{i}: POD_PRINT disi {v[0]} dosya {gb(v[1])} GB | POD_PRINT {v[2]} dosya {gb(v[3])} GB")
+        print(f"  SQ-TEMP grup #{i}: POD_PRINT disi {v[0]} dosya {gb(v[1])} GB | POD_PRINT {v[2]} dosya {gb(v[3])} GB | klasor {v[4]}")
     if a.j3_grup is not None and a.j3_grup not in grup:
         raise SystemExit("HATA: --j3-grup envanterde yok (DUR)")
     d = Drive(os.environ["DRIVE_TOKEN_KOMUT"])
@@ -640,7 +674,7 @@ def kuru(a):
             k.is_test()
         elif is_ == "J4":
             k.is_script()
-    kodda, girdisiz = k.kod_kontrol(os.path.join(a.cikti, "_adlar.txt"))
+    kodda = k.kod_kontrol(os.path.join(a.cikti, "_adlar.txt"))
     k.birim = ic_ice_temizle(k.birim, k.atla)
     for b in k.birim:
         if b["is_"] == "J5":
@@ -652,7 +686,7 @@ def kuru(a):
     k.birim = [b for b in k.birim if not b.get("sil")]
     os.makedirs(a.cikti, exist_ok=True)
     plan = dict(surum=2, kuru_t=simdi.isoformat(), esik14=k.esik14.isoformat(), j3_grup=a.j3_grup, isler=isler,
-                birim=k.birim, atla=k.atla, girdisiz=girdisiz)
+                birim=k.birim, atla=k.atla)
     pj = os.path.join(a.cikti, "plan.json")
     with open(pj, "w") as h:
         json.dump(plan, h, ensure_ascii=False, indent=0)
@@ -676,13 +710,11 @@ def kuru(a):
     for n, v in sorted(ozet["neden"].items(), key=lambda x: -x[1][0]):
         md.append(f"- {n}: {v[0]} dosya, {gb(v[1])} GB, {v[2]} kayit")
     md += ["", "SERDAR_QUESTION, ASTROLOVE/TEMP altindaki dosyalar, gruba gore (J3 icin --j3-grup secimi):", "",
-           "| # | grup | POD_PRINT disi dosya | GB | POD_PRINT dosya | GB |", "|---|---|---|---|---|---|"]
+           "| # | grup | POD_PRINT disi dosya | GB | POD_PRINT dosya | GB | klasor satiri |", "|---|---|---|---|---|---|---|"]
     for i, (g, v) in enumerate(sorted(grup.items())):
-        md.append(f"| {i} | {g} | {v[0]} | {gb(v[1])} | {v[2]} | {gb(v[3])} |")
-    md += ["", f"Kodda gecen, dinamik onekli ya da kisa adli (atlanan) birim: {kodda}.",
-           "J3: girdisi Cop'e gidecek klasor adlari ve onlari anan depo dosyalari (Serdar: bu is akislari bir daha calistirilmaz):", ""]
-    for ad, fs in sorted(girdisiz.items()):
-        md.append(f"- {ad}: {', '.join(fs[:8])}{' ...' if len(fs) > 8 else ''}")
+        md.append(f"| {i} | {g} | {v[0]} | {gb(v[1])} | {v[2]} | {gb(v[3])} | {v[4]} |")
+    md += ["", f"Kodda gecen, dinamik onekli ya da kisa adli (atlanan) birim: {kodda}. Taranan ref: {len(k.kod.refler)}.",
+           "", "Bilinen sinirlar:", ""] + [f"- {x}" for x in SINIRLAR]
     md += ["", "J4: Apps Script tetikleyicisi Drive API ile gorulemez; kural geregi TASINMADI.",
            f"Liste: OFIS/KURU_DRIVE_TRASH_{ts}.csv"]
     with open(os.path.join(a.cikti, f"KURU_DRIVE_TRASH_{ts}.md"), "w") as h:
@@ -770,6 +802,7 @@ def uygula(a):
         for pn, parti in enumerate(partiler, 1):
             ok = atl = hata = 0
             pdosya = pbayt = 0
+            yollar = Yollar(d)  # yol onbellegi her partide tazelenir
             for b in parti:
                 if (time.time() - t0) / 60 > SURE_BUTCE_DK:
                     sure_doldu = True
@@ -869,8 +902,8 @@ def rapor(a, plan, sonuc, islenmeyen, say):
            "  Kimlik listesi: OFIS/DRIVE_TEMIZLIK_UYGULA_" + ts + ".jsonl (durum COPE_TASINDI).",
            "- ARCHIVE (J5): kayittaki eski_ust klasorune geri tasinir (Drive'da Tasi ya da API addParents=eski_ust, "
            "removeParents=yeni_ust).", "",
-           "J3 ile girdisi kalkan klasorler ve onlari anan depo dosyalari:", ""]
-    md += [f"- {ad}: {', '.join(fs[:8])}" for ad, fs in sorted(plan.get("girdisiz", {}).items())] or ["- yok"]
+           "Girdisiz kalan is akisi: yok (adi ya da atasi herhangi bir dalda gecen klasor tasinmadi).", "",
+           "Bilinen sinirlar:", ""] + [f"- {x}" for x in SINIRLAR]
     with open(os.path.join(a.cikti, f"RAPOR_DRIVE_TRASH_{ts}.md"), "w") as h:
         h.write("\n".join(md) + "\n")
 

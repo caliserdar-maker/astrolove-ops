@@ -42,6 +42,7 @@ def zt(**k):
 
 ESKI, YAKIN = zt(days=-40), zt(days=-3)
 KOD_KIMLIK = "1" + "K" * 32          # depoda gecen Drive kimligi (sahte)
+DOC_KIMLIK = "1" + "D" * 43          # 44 karakterli Docs/Sheets kimligi
 HATALI = set()
 ILK401 = {"kalan": 0, "kotu": None}
 
@@ -189,6 +190,11 @@ def kur(tmp):
     e("Q2", "POD_PRINT", "TEMP", KL, 0); e("Q2a", "baski_p.tif", "Q2", size=900)
     e("Q3", "SIPARIS_ISIM", "TEMP", KL, 0); e("Q3a", "dosya_f.pdf", "Q3")
     e("Q5", "BASKA_GRUP_KL", "TEMP", KL, 0); e("Q5a", "baska_g.png", "Q5")
+    e("Q6", "DIJITAL_ESKI_V2", "TEMP", KL, 0); e("Q6a", "eski_dijital.png", "Q6", size=700)
+    e(DOC_KIMLIK, "ESKI_TABLO_X", "TEMP", "application/vnd.google-apps.spreadsheet")
+    e("T20", "KART_ON_20261001", "TEMP", KL, 0); e("T20s", "ALT_KART_KL", "T20", KL, 0); e("T20x", "kart_child.png", "T20s")
+    e("T20y", "kart_yakin.png", "T20", mod=YAKIN)
+    e("T21", "OKUNAN_KEEP_KL", "TEMP", KL, 0); e("T21a", "icerik_trash.json", "T21")
     e("Q4", "aile.jpg", "NOK")
     # J2
     e("S1", "9000000001", "SIP", KL, 0); e("S1a", "KAPI_RAPORU_DB.json", "S1"); e("S1b", "AstroLoveArt_X.pdf", "S1")
@@ -208,9 +214,9 @@ def kur(tmp):
     kat = {fid: "KEEP" for fid in S.f}
     for fid in ["T1", "T1a", "T1b", "T2", "T2s", "T2s1", "T2y", "T2e", "T3", "T3a", "T4", "T4a", "T5", "T6", "T7", "T8",
                 "T9", "T10", "T11", "T11a", KOD_KIMLIK, "T12a", "T13", "T13a", "T14", "T15", "T16", "T16s", "T16x", "T16y",
-                "T17", "T17a", "T18", "T19", "T19n", "T19a", "S7"]:
+                "T17", "T17a", "T18", "T19", "T19n", "T19a", "S7", DOC_KIMLIK, "T20", "T20s", "T20x", "T20y", "T21a"]:
         kat[fid] = "TRASH"
-    for fid in ["Q1", "Q1a", "Q2", "Q2a", "Q3", "Q3a", "Q4", "NOK", "Q5", "Q5a"]:
+    for fid in ["Q1", "Q1a", "Q2", "Q2a", "Q3", "Q3a", "Q4", "NOK", "Q5", "Q5a", "Q6", "Q6a"]:
         kat[fid] = "SERDAR_QUESTION"
     for fid in ["R1", "R1a", "R2", "R2a", "R3", "R3a", "R4"]:
         kat[fid] = "ARCHIVE"
@@ -238,7 +244,9 @@ def kur(tmp):
                 w.writerow(s)
     depo = os.path.join(tmp, "depo"); os.makedirs(depo)
     Path(depo, "a.yml").write_text("girdi: gdrive:ASTROLOVE/TEMP/KODDA_GECEN_KLASOR/x\nb: TEMP/BANNER_${damga}\n"
-                                   f"root_folder_id={KOD_KIMLIK}\nc: TEMP/UST_OKUNAN/\nd: TEMP/POD_GALLERY/\n")
+                                   f"root_folder_id={KOD_KIMLIK}\nc: TEMP/UST_OKUNAN/\nd: TEMP/POD_GALLERY/\n"
+                                   f"tablo: {DOC_KIMLIK}\ne: TEMP/OKUNAN_KEEP_KL\n")
+    Path(depo, "k.py").write_text('yol = f"gdrive:ASTROLOVE/TEMP/KART_ON_{tarih}"\n')
     g = ["git", "-C", depo, "-c", "user.email=t@t", "-c", "user.name=t"]
     for c in (["init", "-q"], ["add", "."], ["commit", "-qm", "t"], ["checkout", "-qb", "eski"]):
         subprocess.run(g + c, check=True, capture_output=True)
@@ -298,7 +306,11 @@ def main():
         kontrol("bolunen klasorun ata adi kodda: cocuk atlanir", "T16s" not in hep and at.get("T16s") == "kodda_geciyor")
         kontrol("yedek deseni atlanir", "T18" not in hep and at.get("T18") == "yedek_deseni")
         kontrol("ic '.' klasoru korunur", "T19" not in hep and "T19a" not in hep and at.get("T19n") == "kisisel_nokta")
-        kontrol("J3 secili grup birim + girdisiz listesi", "Q1" in b and b["Q1"]["is_"] == "J3" and "POD_GALLERY" in plan["girdisiz"])
+        kontrol("J3 secili grup birim", "Q6" in b and b["Q6"]["is_"] == "J3")
+        kontrol("J3 kodda gecen ATLANIR (istisna yok)", "Q1" not in hep and at.get("Q1") == "kodda_geciyor")
+        kontrol("44 karakterli kimlik atlanir", DOC_KIMLIK not in hep and at.get(DOC_KIMLIK) == "kodda_kimlik")
+        kontrol("f-string onek, ata adinda da", "T20s" not in hep and at.get("T20s") == "kodda_dinamik_onek")
+        kontrol("kok ustu ata adi kodda", "T21a" not in hep and at.get("T21a") == "kodda_geciyor")
         kontrol("J3 baska grup secilmez", "Q5" not in hep and "Q5" not in at)
         kontrol("J3 POD_PRINT secilmez", "Q2" not in hep and "Q2a" not in hep)
         kontrol("J3 siparis deseni", at.get("Q3") == "siparis_deseni")
@@ -324,7 +336,7 @@ def main():
         kontrol("onaysiz DUR", rc not in (0, None) and S.yaz == [])
         rc, _ = kos(U + ["--onay", "TASI", "--plan-sha", "0" * 64])
         kontrol("yanlis sha DUR", rc not in (0, None) and S.yaz == [])
-        S.f["Q1a"]["modifiedTime"] = zt(minutes=5)
+        S.f["Q6a"]["modifiedTime"] = zt(minutes=5)
         S.f["T2e"]["modifiedTime"] = zt(days=-60)
         S.ekle("T17n", "sonradan.png", "T17", mod=ESKI)
         S.ekle("ARCdup", "ESKI_RAPOR_20261001.md", "ARC")             # J5 hedefte ayni ad
@@ -336,7 +348,7 @@ def main():
         kontrol("uygula cikis 0", rc == 0)
         kontrol("401 sonrasi yenilenip yazildi", ILK401["kalan"] == 0 and u["T1"]["durum"] == "COPE_TASINDI")
         kontrol("J1 Cop + geri okuma", S.f["T1"]["trashed"])
-        kontrol("alt oge degisti -> atlandi", u["Q1"]["durum"] == "ATLANDI" and not S.f["Q1"]["trashed"])
+        kontrol("alt oge degisti -> atlandi", u["Q6"]["durum"] == "ATLANDI" and not S.f["Q6"]["trashed"])
         kontrol("birim mtime farkli -> atlandi", u["T2e"]["durum"] == "ATLANDI" and not S.f["T2e"]["trashed"])
         kontrol("eski mtime ile eklenen cocuk -> atlandi", u["T17"]["durum"] == "ATLANDI" and not S.f["T17"]["trashed"])
         kontrol("J5 ARCHIVE/TEMP", u["R1"]["durum"] == "ARSIVE_TASINDI" and S.f[S.f["R1"]["parents"][0]]["parents"] == ["ARC"])
@@ -375,6 +387,25 @@ def main():
                 kontrol(ad, False)
             except SystemExit:
                 kontrol(ad, True)
+        # eszamanli 401: ayni eski token ile ikinci cagri yeniden komut calistirmaz
+        sayac = os.path.join(tmp, "say")
+        d2 = M.Drive(f"echo x >> {sayac}; echo SAHTE_YENI_$(wc -l < {sayac})")
+        d2.tok = "SAHTE_ESKI"
+        t1 = d2.token(eski="SAHTE_ESKI")
+        t2 = d2.token(eski="SAHTE_ESKI")
+        kontrol("eszamanli 401 tek yenileme", t1 == t2 != "SAHTE_ESKI" and len(open(sayac).read().split()) == 1)
+        # is akisinda sabit ama depoda olmayan ref -> DUR
+        dp2 = os.path.join(tmp, "depo2"); os.makedirs(os.path.join(dp2, ".github", "workflows"))
+        Path(dp2, ".github", "workflows", "x.yml").write_text("renk_ref: {default: 'abc1234'}\n")
+        g2 = ["git", "-C", dp2, "-c", "user.email=t@t", "-c", "user.name=t"]
+        for c in (["init", "-q"], ["add", "."], ["commit", "-qm", "t"]):
+            subprocess.run(g2 + c, check=True, capture_output=True)
+        try:
+            M.Kod(dp2, ["HEAD"])
+            kontrol("sabit ref yok -> DUR", False)
+        except SystemExit:
+            kontrol("sabit ref yok -> DUR", True)
+        kontrol("sabit ref bulunur", M.Kod.sabit_refler(type("K", (), {"depo": dp2})()) == ["abc1234"])
         bad = os.path.join(tmp, "bad"); os.makedirs(bad)
         Path(bad, "ENVANTER_PARCA_01A.csv").write_text("id,title\nx,y\n")
         rc, _ = kos(["--mod", "kuru", "--envanter", bad, "--depo", depo, "--cikti", out])
