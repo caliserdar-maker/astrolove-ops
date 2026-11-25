@@ -49,13 +49,18 @@ def yayinla(http, k, satir, medya, uyku=time.sleep):
         alan = {"media_type": "STORIES", ("video_url" if m["tip"] == "video" else "image_url"): m["url"]}
         cid = _kap(http, k, uyku, **alan)
     elif tur == "gorsel":
-        cid = _kap(http, k, uyku, image_url=medya[0]["url"], caption=metin)
+        alan = {"image_url": medya[0]["url"], "caption": metin}
+        if (satir.get("alt_metin") or "").strip():  # resmi: alt_text yalniz gorsel (Mart 2025), en cok 1000
+            alan["alt_text"] = satir["alt_metin"].strip()
+        cid = _kap(http, k, uyku, **alan)
     elif tur == "karusel":
         cocuk = []
         for m in medya:
             alan = {"is_carousel_item": "true", ("video_url" if m["tip"] == "video" else "image_url"): m["url"]}
             if m["tip"] == "video":
                 alan["media_type"] = "VIDEO"
+            elif (satir.get("alt_metin") or "").strip():
+                alan["alt_text"] = satir["alt_metin"].strip()
             c = _kap(http, k, uyku, **alan)
             _hazir(http, k, c, uyku)
             cocuk.append(c)

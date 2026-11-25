@@ -102,6 +102,7 @@ class Oturum:
         self.yenile_hata = False
         self.kaydir = False
         self.fb = {"hesaplar": [], "hedef": ["9001"], "sayfa_token": True, "gecerli": True, "liste_hedef": None}
+        self.yorum_hata = False
         self.tamam_yaz_hata = False
 
     def _hucre(self, rng):
@@ -206,6 +207,10 @@ class Oturum:
             return Y(j={"id": pid, "name": "AstroLoveArt", **({"access_token": TOK["facebook"]} if self.fb["sayfa_token"] else {})})
         if "graph.facebook.com" in url and url.endswith("/me"):
             return Y(j={"id": "9001", "name": "AstroLoveArt"})
+        if "graph.facebook.com" in url and url.endswith("/comments"):
+            if self.yorum_hata:
+                return Y(400, {"error": {"message": "comment blocked"}})
+            return Y(j={"id": "CMT1"})
         if "graph.facebook.com" in url:
             if url.endswith("/video_reels"):
                 return Y(j={"video_id": "FBV1"} if data["upload_phase"] == "start" else {"success": True})
@@ -236,10 +241,11 @@ def kimlikleri_koy():
         drive_koy(f"ASTROLOVE/TEMP/SOSYAL_{p.upper()}_TOKEN.json", json.dumps({sir: t, alan: deger}).encode())
 
 
-def satir(no, platform, tur, medya="", metin="Hello stars", saat=-1, onay=True, durum="", gorunurluk="", md5ler=None):
+def satir(no, platform, tur, medya="", metin="Hello stars", saat=-1, onay=True, durum="", gorunurluk="", md5ler=None,
+          link="", alt="", pano=""):
     s = {"satir_no": str(no), "tarih_saat_TR": (SIMDI + timedelta(hours=saat)).strftime("%Y-%m-%d %H:%M"),
-         "platform": platform, "tur": tur, "medya": medya, "metin": metin, "link": "", "pano": "", "yz_beyani": "hayir",
-         "gorunurluk": gorunurluk, "DURUM": durum, "sonuc_no": "", "not": ""}
+         "platform": platform, "tur": tur, "medya": medya, "metin": metin, "link": link, "pano": pano, "yz_beyani": "hayir",
+         "gorunurluk": gorunurluk, "DURUM": durum, "sonuc_no": "", "not": "", "alt_metin": alt}
     if onay:
         s["ONAY"] = "SERDAR_20261207"
         s["ONAY_OZET"] = secim.ozet(s, md5ler if md5ler is not None else
@@ -557,7 +563,8 @@ def senaryo_plan78():
     out = TMP / "plan.csv"
     with contextlib.redirect_stdout(io.StringIO()) as o:
         rc = plan78.main(["--metin", str(yol), "--baslangic", "2026-12-13", "--cikti", str(out), "--ilk-no", "101", "--mevcut-en-buyuk", "2"])
-    r = list(csv.DictReader(open(out)))
+    kontrol("plan78: eksik planda dosya _EKSIK adiyla (asil ad yazilmaz)", not out.exists() and (TMP / "plan_EKSIK.csv").exists())
+    r = list(csv.DictReader(open(TMP / "plan_EKSIK.csv")))
     leo = [x for x in r if "CANCER_LEO" in x["not"]]
     kontrol("plan78: 702 satir, kapi PASS, eksik metin/medya -> cikis 3 (takvime yazilmaz)", rc == 3 and len(r) == 702
             and "KAPI PASS" in o.getvalue() and "HAZIRLIK EKSIK" in o.getvalue() and r[0]["satir_no"] == "101")
@@ -565,8 +572,23 @@ def senaryo_plan78():
     kontrol("plan78: YT yalniz short, IG/FB 3 gorsel + 1 reel", {x["tur"] for x in r if x["platform"] == "youtube"} == {"short"}
             and Counter(x["tur"] for x in leo if x["platform"] == "instagram") == Counter(gorsel=3, reel=1))
     kontrol("plan78: ilk gun video da var (tur karisimi)", any(x["tur"] in ("reel", "short") for x in r if x["tarih_saat_TR"].startswith("2026-12-13")))
-    kontrol("plan78: ONAY/DURUM bos, metin genel surum + Etsy linki", all(x["ONAY"] == "" and x["DURUM"] == "" for x in r)
-            and all(x["metin"].endswith("https://astroloveart.etsy.com/listing/4570143387") for x in leo) and not any("Valentine" in x["metin"] for x in r))
+    kontrol("plan78: ONAY/DURUM bos, link sutunu Share & Save, metinde adres yok", all(x["ONAY"] == "" and x["DURUM"] == "" for x in r)
+            and all(x["link"] == "https://astroloveart.etsy.com/listing/4570143387" and "http" not in x["metin"] for x in leo)
+            and not any("Valentine" in x["metin"] for x in r))
+    import re as _re
+    from zoneinfo import ZoneInfo as _Z
+    igfb = [x for x in r if x["platform"] in ("instagram", "facebook")]
+    et = [datetime.strptime(x["tarih_saat_TR"], "%Y-%m-%d %H:%M").replace(tzinfo=_Z("Europe/Istanbul")).astimezone(_Z("America/New_York")) for x in igfb]
+    kontrol("plan78: IG/FB hafta ici 10:00-12:00 ET; Aralik TR 18:xx, Nisan TR 17:xx", all(t.weekday() < 5 and 10 <= t.hour < 12 for t in et)
+            and any(x["tarih_saat_TR"].startswith("2026-12-14 18:00") for x in igfb) and any(x["tarih_saat_TR"][5:7] == "04" and x["tarih_saat_TR"][11:13] == "17" for x in igfb))
+    yt = [x["metin"] for x in leo if x["platform"] == "youtube"][0]
+    ig = [x for x in leo if x["platform"] == "instagram" and x["tur"] == "gorsel"][0]
+    fb = [x["metin"] for x in leo if x["platform"] == "facebook"][0]
+    kontrol("plan78 YT: kanca baslik, kanal sayfasi cumlesi, <= 3 hashtag (burclar)", yt.startswith("Cancer + Leo as One Symbol?")
+            and "Shop link is on our channel page." in yt and _re.findall(r"#\w+", yt) == ["#cancer", "#leo", "#zodiaccouple"] and "bio" not in yt)
+    kontrol("plan78 IG: alici ifadesi, bio linki, 5 hashtag, alt metin", "boyfriend, girlfriend, husband or wife" in ig["metin"]
+            and "link in our bio" in ig["metin"] and len(_re.findall(r"#\w+", ig["metin"])) == 5 and ig["alt_metin"])
+    kontrol("plan78 FB: ilk yorum cumlesi, hashtag yok", fb.endswith("Link in the first comment.") and "#" not in fb)
     bozuk = TMP / "bozuk.csv"
     rows = list(csv.DictReader(open(yol)))
     for x in rows:
@@ -589,6 +611,42 @@ def senaryo_plan78():
                       ("Made for Easter.", "paskalya"), ("Photo Rag paper.", "Photo Rag")):
         kontrol(f"FAIL plan78 yasak: {ad}", plan78.yasak_bul(ifade) != "")
     kontrol("plan78 yasak: Valentina adi ve ilan no rakamlari serbest", plan78.yasak_bul("Valentina and Leo https://astroloveart.etsy.com/listing/4570143387") == "")
+
+
+def senaryo_abd():
+    sifirla()
+    acik()
+    L = "https://astroloveart.etsy.com/listing/4570143387"
+    genel(41, 1, ".jpg", b"JPG-A")
+    genel(43, 1, ".jpg", b"JPG-A")
+    otr = Oturum([satir(40, "facebook", "gorsel", "SOSYAL/a.jpg", link=L), satir(41, "instagram", "gorsel", "SOSYAL/a.jpg", alt="Gold symbol on navy"),
+                  satir(42, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="public"),
+                  satir(43, "threads", "gorsel", "SOSYAL/a.jpg", pano="zodiac art")])
+    rc, out = kos(otr, "yayin")
+    yrm = [c for c in otr.cagri if c[1].endswith("/comments")]
+    kontrol("FB: Etsy linki ilk yorum (gonderi no uzerine)", rc == 0 and len(yrm) == 1 and yrm[0][3]["message"] == L and "9001_55/comments" in yrm[0][1])
+    ig = [c for c in otr.cagri if c[1].endswith("/media") and c[0] == "POST"]
+    kontrol("IG gorsel: alt_text gonderildi", ig and ig[0][3].get("alt_text") == "Gold symbol on navy")
+    yt = [c for c in otr.cagri if "upload/youtube" in c[1] and c[0] == "POST"]
+    kontrol("YT: defaultLanguage en, defaultAudioLanguage zxx, containsSyntheticMedia false",
+            yt and yt[0][5]["snippet"]["defaultLanguage"] == "en" and yt[0][5]["snippet"]["defaultAudioLanguage"] == "zxx"
+            and yt[0][5]["status"]["containsSyntheticMedia"] is False)
+    th = [c for c in otr.cagri if c[1].endswith("/threads") and c[0] == "POST"]
+    kontrol("Threads: topic_tag gonderildi", th and th[0][3].get("topic_tag") == "zodiac art")
+    sifirla()
+    otr = Oturum([satir(44, "facebook", "gorsel", "SOSYAL/a.jpg", link=L)])
+    otr.yorum_hata = True
+    rc, out = kos(otr, "yayin")
+    d = satir_al(otr, 44)
+    kontrol("FAIL FB ilk yorum hatasi: gonderi TAMAM kalir, uyari + not", d["DURUM"].startswith("TAMAM") and "UYARI ilk yorum" in d["not"]
+            and rc == 1 and any("YAYINLANDI no=9001_55" in p.read_text() for p in DRIVE.rglob("SOSYAL_HATA_*")))
+    sifirla()
+    otr = Oturum([satir(45, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", gorunurluk="taslak", link=L)])
+    kos(otr, "yayin", "--gizli-test", "45")
+    kontrol("FB taslakta ilk yorum yok", not any(c[1].endswith("/comments") for c in otr.cagri))
+    otr = Oturum([satir(46, "threads", "metin", pano="bad.tag")])
+    rc, _ = kos(otr, "yayin")
+    kontrol("FAIL Threads konu etiketinde '.' GECERSIZ", rc == 1 and not any(c[1].endswith("/threads") for c in otr.cagri))
 
 
 def senaryo_yml():
@@ -775,7 +833,7 @@ def mutasyon():
 if __name__ == "__main__":
     try:
         for f in (senaryo_ana, senaryo_kuru, senaryo_kapali, senaryo_medya_farkli, senaryo_publish_500, senaryo_son_an,
-                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_gizli_test, senaryo_video_kaynak, senaryo_plan78, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
+                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_gizli_test, senaryo_video_kaynak, senaryo_plan78, senaryo_abd, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
             try:
                 f()
             except Exception as e:

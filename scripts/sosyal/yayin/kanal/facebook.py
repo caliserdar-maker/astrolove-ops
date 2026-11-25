@@ -37,7 +37,7 @@ def yayinla(http, k, satir, medya, uyku=time.sleep):
                                "description": metin})
         if not j.get("success"):
             raise Hata("reel finish basarisiz", belirsiz=True)
-        return vid
+        return _ilk_yorum(http, k, vid, satir, taslak)
     if tur == "gorsel":
         with open(m["yerel"], "rb") as f:
             j, _ = http.iste("POST", f"{BASE}/{k['page_id']}/photos", token=k["token"],
@@ -45,5 +45,20 @@ def yayinla(http, k, satir, medya, uyku=time.sleep):
         no = j.get("post_id") or j.get("id")
         if not no:
             raise Hata("photos no donmedi", belirsiz=True)
-        return no
+        return _ilk_yorum(http, k, no, satir, taslak)
     raise Hata(f"facebook tur desteklenmiyor: {tur}")
+
+
+def _ilk_yorum(http, k, no, satir, taslak):
+    """ABD denetimi (Serdar 25 Kas): Etsy linki gonderinin ilk yorumu. Gonderi YAYINLANDI; yorum hatasi gonderiyi HATA yapmaz,
+    (no, uyari) dondurulur (calis TAMAM yazar + uyari). Taslakta yorum yok."""
+    link = (satir.get("link") or "").strip()
+    if taslak or not link:
+        return no
+    try:
+        j, _ = http.iste("POST", f"{BASE}/{no}/comments", token=k["token"], data={"message": link})
+        if not j.get("id"):
+            return no, "ilk yorum no donmedi"
+        return no
+    except Hata as e:
+        return no, f"ilk yorum yazilamadi: {e}"

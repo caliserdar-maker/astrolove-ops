@@ -40,7 +40,8 @@ def yayinla(http, k, satir, medya, uyku=None):
     baslik = (metin.splitlines() or [""])[0][:100].strip()
     if not baslik:
         raise Hata("YouTube basligi bos (metnin ilk satiri)")
-    govde = {"snippet": {"title": baslik, "description": metin[:5000], "categoryId": "22"},
+    govde = {"snippet": {"title": baslik, "description": metin[:5000], "categoryId": "22",
+                         "defaultLanguage": "en", "defaultAudioLanguage": "zxx"},  # ABD denetimi: dil en, ses yalniz muzik
              "status": {"privacyStatus": satir["gorunurluk"].strip(), "selfDeclaredMadeForKids": False,
                         "containsSyntheticMedia": satir.get("yz_beyani") == "evet"}}
     veri = medya[0]["yerel"].read_bytes()

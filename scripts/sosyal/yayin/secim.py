@@ -16,9 +16,9 @@ import video_kaynak
 
 TZ = ZoneInfo("Europe/Istanbul")
 SUTUNLAR = ["satir_no", "tarih_saat_TR", "platform", "tur", "medya", "metin", "link", "pano", "yz_beyani",
-            "gorunurluk", "ONAY", "ONAY_OZET", "DURUM", "sonuc_no", "not"]
+            "gorunurluk", "ONAY", "ONAY_OZET", "DURUM", "sonuc_no", "not", "alt_metin"]
 OZET_ALANLARI = ["satir_no", "tarih_saat_TR", "platform", "tur", "medya", "metin", "link", "pano", "yz_beyani",
-                 "gorunurluk"]
+                 "gorunurluk", "alt_metin"]
 TURLER = {
     "instagram": {"reel", "karusel", "hikaye", "gorsel"},
     "facebook": {"reel", "gorsel"},
@@ -80,6 +80,12 @@ def dogrula(satir):
         h.append("youtube gorunurluk public/private/unlisted degil")
     if p == "facebook" and (satir.get("gorunurluk") or "").strip() not in ("", "public", "taslak"):
         h.append("facebook gorunurluk bos/public/taslak degil")
+    if len(satir.get("alt_metin") or "") > 1000:
+        h.append("alt_metin 1000 karakteri asiyor")
+    if p == "threads" and (satir.get("pano") or "").strip():
+        etk = satir["pano"].strip()
+        if not 1 <= len(etk) <= 50 or re.search(r"[.&]", etk):
+            h.append("threads konu etiketi (pano) 1-50 karakter, '.' ve '&' yok")
     if p == "threads" and len(satir.get("metin") or "") > 500:
         h.append("threads metni 500 karakteri asiyor")
     if p == "instagram" and len(satir.get("metin") or "") > 2200:

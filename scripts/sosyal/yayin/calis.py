@@ -156,9 +156,13 @@ def yayin(http, tk, simdi, kuru, uyku=None, gizli_test=""):
                 uyari.append(f"{etiket}: HATA (belirsiz) {type(e).__name__} {temizle(e)}")
                 continue
             # YAYINLANDI: bundan sonraki her hata "yayinlandi" diye raporlanir, HATA yazilmaz (yeniden paylasim riski)
+            ek = ""
+            if isinstance(no, tuple):  # (gonderi no, ek uyari) ornek: Facebook ilk yorum yazilamadi
+                no, ek = no
+                uyari.append(f"{etiket}: YAYINLANDI no={no}; {ek}")
             try:
                 tk.tazele(s)
-                tk.yaz(s, DURUM=f"TAMAM {ts(simdi)}", sonuc_no=str(no))
+                tk.yaz(s, DURUM=f"TAMAM {ts(simdi)}", sonuc_no=str(no), **({"not": f"UYARI {ek}"[:200]} if ek else {}))
                 log(f"{etiket}: TAMAM {no}")
             except Exception as e:
                 uyari.append(f"{etiket}: YAYINLANDI no={no} ama takvime TAMAM yazilamadi ({temizle(e)}); satiri elle TAMAM {no} yapin")
