@@ -17,11 +17,11 @@ k3 = VW / 3000.0
 Cv = cv2.resize(C, (VW, VH), interpolation=cv2.INTER_AREA).astype(np.float32)
 hx, hy, hr = [v * k3 for v in J["delik_bizim"]]
 R = J["R"] * k3
-# 25 Kas (Merkez C kararı, Ivory kapak), YALNIZ V_KENAR=1 ile (varsayilan 0 = onayli 8 Kas davranisi, bordo video bayt bayt ayni):
+# 25 Kas (Merkez C kararı, Ivory kapak), YALNIZ V_DISK_KENAR=1 ile (varsayilan 0 = onayli 8 Kas davranisi, bordo video bayt bayt ayni):
 # disk merkezi sahne olcumunden (V_OLC cx, cy; set_yerlestir donusumu W/O["W"] + dikey pay) ve statik kapak ortusu 1,01R.
 # Neden: kling.mp4 bordo sahneden; baska renk diskte (Ivory) Kling'in bordo disk kenari 0,985R disina sizar ve merkez delikten
 # turetildigi icin (donuk sahne, Ivory 0,42 derece) 3,4 px kayar. Altin maskesi (yuz, 0,985R) degismez.
-KENAR = os.environ.get("V_KENAR", "0") == "1"
+KENAR = os.environ.get("V_DISK_KENAR", "0") == "1"   # ad ayri: kapak_ornek.py V_KENAR baska anlamda (carpan)
 if KENAR:
     _ko = 3000.0 / O["W"]; _pay = (2250 - int(round(O["H"] * _ko))) // 2
     cx, cy = O["cx"] * _ko * k3, (O["cy"] * _ko + _pay) * k3
@@ -31,7 +31,7 @@ yy, xx = np.mgrid[0:VH, 0:VW].astype(np.float32)
 X, Y = (xx - cx) / R, (yy - cy) / R
 dr = np.hypot(X, Y)
 yuz = np.clip((0.985 * R - dr * R) / 2.0, 0, 1)                             # altin maskesi icin (degismedi)
-ORTU_R = 1.01 if KENAR else 0.985                                            # statik kapak ortusu (V_KENAR=1: disk kenari dahil)
+ORTU_R = 1.01 if KENAR else 0.985                                            # statik kapak ortusu (V_DISK_KENAR=1: disk kenari dahil)
 ortu = np.clip((ORTU_R * R - dr * R) / 2.0, 0, 1)
 b_, g_, r_ = Cv[..., 0], Cv[..., 1], Cv[..., 2]
 ipbol = ((np.abs(xx - hx) < 0.9 * hr) & (yy < hy)) | (np.hypot(xx - hx, yy - hy) < 1.02 * hr) | ((np.abs(xx - hx) < 2.6 * hr) & (yy < hy - 1.6 * hr))   # yalniz ip sutunu ve delik
