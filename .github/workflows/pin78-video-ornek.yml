@@ -18,12 +18,13 @@ on:
         default: CANCER_LEO
 env:
   OFIS: 1KBuisCudYyac5ThyLs19eZW4MQZgwp0W
-  KLASOR: PINTEREST_PIN78_ORNEK_20261125_v4
+  KLASOR: PINTEREST_PIN78_ORNEK_20261125_v5
   REF_DIR: 1_rcZ69bhw00QfHedBiWywEoHPu9Y4bkB
   P2000: gdrive:ASTROLOVE/TEMP/PIN_V6_20261012/_POSTER2000
   KAPAKD: gdrive:ASTROLOVE/TEMP/VIDEO_V9_20261012/KAPAK
   PVID: gdrive:ASTROLOVE/TEMP/SOSYAL_VIDEO_P_78_20261020
   SURE: '15'
+  SURE_R: '15.9'   # sessiz render suresi: sondaki karartma 15.0 sn'den sonraya kalir, kapak_son ilk 15.0 sn'yi alir
 jobs:
   uret:
     runs-on: ubuntu-latest
@@ -122,34 +123,33 @@ jobs:
         python3 $V/acilis_p.py --poster _g/poster.jpg --a "$A" --b "$B" --font "$RUNNER_TEMP/EBGaramond[wght].ttf" --out _w/P_kare.png >/dev/null \
           || { echo "::error::P karesi (kiyas icin) uretilemedi"; exit 1; }
         K=0.5,2,5,8,10.5,11.5,12.5,13.5,14.5
-        python3 $V/video_uret.py --poster _g/poster.jpg --a "$A" --b "$B" --out _w/kb --kareler $K --acilis B --sure "$SURE" --bilgi _w/bilgi.json >/dev/null
+        python3 $V/video_uret.py --poster _g/poster.jpg --a "$A" --b "$B" --out _w/kb --kareler $K --acilis B --sure "$SURE_R" --bilgi _w/bilgi.json >/dev/null
         python3 $V/video_uret.py --poster _g/poster.jpg --a "$A" --b "$B" --out _w/kp --kareler $K --acilis P --acilis_kare _w/P_kare.png >/dev/null
-        # 4) video (B, $SURE sn, muzikli) + onayli kapak basa
+        # 4) video (B, sessiz $SURE_R sn) -> kapak_son (ilk $SURE sn, sonda kapak + muzik) -> kapak_basa (basta kapak)
+        #    Serdar 25 Kas: secenek B (yumusak gecis), video kapakla baslar ve kapakla biter (ilk kare = son kare)
         T0=$(date +%s)
-        python3 $V/video_uret.py --poster _g/poster.jpg --a "$A" --b "$B" --out _w/v --acilis B --sure "$SURE" --muzik _w/m/muzik_k.m4a > _w/v.log 2>&1 &
+        python3 $V/video_uret.py --poster _g/poster.jpg --a "$A" --b "$B" --out _w/v --acilis B --sure "$SURE_R" > _w/v.log 2>&1 &
         while [ "$(jobs -rp | wc -l)" -gt 0 ]; do sleep 45; echo "ETA $(grep -o '[0-9]*/[0-9]* kare.*' _w/v.log | tail -1) | gecen $(( $(date +%s) - T0 )) sn"; done
         wait
-        rm -f _w/m/muzik.m4a   # cozulen tam muzik; kisaltilmis kopya QC'den sonra silinir
         f="_w/v/$SLUG-astroloveart-reel.mp4"
         [ -f "$f" ] || { echo "::error::video uretilemedi"; tail -20 _w/v.log; exit 1; }
+        python3 $V/kapak_son.py --video "$f" --kapak _g/kapak.jpg --cikis _w/son.mp4 --sure "$SURE" --tam 0.5 --gecis 0.5 \
+          --muzik _w/m/muzik.m4a --qc _o/kapak_son_qc.json > _o/kapak_son_log.txt 2>&1; KS=$?
+        rm -f _w/m/muzik.m4a   # cozulen tam muzik; kisaltilmis kopya (LUFS kapisi icin) QC'den sonra silinir
+        [ -s _w/son.mp4 ] || { echo "::error::kapak_son uretilemedi"; tail -5 _o/kapak_son_log.txt; exit 1; }
         ONAY=""; [ -s _g/onayli_P.mp4 ] && ONAY="--onayli_mp4 _g/onayli_P.mp4"
-        RC=0
-        [ -n "$ONAY" ] || { echo "::error::onayli P videosu yok: kiyas kapisi kosamaz (FAIL)"; RC=1; }
-        # iki secenek (Serdar secer, oneri yok): GECIS = kapak 0-0.5 sn + 0.5 sn yumusak gecis (onayli kapak_basa ayari);
-        # KESME = kapak 0-0.5 sn + 1 karelik gecis (sert kesme, ust uste binme yok)
-        for SEC in GECIS KESME; do
-          G=0.5; [ "$SEC" = KESME ] && G=0.0334
-          OUT="_o/$SLUG-pin-video_$SEC.mp4"
-          python3 $V/kapak_basa.py --video "$f" --kapak _g/kapak.jpg --cikis "$OUT" --tam 0.5 --gecis $G --qc "_o/kapak_basa_qc_$SEC.json" > "_o/kapak_basa_log_$SEC.txt" 2>&1
-          python3 scripts/sosyal/pin78_video_qc.py --b _w/kb --p _w/kp --bilgi _w/bilgi.json --sure "$SURE" --video "$OUT" --kapak_qc "_o/kapak_basa_qc_$SEC.json" \
-            --muzik _w/m/muzik_k.m4a $ONAY --oz-test > "_o/video_oz_test_$SEC.txt"; VO=$?
-          python3 scripts/sosyal/pin78_video_qc.py --b _w/kb --p _w/kp --bilgi _w/bilgi.json --sure "$SURE" --video "$OUT" --kapak_qc "_o/kapak_basa_qc_$SEC.json" \
-            --muzik _w/m/muzik_k.m4a $ONAY > "_o/video_qc_$SEC.txt"; VQ=$?
-          grep -E "FAIL|son kart|onayli P|LUFS" "_o/video_qc_$SEC.txt" | sed "s/^/::warning::VIDEO $SEC /"
-          mkdir -p "_o/video_kareler_$SEC"
-          for s in 0 0.5 0.6 0.8 1.0 1.2 3 8 10.5 12.5 14.2; do ffmpeg -v error -y -ss $s -i "$OUT" -frames:v 1 -q:v 2 "_o/video_kareler_$SEC/kare_${s}s.jpg"; done
-          RC=$(( RC + VO + VQ ))
-        done
+        RC=$KS
+        [ -n "$ONAY" ] || { echo "::error::onayli P videosu yok: kiyas kapisi kosamaz (FAIL)"; RC=$(( RC + 1 )); }
+        SEC=GECIS
+        OUT="_o/$SLUG-pin-video.mp4"
+        python3 $V/kapak_basa.py --video _w/son.mp4 --kapak _g/kapak.jpg --cikis "$OUT" --tam 0.5 --gecis 0.5 --qc "_o/kapak_basa_qc.json" > "_o/kapak_basa_log.txt" 2>&1
+        Q="--b _w/kb --p _w/kp --bilgi _w/bilgi.json --sure $SURE --video $OUT --kapak_qc _o/kapak_basa_qc.json --kapak _g/kapak.jpg --kapak_son_qc _o/kapak_son_qc.json --son_kapak 1.0 --muzik _w/m/muzik_k.m4a"
+        python3 scripts/sosyal/pin78_video_qc.py $Q $ONAY --oz-test > "_o/video_oz_test.txt"; VO=$?
+        python3 scripts/sosyal/pin78_video_qc.py $Q $ONAY > "_o/video_qc.txt"; VQ=$?
+        grep -E "FAIL|son kart|onayli P|LUFS|kare = " "_o/video_qc.txt" | sed "s/^/::warning::VIDEO /"
+        mkdir -p "_o/video_kareler_$SEC"
+        for s in 0 0.5 0.6 0.8 1.0 1.2 3 8 10.5 12.5 14.0 14.25 14.5 14.95; do ffmpeg -v error -y -ss $s -i "$OUT" -frames:v 1 -q:v 2 "_o/video_kareler_$SEC/kare_${s}s.jpg"; done
+        RC=$(( RC + VO + VQ ))
         rm -f _w/m/muzik_k.m4a
         echo "VIDEO_RC=$RC" >> "$GITHUB_ENV"
     - name: Kontak + Drive

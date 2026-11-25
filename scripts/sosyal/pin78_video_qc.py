@@ -14,7 +14,9 @@ Kapilar (PASS/FAIL):
   7) Onayli Drive P videosuyla (--onayli_mp4) 2 / 5 / 8 / 10.5 sn karelerinde ortalama fark <= 2.0 (kapak_basa.py ESIK) VE
      p99 <= 10 (25 Kas olcum: ayni kaynak ort 0.86-1.32 p99 4-5; farkli isimli poster ort 1.03-1.86 p99 6-20, ortalama tek basina
      ayirt edemedi). Ilk 1.5 sn (kapak + gecis) ve son kararma bu kapinin disinda.
-Kullanim: pin78_video_qc.py --b DIR --p DIR --bilgi bilgi.json --sure 15 --video V.mp4 --kapak_qc Q.json [--onayli_mp4 O.mp4] [--oz-test]
+Kullanim: pin78_video_qc.py --b DIR --p DIR --bilgi bilgi.json --sure 15 --video V.mp4 --kapak_qc Q.json [--kapak K.jpg --kapak_son_qc Q2.json
+          --son_kapak 1.0] [--onayli_mp4 O.mp4] [--oz-test]
+  8) (Serdar 25 Kas) --kapak verilirse: ilk kare = kapak, son kare = kapak, ilk kare = son kare (ort. fark < 2.0).
 """
 import argparse, glob, json, os, shutil, subprocess, sys, tempfile
 import numpy as np
@@ -101,7 +103,7 @@ def kapilar(g):
     bi = json.load(open(g.bilgi))
     son_bas = round(19.6 - bi['T_B0'], 3); son_fo = round(g.sure - 0.9, 3)
     S = esitlik(g.b, g.p, son_fo)
-    sk = round(g.sure - son_bas, 3)
+    sk = round(g.sure - (g.son_kapak or 0.0) - son_bas, 3)     # sonda kapak varsa son kart kapak gecisinde biter
     S.append((f'son kart {SON_ALT:g}-{SON_UST:g} sn', SON_ALT <= sk <= SON_UST, f'{sk} sn ({son_bas}-{g.sure:g})'))
     if g.video:
         S += video(g.video, g.sure)
@@ -117,7 +119,35 @@ def kapilar(g):
     if g.kapak_qc:
         q = json.load(open(g.kapak_qc)) if os.path.exists(g.kapak_qc) else {}
         S.append(('kapak_basa QC PASS', q.get('sonuc') == 'PASS', q.get('sonuc', 'yok')))
+    if g.kapak_son_qc:
+        q = json.load(open(g.kapak_son_qc)) if os.path.exists(g.kapak_son_qc) else {}
+        S.append(('kapak_son QC PASS', q.get('sonuc') == 'PASS', q.get('sonuc', 'yok')))
+    if g.video and g.kapak:
+        S += ilk_son(g.video, g.kapak)
     return S, son_bas, son_fo
+
+
+def mp4_kare(v, son=False):
+    t = tempfile.mkdtemp(); o = os.path.join(t, 'k.png')
+    a = ['ffmpeg', '-v', 'error', '-y'] + (['-sseof', '-0.1'] if son else []) + ['-i', v] + (['-update', '1'] if son else ['-frames:v', '1']) + [o]
+    subprocess.run(a, check=True)
+    return np.asarray(Image.open(o).convert('RGB')).astype(float)
+
+
+def kapak_dizi(k, W, H):
+    im = Image.open(k).convert('RGB'); s_ = max(W / im.size[0], H / im.size[1])
+    im = im.resize((round(im.size[0] * s_), round(im.size[1] * s_)), Image.LANCZOS)
+    x0 = (im.size[0] - W) // 2; y0 = (im.size[1] - H) // 2
+    return np.asarray(im.crop((x0, y0, x0 + W, y0 + H))).astype(float)
+
+
+def ilk_son(v, kapak, ilk=None, son=None):
+    """Serdar 25 Kas: video kapakla baslar, kapakla biter; ilk kare = son kare (ort. fark < 2.0, kapak_basa ESIK)."""
+    ilk = mp4_kare(v) if ilk is None else ilk; son = mp4_kare(v, son=True) if son is None else son
+    K = kapak_dizi(kapak, ilk.shape[1], ilk.shape[0])
+    d1, d2, d3 = (float(np.abs(x - y).mean()) for x, y in ((ilk, K), (son, K), (ilk, son)))
+    return [('ilk kare = kapak (ort < 2.0)', d1 < 2.0, round(d1, 2)), ('son kare = kapak (ort < 2.0)', d2 < 2.0, round(d2, 2)),
+            ('ilk kare = son kare (ort < 2.0)', d3 < 2.0, round(d3, 2))]
 
 
 def main():
@@ -126,6 +156,8 @@ def main():
         ap.add_argument('--' + k, required=True)
     ap.add_argument('--sure', type=float, required=True); ap.add_argument('--video'); ap.add_argument('--kapak_qc')
     ap.add_argument('--onayli_mp4'); ap.add_argument('--muzik'); ap.add_argument('--oz-test', action='store_true')
+    ap.add_argument('--kapak', help='onayli kapak (ilk = son kare kapisi)'); ap.add_argument('--kapak_son_qc')
+    ap.add_argument('--son_kapak', type=float, default=0.0, help='sondaki kapak tam + gecis suresi (sn)')
     g = ap.parse_args()
     S, son_bas, son_fo = kapilar(g)
     if g.oz_test:
@@ -136,10 +168,17 @@ def main():
         k = kareler(t); f0 = k[min(x for x in k if x >= 1.5)]
         a = np.asarray(Image.open(f0)).copy(); a[300:320, 300:320] = 255; Image.fromarray(a).save(f0, quality=95)
         sonuc.append(('FAIL: bozuk kare', not all(o for _, o, _ in esitlik(t, g.p, son_fo))))
-        g24 = argparse.Namespace(**{**vars(g), 'sure': 24.0, 'video': None, 'kapak_qc': None, 'muzik': None, 'onayli_mp4': None})
+        g24 = argparse.Namespace(**{**vars(g), 'sure': 24.0, 'video': None, 'kapak_qc': None, 'muzik': None, 'onayli_mp4': None,
+                                    'kapak_son_qc': None, 'kapak': None, 'son_kapak': 0.0})
         sonuc.append(('FAIL: 24 sn (son kart 13 sn)', not all(o for a, o, _ in kapilar(g24)[0] if a.startswith('son kart'))))
         if g.video:
             sonuc.append(('FAIL: yanlis sure beklentisi', not all(o for _, o, _ in video(g.video, g.sure + 1))))
+        if g.video and g.kapak:
+            # bilinen FAIL: son kare yerine 8. saniye karesi (kapakla bitmeyen video)
+            t8 = tempfile.mkdtemp(); o8 = os.path.join(t8, 'k8.png')
+            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', '8', '-i', g.video, '-frames:v', '1', o8], check=True)
+            k8 = np.asarray(Image.open(o8).convert('RGB')).astype(float)
+            sonuc.append(('FAIL: kapakla bitmeyen video', not all(o for _, o, _ in ilk_son(g.video, g.kapak, son=k8))))
         if g.video and g.onayli_mp4:
             # bilinen FAIL: 3 sn kaymis kare (ayni olmayan goruntu) kiyas kapisini gecemez
             sonuc.append(('FAIL: kaymis kare kiyasi', any(m > 2.0 or p > 10 for _, m, p in kiyas(g.video, g.onayli_mp4, [5], ofs=3.0))))
