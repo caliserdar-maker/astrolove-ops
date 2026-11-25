@@ -38,8 +38,14 @@ def kontrol(rows):
         for alan in ('baslik', 'aciklama', 'alt_metin'):
             y = tara(r[alan]); S.append((f'{k} {alan} yasak yok', not y, y))
         S.append((f'{k} aranan terim', any(t in r['aciklama'].lower() for t in TERIM), ''))
+    for r in rows:   # genel (Subat sonrasi) surumde Sevgililer ifadesi yok
+        if r.get('surum') == 'genel':
+            v = re.findall(r"valentine|14 feb", ' '.join((r['baslik'], r['aciklama'], r['alt_metin'])), re.I)
+            S.append((f"{r['konsept']} {r['cift']} genel surumde Sevgililer yok", not v, v))
     for i in range(len(rows)):
         for j in range(i + 1, len(rows)):
+            if rows[i].get('surum', '') != rows[j].get('surum', ''):
+                continue          # ayni pinin iki surumu (Sevgililer / genel) birbirinin yerine kullanilir, kopya sayilmaz
             wi, wj = rows[i]['aciklama'].lower().split(), rows[j]['aciklama'].lower().split()
             gi = {' '.join(wi[n:n + 12]) for n in range(len(wi) - 11)}
             ort = [g for g in (' '.join(wj[n:n + 12]) for n in range(len(wj) - 11)) if g in gi]
@@ -61,6 +67,9 @@ def main():
                    'marka': dict(kotu, alt_metin='AstroLove poster'), 'kalip': dict(kotu, baslik='Valentine gift'),
                    'link': dict(kotu, link='https://astroloveart.etsy.com/listing/1'), 'premium': dict(kotu, aciklama='premium paper')}
         sonuc = [('bilinen PASS', ok)] + [(f'FAIL: {ad}', not all(o for _, o, _ in kontrol([r]))) for ad, r in testler.items()]
+        if any(r.get('surum') == 'genel' for r in rows):
+            gr = next(r for r in rows if r.get('surum') == 'genel')
+            sonuc.append(('FAIL: genel surumde Valentine', not all(o for _, o, _ in kontrol([dict(gr, aciklama=gr['aciklama'] + " A Valentine's gift.")]))))
         sonuc.append(('FAIL: kopya cumle', not all(o for _, o, _ in kontrol([rows[0], dict(rows[1], aciklama=rows[0]['aciklama'])]))))
         for ad, v in sonuc:
             print(('PASS ' if v else 'FAIL ') + 'oz-test ' + ad)

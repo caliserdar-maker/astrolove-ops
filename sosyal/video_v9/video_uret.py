@@ -75,7 +75,7 @@ def navy_glow(profile, cy_frac, gain=0.70, sigma=0.42):
     return Image.fromarray(np.clip(np.round(out), 0, 255).astype(np.uint8), 'RGB')
 
 
-def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acilis=None, acilis_kare_yol=None, son_satir='Make it yours', son_alt='On Etsy'):
+def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acilis=None, acilis_kare_yol=None, son_satir='Make it yours', son_alt='On Etsy', sure=DUR):
     os.makedirs(out_dir, exist_ok=True)
     slug = f'{A.lower()}-and-{B.lower()}'
     P = PU.PosterR(poster_path)
@@ -326,6 +326,8 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acil
     _g = np.random.default_rng(99)
     GRAIN = (_g.uniform(-0.5, 0.5, (H, W, 3)) + _g.uniform(-0.5, 0.5, (H, W, 3))).astype(np.float32)
 
+    T_FO = T_END_FREEZE if sure == DUR else round(sure - (DUR - T_END_FREEZE), 6)   # 0.9 s fade-out at the end
+
     def frame(n):
         to = n / FPS
         t = kaynak_t(to, acilis, T_B0)
@@ -344,8 +346,8 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acil
         f = acilis_kare(to, f)
         if acilis is None:
             f = f * ease(t, 0, 1.0) * (1 - ease(t, 23.1, 24.0)) if (t < 1.0 or t > 23.1) else f
-        elif to > T_END_FREEZE:      # A and B: no black opening, same fade-out on the output clock
-            f = f * (1 - ease(to, T_END_FREEZE, 24.0))
+        elif to > T_FO:              # A and B: no black opening, same fade-out on the output clock
+            f = f * (1 - ease(to, T_FO, sure))   # sure=24: approved 23.1-24.0 (float-identical)
         r = np.random.default_rng(n)
         tpdf = r.uniform(-0.5, 0.5, f.shape) + r.uniform(-0.5, 0.5, f.shape)
         # fine static grain (3 levels) + light moving grain: no visible rings in the navy gradient, also after
@@ -364,16 +366,17 @@ def build(poster_path, A, B, out_dir, muzik=None, kareler=None, bilgi=None, acil
                             '-c:v', 'libx264', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-crf', '16', '-preset', 'slow', '-tune', 'grain', '-aq-mode', '3', '-r', str(FPS), tmp],
                            stdin=subprocess.PIPE)
     t0 = time.time()
-    for n in range(NF):
+    nf = int(round(FPS * sure))
+    for n in range(nf):
         enc.stdin.write(frame(n).tobytes())
-        if n % 60 == 0 or n == NF - 1:
+        if n % 60 == 0 or n == nf - 1:
             el = time.time() - t0
-            print(f'{slug}: {n + 1}/{NF} kare  %{100 * (n + 1) / NF:.0f}  gecen {el:.0f} sn  kalan {el / (n + 1) * (NF - n - 1):.0f} sn', flush=True)
+            print(f'{slug}: {n + 1}/{nf} kare  %{100 * (n + 1) / nf:.0f}  gecen {el:.0f} sn  kalan {el / (n + 1) * (nf - n - 1):.0f} sn', flush=True)
     enc.stdin.close(); enc.wait()
     out = os.path.join(out_dir, f'{slug}-astroloveart-reel.mp4')
     if muzik:
         subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', tmp, '-i', muzik, '-map', '0:v', '-map', '1:a', '-c', 'copy',
-                        '-t', '24', '-movflags', '+faststart', out], check=True)
+                        '-t', f'{sure:g}', '-movflags', '+faststart', out], check=True)
         os.remove(tmp)
     else:
         os.replace(tmp, out)
@@ -394,11 +397,15 @@ if __name__ == '__main__':
     ap.add_argument('--son_satir', default='Make it yours',
                     help='end card first line (25 Nov 2026 Valentine sample); default = approved v9 text')
     ap.add_argument('--son_alt', default='On Etsy', help='end card third line; default = approved v9 text')
+    ap.add_argument('--sure', type=float, default=DUR,
+                    help='output length in s (25 Nov 2026 Serdar: shorter end card); only with --acilis B/B1/C/P; default 24 = approved')
     g = ap.parse_args()
     k = [float(x) for x in g.kareler.split(',')] if g.kareler else None
     bi = {} if g.bilgi else None
+    if g.sure != DUR and g.acilis not in ('B', 'B1', 'C', 'P'):
+        ap.error('--sure needs --acilis B/B1/C/P (the approved v9 opening is fixed to 24 s)')
     if g.acilis == 'P' and not g.acilis_kare:
         ap.error('--acilis P needs --acilis_kare')
-    print(build(g.poster, g.a, g.b, g.out, g.muzik, k, bi, g.acilis, g.acilis_kare, g.son_satir, g.son_alt))
+    print(build(g.poster, g.a, g.b, g.out, g.muzik, k, bi, g.acilis, g.acilis_kare, g.son_satir, g.son_alt, g.sure))
     if g.bilgi:
         json.dump(bi, open(g.bilgi, 'w'), indent=1)

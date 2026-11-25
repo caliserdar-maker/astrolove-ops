@@ -1,0 +1,153 @@
+name: pin78-video-ornek
+# Pinterest 78 cift x 3 tur, 1 CIFT ORNEGI (Serdar 25 Kas 2026, KARARLAR_20261125_49/_50). Yayin YOK, Metricool / Pinterest /
+# Etsy YAZMA YOK. Cikti: Drive OFIS/PINTEREST_PIN78_ORNEK_20261125/ (herhangi bir kapi FAIL ise FAIL_<kosu> alt klasoru).
+# Poster ve kart pini: onayli v6 AYNEN (Drive kopyasi; uretim yok). Metin: data/sosyal/pinterest/pin78 (Sevgililer + genel surum).
+# Video: onayli sosyal video (video_v9) acilis B (poster karesi YOK) + --sure 15 (son kart 4 sn, metin onayli) + onayli
+#   kapak_v1 kapagi (Drive VIDEO_V9_20261012/KAPAK) kapak_basa.py ile 0-0.5 sn tam, 0.5-1.0 sn gecis (onayli 2. yontem, 15 Eki).
+#   Muzik: onayli muzik 2'nin ilk 15 sn'si, son 2 sn yumusak kapanis (yeni muzik yok). Poster: onayli _POSTER2000.
+# QC: pin78_video_qc.py (onayli P ile kare esitligi, son kart 3-4 sn, video/ses, kapak_basa QC; oz-test), sevgililer_metin.py,
+#   pin78_takvim.py (234 pin kuru takvim). Onayli v9 yolu once dogrula.py.
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      cift:
+        description: 'cift anahtari (alfabetik)'
+        default: CANCER_LEO
+env:
+  OFIS: 1KBuisCudYyac5ThyLs19eZW4MQZgwp0W
+  KLASOR: PINTEREST_PIN78_ORNEK_20261125
+  REF_DIR: 1_rcZ69bhw00QfHedBiWywEoHPu9Y4bkB
+  P2000: gdrive:ASTROLOVE/TEMP/PIN_V6_20261012/_POSTER2000
+  KAPAKD: gdrive:ASTROLOVE/TEMP/VIDEO_V9_20261012/KAPAK
+  PVID: gdrive:ASTROLOVE/TEMP/SOSYAL_VIDEO_P_78_20261020
+  SURE: '15'
+jobs:
+  uret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      CIFT: ${{ inputs.cift }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Kurulum
+      run: |
+        set -euo pipefail
+        pip install -q numpy==2.1.3 pillow==11.0.0 scipy==1.14.1 opencv-python-headless==4.10.0.84 requests
+        sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core >/dev/null
+        curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null 2>&1
+        curl -fsSL --retry 3 "https://raw.githubusercontent.com/google/fonts/main/ofl/ebgaramond/EBGaramond%5Bwght%5D.ttf" -o "$RUNNER_TEMP/EBGaramond[wght].ttf"
+    - name: rclone.conf
+      env:
+        RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.config/rclone; umask 077
+        printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+        if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+          grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV" || true; fi
+    - name: Girdi
+      run: |
+        set -euo pipefail
+        case "$CIFT" in *[!A-Z_]*|'') echo "::error::cift gecersiz"; exit 1 ;; esac
+        a=$(echo "${CIFT%%_*}" | sed 's/.*/\L&/; s/^./\U&/'); b=$(echo "${CIFT#*_}" | sed 's/.*/\L&/; s/^./\U&/')
+        slug=$(echo "$a-and-$b" | tr 'A-Z' 'a-z')
+        [ -n "$a" ] && [ -n "$b" ] && [ -n "$slug" ] || { echo "::error::ad bos"; exit 1; }
+        echo "A=$a" >> "$GITHUB_ENV"; echo "B=$b" >> "$GITHUB_ENV"; echo "SLUG=$slug" >> "$GITHUB_ENV"
+        mkdir -p _g _o
+        rclone copyto "$P2000/$CIFT.jpg" _g/poster.jpg -q
+        rclone copyto "$KAPAKD/$slug-astroloveart-kapak.jpg" _g/kapak.jpg -q
+        [ -s _g/poster.jpg ] && [ -s _g/kapak.jpg ] || { echo "::error::poster ya da onayli kapak yok"; exit 1; }
+        rclone copyto "$PVID/$slug-astroloveart-reel.mp4" _g/onayli_P.mp4 -q || echo "::warning::onayli P videosu bulunamadi (yalniz bilgi kiyasi)"
+        if [ "$CIFT" = CANCER_LEO ]; then
+          rclone backend copyid gdrive: 1-U_CIzLqT7nIkbUlrHNXcOjFwRbD_RWs _o/PIN_POSTER_CANCER_LEO_v6.jpg -q
+          rclone backend copyid gdrive: 13gIzmVN51F0DUF3c5vl4p77jXsq2tSo_ _o/PIN_KART_CANCER_LEO_v6.jpg -q
+        fi
+        cp _g/kapak.jpg "_o/ONAYLI_KAPAK_$slug.jpg"
+        ls -la _g _o
+    - name: Metin + takvim
+      run: |
+        set +e -uo pipefail
+        M=data/sosyal/pinterest/pin78/ORNEK_METIN_CANCER_LEO.csv
+        python3 scripts/sosyal/sevgililer_metin.py $M --oz-test > _o/metin_oz_test.txt; MO=$?
+        python3 scripts/sosyal/sevgililer_metin.py $M > _o/metin_qc.txt; MT=$?
+        python3 scripts/sosyal/pin78_takvim.py --cikti /dev/null --oz-test > _o/takvim_oz_test.txt; TO=$?
+        python3 scripts/sosyal/pin78_takvim.py --cikti _o/TAKVIM_PIN78_20261125.csv > _o/takvim_qc.txt; TQ=$?
+        cp $M _o/
+        tail -2 _o/takvim_qc.txt | sed 's/^/::warning::TAKVIM /'
+        echo "METIN_RC=$(( MO + MT + TO + TQ ))" >> "$GITHUB_ENV"
+    - name: Video + QC
+      run: |
+        set +e -uo pipefail
+        V=sosyal/video_v9; mkdir -p _w/ref _w/dg _w/m _w/kb _w/kp _w/v
+        # 1) onayli v9 yolu degismedi
+        rclone copyto gdrive:AstroLoveArt_Gemini_Leo_2000.jpg _w/ref/GEMINI_LEO.jpg --drive-root-folder-id "$REF_DIR" -q
+        python3 $V/video_uret.py --poster _w/ref/GEMINI_LEO.jpg --a Gemini --b Leo --out _w/dg --kareler 2,5,8,13,17,22 >/dev/null \
+          && python3 $V/dogrula.py _w/dg > _w/dg.txt; DG=$?
+        cp _w/dg.txt _o/dogrula_onayli_v9.txt; tail -1 _w/dg.txt | sed 's/^/::warning::DOGRULA /'
+        [ "$DG" = 0 ] || { echo "::error::onayli v9 dogrulamasi FAIL, video uretilmedi"; exit 1; }
+        # 2) muzik 2 -> ilk $SURE sn, son 2 sn yumusak kapanis
+        P=$(rclone cat "gdrive:ASTROLOVE/TEMP/MUZIK_PAROLA.txt" 2>/dev/null | tr -d '\r\n')
+        [ -n "$P" ] && echo "::add-mask::$P"
+        [ -n "$P" ] || { echo "::error::muzik parolasi okunamadi"; exit 1; }
+        MUZIK_PAROLA="$P" openssl enc -d -aes-256-cbc -pbkdf2 -in $V/assets/muzik_2.m4a.enc -out _w/m/muzik.m4a -pass env:MUZIK_PAROLA \
+          || { unset P; echo "::error::muzik cozulemedi"; exit 1; }
+        unset P
+        FO=$(python3 -c "print(float('$SURE')-2.0)")
+        ffmpeg -v error -y -i _w/m/muzik.m4a -af "atrim=0:$SURE,afade=t=out:st=$FO:d=2,asetpts=N/SR/TB" -c:a aac -b:a 192k _w/m/muzik_k.m4a \
+          || { echo "::error::muzik kisaltilamadi"; exit 1; }
+        ffmpeg -nostats -i _w/m/muzik_k.m4a -af ebur128 -f null - 2>&1 | grep -E "^\s+I:" | tail -1 | sed 's/^ */BILGI muzik LUFS /' > _o/muzik_lufs.txt
+        # 3) kareler: B/$SURE sn ile onayli P/24 sn (ayni poster, ayni kod)
+        python3 $V/acilis_p.py --poster _g/poster.jpg --a "$A" --b "$B" --font "$RUNNER_TEMP/EBGaramond[wght].ttf" --out _w/P_kare.png >/dev/null \
+          || { echo "::error::P karesi (kiyas icin) uretilemedi"; exit 1; }
+        K=0.5,2,5,8,10.5,11.5,12.5,13.5,14.5
+        python3 $V/video_uret.py --poster _g/poster.jpg --a "$A" --b "$B" --out _w/kb --kareler $K --acilis B --sure "$SURE" --bilgi _w/bilgi.json >/dev/null
+        python3 $V/video_uret.py --poster _g/poster.jpg --a "$A" --b "$B" --out _w/kp --kareler $K --acilis P --acilis_kare _w/P_kare.png >/dev/null
+        # 4) video (B, $SURE sn, muzikli) + onayli kapak basa
+        T0=$(date +%s)
+        python3 $V/video_uret.py --poster _g/poster.jpg --a "$A" --b "$B" --out _w/v --acilis B --sure "$SURE" --muzik _w/m/muzik_k.m4a > _w/v.log 2>&1 &
+        while [ "$(jobs -rp | wc -l)" -gt 0 ]; do sleep 45; echo "ETA $(grep -o '[0-9]*/[0-9]* kare.*' _w/v.log | tail -1) | gecen $(( $(date +%s) - T0 )) sn"; done
+        wait
+        rm -f _w/m/muzik.m4a
+        f="_w/v/$SLUG-astroloveart-reel.mp4"
+        [ -f "$f" ] || { echo "::error::video uretilemedi"; tail -20 _w/v.log; exit 1; }
+        OUT="_o/$SLUG-pin-video.mp4"
+        python3 $V/kapak_basa.py --video "$f" --kapak _g/kapak.jpg --cikis "$OUT" --tam 0.5 --gecis 0.5 --qc _o/kapak_basa_qc.json > _o/kapak_basa_log.txt 2>&1
+        ONAY=""; [ -s _g/onayli_P.mp4 ] && ONAY="--onayli_mp4 _g/onayli_P.mp4"
+        python3 scripts/sosyal/pin78_video_qc.py --b _w/kb --p _w/kp --bilgi _w/bilgi.json --sure "$SURE" --video "$OUT" --kapak_qc _o/kapak_basa_qc.json --oz-test > _o/video_oz_test.txt; VO=$?
+        python3 scripts/sosyal/pin78_video_qc.py --b _w/kb --p _w/kp --bilgi _w/bilgi.json --sure "$SURE" --video "$OUT" --kapak_qc _o/kapak_basa_qc.json $ONAY > _o/video_qc.txt; VQ=$?
+        cat _o/muzik_lufs.txt >> _o/video_qc.txt
+        grep -E "FAIL|BILGI|son kart" _o/video_qc.txt | sed 's/^/::warning::VIDEO /'
+        mkdir -p _o/video_kareler
+        for s in 0 0.6 1.2 3 8 10.5 12.5 14.2; do ffmpeg -v error -y -ss $s -i "$OUT" -frames:v 1 -q:v 2 "_o/video_kareler/kare_${s}s.jpg"; done
+        echo "VIDEO_RC=$(( VO + VQ ))" >> "$GITHUB_ENV"
+    - name: Kontak + Drive
+      if: ${{ always() }}
+      run: |
+        set +e -uo pipefail
+        python3 - <<'PY'
+        import glob, os
+        from PIL import Image, ImageDraw
+        o = '_o'; c = Image.new('RGB', (2560, 1720), (255, 255, 255)); d = ImageDraw.Draw(c)
+        pins = sorted(glob.glob(os.path.join(o, 'PIN_*_v6.jpg')))
+        x = 40
+        for p in pins:
+            c.paste(Image.open(p).convert('RGB').resize((600, 900)), (x, 50)); d.text((x, 20), os.path.basename(p) + ' (onayli v6 aynen)', fill=(0, 0, 0)); x += 640
+        kr = sorted(glob.glob(os.path.join(o, 'video_kareler', '*.jpg')), key=lambda f: float(f.split('kare_')[1][:-5]))
+        x2 = 40
+        for k in kr:
+            c.paste(Image.open(k).convert('RGB').resize((280, 498)), (x2, 1000)); d.text((x2, 1505), 'video ' + k.split('kare_')[1][:-4], fill=(0, 0, 0)); x2 += 310
+        c.save(os.path.join(o, 'KONTAK_PIN78_ORNEK.jpg'), quality=92)
+        PY
+        ls -la _o _o/video_kareler
+        HEDEF="$KLASOR"
+        if [ "${METIN_RC:-1}" != 0 ] || [ "${VIDEO_RC:-1}" != 0 ]; then HEDEF="$KLASOR/FAIL_${{ github.run_id }}"; fi
+        rclone copy _o "gdrive:$HEDEF" --drive-root-folder-id "$OFIS" -q && echo "::warning::DRIVE OFIS/$HEDEF $(rclone lsf "gdrive:$HEDEF" --drive-root-folder-id "$OFIS" | tr '\n' ' ')"
+        rm -rf _w ~/.config/rclone
+        echo "::warning::SONUC METIN_RC=${METIN_RC:-1} VIDEO_RC=${VIDEO_RC:-1}"
+        [ "${METIN_RC:-1}" = 0 ] && [ "${VIDEO_RC:-1}" = 0 ]
