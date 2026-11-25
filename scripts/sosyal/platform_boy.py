@@ -67,11 +67,11 @@ def iki_satir_bant(pin, A, B):
     return bant, (IKI_UST - 10, baslik_alt + 10)
 
 
-def dorde_bes(pin, A=None, B=None, iki_izin=False):
+def dorde_bes(pin, A=None, B=None, iki_izin=False, zorla=False):
     im = Image.open(pin).convert('RGB')
     if im.size != (1000, 1500):
         raise SystemExit(f'DUR: pin boyu {im.size}')
-    iki = bool(iki_izin and A and B and tek_satir_pt(pin) < MIN_PT + 0.3)
+    iki = bool(iki_izin and A and B and (zorla or tek_satir_pt(pin) < MIN_PT + 0.3))
     if iki:
         ust, pencere = iki_satir_bant(pin, A, B)
     else:
@@ -120,12 +120,10 @@ def satirlar(a, ust_h, alt_y, pencere=None):
     ub = govde(*pencere); ab = govde(alt_y, H)
     out = {}
     def ilk_harf(y0, y1):
-        # satirin ilk harfi (her iki satirda da buyuk harf: burc adinin ilk harfi / 'A'dd): ilk bitisik sutun grubunun murekkep yuksekligi
-        cols = d[y0:y1 + 1].any(0); xs = np.where(cols)[0]; x = xs[0]
-        while x + 1 < len(cols) and cols[x + 1]:
-            x += 1
-        rr = np.where(d[y0:y1 + 1, xs[0]:x + 1].any(1))[0]
-        return int(rr[-1] - rr[0] + 1)
+        # buyuk harf yuksekligi = taban cizgisi - satir ustu (inceleme 2. tur: "AQ" bitisik grup + Q kuyrugu olcumu sisiriyordu).
+        # Taban cizgisi: murekkepli sutunlarin alt ucunun en sik degeri (alt uzantilar Q/g/y/p azinlikta); ust: satirin en ust murekkebi
+        # (buyuk harf ya da ust uzanti; CAP_PT 0.73 ile en kucuk punto tahmini).
+        return taban(d, y0, y1)[1]
     if ub:
         # baslik: penceredeki tum satirlar (iki satirli 4:5'te iki blok); kutu birlesik, punto en kucuk satirin ilk harfi
         y0, y1 = ub[0][0], ub[-1][1]; xs = np.where(d[y0:y1 + 1].any(0))[0]
@@ -138,20 +136,34 @@ def satirlar(a, ust_h, alt_y, pencere=None):
     return out
 
 
+def taban(d, y0, y1, x0=None, x1=None):
+    """d: murekkep maskesi. (taban_y, buyuk_harf_yuksekligi) doner."""
+    m = d[y0:y1 + 1, x0:x1]
+    cols = np.where(m.any(0))[0]
+    alt = np.array([np.where(m[:, c])[0].max() for c in cols])
+    vals, cnt = np.unique(alt, return_counts=True)
+    tb = int(vals[np.argmax(cnt)])
+    ust = int(np.where(m.any(1))[0].min())
+    return y0 + tb, tb - ust + 1
+
+
 def pt(px_h, img_w, gorunum_pt):
     """murekkep yuksekligi (px) -> punto (pt) bu gorunumde."""
     return px_h / CAP_PT * gorunum_pt / img_w
 
 
-def kontrol_gorsel(ad, a, ust_h, alt_y, S, gorunumler, pencere=None):
+def kontrol_gorsel(ad, a, ust_h, alt_y, S, gorunumler, pencere=None, iki=False):
     """gorunumler: [(gorunum adi, genislik_pt, kirpma (x0, y0, x1, y1) goruntu px)]"""
     st = satirlar(a, ust_h, alt_y, pencere)
+    if iki:
+        S.append((f'{ad} iki satirli baslik: iki ayri satir olculdu', len(st.get('baslik_satir', [])) == 2, len(st.get('baslik_satir', []))))
     if len(st.get('baslik_satir', [])) > 1:
         bl = st['baslik_satir']
-        ara = min(bl[i + 1][0] - bl[i][1] - 1 for i in range(len(bl) - 1))
-        S.append((f'{ad} iki satirli baslik: satir arasi >= 20 px', ara >= 20, ara))
+        dm = np.abs(a.astype(int) - np.array(BG)).sum(2) > 60
+        ara = min(bl[i + 1][0] - taban(dm, bl[i][0], bl[i][1])[0] - 1 for i in range(len(bl) - 1))   # taban cizgisinden (Q kuyrugu haric)
+        S.append((f'{ad} iki satirli baslik: satir arasi (taban cizgisinden) >= 20 px', ara >= 20, ara))
         S.append((f'{ad} iki satirli baslik: ust bosluk >= 30 px', bl[0][0] >= 30, bl[0][0]))
-        alt_b = np.where((np.abs(a[bl[-1][1] + 1:ust_h].astype(int) - np.array(BG)).sum(2) > 60).any(1))[0]
+        alt_b = np.where(dm[bl[-1][1] + 1:ust_h].any(1))[0]
         gb = int(alt_b[0]) if len(alt_b) else -1
         S.append((f'{ad} iki satirli baslik: alt basliga bosluk >= 20 px', gb >= 20, gb))
     for s in ('baslik', 'alt_satir'):
@@ -281,7 +293,7 @@ def calis(g):
         cw = round(H45 * 3 / 4); x0 = (W45 - cw) // 2
         kontrol_gorsel(f'{tur} 4:5', a45, b['ust_h'], b['alt_y'], S,
                        [('IG akis', TEL_PT, (0, 0, W45, H45)), ('FB akis', TEL_PT, (0, 0, W45, H45)),
-                        ('IG profil izgarasi 3:4', IZGARA_PT, (x0, 0, x0 + cw, H45))], pencere=b['baslik_pencere'])
+                        ('IG profil izgarasi 3:4', IZGARA_PT, (x0, 0, x0 + cw, H45))], pencere=b['baslik_pencere'], iki=b['iki_satir'])
     K = None
     if g.video:
         K, bv = kontrol_video(g.video, S); bilgi['video'] = bv
@@ -321,6 +333,15 @@ def main():
             d.text((-60, 40), 'CANCER & LEO AND MORE', font=f, fill=(22, 38, 65)); im2.save(os.path.join(t, 'f3.jpg'), quality=95)
             g4 = copy.copy(g); g4.poster = os.path.join(t, 'f3.jpg'); g4.out = os.path.join(t, 'd'); g4.video = None
             ok4, S4 = calis(g4); R.append(('FAIL: baslik kenardan tasiyor (kirpilir)', not ok4 and any((not s[1]) and 'tam gorunur' in s[0] for s in S4)))
+            # iki satirli 4:5 baslik (Merkez 25 Kas): bilinen PASS (AQUARIUS & / SAGITTARIUS, Q kuyruklu) ve bilinen FAIL (satir arasi 4 px)
+            global IKI_ARALIK
+            im, bi = dorde_bes(g.poster, 'Aquarius', 'Sagittarius', iki_izin=True, zorla=True); a45 = np.asarray(im)
+            S7 = []; st = kontrol_gorsel('iki', a45, bi['ust_h'], bi['alt_y'], S7, [('IG izgara', IZGARA_PT, (34, 0, 1046, H45))], pencere=bi['baslik_pencere'], iki=True)
+            R.append(('iki satir bilinen PASS (2 satir, kapilar)', len(st.get('baslik_satir', [])) == 2 and all(s[1] for s in S7)))
+            eski = IKI_ARALIK; IKI_ARALIK = 4
+            im, bi = dorde_bes(g.poster, 'Aquarius', 'Sagittarius', iki_izin=True, zorla=True); IKI_ARALIK = eski
+            S8 = []; kontrol_gorsel('iki', np.asarray(im), bi['ust_h'], bi['alt_y'], S8, [('IG izgara', IZGARA_PT, (34, 0, 1046, H45))], pencere=bi['baslik_pencere'], iki=True)
+            R.append(('FAIL: iki satir arasi 4 px', any((not s[1]) and ('satir arasi' in s[0] or 'iki ayri satir' in s[0]) for s in S8)))
             if g.video:
                 # FAIL 4: videoya alt %20 alanina altin yazi
                 v2 = os.path.join(t, 'v2.mp4')

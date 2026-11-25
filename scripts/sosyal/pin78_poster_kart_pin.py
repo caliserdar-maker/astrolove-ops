@@ -105,15 +105,6 @@ def poster_pin(kaynak, A, B, sablon):
     return im, {'baslik_px': s, 'baslik_metni': metin}
 
 
-def baslik_cap(metin, boy):
-    s = boy
-    while True:
-        f = ImageFont.truetype(PAGELLA, s); bb = f.getbbox(metin)
-        if bb[2] - bb[0] <= BASLIK_MAX_W or s < 40:
-            H = f.getbbox('H'); return H[3] - H[1]
-        s -= 0.5
-
-
 def etiket_font(font_dir, boy):
     f = ImageFont.truetype(os.path.join(font_dir, 'OpenSans.ttf'), boy)
     f.set_variation_by_axes([600, 95])

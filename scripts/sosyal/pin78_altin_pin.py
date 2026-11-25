@@ -41,6 +41,7 @@ GLIF_H, GLIF_Y = 76, (848, 923)
 AD_H, AD_Y = 49, (943, 991)
 GLIF_CX = (206, 576)                               # PIN_03 glif satiri x 168-614: sol/sag glif merkezleri (panel ici)
 PAY, BOSLUK = 24, 12
+AD_ARA = 42                                        # uretimde adlar arasi (kapi >= 40 olcum; 2 px JPEG/kenar payi, inceleme 2. tur)
 # Serdar 25 Kas karari A (Merkez aktarimi): bu 6 ciftte ad BUYUK HARF, sigan en buyuk boyda (36-44 px); 45 px kapisina istisna
 AD_ISTISNA = {'AQUARIUS_CAPRICORN', 'AQUARIUS_SAGITTARIUS', 'CAPRICORN_CAPRICORN', 'CAPRICORN_SAGITTARIUS', 'SAGITTARIUS_SAGITTARIUS',
               'SAGITTARIUS_SCORPIO'}
@@ -160,12 +161,12 @@ def panel(poster, A, B, kart, olc, buyut=False):
         ma, sa_ = ad_maske(A.upper(), h); mb, sb_ = ad_maske(B.upper(), h)
         xa = min(max(GLIF_CX[0], PAY + ma.size[0] / 2), PW - PAY - ma.size[0] / 2)
         xb = max(min(GLIF_CX[1], PW - PAY - mb.size[0] / 2), PAY + mb.size[0] / 2)
-        eksik = 40 - ((xb - mb.size[0] / 2) - (xa + ma.size[0] / 2))
+        eksik = AD_ARA - ((xb - mb.size[0] / 2) - (xa + ma.size[0] / 2))
         if eksik > 0:          # adlar disari (sol ada sola, sag ada saga) payi gecmeden, esit paylasarak kayar
             la = max(0.0, xa - (PAY + ma.size[0] / 2)); rb = max(0.0, (PW - PAY - mb.size[0] / 2) - xb)
             da = min(la, max(eksik / 2, eksik - rb)); db = min(rb, eksik - da)
             xa -= da; xb += db
-        if (xb - mb.size[0] / 2) - (xa + ma.size[0] / 2) >= 40 and xa - ma.size[0] / 2 >= PAY and xb + mb.size[0] / 2 <= PW - PAY:
+        if (xb - mb.size[0] / 2) - (xa + ma.size[0] / 2) >= AD_ARA and xa - ma.size[0] / 2 >= PAY and xb + mb.size[0] / 2 <= PW - PAY:
             break
         h -= 1
         if h < 20:
@@ -221,10 +222,11 @@ def qc(yol, bilgi, olc, cerceve, baslik):
         bos = np.diff(cols); j = int(np.argmax(bos))
         adlar = [(cols[0], cols[j]), (cols[j + 1], cols[-1])]
         for x0, x1 in adlar:
-            c = am[:, x0:x1 + 1].any(0); e = 0
-            while e + 1 < len(c) and c[e + 1]:
-                e += 1
-            rr = np.where(am[:, x0:x0 + e + 1].any(1))[0]; olc_ad.append(int(rr[-1] - rr[0] + 1))
+            # buyuk harf yuksekligi = taban cizgisi (sutun alt uclarinin en sik degeri; Q kuyrugu azinlik) - en ust murekkep
+            # (inceleme 2. tur: ilk bitisik grup "AQ" + Q kuyrugu olcumu 62 px'e sisiriyordu)
+            m_ = am[:, x0:x1 + 1]; cs = np.where(m_.any(0))[0]
+            alt_ = np.array([np.where(m_[:, c_])[0].max() for c_ in cs]); v_, n_ = np.unique(alt_, return_counts=True)
+            olc_ad.append(int(v_[np.argmax(n_)] - np.where(m_.any(1))[0].min() + 1))
         gb = np.diff(gcols); gs = np.where(gb > 20)[0]
         sol = (gcols[0] + gcols[gs[0]]) / 2 if len(gs) else gcols[0]; sag = (gcols[gs[-1] + 1] + gcols[-1]) / 2 if len(gs) else gcols[-1]
         k('ad glifinin altinda (glif merkezi ad kutusu icinde)', adlar[0][0] <= sol <= adlar[0][1] and adlar[1][0] <= sag <= adlar[1][1],
@@ -232,7 +234,8 @@ def qc(yol, bilgi, olc, cerceve, baslik):
         k('adlar arasi >= 40 px (olcum)', int(adlar[1][0] - adlar[0][1]) >= 40, int(adlar[1][0] - adlar[0][1]))
     k('ad olcumu (iki ad, ilk harf) bulundu', len(olc_ad) == 2, olc_ad)
     h_olc = min(olc_ad) if olc_ad else 0
-    k('olculen ad yuksekligi = uretici beyani (+-3 px)', abs(h_olc - bilgi['ad_buyuk_harf_px']) <= 3, f"olcum {olc_ad} beyan {bilgi['ad_buyuk_harf_px']}")
+    k('olculen ad yuksekligi = uretici beyani (her ad +-3 px)', bool(olc_ad) and all(abs(h_ - bilgi['ad_buyuk_harf_px']) <= 3 for h_ in olc_ad),
+      f"olcum {olc_ad} beyan {bilgi['ad_buyuk_harf_px']}")
     if bilgi.get('cift') in AD_ISTISNA:
         k('ad buyuk harf >= 36 px (Serdar 25 Kas A istisnasi: sigan en buyuk boy; olcum)', h_olc >= 36, h_olc)
     else:
@@ -290,7 +293,10 @@ def main():
         zem = Image.new('RGB', band.size, tuple(int(v) for v in np.asarray(b5.crop((PX0 + 30, y1_ + 6, PX0 + 60, y1_ + 12))).reshape(-1, 3).mean(0)))
         b5.paste(zem, (PX0 + 24, y0_)); b5.paste(kb, (PX0 + 300, y0_ + 8))
         b5.save(os.path.join(t, 'b5m.jpg'), quality=95, subsampling=0)
-        sonuc.append(('FAIL: ad kucultulup kaydirildi (beyan ayni)', any(s['sonuc'] == 'FAIL' and ('ad ' in s['kapi']) for s in qc(os.path.join(t, 'b5m.jpg'), bilgi, olc, g.cerceve, g.baslik))))
+        q5 = qc(os.path.join(t, 'b5m.jpg'), bilgi, olc, g.cerceve, g.baslik)
+        sonuc.append(('FAIL: ad kucultulup kaydirildi (beyan ayni; olcum ve glif-alti kapilari)',
+                      any(s['sonuc'] == 'FAIL' and s['kapi'].startswith('olculen ad') for s in q5)
+                      and any(s['sonuc'] == 'FAIL' and s['kapi'].startswith('ad glifinin') for s in q5)))
         # FAIL 4: cerceve bozulmasi
         b4 = im.copy(); b4.paste((0, 0, 0), (20, 1400, 60, 1440)); b4.save(os.path.join(t, 'b4.jpg'), quality=95, subsampling=0)
         sonuc.append(('FAIL: cerceve', any(s['sonuc'] == 'FAIL' for s in qc(os.path.join(t, 'b4.jpg'), bilgi, olc, g.cerceve, g.baslik))))

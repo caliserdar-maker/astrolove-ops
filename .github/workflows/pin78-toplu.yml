@@ -260,6 +260,7 @@ jobs:
     - uses: actions/checkout@v4
     - name: Ozet + takvim/metin durum (dosyasi hazir olmayan pin isaretlenir)
       env:
+        CIFTLER: ${{ inputs.ciftler }}
         RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
         GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
       run: |
@@ -274,32 +275,41 @@ jobs:
         for d in PINTEREST_2x3 VIDEO GONDERI_4x5 ONIZLEME FAIL; do rclone lsf "$R/$d" $X > "_z/$d.txt"; done
         rclone lsf "$R" $X --dirs-only > _z/kok.txt
         rclone copyto "$R/TAKVIM_PIN78_20261125.csv" _z/T.csv $X -q; rclone copyto "$R/METIN_PIN78_20261125.csv" _z/M.csv $X -q
-        python3 - <<'PY' > _z/OZET_PIN78.txt
-        import csv, collections, os
+        python3 - <<'PY' > _z/OZET_PIN78.txt; PR=$?
+        import csv, collections, os, sys
         L = {d: set(x.strip().rstrip('/') for x in open(f'_z/{d}.txt')) for d in ('PINTEREST_2x3', 'VIDEO', 'GONDERI_4x5', 'ONIZLEME', 'FAIL')}
         kok = [x.strip() for x in open('_z/kok.txt')]
         tum = [(r['cift'], r['a'].lower() + '-and-' + r['b'].lower()) for r in csv.DictReader(open('data/pod/pod78_ids.csv'))]
-        def hazir(s):
-            return all(f'{s}-{t}.jpg' in L['PINTEREST_2x3'] for t in ('poster', 'kart', 'altin')) and f'{s}-pin-video.mp4' in L['VIDEO'] \
+        sec = [c for c, _ in tum] if os.environ['CIFTLER'] == 'HEPSI' else list(dict.fromkeys(os.environ['CIFTLER'].split(',')))
+        def hazir(s):   # FAIL klasorunde olan cift hazir sayilmaz (eski koşudan kalan dosya olsa bile); onizleme de gerekir
+            return s not in L['FAIL'] and f'ONIZLEME_PAFTA_{s}.jpg' in L['ONIZLEME'] \
+                and all(f'{s}-{t}.jpg' in L['PINTEREST_2x3'] for t in ('poster', 'kart', 'altin')) and f'{s}-pin-video.mp4' in L['VIDEO'] \
                 and all(f'{s}-{t}-4x5.jpg' in L['GONDERI_4x5'] for t in ('poster', 'kart', 'altin'))
         H = [c for c, s in tum if hazir(s)]
         print('KLASOR', os.environ['KLASOR'])
         print('AYNI ADLI KLASOR (olmamali):', [k for k, n in collections.Counter(kok).items() if n > 1])
         print('PINTEREST_2x3', len(L['PINTEREST_2x3']), '/ 234; VIDEO', len(L['VIDEO']), '/ 78; GONDERI_4x5', len(L['GONDERI_4x5']),
               '/ 234; ONIZLEME', len(L['ONIZLEME']), '/ 78; FAIL', sorted(L['FAIL']))
-        print('HAZIR CIFT', len(H), '/ 78; HAZIR OLMAYAN', [c for c, s in tum if c not in H])
+        print('SECILEN', len(sec), '| HAZIR CIFT (secilen icinde)', len([c for c in sec if c in H]), '/', len(sec),
+              '| HAZIR OLMAYAN', [c for c in sec if c not in H])
+        sorun = [k for k, n in collections.Counter(kok).items() if n > 1]
         for ad in ('T', 'M'):
             if not os.path.exists(f'_z/{ad}.csv'):
-                print(ad, 'csv yok'); continue
+                print(ad, 'csv yok'); sorun.append(ad + ' yok'); continue
             rows = list(csv.DictReader(open(f'_z/{ad}.csv', encoding='utf-8')))
+            if not rows:
+                print(ad, 'csv bos'); sorun.append(ad + ' bos'); continue
             for r in rows:
                 r['dosya_hazir'] = 'EVET' if r['cift'] in H else 'HAYIR'
             out = '_z/TAKVIM_PIN78_20261125_DURUM.csv' if ad == 'T' else '_z/METIN_PIN78_20261125_DURUM.csv'
             with open(out, 'w', newline='', encoding='utf-8') as f:
                 w = csv.DictWriter(f, fieldnames=list(rows[0]), lineterminator='\n'); w.writeheader(); w.writerows(rows)
             print(ad, 'satir', len(rows), 'dosya_hazir=HAYIR', sum(r['dosya_hazir'] == 'HAYIR' for r in rows))
+        tamam = not sorun and all(c in H for c in sec)
+        print('OZET_SONUC', 'PASS' if tamam else 'FAIL', sorun)
+        sys.exit(0 if tamam else 1)
         PY
         cat _z/OZET_PIN78.txt | sed 's/^/::warning::/'
         rclone copy _z "$R" $X --include "OZET_PIN78.txt" --include "*_DURUM.csv" -q
         rm -rf ~/.config/rclone
-        grep -q "HAZIR CIFT 78 / 78" _z/OZET_PIN78.txt
+        [ "$PR" = 0 ]
