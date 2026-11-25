@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Pinterest 78 cift x 3 tur (poster, kart, video) = 234 pin KURU takvimi (Serdar 25 Kas 2026, KARARLAR_20261125_49/_50).
+"""Pinterest 78 cift x 4 tur (poster, kart, altin yakin cekim, video) = 312 pin KURU takvimi (Serdar 25 Kas 2026,
+KARARLAR_20261125_49/_50/_51).
 YAZMA YOK (Metricool / Pinterest). Kurallar: gunde 7 pin; ayni ilana iki pin arasi >= 7 gun; baslangic --baslangic;
 12 Ara 2026'dan once kanal Metricool, sonra kendi sistem (Metricool 12 Ara'da biter, ANA_LISTE_20261123); metin surumu:
 yayin 1 Mar 2027'den once "sevgililer", sonra "genel". Sira: oncelikli 4 cift (satan/aranan: CANCER_LEO, SCORPIO_TAURUS,
 PISCES_VIRGO, CANCER_LIBRA; kayit [ER] + PINLER_ORNEK), sonra data/sosyal/pinterest/SIRA_78.csv. Tur sirasi: once 78 poster,
-sonra 78 kart, sonra 78 video (ayni cift turlar arasi ~11 gun). Saatler: 02:00-05:00 TR, 30 dk arayla (strateji raporu 7.3:
-ABD Dogu 18:00-21:00; raporda da tahmin). Plan gunu 1 = --baslangic gecesi (ertesi takvim gunu 02:00).
-Pano / bolum (strateji 7.5 onerisi, Serdar onayi gerekir): poster -> Valentine's Day Gifts for Couples / Posters, video -> ayni pano /
-Videos, kart -> Zodiac Compatibility Art / Combined Symbol Cards (ana panoda 78 pin var, strateji 7.5 kayit).
-Kontrol (PASS/FAIL, cikis 1): 234 satir, cift basina 3 (her turden 1), TAKVIM GUNU basina <= 7, ayni ilan arasi >= 7 gun,
+sonra 78 kart, 78 altin yakin cekim, 78 video (ayni cift turlar arasi ~11 gun). Saatler: Serdar KARAR 10 (SOSYAL_KARAR 20 Eki)
+"saatler 09:00-23:30 yayilir": 7 slot esit aralik (09:00 ... 23:30, Europe/Istanbul). Plan gunu 1 = --baslangic ertesi gunu.
+Pano / bolum (strateji 7.5 onerisi, Serdar onayi gerekir; bolumler Pinterest'te YOK, acilmasi yazim): sevgililer surumu:
+poster -> Valentine's Day Gifts for Couples / Posters, video -> ayni pano / Videos, kart -> Zodiac Compatibility Art / Combined
+Symbol Cards (ana panoda 78 pin), altin -> Astrology Wall Art and Home Decor (bos pano; strateji 7.5 "C yakin cekim").
+genel surum (1 Mar 2027 sonrasi): poster ve video -> Wedding and Engagement Gifts, kart ve altin ayni.
+Kontrol (PASS/FAIL, cikis 1): 312 satir, cift basina 4 (her turden 1), TAKVIM GUNU basina <= 7, ayni ilan arasi >= 7 gun,
 78 ilan, pano/bolum basina (mevcut pinler dahil) <= 100 (R4 20-100), Metricool satirlari 12 Ara'dan once.
 Not: Metricool kuyrugunda 12 Ara'ya kadar gunde ~4 kupa pini daha var (strateji 7.1 [09]); gunluk toplam ~11 olur.
 Kullanim: pin78_takvim.py --cikti TAKVIM.csv [--baslangic 2026-11-25]
@@ -19,9 +22,14 @@ from datetime import date, datetime, timedelta
 
 KOK = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ONCELIK = ['CANCER_LEO', 'SCORPIO_TAURUS', 'PISCES_VIRGO', 'CANCER_LIBRA']
-SAAT = ['02:00', '02:30', '03:00', '03:30', '04:00', '04:30', '05:00']   # hepsi plan gununun ertesi takvim gunu
-PANO = {'poster': ("Valentine's Day Gifts for Couples", 'Posters'), 'kart': ('Zodiac Compatibility Art', 'Combined Symbol Cards'),
-        'video': ("Valentine's Day Gifts for Couples", 'Videos')}
+SAAT = ['09:00', '11:25', '13:50', '16:15', '18:40', '21:05', '23:30']   # KARAR 10: 09:00-23:30 esit aralik
+TURLER = ('poster', 'kart', 'altin', 'video')
+PANO = {('poster', 'sevgililer'): ("Valentine's Day Gifts for Couples", 'Posters'),
+        ('video', 'sevgililer'): ("Valentine's Day Gifts for Couples", 'Videos'),
+        ('poster', 'genel'): ('Wedding and Engagement Gifts', ''), ('video', 'genel'): ('Wedding and Engagement Gifts', '')}
+for _s in ('sevgililer', 'genel'):
+    PANO[('kart', _s)] = ('Zodiac Compatibility Art', 'Combined Symbol Cards')
+    PANO[('altin', _s)] = ('Astrology Wall Art and Home Decor', '')
 MEVCUT = {("Zodiac Compatibility Art", ''): 78, ("Zodiac Couple Wall Art", ''): 156}   # strateji 7.5 (22 Kas okuma); bolumsuz = ana pano
 METRICOOL_SON = date(2026, 12, 12)
 GENEL_BAS = date(2027, 3, 1)
@@ -36,26 +44,29 @@ def sira():
 def plan(bas):
     ids = {r['cift']: r['listing_id'] for r in csv.DictReader(open(os.path.join(KOK, 'data/pod/pod78_ids.csv'), encoding='utf-8'))}
     out, n = [], 0
-    for tur in ('poster', 'kart', 'video'):
+    for tur in TURLER:
         for c in sira():
             g, s = divmod(n, len(SAAT)); n += 1
             gun = bas + timedelta(days=g)
             hh = SAAT[s]; t = datetime.combine(gun + timedelta(days=1), datetime.strptime(hh, '%H:%M').time())
+            sur = 'sevgililer' if t.date() < GENEL_BAS else 'genel'
             out.append({'plan_gunu': g + 1, 'tarih_saat_tr': t.strftime('%Y-%m-%d %H:%M'), 'cift': c, 'tur': tur,
                         'listing_id': ids.get(c, ''), 'link': f"https://www.etsy.com/listing/{ids.get(c, '')}",
-                        'pano': PANO[tur][0], 'pano_bolumu': PANO[tur][1],
+                        'pano': PANO[(tur, sur)][0], 'pano_bolumu': PANO[(tur, sur)][1],
                         'kanal': 'Metricool' if t.date() < METRICOOL_SON else 'kendi sistem (Pinterest yolu HAZIR DEGIL)',
-                        'metin_surumu': 'sevgililer' if t.date() < GENEL_BAS else 'genel'})
+                        'metin_surumu': sur})
     return out
 
 
 def kontrol(out):
-    S = [('234 satir', len(out) == 234, len(out))]
+    N = 78 * len(TURLER)
+    S = [(f'{N} satir', len(out) == N, len(out))]
     say = Counter(r['cift'] for r in out); turler = defaultdict(set)
     for r in out:
         turler[r['cift']].add(r['tur'])
-    S.append(('78 cift x 3', len(say) == 78 and set(say.values()) == {3}, f'{len(say)} cift'))
-    S.append(('cift basina 3 tur', all(len(v) == 3 for v in turler.values()), ''))
+    S.append((f'78 cift x {len(TURLER)}', len(say) == 78 and set(say.values()) == {len(TURLER)}, f'{len(say)} cift'))
+    S.append((f'cift basina {len(TURLER)} tur', all(len(v) == len(TURLER) for v in turler.values()), ''))
+    S.append(('genel surum Sevgililer panosunda degil', not any(r['metin_surumu'] == 'genel' and 'valentine' in r['pano'].lower() for r in out), ''))
     gun = Counter(r['tarih_saat_tr'][:10] for r in out)
     S.append(('takvim gunu basina <= 7', max(gun.values()) <= 7, max(gun.values())))
     S.append(('Metricool satirlari 12 Ara oncesi', all(r['tarih_saat_tr'][:10] < str(METRICOOL_SON) for r in out if r['kanal'] == 'Metricool'), ''))
@@ -71,7 +82,8 @@ def kontrol(out):
     for k, n in MEVCUT.items():
         if k in pano:          # yalniz bu planin pin ekledigi pano/bolum
             pano[k] += n
-    S.append(('pano/bolum basina <= 100 (mevcut dahil)', max(pano.values()) <= 100, {f'{a}/{b or "ana"}': n for (a, b), n in pano.items()}))
+    S.append(('pano/bolum basina <= 100 (mevcut dahil; ZAYIF: yalniz 22 Kas kayit sayilari, bolumler henuz yok)', max(pano.values()) <= 100,
+              {f'{a}/{b or "ana"}': n for (a, b), n in pano.items()}))
     return S
 
 
