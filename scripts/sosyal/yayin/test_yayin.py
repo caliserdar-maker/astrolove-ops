@@ -496,6 +496,12 @@ def senaryo_gizli_test():
         rc, out = kos(otr, "yayin", "--gizli-test", n)
         yazim = [c for c in otr.cagri[once:] if c[0] != "GET" and "oauth2" not in c[1]]
         kontrol(f"FAIL gizli test {ad}: DUR, yazim yok", rc == 2 and not yazim and "DUR" in out)
+    otr2 = Oturum([satir(28, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="private", onay=False),
+                   satir(29, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="private", saat=+3)])
+    for n, ad in (("28", "onaysiz"), ("29", "zamani gelmemis")):
+        rc, out = kos(otr2, "yayin", "--gizli-test", n)
+        kontrol(f"FAIL gizli test {ad}: cikis 1 + 'yayinlanmadi'", rc == 1 and "yayinlanmadi" in out
+                and not any("upload/youtube" in c[1] for c in otr2.cagri))
     sifirla()
     acik()
     otr = Oturum([satir(26, "facebook", "reel", "SOSYAL/r.mp4")])

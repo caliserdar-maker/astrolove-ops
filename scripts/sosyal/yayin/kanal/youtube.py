@@ -41,7 +41,7 @@ def yayinla(http, k, satir, medya, uyku=None):
     if not baslik:
         raise Hata("YouTube basligi bos (metnin ilk satiri)")
     govde = {"snippet": {"title": baslik, "description": metin[:5000], "categoryId": "22"},
-             "status": {"privacyStatus": satir["gorunurluk"], "selfDeclaredMadeForKids": False,
+             "status": {"privacyStatus": satir["gorunurluk"].strip(), "selfDeclaredMadeForKids": False,
                         "containsSyntheticMedia": satir.get("yz_beyani") == "evet"}}
     veri = medya[0]["yerel"].read_bytes()
     _, r = http.iste("POST", f"{API}/upload/youtube/v3/videos", token=t,

@@ -105,6 +105,11 @@ def yayin(http, tk, simdi, kuru, uyku=None, gizli_test=""):
                 except Hata as e:
                     kod, neden = "MEDYA", str(e)
             ozet_say[kod] = ozet_say.get(kod, 0) + 1
+            if gizli_test and kod not in ("YAYINLA",):
+                uyari.append(f"GIZLI TEST {etiket}: yayinlanmadi ({kod} {neden})")
+                log(f"GIZLI TEST {etiket}: yayinlanmadi ({kod} {neden})")
+                if kod != "KACTI":
+                    continue
             if kod in ("BEKLE", "ATLA", "ONAYSIZ", "KAPALI"):
                 continue
             if kod in ("GECERSIZ", "OZET_FARKLI", "MEDYA"):
