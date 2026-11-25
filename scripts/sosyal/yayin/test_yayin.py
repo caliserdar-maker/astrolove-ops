@@ -14,6 +14,8 @@ import stat
 import sys
 import tempfile
 import contextlib
+import csv
+from collections import Counter
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -56,6 +58,9 @@ CONF = TMP / "rclone.conf"
 CONF.write_text('[gdrive]\ntype = drive\nclient_id = cid\nclient_secret = GSECRET0123456789\ntoken = {"refresh_token": "GREFRESH0123456789"}\n')
 os.environ.update(RCLONE_CONFIG=str(CONF), SOSYAL_TAKVIM_ID="SHEET1", GITHUB_ACTIONS="", OPS_ADMIN_TOKEN="ghADMIN0123456789",
                   YT_CLIENT_ID="ytcid", YT_CLIENT_SECRET="YTSECRET0123456789", IG_APP_ID="igapp", IG_APP_SECRET="IGSECRET0123456789")
+VAYAR = TMP / "video_kaynak.json"
+VAYAR.write_text(json.dumps({"klasor": "SOSYAL", "ad_kalibi": "{a}-and-{b}-pin-video.mp4", "onay": "SERDAR_20261126"}))
+os.environ["SOSYAL_VIDEO_KAYNAK"] = str(VAYAR)
 for k in ("RCLONE_CONFIG_GDRIVE_CLIENT_ID", "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET"):
     os.environ.pop(k, None)
 
@@ -65,6 +70,12 @@ import izin  # noqa: E402
 import secim  # noqa: E402
 import token_yenile  # noqa: E402
 
+def jpeg(w, h, ek=b""):
+    sof = b"\xff\xc0" + (17).to_bytes(2, "big") + b"\x08" + h.to_bytes(2, "big") + w.to_bytes(2, "big") + b"\x03" + b"\x01\x11\x00\x02\x11\x00\x03\x11\x00"
+    return b"\xff\xd8" + b"\xff\xe0" + (4 + len(ek)).to_bytes(2, "big") + b"JF" + ek + sof + b"\xff\xd9"
+
+
+JPG_A, JPG_B, JPG_23 = jpeg(1080, 1350, b"A"), jpeg(1080, 1350, b"B"), jpeg(1000, 1500, b"P")
 TOK = {"instagram": "IGTOKEN_SAHTE_0123456789", "threads": "THTOKEN_SAHTE_0123456789",
        "facebook": "FBPAGETOKEN_SAHTE_0123456789", "youtube": "YTREFRESH_SAHTE_0123456789"}
 SIRLAR = list(TOK.values()) + ["GSECRET0123456789", "GREFRESH0123456789", "ghADMIN0123456789", "YTSECRET0123456789",
@@ -97,6 +108,7 @@ class Oturum:
         self.yenile_hata = False
         self.kaydir = False
         self.fb = {"hesaplar": [], "hedef": ["9001"], "sayfa_token": True, "gecerli": True, "liste_hedef": None}
+        self.yorum_hata = False
         self.tamam_yaz_hata = False
 
     def _hucre(self, rng):
@@ -201,6 +213,10 @@ class Oturum:
             return Y(j={"id": pid, "name": "AstroLoveArt", **({"access_token": TOK["facebook"]} if self.fb["sayfa_token"] else {})})
         if "graph.facebook.com" in url and url.endswith("/me"):
             return Y(j={"id": "9001", "name": "AstroLoveArt"})
+        if "graph.facebook.com" in url and url.endswith("/comments"):
+            if self.yorum_hata:
+                return Y(400, {"error": {"message": "comment blocked"}})
+            return Y(j={"id": "CMT1"})
         if "graph.facebook.com" in url:
             if url.endswith("/video_reels"):
                 return Y(j={"video_id": "FBV1"} if data["upload_phase"] == "start" else {"success": True})
@@ -231,10 +247,11 @@ def kimlikleri_koy():
         drive_koy(f"ASTROLOVE/TEMP/SOSYAL_{p.upper()}_TOKEN.json", json.dumps({sir: t, alan: deger}).encode())
 
 
-def satir(no, platform, tur, medya="", metin="Hello stars", saat=-1, onay=True, durum="", gorunurluk="", md5ler=None):
+def satir(no, platform, tur, medya="", metin="Hello stars", saat=-1, onay=True, durum="", gorunurluk="", md5ler=None,
+          link="", alt="", pano=""):
     s = {"satir_no": str(no), "tarih_saat_TR": (SIMDI + timedelta(hours=saat)).strftime("%Y-%m-%d %H:%M"),
-         "platform": platform, "tur": tur, "medya": medya, "metin": metin, "link": "", "pano": "", "yz_beyani": "hayir",
-         "gorunurluk": gorunurluk, "DURUM": durum, "sonuc_no": "", "not": ""}
+         "platform": platform, "tur": tur, "medya": medya, "metin": metin, "link": link, "pano": pano, "yz_beyani": "hayir",
+         "gorunurluk": gorunurluk, "DURUM": durum, "sonuc_no": "", "not": "", "alt_metin": alt}
     if onay:
         s["ONAY"] = "SERDAR_20261207"
         s["ONAY_OZET"] = secim.ozet(s, md5ler if md5ler is not None else
@@ -283,22 +300,22 @@ def sifirla():
     DRIVE.mkdir()
     MEDIA.clear()
     kimlikleri_koy()
-    drive_koy("SOSYAL/r.mp4", b"REEL")
-    drive_koy("SOSYAL/a.jpg", b"JPG-A")
-    drive_koy("SOSYAL/b.jpg", b"JPG-B")
-    drive_koy("SOSYAL/s.mp4", b"SHORT")
+    drive_koy("SOSYAL/cancer-and-libra-pin-video.mp4", b"REEL")
+    drive_koy("SOSYAL/a.jpg", JPG_A)
+    drive_koy("SOSYAL/b.jpg", JPG_B)
+    drive_koy("SOSYAL/aries-and-leo-pin-video.mp4", b"SHORT")
     genel(1, 1, ".mp4", b"REEL")
-    genel(2, 1, ".jpg", b"JPG-A")
-    genel(2, 2, ".jpg", b"JPG-B")
+    genel(2, 1, ".jpg", JPG_A)
+    genel(2, 2, ".jpg", JPG_B)
 
 
 def senaryo_ana():
     sifirla()
     acik()
-    rows = [satir(1, "instagram", "reel", "SOSYAL/r.mp4"), satir(2, "instagram", "karusel", "SOSYAL/a.jpg;SOSYAL/b.jpg"),
-            satir(3, "threads", "metin"), satir(4, "facebook", "reel", "SOSYAL/r.mp4"),
-            satir(5, "facebook", "gorsel", "SOSYAL/a.jpg"), satir(6, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="private"),
-            satir(7, "instagram", "reel", "SOSYAL/r.mp4", onay=False),
+    rows = [satir(1, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4"), satir(2, "instagram", "karusel", "SOSYAL/a.jpg;SOSYAL/b.jpg"),
+            satir(3, "threads", "metin"), satir(4, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4"),
+            satir(5, "facebook", "gorsel", "SOSYAL/a.jpg"), satir(6, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="private"),
+            satir(7, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", onay=False),
             satir(8, "threads", "metin", durum="BEKLIYOR 2026-12-08T09:00"),
             satir(9, "threads", "metin", saat=-7), satir(10, "threads", "metin", saat=+2)]
     r11 = satir(11, "threads", "metin")
@@ -333,7 +350,7 @@ def senaryo_ana():
 def senaryo_kuru():
     sifirla()
     acik(hepsi=[])
-    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/r.mp4"), satir(9, "threads", "metin", saat=-7)])
+    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4"), satir(9, "threads", "metin", saat=-7)])
     rc, out = kos(otr, "yayin", "--kuru")
     yazim = [c for c in otr.cagri if c[0] != "GET" and "oauth2" not in c[1]]
     kontrol("kuru: yazim 0", not yazim and not list(DRIVE.rglob("SOSYAL_HATA_*")))
@@ -343,7 +360,7 @@ def senaryo_kuru():
 def senaryo_kapali():
     sifirla()
     acik(hepsi=["YAYIN_FB"])
-    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/r.mp4")])
+    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4")])
     kos(otr, "yayin")
     kontrol("FAIL anahtar kapali: yayin yok", satir_al(otr, 1)["DURUM"] == "" and not any("/media" in c[1] for c in otr.cagri))
     os.environ["SOSYAL_YAYIN_ACIK"] = ""
@@ -355,7 +372,7 @@ def senaryo_medya_farkli():
     sifirla()
     acik()
     genel(1, 1, ".mp4", b"BASKA")
-    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/r.mp4")])
+    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4")])
     rc, out = kos(otr, "yayin")
     kontrol("FAIL genel medya farkli: yayin yok", satir_al(otr, 1)["DURUM"] == "" and rc == 1 and "MEDYA" in out)
 
@@ -363,7 +380,7 @@ def senaryo_medya_farkli():
 def senaryo_publish_500():
     sifirla()
     acik()
-    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/r.mp4")])
+    otr = Oturum([satir(1, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4")])
     otr.publish_500 = True
     rc, out = kos(otr, "yayin")
     d = satir_al(otr, 1)
@@ -391,11 +408,11 @@ def senaryo_onayla():
     rc, out = kos(otr, "onayla", "--satirlar", "2,5", "--onay", "SERDAR_20261207", "--medya-kok", str(mk),
                   "--asama", "hazirla", "--plan", str(plan))
     kontrol("onayla hazirla: takvime ONAY yazilmadi", satir_al(otr, 2)["ONAY"] == "" and plan.exists())
-    kontrol("onayla hazirla: genel medya konuldu", (mk / "yayin/202612/2_2.jpg").read_bytes() == b"JPG-B")
+    kontrol("onayla hazirla: genel medya konuldu", (mk / "yayin/202612/2_2.jpg").read_bytes() == JPG_B)
     kontrol("FAIL onayla: medyasi olmayan satir hazirlanmadi", rc == 1 and "5" not in json.loads(plan.read_text())["satirlar"])
     rc, out = kos(otr, "onayla", "--satirlar", "2,5", "--onay", "SERDAR_20261207", "--asama", "yaz", "--plan", str(plan))
     d = satir_al(otr, 2)
-    md5 = [hashlib.md5(b"JPG-A").hexdigest(), hashlib.md5(b"JPG-B").hexdigest()]
+    md5 = [hashlib.md5(JPG_A).hexdigest(), hashlib.md5(JPG_B).hexdigest()]
     kontrol("onayla yaz: ONAY + ozet", d["ONAY"] == "SERDAR_20261207" and d["ONAY_OZET"] == secim.ozet(d, md5))
     kontrol("FAIL onayla yaz: hazirlanmayan satir onaylanmadi", satir_al(otr, 5)["ONAY"] == "" and rc == 1)
     otr2 = Oturum([satir(2, "instagram", "karusel", "SOSYAL/a.jpg;SOSYAL/b.jpg", onay=False, metin="sonradan degisti")])
@@ -442,9 +459,10 @@ def senaryo_inceleme_bulgulari():
     rc, _ = kos(otr, "yayin")
     kontrol("gelecek tarihli eksik taslak uyari vermez", rc == 0 and not list(DRIVE.rglob("SOSYAL_HATA_*")))
     sifirla()
-    genel(12, 1, ".jpg", b"JPG-A")
-    genel(13, 1, ".jpg", b"JPG-A")
-    otr = Oturum([satir(12, "threads", "gorsel", "SOSYAL/a.jpg"), satir(13, "instagram", "hikaye", "SOSYAL/a.jpg")])
+    genel(12, 1, ".jpg", JPG_A)
+    drive_koy("SOSYAL/h916.jpg", jpeg(1080, 1920))
+    genel(13, 1, ".jpg", jpeg(1080, 1920))
+    otr = Oturum([satir(12, "threads", "gorsel", "SOSYAL/a.jpg"), satir(13, "instagram", "hikaye", "SOSYAL/h916.jpg")])
     rc, _ = kos(otr, "yayin")
     th = [c for c in otr.cagri if c[1].endswith("/threads") and c[0] == "POST"]
     ig = [c for c in otr.cagri if c[1].endswith("/media") and c[0] == "POST"]
@@ -471,12 +489,12 @@ def senaryo_gizli_test():
     os.environ["SOSYAL_YAYIN_ACIK"] = ""
     for x in calis.ANAHTAR.values():
         os.environ[x] = ""
-    rows = [satir(20, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="private"),
-            satir(21, "facebook", "reel", "SOSYAL/r.mp4", gorunurluk="taslak"),
+    rows = [satir(20, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="private"),
+            satir(21, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", gorunurluk="taslak"),
             satir(24, "facebook", "gorsel", "SOSYAL/a.jpg", gorunurluk="taslak"),
-            satir(22, "instagram", "reel", "SOSYAL/r.mp4"),
-            satir(23, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="public"),
-            satir(25, "facebook", "reel", "SOSYAL/r.mp4")]
+            satir(22, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4"),
+            satir(23, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="public"),
+            satir(25, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4")]
     genel(22, 1, ".mp4", b"REEL")
     otr = Oturum(rows)
     rc, out = kos(otr, "yayin", "--gizli-test", "20")
@@ -496,21 +514,207 @@ def senaryo_gizli_test():
         rc, out = kos(otr, "yayin", "--gizli-test", n)
         yazim = [c for c in otr.cagri[once:] if c[0] != "GET" and "oauth2" not in c[1]]
         kontrol(f"FAIL gizli test {ad}: DUR, yazim yok", rc == 2 and not yazim and "DUR" in out)
-    otr2 = Oturum([satir(28, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="private", onay=False),
-                   satir(29, "youtube", "short", "SOSYAL/s.mp4", gorunurluk="private", saat=+3)])
+    otr2 = Oturum([satir(28, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="private", onay=False),
+                   satir(29, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="private", saat=+3)])
     for n, ad in (("28", "onaysiz"), ("29", "zamani gelmemis")):
         rc, out = kos(otr2, "yayin", "--gizli-test", n)
         kontrol(f"FAIL gizli test {ad}: cikis 1 + 'yayinlanmadi'", rc == 1 and "yayinlanmadi" in out
                 and not any("upload/youtube" in c[1] for c in otr2.cagri))
     sifirla()
     acik()
-    otr = Oturum([satir(26, "facebook", "reel", "SOSYAL/r.mp4")])
+    otr = Oturum([satir(26, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4")])
     kos(otr, "yayin")
     fin = [c for c in otr.cagri if c[1].endswith("/video_reels") and (c[3] or {}).get("upload_phase") == "finish"]
     kontrol("FB normal satir: PUBLISHED (gizli kip yalniz taslakta)", fin and fin[0][3]["video_state"] == "PUBLISHED")
-    otr = Oturum([satir(27, "facebook", "reel", "SOSYAL/r.mp4", gorunurluk="gizli")])
+    otr = Oturum([satir(27, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", gorunurluk="gizli")])
     rc, _ = kos(otr, "yayin")
     kontrol("FAIL FB gecersiz gorunurluk: GECERSIZ, yayin yok", rc == 1 and not any(c[1].endswith("/video_reels") for c in otr.cagri))
+
+
+def senaryo_video_kaynak():
+    import video_kaynak as V
+    sifirla()
+    eski = VAYAR.read_text()
+    tam = json.loads(eski)
+    kontrol("video kaynagi: dogru yol gecer", V.medya_hatasi("SOSYAL/cancer-and-libra-pin-video.mp4") == "")
+    kontrol("video kaynagi: yol yardimcisi", V.yol("CANCER_LIBRA") == "SOSYAL/cancer-and-libra-pin-video.mp4")
+    kontrol("video kaynagi: ayni burc cifti gecer", V.medya_hatasi("SOSYAL/leo-and-leo-pin-video.mp4") == "")
+    kontrol("video kaynagi: JPEG kontrol disi", V.medya_hatasi("BASKA/a.jpg") == "")
+    for yol, ad in (("ASTROLOVE/TEMP/SOSYAL_VIDEO_P_78_20261020/cancer-and-libra-astroloveart-reel.mp4", "eski mockup videosu"),
+                    ("BASKA/cancer-and-libra-pin-video.mp4", "yanlis klasor"), ("SOSYAL/libra-and-cancer-pin-video.mp4", "alfabetik degil"),
+                    ("SOSYAL/cancer-and-dragon-pin-video.mp4", "gecersiz burc"), ("SOSYAL/sub/cancer-and-libra-pin-video.mp4", "alt klasor"),
+                    ("X/old-reel.mp4/", "sonda /"), ("SOSYAL/CANCER-and-libra-pin-video.MP4", "buyuk harf"), ("X/eski.mp4 ", "sonda bosluk")):
+        kontrol(f"FAIL video kaynagi: {ad}", V.medya_hatasi(yol) != "")
+    for bozuk, ad in (({**tam, "onay": ""}, "onay bos"), ({**tam, "klasor": ""}, "klasor bos"), ({**tam, "onay": "serdar"}, "onay bicimi"),
+                      ({**tam, "ad_kalibi": ""}, "kalip bos"), ([1], "JSON nesne degil"), ("{bozuk", "JSON bozuk")):
+        VAYAR.write_text(bozuk if isinstance(bozuk, str) else json.dumps(bozuk))
+        kontrol(f"FAIL video kaynagi ayari {ad}: hicbir mp4 gecmez", V.medya_hatasi("SOSYAL/cancer-and-libra-pin-video.mp4") != "")
+    VAYAR.write_text(json.dumps({**tam, "onay": ""}))
+    acik()
+    otr = Oturum([satir(30, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="private")])
+    rc, _ = kos(otr, "yayin")
+    kontrol("FAIL ayar onaysizken onayli video satiri yayinlanmaz (GECERSIZ)", rc == 1 and satir_al(otr, 30)["DURUM"] == ""
+            and not any("upload/youtube" in c[1] for c in otr.cagri))
+    otr = Oturum([satir(31, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", onay=False)])
+    rc, _ = kos(otr, "onayla", "--satirlar", "31", "--onay", "SERDAR_20261207", "--asama", "hazirla", "--plan", str(TMP / "p31.json"))
+    kontrol("FAIL ayar onaysizken onayla video satirini hazirlamaz", rc == 1 and "31" not in json.loads((TMP / "p31.json").read_text())["satirlar"])
+    VAYAR.write_text(eski)
+    gercek = json.loads((KOK.parents[2] / "config/sosyal_video_kaynak.json").read_text())
+    kontrol("depodaki ayar: klasor ve onay BOS (video B onayina kadar yayin yok)", gercek.get("klasor") == "" and gercek.get("onay") == ""
+            and gercek.get("ad_kalibi") == "{a}-and-{b}-pin-video.mp4")
+
+
+def senaryo_plan78():
+    import plan78
+    yol = KOK.parents[2] / "data/sosyal/pinterest/pin78/ORNEK_METIN_CANCER_LEO.csv"
+    out = TMP / "plan.csv"
+    with contextlib.redirect_stdout(io.StringIO()) as o:
+        rc = plan78.main(["--metin", str(yol), "--baslangic", "2026-12-13", "--cikti", str(out), "--ilk-no", "101", "--mevcut-en-buyuk", "2"])
+    kontrol("plan78: eksik planda dosya _EKSIK adiyla (asil ad yazilmaz)", not out.exists() and (TMP / "plan_EKSIK.csv").exists())
+    r = list(csv.DictReader(open(TMP / "plan_EKSIK.csv")))
+    leo = [x for x in r if "CANCER_LEO" in x["not"]]
+    kontrol("plan78: 702 satir, kapi PASS, eksik metin/medya -> cikis 3 (takvime yazilmaz)", rc == 3 and len(r) == 702
+            and "KAPI PASS" in o.getvalue() and "HAZIRLIK EKSIK" in o.getvalue() and r[0]["satir_no"] == "101")
+    kontrol("plan78: cift basina 9 (IG 4, FB 4, YT 1)", Counter(x["platform"] for x in leo) == Counter(instagram=4, facebook=4, youtube=1))
+    kontrol("plan78: YT yalniz short, IG/FB 3 gorsel + 1 reel", {x["tur"] for x in r if x["platform"] == "youtube"} == {"short"}
+            and Counter(x["tur"] for x in leo if x["platform"] == "instagram") == Counter(gorsel=3, reel=1))
+    kontrol("plan78: ilk gun video da var (tur karisimi)", any(x["tur"] in ("reel", "short") for x in r if x["tarih_saat_TR"].startswith("2026-12-13")))
+    kontrol("plan78: ONAY/DURUM bos, link sutunu Share & Save, metinde adres yok", all(x["ONAY"] == "" and x["DURUM"] == "" for x in r)
+            and all(x["link"] == "https://astroloveart.etsy.com/listing/4570143387" and "http" not in x["metin"] for x in leo)
+            and not any("Valentine" in x["metin"] for x in r))
+    import re as _re
+    from zoneinfo import ZoneInfo as _Z
+    igfb = [x for x in r if x["platform"] in ("instagram", "facebook")]
+    et = [datetime.strptime(x["tarih_saat_TR"], "%Y-%m-%d %H:%M").replace(tzinfo=_Z("Europe/Istanbul")).astimezone(_Z("America/New_York")) for x in igfb]
+    kontrol("plan78: IG/FB hafta ici 10:00-12:00 ET; Aralik TR 18:xx, Nisan TR 17:xx", all(t.weekday() < 5 and 10 <= t.hour < 12 for t in et)
+            and any(x["tarih_saat_TR"].startswith("2026-12-14 18:00") for x in igfb) and any(x["tarih_saat_TR"][5:7] == "04" and x["tarih_saat_TR"][11:13] == "17" for x in igfb))
+    yt = [x["metin"] for x in leo if x["platform"] == "youtube"][0]
+    ig = [x for x in leo if x["platform"] == "instagram" and x["tur"] == "gorsel"][0]
+    fb = [x["metin"] for x in leo if x["platform"] == "facebook"][0]
+    kontrol("plan78 YT: kanca baslik, kanal sayfasi cumlesi, <= 3 hashtag (burclar)", yt.startswith("Cancer + Leo as One Symbol?")
+            and "Shop link is on our channel page." in yt and _re.findall(r"#\w+", yt) == ["#cancer", "#leo", "#zodiaccouple"] and "bio" not in yt)
+    kontrol("plan78 IG: alici ifadesi, bio linki, 5 hashtag, alt metin", "boyfriend, girlfriend, husband or wife" in ig["metin"]
+            and "link in our bio" in ig["metin"] and len(_re.findall(r"#\w+", ig["metin"])) == 5 and ig["alt_metin"])
+    kontrol("plan78 FB: ilk yorum cumlesi, hashtag yok", fb.endswith("Link in the first comment.") and "#" not in fb)
+    bozuk = TMP / "bozuk.csv"
+    rows = list(csv.DictReader(open(yol)))
+    for x in rows:
+        if x["surum"] == "genel" and x["konsept"] == "kart":
+            x["aciklama"] += " A perfect Valentine gift — 2027."
+    with open(bozuk, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=rows[0].keys())
+        w.writeheader()
+        w.writerows(rows)
+    with contextlib.redirect_stdout(io.StringIO()) as o:
+        rc = plan78.main(["--metin", str(bozuk), "--baslangic", "2026-12-13", "--cikti", str(TMP / "p2.csv"), "--ilk-no", "101", "--mevcut-en-buyuk", "2"])
+    kontrol("FAIL plan78: sezonluk/uzun tire/yil ifadesi kapida", rc == 1 and "yasak/sezonluk" in o.getvalue())
+    with contextlib.redirect_stdout(io.StringIO()) as o:
+        rc = plan78.main(["--metin", str(yol), "--baslangic", "2026-12-13", "--cikti", str(TMP / "p3.csv"), "--yt", "9", "--ilk-no", "101", "--mevcut-en-buyuk", "2"])
+    kontrol("FAIL plan78: desteklenmeyen gunluk sayi DUR", rc == 2)
+    with contextlib.redirect_stdout(io.StringIO()) as o:
+        rc = plan78.main(["--metin", str(yol), "--baslangic", "2026-12-13", "--cikti", str(TMP / "p5.csv"), "--ilk-no", "2", "--mevcut-en-buyuk", "2"])
+    kontrol("FAIL plan78: satir_no cakismasi DUR", rc == 2 and "cakisir" in o.getvalue())
+    for ifade, ad in (("Printed by Prodigi.", "tedarikci"), ("A free preview.", "free preview"), ("Happy New Year.", "yeni yil"),
+                      ("Made for Easter.", "paskalya"), ("Photo Rag paper.", "Photo Rag")):
+        kontrol(f"FAIL plan78 yasak: {ad}", plan78.yasak_bul(ifade) != "")
+    kontrol("plan78 yasak: Valentina adi ve ilan no rakamlari serbest", plan78.yasak_bul("Valentina and Leo https://astroloveart.etsy.com/listing/4570143387") == "")
+
+
+def senaryo_abd():
+    sifirla()
+    acik()
+    L = "https://astroloveart.etsy.com/listing/4570143387"
+    genel(41, 1, ".jpg", JPG_A)
+    genel(43, 1, ".jpg", JPG_A)
+    otr = Oturum([satir(40, "facebook", "gorsel", "SOSYAL/a.jpg", link=L), satir(41, "instagram", "gorsel", "SOSYAL/a.jpg", alt="Gold symbol on navy"),
+                  satir(42, "youtube", "short", "SOSYAL/aries-and-leo-pin-video.mp4", gorunurluk="public"),
+                  satir(43, "threads", "gorsel", "SOSYAL/a.jpg", pano="zodiac art")])
+    rc, out = kos(otr, "yayin")
+    yrm = [c for c in otr.cagri if c[1].endswith("/comments")]
+    kontrol("FB: Etsy linki ilk yorum (gonderi no uzerine)", rc == 0 and len(yrm) == 1 and yrm[0][3]["message"] == L and "9001_55/comments" in yrm[0][1])
+    ig = [c for c in otr.cagri if c[1].endswith("/media") and c[0] == "POST"]
+    kontrol("IG gorsel: alt_text gonderildi", ig and ig[0][3].get("alt_text") == "Gold symbol on navy")
+    yt = [c for c in otr.cagri if "upload/youtube" in c[1] and c[0] == "POST"]
+    kontrol("YT: defaultLanguage en, defaultAudioLanguage zxx, containsSyntheticMedia false",
+            yt and yt[0][5]["snippet"]["defaultLanguage"] == "en" and yt[0][5]["snippet"]["defaultAudioLanguage"] == "zxx"
+            and yt[0][5]["status"]["containsSyntheticMedia"] is False)
+    th = [c for c in otr.cagri if c[1].endswith("/threads") and c[0] == "POST"]
+    kontrol("Threads: topic_tag gonderildi", th and th[0][3].get("topic_tag") == "zodiac art")
+    sifirla()
+    otr = Oturum([satir(44, "facebook", "gorsel", "SOSYAL/a.jpg", link=L)])
+    otr.yorum_hata = True
+    rc, out = kos(otr, "yayin")
+    d = satir_al(otr, 44)
+    kontrol("FAIL FB ilk yorum hatasi: gonderi TAMAM kalir, uyari + not", d["DURUM"].startswith("TAMAM") and "UYARI ilk yorum" in d["not"]
+            and rc == 1 and any("YAYINLANDI no=9001_55" in p.read_text() for p in DRIVE.rglob("SOSYAL_HATA_*")))
+    sifirla()
+    otr = Oturum([satir(45, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", gorunurluk="taslak", link=L)])
+    kos(otr, "yayin", "--gizli-test", "45")
+    kontrol("FB taslakta ilk yorum yok", not any(c[1].endswith("/comments") for c in otr.cagri))
+    otr = Oturum([satir(46, "threads", "metin", pano="bad.tag")])
+    rc, _ = kos(otr, "yayin")
+    kontrol("FAIL Threads konu etiketinde '.' GECERSIZ", rc == 1 and not any(c[1].endswith("/threads") for c in otr.cagri))
+
+
+def senaryo_abd2():
+    import takvim
+    eski = Oturum([satir(50, "threads", "metin")])
+    eski.baslik = [c for c in secim.SUTUNLAR if c != "alt_metin"]
+    eski.satirlar = [r[:-1] for r in eski.satirlar]
+    acik()
+    rc, out = kos(eski, "yayin")
+    kontrol("eski 15 sutunlu takvim: DUR yok, yayin calisir", rc == 0 and "eksik sutun" not in out
+            and any(c[1].endswith("/threads_publish") for c in eski.cagri))
+    s0 = satir(51, "threads", "metin", onay=False)
+    d = dict(s0); d.pop("alt_metin")
+    kontrol("bos alt_metin onay ozetini degistirmez", secim.ozet(s0, []) == secim.ozet(d, []))
+    kontrol("dolu alt_metin ozete girer", secim.ozet({**s0, "alt_metin": "x"}, []) != secim.ozet(s0, []))
+    sifirla()
+    otr = Oturum([satir(52, "facebook", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", link="https://astroloveart.etsy.com/listing/1")])
+    rc, _ = kos(otr, "yayin")
+    yrm = [c for c in otr.cagri if c[1].endswith("/comments")]
+    kontrol("FB reel: ilk yorum video no uzerine", rc == 0 and len(yrm) == 1 and "/FBV1/comments" in yrm[0][1])
+    otr = Oturum([satir(53, "facebook", "gorsel", "SOSYAL/a.jpg", link="https://astroloveart.etsy.com/listing/1")])
+    otr.satirlar[0][otr.baslik.index("not")] = "PLAN78 CANCER_LEO poster"
+    otr.yorum_hata = True
+    kos(otr, "yayin")
+    kontrol("FB yorum hatasi: not sutunundaki plan izi korunur", satir_al(otr, 53)["not"].startswith("PLAN78 CANCER_LEO poster UYARI"))
+
+
+def senaryo_boyut():
+    import medya as M
+    f = TMP / "olc.jpg"
+    for veri, beklenen, ad in ((JPG_A, (1080, 1350), "4:5"), (JPG_23, (1000, 1500), "2:3"), (b"JPG degil", None, "bozuk")):
+        f.write_bytes(veri)
+        kontrol(f"jpeg_boyut: {ad}", M.jpeg_boyut(f) == beklenen)
+    def exifli(yon):   # CI'da Pillow yok: APP1 Exif elle (MM, IFD0, Orientation SHORT)
+        tiff = b"MM\x00*\x00\x00\x00\x08" + (1).to_bytes(2, "big") + (0x0112).to_bytes(2, "big") + (3).to_bytes(2, "big") \
+            + (1).to_bytes(4, "big") + yon.to_bytes(2, "big") + b"\x00\x00" + b"\x00\x00\x00\x00"
+        app1 = b"Exif\x00\x00" + tiff
+        return JPG_A[:2] + b"\xff\xe1" + (len(app1) + 2).to_bytes(2, "big") + app1 + JPG_A[2:]
+    f.write_bytes(exifli(6))
+    kontrol("FAIL jpeg_boyut: EXIF yon 6 reddedilir", M.jpeg_boyut(f) is None)
+    f.write_bytes(exifli(1))
+    kontrol("jpeg_boyut: EXIF yon 1 gecer", M.jpeg_boyut(f) == (1080, 1350))
+    f.write_bytes(JPG_A[:2] + b"\xff\xff" + JPG_A[2:])
+    kontrol("jpeg_boyut: 0xFF dolgu baytlari", M.jpeg_boyut(f) == (1080, 1350))
+    sifirla()
+    drive_koy("SOSYAL/p23.jpg", JPG_23)
+    acik()
+    for p in ("instagram", "facebook", "threads"):
+        otr = Oturum([satir(60, p, "gorsel", "SOSYAL/p23.jpg")])
+        genel(60, 1, ".jpg", JPG_23)
+        rc, out = kos(otr, "yayin")
+        kontrol(f"FAIL {p}: 2:3 pin gonderilmez (MEDYA)", rc == 1 and "1080x1350" in out and satir_al(otr, 60)["DURUM"] == ""
+                and not any(c[0] == "POST" and ("/media" in c[1] or "/photos" in c[1] or c[1].endswith("/threads")) for c in otr.cagri))
+    drive_koy("SOSYAL/h.jpg", jpeg(1080, 1920))
+    genel(62, 1, ".jpg", jpeg(1080, 1920))
+    otr = Oturum([satir(62, "instagram", "hikaye", "SOSYAL/h.jpg")])
+    rc, _ = kos(otr, "yayin")
+    kontrol("IG hikaye: 9:16 1080x1920 gecer", rc == 0 and satir_al(otr, 62)["DURUM"].startswith("TAMAM"))
+    otr = Oturum([satir(61, "instagram", "gorsel", "SOSYAL/p23.jpg", onay=False)])
+    rc, _ = kos(otr, "onayla", "--satirlar", "61", "--onay", "SERDAR_20261207", "--asama", "hazirla", "--plan", str(TMP / "p61.json"), "--medya-kok", str(TMP / "m61"))
+    kontrol("FAIL onayla: 2:3 gorsel IG satiri hazirlanmaz", rc == 1 and "61" not in json.loads((TMP / "p61.json").read_text())["satirlar"])
 
 
 def senaryo_yml():
@@ -659,7 +863,7 @@ def senaryo_yenile():
 def senaryo_istatistik_kontrol():
     import istatistik
     sifirla()
-    r = satir(1, "instagram", "reel", "SOSYAL/r.mp4", durum="TAMAM 2026-12-08T09:00")
+    r = satir(1, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", durum="TAMAM 2026-12-08T09:00")
     r["sonuc_no"] = "IGMEDIA77"
     otr = Oturum([r, satir(2, "threads", "metin")])
     with contextlib.redirect_stdout(io.StringIO()):
@@ -685,7 +889,7 @@ def mutasyon():
     secim.ONAY_RX = re.compile(r".*")
     sifirla()
     acik()
-    otr = Oturum([satir(7, "instagram", "reel", "SOSYAL/r.mp4", onay=False)])
+    otr = Oturum([satir(7, "instagram", "reel", "SOSYAL/cancer-and-libra-pin-video.mp4", onay=False)])
     genel(7, 1, ".mp4", b"REEL")
     otr.satirlar[0][otr.baslik.index("ONAY_OZET")] = secim.ozet(satir_al(otr, 7), [hashlib.md5(b"REEL").hexdigest()])
     kos(otr, "yayin")
@@ -697,7 +901,7 @@ def mutasyon():
 if __name__ == "__main__":
     try:
         for f in (senaryo_ana, senaryo_kuru, senaryo_kapali, senaryo_medya_farkli, senaryo_publish_500, senaryo_son_an,
-                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_gizli_test, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
+                  senaryo_onayla, senaryo_inceleme_bulgulari, senaryo_gizli_test, senaryo_video_kaynak, senaryo_plan78, senaryo_abd, senaryo_abd2, senaryo_boyut, senaryo_yml, senaryo_http_kurali, senaryo_izin, senaryo_fb_cevir, senaryo_yenile, senaryo_istatistik_kontrol, mutasyon):
             try:
                 f()
             except Exception as e:

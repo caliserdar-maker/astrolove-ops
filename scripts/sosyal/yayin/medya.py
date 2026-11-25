@@ -29,6 +29,54 @@ def genel_yol(satir, i, kaynak):
     return f"yayin/{ay}/{no}_{i}{Path(kaynak).suffix.lower()}"
 
 
+GONDERI_BOYUT = {"instagram": (1080, 1350), "facebook": (1080, 1350), "threads": (1080, 1350)}   # Serdar 25 Kas: 4:5
+TUR_BOYUT = {("instagram", "hikaye"): (1080, 1920)}   # hikaye 9:16
+
+
+def _yon(seg):
+    """APP1 Exif segmentinden Orientation (0x0112); yoksa 1."""
+    if seg[:6] != b"Exif\x00\x00" or len(seg) < 14:
+        return 1
+    t = seg[6:]
+    e = "little" if t[:2] == b"II" else "big"
+    ifd = int.from_bytes(t[4:8], e)
+    if ifd + 2 > len(t):
+        return 0
+    for k in range(int.from_bytes(t[ifd:ifd + 2], e)):
+        o = ifd + 2 + 12 * k
+        if o + 12 > len(t):
+            return 0
+        if int.from_bytes(t[o:o + 2], e) == 0x0112:
+            return int.from_bytes(t[o + 8:o + 10], e)
+    return 1
+
+
+def jpeg_boyut(yol):
+    """JPEG piksel boyutu (genislik, yukseklik); SOF isaretinden okunur (kutuphane yok). Okunamazsa ya da EXIF
+    yonlendirmesi 1 degilse (dondurulmus gosterim) None."""
+    with open(yol, "rb") as f:
+        v = f.read()
+    if v[:2] != b"\xff\xd8":
+        return None
+    i = 2
+    while i + 9 < len(v):
+        if v[i] != 0xFF:
+            return None
+        while i + 1 < len(v) and v[i + 1] == 0xFF:   # dolgu baytlari
+            i += 1
+        m = v[i + 1]
+        if m in (0xD8, 0x01) or 0xD0 <= m <= 0xD7:
+            i += 2
+            continue
+        n = int.from_bytes(v[i + 2:i + 4], "big")
+        if m == 0xE1 and _yon(v[i + 4:i + 2 + n]) != 1:
+            return None
+        if m in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
+            return int.from_bytes(v[i + 7:i + 9], "big"), int.from_bytes(v[i + 5:i + 7], "big")
+        i += 2 + n
+    return None
+
+
 def indir(satir, dizin):
     """Drive'dan yerel kopya. Donus: [{"kaynak", "yerel", "md5", "tip", "genel", "url"}]."""
     out = []
@@ -40,6 +88,13 @@ def indir(satir, dizin):
         drive_indir(kaynak, hedef)
         if not hedef.exists() or hedef.stat().st_size == 0:
             raise Hata(f"medya indirilemedi: {kaynak}")
+        pl = (satir.get("platform") or "").strip()
+        beklenen = TUR_BOYUT.get((pl, (satir.get("tur") or "").strip()), GONDERI_BOYUT.get(pl))
+        if t == "gorsel" and beklenen:
+            olcu = jpeg_boyut(hedef)
+            if olcu != beklenen:
+                raise Hata(f"{pl} gorseli {beklenen[0]}x{beklenen[1]} degil: "
+                           f"{'okunamadi ya da EXIF dondurmeli' if olcu is None else f'{olcu[0]}x{olcu[1]}'} ({kaynak}); 2:3 pin gonderilmez")
         g = genel_yol(satir, i, kaynak) if satir["platform"] in GENEL_PLATFORM else None
         out.append({"kaynak": kaynak, "yerel": hedef, "md5": md5_dosya(hedef), "tip": t,
                     "genel": g, "url": f"{MEDIA_BASE}/{g}" if g else None})

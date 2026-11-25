@@ -17,6 +17,7 @@ def kimlik_dogrula(http, k):
 
 
 def _kap(http, k, **alan):
+    alan = {a: v for a, v in alan.items() if v not in (None, "")}
     j, _ = http.iste("POST", f"{BASE}/{k['th_id']}/threads", token=k["token"], data=alan)
     if not j.get("id"):
         raise Hata("kapsayici no donmedi")
@@ -39,14 +40,15 @@ def _hazir(http, k, cid, uyku):
 
 def yayinla(http, k, satir, medya, uyku=time.sleep):
     tur, metin = satir["tur"], satir.get("metin", "")
+    etiket = (satir.get("pano") or "").strip()  # konu etiketi (topic_tag, gonderi basina 1; resmi Threads Posts)
     if any(not m.get("url") for m in medya):
         raise Hata("Threads herkese acik medya adresi ister")
     if tur == "metin":
-        cid = _kap(http, k, media_type="TEXT", text=metin)
+        cid = _kap(http, k, media_type="TEXT", text=metin, topic_tag=etiket)
     elif tur in ("gorsel", "video"):
         m = medya[0]
         tip = "VIDEO" if m["tip"] == "video" else "IMAGE"
-        cid = _kap(http, k, media_type=tip, text=metin, **{("video_url" if tip == "VIDEO" else "image_url"): m["url"]})
+        cid = _kap(http, k, media_type=tip, text=metin, topic_tag=etiket, **{("video_url" if tip == "VIDEO" else "image_url"): m["url"]})
     elif tur == "karusel":
         cocuk = []
         for m in medya:
@@ -55,7 +57,7 @@ def yayinla(http, k, satir, medya, uyku=time.sleep):
                      **{("video_url" if tip == "VIDEO" else "image_url"): m["url"]})
             _hazir(http, k, c, uyku)
             cocuk.append(c)
-        cid = _kap(http, k, media_type="CAROUSEL", children=",".join(cocuk), text=metin)
+        cid = _kap(http, k, media_type="CAROUSEL", children=",".join(cocuk), text=metin, topic_tag=etiket)
     else:
         raise Hata(f"threads tur desteklenmiyor: {tur}")
     _hazir(http, k, cid, uyku)

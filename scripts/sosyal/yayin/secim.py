@@ -12,11 +12,14 @@ import re
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import video_kaynak
+
 TZ = ZoneInfo("Europe/Istanbul")
 SUTUNLAR = ["satir_no", "tarih_saat_TR", "platform", "tur", "medya", "metin", "link", "pano", "yz_beyani",
-            "gorunurluk", "ONAY", "ONAY_OZET", "DURUM", "sonuc_no", "not"]
+            "gorunurluk", "ONAY", "ONAY_OZET", "DURUM", "sonuc_no", "not", "alt_metin"]
+OPSIYONEL = {"alt_metin"}   # eski takvimde sutun yoksa bos kabul edilir (takvim.oku DUR vermez)
 OZET_ALANLARI = ["satir_no", "tarih_saat_TR", "platform", "tur", "medya", "metin", "link", "pano", "yz_beyani",
-                 "gorunurluk"]
+                 "gorunurluk", "alt_metin"]
 TURLER = {
     "instagram": {"reel", "karusel", "hikaye", "gorsel"},
     "facebook": {"reel", "gorsel"},
@@ -35,6 +38,9 @@ def medya_listesi(satir):
 def ozet(satir, md5ler):
     """Onay anindaki icerigin ozeti (16 hex). md5ler: medya_listesi sirasiyla Drive md5."""
     d = {k: (satir.get(k) or "").strip() for k in OZET_ALANLARI}
+    for k in OPSIYONEL:   # bos opsiyonel alan ozete girmez: sutun eklenmeden once onaylanan satirlarin ozeti degismez
+        if not d.get(k):
+            d.pop(k, None)
     d["_md5"] = list(md5ler)
     return hashlib.sha256(json.dumps(d, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:16]
 
@@ -68,12 +74,22 @@ def dogrula(satir):
         h.append("karusel 2-10 medya")
     if tur not in ("karusel",) and len(m) > 1:
         h.append("bu turde tek medya")
+    for mm in m:
+        vh = video_kaynak.medya_hatasi(mm)
+        if vh:
+            h.append(vh)
     if (satir.get("yz_beyani") or "").strip() not in ("evet", "hayir"):
         h.append("yz_beyani evet/hayir degil")
     if p == "youtube" and (satir.get("gorunurluk") or "").strip() not in ("public", "private", "unlisted"):
         h.append("youtube gorunurluk public/private/unlisted degil")
     if p == "facebook" and (satir.get("gorunurluk") or "").strip() not in ("", "public", "taslak"):
         h.append("facebook gorunurluk bos/public/taslak degil")
+    if len(satir.get("alt_metin") or "") > 1000:
+        h.append("alt_metin 1000 karakteri asiyor")
+    if p == "threads" and (satir.get("pano") or "").strip():
+        etk = satir["pano"].strip()
+        if not 1 <= len(etk) <= 50 or re.search(r"[.&]", etk):
+            h.append("threads konu etiketi (pano) 1-50 karakter, '.' ve '&' yok")
     if p == "threads" and len(satir.get("metin") or "") > 500:
         h.append("threads metni 500 karakteri asiyor")
     if p == "instagram" and len(satir.get("metin") or "") > 2200:
