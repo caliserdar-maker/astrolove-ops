@@ -1,8 +1,10 @@
 name: terim-tarama
 # DIJITAL ARASTIRMA TERIM TARAMASI (huni Asama 1; Serdar 26 Kas "Evet derhal basla", KARARLAR_20261126_1 ve _2). SALT OKUMA: yalniz GET,
 # yalniz API anahtari (OAuth token indirilmez). Betik scripts/etsy/terim_tarama.py, test scripts/etsy/test_terim_tarama.py.
-# Terim basina en cok 6 istek (153 terim: en cok 918 + ping); yorum cagrisi YOK. Kota: kosu basinda ve her terimden once kalan < 1.200
-# -> temiz DUR (cikis 3), yeniden kosu kaldigi terimden surer. Tetik YALNIZ elle (workflow_dispatch); schedule YOK, kendini yeniden
+# Terim basina en cok 6 mantiksal cagri (153 terim: en cok 918 + ping; 5xx / kisa 429 yeniden denemeleri gercek istegi artirabilir,
+# sayac gercek istegi sayar); yorum cagrisi YOK. Kota: kosu basinda ve her terimden once kalan < kota_alt -> temiz DUR (cikis 3),
+# yeniden kosu kaldigi terimden surer. kota_alt varsayilani 10 (CLAUDE.md KOTA SINIRI: tum varsayilanlar 10; gorev metnindeki 1.200
+# yalniz Serdar acikca onaylarsa girdi olarak verilir). Tetik YALNIZ elle (workflow_dispatch); schedule YOK, kendini yeniden
 # tetikleme YOK. Depo herkese acik: toplanan veri commit'e, loga, artifact'e GIRMEZ; cikti yalniz gizli Drive
 # ASTROLOVE/DIJITAL_ARASTIRMA_20261125/ (TERIM_* dosyalari + terim_durum.json; derin toplayicinin dosyalarina dokunmaz).
 # Kilit: kilit_bekle (Etsy kumesi), Drive durumu kilitten SONRA. Log dosyasi sir_koru tee'den gecer.
@@ -21,6 +23,10 @@ on:
         description: "Etsy okuma suresi (dk, en cok 45)"
         required: false
         default: "30"
+      kota_alt:
+        description: "kalan kota bunun altindaysa DUR (varsayilan 10 = CLAUDE.md KOTA SINIRI; yukseltme Serdar onayiyla)"
+        required: false
+        default: "10"
 permissions:
   contents: read
   actions: read
@@ -37,14 +43,19 @@ jobs:
         env:
           DK_G: ${{ github.event.inputs.dk }}
           YENIDEN_G: ${{ github.event.inputs.yeniden }}
+          KOTA_G: ${{ github.event.inputs.kota_alt }}
         run: |
           set -euo pipefail
           DK="${DK_G:-30}"
           case "$DK" in ''|*[!0-9]*) echo "::error::dk tam sayi olmali"; exit 1;; esac
           [ "$DK" -ge 1 ] && [ "$DK" -le 45 ] || { echo "::error::dk 1-45 olmali"; exit 1; }
           case "${YENIDEN_G:-false}" in true|false) ;; *) echo "::error::yeniden true / false olmali"; exit 1;; esac
+          KA="${KOTA_G:-10}"
+          case "$KA" in ''|*[!0-9]*) echo "::error::kota_alt tam sayi olmali"; exit 1;; esac
+          [ "$KA" -ge 10 ] && [ "$KA" -le 4000 ] || { echo "::error::kota_alt 10-4000 olmali"; exit 1; }
           echo "DK=$DK" >> "$GITHUB_ENV"
           echo "YENIDEN=${YENIDEN_G:-false}" >> "$GITHUB_ENV"
+          echo "KOTA_ALT=$KA" >> "$GITHUB_ENV"
       - name: Kurulum
         run: |
           set -euo pipefail
@@ -79,7 +90,7 @@ jobs:
           rclone lsf "gdrive:ASTROLOVE" --dirs-only -q > /dev/null || { echo "::error::Drive ASTROLOVE okunamadi"; exit 1; }
           rclone mkdir "gdrive:ASTROLOVE/DIJITAL_ARASTIRMA_20261125" -q || { echo "::error::Drive klasoru acilamadi"; exit 1; }
           rclone copy "gdrive:ASTROLOVE/DIJITAL_ARASTIRMA_20261125" out --max-depth 1 \
-            --include "/TERIM_TARAMA.csv" --include "/TERIM_ILAN.csv" --include "/TERIM_MAGAZA.csv" --include "/terim_durum.json" -q \
+            --include "/TERIM_TARAMA.csv" --include "/TERIM_ILAN.csv" --include "/TERIM_MAGAZA.csv" --include "/terim_durum.json" --include "/TERIM_KOSU_LOG.txt" -q \
             || { echo "::error::Drive okunamadi"; exit 1; }
           echo "durum dosyasi: $([ -f out/terim_durum.json ] && echo var || echo yok) | dosya $(find out -type f | wc -l)"
       - name: Tara (salt okur)
@@ -96,7 +107,7 @@ jobs:
           python3 -c 'import json, os, sys; json.dump({"etsy_api_key": os.environ["ETSY_API_KEY"], "etsy_shared_secret": os.environ["ETSY_SHARED_SECRET"]}, open(sys.argv[1], "w"))' "$SJ"
           EK=()
           [ "$YENIDEN" = true ] && EK+=(--yeniden)
-          python scripts/etsy/terim_tarama.py --out out --dk "$DK" --yalniz "${YALNIZ:-}" "${EK[@]}" 2>&1 \
+          python scripts/etsy/terim_tarama.py --out out --dk "$DK" --yalniz="${YALNIZ:-}" --kota-alt "$KOTA_ALT" "${EK[@]}" 2>&1 \
             | python3 scripts/guvenlik/sir_koru.py tee --sir-json "$SJ" out/TERIM_KOSU_LOG.txt
           RC=("${PIPESTATUS[@]}")
           rm -f "$SJ"
@@ -125,7 +136,7 @@ jobs:
           echo "::notice::Drive: TERIM_* ($(find out -type f | wc -l) dosya) | durum / kalan terim / toplam istek: $D"
       - if: always()
         run: rm -rf ~/.config/rclone out _t.log
-      - name: Sonuc (1 ise kirmizi)
+      - name: Sonuc (0 / 3 / 4 disi kirmizi)
         run: |
           echo "cikis kodu: ${KOD:-?}"
-          [ "${KOD:-1}" != "1" ]
+          case "${KOD:-}" in 0|3|4) exit 0;; *) exit 1;; esac      # yalniz 0 / 3 (kota) / 4 (yol verildi) yesil

@@ -79,6 +79,28 @@ def yalniz_elle(yml):
     return tetikler(yml) == {"workflow_dispatch"} and "gh workflow run" not in govde and "schedule:" not in govde
 
 
+# 25 Kas main surumunun (435ecd6) tetik ve zincir parcasi (gecmis okumadan bilinen FAIL ornegi)
+ESKI_25KAS = """name: dijital-arastirma
+on:
+  schedule:
+    - cron: "23 * * * *"
+  push:
+    branches: [main]
+    paths:
+      - "config/dijital_arastirma.trigger"
+  workflow_dispatch:
+    inputs:
+      zincir:
+        description: "zincir sirasi (otomatik)"
+jobs:
+  oku:
+    steps:
+      - name: Zincir (kendini yeniden tetikle)
+        run: |
+          gh workflow run dijital-arastirma.yml -R "$GITHUB_REPOSITORY" --ref main -f zincir="$N"
+"""
+
+
 def kontrol(ad, kosul):
     print(("PASS " if kosul else "FAIL ") + ad)
     if not kosul:
@@ -126,7 +148,8 @@ def kos_adim(metin, tmp, cwd, env_ek, bas="-eo pipefail"):
 
 def sahte_betik(tmp, ad, kod, cikti):
     p = tmp / ad
-    p.write_text(f"import sys, pathlib\nprint({cikti!r})\npathlib.Path('out').mkdir(exist_ok=True)\n"
+    p.write_text(f"import sys, pathlib, json\nprint({cikti!r})\npathlib.Path('out').mkdir(exist_ok=True)\n"
+                 f"pathlib.Path({str(tmp / 'argv.json')!r}).write_text(json.dumps(sys.argv[1:]))\n"
                  f"pathlib.Path('out/{'terim_durum.json' if 'terim' in ad else 'durum.json'}').write_text("
                  f"'{{\"durum\": \"devam\", \"asama\": \"yorum\", \"kosu\": 1, \"istek_toplam\": 5, \"kalan_terim_n\": 2}}')\n"
                  f"sys.exit({kod})\n")
@@ -150,25 +173,29 @@ def test_terim(tmp0):
     kontrol("terim-tarama: ${{ }} run metninde yok (girdi env ile)", all("${{" not in v for v in adimlar(yml).values()))
     A = adimlar(yml)
     # girdi kapisi
-    for dk, yen, bek in (("30", "false", 0), ("45", "true", 0), ("0", "false", 1), ("46", "false", 1), ("3a", "false", 1),
-                         ("30", "evet", 1), ("", "", 0)):
+    for dk, yen, ka, bek in (("30", "false", "10", 0), ("45", "true", "1200", 0), ("0", "false", "10", 1), ("46", "false", "10", 1),
+                             ("3a", "false", "10", 1), ("30", "evet", "10", 1), ("", "", "", 0), ("30", "false", "9", 1),
+                             ("30", "false", "4001", 1), ("30", "false", "1e3", 1)):
         tmp = Path(tempfile.mkdtemp(dir=tmp0))
         kur(tmp)
-        r = kos_adim(A["Girdi kapisi"], tmp, tmp, {"DK_G": dk, "YENIDEN_G": yen}, "-e")
-        kontrol(f"terim girdi dk={dk!r} yeniden={yen!r} -> {bek}", r.returncode == bek)
+        r = kos_adim(A["Girdi kapisi"], tmp, tmp, {"DK_G": dk, "YENIDEN_G": yen, "KOTA_G": ka}, "-e")
+        kontrol(f"terim girdi dk={dk!r} yeniden={yen!r} kota_alt={ka!r} -> {bek}", r.returncode == bek)
+        if bek == 0:
+            kontrol(f"terim girdi kota_alt varsayilan 10 / verilen ({ka!r})",
+                    f"KOTA_ALT={ka or '10'}" in (tmp / "github_env").read_text())
     # Drive'dan al: yalniz TERIM_* + terim_durum.json, alt klasor yok
     tmp = Path(tempfile.mkdtemp(dir=tmp0))
     kur(tmp)
     uz = tmp / "drive" / "ASTROLOVE" / "DIJITAL_ARASTIRMA_20261125"
     (uz / "DERIN_1").mkdir(parents=True)
-    for ad in ("TERIM_TARAMA.csv", "TERIM_ILAN.csv", "TERIM_MAGAZA.csv", "terim_durum.json", "ILANLAR.csv", "durum.json",
-               "YORUMLAR.csv", "DERIN_1/durum.json"):
+    for ad in ("TERIM_TARAMA.csv", "TERIM_ILAN.csv", "TERIM_MAGAZA.csv", "terim_durum.json", "TERIM_KOSU_LOG.txt", "ILANLAR.csv",
+               "durum.json", "YORUMLAR.csv", "DERIN_1/durum.json", "DERIN_1/TERIM_TARAMA.csv"):
         (uz / ad).write_text("x")
     c = calisma(tmp, "c")
     r = kos_adim(A["Durumu Drive'dan al (kilitten sonra)"], tmp, c, {}, "-e")
     inen = sorted(str(p.relative_to(c / "out")) for p in (c / "out").rglob("*") if p.is_file())
     kontrol("terim Drive indirme: yalniz TERIM_* + terim_durum.json", r.returncode == 0
-            and inen == ["TERIM_ILAN.csv", "TERIM_MAGAZA.csv", "TERIM_TARAMA.csv", "terim_durum.json"])
+            and inen == ["TERIM_ILAN.csv", "TERIM_KOSU_LOG.txt", "TERIM_MAGAZA.csv", "TERIM_TARAMA.csv", "terim_durum.json"])
     # Tara: cikis kodu KOD'a; sir_koru tee gercek
     sir = "SAHTE-ANAHTAR-0123456789"
     for kod, cikti, bek in ((0, "KOSU 1: durum bitti", "0"), (3, "DUR: kota", "3"), (4, "YOL", "4"), (1, "HATA", "1"),
@@ -179,8 +206,12 @@ def test_terim(tmp0):
         sb = sahte_betik(tmp, "terim_sahte.py", kod, cikti)
         m = A["Tara (salt okur)"].replace("python scripts/etsy/terim_tarama.py", f"python3 {sb}")
         kontrol("terim Tara: betik cagrisi degistirildi", m != A["Tara (salt okur)"])
-        (tmp / "github_env").write_text("DK=30\nYENIDEN=true\n")
-        r = kos_adim(m, tmp, c, {"ETSY_API_KEY": sir, "ETSY_SHARED_SECRET": "SAHTE-SIR-0123456789", "YALNIZ": "a; b"}, "-e")
+        (tmp / "github_env").write_text("DK=30\nYENIDEN=true\nKOTA_ALT=1200\n")
+        r = kos_adim(m, tmp, c, {"ETSY_API_KEY": sir, "ETSY_SHARED_SECRET": "SAHTE-SIR-0123456789", "YALNIZ": "-x; b"}, "-e")
+        import json as _j
+        argv = _j.loads((tmp / "argv.json").read_text()) if (tmp / "argv.json").exists() else []
+        kontrol(f"terim Tara argumanlari aktarilir ({cikti[:8]})", argv == ["--out", "out", "--dk", "30", "--yalniz=-x; b",
+                                                                           "--kota-alt", "1200", "--yeniden"])
         ge = (tmp / "github_env").read_text()
         log = (c / "out" / "TERIM_KOSU_LOG.txt").read_text() if (c / "out" / "TERIM_KOSU_LOG.txt").exists() else ""
         kontrol(f"terim Tara cikis {kod} ({cikti[:12]}) -> KOD={bek}, adim 0", r.returncode == 0 and f"KOD={bek}" in ge)
@@ -199,10 +230,10 @@ def test_terim(tmp0):
             (c / "out" / "TERIM_KOSU_LOG.txt").write_text("authorization: Bearer abcdefghijklmnop\n")
             r4 = kos_adim(A["Drive'a yaz (sir taramasi)"], tmp, c, {"ETSY_API_KEY": sir, "ETSY_SHARED_SECRET": "SAHTE-SIR-0123456789"}, "-e")
             kontrol("bilinen FAIL: logda sir deseni -> Drive'a yazilmaz", r4.returncode == 1 and "copy out" not in (tmp / "iz.txt").read_text())
-    for kod, bek in (("0", 0), ("3", 0), ("4", 0), ("1", 1), ("", 1)):
+    for kod, bek in (("0", 0), ("3", 0), ("4", 0), ("1", 1), ("", 1), ("2", 1), ("137", 1)):
         tmp = Path(tempfile.mkdtemp(dir=tmp0))
         kur(tmp)
-        r = kos_adim(A["Sonuc (1 ise kirmizi)"], tmp, tmp, {"KOD": kod} if kod else {}, "-e")
+        r = kos_adim(A["Sonuc (0 / 3 / 4 disi kirmizi)"], tmp, tmp, {"KOD": kod} if kod else {}, "-e")
         kontrol(f"terim Sonuc KOD={kod!r} -> {bek}", r.returncode == bek)
 
 
@@ -239,8 +270,12 @@ def test_derin(tmp0):
         sb = sahte_betik(tmp, "derin_sahte.py", kod, cikti)
         m = A["Oku (salt okur)"].replace("python scripts/etsy/dijital_arastirma.py", f"python3 {sb}")
         kontrol("derin Oku: betik cagrisi degistirildi", m != A["Oku (salt okur)"])
+        kontrol("derin Sonuc adimi 0/3/4 disi kirmizi", 'case "${KOD:-}" in 0|3|4) exit 0;; *) exit 1;; esac' in yml)
         (tmp / "github_env").write_text("DK=40\nETIKET=1\n")
         r = kos_adim(m, tmp, c, {"ETSY_API_KEY": sir, "ETSY_SHARED_SECRET": "SAHTE-SIR-0123456789", "TERIMLER": "a;b"}, "-e")
+        import json as _j
+        argv = _j.loads((tmp / "argv.json").read_text()) if (tmp / "argv.json").exists() else []
+        kontrol(f"derin Oku argumanlari aktarilir ({cikti[:6]})", argv == ["--out", "out", "--dk", "40", "--terimler=a;b"])
         kontrol(f"derin Oku cikis {kod} -> KOD={bek}", r.returncode == 0 and f"KOD={bek}" in (tmp / "github_env").read_text())
         if kod == 0 and sir not in cikti:
             r2 = kos_adim(A["Drive'a yaz (sir taramasi)"], tmp, c, {"ETSY_API_KEY": sir, "ETSY_SHARED_SECRET": "SAHTE-SIR-0123456789"}, "-e")
@@ -259,10 +294,7 @@ def main():
         eski = (WF / "dijital-arastirma.yml").read_text(encoding="utf-8")
         kontrol("mutasyon: zincir (gh workflow run) eklenirse yakalanir", not yalniz_elle(eski + "\n      - run: gh workflow run x.yml\n"))
         kontrol("mutasyon: push tetigi eklenirse yakalanir", not yalniz_elle(eski.replace("on:\n", "on:\n  push:\n    branches: [main]\n", 1)))
-        import subprocess as _sp
-        main_yml = _sp.run(["git", "show", "origin/main:.github/workflows/dijital-arastirma.yml"], cwd=KOK, capture_output=True, text=True)
-        if main_yml.returncode == 0 and "schedule" in main_yml.stdout:
-            kontrol("bilinen FAIL: 25 Kas main surumu (schedule + zincir) yakalanir", not yalniz_elle(main_yml.stdout))
+        kontrol("bilinen FAIL: 25 Kas surumu (schedule + push + zincir) yakalanir", not yalniz_elle(ESKI_25KAS))
     finally:
         shutil.rmtree(tmp0, ignore_errors=True)
     print(f"SONUC: {'FAIL ' + str(len(HATA)) if HATA else 'PASS'}")

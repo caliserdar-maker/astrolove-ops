@@ -43,7 +43,7 @@ GUN = 86400
 # ------------------------------------------------------------------ sahte veri
 # magazalar: (yas gun, toplam satis)
 MAGAZA = {70000001: (200, 150), 70000002: (100, 40), 70000003: (1000, 500), 70000004: (900, 10), 70000005: (30, 300),
-          70000006: (2000, 0), 70000007: (50, 120), 70000008: (400, 5)}
+          70000006: (2000, 0), 70000007: (50, 120), 70000008: (400, 5), 70000009: (None, 20)}
 ILAN = {}
 TERIM_ILAN = {}
 
@@ -62,10 +62,16 @@ for sid, n in ((70000001, 30), (70000002, 15), (70000003, 5), (70000004, 5), (70
     for k in range(n):
         lid += 1
         _alfa.append(ilan(lid, sid, "download", "EUR" if len(_alfa) % 4 == 0 else "USD", 400 + len(_alfa), len(_alfa), 30 + len(_alfa)))
-for k in range(40):
+lid += 1
+_alfa.append(ilan(lid, 70000009, "download", "USD", 1000, 1000, 30))     # I: kurulus tarihi yok (yas bilinmiyor)
+lid += 1
+_alfa.append(ilan(lid, 70000009, "download", "", 0, 2, 40))              # fiyati okunamayan ilan (fiyat_yok)
+ILAN[lid]["price"] = {}
+for k in range(38):
     lid += 1
-    _alfa.append(ilan(lid, 70000008, "physical"))
+    _alfa.append(ilan(lid, 70000008, "physical", fav=7, yas_gun=5000))
 TERIM_ILAN["alfa terim"] = _alfa
+ALFA_DL = [ILAN[i] for i in _alfa if ILAN[i]["listing_type"] == "download"]
 # beta: 3 sayfa x 100; sayfa basina 10/10/15 download (sayfa 2'de sayfa 1'den bir tekrar); 4. sayfa var ama okunmaz (EK_SAYFA 2)
 _beta, lid = [], 900200000
 for sayfa, ndl in ((1, 10), (2, 10), (3, 15), (4, 50)):
@@ -107,6 +113,7 @@ class Sahte:
         self.terim_istek = {}
         self.hata_terim = set()
         self.k429 = None          # bu istek sirasinda 429 (uzun retry-after)
+        self.basliksiz = False    # True: x-remaining-today basligi yok
 
     def __call__(self, method, url, params=None, data=None, json=None, headers=None, timeout=None):  # noqa: A002
         assert "x-api-key" in (headers or {}) and "Authorization" not in headers, "OAuth basligi"
@@ -119,7 +126,10 @@ class Sahte:
         if self.k429 is not None and self.istek == self.k429:
             return Yanit(429, {"error": "kota"}, self.kalan, {"retry-after": "3600"})
         if p == "/openapi-ping":
-            return Yanit(200, {"application_id": 1}, self.kalan)
+            y = Yanit(200, {"application_id": 1}, self.kalan)
+            if self.basliksiz:
+                y.headers.pop("x-remaining-today")
+            return y
         if p == "/listings/active":
             t = params.get("keywords")
             self.terim_istek[t] = self.terim_istek.get(t, 0) + 1
@@ -140,8 +150,10 @@ class Sahte:
                     continue
                 sid = ILAN[i]["shop_id"]
                 yas, sat = MAGAZA[sid]
-                res.append(dict(ILAN[i], shop={"shop_id": sid, "shop_name": f"Magaza{sid}", "create_date": SIMDI - yas * GUN,
-                                               "transaction_sold_count": sat, "review_count": 1, "url": "u"}))
+                sh = {"shop_id": sid, "shop_name": f"Magaza{sid}", "transaction_sold_count": sat, "review_count": 1, "url": "u"}
+                if yas is not None:
+                    sh["create_date"] = SIMDI - yas * GUN
+                res.append(dict(ILAN[i], shop=sh))
             return Yanit(200, {"count": len(res), "results": res}, self.kalan)
         return Yanit(404, {"error": "yok"}, self.kalan)
 
@@ -153,10 +165,10 @@ def api_kur(s):
     return api
 
 
-def kos(s, d, terimler=TERIMLER, dk=60, yv=None, yeniden=False):
+def kos(s, d, terimler=TERIMLER, dk=60, yv=None, yeniden=False, kota_alt=T.KOTA_ALT, simdi=SIMDI):
     log = io.StringIO()
     with contextlib.redirect_stdout(log), contextlib.redirect_stderr(log):
-        kod = T.calis(d, dk, api_kur(s), terimler, yeniden, yv, simdi_fn=lambda: SIMDI)
+        kod = T.calis(d, dk, api_kur(s), terimler, yeniden, yv, simdi_fn=lambda: simdi, kota_alt=kota_alt)
     return kod, log.getvalue()
 
 
@@ -183,13 +195,21 @@ def satirlar(d, haric=("olcum_utc",)):
 
 
 def alfa_beklenen(r):
-    """Elle hesap (sahte veri tanimindan): 60 download / 100; A 30 B 15 C 5 D 5 E 3 F 2; genc A B E; genc>=100 satis A(150) E(300)."""
-    return (r["ilk100_download_n"] == "60" and r["ilk100_download_oran"] == "0.6" and r["sayfa"] == "1"
-            and r["farkli_magaza"] == "6" and r["en_buyuk_magaza_payi"] == "0.5" and r["ilk3_magaza_payi"] == "0.833"
-            and r["magaza_bilinen_n"] == "6" and r["genc_magaza_n"] == "3" and r["genc_magaza_payi"] == "0.5"
-            and r["genc_satis100_n"] == "2" and r["genc_satis100_satis_medyan"] == "225.0" and r["magaza_satis_medyan"] == "95.0"
-            and r["fiyat_usd_n"] == "45" and r["fiyat_usd_disi_n"] == "15"
-            and r["magaza_yasi_medyan_ay"] == str(round(((200 + 900) / 2) * GUN / T.AY_SN, 1)))
+    """Elle hesap (sahte veri tanimindan): 62 download / 100; A 30 B 15 C 5 D 5 E 3 F 2 I 2; I'nin kurulus tarihi yok (yasi bilinen
+    6 magaza); genc A B E -> pay 3/6 (payda yasi bilinen); genc>=100 satis A(150) E(300); satis medyani 7 magaza [0,10,20,40,150,300,500]
+    = 40; USD 46, USD disi (EUR) 15, fiyat yok 1. Ilan yasi original_creation (created_timestamp hep 5 gun: ayirt eder), favori dl
+    kumesinde (fiziksel ilanlar fav 7: ayirt eder)."""
+    import statistics
+    yas = statistics.median((SIMDI - L["original_creation_timestamp"]) / T.AY_SN for L in ALFA_DL)
+    fav = statistics.median(L["num_favorers"] for L in ALFA_DL)
+    return (r["ilk100_download_n"] == "62" and r["ilk100_download_oran"] == "0.62" and r["sayfa"] == "1" and r["download_n"] == "62"
+            and r["farkli_magaza"] == "7" and r["en_buyuk_magaza_payi"] == "0.484" and r["ilk3_magaza_payi"] == "0.806"
+            and r["ilk100_farkli_magaza"] == "7" and r["ilk100_en_buyuk_magaza_payi"] == "0.484"
+            and r["magaza_bilinen_n"] == "7" and r["genc_magaza_n"] == "3" and r["genc_magaza_payi"] == "0.5"
+            and r["genc_satis100_n"] == "2" and r["genc_satis100_satis_medyan"] == "225.0" and r["magaza_satis_medyan"] == "40.0"
+            and r["fiyat_usd_n"] == "46" and r["fiyat_usd_disi_n"] == "15" and r["fiyat_yok_n"] == "1" and r["az_veri"] == ""
+            and r["magaza_yasi_medyan_ay"] == str(round(((200 + 900) / 2) * GUN / T.AY_SN, 1))
+            and r["ilan_yasi_medyan_ay"] == str(round(yas, 1)) and r["favori_medyan"] == str(round(float(fav), 1)))
 
 
 def main():
@@ -207,7 +227,7 @@ def main():
         kontrol("terim basina tek satir", sorted(r) == sorted(TERIMLER) and len(oku(d1, "TERIM_TARAMA.csv")) == 3)
         kontrol("alfa olcutleri elle hesapla ayni", alfa_beklenen(r["alfa terim"]))
         import statistics
-        usd = [round((400 + i) / 100, 2) for i in range(60) if i % 4]
+        usd = [round((400 + i) / 100, 2) for i in range(60) if i % 4] + [10.0]
         kontrol("alfa fiyat medyani yalniz USD", float(r["alfa terim"]["fiyat_medyan_usd"]) == round(statistics.median(usd), 2))
         kontrol("ek sayfa: beta 3 sayfa (10+9+15 < 30 sonra durur)", r["beta terim"]["sayfa"] == "3" and s.terim_istek["beta terim"] == 3)
         kontrol("ek sayfa yok: alfa >= 30 download", s.terim_istek["alfa terim"] == 1)
@@ -216,6 +236,7 @@ def main():
         bi = [x for x in oku(d1, "TERIM_ILAN.csv") if x["terim"] == "beta terim"]
         kontrol("TERIM_ILAN beta tekil", len(bi) == len({x["listing_id"] for x in bi}) == 299)
         kontrol("ilk100 yalniz 1. sayfa", r["beta terim"]["ilk100_download_n"] == "10" and r["beta terim"]["ilk100_ilan"] == "100")
+        kontrol("az veri isareti (gama 5 download)", r["gama terim"]["az_veri"] == "evet" and r["beta terim"]["az_veri"] == "")
         kontrol("terim basina en cok 6 cagri", all(int(x["cagri"]) <= 6 and int(x["istek"]) <= 6 for x in r.values()))
         kontrol("magaza onbellegi: her magaza bir kez batch", len(s.batch_ids) == len({ILAN[i]["shop_id"] for i in s.batch_ids}))
         kontrol("beta magazalari onbellekten (A alfa'da okundu)", r["beta terim"]["magaza_bilinen_n"] == "2")
@@ -230,21 +251,25 @@ def main():
                 and "USD" not in lg and "EUR" not in lg)
         kontrol("log: sayim var", "terim tamam 3" in lg and "kota" in lg)
         # 2) kota: baslangicta < 1.200 -> yalniz ping
+        kontrol("varsayilan kota esigi = KOTA_SINIRI 10 (CLAUDE.md)", T.KOTA_ALT == E.KOTA_SINIRI == 10)
+        sv = Sahte(kalan=1150)
+        kodv, _ = kos(sv, tmp / "b0")
+        kontrol("varsayilan esikte 1.150 kalanla tam akis", kodv == 0 and durum(tmp / "b0")["durum"] == "bitti")
         s2 = Sahte(kalan=1150)
         d2 = tmp / "b"
-        kod2, _ = kos(s2, d2)
+        kod2, _ = kos(s2, d2, kota_alt=1200)
         kontrol("bilinen FAIL: kota < 1200 basta -> kod 3", kod2 == 3)
         kontrol("kota basta: terim istegi yok", s2.terim_istek == {} and s2.istek == 1)
         kontrol("kota basta: durum devam + kalan terim", durum(d2)["durum"] == "devam" and durum(d2)["kalan_terim"] == "alfa terim")
         # 3) kota terimler arasinda: alfa biter, beta'dan once DUR; sonra devam -> ayni sonuc
         s3 = Sahte(kalan=1200 + 4)     # ping 1 + alfa 2 istek -> kalan 1201; beta basinda 1201 >= 1200 -> beta (4) -> 1197 -> DUR
         d3 = tmp / "c"
-        kod3, _ = kos(s3, d3)
+        kod3, _ = kos(s3, d3, kota_alt=1200)
         kontrol("kota DUR kod 3", kod3 == 3)
         kontrol("kota DUR: 2 terim tamam, gama bekliyor", sorted(satirlar(d3)) == ["alfa terim", "beta terim"]
                 and durum(d3)["kalan_terim"] == "gama terim")
         s3.kalan = 5000
-        kod3b, _ = kos(s3, d3)
+        kod3b, _ = kos(s3, d3, kota_alt=1200)
         kontrol("kota sonrasi devam bitti", kod3b == 0 and durum(d3)["durum"] == "bitti")
         kontrol("devam sonucu tam akisla ayni", satirlar(d3) == r)
         kontrol("devam: bitmis terim yeniden okunmaz", s3.terim_istek["alfa terim"] == 1)
@@ -286,6 +311,21 @@ def main():
                 and satirlar(d1, hr) == {k: {a: b for a, b in v.items() if a not in hr} for k, v in r.items()})
         kontrol("yeniden: magaza onbellekten (batch yok)", s7.batch_ids == [])
         kontrol("yeniden: TERIM_ILAN beta cift satir yok", len([x for x in oku(d1, "TERIM_ILAN.csv") if x["terim"] == "beta terim"]) == 299)
+        s7b = Sahte()
+        kos(s7b, d1)
+        kontrol("yeniden bittikten sonra normal kosu tekrar okumaz", s7b.terim_istek == {} and durum(d1)["yeniden_bekleyen"] == [])
+        # 7b) bayat magaza (7 gunden eski okuma) yeniden okunur, taze okunmaz
+        s7c = Sahte()
+        kos(s7c, d1, terimler=["alfa terim"], yeniden=True, simdi=SIMDI + 8 * GUN)
+        kontrol("bayat magaza yeniden okunur (8 gun)", len(s7c.batch_ids) == 7)
+        s7d = Sahte()
+        kos(s7d, d1, terimler=["alfa terim"], yeniden=True, simdi=SIMDI + 10 * GUN)
+        kontrol("taze magaza okunmaz (2 gun once okundu)", s7d.batch_ids == [])
+        # 7c) baslik yok -> DUR, terim istegi yok
+        s7e = Sahte()
+        s7e.basliksiz = True
+        kod7e, _ = kos(s7e, tmp / "bb")
+        kontrol("bilinen FAIL: kota basligi yok -> kod 3, terim istegi yok", kod7e == 3 and s7e.terim_istek == {})
         # 8) terim hatasi: tek terim 500 -> atlanir; ardisik 3 -> kod 1
         s8 = Sahte()
         s8.hata_terim = {"beta terim"}
@@ -294,10 +334,29 @@ def main():
         kontrol("tek terim hatasi: diger terimler tamam, kod 0, durum devam", kod8 == 0 and sorted(satirlar(d8)) == ["alfa terim", "gama terim"]
                 and durum(d8)["durum"] == "devam")
         kontrol("5xx yeniden denemesi istek sayacinda", durum(d8)["istek_toplam"] == s8.istek)
+        dh = durum(d8)
+        kontrol("okunamayan terim durumda sayilir", dh["terim_hata"] == {"beta terim": 1})
+        s8.hata_terim = set()
+        kos(s8, d8)
+        kontrol("okunamayan terim sonraki kosuda okunur", durum(d8)["durum"] == "bitti" and durum(d8)["terim_hata"] == {})
         s9 = Sahte()
         s9.hata_terim = set(TERIMLER)
         kod9, _ = kos(s9, tmp / "h")
         kontrol("bilinen FAIL: ardisik 3 terim hatasi kod 1", kod9 == 1)
+        # kalici hatali 3 terim listenin basinda: sonraki kosular takilmaz (sona alinir, 2. kosuda 'hata' kapanir)
+        sh = Sahte()
+        sh.hata_terim = {"h1", "h2", "h3"}
+        dh2 = tmp / "h2"
+        sira = ["h1", "h2", "h3"] + TERIMLER
+        k1, _ = kos(sh, dh2, terimler=sira)
+        k2, _ = kos(sh, dh2, terimler=sira)
+        st2 = durum(dh2)
+        kontrol("kalici hata: 1. kosu kod 1 (hatalilar basta), 2. kosuda hatalilar sona alinir, diger terimler tamam",
+                k1 == 1 and k2 == 1 and all(satirlar(dh2)[t]["durum"] == "tamam" for t in TERIMLER))
+        kontrol("kalici hata: 2 kosudan sonra 'hata' kapanir, durum bitti", all(satirlar(dh2)[t]["durum"] == "hata" for t in ("h1", "h2", "h3"))
+                and st2["durum"] == "bitti" and st2["hata_terim_n"] == 3)
+        k3, _ = kos(sh, dh2, terimler=sira)
+        kontrol("kalici hata kapandiktan sonra yeniden denenmez", k3 == 0 and sh.terim_istek["h1"] == 2 * 3)
         # 9) secim
         try:
             T.secim_coz(TERIMLER, "alfa terim; yok boyle")
@@ -347,16 +406,22 @@ def main():
         kos(Sahte(), tmp / "x2")
         kontrol("mutasyon GENC_GUN yakalanir", not alfa_beklenen(satirlar(tmp / "x2")["alfa terim"]))
         T.GENC_GUN = eski_g
-        eski_tt = T.terim_tara
+        eski_te = T.tekil_ekle
 
-        def bozuk(dp, ok, terim, simdi):
-            satir, il, yeni = eski_tt(dp, ok, terim, simdi)
-            return satir, il + il[:1], yeni
-        T.terim_tara = bozuk
+        def tekilsiz(tum, gorulen, res, sayfa):
+            tum.extend((sayfa, i + 1, L) for i, L in enumerate(res))
+        T.tekil_ekle = tekilsiz
         kos(Sahte(), tmp / "x3")
-        bi3 = [x for x in oku(tmp / "x3", "TERIM_ILAN.csv") if x["terim"] == "beta terim"]
-        kontrol("mutasyon tekillestirme bozuk yakalanir", len(bi3) != len({x["listing_id"] for x in bi3}))
-        T.terim_tara = eski_tt
+        T.tekil_ekle = eski_te
+        kontrol("mutasyon tekil_ekle bozuk yakalanir (beta download 35)", satirlar(tmp / "x3")["beta terim"]["download_n"] != "34")
+        # kaydet sirasi: TERIM_TARAMA en son (arada kesilirse terim tamam gorunmez)
+        sira_yaz = []
+        eski_yc = D.yaz_csv
+        D.yaz_csv = lambda p_, a_, s_: (sira_yaz.append(Path(p_).name), eski_yc(p_, a_, s_))
+        kos(Sahte(), tmp / "x4", terimler=["gama terim"])
+        D.yaz_csv = eski_yc
+        kontrol("kaydet: TERIM_TARAMA en son yazilir", sira_yaz and sira_yaz[-1] == "TERIM_TARAMA.csv"
+                and all(sira_yaz[i] == "TERIM_TARAMA.csv" for i in range(2, len(sira_yaz), 3)))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     print(f"SONUC: {'FAIL ' + str(len(HATA)) if HATA else 'PASS'}")

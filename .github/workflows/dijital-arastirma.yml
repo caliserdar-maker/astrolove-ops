@@ -97,7 +97,7 @@ jobs:
           umask 077; mkdir -p out          # sir_koru tee log dosyasini betikten once acar
           SJ="$RUNNER_TEMP/sir.json"
           python3 -c 'import json, os, sys; json.dump({"etsy_api_key": os.environ["ETSY_API_KEY"], "etsy_shared_secret": os.environ["ETSY_SHARED_SECRET"]}, open(sys.argv[1], "w"))' "$SJ"
-          python scripts/etsy/dijital_arastirma.py --out out --dk "$DK" --terimler "${TERIMLER:-}" 2>&1 \
+          python scripts/etsy/dijital_arastirma.py --out out --dk "$DK" --terimler="${TERIMLER:-}" 2>&1 \
             | python3 scripts/guvenlik/sir_koru.py tee --sir-json "$SJ" out/DERIN_KOSU_LOG.txt
           RC=("${PIPESTATUS[@]}")
           rm -f "$SJ"
@@ -126,7 +126,7 @@ jobs:
           echo "::notice::Drive: DERIN_${ETIKET}/ ($(find out -type f | wc -l) dosya) | asama / kosu / toplam istek: $A"
       - if: always()
         run: rm -rf ~/.config/rclone out _t.log
-      - name: Sonuc (1 ise kirmizi)
+      - name: Sonuc (0 / 3 / 4 disi kirmizi)
         run: |
           echo "cikis kodu: ${KOD:-?}"
-          [ "${KOD:-1}" != "1" ]
+          case "${KOD:-}" in 0|3|4) exit 0;; *) exit 1;; esac      # yalniz 0 / 3 (kota) / 4 (yol verildi) yesil

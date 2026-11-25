@@ -90,6 +90,10 @@ class Sahte:
         self.ping_n = 0
         self.yazma = 0
         self.yorum_istek = {}
+        self.hata_grup = {}       # (terim, sort_on) -> kalan hata sayisi (503)
+        self.batch_hata = False
+        self.shop_hata = False
+        self.yorum_hata = {}      # ilan -> kalan hata sayisi
 
     def ping(self, path):
         self.ping_n += 1
@@ -107,12 +111,22 @@ class Sahte:
             return Yanit(429, {"error": "kota"}, 0)
         if p == "/listings/active":
             assert "taxonomy_id" not in params, "terim modunda taksonomi suzgeci yok"
+            k = (params["keywords"], params.get("sort_on"))
+            if self.hata_grup.get(k, 0) > 0:
+                self.hata_grup[k] -= 1
+                return Yanit(503, {"error": "x"}, self.kalan)
             L = [ILAN[i] for i in SIRA[params["keywords"]]]
             if params.get("sort_on") == "created":
                 L = sorted(L, key=lambda x: -x["created_timestamp"])
             off, lim = int(params.get("offset", 0)), int(params.get("limit", 25))
             return Yanit(200, {"count": len(L), "results": L[off:off + lim]}, self.kalan)
+        if p.startswith("/shops/"):
+            if self.shop_hata:
+                return Yanit(503, {"error": "x"}, self.kalan)
+            return Yanit(200, {"shop_id": int(p.split("/")[2]), "shop_name": "S", "transaction_sold_count": 50}, self.kalan)
         if p == "/listings/batch":
+            if self.batch_hata:
+                return Yanit(503, {"error": "x"}, self.kalan)
             ids = [int(x) for x in params["listing_ids"].split(",")]
             assert len(ids) <= 100
             res = [dict(ILAN[i], shop={"shop_id": ILAN[i]["shop_id"], "shop_name": "S", "transaction_sold_count": 50,
@@ -122,6 +136,9 @@ class Sahte:
             lid = int(p.split("/")[2])
             off, lim = int(params.get("offset", 0)), int(params.get("limit", 25))
             self.yorum_istek[(lid, off)] = self.yorum_istek.get((lid, off), 0) + 1
+            if self.yorum_hata.get(lid, 0) > 0:
+                self.yorum_hata[lid] -= 1
+                return Yanit(404, {"error": "x"}, self.kalan)
             y = yorumlar(lid)
             return Yanit(200, {"count": len(y), "results": y[off:off + lim]}, self.kalan)
         return Yanit(404, {"error": "yok"}, self.kalan)
@@ -223,6 +240,11 @@ def main():
             y12 = sum(1 for r in y if r["listing_id"] in lids and int(r["created_timestamp"]) >= SIMDI - 365 * GUN)
             kontrol(f"ozet son 12 ay yorum ({t})", int(h[t]["son_12ay_yorum_sayisi"]) == y12)
         kontrol("ozet: kesik ilan sayilir", int(h["planner terim"]["yorum_kesik_ilan"]) == 1)
+        import statistics
+        for t in TERIMLER:
+            lids = {r["listing_id"] for r in bag if r["terim"] == t}
+            yas = statistics.median((SIMDI - ILAN[int(x)]["original_creation_timestamp"]) / D.AY_SN for x in lids)
+            kontrol(f"ozet ilan yasi original_creation ile ({t})", float(h[t]["ilan_yasi_medyan_ay"]) == round(yas, 1))
         kontrol("istek sayaci = sahte istek + ping", st["istek_toplam"] == s.istek + s.ping_n and s.ping_n == 1)
         kontrol("durum zaman damgasi + kosu kaydi", bool(st.get("son_guncelleme_utc")) and st["kosular"][-1].get("bit_utc")
                 and st["kosular"][-1]["istek"] == s.istek + 1)
@@ -255,6 +277,43 @@ def main():
                 if durum(d5)["asama"] == "bitti":
                     break
             kontrol(f"kesinti her {k_} istekte: bitti + ayni sonuc", durum(d5)["asama"] == "bitti" and imza(d5) == imza(d1))
+        # 2c) okuma hatasi "bitti" sayilmaz: grup ilk sayfasi 503 (3 deneme x 2 = 6 yanit), batch + shops 503
+        s6 = Sahte()
+        s6.hata_grup = {("planner terim", "score"): 6}
+        s6.batch_hata = s6.shop_hata = True
+        d6 = tmp / "hg"
+        kod6a, _ = kos(s6, d6)
+        st6 = durum(d6)
+        kontrol("bilinen FAIL: okunamayan grup + magaza -> kod 1, asama ornek", kod6a == 1 and st6["asama"] == "ornek"
+                and "planner terim\trelevans" not in st6["ornek_bitti"])
+        kontrol("okunamayan magaza bos satir olarak yazilmaz", len(oku(d6, "MAGAZALAR.csv")) == 0)
+        s6.batch_hata = s6.shop_hata = False
+        for _ in range(3):
+            kos(s6, d6)
+            if durum(d6)["asama"] == "bitti":
+                break
+        kontrol("hata sonrasi devam: ayni sonuc", durum(d6)["asama"] == "bitti" and imza(d6) == imza(d1)
+                and all(r["transaction_sold_count"] for r in oku(d6, "MAGAZALAR.csv")))
+        # kalici grup hatasi: 2 kosuda okunamazsa kapanir, ozette sayilir
+        s6b = Sahte()
+        s6b.hata_grup = {("planner terim", "score"): 10 ** 6}
+        d6b = tmp / "hg2"
+        kos(s6b, d6b)
+        kos(s6b, d6b)
+        for _ in range(3):
+            kos(s6b, d6b)
+            if durum(d6b)["asama"] == "bitti":
+                break
+        hb = {o["terim"]: o for o in oku(d6b, "TERIM_OZET.csv") if o["grup"] == "hepsi"}
+        kontrol("kalici grup hatasi kapanir, ozette grup_okuma_hatasi 1", durum(d6b)["asama"] == "bitti"
+                and hb["planner terim"]["grup_okuma_hatasi"] == "1" and hb["clipart terim"]["grup_okuma_hatasi"] == "0")
+        # yorum ilk sayfasi bir kez 404: ayni kosuda yeniden denenir, secim etkilenmez
+        s6c = Sahte()
+        s6c.yorum_hata = {COK: 1}
+        d6c = tmp / "hg3"
+        kos(s6c, d6c)
+        kontrol("yorum ilk sayfa hatasi ayni kosuda yeniden denenir", durum(d6c)["asama"] == "bitti" and imza(d6c) == imza(d1)
+                and str(COK) in durum(d6c)["yorum_tam"]["planner terim"])
         # 3) yol verme
         s3 = Sahte()
         d3 = tmp / "c"

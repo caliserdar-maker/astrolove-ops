@@ -71,8 +71,6 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0     # test_dijital_is_akisi origin/main surumunu okur (yoksa o kontrol atlanir)
       - name: Kurulum
         run: pip install -q requests==2.34.2
       - name: Testler

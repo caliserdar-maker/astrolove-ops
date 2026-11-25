@@ -43,6 +43,7 @@ YENI_GUN = 365         # "yeni" grubu: original_creation_timestamp bu kadar gund
 YORUM_TAM_N = 5        # terim basina tum yorumlari okunan en cok yorumlu ilan
 YORUM_SAYFA_AZAMI = 10  # ilan basina en cok yorum sayfasi (100'luk)
 TERIM_AZAMI = 8
+OKUMA_DENEME = 2       # okunamayan grup / magaza: bu kadar kosuda okunamazsa 'hata' olarak kapanir (durum.json'da listelenir)
 KOTA_PAY = 0.20        # kalan < KOTA_PAY * gunluk sinir -> dur
 YOL_VER_SN = 60        # baska Etsy kosusu kontrol araligi
 DK_AZAMI = 45          # kosu basina Etsy okuma suresi tavani (kilit tutma)
@@ -299,7 +300,11 @@ def grup_topla(ok, terim, grup, mevcut, n_ek, offset0, simdi):
     for _ in range(GRUP_SAYFA):
         params["offset"] = offset
         j = ok.get("/listings/active", dict(params), hata_bos=True)
-        res = (j or {}).get("results") or []
+        if j is None:
+            j = ok.get("/listings/active", dict(params), hata_bos=True)   # ayni kosuda bir yeniden deneme
+        if j is None:
+            return None, offset0          # okuma hatasi: bos sayfa DEGIL; grup bitti sayilmaz
+        res = j.get("results") or []
         for L in res:
             lid = str(L["listing_id"])
             if not uygun(L) or lid in mevcut or lid in gorulen:
@@ -319,6 +324,8 @@ def grup_topla(ok, terim, grup, mevcut, n_ek, offset0, simdi):
 def asama_ornek(dp, ok, terimler, simdi):
     yap = dp.d.setdefault("ornek_bitti", [])
     ofs = dp.d.setdefault("ornek_offset", {})
+    gh = dp.d.setdefault("ornek_hata", {})          # anahtar -> okunamadigi kosu sayisi
+    bekleyen = 0
     for k, t in enumerate(terimler):
         mevcut = set(dp.terim_ilanlari(t))
         for grup in ("relevans", "yeni"):
@@ -326,6 +333,13 @@ def asama_ornek(dp, ok, terimler, simdi):
             if anahtar in yap:
                 continue
             sec, o1 = grup_topla(ok, t, grup, mevcut, GRUP_N, ofs.get(anahtar, 0), simdi)
+            if sec is None:
+                gh[anahtar] = int(gh.get(anahtar, 0)) + 1
+                if gh[anahtar] >= OKUMA_DENEME:      # kalici hata: kapanir, durum.json ornek_hata'da kalir, ozette sayilir
+                    yap.append(anahtar)
+                    continue
+                bekleyen += 1
+                break          # sira korunur: relevans okunmadan yeni grubu secilmez (secim kumesi hataya gore degismez)
             # ayni adimda (arada istek yok): satirlar + baglar + offset + bitti
             ofs[anahtar] = o1
             for i, L in enumerate(sec):
@@ -335,9 +349,12 @@ def asama_ornek(dp, ok, terimler, simdi):
                 dp.uyelik.append({"terim": t, "grup": grup, "sira": i + 1, "listing_id": lid})
                 mevcut.add(lid)
             yap.append(anahtar)
+            gh.pop(anahtar, None)
         dp.kaydet()
         log(f"ornek: terim {k + 1}/{len(terimler)} | tekil ilan {len(dp.ilan)} | bag {len(dp.uyelik)} | kota {ok.api.remaining}")
-    magaza_topla(dp, ok)
+    eksik = magaza_topla(dp, ok)
+    if bekleyen or eksik:
+        raise SystemExit(f"HATA: okunamayan grup {bekleyen}, magaza {eksik}; sonraki kosu yeniden dener")
     dp.d["asama"] = "yorum"
     log(f"ORNEK: terim {len(terimler)} | tekil ilan {len(dp.ilan)} | bag {len(dp.uyelik)} | magaza {len(dp.magaza)}")
 
@@ -357,12 +374,25 @@ def magaza_topla(dp, ok):
             sh = x.get("shop") or {}
             if sh.get("shop_id"):
                 dp.magaza[str(sh["shop_id"])] = {a: sh.get(a, "") for a in MAGAZA_ALAN}
-    for s in tekil:   # batch Shop vermediyse tek tek
+    mh = dp.d.setdefault("magaza_hata", {})
+    eksik = 0
+    for s in tekil:   # batch Shop vermediyse tek tek; okunamazsa BOS SATIR YAZILMAZ (sonraki kosu yeniden dener)
         sid = str(s["shop_id"])
-        if sid not in dp.magaza:
-            sh = ok.get(f"/shops/{sid}", hata_bos=True) or {}
+        if sid in dp.magaza:
+            continue
+        sh = ok.get(f"/shops/{sid}", hata_bos=True)
+        if sh and sh.get("shop_id"):
             dp.magaza[sid] = {a: sh.get(a, "") for a in MAGAZA_ALAN}
             dp.magaza[sid]["shop_id"] = sid
+            mh.pop(sid, None)
+            continue
+        mh[sid] = int(mh.get(sid, 0)) + 1
+        if mh[sid] >= OKUMA_DENEME:      # kalici: yalniz kimlikli satir (alanlar bos), durum.json magaza_hata'da kalir
+            dp.magaza[sid] = {a: "" for a in MAGAZA_ALAN}
+            dp.magaza[sid]["shop_id"] = sid
+        else:
+            eksik += 1
+    return eksik
 
 
 # ------------------------------------------------------------------ asama: yorum
@@ -401,13 +431,16 @@ def sayfa_al(dp, ok, lid, yd):
 def asama_yorum(dp, ok, terimler):
     yd = dp.d.setdefault("yorum", {})
     t0 = time.monotonic()
-    # 1) her tekil ilanin ilk sayfasi
-    bekleyen = [lid for lid in dp.ilan if lid not in yd or (yd[lid]["count"] is None and not yd[lid]["bitti"])]
-    for i, lid in enumerate(bekleyen):
-        sayfa_al(dp, ok, lid, yd)
-        if i % 100 == 0:
-            dp.kaydet()
-            log(f"yorum ilk sayfa: {i}/{len(bekleyen)} | yorum {len(dp.yorum)} | {time.monotonic() - t0:.0f} sn | kota {ok.api.remaining}")
+    # 1) her tekil ilanin ilk sayfasi; hata veren ilan ayni kosuda bir kez daha (2. hatada bitti + hata isareti)
+    for tur in range(OKUMA_DENEME):
+        bekleyen = [lid for lid in dp.ilan if lid not in yd or (yd[lid]["count"] is None and not yd[lid]["bitti"])]
+        for i, lid in enumerate(bekleyen):
+            sayfa_al(dp, ok, lid, yd)
+            if i % 100 == 0 or i + 1 == len(bekleyen):
+                dp.kaydet()
+                gec = time.monotonic() - t0
+                log(f"yorum ilk sayfa (tur {tur + 1}): {i + 1}/{len(bekleyen)} (%{100 * (i + 1) // len(bekleyen)}) | gecen {gec / 60:.1f} dk"
+                    f" | kalan ~{gec / (i + 1) * (len(bekleyen) - i - 1) / 60:.1f} dk | yorum {len(dp.yorum)} | kota {ok.api.remaining}")
     for lid, s in dp.ilan.items():
         st = yd.get(lid)
         if st:
@@ -520,6 +553,10 @@ def asama_ozet(dp, terimler, simdi=None):
                 "yorum_kesik_ilan": sum(1 for x in lids if (yd.get(x) or {}).get("kesik")),
                 "yorum_hatali_ilan": sum(1 for x in lids if (yd.get(x) or {}).get("hata")),
                 "tum_yorumu_okunan_secim": len([x for x in tam_sec.get(t, []) if x in lids]),
+                "grup_okuma_hatasi": sum(1 for g in (("relevans", "yeni") if grup == "hepsi" else (grup,))
+                                         if int(dp.d.get("ornek_hata", {}).get(f"{t}\t{g}", 0)) >= OKUMA_DENEME),
+                "magaza_okunamadi": len({s["shop_id"] for s in ilanlar} & {k for k, v in dp.d.get("magaza_hata", {}).items()
+                                                                           if int(v) >= OKUMA_DENEME}),
                 "son_12ay_yorum_sayisi": len(y12), "son_12ay_yorum_tam": "evet" if tam12 else "alt_sinir",
                 "dusuk_yildiz_n": len(neg), "dusuk_yildiz_payi": round(len(neg) / len(yorumlar), 3) if yorumlar else "",
                 "yildiz4_n": sum(1 for y in yorumlar if y["duygu"] == "notr"), "yildiz5_n": len(pos),
@@ -528,7 +565,8 @@ def asama_ozet(dp, terimler, simdi=None):
                 "fiyat_usd_n": len(usd), "fiyat_usd_disi_n": len(ilanlar) - len(usd),
                 "ilan_yasi_medyan_ay": round(statistics.median(yas), 1) if yas else "",
                 "favori_medyan": statistics.median(fav) if fav else "",
-                "not": ("yorum sayisi satis degildir; son_12ay_yorum_sayisi siralamada kullanilmaz"
+                "not": ("yorum sayisi satis degildir; son_12ay_yorum_sayisi siralamada kullanilmaz; dusuk_yildiz_payi karisik kume:"
+                        f" en cok yorumlu {YORUM_TAM_N} ilanda {YORUM_SAYFA_AZAMI * 100}'e kadar, digerlerinde ilk 100 yorum"
                         + (f"; yeni = original_creation son {YENI_GUN} gun" if grup == "yeni" else "")),
             })
     alanlar = list(ozet[0].keys()) if ozet else ["terim"]
