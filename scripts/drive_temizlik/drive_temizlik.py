@@ -61,6 +61,8 @@ GERCEK_RECEIPT = re.compile(r"(?<!\d)[1-9]\d{9}(?!\d)")     # 10 haneli; test nu
 KOD_ONEK_E = r"/[A-Za-z][A-Za-z0-9_]{3,}(\$\{|\$[A-Za-z_]|\{[A-Za-z_]|[\"'][[:space:]]*\+|%s|%\()"
 KOD_ONEK = re.compile(r"/([A-Za-z][A-Za-z0-9_]{3,})(?:\$\{|\$[A-Za-z_]|\{[A-Za-z_]|[\"']\s*\+|%s|%\()")
 GENEL_ATA = {"ASTROLOVE", "TEMP", "OFIS"}
+# J3 envanterinde klasor satirlari ayri grupta; bu gruptaki TEMP klasorleri J3 koku olabilir (icerik oge oge kontrol edilir)
+J3_KLASOR_GRUP = "Klasor (tum icerik ayni kategori)"
 KURU_BUTCE_DK = 270
 
 
@@ -239,7 +241,9 @@ def uygun_satir(is_, s, j3_grup):
     if is_ == "J1":
         return k == "TRASH"
     if is_ == "J3":
-        if k != "SERDAR_QUESTION" or not yol.startswith("ASTROLOVE/TEMP/") or j3_grup is None or s["group"] != j3_grup:
+        if k != "SERDAR_QUESTION" or not yol.startswith("ASTROLOVE/TEMP/") or j3_grup is None:
+            return False
+        if not (s["group"] == j3_grup or (s["klasor"] and s["group"] == J3_KLASOR_GRUP)):
             return False
         return not any(p.upper().startswith("POD_PRINT") for p in yol.split("/"))
     if is_ == "J5":
@@ -365,9 +369,31 @@ class Kuru:
         self.t_bas = time.time()
         self.kod_id = kod.idler()
         self.kod_uzun = [t for t in self.kod_id if len(t) > 33]   # bitisik yazilmis kimlikler icin alt dizgi aramasi
+        self.muaf_say = 0
+        self.ek_ad = set()
         self.kismi = False
         self.kod_onek = {o for o in kod.onekler() if len(o) >= 4}
         print(f"kod taramasi: ref {len(kod.refler)}, Drive kimligi adayi {len(self.kod_id)}, dinamik onek {len(self.kod_onek)}")
+
+    def muaf(self, *idler):
+        """genel kap klasorlerinin kimligi kimlik kapisindan cikar (tam token ve onu iceren bitisik tokenler)."""
+        once = len(self.kod_id)
+        self.kod_id = {t for t in self.kod_id if not any(i in t for i in idler)}
+        self.kod_uzun = [t for t in self.kod_uzun if not any(i in t for i in idler)]
+        self.muaf_say = once - len(self.kod_id)
+        if self.muaf_say > len(idler):
+            raise SystemExit(f"HATA: muafiyet {self.muaf_say} token cikardi (en fazla {len(idler)}; bitisik kimlik) (DUR)")
+        # kimlikten sonra gelen yolun ilk bileseni (tum ref'ler) kod adi sayilir; degiskenle basliyorsa DUR
+        self.ek_ad = set()
+        for i in idler:
+            for m in self.kod._grep(["-E", i + "[:/][^\"' ]*"]):
+                kalan = m.split(i, 1)[1][1:] if i in m else ""
+                ilk = kalan.split("/")[0]
+                if ilk.startswith("$") or ilk.startswith("{"):
+                    raise SystemExit("HATA: muaf kimlikten sonra degiskenle kurulan yol var (DUR)")
+                if ilk:
+                    self.ek_ad.add(ilk)
+        print(f"kimlik muafiyeti: {len(idler)} genel klasor, cikarilan token {self.muaf_say}, kimlik sonrasi ad {len(self.ek_ad)}")
 
     def oge_neden(self, is_, o, ust):
         if o.get("trashed"):
@@ -566,13 +592,15 @@ class Kuru:
         adlar = set()
         for b in self.birim:
             adlar |= {a for a in [b["ad"]] + b["ata_adlar"] if len(a) >= 6}
-        bulunan = self.kod.adlar(adlar, gecici)
+        bulunan = self.kod.adlar(adlar, gecici) | self.ek_ad
         kalan, atilan = [], 0
         for b in self.birim:
             bak = [b["ad"]] if b["is_"] == "J2" else [b["ad"]] + b["ata_adlar"]
             gecen = [a for a in bak if a in bulunan]
             onek = any(a.startswith(o) for a in bak for o in self.kod_onek)
-            if len(b["ad"]) < 6 and b["is_"] != "J2":
+            if b["is_"] == "J3" and b["dosya"] == 0:
+                self.atla.append(dict(b, neden="j3_bos_klasor")); atilan += 1
+            elif len(b["ad"]) < 6 and b["is_"] != "J2":
                 self.atla.append(dict(b, neden="ad_kisa_kontrol_edilemez")); atilan += 1
             elif onek:
                 self.atla.append(dict(b, neden="kodda_dinamik_onek")); atilan += 1
@@ -619,6 +647,9 @@ SINIRLAR = ["viewedByMeTime yalniz kullanicinin acmasiyla degisir; API/rclone ok
             "tamamen degiskenden kurulan yollar (orn. TEMP/${ON}_...) gorulemez.",
             "Repo degiskenleri (vars) ve secret'lardaki kimlik/ref'ler, betik icinde sabitlenmis SHA'lar ve os.path.join / "
             ".format ile kurulan yollar taranmaz.",
+            "TEMP/OFIS kimlik muafiyeti (Serdar 25 Kas): bu iki klasorun altindaki yollar yalniz adla korunur; OFIS alt "
+            "klasorlerindeki 14 gunden eski RAPOR/SORU dosyalari (J5) koruma desenine uymuyorsa ARCHIVE'e tasinir (silinmez).",
+            "J2 ile Cop'e giden 900000000N test klasorlerini okuyan teshis is akislari (orn. siparis-yardimci) girdisiz kalir.",
             "Kapsamdan bilerek dusenler: OFIS kokundeki Chrome kilit dosyalari (OFIS koku korunur), J1'deki KUPA_SIPARIS_TEST_* "
             "(siparis deseni), J4 Adsiz proje (tetikleyici dogrulanamadi), Drive kokundeki J1 dosyalari."]
 
@@ -665,6 +696,8 @@ def kuru(a):
         print(f"  SQ-TEMP grup #{i}: POD_PRINT disi {v[0]} dosya {gb(v[1])} GB | POD_PRINT {v[2]} dosya {gb(v[3])} GB | klasor {v[4]}")
     if a.j3_grup is not None and a.j3_grup not in grup:
         raise SystemExit("HATA: --j3-grup envanterde yok (DUR)")
+    if a.j3_grup is not None and grup.get(J3_KLASOR_GRUP, [0] * 5)[4] == 0:
+        raise SystemExit("HATA: J3 klasor grubu envanterde yok (DUR)")
     d = Drive(os.environ["DRIVE_TOKEN_KOMUT"])
     simdi = datetime.now(timezone.utc)
     refler = [r for r in a.refler.split(",") if r] if a.refler else ["HEAD"]
@@ -676,6 +709,14 @@ def kuru(a):
     canli = d.liste(f"name = 'OFIS' and mimeType = '{KLASOR}' and 'root' in parents and trashed = false", "id")
     if len(ofis) != 1 or len(canli) != 1 or ofis[0]["id"] != canli[0]["id"]:
         raise SystemExit("HATA: envanter koku ile canli Drive koku eslesmiyor (DUR)")
+    # TEMP/OFIS kimlik muafiyeti (Serdar 25 Kas onayi): kodda rclone koku olarak gecen bu iki genel klasorun kimligi
+    # kimlik kapisindan cikarilir; altlarindaki yollar adla taranmaya devam eder (GENEL_ATA ile ayni ilke)
+    ast = d.liste(f"name = 'ASTROLOVE' and mimeType = '{KLASOR}' and 'root' in parents and trashed = false", "id")
+    temp = [] if len(ast) != 1 else d.liste(f"name = 'TEMP' and mimeType = '{KLASOR}' and '{ast[0]['id']}' in parents "
+                                             f"and trashed = false", "id")
+    if len(temp) != 1:
+        raise SystemExit("HATA: ASTROLOVE/TEMP tekil bulunamadi (DUR)")
+    k.muaf(temp[0]["id"], canli[0]["id"])
     isler = a.isler.split(",")
     for is_ in isler:
         if is_ in ("J1", "J5") or (is_ == "J3" and a.j3_grup is not None):
