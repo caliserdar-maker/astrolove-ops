@@ -1,0 +1,142 @@
+name: terim-tarama
+# DIJITAL ARASTIRMA TERIM TARAMASI (huni Asama 1; Serdar 26 Kas "Evet derhal basla", KARARLAR_20261126_1 ve _2). SALT OKUMA: yalniz GET,
+# yalniz API anahtari (OAuth token indirilmez). Betik scripts/etsy/terim_tarama.py, test scripts/etsy/test_terim_tarama.py.
+# Terim basina en cok 6 mantiksal cagri (153 terim: en cok 918 + ping; 5xx / kisa 429 yeniden denemeleri gercek istegi artirabilir,
+# sayac gercek istegi sayar); yorum cagrisi YOK. Kota: kosu basinda ve her terimden once kalan < kota_alt -> temiz DUR (cikis 3),
+# yeniden kosu kaldigi terimden surer. kota_alt varsayilani 10 (CLAUDE.md KOTA SINIRI: tum varsayilanlar 10; gorev metnindeki 1.200
+# yalniz Serdar acikca onaylarsa girdi olarak verilir). Tetik YALNIZ elle (workflow_dispatch); schedule YOK, kendini yeniden
+# tetikleme YOK. Depo herkese acik: toplanan veri commit'e, loga, artifact'e GIRMEZ; cikti yalniz gizli Drive
+# ASTROLOVE/DIJITAL_ARASTIRMA_20261125/ (TERIM_* dosyalari + terim_durum.json; derin toplayicinin dosyalarina dokunmaz).
+# Kilit: kilit_bekle (Etsy kumesi), Drive durumu kilitten SONRA. Log dosyasi sir_koru tee'den gecer.
+on:
+  workflow_dispatch:
+    inputs:
+      yalniz:
+        description: "yalniz su terimler (';' ile ayrilmis, config/dijital_terimler.txt icinden; bos = tamami)"
+        required: false
+        default: ""
+      yeniden:
+        description: "secili terimler bitmis olsa da yeniden olculsun (true / false)"
+        required: false
+        default: "false"
+      dk:
+        description: "Etsy okuma suresi (dk, en cok 45)"
+        required: false
+        default: "30"
+      kota_alt:
+        description: "kalan kota bunun altindaysa DUR (varsayilan 10 = CLAUDE.md KOTA SINIRI; yukseltme Serdar onayiyla)"
+        required: false
+        default: "10"
+permissions:
+  contents: read
+  actions: read
+jobs:
+  tara:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180     # kilit_bekle en fazla 120 dk + okuma en cok 45 dk + Drive
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Girdi kapisi
+        env:
+          DK_G: ${{ github.event.inputs.dk }}
+          YENIDEN_G: ${{ github.event.inputs.yeniden }}
+          KOTA_G: ${{ github.event.inputs.kota_alt }}
+        run: |
+          set -euo pipefail
+          DK="${DK_G:-30}"
+          case "$DK" in ''|*[!0-9]*) echo "::error::dk tam sayi olmali"; exit 1;; esac
+          [ "$DK" -ge 1 ] && [ "$DK" -le 45 ] || { echo "::error::dk 1-45 olmali"; exit 1; }
+          case "${YENIDEN_G:-false}" in true|false) ;; *) echo "::error::yeniden true / false olmali"; exit 1;; esac
+          KA="${KOTA_G:-10}"
+          case "$KA" in ''|*[!0-9]*) echo "::error::kota_alt tam sayi olmali"; exit 1;; esac
+          [ "$KA" -ge 10 ] && [ "$KA" -le 4000 ] || { echo "::error::kota_alt 10-4000 olmali"; exit 1; }
+          echo "DK=$DK" >> "$GITHUB_ENV"
+          echo "YENIDEN=${YENIDEN_G:-false}" >> "$GITHUB_ENV"
+          echo "KOTA_ALT=$KA" >> "$GITHUB_ENV"
+      - name: Kurulum
+        run: |
+          set -euo pipefail
+          pip install -q requests==2.34.2
+          curl -fsSL --retry 3 https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: Yerel test (sahte Etsy, ag yok)
+        run: |
+          set -euo pipefail
+          python scripts/etsy/test_terim_tarama.py > _t.log 2>&1 || { grep -E "^(FAIL|SONUC)" _t.log; exit 1; }
+          grep -E "^SONUC" _t.log
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf
+          chmod 600 ~/.config/rclone/rclone.conf
+          if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf && [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"
+          fi
+      - name: Etsy kilidi (sira bekle, iptal yok)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/etsy/kilit_bekle.py
+      - name: Durumu Drive'dan al (kilitten sonra)
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p out
+          rclone lsf "gdrive:ASTROLOVE" --dirs-only -q > /dev/null || { echo "::error::Drive ASTROLOVE okunamadi"; exit 1; }
+          rclone mkdir "gdrive:ASTROLOVE/DIJITAL_ARASTIRMA_20261125" -q || { echo "::error::Drive klasoru acilamadi"; exit 1; }
+          rclone copy "gdrive:ASTROLOVE/DIJITAL_ARASTIRMA_20261125" out --max-depth 1 \
+            --include "/TERIM_TARAMA.csv" --include "/TERIM_ILAN.csv" --include "/TERIM_MAGAZA.csv" --include "/terim_durum.json" --include "/TERIM_KOSU_LOG.txt" -q \
+            || { echo "::error::Drive okunamadi"; exit 1; }
+          echo "durum dosyasi: $([ -f out/terim_durum.json ] && echo var || echo yok) | dosya $(find out -type f | wc -l)"
+      - name: Tara (salt okur)
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+          GH_TOKEN: ${{ github.token }}
+          YALNIZ: ${{ github.event.inputs.yalniz }}
+        run: |
+          set -uo pipefail
+          set +e
+          umask 077; mkdir -p out          # sir_koru tee log dosyasini betikten once acar
+          SJ="$RUNNER_TEMP/sir.json"
+          python3 -c 'import json, os, sys; json.dump({"etsy_api_key": os.environ["ETSY_API_KEY"], "etsy_shared_secret": os.environ["ETSY_SHARED_SECRET"]}, open(sys.argv[1], "w"))' "$SJ"
+          EK=()
+          [ "$YENIDEN" = true ] && EK+=(--yeniden)
+          python scripts/etsy/terim_tarama.py --out out --dk "$DK" --yalniz="${YALNIZ:-}" --kota-alt "$KOTA_ALT" "${EK[@]}" 2>&1 \
+            | python3 scripts/guvenlik/sir_koru.py tee --sir-json "$SJ" out/TERIM_KOSU_LOG.txt
+          RC=("${PIPESTATUS[@]}")
+          rm -f "$SJ"
+          kod="${RC[0]}"
+          [ "${RC[1]}" = 0 ] || { echo "::error::log sir taramasi FAIL"; kod=1; }
+          echo "KOD=$kod" >> "$GITHUB_ENV"
+          echo "::notice::terim_tarama cikis $kod (0 tamam/sure, 3 kota, 4 yol verildi, 1 hata)"
+          exit 0
+      - name: Drive'a yaz (sir taramasi)
+        if: always()
+        env:
+          ETSY_API_KEY: ${{ secrets.ETSY_API_KEY }}
+          ETSY_SHARED_SECRET: ${{ secrets.ETSY_SHARED_SECRET }}
+        run: |
+          set -euo pipefail
+          [ -f out/terim_durum.json ] || { echo "durum yok, yazilmadi"; exit 0; }
+          for v in "${ETSY_API_KEY:-}" "${ETSY_SHARED_SECRET:-}" "${RCLONE_CONFIG_GDRIVE_CLIENT_SECRET:-}"; do
+            if [ -n "$v" ] && grep -rqF -- "$v" out; then echo "::error::DUR: ciktida sir, Drive'a yazilmadi"; exit 1; fi
+          done
+          # desen taramasi log + durum dosyasinda (ham Etsy CSV'lerinde ilan basligi desene yanlis eslesebilir; sir degerleri yukarida tum ciktida)
+          T=(out/terim_durum.json); [ -f out/TERIM_KOSU_LOG.txt ] && T+=(out/TERIM_KOSU_LOG.txt)
+          python3 scripts/guvenlik/sir_koru.py tara "${T[@]}" || { echo "::error::DUR: log / durumda sir deseni, Drive'a yazilmadi"; exit 1; }
+          find out -name '*.tmp' -delete
+          rclone copy out "gdrive:ASTROLOVE/DIJITAL_ARASTIRMA_20261125" -q
+          D=$(python3 -c "import json; d=json.load(open('out/terim_durum.json')); print(d.get('durum'), d.get('kalan_terim_n'), d.get('hata_terim_n'), len(d.get('yeniden_olculemedi') or []), d.get('istek_toplam'))")
+          echo "::notice::Drive: TERIM_* ($(find out -type f | wc -l) dosya) | durum / kalan terim / hata kapanan / yeniden olculemeyen / toplam istek: $D"
+      - if: always()
+        run: rm -rf ~/.config/rclone out _t.log
+      - name: Sonuc (0 / 3 / 4 disi kirmizi)
+        run: |
+          echo "cikis kodu: ${KOD:-?}"
+          case "${KOD:-}" in 0|3|4) exit 0;; *) exit 1;; esac      # yalniz 0 / 3 (kota) / 4 (yol verildi) yesil
