@@ -381,7 +381,7 @@ def main():
         kontrol("secim: bos = hepsi, buyuk/kucuk harf", T.secim_coz(TERIMLER, "") == TERIMLER
                 and T.secim_coz(TERIMLER, " GAMA  terim;alfa terim") == ["gama terim", "alfa terim"])
         liste = T.terimler_oku(T.VARSAYILAN_LISTE)
-        kontrol("depodaki terim listesi 153 tekil", len(liste) == 153 and len({x.lower() for x in liste}) == 153)
+        kontrol("depodaki terim listesi 223 tekil", len(liste) == 223 and len({x.lower() for x in liste}) == 223)
         # 10) PATCH yasak
         try:
             api_kur(Sahte()).patch("/shops/1/listings/2", {"title": "x"})
