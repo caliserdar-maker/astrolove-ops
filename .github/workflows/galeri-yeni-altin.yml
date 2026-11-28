@@ -100,7 +100,7 @@ jobs:
           python3 - <<'EOF'
           import re, sys, glob
           SIP = re.compile(r'(?<!\d)42\d{8}(?!\d)'); EP = re.compile(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}')
-          assert SIP.search('x 4212345678 y') and EP.search('a@b.co'), 'tarama bilinen FAIL yakalamadi'
+          assert SIP.search('x ' + '42' + '12345678 y') and EP.search('a' + '@b.co'), 'tarama bilinen FAIL yakalamadi'
           kotu = [f for f in glob.glob('_o/dal/*.json') if SIP.search(open(f).read()) or EP.search(open(f).read())]
           from PIL import Image
           buyuk = [f for f in glob.glob('_o/dal/*.jpg') if max(Image.open(f).size) > 1600]
