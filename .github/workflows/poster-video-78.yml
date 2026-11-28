@@ -10,6 +10,9 @@ permissions:
 
 on:
   workflow_dispatch:
+  push:
+    branches: [poster-video-78]
+    paths: ['.github/workflows/poster-video-78.yml']
 
 jobs:
   video:
