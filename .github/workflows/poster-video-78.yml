@@ -1,0 +1,62 @@
+name: poster-video-78
+
+# 77 poster ilan videosu (Serdar 28 Kas 2026: "video uretimine gerekirse 10 isci ekle, en kisa surede"; KARARLAR_20261128_106).
+# Onayli ayar (KARARLAR_20261128_90/_93/_100): scripts/poster_video78/kapak_video2.py N_KAT=2 TOZ_S=2 TOZ_KAZANC=2 OLUSUM=eski,
+# girdi data/poster_video78/<cift>.jpg (v2 Etsy kapagi, isim_altin). H.264 ffmpeg libx264 ~11 Mbps (Chrome yukleme siniri 10,4 MB alti).
+# Etsy / Drive / musteri yazimi YOK; cikti yalniz artifact. Calistirma: dal poster-video-78 secilerek.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        parca: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: kurulum
+        run: pip install numpy opencv-python-headless pillow scipy
+      - name: video
+        shell: bash
+        env:
+          N_KAT: '2'
+          TOZ_S: '2'
+          TOZ_KAZANC: '2'
+          OLUSUM: eski
+          PARCA: ${{ matrix.parca }}
+        run: |
+          set -eo pipefail
+          mkdir -p cikti
+          i=0
+          for f in $(ls data/poster_video78/*.jpg | sort); do
+            if [ $((i % 20)) -eq "$PARCA" ]; then
+              c=$(basename "$f" .jpg)
+              echo "== $c $(date +%T)"
+              python scripts/poster_video78/kapak_video2.py "$f" "ham_$c.mp4"
+              ffmpeg -y -loglevel error -i "ham_$c.mp4" -c:v libx264 -preset slow -b:v 11M -maxrate 12M -bufsize 24M \
+                -pix_fmt yuv420p -movflags +faststart -an "cikti/AstroLoveArt_${c}_poster_video.mp4"
+              cp "ham_$c.mp4.qc.json" "cikti/${c}.qc.json"
+              cp "ham_$c.mp4.KONTAK.jpg" "cikti/${c}.KONTAK.jpg"
+            fi
+            i=$((i+1))
+          done
+          ls -la cikti
+          for v in cikti/*.mp4; do
+            b=$(stat -c %s "$v")
+            if [ "$b" -gt 10400000 ] || [ "$b" -lt 3000000 ]; then echo "BOYUT FAIL $v $b"; exit 1; fi
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: video-${{ matrix.parca }}
+          path: cikti/
+          retention-days: 7
