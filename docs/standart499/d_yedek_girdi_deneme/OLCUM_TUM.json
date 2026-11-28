@@ -1,0 +1,494 @@
+{
+ "15_renk_midnight_blue.jpg": {
+  "posterler": [
+   {
+    "kutu": [
+     810,
+     150,
+     2189,
+     1905
+    ],
+    "zemin": "koyu",
+    "halka": [
+     688,
+     702,
+     490
+    ],
+    "zemin_gurultu_std": 4.31,
+    "silinen_px": 148221,
+    "ogeler": {
+     "sembol": {
+      "eski_kutu": [
+       384,
+       353,
+       996,
+       929
+      ],
+      "olcek": 0.6197,
+      "en_boy_orani": [
+       0.622,
+       0.6174
+      ],
+      "konum": [
+       380,
+       347
+      ],
+      "IoU": 0.878,
+      "kaynak_px": [
+       984,
+       933
+      ],
+      "cikti_px": [
+       612,
+       576
+      ]
+     },
+     "burc_a": {
+      "eski_kutu": [
+       400,
+       1119,
+       520,
+       1222
+      ],
+      "olcek": 0.6197,
+      "en_boy_orani": [
+       0.6283,
+       0.6131
+      ],
+      "konum": [
+       395,
+       1113
+      ],
+      "IoU": 0.85,
+      "kaynak_px": [
+       191,
+       168
+      ],
+      "cikti_px": [
+       120,
+       103
+      ]
+     },
+     "burc_b": {
+      "eski_kutu": [
+       852,
+       1117,
+       994,
+       1225
+      ],
+      "olcek": 0.6197,
+      "en_boy_orani": [
+       0.6228,
+       0.6171
+      ],
+      "konum": [
+       847,
+       1111
+      ],
+      "IoU": 0.766,
+      "kaynak_px": [
+       228,
+       175
+      ],
+      "cikti_px": [
+       142,
+       108
+      ]
+     },
+     "isimler": {
+      "eski_kutu": [
+       360,
+       1286,
+       1019,
+       1348
+      ],
+      "olcek": 0.6197,
+      "en_boy_orani": [
+       0.5921,
+       0.5905
+      ],
+      "konum": [
+       344,
+       1281
+      ],
+      "IoU": 0.303,
+      "kaynak_px": [
+       1113,
+       105
+      ],
+      "cikti_px": [
+       659,
+       62
+      ]
+     },
+     "mesaj": {
+      "eski_kutu": [
+       304,
+       1495,
+       1075,
+       1557
+      ],
+      "olcek": 0.6197,
+      "en_boy_orani": [
+       0.6042,
+       0.5962
+      ],
+      "konum": [
+       293,
+       1488
+      ],
+      "IoU": 0.31,
+      "kaynak_px": [
+       1276,
+       104
+      ],
+      "cikti_px": [
+       771,
+       62
+      ]
+     },
+     "halka": {
+      "eski_r": 490,
+      "yeni_r_kaynak": 787.8,
+      "olcek": 0.622,
+      "konum": [
+       192,
+       204
+      ],
+      "IoU": 0.524,
+      "eski_banda_dusen_oran": 0.98
+     }
+    }
+   }
+  ],
+  "baslik": null
+ },
+ "16_renk_deep_black.jpg": {
+  "posterler": [
+   {
+    "kutu": [
+     810,
+     150,
+     2189,
+     1905
+    ],
+    "zemin": "koyu",
+    "halka": [
+     688,
+     702,
+     490
+    ],
+    "zemin_gurultu_std": 4.31,
+    "silinen_px": 147455,
+    "ogeler": {
+     "sembol": {
+      "eski_kutu": [
+       384,
+       353,
+       996,
+       929
+      ],
+      "olcek": 0.6197,
+      "en_boy_orani": [
+       0.622,
+       0.6174
+      ],
+      "konum": [
+       380,
+       347
+      ],
+      "IoU": 0.878,
+      "kaynak_px": [
+       984,
+       933
+      ],
+      "cikti_px": [
+       612,
+       576
+      ]
+     },
+     "burc_a": {
+      "eski_kutu": [
+       399,
+       1119,
+       519,
+       1222
+      ],
+      "olcek": 0.6197,
+      "en_boy_orani": [
+       0.6283,
+       0.6131
+      ],
+      "konum": [
+       394,
+       1113
+      ],
+      "IoU": 0.855,
+      "kaynak_px": [
+       191,
+       168
+      ],
+      "cikti_px": [
+       120,
+       103
+      ]
+     },
+     "burc_b": {
+      "eski_kutu": [
+       852,
+       1117,
+       994,
+       1225
+      ],
+      "olcek": 0.6197,
+      "en_boy_orani": [
+       0.6228,
+       0.6171
+      ],
+      "konum": [
+       846,
+       1111
+      ],
+      "IoU": 0.773,
+      "kaynak_px": [
+       228,
+       175
+      ],
+      "cikti_px": [
+       142,
+       108
+      ]
+     },
+     "isimler": {
+      "eski_kutu": [
+       359,
+       1286,
+       1020,
+       1349
+      ],
+      "olcek": 0.6197,
+      "en_boy_orani": [
+       0.5939,
+       0.6
+      ],
+      "konum": [
+       342,
+       1281
+      ],
+      "IoU": 0.293,
+      "kaynak_px": [
+       1113,
+       105
+      ],
+      "cikti_px": [
+       661,
+       63
+      ]
+     },
+     "mesaj": {
+      "eski_kutu": [
+       302,
+       1495,
+       1076,
+       1557
+      ],
+      "olcek": 0.6197,
+      "en_boy_orani": [
+       0.6066,
+       0.5962
+      ],
+      "konum": [
+       292,
+       1487
+      ],
+      "IoU": 0.322,
+      "kaynak_px": [
+       1276,
+       104
+      ],
+      "cikti_px": [
+       774,
+       62
+      ]
+     },
+     "halka": {
+      "eski_r": 490,
+      "yeni_r_kaynak": 787.8,
+      "olcek": 0.622,
+      "konum": [
+       192,
+       204
+      ],
+      "IoU": 0.53,
+      "eski_banda_dusen_oran": 0.982
+     }
+    }
+   }
+  ],
+  "baslik": null
+ },
+ "17_renk_pure_white.jpg": {
+  "posterler": [
+   {
+    "kutu": [
+     810,
+     150,
+     2189,
+     1905
+    ],
+    "zemin": "acik",
+    "halka": [
+     690,
+     704,
+     491
+    ],
+    "zemin_gurultu_std": 3.52,
+    "silinen_px": 158617,
+    "ogeler": {
+     "sembol": {
+      "eski_kutu": [
+       384,
+       353,
+       996,
+       930
+      ],
+      "olcek": 0.6202,
+      "en_boy_orani": [
+       0.622,
+       0.6184
+      ],
+      "konum": [
+       379,
+       347
+      ],
+      "IoU": 0.886,
+      "kaynak_px": [
+       984,
+       933
+      ],
+      "cikti_px": [
+       612,
+       577
+      ]
+     },
+     "burc_a": {
+      "eski_kutu": [
+       401,
+       1117,
+       521,
+       1223
+      ],
+      "olcek": 0.6202,
+      "en_boy_orani": [
+       0.6283,
+       0.631
+      ],
+      "konum": [
+       396,
+       1113
+      ],
+      "IoU": 0.831,
+      "kaynak_px": [
+       191,
+       168
+      ],
+      "cikti_px": [
+       120,
+       106
+      ]
+     },
+     "burc_b": {
+      "eski_kutu": [
+       851,
+       1117,
+       995,
+       1225
+      ],
+      "olcek": 0.6202,
+      "en_boy_orani": [
+       0.6316,
+       0.6171
+      ],
+      "konum": [
+       847,
+       1111
+      ],
+      "IoU": 0.772,
+      "kaynak_px": [
+       228,
+       175
+      ],
+      "cikti_px": [
+       144,
+       108
+      ]
+     },
+     "isimler": {
+      "eski_kutu": [
+       361,
+       1286,
+       1019,
+       1348
+      ],
+      "olcek": 0.6202,
+      "en_boy_orani": [
+       0.5912,
+       0.5905
+      ],
+      "konum": [
+       344,
+       1281
+      ],
+      "IoU": 0.285,
+      "kaynak_px": [
+       1113,
+       105
+      ],
+      "cikti_px": [
+       658,
+       62
+      ]
+     },
+     "mesaj": {
+      "eski_kutu": [
+       290,
+       1493,
+       1090,
+       1558
+      ],
+      "olcek": 0.6202,
+      "en_boy_orani": [
+       0.627,
+       0.625
+      ],
+      "konum": [
+       288,
+       1487
+      ],
+      "IoU": 0.488,
+      "kaynak_px": [
+       1276,
+       104
+      ],
+      "cikti_px": [
+       800,
+       65
+      ]
+     },
+     "halka": {
+      "eski_r": 491,
+      "yeni_r_kaynak": 787.8,
+      "olcek": 0.6233,
+      "konum": [
+       190,
+       205
+      ],
+      "IoU": 0.41,
+      "eski_banda_dusen_oran": 1.0
+     }
+    }
+   }
+  ],
+  "baslik": null
+ }
+}

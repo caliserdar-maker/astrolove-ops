@@ -130,3 +130,40 @@ Drive asil galeri dosyalari: yol DOGRULANMADI. Depoda gecen adaylar: `TEMP/POSTE
 
 Is akisi: mevcut main is akislari arasinda bunu yapan yok. Yeni is akisi main'e girmeli (Drive girdi -> uretim -> Drive
 `GALERI_YENI_ALTIN/<CIFT>/`): gorev kurali geregi DUR, ayri onay.
+
+### 6.1 Durum (28 Kas, Merkez oncelik mesaji 17:52: once D, sonra C2; B / C1 / C3 / C4 BEKLER)
+
+- Drive asillari dala alinamadi: `drive-dala-al.yml` ve `drive-onizleme-kopya.yml` ikisi de DEVRE DISI
+  (API: "Cannot trigger a 'workflow_dispatch' on a disabled workflow"). Drive'dan dala dosya tasiyan etkin main is akisi yok.
+  Not: drive-dala-al icin acilan bos dal `claude/standart-499-girdi` (= main f522f5d4, icerik yok) kaldi; silme istegi
+  vekil sunucuda kesildi, tekrar denenmedi.
+- Beklenen Drive asil yollari (kod okumasi, DOGRULANMADI): `TEMP/POSTER_GALERI_V11/20261029_103607/CANCER_LIBRA_W07_MB.jpg`,
+  `_W08_DB`, `_W09_PW`, `_W10_WP`, `_W01_KAPAK` (CI karti, galeri-ci11 varsayilani ayni damga) ve
+  `TEMP/POSTER_GALERI_V11/20261029_103607/W02_W06/40879133310/CANCER_LIBRA_W03_KISISEL.jpg`, `_W06_GENEL.jpg`
+  (adlar `galeri_v11_dogrula.py:8`, `galeri_v11_liste.py:47-69`; damga / kosu `galeri-v11-dogrula.yml` varsayilanlari).
+  Canli galeri id'leri r03, r06-r09 88120xxxxx (29 Eki v11b yuklemesi) ile uyumlu; r10 (8764250162) ve r11 (8822288409) farkli
+  tarihli: o ikisinin asli baska klasorde olabilir. W05 (r05) 5-6 Kas'ta p1g_kart ile yeniden uretildi (baska kosu).
+- Yontem kodu depoya uyarlandi (yeni dosyalar): `scripts/galeri_yeni_altin/katman.py` (pin_katman.py), `degistir.py`
+  (pin_degistir.py; islem fonksiyonlari diff ile AYNI, yalniz yol argumanlari + baslik kapisi). Yeni kapi: tum modunda
+  BASLIK_BOLGE poster kutusuyla kesisirse DUR (bilinen FAIL denendi: final19 kartinda DUR verdi; kesismeyen durumda gecer).
+- YEDEK GIRDI denemesi (Drive asli DEGIL): `altin-pilot-kaynak:data/pod/cl_galeri_final19/15, 16, 17` (MB, DB, PW renk kartlari,
+  3000x2250, poster kutusu olcumu 810,150,2189,1905) + `_POSTER2000` CL (`gecici/pin78-girdi`). Pillow 13.0.0 / numpy 2.5.5 /
+  opencv 5.1.0 / scipy (yerel venv). 3 gorsel 13 sn, kutu disi assert PASS. IoU (yeni alfa > 0.5 / eski cekirdek):
+  sembol 0.878 / 0.878 / 0.886, burc_a 0.85 / 0.855 / 0.831, burc_b 0.766 / 0.773 / 0.772, isimler 0.303 / 0.293 / 0.285,
+  mesaj 0.31 / 0.322 / 0.488, halka 0.524 / 0.53 / 0.41 (kaynak: OLCUM_TUM.json). Isim / mesaj IoU dusuk: yeni isim satiri
+  eskisinden biraz genis (harf araligi farki; yakin kesitte gorunuyor). Pafta: `d_yedek_girdi_deneme/`.
+- Pilot IoU degerleri (canli CDN girdisi) Merkez'de; karsilastirma icin gerekli. Isim / mesaj icin esik onerilmedi (olcum yok).
+
+### 6.2 D icin gereken is akisi (main'e girmeli -> ayri onay; yazilmadi)
+
+`galeri-yeni-altin.yml` (workflow_dispatch; Etsy YOK, token YOK, kilit YOK): girdi `cift`, `galeri_damga`, `kart_kosu`, `mod` (kuru | uret).
+1. Drive salt okuma: `_POSTER2000/<CIFT>.jpg` + yukaridaki W dosyalari (eksikse DUR; sha256 MANIFEST / KAPI.csv ile ayni olmali).
+2. Kapi: boyut 3000x2250; poster kutusu pilot kutusuyla (`altin_pilot.py:24-32`) +-3 px (koyu: esik olcumu; PW: duvar / poster ayrimi).
+3. `katman.py` -> `degistir.py --mod tum` (r10 / r11 yalniz baslik; r01 kapak yok) -> pafta (eski / yeni, yakin kirpinti).
+4. Drive `TEMP/GALERI_YENI_ALTIN/<CIFT>/` (yeni gorseller + OLCUM_TUM.json + paftalar). Etsy'ye yazim ayri onay (toplu yazim kurali).
+Pillow surumu sabitlenmeli (CLAUDE.md PILLOW kurali; pilotun surumu bilinmiyor, Merkez'den).
+
+### 6.3 C2 (Made for You karti, 24 -> 12 hours)
+
+Canli kart il 8855745013 (r05 = W05_SUREC). Uretim kodu adayi `scripts/kapak78/p1g_kart.py` (W05_SUREC, 5-6 Kas). Asil dosya Drive'da
+(p1g_kart kosu klasoru); ayni engel: Drive girdisi icin etkin is akisi yok. Kod okumasi bir sonraki adim.
