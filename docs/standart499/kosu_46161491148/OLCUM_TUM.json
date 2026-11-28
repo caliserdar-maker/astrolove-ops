@@ -1,0 +1,1343 @@
+{
+ "CANCER_LIBRA_W03_KISISEL.jpg": {
+  "posterler": [
+   {
+    "kutu": [
+     441,
+     498,
+     1581,
+     1923
+    ],
+    "zemin": "koyu",
+    "halka": [
+     570,
+     569,
+     395
+    ],
+    "zemin_gurultu_std": 4.77,
+    "silinen_px": 105956,
+    "ogeler": {
+     "sembol": {
+      "eski_kutu": [
+       323,
+       288,
+       818,
+       755
+      ],
+      "olcek": 0.5018,
+      "en_boy_orani": [
+       0.503,
+       0.5005
+      ],
+      "konum": [
+       319,
+       283
+      ],
+      "IoU": 0.882,
+      "kaynak_px": [
+       984,
+       933
+      ],
+      "cikti_px": [
+       495,
+       467
+      ]
+     },
+     "burc_a": {
+      "eski_kutu": [
+       327,
+       907,
+       423,
+       992
+      ],
+      "olcek": 0.5018,
+      "en_boy_orani": [
+       0.5026,
+       0.506
+      ],
+      "konum": [
+       323,
+       903
+      ],
+      "IoU": 0.845,
+      "kaynak_px": [
+       191,
+       168
+      ],
+      "cikti_px": [
+       96,
+       85
+      ]
+     },
+     "burc_b": {
+      "eski_kutu": [
+       707,
+       906,
+       822,
+       993
+      ],
+      "olcek": 0.5018,
+      "en_boy_orani": [
+       0.5044,
+       0.4971
+      ],
+      "konum": [
+       702,
+       902
+      ],
+      "IoU": 0.774,
+      "kaynak_px": [
+       228,
+       175
+      ],
+      "cikti_px": [
+       115,
+       87
+      ]
+     },
+     "isimler": {
+      "eski_kutu": [
+       289,
+       1047,
+       851,
+       1101
+      ],
+      "olcek": 0.5018,
+      "en_boy_orani": [
+       0.5049,
+       0.5143
+      ],
+      "konum": [
+       286,
+       1043
+      ],
+      "IoU": 0.581,
+      "kaynak_px": [
+       1113,
+       105
+      ],
+      "cikti_px": [
+       562,
+       54
+      ]
+     },
+     "mesaj": {
+      "eski_kutu": [
+       205,
+       1216,
+       927,
+       1270
+      ],
+      "olcek": 0.5018,
+      "en_boy_orani": [
+       0.5658,
+       0.5192
+      ],
+      "konum": [
+       245,
+       1212
+      ],
+      "IoU": 0.429,
+      "kaynak_px": [
+       1276,
+       104
+      ],
+      "cikti_px": [
+       722,
+       54
+      ]
+     },
+     "halka": {
+      "eski_r": 395,
+      "yeni_r_kaynak": 787.8,
+      "olcek": 0.5014,
+      "konum": [
+       169,
+       168
+      ],
+      "IoU": 0.478,
+      "eski_banda_dusen_oran": 0.955
+     }
+    }
+   }
+  ],
+  "baslik": null
+ },
+ "CANCER_LIBRA_W06_GENEL.jpg": {
+  "posterler": [
+   {
+    "kutu": [
+     523,
+     497,
+     950,
+     1052
+    ],
+    "zemin": "koyu",
+    "halka": [
+     213,
+     222,
+     156
+    ],
+    "zemin_gurultu_std": 7.09,
+    "silinen_px": 27906,
+    "ogeler": {
+     "sembol": {
+      "eski_kutu": [
+       116,
+       110,
+       311,
+       294
+      ],
+      "olcek": 0.1977,
+      "en_boy_orani": [
+       0.1982,
+       0.1972
+      ],
+      "konum": [
+       115,
+       108
+      ],
+      "IoU": 0.878,
+      "kaynak_px": [
+       984,
+       933
+      ],
+      "cikti_px": [
+       195,
+       184
+      ]
+     },
+     "burc_a": {
+      "eski_kutu": [
+       121,
+       354,
+       160,
+       388
+      ],
+      "olcek": 0.1977,
+      "en_boy_orani": [
+       0.2042,
+       0.2024
+      ],
+      "konum": [
+       120,
+       352
+      ],
+      "IoU": 0.724,
+      "kaynak_px": [
+       191,
+       168
+      ],
+      "cikti_px": [
+       39,
+       34
+      ]
+     },
+     "burc_b": {
+      "eski_kutu": [
+       265,
+       353,
+       311,
+       388
+      ],
+      "olcek": 0.1977,
+      "en_boy_orani": [
+       0.2018,
+       0.2
+      ],
+      "konum": [
+       264,
+       352
+      ],
+      "IoU": 0.662,
+      "kaynak_px": [
+       228,
+       175
+      ],
+      "cikti_px": [
+       46,
+       35
+      ]
+     },
+     "isimler": {
+      "eski_kutu": [
+       109,
+       407,
+       319,
+       428
+      ],
+      "olcek": 0.1977,
+      "en_boy_orani": [
+       0.1887,
+       0.2
+      ],
+      "konum": [
+       103,
+       406
+      ],
+      "IoU": 0.326,
+      "kaynak_px": [
+       1113,
+       105
+      ],
+      "cikti_px": [
+       210,
+       21
+      ]
+     },
+     "mesaj": {
+      "eski_kutu": [
+       91,
+       474,
+       337,
+       495
+      ],
+      "olcek": 0.1977,
+      "en_boy_orani": [
+       0.1928,
+       0.2019
+      ],
+      "konum": [
+       87,
+       472
+      ],
+      "IoU": 0.375,
+      "kaynak_px": [
+       1276,
+       104
+      ],
+      "cikti_px": [
+       246,
+       21
+      ]
+     },
+     "halka": {
+      "eski_r": 156,
+      "yeni_r_kaynak": 787.8,
+      "olcek": 0.198,
+      "konum": [
+       55,
+       64
+      ],
+      "IoU": 0.393,
+      "eski_banda_dusen_oran": 1.0
+     }
+    }
+   },
+   {
+    "kutu": [
+     1283,
+     497,
+     1710,
+     1052
+    ],
+    "zemin": "koyu",
+    "halka": [
+     213,
+     222,
+     156
+    ],
+    "zemin_gurultu_std": 7.19,
+    "silinen_px": 27696,
+    "ogeler": {
+     "sembol": {
+      "eski_kutu": [
+       116,
+       110,
+       311,
+       294
+      ],
+      "olcek": 0.1977,
+      "en_boy_orani": [
+       0.1982,
+       0.1972
+      ],
+      "konum": [
+       115,
+       108
+      ],
+      "IoU": 0.877,
+      "kaynak_px": [
+       984,
+       933
+      ],
+      "cikti_px": [
+       195,
+       184
+      ]
+     },
+     "burc_a": {
+      "eski_kutu": [
+       121,
+       354,
+       159,
+       388
+      ],
+      "olcek": 0.1977,
+      "en_boy_orani": [
+       0.199,
+       0.2024
+      ],
+      "konum": [
+       119,
+       352
+      ],
+      "IoU": 0.711,
+      "kaynak_px": [
+       191,
+       168
+      ],
+      "cikti_px": [
+       38,
+       34
+      ]
+     },
+     "burc_b": {
+      "eski_kutu": [
+       265,
+       353,
+       311,
+       388
+      ],
+      "olcek": 0.1977,
+      "en_boy_orani": [
+       0.2018,
+       0.2
+      ],
+      "konum": [
+       263,
+       352
+      ],
+      "IoU": 0.668,
+      "kaynak_px": [
+       228,
+       175
+      ],
+      "cikti_px": [
+       46,
+       35
+      ]
+     },
+     "isimler": {
+      "eski_kutu": [
+       109,
+       407,
+       319,
+       429
+      ],
+      "olcek": 0.1977,
+      "en_boy_orani": [
+       0.1887,
+       0.2095
+      ],
+      "konum": [
+       103,
+       406
+      ],
+      "IoU": 0.306,
+      "kaynak_px": [
+       1113,
+       105
+      ],
+      "cikti_px": [
+       210,
+       22
+      ]
+     },
+     "mesaj": {
+      "eski_kutu": [
+       90,
+       473,
+       337,
+       494
+      ],
+      "olcek": 0.1977,
+      "en_boy_orani": [
+       0.1936,
+       0.2019
+      ],
+      "konum": [
+       87,
+       471
+      ],
+      "IoU": 0.395,
+      "kaynak_px": [
+       1276,
+       104
+      ],
+      "cikti_px": [
+       247,
+       21
+      ]
+     },
+     "halka": {
+      "eski_r": 156,
+      "yeni_r_kaynak": 787.8,
+      "olcek": 0.198,
+      "konum": [
+       55,
+       64
+      ],
+      "IoU": 0.409,
+      "eski_banda_dusen_oran": 1.0
+     }
+    }
+   },
+   {
+    "kutu": [
+     2043,
+     497,
+     2470,
+     1052
+    ],
+    "zemin": "acik",
+    "halka": [
+     213,
+     220,
+     157
+    ],
+    "zemin_gurultu_std": 3.06,
+    "silinen_px": 34626,
+    "ogeler": {
+     "sembol": {
+      "eski_kutu": [
+       114,
+       107,
+       312,
+       295
+      ],
+      "olcek": 0.2014,
+      "en_boy_orani": [
+       0.2012,
+       0.2015
+      ],
+      "konum": [
+       113,
+       105
+      ],
+      "IoU": 0.745,
+      "kaynak_px": [
+       984,
+       933
+      ],
+      "cikti_px": [
+       198,
+       188
+      ]
+     },
+     "burc_a": {
+      "eski_kutu": [
+       118,
+       353,
+       162,
+       390
+      ],
+      "olcek": 0.2014,
+      "en_boy_orani": [
+       0.2304,
+       0.2202
+      ],
+      "konum": [
+       118,
+       353
+      ],
+      "IoU": 0.517,
+      "kaynak_px": [
+       191,
+       168
+      ],
+      "cikti_px": [
+       44,
+       37
+      ]
+     },
+     "burc_b": {
+      "eski_kutu": [
+       265,
+       353,
+       312,
+       391
+      ],
+      "olcek": 0.2014,
+      "en_boy_orani": [
+       0.2061,
+       0.2171
+      ],
+      "konum": [
+       263,
+       352
+      ],
+      "IoU": 0.439,
+      "kaynak_px": [
+       228,
+       175
+      ],
+      "cikti_px": [
+       47,
+       38
+      ]
+     },
+     "isimler": {
+      "eski_kutu": [
+       107,
+       407,
+       321,
+       431
+      ],
+      "olcek": 0.2014,
+      "en_boy_orani": [
+       0.1923,
+       0.2286
+      ],
+      "konum": [
+       102,
+       408
+      ],
+      "IoU": 0.299,
+      "kaynak_px": [
+       1113,
+       105
+      ],
+      "cikti_px": [
+       214,
+       24
+      ]
+     },
+     "mesaj": {
+      "eski_kutu": [
+       84,
+       474,
+       344,
+       498
+      ],
+      "olcek": 0.2014,
+      "en_boy_orani": [
+       0.2038,
+       0.2308
+      ],
+      "konum": [
+       83,
+       474
+      ],
+      "IoU": 0.467,
+      "kaynak_px": [
+       1276,
+       104
+      ],
+      "cikti_px": [
+       260,
+       24
+      ]
+     },
+     "halka": {
+      "eski_r": 157,
+      "yeni_r_kaynak": 787.8,
+      "olcek": 0.1993,
+      "konum": [
+       54,
+       61
+      ],
+      "IoU": 0.162,
+      "eski_banda_dusen_oran": 1.0
+     }
+    }
+   }
+  ],
+  "baslik": null
+ },
+ "CANCER_LIBRA_W07_MB.jpg": {
+  "posterler": [
+   {
+    "kutu": [
+     984,
+     680,
+     2023,
+     2031
+    ],
+    "zemin": "koyu",
+    "halka": [
+     520,
+     540,
+     379
+    ],
+    "zemin_gurultu_std": 4.68,
+    "silinen_px": 118656,
+    "ogeler": {
+     "sembol": {
+      "eski_kutu": [
+       283,
+       269,
+       757,
+       716
+      ],
+      "olcek": 0.4804,
+      "en_boy_orani": [
+       0.4817,
+       0.4791
+      ],
+      "konum": [
+       280,
+       265
+      ],
+      "IoU": 0.882,
+      "kaynak_px": [
+       984,
+       933
+      ],
+      "cikti_px": [
+       474,
+       447
+      ]
+     },
+     "burc_a": {
+      "eski_kutu": [
+       295,
+       860,
+       389,
+       944
+      ],
+      "olcek": 0.4804,
+      "en_boy_orani": [
+       0.4921,
+       0.5
+      ],
+      "konum": [
+       292,
+       858
+      ],
+      "IoU": 0.833,
+      "kaynak_px": [
+       191,
+       168
+      ],
+      "cikti_px": [
+       94,
+       84
+      ]
+     },
+     "burc_b": {
+      "eski_kutu": [
+       645,
+       860,
+       756,
+       946
+      ],
+      "olcek": 0.4804,
+      "en_boy_orani": [
+       0.4868,
+       0.4914
+      ],
+      "konum": [
+       641,
+       857
+      ],
+      "IoU": 0.806,
+      "kaynak_px": [
+       228,
+       175
+      ],
+      "cikti_px": [
+       111,
+       86
+      ]
+     },
+     "isimler": {
+      "eski_kutu": [
+       264,
+       990,
+       776,
+       1040
+      ],
+      "olcek": 0.4804,
+      "en_boy_orani": [
+       0.46,
+       0.4762
+      ],
+      "konum": [
+       252,
+       988
+      ],
+      "IoU": 0.307,
+      "kaynak_px": [
+       1113,
+       105
+      ],
+      "cikti_px": [
+       512,
+       50
+      ]
+     },
+     "mesaj": {
+      "eski_kutu": [
+       221,
+       1152,
+       820,
+       1204
+      ],
+      "olcek": 0.4804,
+      "en_boy_orani": [
+       0.4694,
+       0.5
+      ],
+      "konum": [
+       212,
+       1148
+      ],
+      "IoU": 0.327,
+      "kaynak_px": [
+       1276,
+       104
+      ],
+      "cikti_px": [
+       599,
+       52
+      ]
+     },
+     "halka": {
+      "eski_r": 379,
+      "yeni_r_kaynak": 787.8,
+      "olcek": 0.4811,
+      "konum": [
+       135,
+       156
+      ],
+      "IoU": 0.351,
+      "eski_banda_dusen_oran": 1.0
+     }
+    }
+   }
+  ],
+  "baslik": {
+   "bolge": [
+    900,
+    300,
+    2100,
+    470
+   ],
+   "yazi_kutu": [
+    1091,
+    353,
+    1910,
+    420
+   ],
+   "eski_renk": [
+    138.0,
+    98.0,
+    29.0
+   ],
+   "yeni_degrade_ust_orta_alt": [
+    [
+     164.0,
+     124.0,
+     43.0
+    ],
+    [
+     187.0,
+     133.0,
+     37.0
+    ],
+    [
+     151.0,
+     108.0,
+     31.0
+    ]
+   ],
+   "duvar_L": 221.2,
+   "eski_L": 102.1,
+   "yeni_L_ort": 136.6,
+   "yazi_px": 23648
+  }
+ },
+ "CANCER_LIBRA_W08_DB.jpg": {
+  "posterler": [
+   {
+    "kutu": [
+     984,
+     680,
+     2023,
+     2031
+    ],
+    "zemin": "koyu",
+    "halka": [
+     520,
+     538,
+     378
+    ],
+    "zemin_gurultu_std": 4.64,
+    "silinen_px": 116206,
+    "ogeler": {
+     "sembol": {
+      "eski_kutu": [
+       283,
+       269,
+       757,
+       716
+      ],
+      "olcek": 0.4804,
+      "en_boy_orani": [
+       0.4817,
+       0.4791
+      ],
+      "konum": [
+       280,
+       265
+      ],
+      "IoU": 0.882,
+      "kaynak_px": [
+       984,
+       933
+      ],
+      "cikti_px": [
+       474,
+       447
+      ]
+     },
+     "burc_a": {
+      "eski_kutu": [
+       295,
+       861,
+       388,
+       944
+      ],
+      "olcek": 0.4804,
+      "en_boy_orani": [
+       0.4869,
+       0.494
+      ],
+      "konum": [
+       291,
+       858
+      ],
+      "IoU": 0.832,
+      "kaynak_px": [
+       191,
+       168
+      ],
+      "cikti_px": [
+       93,
+       83
+      ]
+     },
+     "burc_b": {
+      "eski_kutu": [
+       645,
+       860,
+       756,
+       945
+      ],
+      "olcek": 0.4804,
+      "en_boy_orani": [
+       0.4868,
+       0.4857
+      ],
+      "konum": [
+       641,
+       857
+      ],
+      "IoU": 0.778,
+      "kaynak_px": [
+       228,
+       175
+      ],
+      "cikti_px": [
+       111,
+       85
+      ]
+     },
+     "isimler": {
+      "eski_kutu": [
+       264,
+       990,
+       778,
+       1042
+      ],
+      "olcek": 0.4804,
+      "en_boy_orani": [
+       0.4618,
+       0.4952
+      ],
+      "konum": [
+       251,
+       988
+      ],
+      "IoU": 0.3,
+      "kaynak_px": [
+       1113,
+       105
+      ],
+      "cikti_px": [
+       514,
+       52
+      ]
+     },
+     "mesaj": {
+      "eski_kutu": [
+       220,
+       1151,
+       821,
+       1204
+      ],
+      "olcek": 0.4804,
+      "en_boy_orani": [
+       0.471,
+       0.5096
+      ],
+      "konum": [
+       211,
+       1148
+      ],
+      "IoU": 0.342,
+      "kaynak_px": [
+       1276,
+       104
+      ],
+      "cikti_px": [
+       601,
+       53
+      ]
+     },
+     "halka": {
+      "eski_r": 378,
+      "yeni_r_kaynak": 787.8,
+      "olcek": 0.4798,
+      "konum": [
+       135,
+       155
+      ],
+      "IoU": 0.346,
+      "eski_banda_dusen_oran": 0.989
+     }
+    }
+   }
+  ],
+  "baslik": {
+   "bolge": [
+    900,
+    300,
+    2100,
+    470
+   ],
+   "yazi_kutu": [
+    1091,
+    353,
+    1910,
+    420
+   ],
+   "eski_renk": [
+    138.0,
+    98.0,
+    29.0
+   ],
+   "yeni_degrade_ust_orta_alt": [
+    [
+     164.0,
+     124.0,
+     43.0
+    ],
+    [
+     187.0,
+     133.0,
+     37.0
+    ],
+    [
+     151.0,
+     108.0,
+     31.0
+    ]
+   ],
+   "duvar_L": 221.2,
+   "eski_L": 102.1,
+   "yeni_L_ort": 136.6,
+   "yazi_px": 23648
+  }
+ },
+ "CANCER_LIBRA_W09_PW.jpg": {
+  "posterler": [
+   {
+    "kutu": [
+     984,
+     680,
+     2023,
+     2031
+    ],
+    "zemin": "acik",
+    "halka": [
+     516,
+     518,
+     449
+    ],
+    "zemin_gurultu_std": 1.05,
+    "silinen_px": 196753,
+    "ogeler": {
+     "sembol": {
+      "eski_kutu": [
+       235,
+       194,
+       795,
+       725
+      ],
+      "olcek": 0.5691,
+      "en_boy_orani": [
+       0.5691,
+       0.5691
+      ],
+      "konum": [
+       233,
+       190
+      ],
+      "IoU": 0.732,
+      "kaynak_px": [
+       984,
+       933
+      ],
+      "cikti_px": [
+       560,
+       531
+      ]
+     },
+     "burc_a": {
+      "eski_kutu": [
+       248,
+       890,
+       367,
+       995
+      ],
+      "olcek": 0.5691,
+      "en_boy_orani": [
+       0.623,
+       0.625
+      ],
+      "konum": [
+       249,
+       894
+      ],
+      "IoU": 0.505,
+      "kaynak_px": [
+       191,
+       168
+      ],
+      "cikti_px": [
+       119,
+       105
+      ]
+     },
+     "burc_b": {
+      "eski_kutu": [
+       662,
+       890,
+       797,
+       1000
+      ],
+      "olcek": 0.5691,
+      "en_boy_orani": [
+       0.5921,
+       0.6286
+      ],
+      "konum": [
+       659,
+       888
+      ],
+      "IoU": 0.492,
+      "kaynak_px": [
+       228,
+       175
+      ],
+      "cikti_px": [
+       135,
+       110
+      ]
+     },
+     "isimler": {
+      "eski_kutu": [
+       214,
+       1042,
+       823,
+       1109
+      ],
+      "olcek": 0.5691,
+      "en_boy_orani": [
+       0.5472,
+       0.6381
+      ],
+      "konum": [
+       200,
+       1046
+      ],
+      "IoU": 0.288,
+      "kaynak_px": [
+       1113,
+       105
+      ],
+      "cikti_px": [
+       609,
+       67
+      ]
+     },
+     "mesaj": {
+      "eski_kutu": [
+       142,
+       1234,
+       886,
+       1305
+      ],
+      "olcek": 0.5691,
+      "en_boy_orani": [
+       0.5831,
+       0.6827
+      ],
+      "konum": [
+       148,
+       1233
+      ],
+      "IoU": 0.429,
+      "kaynak_px": [
+       1276,
+       104
+      ],
+      "cikti_px": [
+       744,
+       71
+      ]
+     },
+     "halka": {
+      "eski_r": 449,
+      "yeni_r_kaynak": 787.8,
+      "olcek": 0.57,
+      "konum": [
+       61,
+       61
+      ],
+      "IoU": 0.199,
+      "eski_banda_dusen_oran": 1.0
+     }
+    }
+   }
+  ],
+  "baslik": {
+   "bolge": [
+    900,
+    300,
+    2100,
+    470
+   ],
+   "yazi_kutu": [
+    1091,
+    353,
+    1910,
+    420
+   ],
+   "eski_renk": [
+    138.0,
+    98.0,
+    29.0
+   ],
+   "yeni_degrade_ust_orta_alt": [
+    [
+     164.0,
+     124.0,
+     43.0
+    ],
+    [
+     187.0,
+     133.0,
+     37.0
+    ],
+    [
+     151.0,
+     108.0,
+     31.0
+    ]
+   ],
+   "duvar_L": 221.2,
+   "eski_L": 102.1,
+   "yeni_L_ort": 136.6,
+   "yazi_px": 23648
+  }
+ },
+ "CANCER_LIBRA_W10_WP.jpg": {
+  "posterler": [],
+  "baslik": {
+   "bolge": [
+    900,
+    300,
+    2100,
+    470
+   ],
+   "yazi_kutu": [
+    1091,
+    353,
+    1910,
+    420
+   ],
+   "eski_renk": [
+    138.0,
+    98.0,
+    29.0
+   ],
+   "yeni_degrade_ust_orta_alt": [
+    [
+     164.0,
+     124.0,
+     43.0
+    ],
+    [
+     187.0,
+     133.0,
+     37.0
+    ],
+    [
+     151.0,
+     108.0,
+     31.0
+    ]
+   ],
+   "duvar_L": 221.2,
+   "eski_L": 102.1,
+   "yeni_L_ort": 136.6,
+   "yazi_px": 23648
+  }
+ },
+ "CANCER_LIBRA_W01_KAPAK.jpg": {
+  "posterler": [],
+  "baslik": {
+   "bolge": [
+    900,
+    300,
+    2100,
+    470
+   ],
+   "yazi_kutu": [
+    1091,
+    353,
+    1910,
+    420
+   ],
+   "eski_renk": [
+    138.0,
+    98.0,
+    29.0
+   ],
+   "yeni_degrade_ust_orta_alt": [
+    [
+     164.0,
+     124.0,
+     43.0
+    ],
+    [
+     187.0,
+     133.0,
+     37.0
+    ],
+    [
+     151.0,
+     108.0,
+     31.0
+    ]
+   ],
+   "duvar_L": 221.2,
+   "eski_L": 102.1,
+   "yeni_L_ort": 136.6,
+   "yazi_px": 23648
+  }
+ }
+}

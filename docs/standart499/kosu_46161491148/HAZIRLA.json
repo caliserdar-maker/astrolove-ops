@@ -1,0 +1,160 @@
+{
+ "cift": "CANCER_LIBRA",
+ "dosyalar": {
+  "CANCER_LIBRA_W03_KISISEL.jpg": {
+   "boyut": [
+    3000,
+    2250
+   ],
+   "koyu_sinir": [
+    {
+     "pilot": [
+      441,
+      498,
+      1581,
+      1923
+     ],
+     "olculen": [
+      441,
+      498,
+      1581,
+      1923
+     ],
+     "fark": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "CANCER_LIBRA_W06_GENEL.jpg": {
+   "boyut": [
+    3000,
+    2250
+   ],
+   "koyu_sinir": [
+    {
+     "pilot": [
+      523,
+      497,
+      950,
+      1052
+     ],
+     "olculen": [
+      523,
+      497,
+      950,
+      1052
+     ],
+     "fark": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "pilot": [
+      1283,
+      497,
+      1710,
+      1052
+     ],
+     "olculen": [
+      1283,
+      497,
+      1710,
+      1052
+     ],
+     "fark": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "CANCER_LIBRA_W07_MB.jpg": {
+   "boyut": [
+    3000,
+    2250
+   ],
+   "koyu_sinir": [
+    {
+     "pilot": [
+      984,
+      680,
+      2023,
+      2031
+     ],
+     "olculen": [
+      984,
+      680,
+      2023,
+      2031
+     ],
+     "fark": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "CANCER_LIBRA_W08_DB.jpg": {
+   "boyut": [
+    3000,
+    2250
+   ],
+   "koyu_sinir": [
+    {
+     "pilot": [
+      984,
+      680,
+      2023,
+      2031
+     ],
+     "olculen": [
+      984,
+      680,
+      2023,
+      2031
+     ],
+     "fark": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "CANCER_LIBRA_W09_PW.jpg": {
+   "boyut": [
+    3000,
+    2250
+   ],
+   "koyu_sinir": []
+  },
+  "CANCER_LIBRA_W10_WP.jpg": {
+   "boyut": [
+    3000,
+    2250
+   ],
+   "koyu_sinir": []
+  },
+  "CANCER_LIBRA_W01_KAPAK.jpg": {
+   "boyut": [
+    3000,
+    2250
+   ],
+   "koyu_sinir": []
+  }
+ },
+ "hata": [],
+ "durum": "PASS"
+}
