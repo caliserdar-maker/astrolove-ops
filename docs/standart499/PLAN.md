@@ -98,3 +98,35 @@ aranan (200 dalin hepsinde, `git grep -F`, *.py *.json *.md *.yml *.csv):
   `altin_pilot.py` (r03). il 8855745013: hicbir dalda yok.
 Bu uc canli kartin (poster ilani CL) uretim kodu kesin bulunamadi; adaylar yukarida. Kartlar B'deki posteri icerdigi icin
 C, B kararindan sonra.
+
+Ad duzeltmesi (Merkez mesaji 28 Kas 16:59, KARARLAR_20261128_98): kartlarda "Standard Digital File" / "Standard" YOK.
+- C1 sirasi: 1. "Digital, No Names" (US$4.99), 2. "Personalized Digital" (US$9.90), 3. "Personalized Print" (US$24.90 - US$69.90).
+  Not: son satirdaki fiyat araligi tireli; Ingilizce metinde uzun / orta tire yasak, burada yalniz duz kisa cizgi (-) kullanilir.
+- C2 notu: "Digital, No Names files skip the preview".
+- C3 satiri: "Or choose Digital, No Names: your two signs with Two Signs, One Story".
+- C4 basligi "Personalized or Standard" bu adlarla uyumlu degil; yeni baslik Merkez'den beklenir (oneri: "Personalized or Digital, No Names").
+
+## 6. D) 78 poster galerisi yeni altin (Merkez mesaji 28 Kas 16:57, KARARLAR_20261128_97). PLAN, uretim yok
+
+Sira: B ve C'den sonra; once yalniz CANCER_LIBRA (eski / yeni pafta, yakin kirpinti) -> rapor -> DUR -> Merkez onayi -> kalan 77.
+Etsy'ye yazim yok. Kapak ve video haric (KARARLAR_92).
+
+Altinli galeri siralari (CL; Merkez'in aktardigi KARARLAR_74): r03, r06, r07, r08, r09, r10 ve r11 (r10 / r11 yalniz Canva basligi;
+poster murekkebi kahve). r01 kapak haric. Celiski: pilotun is listesi r01'i iceriyor (`altin_pilot.py:25`); D'de r01 atlanir.
+Kalan 77 ciftte siralar ayni mi: dogrulanmadi (galeri yedegi okunmadan bilinmez).
+
+Yontem (Merkez pilotu, degistirilmeden; yollar depoya uyarlanir):
+- katman: `pin_katman.py` -> `sosyal/pin_v6/pin_uret.py` PosterR + `lib.py` Poster.layer, kaynak `_POSTER2000/<CIFT>.jpg`.
+- degistirme: `pin_degistir.py` tum modu (sembol, burc_a, burc_b, isimler, mesaj, halka; Canva basligi isim degradesiyle).
+- Kapi (eklenmesi gereken): galeri posterindeki isim / mesaj metni _POSTER2000'deki ile AYNI olmali (katman yapistirildigi icin);
+  CL'de ikisi de EMILY / JAMES (dosyalari actim). Farkli ciftte farkliysa o cift DUR.
+- Olcek: galeri poster kutusu ~1040 px genis (`altin_pilot.py:25`), kaynak 2000 px: yalniz kucultme (pilot kurali korunur).
+- Laptop yollari (`../logo_wt`, `pin_kaynak/`, `eski/`, `C:/Windows/Fonts/arial.ttf` `pafta.py:11-12`) depo yollarina cevrilir;
+  pafta fontu Linux'ta yok, depodaki bir fontla degistirilir (yalniz pafta etiketi; urun gorseli degil).
+- Poster kutulari pilotta elle olculmus (`altin_pilot.py:24-32`); 77 cift icin kutu olcumu gerekir (kapi: kutu disi assert).
+
+Drive asil galeri dosyalari: yol DOGRULANMADI. Depoda gecen adaylar: `TEMP/POSTER_GALERI_V11/`, `TEMP/POSTER_GALERI_V11_YEDEK/`,
+`TEMP/GALERI_77`, `TEMP/CL_GALERI_FINAL19`. Code ortami Drive'i okuyamaz; once salt okuma listeleme kosusu gerekir.
+
+Is akisi: mevcut main is akislari arasinda bunu yapan yok. Yeni is akisi main'e girmeli (Drive girdi -> uretim -> Drive
+`GALERI_YENI_ALTIN/<CIFT>/`): gorev kurali geregi DUR, ayri onay.
