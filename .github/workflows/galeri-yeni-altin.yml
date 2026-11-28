@@ -1,0 +1,120 @@
+name: galeri-yeni-altin
+# 78 POSTER GALERISI YENI ALTIN (Merkez ek gorev D, KARARLAR_20261128_97; Merkez karari 28 Kas ~18:40: is akisi main'e girer).
+# ETSY YOK, token YOK, kilit YOK. Drive yalniz: OKUMA (galeri asillari + _POSTER2000) ve YAZMA yalniz OFIS/GALERI_YENI_ALTIN/<CIFT>/<kosu>/.
+# Yontem: Merkez CL pilotu (dal altin-pilot-kaynak c964f94a) depo uyarlamasi scripts/galeri_yeni_altin/ (katman.py, degistir.py --mod tum,
+# hazirla.py girdi kapisi, pafta.py). Kapilar: dosya var + 3000x2250 (hazirla), kutu disi piksel ayni (degistir assert), baslik / kutu kesisimi.
+# Cikti: Drive OFIS/GALERI_YENI_ALTIN/<CIFT>/<kosu>/ (yeni tam boy gorseller, OLCUM_TUM.json, HAZIRLA.json, LISTE.json, paftalar) +
+#   standart-499-ornek dalina yalniz kucuk paftalar ve JSON (docs/standart499/kosu_<kosu>/; gizlilik taramasindan sonra).
+# mod=liste: yalniz Drive listesi (LISTE.json) dala; uretim yok. mod=uret: liste + uretim + paftalar.
+permissions:
+  contents: write   # yalniz standart-499-ornek dalina pafta / JSON (asagida sabit)
+on:
+  workflow_dispatch:
+    inputs:
+      mod: {description: "liste | uret", required: true, default: "liste"}
+      cift: {description: "cift (orn. CANCER_LIBRA)", required: true, default: "CANCER_LIBRA"}
+      galeri_damga: {description: "TEMP/POSTER_GALERI_V11/<damga> (W01, W07-W10)", required: true, default: "20261029_103607"}
+      kart_kosu: {description: "TEMP/POSTER_GALERI_V11/<damga>/W02_W06/<kosu> (W03, W06)", required: true, default: "40879133310"}
+defaults:
+  run:
+    shell: bash
+jobs:
+  is:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DAL: standart-499-ornek
+    steps:
+      - name: Girdi kapisi
+        env: {MOD: "${{ inputs.mod }}", C: "${{ inputs.cift }}", G: "${{ inputs.galeri_damga }}", W: "${{ inputs.kart_kosu }}"}
+        run: |
+          [[ "$MOD" =~ ^(liste|uret)$ ]] || { echo "::error::mod"; exit 1; }
+          [[ "$C" =~ ^[A-Z]+_[A-Z]+$ ]] || { echo "::error::cift"; exit 1; }
+          [[ "$G" =~ ^[0-9]{8}_[0-9]{6}$ ]] || { echo "::error::galeri_damga"; exit 1; }
+          [[ "$W" =~ ^[0-9]+$ ]] || { echo "::error::kart_kosu"; exit 1; }
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow==12.3.0 numpy==2.5.3 opencv-python-headless==5.0.0.93 scipy==1.18.1
+      - name: rclone
+        run: |
+          curl -fsSL -o /tmp/rc.zip https://downloads.rclone.org/rclone-current-linux-amd64.zip
+          unzip -q -j /tmp/rc.zip '*/rclone' -d /tmp/rcb && sudo install -m 755 /tmp/rcb/rclone /usr/local/bin/rclone
+      - name: rclone.conf
+        env:
+          RCLONE_CONF_B64: ${{ secrets.RCLONE_CONF_B64 }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          mkdir -p ~/.config/rclone; umask 077
+          printf '%s' "$RCLONE_CONF_B64" | base64 -d > ~/.config/rclone/rclone.conf; chmod 600 ~/.config/rclone/rclone.conf
+          if [ -n "${GOOGLE_CLIENT_SECRET:-}" ]; then echo "::add-mask::$GOOGLE_CLIENT_SECRET"
+            if grep -qE '^[[:space:]]*client_id[[:space:]]*=[[:space:]]*\S' ~/.config/rclone/rclone.conf; then
+              echo "RCLONE_CONFIG_GDRIVE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> "$GITHUB_ENV"; fi; fi
+      - name: Drive liste + girdi (salt okuma)
+        env: {MOD: "${{ inputs.mod }}", C: "${{ inputs.cift }}", G: "${{ inputs.galeri_damga }}", W: "${{ inputs.kart_kosu }}"}
+        run: |
+          T="gdrive:ASTROLOVE/TEMP"
+          mkdir -p _g _k _o _o/dal
+          RC=0
+          { echo "{\"galeri\": "; rclone lsjson "$T/POSTER_GALERI_V11/$G" --files-only --max-depth 1 --include "${C}_*" --hash || RC=1
+            echo ", \"kart\": "; rclone lsjson "$T/POSTER_GALERI_V11/$G/W02_W06/$W" --files-only --max-depth 1 --include "${C}_*" --include "MANIFEST*" --hash || RC=1
+            echo ", \"poster2000\": "; rclone lsjson "$T/PIN_V6_20261012/_POSTER2000" --files-only --max-depth 1 --include "${C}.jpg" --hash || RC=1
+            echo "}"; } > _o/LISTE.json
+          cp _o/LISTE.json _o/dal/
+          python3 -c "import json,sys; d=json.load(open('_o/LISTE.json')); print('LISTE', {k: [x['Name'] for x in v] for k, v in d.items()})"
+          [ "$RC" = 0 ] || { echo "::error::Drive listeleme hatasi"; exit 1; }
+          if [ "$MOD" = uret ]; then
+            for e in W01_KAPAK W07_MB W08_DB W09_PW W10_WP; do rclone copyto "$T/POSTER_GALERI_V11/$G/${C}_$e.jpg" "_g/${C}_$e.jpg" || RC=1; done
+            for e in W03_KISISEL W06_GENEL; do rclone copyto "$T/POSTER_GALERI_V11/$G/W02_W06/$W/${C}_$e.jpg" "_g/${C}_$e.jpg" || RC=1; done
+            rclone copyto "$T/PIN_V6_20261012/_POSTER2000/$C.jpg" "_k/POSTER2000_$C.jpg" || RC=1
+            ls -la _g _k
+            [ "$RC" = 0 ] || echo "::warning::girdi eksik (hazirla kapisi DUR verecek)"
+          fi
+      - name: Uret (katman + degistir + pafta)
+        if: ${{ inputs.mod == 'uret' }}
+        env: {C: "${{ inputs.cift }}"}
+        run: |
+          RC=0
+          python3 scripts/galeri_yeni_altin/hazirla.py --girdi _g --cift "$C" --is-cikti _o/IS.json --rapor _o/HAZIRLA.json || RC=1
+          cp _o/HAZIRLA.json _o/dal/
+          [ "$RC" = 0 ] || { echo "::error::hazirla DUR (HAZIRLA.json)"; exit 0; }
+          [ -s "_k/POSTER2000_$C.jpg" ] || { echo "::error::_POSTER2000 yok"; exit 1; }
+          python3 scripts/galeri_yeni_altin/katman.py --poster "_k/POSTER2000_$C.jpg" --cikti _k/katman
+          python3 scripts/galeri_yeni_altin/degistir.py --katman _k/katman --girdi _g --cikti _o/yeni --is _o/IS.json --mod tum
+          python3 scripts/galeri_yeni_altin/pafta.py --eski _g --yeni _o/yeni --is _o/IS.json --cikti _o/pafta
+          cp _o/yeni/OLCUM_TUM.json _o/dal/; cp _o/pafta/*.jpg _o/dal/
+          echo "URETIM_TAMAM" > _o/URETIM_TAMAM
+      - name: Drive OFIS (yalniz OFIS/GALERI_YENI_ALTIN/<CIFT>/<kosu>/)
+        if: ${{ always() && inputs.mod == 'uret' }}
+        env: {C: "${{ inputs.cift }}"}
+        run: |
+          [ -d _o ] || exit 0
+          D="gdrive:OFIS/GALERI_YENI_ALTIN/$C/${GITHUB_RUN_ID}"
+          rclone copy _o "$D" --exclude "dal/**" -q
+          rclone lsf "$D" -R | head -60
+      - name: Dala (standart-499-ornek; kucuk pafta + JSON, gizlilik taramasi)
+        if: ${{ always() }}
+        run: |
+          [ -d _o/dal ] || exit 0
+          python3 - <<'EOF'
+          import re, sys, glob
+          SIP = re.compile(r'(?<!\d)42\d{8}(?!\d)'); EP = re.compile(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}')
+          assert SIP.search('x ' + '42' + '12345678 y') and EP.search('a' + '@b.co'), 'tarama bilinen FAIL yakalamadi'
+          kotu = [f for f in glob.glob('_o/dal/*.json') if SIP.search(open(f).read()) or EP.search(open(f).read())]
+          from PIL import Image
+          buyuk = [f for f in glob.glob('_o/dal/*.jpg') if max(Image.open(f).size) > 1600]
+          print('TARAMA', 'json sizinti', kotu, '>1600 px', buyuk)
+          sys.exit(1 if kotu or buyuk else 0)
+          EOF
+          git config user.name "astrolove-ops"; git config user.email "actions@users.noreply.github.com"
+          git fetch -q origin "$DAL" && git worktree add -q _dal "origin/$DAL"
+          H="_dal/docs/standart499/kosu_${GITHUB_RUN_ID}"; mkdir -p "$H"; cp _o/dal/* "$H/"
+          cd _dal && git add -A docs/standart499 && git commit -qm "galeri-yeni-altin kosu ${GITHUB_RUN_ID} (${{ inputs.mod }} ${{ inputs.cift }})" && git push -q origin "HEAD:refs/heads/$DAL"
+          echo "dal: $DAL docs/standart499/kosu_${GITHUB_RUN_ID}"
+      - name: Sonuc
+        if: ${{ inputs.mod == 'uret' }}
+        run: |
+          [ -f _o/URETIM_TAMAM ] || { echo "::error::uretim tamamlanmadi"; exit 1; }
+      - if: ${{ always() }}
+        run: rm -rf ~/.config/rclone _g _k
